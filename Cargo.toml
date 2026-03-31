@@ -1,0 +1,30 @@
+[package]
+name = "oxirush-ngap"
+version = "0.2.0"
+edition = "2024"
+build = "build/main.rs"
+description = "5G NGAP (NG Application Protocol) APER codec — auto-generated from 3GPP ASN.1 definitions"
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+keywords = ["5g", "ngap", "3gpp", "asn1", "aper"]
+categories = ["network-programming", "encoding", "parser-implementations"]
+readme = "README.md"
+
+[dependencies]
+paste = "1"
+asn1-codecs = {  version = "0.7.0" }
+asn1_codecs_derive = { version = "0.7.0" }
+trybuild = { version = "1.0" }
+hex = { version = "0.4" }
+bitvec = { version = "1.0" , features = ["serde"]}
+criterion = { version = "0.5.1" , features = ["rayon"]}
+env_logger = { version = "0.11.6" }
+serde = { version = "1.0" , features = ["derive"]}
+
+[build-dependencies]
+asn1-compiler = "0.7.0"
+csv = "*"
+regex = "1"
+anyhow = "1.0"

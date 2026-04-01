@@ -3,9 +3,9 @@
 //! Shows how to decode an NGAP PDU and extract specific IEs with required/optional
 //! semantics and custom expressions, eliminating manual iteration and matching.
 
-use asn1_codecs::aper::AperCodec;
 use asn1_codecs::PerCodecData;
-use oxirush_ngap::macros::*;
+use asn1_codecs::aper::AperCodec;
+use oxirush_ngap::macros::MissingIeError;
 use oxirush_ngap::ngap::*;
 use oxirush_ngap::{build_ngap, extract_ngap_ies};
 
@@ -49,10 +49,10 @@ fn handle_release_request(pdu: &NGAP_PDU) -> Result<Vec<String>, MissingIeError>
 fn main() {
     // Build a UEContextReleaseRequest with the build_ngap! macro
     let pdu = build_ngap!(InitiatingMessage, Id_UEContextReleaseRequest,
-        PROC_UE_CONTEXT_RELEASE_REQUEST, REJECT, UEContextReleaseRequest,
-        REJECT IE_AMF_UE_NGAP_ID => Id_AMF_UE_NGAP_ID(AMF_UE_NGAP_ID(42)),
-        REJECT IE_RAN_UE_NGAP_ID => Id_RAN_UE_NGAP_ID(RAN_UE_NGAP_ID(7)),
-        IGNORE IE_CAUSE => Id_Cause(
+        ID_UE_CONTEXT_RELEASE_REQUEST, REJECT, UEContextReleaseRequest,
+        REJECT ID_AMF_UE_NGAP_ID => Id_AMF_UE_NGAP_ID(AMF_UE_NGAP_ID(42)),
+        REJECT ID_RAN_UE_NGAP_ID => Id_RAN_UE_NGAP_ID(RAN_UE_NGAP_ID(7)),
+        IGNORE ID_CAUSE => Id_Cause(
             Cause::RadioNetwork(CauseRadioNetwork(CauseRadioNetwork::USER_INACTIVITY))
         ),
     );

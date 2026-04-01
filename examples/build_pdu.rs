@@ -4,9 +4,8 @@
 //! types require. Compare the macro invocation with the equivalent hand-written code
 //! at the bottom of this example.
 
-use asn1_codecs::aper::AperCodec;
 use asn1_codecs::PerCodecData;
-use oxirush_ngap::macros::*;
+use asn1_codecs::aper::AperCodec;
 use oxirush_ngap::ngap::*;
 use oxirush_ngap::{build_ngap, build_ngap_ie};
 
@@ -17,9 +16,9 @@ fn main() {
     let ran_ue_id: u32 = 0;
 
     let pdu = build_ngap!(SuccessfulOutcome, Id_InitialContextSetup,
-        PROC_INITIAL_CONTEXT_SETUP, REJECT, InitialContextSetupResponse,
-        IGNORE IE_AMF_UE_NGAP_ID => Id_AMF_UE_NGAP_ID(AMF_UE_NGAP_ID(amf_ue_id)),
-        IGNORE IE_RAN_UE_NGAP_ID => Id_RAN_UE_NGAP_ID(RAN_UE_NGAP_ID(ran_ue_id)),
+        ID_INITIAL_CONTEXT_SETUP, REJECT, InitialContextSetupResponse,
+        IGNORE ID_AMF_UE_NGAP_ID => Id_AMF_UE_NGAP_ID(AMF_UE_NGAP_ID(amf_ue_id)),
+        IGNORE ID_RAN_UE_NGAP_ID => Id_RAN_UE_NGAP_ID(RAN_UE_NGAP_ID(ran_ue_id)),
     );
 
     println!("=== InitialContextSetupResponse (via build_ngap!) ===");
@@ -28,10 +27,10 @@ fn main() {
     // ── Build a UEContextReleaseRequest ─────────────────────────────────
 
     let pdu = build_ngap!(InitiatingMessage, Id_UEContextReleaseRequest,
-        PROC_UE_CONTEXT_RELEASE_REQUEST, REJECT, UEContextReleaseRequest,
-        REJECT IE_AMF_UE_NGAP_ID => Id_AMF_UE_NGAP_ID(AMF_UE_NGAP_ID(amf_ue_id)),
-        REJECT IE_RAN_UE_NGAP_ID => Id_RAN_UE_NGAP_ID(RAN_UE_NGAP_ID(ran_ue_id)),
-        IGNORE IE_CAUSE => Id_Cause(
+        ID_UE_CONTEXT_RELEASE_REQUEST, REJECT, UEContextReleaseRequest,
+        REJECT ID_AMF_UE_NGAP_ID => Id_AMF_UE_NGAP_ID(AMF_UE_NGAP_ID(amf_ue_id)),
+        REJECT ID_RAN_UE_NGAP_ID => Id_RAN_UE_NGAP_ID(RAN_UE_NGAP_ID(ran_ue_id)),
+        IGNORE ID_CAUSE => Id_Cause(
             Cause::RadioNetwork(CauseRadioNetwork(CauseRadioNetwork::USER_INACTIVITY))
         ),
     );
@@ -41,11 +40,14 @@ fn main() {
 
     // ── Build a single IE with build_ngap_ie! ───────────────────────────
 
-    let cause_ie = build_ngap_ie!(UEContextReleaseRequest, IGNORE IE_CAUSE =>
+    let cause_ie = build_ngap_ie!(UEContextReleaseRequest, IGNORE ID_CAUSE =>
         Id_Cause(Cause::RadioNetwork(CauseRadioNetwork(CauseRadioNetwork::USER_INACTIVITY)))
     );
     println!("\n=== Single IE (via build_ngap_ie!) ===");
-    println!("IE ID: {}, Criticality: {:?}", cause_ie.id.0, cause_ie.criticality.0);
+    println!(
+        "IE ID: {}, Criticality: {:?}",
+        cause_ie.id.0, cause_ie.criticality.0
+    );
 
     // ── Equivalent hand-written code (for comparison) ───────────────────
     // Without macros, the same InitialContextSetupResponse would be:

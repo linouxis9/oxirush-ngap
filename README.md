@@ -31,15 +31,16 @@ oxirush-ngap = "0.1"
 The auto-generated types are deeply nested. The `build_ngap!` macro provides a concise DSL:
 
 ```rust
-use oxirush_ngap::{build_ngap, build_ngap_ie, ngap::*, macros::*};
+use oxirush_ngap::{build_ngap, build_ngap_ie, ngap::*};
 use asn1_codecs::{aper::AperCodec, PerCodecData};
 
-// Build a complete NGAP PDU in one expression
+// Build a complete NGAP PDU in one expression.
+// Use the auto-generated ID_* constants from ngap.rs for procedure codes and IE IDs.
 let pdu = build_ngap!(InitiatingMessage, Id_UEContextReleaseRequest,
-    PROC_UE_CONTEXT_RELEASE_REQUEST, REJECT, UEContextReleaseRequest,
-    REJECT IE_AMF_UE_NGAP_ID => Id_AMF_UE_NGAP_ID(AMF_UE_NGAP_ID(1)),
-    REJECT IE_RAN_UE_NGAP_ID => Id_RAN_UE_NGAP_ID(RAN_UE_NGAP_ID(0)),
-    IGNORE IE_CAUSE => Id_Cause(
+    ID_UE_CONTEXT_RELEASE_REQUEST, REJECT, UEContextReleaseRequest,
+    REJECT ID_AMF_UE_NGAP_ID => Id_AMF_UE_NGAP_ID(AMF_UE_NGAP_ID(1)),
+    REJECT ID_RAN_UE_NGAP_ID => Id_RAN_UE_NGAP_ID(RAN_UE_NGAP_ID(0)),
+    IGNORE ID_CAUSE => Id_Cause(
         Cause::RadioNetwork(CauseRadioNetwork(CauseRadioNetwork::USER_INACTIVITY))
     ),
 );
@@ -52,14 +53,14 @@ let wire_bytes = output.into_bytes();
 
 `build_ngap!` arguments: `(Direction, OuterVariant, ProcedureCode, Criticality, MessageType, IEs...)`
 
-Each IE: `Criticality IE_ID_CONSTANT => VariantName(value)`
+Each IE: `Criticality ID_CONSTANT => VariantName(value)` — use auto-generated `ID_*` constants from `ngap::*`.
 
 Build individual IEs when you need conditional logic:
 
 ```rust
-use oxirush_ngap::{build_ngap_ie, ngap::*, macros::*};
+use oxirush_ngap::{build_ngap_ie, ngap::*};
 
-let cause_ie = build_ngap_ie!(UEContextReleaseRequest, IGNORE IE_CAUSE =>
+let cause_ie = build_ngap_ie!(UEContextReleaseRequest, IGNORE ID_CAUSE =>
     Id_Cause(Cause::RadioNetwork(CauseRadioNetwork(CauseRadioNetwork::USER_INACTIVITY)))
 );
 ```
@@ -178,7 +179,7 @@ The build script (`build/main.rs`) runs at `cargo build` time:
 | `InitiatingMessage` | Procedure code + criticality + value (e.g., `NGSetupRequest`, `InitialUEMessage`) |
 | `SuccessfulOutcome` | Response to initiating message (e.g., `NGSetupResponse`) |
 | `PLMNIdentity` | 3-byte TBCD-encoded PLMN (MCC + MNC) |
-| `NAS_PDU` | Opaque NAS payload (decode with `oxirush-nas`) |
+| `NAS_PDU` | Opaque NAS payload (decode with [oxirush-nas](https://github.com/linouxis9/oxirush-nas)) |
 | `GNB_ID` | gNodeB identifier (22-32 bits) |
 | `AMF_UE_NGAP_ID` / `RAN_UE_NGAP_ID` | UE context identifiers |
 | `MissingIeError` | Error returned by `extract_ngap_ies!` when a required IE is absent |

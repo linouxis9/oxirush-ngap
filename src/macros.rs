@@ -61,7 +61,6 @@
 ///     Ok(vec![])
 /// }
 /// ```
-
 use core::fmt;
 
 /// Error returned by [`extract_ngap_ies!`] when a required IE is missing.
@@ -165,42 +164,3 @@ macro_rules! build_ngap_ie {
     };
 }
 
-// ── NGAP Protocol IE IDs (3GPP TS 38.413 Section 9.2) ──────────────────────
-
-pub const IE_AMF_UE_NGAP_ID: u16 = 10;
-pub const IE_CAUSE: u16 = 15;
-pub const IE_DEFAULT_PAGING_DRX: u16 = 21;
-pub const IE_FIVE_G_S_TMSI: u16 = 26;
-pub const IE_GLOBAL_RAN_NODE_ID: u16 = 27;
-pub const IE_HANDOVER_TYPE: u16 = 29;
-pub const IE_NAS_PDU: u16 = 38;
-pub const IE_PDU_SESSION_RESOURCE_RELEASED_LIST_REL_RES: u16 = 70;
-pub const IE_PDU_SESSION_RESOURCE_SETUP_LIST_SU_RES: u16 = 75;
-pub const IE_RAN_NODE_NAME: u16 = 82;
-pub const IE_RAN_UE_NGAP_ID: u16 = 85;
-pub const IE_RRC_ESTABLISHMENT_CAUSE: u16 = 90;
-pub const IE_SOURCE_AMF_UE_NGAP_ID: u16 = 100;
-pub const IE_SOURCE_TO_TARGET_CONTAINER: u16 = 101;
-pub const IE_SUPPORTED_TA_LIST: u16 = 102;
-pub const IE_TARGET_ID: u16 = 105;
-pub const IE_TARGET_TO_SOURCE_CONTAINER: u16 = 106;
-pub const IE_UE_CONTEXT_REQUEST: u16 = 112;
-pub const IE_UE_SECURITY_CAPABILITIES: u16 = 119;
-pub const IE_USER_LOCATION_INFO: u16 = 121;
-
-// ── NGAP Procedure Codes (3GPP TS 38.413 Section 9.1) ──────────────────────
-
-pub const PROC_HANDOVER_NOTIFICATION: u8 = 11;
-pub const PROC_HANDOVER_PREPARATION: u8 = 12;
-pub const PROC_HANDOVER_RESOURCE_ALLOC: u8 = 13;
-pub const PROC_INITIAL_CONTEXT_SETUP: u8 = 14;
-pub const PROC_INITIAL_UE_MESSAGE: u8 = 15;
-pub const PROC_NG_SETUP: u8 = 21;
-pub const PROC_PATH_SWITCH_REQUEST: u8 = 25;
-pub const PROC_PDU_SESSION_RESOURCE_RELEASE: u8 = 28;
-pub const PROC_PDU_SESSION_RESOURCE_SETUP: u8 = 29;
-pub const PROC_UE_CONTEXT_RELEASE: u8 = 41;
-pub const PROC_UE_CONTEXT_RELEASE_REQUEST: u8 = 42;
-pub const PROC_UPLINK_NAS_TRANSPORT: u8 = 46;
-pub const PROC_ERROR_INDICATION: u8 = 9;
-pub const PROC_NG_RESET: u8 = 20;

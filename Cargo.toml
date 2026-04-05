@@ -1,8 +1,8 @@
 [package]
 name = "oxirush-ngap"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
-build = "build/main.rs"
+# build = "build/main.rs"
 description = "5G NGAP (NG Application Protocol) APER codec — auto-generated from 3GPP ASN.1 definitions"
 license.workspace = true
 repository.workspace = true

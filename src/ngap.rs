@@ -20816,3 +20816,4261 @@ pub struct XnTNLConfigurationInfoIE_Extensions_Entry {}
     sz_ub = "65535"
 )]
 pub struct XnTNLConfigurationInfoIE_Extensions(pub Vec<XnTNLConfigurationInfoIE_Extensions_Entry>);
+
+// Auto-generated From impls for newtype structs (used by build_ngap! macro)
+impl From<Vec<AMF_TNLAssociationSetupItem>> for AMF_TNLAssociationSetupList {
+    fn from(v: Vec<AMF_TNLAssociationSetupItem>) -> Self {
+        AMF_TNLAssociationSetupList(v)
+    }
+}
+impl From<Vec<AMF_TNLAssociationToAddItem>> for AMF_TNLAssociationToAddList {
+    fn from(v: Vec<AMF_TNLAssociationToAddItem>) -> Self {
+        AMF_TNLAssociationToAddList(v)
+    }
+}
+impl From<Vec<AMF_TNLAssociationToRemoveItem>> for AMF_TNLAssociationToRemoveList {
+    fn from(v: Vec<AMF_TNLAssociationToRemoveItem>) -> Self {
+        AMF_TNLAssociationToRemoveList(v)
+    }
+}
+impl From<Vec<AMF_TNLAssociationToUpdateItem>> for AMF_TNLAssociationToUpdateList {
+    fn from(v: Vec<AMF_TNLAssociationToUpdateItem>) -> Self {
+        AMF_TNLAssociationToUpdateList(v)
+    }
+}
+impl From<u64> for AMF_UE_NGAP_ID {
+    fn from(v: u64) -> Self {
+        AMF_UE_NGAP_ID(v)
+    }
+}
+impl From<String> for AMFName {
+    fn from(v: String) -> Self {
+        AMFName(v)
+    }
+}
+impl From<String> for AMFNameUTF8String {
+    fn from(v: String) -> Self {
+        AMFNameUTF8String(v)
+    }
+}
+impl From<String> for AMFNameVisibleString {
+    fn from(v: String) -> Self {
+        AMFNameVisibleString(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for AMFPointer {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        AMFPointer(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for AMFRegionID {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        AMFRegionID(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for AMFSetID {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        AMFSetID(v)
+    }
+}
+impl From<Vec<AdditionalDLUPTNLInformationForHOItem>> for AdditionalDLUPTNLInformationForHOList {
+    fn from(v: Vec<AdditionalDLUPTNLInformationForHOItem>) -> Self {
+        AdditionalDLUPTNLInformationForHOList(v)
+    }
+}
+impl From<u8> for AdditionalQosFlowInformation {
+    fn from(v: u8) -> Self {
+        AdditionalQosFlowInformation(v)
+    }
+}
+impl From<Vec<CAG_ID>> for Allowed_CAG_List_per_PLMN {
+    fn from(v: Vec<CAG_ID>) -> Self {
+        Allowed_CAG_List_per_PLMN(v)
+    }
+}
+impl From<Vec<Allowed_PNI_NPN_Item>> for Allowed_PNI_NPN_List {
+    fn from(v: Vec<Allowed_PNI_NPN_Item>) -> Self {
+        Allowed_PNI_NPN_List(v)
+    }
+}
+impl From<Vec<AllowedNSSAI_Item>> for AllowedNSSAI {
+    fn from(v: Vec<AllowedNSSAI_Item>) -> Self {
+        AllowedNSSAI(v)
+    }
+}
+impl From<Vec<TAC>> for AllowedTACs {
+    fn from(v: Vec<TAC>) -> Self {
+        AllowedTACs(v)
+    }
+}
+impl From<u8> for AlternativeQoSParaSetIndex {
+    fn from(v: u8) -> Self {
+        AlternativeQoSParaSetIndex(v)
+    }
+}
+impl From<Vec<AlternativeQoSParaSetItem>> for AlternativeQoSParaSetList {
+    fn from(v: Vec<AlternativeQoSParaSetItem>) -> Self {
+        AlternativeQoSParaSetList(v)
+    }
+}
+impl From<u8> for AlternativeQoSParaSetNotifyIndex {
+    fn from(v: u8) -> Self {
+        AlternativeQoSParaSetNotifyIndex(v)
+    }
+}
+impl From<Vec<AreaOfInterestCellItem>> for AreaOfInterestCellList {
+    fn from(v: Vec<AreaOfInterestCellItem>) -> Self {
+        AreaOfInterestCellList(v)
+    }
+}
+impl From<Vec<AreaOfInterestItem>> for AreaOfInterestList {
+    fn from(v: Vec<AreaOfInterestItem>) -> Self {
+        AreaOfInterestList(v)
+    }
+}
+impl From<Vec<AreaOfInterestRANNodeItem>> for AreaOfInterestRANNodeList {
+    fn from(v: Vec<AreaOfInterestRANNodeItem>) -> Self {
+        AreaOfInterestRANNodeList(v)
+    }
+}
+impl From<Vec<AreaOfInterestTAIItem>> for AreaOfInterestTAIList {
+    fn from(v: Vec<AreaOfInterestTAIItem>) -> Self {
+        AreaOfInterestTAIList(v)
+    }
+}
+impl From<Vec<AreaScopeOfNeighCellsItem>> for AreaScopeOfNeighCellsList {
+    fn from(v: Vec<AreaScopeOfNeighCellsItem>) -> Self {
+        AreaScopeOfNeighCellsList(v)
+    }
+}
+impl From<Vec<AssociatedQosFlowItem>> for AssociatedQosFlowList {
+    fn from(v: Vec<AssociatedQosFlowItem>) -> Self {
+        AssociatedQosFlowList(v)
+    }
+}
+impl From<u8> for AuthenticatedIndication {
+    fn from(v: u8) -> Self {
+        AuthenticatedIndication(v)
+    }
+}
+impl From<u16> for AveragingWindow {
+    fn from(v: u16) -> Self {
+        AveragingWindow(v)
+    }
+}
+impl From<u64> for BitRate {
+    fn from(v: u64) -> Self {
+        BitRate(v)
+    }
+}
+impl From<u8> for BluetoothMeasConfig {
+    fn from(v: u8) -> Self {
+        BluetoothMeasConfig(v)
+    }
+}
+impl From<Vec<BluetoothMeasConfigNameItem>> for BluetoothMeasConfigNameList {
+    fn from(v: Vec<BluetoothMeasConfigNameItem>) -> Self {
+        BluetoothMeasConfigNameList(v)
+    }
+}
+impl From<Vec<u8>> for BluetoothName {
+    fn from(v: Vec<u8>) -> Self {
+        BluetoothName(v)
+    }
+}
+impl From<Vec<BroadcastPLMNItem>> for BroadcastPLMNList {
+    fn from(v: Vec<BroadcastPLMNItem>) -> Self {
+        BroadcastPLMNList(v)
+    }
+}
+impl From<Vec<u8>> for BurstArrivalTime {
+    fn from(v: Vec<u8>) -> Self {
+        BurstArrivalTime(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for CAG_ID {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        CAG_ID(v)
+    }
+}
+impl From<u8> for CEmodeBSupport_Indicator {
+    fn from(v: u8) -> Self {
+        CEmodeBSupport_Indicator(v)
+    }
+}
+impl From<u8> for CEmodeBrestricted {
+    fn from(v: u8) -> Self {
+        CEmodeBrestricted(v)
+    }
+}
+impl From<Vec<CNTypeRestrictionsForEquivalentItem>> for CNTypeRestrictionsForEquivalent {
+    fn from(v: Vec<CNTypeRestrictionsForEquivalentItem>) -> Self {
+        CNTypeRestrictionsForEquivalent(v)
+    }
+}
+impl From<u8> for CNTypeRestrictionsForServing {
+    fn from(v: u8) -> Self {
+        CNTypeRestrictionsForServing(v)
+    }
+}
+impl From<u8> for CancelAllWarningMessages {
+    fn from(v: u8) -> Self {
+        CancelAllWarningMessages(v)
+    }
+}
+impl From<Vec<CancelledCellsInEAI_EUTRA_Item>> for CancelledCellsInEAI_EUTRA {
+    fn from(v: Vec<CancelledCellsInEAI_EUTRA_Item>) -> Self {
+        CancelledCellsInEAI_EUTRA(v)
+    }
+}
+impl From<Vec<CancelledCellsInEAI_NR_Item>> for CancelledCellsInEAI_NR {
+    fn from(v: Vec<CancelledCellsInEAI_NR_Item>) -> Self {
+        CancelledCellsInEAI_NR(v)
+    }
+}
+impl From<Vec<CancelledCellsInTAI_EUTRA_Item>> for CancelledCellsInTAI_EUTRA {
+    fn from(v: Vec<CancelledCellsInTAI_EUTRA_Item>) -> Self {
+        CancelledCellsInTAI_EUTRA(v)
+    }
+}
+impl From<Vec<CancelledCellsInTAI_NR_Item>> for CancelledCellsInTAI_NR {
+    fn from(v: Vec<CancelledCellsInTAI_NR_Item>) -> Self {
+        CancelledCellsInTAI_NR(v)
+    }
+}
+impl From<Vec<CandidateCellItem>> for CandidateCellList {
+    fn from(v: Vec<CandidateCellItem>) -> Self {
+        CandidateCellList(v)
+    }
+}
+impl From<u8> for CauseMisc {
+    fn from(v: u8) -> Self {
+        CauseMisc(v)
+    }
+}
+impl From<u8> for CauseNas {
+    fn from(v: u8) -> Self {
+        CauseNas(v)
+    }
+}
+impl From<u8> for CauseProtocol {
+    fn from(v: u8) -> Self {
+        CauseProtocol(v)
+    }
+}
+impl From<u8> for CauseRadioNetwork {
+    fn from(v: u8) -> Self {
+        CauseRadioNetwork(v)
+    }
+}
+impl From<u8> for CauseTransport {
+    fn from(v: u8) -> Self {
+        CauseTransport(v)
+    }
+}
+impl From<Vec<CAG_ID>> for CellCAGList {
+    fn from(v: Vec<CAG_ID>) -> Self {
+        CellCAGList(v)
+    }
+}
+impl From<Vec<CellIDBroadcastEUTRA_Item>> for CellIDBroadcastEUTRA {
+    fn from(v: Vec<CellIDBroadcastEUTRA_Item>) -> Self {
+        CellIDBroadcastEUTRA(v)
+    }
+}
+impl From<Vec<CellIDBroadcastNR_Item>> for CellIDBroadcastNR {
+    fn from(v: Vec<CellIDBroadcastNR_Item>) -> Self {
+        CellIDBroadcastNR(v)
+    }
+}
+impl From<Vec<CellIDCancelledEUTRA_Item>> for CellIDCancelledEUTRA {
+    fn from(v: Vec<CellIDCancelledEUTRA_Item>) -> Self {
+        CellIDCancelledEUTRA(v)
+    }
+}
+impl From<Vec<CellIDCancelledNR_Item>> for CellIDCancelledNR {
+    fn from(v: Vec<CellIDCancelledNR_Item>) -> Self {
+        CellIDCancelledNR(v)
+    }
+}
+impl From<Vec<EUTRA_CGI>> for CellIdListforMDT_EUTRA {
+    fn from(v: Vec<EUTRA_CGI>) -> Self {
+        CellIdListforMDT_EUTRA(v)
+    }
+}
+impl From<Vec<NR_CGI>> for CellIdListforMDT_NR {
+    fn from(v: Vec<NR_CGI>) -> Self {
+        CellIdListforMDT_NR(v)
+    }
+}
+impl From<u8> for CellSize {
+    fn from(v: u8) -> Self {
+        CellSize(v)
+    }
+}
+impl From<Vec<u8>> for CommonNetworkInstance {
+    fn from(v: Vec<u8>) -> Self {
+        CommonNetworkInstance(v)
+    }
+}
+impl From<Vec<CompletedCellsInEAI_EUTRA_Item>> for CompletedCellsInEAI_EUTRA {
+    fn from(v: Vec<CompletedCellsInEAI_EUTRA_Item>) -> Self {
+        CompletedCellsInEAI_EUTRA(v)
+    }
+}
+impl From<Vec<CompletedCellsInEAI_NR_Item>> for CompletedCellsInEAI_NR {
+    fn from(v: Vec<CompletedCellsInEAI_NR_Item>) -> Self {
+        CompletedCellsInEAI_NR(v)
+    }
+}
+impl From<Vec<CompletedCellsInTAI_EUTRA_Item>> for CompletedCellsInTAI_EUTRA {
+    fn from(v: Vec<CompletedCellsInTAI_EUTRA_Item>) -> Self {
+        CompletedCellsInTAI_EUTRA(v)
+    }
+}
+impl From<Vec<CompletedCellsInTAI_NR_Item>> for CompletedCellsInTAI_NR {
+    fn from(v: Vec<CompletedCellsInTAI_NR_Item>) -> Self {
+        CompletedCellsInTAI_NR(v)
+    }
+}
+impl From<u8> for ConcurrentWarningMessageInd {
+    fn from(v: u8) -> Self {
+        ConcurrentWarningMessageInd(v)
+    }
+}
+impl From<u8> for ConfidentialityProtectionIndication {
+    fn from(v: u8) -> Self {
+        ConfidentialityProtectionIndication(v)
+    }
+}
+impl From<u8> for ConfidentialityProtectionResult {
+    fn from(v: u8) -> Self {
+        ConfidentialityProtectionResult(v)
+    }
+}
+impl From<Vec<u8>> for ConfiguredNSSAI {
+    fn from(v: Vec<u8>) -> Self {
+        ConfiguredNSSAI(v)
+    }
+}
+impl From<u8> for ConfiguredTACIndication {
+    fn from(v: u8) -> Self {
+        ConfiguredTACIndication(v)
+    }
+}
+impl From<Vec<u8>> for CoverageEnhancementLevel {
+    fn from(v: Vec<u8>) -> Self {
+        CoverageEnhancementLevel(v)
+    }
+}
+impl From<u8> for Criticality {
+    fn from(v: u8) -> Self {
+        Criticality(v)
+    }
+}
+impl From<Vec<CriticalityDiagnostics_IE_Item>> for CriticalityDiagnostics_IE_List {
+    fn from(v: Vec<CriticalityDiagnostics_IE_Item>) -> Self {
+        CriticalityDiagnostics_IE_List(v)
+    }
+}
+impl From<Vec<DAPSResponseInfoItem>> for DAPSResponseInfoList {
+    fn from(v: Vec<DAPSResponseInfoItem>) -> Self {
+        DAPSResponseInfoList(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for DL_NAS_MAC {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        DL_NAS_MAC(v)
+    }
+}
+impl From<u8> for DL_NGU_TNLInformationReused {
+    fn from(v: u8) -> Self {
+        DL_NGU_TNLInformationReused(v)
+    }
+}
+impl From<u8> for DLForwarding {
+    fn from(v: u8) -> Self {
+        DLForwarding(v)
+    }
+}
+impl From<u8> for DRB_ID {
+    fn from(v: u8) -> Self {
+        DRB_ID(v)
+    }
+}
+impl From<Vec<DRBsSubjectToEarlyStatusTransfer_Item>> for DRBsSubjectToEarlyStatusTransfer_List {
+    fn from(v: Vec<DRBsSubjectToEarlyStatusTransfer_Item>) -> Self {
+        DRBsSubjectToEarlyStatusTransfer_List(v)
+    }
+}
+impl From<Vec<DRBsSubjectToStatusTransferItem>> for DRBsSubjectToStatusTransferList {
+    fn from(v: Vec<DRBsSubjectToStatusTransferItem>) -> Self {
+        DRBsSubjectToStatusTransferList(v)
+    }
+}
+impl From<Vec<DRBsToQosFlowsMappingItem>> for DRBsToQosFlowsMappingList {
+    fn from(v: Vec<DRBsToQosFlowsMappingItem>) -> Self {
+        DRBsToQosFlowsMappingList(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for DataCodingScheme {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        DataCodingScheme(v)
+    }
+}
+impl From<u8> for DataForwardingAccepted {
+    fn from(v: u8) -> Self {
+        DataForwardingAccepted(v)
+    }
+}
+impl From<u8> for DataForwardingNotPossible {
+    fn from(v: u8) -> Self {
+        DataForwardingNotPossible(v)
+    }
+}
+impl From<Vec<DataForwardingResponseDRBItem>> for DataForwardingResponseDRBList {
+    fn from(v: Vec<DataForwardingResponseDRBItem>) -> Self {
+        DataForwardingResponseDRBList(v)
+    }
+}
+impl From<Vec<DataForwardingResponseERABListItem>> for DataForwardingResponseERABList {
+    fn from(v: Vec<DataForwardingResponseERABListItem>) -> Self {
+        DataForwardingResponseERABList(v)
+    }
+}
+impl From<u8> for DelayCritical {
+    fn from(v: u8) -> Self {
+        DelayCritical(v)
+    }
+}
+impl From<u8> for DirectForwardingPathAvailability {
+    fn from(v: u8) -> Self {
+        DirectForwardingPathAvailability(v)
+    }
+}
+impl From<u8> for E_RAB_ID {
+    fn from(v: u8) -> Self {
+        E_RAB_ID(v)
+    }
+}
+impl From<Vec<E_RABInformationItem>> for E_RABInformationList {
+    fn from(v: Vec<E_RABInformationItem>) -> Self {
+        E_RABInformationList(v)
+    }
+}
+impl From<u8> for EDT_Session {
+    fn from(v: u8) -> Self {
+        EDT_Session(v)
+    }
+}
+impl From<Vec<u8>> for EN_DCSONConfigurationTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        EN_DCSONConfigurationTransfer(v)
+    }
+}
+impl From<Vec<u8>> for EPS_TAC {
+    fn from(v: Vec<u8>) -> Self {
+        EPS_TAC(v)
+    }
+}
+impl From<Vec<EUTRA_CGI>> for EUTRA_CGIList {
+    fn from(v: Vec<EUTRA_CGI>) -> Self {
+        EUTRA_CGIList(v)
+    }
+}
+impl From<Vec<EUTRA_CGI>> for EUTRA_CGIListForWarning {
+    fn from(v: Vec<EUTRA_CGI>) -> Self {
+        EUTRA_CGIListForWarning(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for EUTRACellIdentity {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        EUTRACellIdentity(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for EUTRAencryptionAlgorithms {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        EUTRAencryptionAlgorithms(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for EUTRAintegrityProtectionAlgorithms {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        EUTRAintegrityProtectionAlgorithms(v)
+    }
+}
+impl From<Vec<u8>> for EmergencyAreaID {
+    fn from(v: Vec<u8>) -> Self {
+        EmergencyAreaID(v)
+    }
+}
+impl From<Vec<EmergencyAreaIDBroadcastEUTRA_Item>> for EmergencyAreaIDBroadcastEUTRA {
+    fn from(v: Vec<EmergencyAreaIDBroadcastEUTRA_Item>) -> Self {
+        EmergencyAreaIDBroadcastEUTRA(v)
+    }
+}
+impl From<Vec<EmergencyAreaIDBroadcastNR_Item>> for EmergencyAreaIDBroadcastNR {
+    fn from(v: Vec<EmergencyAreaIDBroadcastNR_Item>) -> Self {
+        EmergencyAreaIDBroadcastNR(v)
+    }
+}
+impl From<Vec<EmergencyAreaIDCancelledEUTRA_Item>> for EmergencyAreaIDCancelledEUTRA {
+    fn from(v: Vec<EmergencyAreaIDCancelledEUTRA_Item>) -> Self {
+        EmergencyAreaIDCancelledEUTRA(v)
+    }
+}
+impl From<Vec<EmergencyAreaIDCancelledNR_Item>> for EmergencyAreaIDCancelledNR {
+    fn from(v: Vec<EmergencyAreaIDCancelledNR_Item>) -> Self {
+        EmergencyAreaIDCancelledNR(v)
+    }
+}
+impl From<Vec<EmergencyAreaID>> for EmergencyAreaIDList {
+    fn from(v: Vec<EmergencyAreaID>) -> Self {
+        EmergencyAreaIDList(v)
+    }
+}
+impl From<Vec<EmergencyAreaID>> for EmergencyAreaIDListForRestart {
+    fn from(v: Vec<EmergencyAreaID>) -> Self {
+        EmergencyAreaIDListForRestart(v)
+    }
+}
+impl From<u8> for EmergencyFallbackRequestIndicator {
+    fn from(v: u8) -> Self {
+        EmergencyFallbackRequestIndicator(v)
+    }
+}
+impl From<u8> for EmergencyServiceTargetCN {
+    fn from(v: u8) -> Self {
+        EmergencyServiceTargetCN(v)
+    }
+}
+impl From<u8> for EndIndication {
+    fn from(v: u8) -> Self {
+        EndIndication(v)
+    }
+}
+impl From<u8> for Enhanced_CoverageRestriction {
+    fn from(v: u8) -> Self {
+        Enhanced_CoverageRestriction(v)
+    }
+}
+impl From<Vec<PLMNIdentity>> for EquivalentPLMNs {
+    fn from(v: Vec<PLMNIdentity>) -> Self {
+        EquivalentPLMNs(v)
+    }
+}
+impl From<u8> for EventType {
+    fn from(v: u8) -> Self {
+        EventType(v)
+    }
+}
+impl From<u8> for ExpectedActivityPeriod {
+    fn from(v: u8) -> Self {
+        ExpectedActivityPeriod(v)
+    }
+}
+impl From<u8> for ExpectedHOInterval {
+    fn from(v: u8) -> Self {
+        ExpectedHOInterval(v)
+    }
+}
+impl From<u8> for ExpectedIdlePeriod {
+    fn from(v: u8) -> Self {
+        ExpectedIdlePeriod(v)
+    }
+}
+impl From<u8> for ExpectedUEMobility {
+    fn from(v: u8) -> Self {
+        ExpectedUEMobility(v)
+    }
+}
+impl From<Vec<ExpectedUEMovingTrajectoryItem>> for ExpectedUEMovingTrajectory {
+    fn from(v: Vec<ExpectedUEMovingTrajectoryItem>) -> Self {
+        ExpectedUEMovingTrajectory(v)
+    }
+}
+impl From<u8> for Extended_ConnectedTime {
+    fn from(v: u8) -> Self {
+        Extended_ConnectedTime(v)
+    }
+}
+impl From<u16> for ExtendedPacketDelayBudget {
+    fn from(v: u16) -> Self {
+        ExtendedPacketDelayBudget(v)
+    }
+}
+impl From<u16> for ExtendedRNC_ID {
+    fn from(v: u16) -> Self {
+        ExtendedRNC_ID(v)
+    }
+}
+impl From<Vec<SliceSupportItem>> for ExtendedSliceSupportList {
+    fn from(v: Vec<SliceSupportItem>) -> Self {
+        ExtendedSliceSupportList(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for ExtendedUEIdentityIndexValue {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        ExtendedUEIdentityIndexValue(v)
+    }
+}
+impl From<Vec<u8>> for FiveG_TMSI {
+    fn from(v: Vec<u8>) -> Self {
+        FiveG_TMSI(v)
+    }
+}
+impl From<u8> for FiveQI {
+    fn from(v: u8) -> Self {
+        FiveQI(v)
+    }
+}
+impl From<Vec<ForbiddenAreaInformation_Item>> for ForbiddenAreaInformation {
+    fn from(v: Vec<ForbiddenAreaInformation_Item>) -> Self {
+        ForbiddenAreaInformation(v)
+    }
+}
+impl From<Vec<TAC>> for ForbiddenTACs {
+    fn from(v: Vec<TAC>) -> Self {
+        ForbiddenTACs(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for GNBSetID {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        GNBSetID(v)
+    }
+}
+impl From<Vec<u8>> for GTP_TEID {
+    fn from(v: Vec<u8>) -> Self {
+        GTP_TEID(v)
+    }
+}
+impl From<u8> for GUAMIType {
+    fn from(v: u8) -> Self {
+        GUAMIType(v)
+    }
+}
+impl From<Vec<u8>> for GlobalCable_ID {
+    fn from(v: Vec<u8>) -> Self {
+        GlobalCable_ID(v)
+    }
+}
+impl From<Vec<u8>> for GlobalLineIdentity {
+    fn from(v: Vec<u8>) -> Self {
+        GlobalLineIdentity(v)
+    }
+}
+impl From<Vec<u8>> for HFCNode_ID {
+    fn from(v: Vec<u8>) -> Self {
+        HFCNode_ID(v)
+    }
+}
+impl From<u8> for HandoverFlag {
+    fn from(v: u8) -> Self {
+        HandoverFlag(v)
+    }
+}
+impl From<u8> for HandoverType {
+    fn from(v: u8) -> Self {
+        HandoverType(v)
+    }
+}
+impl From<u8> for Hysteresis {
+    fn from(v: u8) -> Self {
+        Hysteresis(v)
+    }
+}
+impl From<u8> for IAB_Authorized {
+    fn from(v: u8) -> Self {
+        IAB_Authorized(v)
+    }
+}
+impl From<u8> for IAB_Supported {
+    fn from(v: u8) -> Self {
+        IAB_Supported(v)
+    }
+}
+impl From<u8> for IABNodeIndication {
+    fn from(v: u8) -> Self {
+        IABNodeIndication(v)
+    }
+}
+impl From<u8> for IMSVoiceSupportIndicator {
+    fn from(v: u8) -> Self {
+        IMSVoiceSupportIndicator(v)
+    }
+}
+impl From<u16> for IndexToRFSP {
+    fn from(v: u16) -> Self {
+        IndexToRFSP(v)
+    }
+}
+impl From<u8> for IntegrityProtectionIndication {
+    fn from(v: u8) -> Self {
+        IntegrityProtectionIndication(v)
+    }
+}
+impl From<u8> for IntegrityProtectionResult {
+    fn from(v: u8) -> Self {
+        IntegrityProtectionResult(v)
+    }
+}
+impl From<u8> for IntendedNumberOfPagingAttempts {
+    fn from(v: u8) -> Self {
+        IntendedNumberOfPagingAttempts(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for InterfacesToTrace {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        InterfacesToTrace(v)
+    }
+}
+impl From<Vec<u8>> for LAC {
+    fn from(v: Vec<u8>) -> Self {
+        LAC(v)
+    }
+}
+impl From<u8> for LTEM_Indication {
+    fn from(v: u8) -> Self {
+        LTEM_Indication(v)
+    }
+}
+impl From<Vec<u8>> for LTEUERLFReportContainer {
+    fn from(v: Vec<u8>) -> Self {
+        LTEUERLFReportContainer(v)
+    }
+}
+impl From<Vec<u8>> for LastVisitedEUTRANCellInformation {
+    fn from(v: Vec<u8>) -> Self {
+        LastVisitedEUTRANCellInformation(v)
+    }
+}
+impl From<Vec<u8>> for LastVisitedGERANCellInformation {
+    fn from(v: Vec<u8>) -> Self {
+        LastVisitedGERANCellInformation(v)
+    }
+}
+impl From<Vec<u8>> for LastVisitedUTRANCellInformation {
+    fn from(v: Vec<u8>) -> Self {
+        LastVisitedUTRANCellInformation(v)
+    }
+}
+impl From<u8> for LineType {
+    fn from(v: u8) -> Self {
+        LineType(v)
+    }
+}
+impl From<u8> for Links_to_log {
+    fn from(v: u8) -> Self {
+        Links_to_log(v)
+    }
+}
+impl From<u8> for LocationReportingAdditionalInfo {
+    fn from(v: u8) -> Self {
+        LocationReportingAdditionalInfo(v)
+    }
+}
+impl From<u8> for LocationReportingReferenceID {
+    fn from(v: u8) -> Self {
+        LocationReportingReferenceID(v)
+    }
+}
+impl From<u8> for LoggingDuration {
+    fn from(v: u8) -> Self {
+        LoggingDuration(v)
+    }
+}
+impl From<u8> for LoggingInterval {
+    fn from(v: u8) -> Self {
+        LoggingInterval(v)
+    }
+}
+impl From<u8> for M1ReportingTrigger {
+    fn from(v: u8) -> Self {
+        M1ReportingTrigger(v)
+    }
+}
+impl From<u8> for M4period {
+    fn from(v: u8) -> Self {
+        M4period(v)
+    }
+}
+impl From<u8> for M5period {
+    fn from(v: u8) -> Self {
+        M5period(v)
+    }
+}
+impl From<u8> for M6report_Interval {
+    fn from(v: u8) -> Self {
+        M6report_Interval(v)
+    }
+}
+impl From<u8> for M7period {
+    fn from(v: u8) -> Self {
+        M7period(v)
+    }
+}
+impl From<u8> for MDT_Activation {
+    fn from(v: u8) -> Self {
+        MDT_Activation(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for MDT_Location_Information {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        MDT_Location_Information(v)
+    }
+}
+impl From<Vec<u8>> for MDTModeEutra {
+    fn from(v: Vec<u8>) -> Self {
+        MDTModeEutra(v)
+    }
+}
+impl From<Vec<PLMNIdentity>> for MDTPLMNList {
+    fn from(v: Vec<PLMNIdentity>) -> Self {
+        MDTPLMNList(v)
+    }
+}
+impl From<u8> for MICOModeIndication {
+    fn from(v: u8) -> Self {
+        MICOModeIndication(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for MaskedIMEISV {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        MaskedIMEISV(v)
+    }
+}
+impl From<u16> for MaximumDataBurstVolume {
+    fn from(v: u16) -> Self {
+        MaximumDataBurstVolume(v)
+    }
+}
+impl From<u8> for MaximumIntegrityProtectedDataRate {
+    fn from(v: u8) -> Self {
+        MaximumIntegrityProtectedDataRate(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for MeasurementsToActivate {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        MeasurementsToActivate(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for MessageIdentifier {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        MessageIdentifier(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for MobilityInformation {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        MobilityInformation(v)
+    }
+}
+impl From<Vec<u8>> for NAS_PDU {
+    fn from(v: Vec<u8>) -> Self {
+        NAS_PDU(v)
+    }
+}
+impl From<Vec<u8>> for NASSecurityParametersFromNGRAN {
+    fn from(v: Vec<u8>) -> Self {
+        NASSecurityParametersFromNGRAN(v)
+    }
+}
+impl From<u8> for NB_IoT_DefaultPagingDRX {
+    fn from(v: u8) -> Self {
+        NB_IoT_DefaultPagingDRX(v)
+    }
+}
+impl From<u8> for NB_IoT_Paging_TimeWindow {
+    fn from(v: u8) -> Self {
+        NB_IoT_Paging_TimeWindow(v)
+    }
+}
+impl From<u8> for NB_IoT_Paging_eDRXCycle {
+    fn from(v: u8) -> Self {
+        NB_IoT_Paging_eDRXCycle(v)
+    }
+}
+impl From<u8> for NB_IoT_PagingDRX {
+    fn from(v: u8) -> Self {
+        NB_IoT_PagingDRX(v)
+    }
+}
+impl From<u8> for NB_IoT_UEPriority {
+    fn from(v: u8) -> Self {
+        NB_IoT_UEPriority(v)
+    }
+}
+impl From<Vec<NGRAN_TNLAssociationToRemoveItem>> for NGRAN_TNLAssociationToRemoveList {
+    fn from(v: Vec<NGRAN_TNLAssociationToRemoveItem>) -> Self {
+        NGRAN_TNLAssociationToRemoveList(v)
+    }
+}
+impl From<Vec<u8>> for NGRANTraceID {
+    fn from(v: Vec<u8>) -> Self {
+        NGRANTraceID(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for NID {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        NID(v)
+    }
+}
+impl From<Vec<NR_CGI>> for NR_CGIList {
+    fn from(v: Vec<NR_CGI>) -> Self {
+        NR_CGIList(v)
+    }
+}
+impl From<Vec<NR_CGI>> for NR_CGIListForWarning {
+    fn from(v: Vec<NR_CGI>) -> Self {
+        NR_CGIListForWarning(v)
+    }
+}
+impl From<u16> for NR_PCI {
+    fn from(v: u16) -> Self {
+        NR_PCI(v)
+    }
+}
+impl From<u32> for NRARFCN {
+    fn from(v: u32) -> Self {
+        NRARFCN(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for NRCellIdentity {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        NRCellIdentity(v)
+    }
+}
+impl From<u16> for NRFrequencyBand {
+    fn from(v: u16) -> Self {
+        NRFrequencyBand(v)
+    }
+}
+impl From<Vec<NRFrequencyBandItem>> for NRFrequencyBand_List {
+    fn from(v: Vec<NRFrequencyBandItem>) -> Self {
+        NRFrequencyBand_List(v)
+    }
+}
+impl From<Vec<u8>> for NRMobilityHistoryReport {
+    fn from(v: Vec<u8>) -> Self {
+        NRMobilityHistoryReport(v)
+    }
+}
+impl From<Vec<u8>> for NRPPa_PDU {
+    fn from(v: Vec<u8>) -> Self {
+        NRPPa_PDU(v)
+    }
+}
+impl From<Vec<u8>> for NRUERLFReportContainer {
+    fn from(v: Vec<u8>) -> Self {
+        NRUERLFReportContainer(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for NRencryptionAlgorithms {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        NRencryptionAlgorithms(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for NRintegrityProtectionAlgorithms {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        NRintegrityProtectionAlgorithms(v)
+    }
+}
+impl From<u16> for NetworkInstance {
+    fn from(v: u16) -> Self {
+        NetworkInstance(v)
+    }
+}
+impl From<u8> for NewSecurityContextInd {
+    fn from(v: u8) -> Self {
+        NewSecurityContextInd(v)
+    }
+}
+impl From<u8> for NextHopChainingCount {
+    fn from(v: u8) -> Self {
+        NextHopChainingCount(v)
+    }
+}
+impl From<u8> for NextPagingAreaScope {
+    fn from(v: u8) -> Self {
+        NextPagingAreaScope(v)
+    }
+}
+impl From<Vec<TAC>> for NotAllowedTACs {
+    fn from(v: Vec<TAC>) -> Self {
+        NotAllowedTACs(v)
+    }
+}
+impl From<u8> for NotificationCause {
+    fn from(v: u8) -> Self {
+        NotificationCause(v)
+    }
+}
+impl From<u8> for NotificationControl {
+    fn from(v: u8) -> Self {
+        NotificationControl(v)
+    }
+}
+impl From<u8> for NotifySourceNGRANNode {
+    fn from(v: u8) -> Self {
+        NotifySourceNGRANNode(v)
+    }
+}
+impl From<u16> for NumberOfBroadcasts {
+    fn from(v: u16) -> Self {
+        NumberOfBroadcasts(v)
+    }
+}
+impl From<u16> for NumberOfBroadcastsRequested {
+    fn from(v: u16) -> Self {
+        NumberOfBroadcastsRequested(v)
+    }
+}
+impl From<u8> for OverloadAction {
+    fn from(v: u8) -> Self {
+        OverloadAction(v)
+    }
+}
+impl From<Vec<OverloadStartNSSAIItem>> for OverloadStartNSSAIList {
+    fn from(v: Vec<OverloadStartNSSAIItem>) -> Self {
+        OverloadStartNSSAIList(v)
+    }
+}
+impl From<Vec<PC5QoSFlowItem>> for PC5QoSFlowList {
+    fn from(v: Vec<PC5QoSFlowItem>) -> Self {
+        PC5QoSFlowList(v)
+    }
+}
+impl From<Vec<NR_PCI>> for PCIListForMDT {
+    fn from(v: Vec<NR_PCI>) -> Self {
+        PCIListForMDT(v)
+    }
+}
+impl From<u8> for PDUSessionID {
+    fn from(v: u8) -> Self {
+        PDUSessionID(v)
+    }
+}
+impl From<Vec<PDUSessionResourceAdmittedItem>> for PDUSessionResourceAdmittedList {
+    fn from(v: Vec<PDUSessionResourceAdmittedItem>) -> Self {
+        PDUSessionResourceAdmittedList(v)
+    }
+}
+impl From<Vec<PDUSessionResourceHandoverItem>> for PDUSessionResourceHandoverList {
+    fn from(v: Vec<PDUSessionResourceHandoverItem>) -> Self {
+        PDUSessionResourceHandoverList(v)
+    }
+}
+impl From<Vec<PDUSessionResourceInformationItem>> for PDUSessionResourceInformationList {
+    fn from(v: Vec<PDUSessionResourceInformationItem>) -> Self {
+        PDUSessionResourceInformationList(v)
+    }
+}
+impl From<Vec<PDUSessionResourceItemCxtRelCpl>> for PDUSessionResourceListCxtRelCpl {
+    fn from(v: Vec<PDUSessionResourceItemCxtRelCpl>) -> Self {
+        PDUSessionResourceListCxtRelCpl(v)
+    }
+}
+impl From<Vec<PDUSessionResourceItemCxtRelReq>> for PDUSessionResourceListCxtRelReq {
+    fn from(v: Vec<PDUSessionResourceItemCxtRelReq>) -> Self {
+        PDUSessionResourceListCxtRelReq(v)
+    }
+}
+impl From<Vec<PDUSessionResourceItemHORqd>> for PDUSessionResourceListHORqd {
+    fn from(v: Vec<PDUSessionResourceItemHORqd>) -> Self {
+        PDUSessionResourceListHORqd(v)
+    }
+}
+impl From<Vec<PDUSessionResourceModifyItemModCfm>> for PDUSessionResourceModifyListModCfm {
+    fn from(v: Vec<PDUSessionResourceModifyItemModCfm>) -> Self {
+        PDUSessionResourceModifyListModCfm(v)
+    }
+}
+impl From<Vec<PDUSessionResourceModifyItemModInd>> for PDUSessionResourceModifyListModInd {
+    fn from(v: Vec<PDUSessionResourceModifyItemModInd>) -> Self {
+        PDUSessionResourceModifyListModInd(v)
+    }
+}
+impl From<Vec<PDUSessionResourceModifyItemModReq>> for PDUSessionResourceModifyListModReq {
+    fn from(v: Vec<PDUSessionResourceModifyItemModReq>) -> Self {
+        PDUSessionResourceModifyListModReq(v)
+    }
+}
+impl From<Vec<PDUSessionResourceModifyItemModRes>> for PDUSessionResourceModifyListModRes {
+    fn from(v: Vec<PDUSessionResourceModifyItemModRes>) -> Self {
+        PDUSessionResourceModifyListModRes(v)
+    }
+}
+impl From<Vec<PDUSessionResourceNotifyItem>> for PDUSessionResourceNotifyList {
+    fn from(v: Vec<PDUSessionResourceNotifyItem>) -> Self {
+        PDUSessionResourceNotifyList(v)
+    }
+}
+impl From<Vec<PDUSessionResourceReleasedItemNot>> for PDUSessionResourceReleasedListNot {
+    fn from(v: Vec<PDUSessionResourceReleasedItemNot>) -> Self {
+        PDUSessionResourceReleasedListNot(v)
+    }
+}
+impl From<Vec<PDUSessionResourceReleasedItemPSAck>> for PDUSessionResourceReleasedListPSAck {
+    fn from(v: Vec<PDUSessionResourceReleasedItemPSAck>) -> Self {
+        PDUSessionResourceReleasedListPSAck(v)
+    }
+}
+impl From<Vec<PDUSessionResourceReleasedItemPSFail>> for PDUSessionResourceReleasedListPSFail {
+    fn from(v: Vec<PDUSessionResourceReleasedItemPSFail>) -> Self {
+        PDUSessionResourceReleasedListPSFail(v)
+    }
+}
+impl From<Vec<PDUSessionResourceReleasedItemRelRes>> for PDUSessionResourceReleasedListRelRes {
+    fn from(v: Vec<PDUSessionResourceReleasedItemRelRes>) -> Self {
+        PDUSessionResourceReleasedListRelRes(v)
+    }
+}
+impl From<Vec<PDUSessionResourceResumeItemRESReq>> for PDUSessionResourceResumeListRESReq {
+    fn from(v: Vec<PDUSessionResourceResumeItemRESReq>) -> Self {
+        PDUSessionResourceResumeListRESReq(v)
+    }
+}
+impl From<Vec<PDUSessionResourceResumeItemRESRes>> for PDUSessionResourceResumeListRESRes {
+    fn from(v: Vec<PDUSessionResourceResumeItemRESRes>) -> Self {
+        PDUSessionResourceResumeListRESRes(v)
+    }
+}
+impl From<Vec<PDUSessionResourceSetupItemCxtReq>> for PDUSessionResourceSetupListCxtReq {
+    fn from(v: Vec<PDUSessionResourceSetupItemCxtReq>) -> Self {
+        PDUSessionResourceSetupListCxtReq(v)
+    }
+}
+impl From<Vec<PDUSessionResourceSetupItemCxtRes>> for PDUSessionResourceSetupListCxtRes {
+    fn from(v: Vec<PDUSessionResourceSetupItemCxtRes>) -> Self {
+        PDUSessionResourceSetupListCxtRes(v)
+    }
+}
+impl From<Vec<PDUSessionResourceSetupItemHOReq>> for PDUSessionResourceSetupListHOReq {
+    fn from(v: Vec<PDUSessionResourceSetupItemHOReq>) -> Self {
+        PDUSessionResourceSetupListHOReq(v)
+    }
+}
+impl From<Vec<PDUSessionResourceSetupItemSUReq>> for PDUSessionResourceSetupListSUReq {
+    fn from(v: Vec<PDUSessionResourceSetupItemSUReq>) -> Self {
+        PDUSessionResourceSetupListSUReq(v)
+    }
+}
+impl From<Vec<PDUSessionResourceSetupItemSURes>> for PDUSessionResourceSetupListSURes {
+    fn from(v: Vec<PDUSessionResourceSetupItemSURes>) -> Self {
+        PDUSessionResourceSetupListSURes(v)
+    }
+}
+impl From<Vec<PDUSessionResourceSuspendItemSUSReq>> for PDUSessionResourceSuspendListSUSReq {
+    fn from(v: Vec<PDUSessionResourceSuspendItemSUSReq>) -> Self {
+        PDUSessionResourceSuspendListSUSReq(v)
+    }
+}
+impl From<Vec<PDUSessionResourceSwitchedItem>> for PDUSessionResourceSwitchedList {
+    fn from(v: Vec<PDUSessionResourceSwitchedItem>) -> Self {
+        PDUSessionResourceSwitchedList(v)
+    }
+}
+impl From<Vec<PDUSessionResourceToBeSwitchedDLItem>> for PDUSessionResourceToBeSwitchedDLList {
+    fn from(v: Vec<PDUSessionResourceToBeSwitchedDLItem>) -> Self {
+        PDUSessionResourceToBeSwitchedDLList(v)
+    }
+}
+impl From<Vec<PDUSessionResourceToReleaseItemHOCmd>> for PDUSessionResourceToReleaseListHOCmd {
+    fn from(v: Vec<PDUSessionResourceToReleaseItemHOCmd>) -> Self {
+        PDUSessionResourceToReleaseListHOCmd(v)
+    }
+}
+impl From<Vec<PDUSessionResourceToReleaseItemRelCmd>> for PDUSessionResourceToReleaseListRelCmd {
+    fn from(v: Vec<PDUSessionResourceToReleaseItemRelCmd>) -> Self {
+        PDUSessionResourceToReleaseListRelCmd(v)
+    }
+}
+impl From<u8> for PDUSessionType {
+    fn from(v: u8) -> Self {
+        PDUSessionType(v)
+    }
+}
+impl From<Vec<u8>> for PLMNIdentity {
+    fn from(v: Vec<u8>) -> Self {
+        PLMNIdentity(v)
+    }
+}
+impl From<Vec<PLMNSupportItem>> for PLMNSupportList {
+    fn from(v: Vec<PLMNSupportItem>) -> Self {
+        PLMNSupportList(v)
+    }
+}
+impl From<u16> for PacketDelayBudget {
+    fn from(v: u16) -> Self {
+        PacketDelayBudget(v)
+    }
+}
+impl From<u16> for PacketLossRate {
+    fn from(v: u16) -> Self {
+        PacketLossRate(v)
+    }
+}
+impl From<u8> for Paging_Time_Window {
+    fn from(v: u8) -> Self {
+        Paging_Time_Window(v)
+    }
+}
+impl From<u8> for Paging_eDRX_Cycle {
+    fn from(v: u8) -> Self {
+        Paging_eDRX_Cycle(v)
+    }
+}
+impl From<u8> for PagingAttemptCount {
+    fn from(v: u8) -> Self {
+        PagingAttemptCount(v)
+    }
+}
+impl From<u8> for PagingDRX {
+    fn from(v: u8) -> Self {
+        PagingDRX(v)
+    }
+}
+impl From<u8> for PagingOrigin {
+    fn from(v: u8) -> Self {
+        PagingOrigin(v)
+    }
+}
+impl From<u8> for PagingPriority {
+    fn from(v: u8) -> Self {
+        PagingPriority(v)
+    }
+}
+impl From<u8> for PagingProbabilityInformation {
+    fn from(v: u8) -> Self {
+        PagingProbabilityInformation(v)
+    }
+}
+impl From<u8> for PedestrianUE {
+    fn from(v: u8) -> Self {
+        PedestrianUE(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for PeriodicRegistrationUpdateTimer {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        PeriodicRegistrationUpdateTimer(v)
+    }
+}
+impl From<u32> for Periodicity {
+    fn from(v: u32) -> Self {
+        Periodicity(v)
+    }
+}
+impl From<Vec<u8>> for PortNumber {
+    fn from(v: Vec<u8>) -> Self {
+        PortNumber(v)
+    }
+}
+impl From<u8> for Pre_emptionCapability {
+    fn from(v: u8) -> Self {
+        Pre_emptionCapability(v)
+    }
+}
+impl From<u8> for Pre_emptionVulnerability {
+    fn from(v: u8) -> Self {
+        Pre_emptionVulnerability(v)
+    }
+}
+impl From<u8> for Presence {
+    fn from(v: u8) -> Self {
+        Presence(v)
+    }
+}
+impl From<u8> for PriorityLevelARP {
+    fn from(v: u8) -> Self {
+        PriorityLevelARP(v)
+    }
+}
+impl From<u8> for PriorityLevelQos {
+    fn from(v: u8) -> Self {
+        PriorityLevelQos(v)
+    }
+}
+impl From<u8> for PrivacyIndicator {
+    fn from(v: u8) -> Self {
+        PrivacyIndicator(v)
+    }
+}
+impl From<u8> for ProcedureCode {
+    fn from(v: u8) -> Self {
+        ProcedureCode(v)
+    }
+}
+impl From<u16> for ProtocolExtensionID {
+    fn from(v: u16) -> Self {
+        ProtocolExtensionID(v)
+    }
+}
+impl From<u16> for ProtocolIE_ID {
+    fn from(v: u16) -> Self {
+        ProtocolIE_ID(v)
+    }
+}
+impl From<Vec<QoSFlowsUsageReport_Item>> for QoSFlowsUsageReportList {
+    fn from(v: Vec<QoSFlowsUsageReport_Item>) -> Self {
+        QoSFlowsUsageReportList(v)
+    }
+}
+impl From<Vec<QosFlowAcceptedItem>> for QosFlowAcceptedList {
+    fn from(v: Vec<QosFlowAcceptedItem>) -> Self {
+        QosFlowAcceptedList(v)
+    }
+}
+impl From<Vec<QosFlowAddOrModifyRequestItem>> for QosFlowAddOrModifyRequestList {
+    fn from(v: Vec<QosFlowAddOrModifyRequestItem>) -> Self {
+        QosFlowAddOrModifyRequestList(v)
+    }
+}
+impl From<Vec<QosFlowAddOrModifyResponseItem>> for QosFlowAddOrModifyResponseList {
+    fn from(v: Vec<QosFlowAddOrModifyResponseItem>) -> Self {
+        QosFlowAddOrModifyResponseList(v)
+    }
+}
+impl From<Vec<QosFlowFeedbackItem>> for QosFlowFeedbackList {
+    fn from(v: Vec<QosFlowFeedbackItem>) -> Self {
+        QosFlowFeedbackList(v)
+    }
+}
+impl From<u8> for QosFlowIdentifier {
+    fn from(v: u8) -> Self {
+        QosFlowIdentifier(v)
+    }
+}
+impl From<Vec<QosFlowInformationItem>> for QosFlowInformationList {
+    fn from(v: Vec<QosFlowInformationItem>) -> Self {
+        QosFlowInformationList(v)
+    }
+}
+impl From<Vec<QosFlowWithCauseItem>> for QosFlowListWithCause {
+    fn from(v: Vec<QosFlowWithCauseItem>) -> Self {
+        QosFlowListWithCause(v)
+    }
+}
+impl From<Vec<QosFlowItemWithDataForwarding>> for QosFlowListWithDataForwarding {
+    fn from(v: Vec<QosFlowItemWithDataForwarding>) -> Self {
+        QosFlowListWithDataForwarding(v)
+    }
+}
+impl From<Vec<QosFlowModifyConfirmItem>> for QosFlowModifyConfirmList {
+    fn from(v: Vec<QosFlowModifyConfirmItem>) -> Self {
+        QosFlowModifyConfirmList(v)
+    }
+}
+impl From<Vec<QosFlowNotifyItem>> for QosFlowNotifyList {
+    fn from(v: Vec<QosFlowNotifyItem>) -> Self {
+        QosFlowNotifyList(v)
+    }
+}
+impl From<Vec<QosFlowParametersItem>> for QosFlowParametersList {
+    fn from(v: Vec<QosFlowParametersItem>) -> Self {
+        QosFlowParametersList(v)
+    }
+}
+impl From<Vec<QosFlowPerTNLInformationItem>> for QosFlowPerTNLInformationList {
+    fn from(v: Vec<QosFlowPerTNLInformationItem>) -> Self {
+        QosFlowPerTNLInformationList(v)
+    }
+}
+impl From<Vec<QosFlowSetupRequestItem>> for QosFlowSetupRequestList {
+    fn from(v: Vec<QosFlowSetupRequestItem>) -> Self {
+        QosFlowSetupRequestList(v)
+    }
+}
+impl From<Vec<QosFlowToBeForwardedItem>> for QosFlowToBeForwardedList {
+    fn from(v: Vec<QosFlowToBeForwardedItem>) -> Self {
+        QosFlowToBeForwardedList(v)
+    }
+}
+impl From<u16> for QosMonitoringReportingFrequency {
+    fn from(v: u16) -> Self {
+        QosMonitoringReportingFrequency(v)
+    }
+}
+impl From<u8> for QosMonitoringRequest {
+    fn from(v: u8) -> Self {
+        QosMonitoringRequest(v)
+    }
+}
+impl From<u32> for RAN_UE_NGAP_ID {
+    fn from(v: u32) -> Self {
+        RAN_UE_NGAP_ID(v)
+    }
+}
+impl From<String> for RANNodeName {
+    fn from(v: String) -> Self {
+        RANNodeName(v)
+    }
+}
+impl From<String> for RANNodeNameUTF8String {
+    fn from(v: String) -> Self {
+        RANNodeNameUTF8String(v)
+    }
+}
+impl From<String> for RANNodeNameVisibleString {
+    fn from(v: String) -> Self {
+        RANNodeNameVisibleString(v)
+    }
+}
+impl From<u16> for RANPagingPriority {
+    fn from(v: u16) -> Self {
+        RANPagingPriority(v)
+    }
+}
+impl From<u8> for RAT_Information {
+    fn from(v: u8) -> Self {
+        RAT_Information(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for RATRestrictionInformation {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        RATRestrictionInformation(v)
+    }
+}
+impl From<Vec<RATRestrictions_Item>> for RATRestrictions {
+    fn from(v: Vec<RATRestrictions_Item>) -> Self {
+        RATRestrictions(v)
+    }
+}
+impl From<Vec<u8>> for RGLevelWirelineAccessCharacteristics {
+    fn from(v: Vec<u8>) -> Self {
+        RGLevelWirelineAccessCharacteristics(v)
+    }
+}
+impl From<u16> for RNC_ID {
+    fn from(v: u16) -> Self {
+        RNC_ID(v)
+    }
+}
+impl From<Vec<u8>> for RRCContainer {
+    fn from(v: Vec<u8>) -> Self {
+        RRCContainer(v)
+    }
+}
+impl From<u8> for RRCEstablishmentCause {
+    fn from(v: u8) -> Self {
+        RRCEstablishmentCause(v)
+    }
+}
+impl From<u8> for RRCInactiveTransitionReportRequest {
+    fn from(v: u8) -> Self {
+        RRCInactiveTransitionReportRequest(v)
+    }
+}
+impl From<u8> for RRCState {
+    fn from(v: u8) -> Self {
+        RRCState(v)
+    }
+}
+impl From<u8> for RSN {
+    fn from(v: u8) -> Self {
+        RSN(v)
+    }
+}
+impl From<u8> for Range {
+    fn from(v: u8) -> Self {
+        Range(v)
+    }
+}
+impl From<Vec<RecommendedCellItem>> for RecommendedCellList {
+    fn from(v: Vec<RecommendedCellItem>) -> Self {
+        RecommendedCellList(v)
+    }
+}
+impl From<Vec<RecommendedRANNodeItem>> for RecommendedRANNodeList {
+    fn from(v: Vec<RecommendedRANNodeItem>) -> Self {
+        RecommendedRANNodeList(v)
+    }
+}
+impl From<u8> for RedirectionVoiceFallback {
+    fn from(v: u8) -> Self {
+        RedirectionVoiceFallback(v)
+    }
+}
+impl From<u8> for RedundantQosFlowIndicator {
+    fn from(v: u8) -> Self {
+        RedundantQosFlowIndicator(v)
+    }
+}
+impl From<u8> for ReflectiveQosAttribute {
+    fn from(v: u8) -> Self {
+        ReflectiveQosAttribute(v)
+    }
+}
+impl From<Vec<u8>> for RejectedNSSAIinPLMN {
+    fn from(v: Vec<u8>) -> Self {
+        RejectedNSSAIinPLMN(v)
+    }
+}
+impl From<Vec<u8>> for RejectedNSSAIinTA {
+    fn from(v: Vec<u8>) -> Self {
+        RejectedNSSAIinTA(v)
+    }
+}
+impl From<u8> for RelativeAMFCapacity {
+    fn from(v: u8) -> Self {
+        RelativeAMFCapacity(v)
+    }
+}
+impl From<u32> for RepetitionPeriod {
+    fn from(v: u32) -> Self {
+        RepetitionPeriod(v)
+    }
+}
+impl From<u8> for ReportAmountMDT {
+    fn from(v: u8) -> Self {
+        ReportAmountMDT(v)
+    }
+}
+impl From<u8> for ReportArea {
+    fn from(v: u8) -> Self {
+        ReportArea(v)
+    }
+}
+impl From<u8> for ReportIntervalMDT {
+    fn from(v: u8) -> Self {
+        ReportIntervalMDT(v)
+    }
+}
+impl From<u8> for ResetAll {
+    fn from(v: u8) -> Self {
+        ResetAll(v)
+    }
+}
+impl From<Vec<u8>> for RoutingID {
+    fn from(v: Vec<u8>) -> Self {
+        RoutingID(v)
+    }
+}
+impl From<Vec<TransportLayerAddress>> for SCTP_TLAs {
+    fn from(v: Vec<TransportLayerAddress>) -> Self {
+        SCTP_TLAs(v)
+    }
+}
+impl From<Vec<u8>> for SD {
+    fn from(v: Vec<u8>) -> Self {
+        SD(v)
+    }
+}
+impl From<u8> for SONInformationRequest {
+    fn from(v: u8) -> Self {
+        SONInformationRequest(v)
+    }
+}
+impl From<u8> for SRVCCOperationPossible {
+    fn from(v: u8) -> Self {
+        SRVCCOperationPossible(v)
+    }
+}
+impl From<Vec<u8>> for SST {
+    fn from(v: Vec<u8>) -> Self {
+        SST(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for SecurityKey {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        SecurityKey(v)
+    }
+}
+impl From<u8> for SensorMeasConfig {
+    fn from(v: u8) -> Self {
+        SensorMeasConfig(v)
+    }
+}
+impl From<Vec<SensorMeasConfigNameItem>> for SensorMeasConfigNameList {
+    fn from(v: Vec<SensorMeasConfigNameItem>) -> Self {
+        SensorMeasConfigNameList(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for SerialNumber {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        SerialNumber(v)
+    }
+}
+impl From<Vec<ServedGUAMIItem>> for ServedGUAMIList {
+    fn from(v: Vec<ServedGUAMIItem>) -> Self {
+        ServedGUAMIList(v)
+    }
+}
+impl From<Vec<ServiceAreaInformation_Item>> for ServiceAreaInformation {
+    fn from(v: Vec<ServiceAreaInformation_Item>) -> Self {
+        ServiceAreaInformation(v)
+    }
+}
+impl From<u32> for SgNB_UE_X2AP_ID {
+    fn from(v: u32) -> Self {
+        SgNB_UE_X2AP_ID(v)
+    }
+}
+impl From<Vec<SliceOverloadItem>> for SliceOverloadList {
+    fn from(v: Vec<SliceOverloadItem>) -> Self {
+        SliceOverloadList(v)
+    }
+}
+impl From<Vec<SliceSupportItem>> for SliceSupportList {
+    fn from(v: Vec<SliceSupportItem>) -> Self {
+        SliceSupportList(v)
+    }
+}
+impl From<u8> for SourceOfUEActivityBehaviourInformation {
+    fn from(v: u8) -> Self {
+        SourceOfUEActivityBehaviourInformation(v)
+    }
+}
+impl From<Vec<u8>> for SourceToTarget_TransparentContainer {
+    fn from(v: Vec<u8>) -> Self {
+        SourceToTarget_TransparentContainer(v)
+    }
+}
+impl From<Vec<SupportedTAItem>> for SupportedTAList {
+    fn from(v: Vec<SupportedTAItem>) -> Self {
+        SupportedTAList(v)
+    }
+}
+impl From<u8> for Suspend_Request_Indication {
+    fn from(v: u8) -> Self {
+        Suspend_Request_Indication(v)
+    }
+}
+impl From<u8> for Suspend_Response_Indication {
+    fn from(v: u8) -> Self {
+        Suspend_Response_Indication(v)
+    }
+}
+impl From<u8> for SuspendIndicator {
+    fn from(v: u8) -> Self {
+        SuspendIndicator(v)
+    }
+}
+impl From<Vec<u8>> for TAC {
+    fn from(v: Vec<u8>) -> Self {
+        TAC(v)
+    }
+}
+impl From<Vec<TAIBroadcastEUTRA_Item>> for TAIBroadcastEUTRA {
+    fn from(v: Vec<TAIBroadcastEUTRA_Item>) -> Self {
+        TAIBroadcastEUTRA(v)
+    }
+}
+impl From<Vec<TAIBroadcastNR_Item>> for TAIBroadcastNR {
+    fn from(v: Vec<TAIBroadcastNR_Item>) -> Self {
+        TAIBroadcastNR(v)
+    }
+}
+impl From<Vec<TAICancelledEUTRA_Item>> for TAICancelledEUTRA {
+    fn from(v: Vec<TAICancelledEUTRA_Item>) -> Self {
+        TAICancelledEUTRA(v)
+    }
+}
+impl From<Vec<TAICancelledNR_Item>> for TAICancelledNR {
+    fn from(v: Vec<TAICancelledNR_Item>) -> Self {
+        TAICancelledNR(v)
+    }
+}
+impl From<Vec<TAIListForInactiveItem>> for TAIListForInactive {
+    fn from(v: Vec<TAIListForInactiveItem>) -> Self {
+        TAIListForInactive(v)
+    }
+}
+impl From<Vec<TAIListForPagingItem>> for TAIListForPaging {
+    fn from(v: Vec<TAIListForPagingItem>) -> Self {
+        TAIListForPaging(v)
+    }
+}
+impl From<Vec<TAI>> for TAIListForRestart {
+    fn from(v: Vec<TAI>) -> Self {
+        TAIListForRestart(v)
+    }
+}
+impl From<Vec<TAI>> for TAIListForWarning {
+    fn from(v: Vec<TAI>) -> Self {
+        TAIListForWarning(v)
+    }
+}
+impl From<Vec<TAI>> for TAIListforMDT {
+    fn from(v: Vec<TAI>) -> Self {
+        TAIListforMDT(v)
+    }
+}
+impl From<Vec<TAC>> for TAListforMDT {
+    fn from(v: Vec<TAC>) -> Self {
+        TAListforMDT(v)
+    }
+}
+impl From<Vec<u8>> for TNAP_ID {
+    fn from(v: Vec<u8>) -> Self {
+        TNAP_ID(v)
+    }
+}
+impl From<u8> for TNLAddressWeightFactor {
+    fn from(v: u8) -> Self {
+        TNLAddressWeightFactor(v)
+    }
+}
+impl From<Vec<TNLAssociationItem>> for TNLAssociationList {
+    fn from(v: Vec<TNLAssociationItem>) -> Self {
+        TNLAssociationList(v)
+    }
+}
+impl From<u8> for TNLAssociationUsage {
+    fn from(v: u8) -> Self {
+        TNLAssociationUsage(v)
+    }
+}
+impl From<Vec<u8>> for TWAP_ID {
+    fn from(v: Vec<u8>) -> Self {
+        TWAP_ID(v)
+    }
+}
+impl From<Vec<u8>> for TargetToSource_TransparentContainer {
+    fn from(v: Vec<u8>) -> Self {
+        TargetToSource_TransparentContainer(v)
+    }
+}
+impl From<Vec<u8>> for TargettoSource_Failure_TransparentContainer {
+    fn from(v: Vec<u8>) -> Self {
+        TargettoSource_Failure_TransparentContainer(v)
+    }
+}
+impl From<u8> for Threshold_RSRP {
+    fn from(v: u8) -> Self {
+        Threshold_RSRP(v)
+    }
+}
+impl From<u8> for Threshold_RSRQ {
+    fn from(v: u8) -> Self {
+        Threshold_RSRQ(v)
+    }
+}
+impl From<u8> for Threshold_SINR {
+    fn from(v: u8) -> Self {
+        Threshold_SINR(v)
+    }
+}
+impl From<Vec<u8>> for TimeStamp {
+    fn from(v: Vec<u8>) -> Self {
+        TimeStamp(v)
+    }
+}
+impl From<u8> for TimeToTrigger {
+    fn from(v: u8) -> Self {
+        TimeToTrigger(v)
+    }
+}
+impl From<u8> for TimeToWait {
+    fn from(v: u8) -> Self {
+        TimeToWait(v)
+    }
+}
+impl From<u16> for TimeUEStayedInCell {
+    fn from(v: u16) -> Self {
+        TimeUEStayedInCell(v)
+    }
+}
+impl From<u16> for TimeUEStayedInCellEnhancedGranularity {
+    fn from(v: u16) -> Self {
+        TimeUEStayedInCellEnhancedGranularity(v)
+    }
+}
+impl From<u8> for TimerApproachForGUAMIRemoval {
+    fn from(v: u8) -> Self {
+        TimerApproachForGUAMIRemoval(v)
+    }
+}
+impl From<u8> for TraceDepth {
+    fn from(v: u8) -> Self {
+        TraceDepth(v)
+    }
+}
+impl From<u8> for TrafficLoadReductionIndication {
+    fn from(v: u8) -> Self {
+        TrafficLoadReductionIndication(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for TransportLayerAddress {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        TransportLayerAddress(v)
+    }
+}
+impl From<u8> for TriggeringMessage {
+    fn from(v: u8) -> Self {
+        TriggeringMessage(v)
+    }
+}
+impl From<u8> for TypeOfError {
+    fn from(v: u8) -> Self {
+        TypeOfError(v)
+    }
+}
+impl From<u8> for UE_UP_CIoT_Support {
+    fn from(v: u8) -> Self {
+        UE_UP_CIoT_Support(v)
+    }
+}
+impl From<Vec<UE_associatedLogicalNG_connectionItem>> for UE_associatedLogicalNG_connectionList {
+    fn from(v: Vec<UE_associatedLogicalNG_connectionItem>) -> Self {
+        UE_associatedLogicalNG_connectionList(v)
+    }
+}
+impl From<u8> for UECapabilityInfoRequest {
+    fn from(v: u8) -> Self {
+        UECapabilityInfoRequest(v)
+    }
+}
+impl From<u8> for UEContextRequest {
+    fn from(v: u8) -> Self {
+        UEContextRequest(v)
+    }
+}
+impl From<Vec<LastVisitedCellItem>> for UEHistoryInformation {
+    fn from(v: Vec<LastVisitedCellItem>) -> Self {
+        UEHistoryInformation(v)
+    }
+}
+impl From<u8> for UEPresence {
+    fn from(v: u8) -> Self {
+        UEPresence(v)
+    }
+}
+impl From<Vec<UEPresenceInAreaOfInterestItem>> for UEPresenceInAreaOfInterestList {
+    fn from(v: Vec<UEPresenceInAreaOfInterestItem>) -> Self {
+        UEPresenceInAreaOfInterestList(v)
+    }
+}
+impl From<Vec<u8>> for UERadioCapability {
+    fn from(v: Vec<u8>) -> Self {
+        UERadioCapability(v)
+    }
+}
+impl From<Vec<u8>> for UERadioCapabilityForPagingOfEUTRA {
+    fn from(v: Vec<u8>) -> Self {
+        UERadioCapabilityForPagingOfEUTRA(v)
+    }
+}
+impl From<Vec<u8>> for UERadioCapabilityForPagingOfNB_IoT {
+    fn from(v: Vec<u8>) -> Self {
+        UERadioCapabilityForPagingOfNB_IoT(v)
+    }
+}
+impl From<Vec<u8>> for UERadioCapabilityForPagingOfNR {
+    fn from(v: Vec<u8>) -> Self {
+        UERadioCapabilityForPagingOfNR(v)
+    }
+}
+impl From<Vec<u8>> for UERadioCapabilityID {
+    fn from(v: Vec<u8>) -> Self {
+        UERadioCapabilityID(v)
+    }
+}
+impl From<u8> for UERetentionInformation {
+    fn from(v: u8) -> Self {
+        UERetentionInformation(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for UL_NAS_Count {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        UL_NAS_Count(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for UL_NAS_MAC {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        UL_NAS_MAC(v)
+    }
+}
+impl From<Vec<UL_NGU_UP_TNLModifyItem>> for UL_NGU_UP_TNLModifyList {
+    fn from(v: Vec<UL_NGU_UP_TNLModifyItem>) -> Self {
+        UL_NGU_UP_TNLModifyList(v)
+    }
+}
+impl From<u8> for ULForwarding {
+    fn from(v: u8) -> Self {
+        ULForwarding(v)
+    }
+}
+impl From<Vec<UPTransportLayerInformationItem>> for UPTransportLayerInformationList {
+    fn from(v: Vec<UPTransportLayerInformationItem>) -> Self {
+        UPTransportLayerInformationList(v)
+    }
+}
+impl From<Vec<UPTransportLayerInformationPairItem>> for UPTransportLayerInformationPairList {
+    fn from(v: Vec<UPTransportLayerInformationPairItem>) -> Self {
+        UPTransportLayerInformationPairList(v)
+    }
+}
+impl From<String> for URI_address {
+    fn from(v: String) -> Self {
+        URI_address(v)
+    }
+}
+impl From<Vec<UnavailableGUAMIItem>> for UnavailableGUAMIList {
+    fn from(v: Vec<UnavailableGUAMIItem>) -> Self {
+        UnavailableGUAMIList(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for UpdateFeedback {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        UpdateFeedback(v)
+    }
+}
+impl From<u8> for VehicleUE {
+    fn from(v: u8) -> Self {
+        VehicleUE(v)
+    }
+}
+impl From<Vec<VolumeTimedReport_Item>> for VolumeTimedReportList {
+    fn from(v: Vec<VolumeTimedReport_Item>) -> Self {
+        VolumeTimedReportList(v)
+    }
+}
+impl From<u8> for WLANMeasConfig {
+    fn from(v: u8) -> Self {
+        WLANMeasConfig(v)
+    }
+}
+impl From<Vec<WLANMeasConfigNameItem>> for WLANMeasConfigNameList {
+    fn from(v: Vec<WLANMeasConfigNameItem>) -> Self {
+        WLANMeasConfigNameList(v)
+    }
+}
+impl From<Vec<u8>> for WLANName {
+    fn from(v: Vec<u8>) -> Self {
+        WLANName(v)
+    }
+}
+impl From<Vec<u8>> for WarningAreaCoordinates {
+    fn from(v: Vec<u8>) -> Self {
+        WarningAreaCoordinates(v)
+    }
+}
+impl From<Vec<u8>> for WarningMessageContents {
+    fn from(v: Vec<u8>) -> Self {
+        WarningMessageContents(v)
+    }
+}
+impl From<Vec<u8>> for WarningSecurityInfo {
+    fn from(v: Vec<u8>) -> Self {
+        WarningSecurityInfo(v)
+    }
+}
+impl From<Vec<u8>> for WarningType {
+    fn from(v: Vec<u8>) -> Self {
+        WarningType(v)
+    }
+}
+impl From<Vec<XnExtTLA_Item>> for XnExtTLAs {
+    fn from(v: Vec<XnExtTLA_Item>) -> Self {
+        XnExtTLAs(v)
+    }
+}
+impl From<Vec<TransportLayerAddress>> for XnGTP_TLAs {
+    fn from(v: Vec<TransportLayerAddress>) -> Self {
+        XnGTP_TLAs(v)
+    }
+}
+impl From<Vec<TransportLayerAddress>> for XnTLAs {
+    fn from(v: Vec<TransportLayerAddress>) -> Self {
+        XnTLAs(v)
+    }
+}
+impl From<Vec<AMFConfigurationUpdateProtocolIEs_Entry>> for AMFConfigurationUpdateProtocolIEs {
+    fn from(v: Vec<AMFConfigurationUpdateProtocolIEs_Entry>) -> Self {
+        AMFConfigurationUpdateProtocolIEs(v)
+    }
+}
+impl From<Vec<AMFStatusIndicationProtocolIEs_Entry>> for AMFStatusIndicationProtocolIEs {
+    fn from(v: Vec<AMFStatusIndicationProtocolIEs_Entry>) -> Self {
+        AMFStatusIndicationProtocolIEs(v)
+    }
+}
+impl From<u8> for Allowed_PNI_NPN_ItemPNI_NPN_restricted {
+    fn from(v: u8) -> Self {
+        Allowed_PNI_NPN_ItemPNI_NPN_restricted(v)
+    }
+}
+impl From<Vec<Allowed_PNI_NPN_ItemIE_Extensions_Entry>> for Allowed_PNI_NPN_ItemIE_Extensions {
+    fn from(v: Vec<Allowed_PNI_NPN_ItemIE_Extensions_Entry>) -> Self {
+        Allowed_PNI_NPN_ItemIE_Extensions(v)
+    }
+}
+impl From<Vec<AllowedNSSAI_ItemIE_Extensions_Entry>> for AllowedNSSAI_ItemIE_Extensions {
+    fn from(v: Vec<AllowedNSSAI_ItemIE_Extensions_Entry>) -> Self {
+        AllowedNSSAI_ItemIE_Extensions(v)
+    }
+}
+impl From<Vec<AreaOfInterestIE_Extensions_Entry>> for AreaOfInterestIE_Extensions {
+    fn from(v: Vec<AreaOfInterestIE_Extensions_Entry>) -> Self {
+        AreaOfInterestIE_Extensions(v)
+    }
+}
+impl From<Vec<AreaOfInterestCellItemIE_Extensions_Entry>> for AreaOfInterestCellItemIE_Extensions {
+    fn from(v: Vec<AreaOfInterestCellItemIE_Extensions_Entry>) -> Self {
+        AreaOfInterestCellItemIE_Extensions(v)
+    }
+}
+impl From<Vec<AreaOfInterestItemIE_Extensions_Entry>> for AreaOfInterestItemIE_Extensions {
+    fn from(v: Vec<AreaOfInterestItemIE_Extensions_Entry>) -> Self {
+        AreaOfInterestItemIE_Extensions(v)
+    }
+}
+impl From<Vec<AreaOfInterestTAIItemIE_Extensions_Entry>> for AreaOfInterestTAIItemIE_Extensions {
+    fn from(v: Vec<AreaOfInterestTAIItemIE_Extensions_Entry>) -> Self {
+        AreaOfInterestTAIItemIE_Extensions(v)
+    }
+}
+impl From<u8> for AssociatedQosFlowItemQosFlowMappingIndication {
+    fn from(v: u8) -> Self {
+        AssociatedQosFlowItemQosFlowMappingIndication(v)
+    }
+}
+impl From<Vec<AssociatedQosFlowItemIE_Extensions_Entry>> for AssociatedQosFlowItemIE_Extensions {
+    fn from(v: Vec<AssociatedQosFlowItemIE_Extensions_Entry>) -> Self {
+        AssociatedQosFlowItemIE_Extensions(v)
+    }
+}
+impl From<u8> for BluetoothMeasurementConfigurationBt_rssi {
+    fn from(v: u8) -> Self {
+        BluetoothMeasurementConfigurationBt_rssi(v)
+    }
+}
+impl From<Vec<BroadcastPLMNItemIE_Extensions_Entry>> for BroadcastPLMNItemIE_Extensions {
+    fn from(v: Vec<BroadcastPLMNItemIE_Extensions_Entry>) -> Self {
+        BroadcastPLMNItemIE_Extensions(v)
+    }
+}
+impl From<Vec<CNAssistedRANTuningIE_Extensions_Entry>> for CNAssistedRANTuningIE_Extensions {
+    fn from(v: Vec<CNAssistedRANTuningIE_Extensions_Entry>) -> Self {
+        CNAssistedRANTuningIE_Extensions(v)
+    }
+}
+impl From<u8> for CNTypeRestrictionsForEquivalentItemCn_Type {
+    fn from(v: u8) -> Self {
+        CNTypeRestrictionsForEquivalentItemCn_Type(v)
+    }
+}
+impl From<u16> for COUNTValueForPDCP_SN12PDCP_SN12 {
+    fn from(v: u16) -> Self {
+        COUNTValueForPDCP_SN12PDCP_SN12(v)
+    }
+}
+impl From<u32> for COUNTValueForPDCP_SN12HFN_PDCP_SN12 {
+    fn from(v: u32) -> Self {
+        COUNTValueForPDCP_SN12HFN_PDCP_SN12(v)
+    }
+}
+impl From<Vec<COUNTValueForPDCP_SN12IE_Extensions_Entry>> for COUNTValueForPDCP_SN12IE_Extensions {
+    fn from(v: Vec<COUNTValueForPDCP_SN12IE_Extensions_Entry>) -> Self {
+        COUNTValueForPDCP_SN12IE_Extensions(v)
+    }
+}
+impl From<u32> for COUNTValueForPDCP_SN18PDCP_SN18 {
+    fn from(v: u32) -> Self {
+        COUNTValueForPDCP_SN18PDCP_SN18(v)
+    }
+}
+impl From<u16> for COUNTValueForPDCP_SN18HFN_PDCP_SN18 {
+    fn from(v: u16) -> Self {
+        COUNTValueForPDCP_SN18HFN_PDCP_SN18(v)
+    }
+}
+impl From<Vec<COUNTValueForPDCP_SN18IE_Extensions_Entry>> for COUNTValueForPDCP_SN18IE_Extensions {
+    fn from(v: Vec<COUNTValueForPDCP_SN18IE_Extensions_Entry>) -> Self {
+        COUNTValueForPDCP_SN18IE_Extensions(v)
+    }
+}
+impl From<Vec<CandidateCellIDIE_Extensions_Entry>> for CandidateCellIDIE_Extensions {
+    fn from(v: Vec<CandidateCellIDIE_Extensions_Entry>) -> Self {
+        CandidateCellIDIE_Extensions(v)
+    }
+}
+impl From<Vec<CandidateCellItemIE_Extensions_Entry>> for CandidateCellItemIE_Extensions {
+    fn from(v: Vec<CandidateCellItemIE_Extensions_Entry>) -> Self {
+        CandidateCellItemIE_Extensions(v)
+    }
+}
+impl From<u16> for CandidatePCICandidatePCI {
+    fn from(v: u16) -> Self {
+        CandidatePCICandidatePCI(v)
+    }
+}
+impl From<u32> for CandidatePCICandidateNRARFCN {
+    fn from(v: u32) -> Self {
+        CandidatePCICandidateNRARFCN(v)
+    }
+}
+impl From<Vec<CandidatePCIIE_Extensions_Entry>> for CandidatePCIIE_Extensions {
+    fn from(v: Vec<CandidatePCIIE_Extensions_Entry>) -> Self {
+        CandidatePCIIE_Extensions(v)
+    }
+}
+impl From<Vec<Cell_CAGInformationIE_Extensions_Entry>> for Cell_CAGInformationIE_Extensions {
+    fn from(v: Vec<Cell_CAGInformationIE_Extensions_Entry>) -> Self {
+        Cell_CAGInformationIE_Extensions(v)
+    }
+}
+impl From<Vec<CellBasedMDT_EUTRAIE_Extensions_Entry>> for CellBasedMDT_EUTRAIE_Extensions {
+    fn from(v: Vec<CellBasedMDT_EUTRAIE_Extensions_Entry>) -> Self {
+        CellBasedMDT_EUTRAIE_Extensions(v)
+    }
+}
+impl From<Vec<CellBasedMDT_NRIE_Extensions_Entry>> for CellBasedMDT_NRIE_Extensions {
+    fn from(v: Vec<CellBasedMDT_NRIE_Extensions_Entry>) -> Self {
+        CellBasedMDT_NRIE_Extensions(v)
+    }
+}
+impl From<Vec<CellIDBroadcastNR_ItemIE_Extensions_Entry>> for CellIDBroadcastNR_ItemIE_Extensions {
+    fn from(v: Vec<CellIDBroadcastNR_ItemIE_Extensions_Entry>) -> Self {
+        CellIDBroadcastNR_ItemIE_Extensions(v)
+    }
+}
+impl From<Vec<CellIDCancelledNR_ItemIE_Extensions_Entry>> for CellIDCancelledNR_ItemIE_Extensions {
+    fn from(v: Vec<CellIDCancelledNR_ItemIE_Extensions_Entry>) -> Self {
+        CellIDCancelledNR_ItemIE_Extensions(v)
+    }
+}
+impl From<Vec<CellTrafficTraceProtocolIEs_Entry>> for CellTrafficTraceProtocolIEs {
+    fn from(v: Vec<CellTrafficTraceProtocolIEs_Entry>) -> Self {
+        CellTrafficTraceProtocolIEs(v)
+    }
+}
+impl From<Vec<CellTypeIE_Extensions_Entry>> for CellTypeIE_Extensions {
+    fn from(v: Vec<CellTypeIE_Extensions_Entry>) -> Self {
+        CellTypeIE_Extensions(v)
+    }
+}
+impl From<Vec<CriticalityDiagnosticsIE_Extensions_Entry>> for CriticalityDiagnosticsIE_Extensions {
+    fn from(v: Vec<CriticalityDiagnosticsIE_Extensions_Entry>) -> Self {
+        CriticalityDiagnosticsIE_Extensions(v)
+    }
+}
+impl From<u8> for DAPSRequestInfoDAPSIndicator {
+    fn from(v: u8) -> Self {
+        DAPSRequestInfoDAPSIndicator(v)
+    }
+}
+impl From<Vec<DAPSRequestInfoIE_Extensions_Entry>> for DAPSRequestInfoIE_Extensions {
+    fn from(v: Vec<DAPSRequestInfoIE_Extensions_Entry>) -> Self {
+        DAPSRequestInfoIE_Extensions(v)
+    }
+}
+impl From<u8> for DAPSResponseInfoDapsresponseindicator {
+    fn from(v: u8) -> Self {
+        DAPSResponseInfoDapsresponseindicator(v)
+    }
+}
+impl From<Vec<DAPSResponseInfoIE_Extensions_Entry>> for DAPSResponseInfoIE_Extensions {
+    fn from(v: Vec<DAPSResponseInfoIE_Extensions_Entry>) -> Self {
+        DAPSResponseInfoIE_Extensions(v)
+    }
+}
+impl From<Vec<DAPSResponseInfoItemIE_Extension_Entry>> for DAPSResponseInfoItemIE_Extension {
+    fn from(v: Vec<DAPSResponseInfoItemIE_Extension_Entry>) -> Self {
+        DAPSResponseInfoItemIE_Extension(v)
+    }
+}
+impl From<Vec<DRBStatusDL12IE_Extension_Entry>> for DRBStatusDL12IE_Extension {
+    fn from(v: Vec<DRBStatusDL12IE_Extension_Entry>) -> Self {
+        DRBStatusDL12IE_Extension(v)
+    }
+}
+impl From<Vec<DRBStatusDL18IE_Extension_Entry>> for DRBStatusDL18IE_Extension {
+    fn from(v: Vec<DRBStatusDL18IE_Extension_Entry>) -> Self {
+        DRBStatusDL18IE_Extension(v)
+    }
+}
+impl From<Vec<DRBStatusUL12IE_Extension_Entry>> for DRBStatusUL12IE_Extension {
+    fn from(v: Vec<DRBStatusUL12IE_Extension_Entry>) -> Self {
+        DRBStatusUL12IE_Extension(v)
+    }
+}
+impl From<Vec<DRBStatusUL18IE_Extension_Entry>> for DRBStatusUL18IE_Extension {
+    fn from(v: Vec<DRBStatusUL18IE_Extension_Entry>) -> Self {
+        DRBStatusUL18IE_Extension(v)
+    }
+}
+impl From<Vec<DeactivateTraceProtocolIEs_Entry>> for DeactivateTraceProtocolIEs {
+    fn from(v: Vec<DeactivateTraceProtocolIEs_Entry>) -> Self {
+        DeactivateTraceProtocolIEs(v)
+    }
+}
+impl From<Vec<DownlinkNASTransportProtocolIEs_Entry>> for DownlinkNASTransportProtocolIEs {
+    fn from(v: Vec<DownlinkNASTransportProtocolIEs_Entry>) -> Self {
+        DownlinkNASTransportProtocolIEs(v)
+    }
+}
+impl From<Vec<Dynamic5QIDescriptorIE_Extensions_Entry>> for Dynamic5QIDescriptorIE_Extensions {
+    fn from(v: Vec<Dynamic5QIDescriptorIE_Extensions_Entry>) -> Self {
+        Dynamic5QIDescriptorIE_Extensions(v)
+    }
+}
+impl From<Vec<E_RABInformationItemIE_Extensions_Entry>> for E_RABInformationItemIE_Extensions {
+    fn from(v: Vec<E_RABInformationItemIE_Extensions_Entry>) -> Self {
+        E_RABInformationItemIE_Extensions(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for ENB_ID_macroENB_ID {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        ENB_ID_macroENB_ID(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for ENB_ID_homeENB_ID {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        ENB_ID_homeENB_ID(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for ENB_ID_short_macroENB_ID {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        ENB_ID_short_macroENB_ID(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for ENB_ID_long_macroENB_ID {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        ENB_ID_long_macroENB_ID(v)
+    }
+}
+impl From<Vec<EPS_TAIIE_Extensions_Entry>> for EPS_TAIIE_Extensions {
+    fn from(v: Vec<EPS_TAIIE_Extensions_Entry>) -> Self {
+        EPS_TAIIE_Extensions(v)
+    }
+}
+impl From<Vec<EUTRA_CGIIE_Extensions_Entry>> for EUTRA_CGIIE_Extensions {
+    fn from(v: Vec<EUTRA_CGIIE_Extensions_Entry>) -> Self {
+        EUTRA_CGIIE_Extensions(v)
+    }
+}
+impl From<Vec<ErrorIndicationProtocolIEs_Entry>> for ErrorIndicationProtocolIEs {
+    fn from(v: Vec<ErrorIndicationProtocolIEs_Entry>) -> Self {
+        ErrorIndicationProtocolIEs(v)
+    }
+}
+impl From<Vec<EventL1LoggedMDTConfigIE_Extensions_Entry>> for EventL1LoggedMDTConfigIE_Extensions {
+    fn from(v: Vec<EventL1LoggedMDTConfigIE_Extensions_Entry>) -> Self {
+        EventL1LoggedMDTConfigIE_Extensions(v)
+    }
+}
+impl From<u8> for EventTrigger_outOfCoverage {
+    fn from(v: u8) -> Self {
+        EventTrigger_outOfCoverage(v)
+    }
+}
+impl From<Vec<ExpectedUEBehaviourIE_Extensions_Entry>> for ExpectedUEBehaviourIE_Extensions {
+    fn from(v: Vec<ExpectedUEBehaviourIE_Extensions_Entry>) -> Self {
+        ExpectedUEBehaviourIE_Extensions(v)
+    }
+}
+impl From<u16> for ExpectedUEMovingTrajectoryItemTimeStayedInCell {
+    fn from(v: u16) -> Self {
+        ExpectedUEMovingTrajectoryItemTimeStayedInCell(v)
+    }
+}
+impl From<Vec<Extended_AMFNameIE_Extensions_Entry>> for Extended_AMFNameIE_Extensions {
+    fn from(v: Vec<Extended_AMFNameIE_Extensions_Entry>) -> Self {
+        Extended_AMFNameIE_Extensions(v)
+    }
+}
+impl From<Vec<Extended_RANNodeNameIE_Extensions_Entry>> for Extended_RANNodeNameIE_Extensions {
+    fn from(v: Vec<Extended_RANNodeNameIE_Extensions_Entry>) -> Self {
+        Extended_RANNodeNameIE_Extensions(v)
+    }
+}
+impl From<Vec<FailureIndicationIE_Extensions_Entry>> for FailureIndicationIE_Extensions {
+    fn from(v: Vec<FailureIndicationIE_Extensions_Entry>) -> Self {
+        FailureIndicationIE_Extensions(v)
+    }
+}
+impl From<Vec<FirstDLCountIE_Extension_Entry>> for FirstDLCountIE_Extension {
+    fn from(v: Vec<FirstDLCountIE_Extension_Entry>) -> Self {
+        FirstDLCountIE_Extension(v)
+    }
+}
+impl From<Vec<FiveG_S_TMSIIE_Extensions_Entry>> for FiveG_S_TMSIIE_Extensions {
+    fn from(v: Vec<FiveG_S_TMSIIE_Extensions_Entry>) -> Self {
+        FiveG_S_TMSIIE_Extensions(v)
+    }
+}
+impl From<Vec<FromEUTRANtoNGRANIE_Extensions_Entry>> for FromEUTRANtoNGRANIE_Extensions {
+    fn from(v: Vec<FromEUTRANtoNGRANIE_Extensions_Entry>) -> Self {
+        FromEUTRANtoNGRANIE_Extensions(v)
+    }
+}
+impl From<Vec<FromNGRANtoEUTRANIE_Extensions_Entry>> for FromNGRANtoEUTRANIE_Extensions {
+    fn from(v: Vec<FromNGRANtoEUTRANIE_Extensions_Entry>) -> Self {
+        FromNGRANtoEUTRANIE_Extensions(v)
+    }
+}
+impl From<Vec<GBR_QosInformationIE_Extensions_Entry>> for GBR_QosInformationIE_Extensions {
+    fn from(v: Vec<GBR_QosInformationIE_Extensions_Entry>) -> Self {
+        GBR_QosInformationIE_Extensions(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for GNB_ID_gNB_ID {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        GNB_ID_gNB_ID(v)
+    }
+}
+impl From<Vec<GTPTunnelIE_Extensions_Entry>> for GTPTunnelIE_Extensions {
+    fn from(v: Vec<GTPTunnelIE_Extensions_Entry>) -> Self {
+        GTPTunnelIE_Extensions(v)
+    }
+}
+impl From<Vec<GUAMIIE_Extensions_Entry>> for GUAMIIE_Extensions {
+    fn from(v: Vec<GUAMIIE_Extensions_Entry>) -> Self {
+        GUAMIIE_Extensions(v)
+    }
+}
+impl From<Vec<GlobalENB_IDIE_Extensions_Entry>> for GlobalENB_IDIE_Extensions {
+    fn from(v: Vec<GlobalENB_IDIE_Extensions_Entry>) -> Self {
+        GlobalENB_IDIE_Extensions(v)
+    }
+}
+impl From<Vec<GlobalGNB_IDIE_Extensions_Entry>> for GlobalGNB_IDIE_Extensions {
+    fn from(v: Vec<GlobalGNB_IDIE_Extensions_Entry>) -> Self {
+        GlobalGNB_IDIE_Extensions(v)
+    }
+}
+impl From<Vec<GlobalLine_IDIE_Extensions_Entry>> for GlobalLine_IDIE_Extensions {
+    fn from(v: Vec<GlobalLine_IDIE_Extensions_Entry>) -> Self {
+        GlobalLine_IDIE_Extensions(v)
+    }
+}
+impl From<Vec<GlobalN3IWF_IDIE_Extensions_Entry>> for GlobalN3IWF_IDIE_Extensions {
+    fn from(v: Vec<GlobalN3IWF_IDIE_Extensions_Entry>) -> Self {
+        GlobalN3IWF_IDIE_Extensions(v)
+    }
+}
+impl From<Vec<GlobalNgENB_IDIE_Extensions_Entry>> for GlobalNgENB_IDIE_Extensions {
+    fn from(v: Vec<GlobalNgENB_IDIE_Extensions_Entry>) -> Self {
+        GlobalNgENB_IDIE_Extensions(v)
+    }
+}
+impl From<Vec<GlobalTNGF_IDIE_Extensions_Entry>> for GlobalTNGF_IDIE_Extensions {
+    fn from(v: Vec<GlobalTNGF_IDIE_Extensions_Entry>) -> Self {
+        GlobalTNGF_IDIE_Extensions(v)
+    }
+}
+impl From<Vec<GlobalTWIF_IDIE_Extensions_Entry>> for GlobalTWIF_IDIE_Extensions {
+    fn from(v: Vec<GlobalTWIF_IDIE_Extensions_Entry>) -> Self {
+        GlobalTWIF_IDIE_Extensions(v)
+    }
+}
+impl From<Vec<GlobalW_AGF_IDIE_Extensions_Entry>> for GlobalW_AGF_IDIE_Extensions {
+    fn from(v: Vec<GlobalW_AGF_IDIE_Extensions_Entry>) -> Self {
+        GlobalW_AGF_IDIE_Extensions(v)
+    }
+}
+impl From<u8> for HOReportHandoverReportType {
+    fn from(v: u8) -> Self {
+        HOReportHandoverReportType(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for HOReportSourcecellC_RNTI {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        HOReportSourcecellC_RNTI(v)
+    }
+}
+impl From<Vec<HOReportIE_Extensions_Entry>> for HOReportIE_Extensions {
+    fn from(v: Vec<HOReportIE_Extensions_Entry>) -> Self {
+        HOReportIE_Extensions(v)
+    }
+}
+impl From<Vec<HandoverCancelProtocolIEs_Entry>> for HandoverCancelProtocolIEs {
+    fn from(v: Vec<HandoverCancelProtocolIEs_Entry>) -> Self {
+        HandoverCancelProtocolIEs(v)
+    }
+}
+impl From<Vec<HandoverCommandProtocolIEs_Entry>> for HandoverCommandProtocolIEs {
+    fn from(v: Vec<HandoverCommandProtocolIEs_Entry>) -> Self {
+        HandoverCommandProtocolIEs(v)
+    }
+}
+impl From<Vec<HandoverFailureProtocolIEs_Entry>> for HandoverFailureProtocolIEs {
+    fn from(v: Vec<HandoverFailureProtocolIEs_Entry>) -> Self {
+        HandoverFailureProtocolIEs(v)
+    }
+}
+impl From<Vec<HandoverNotifyProtocolIEs_Entry>> for HandoverNotifyProtocolIEs {
+    fn from(v: Vec<HandoverNotifyProtocolIEs_Entry>) -> Self {
+        HandoverNotifyProtocolIEs(v)
+    }
+}
+impl From<Vec<HandoverRequestProtocolIEs_Entry>> for HandoverRequestProtocolIEs {
+    fn from(v: Vec<HandoverRequestProtocolIEs_Entry>) -> Self {
+        HandoverRequestProtocolIEs(v)
+    }
+}
+impl From<Vec<HandoverRequiredProtocolIEs_Entry>> for HandoverRequiredProtocolIEs {
+    fn from(v: Vec<HandoverRequiredProtocolIEs_Entry>) -> Self {
+        HandoverRequiredProtocolIEs(v)
+    }
+}
+impl From<Vec<HandoverSuccessProtocolIEs_Entry>> for HandoverSuccessProtocolIEs {
+    fn from(v: Vec<HandoverSuccessProtocolIEs_Entry>) -> Self {
+        HandoverSuccessProtocolIEs(v)
+    }
+}
+impl From<Vec<ImmediateMDTNrIE_Extensions_Entry>> for ImmediateMDTNrIE_Extensions {
+    fn from(v: Vec<ImmediateMDTNrIE_Extensions_Entry>) -> Self {
+        ImmediateMDTNrIE_Extensions(v)
+    }
+}
+impl From<Vec<InitialUEMessageProtocolIEs_Entry>> for InitialUEMessageProtocolIEs {
+    fn from(v: Vec<InitialUEMessageProtocolIEs_Entry>) -> Self {
+        InitialUEMessageProtocolIEs(v)
+    }
+}
+impl From<Vec<InterSystemHOReportIE_Extensions_Entry>> for InterSystemHOReportIE_Extensions {
+    fn from(v: Vec<InterSystemHOReportIE_Extensions_Entry>) -> Self {
+        InterSystemHOReportIE_Extensions(v)
+    }
+}
+impl From<Vec<IntersystemSONeNBIDIE_Extensions_Entry>> for IntersystemSONeNBIDIE_Extensions {
+    fn from(v: Vec<IntersystemSONeNBIDIE_Extensions_Entry>) -> Self {
+        IntersystemSONeNBIDIE_Extensions(v)
+    }
+}
+impl From<u8> for IntersystemUnnecessaryHOEarlyIRATHO {
+    fn from(v: u8) -> Self {
+        IntersystemUnnecessaryHOEarlyIRATHO(v)
+    }
+}
+impl From<Vec<LAIIE_Extensions_Entry>> for LAIIE_Extensions {
+    fn from(v: Vec<LAIIE_Extensions_Entry>) -> Self {
+        LAIIE_Extensions(v)
+    }
+}
+impl From<Vec<LastVisitedCellItemIE_Extensions_Entry>> for LastVisitedCellItemIE_Extensions {
+    fn from(v: Vec<LastVisitedCellItemIE_Extensions_Entry>) -> Self {
+        LastVisitedCellItemIE_Extensions(v)
+    }
+}
+impl From<Vec<LocationReportProtocolIEs_Entry>> for LocationReportProtocolIEs {
+    fn from(v: Vec<LocationReportProtocolIEs_Entry>) -> Self {
+        LocationReportProtocolIEs(v)
+    }
+}
+impl From<Vec<LocationReportingControlProtocolIEs_Entry>> for LocationReportingControlProtocolIEs {
+    fn from(v: Vec<LocationReportingControlProtocolIEs_Entry>) -> Self {
+        LocationReportingControlProtocolIEs(v)
+    }
+}
+impl From<Vec<LoggedMDTNrIE_Extensions_Entry>> for LoggedMDTNrIE_Extensions {
+    fn from(v: Vec<LoggedMDTNrIE_Extensions_Entry>) -> Self {
+        LoggedMDTNrIE_Extensions(v)
+    }
+}
+impl From<Vec<M1ConfigurationIE_Extensions_Entry>> for M1ConfigurationIE_Extensions {
+    fn from(v: Vec<M1ConfigurationIE_Extensions_Entry>) -> Self {
+        M1ConfigurationIE_Extensions(v)
+    }
+}
+impl From<Vec<M1PeriodicReportingIE_Extensions_Entry>> for M1PeriodicReportingIE_Extensions {
+    fn from(v: Vec<M1PeriodicReportingIE_Extensions_Entry>) -> Self {
+        M1PeriodicReportingIE_Extensions(v)
+    }
+}
+impl From<Vec<M1ThresholdEventA2IE_Extensions_Entry>> for M1ThresholdEventA2IE_Extensions {
+    fn from(v: Vec<M1ThresholdEventA2IE_Extensions_Entry>) -> Self {
+        M1ThresholdEventA2IE_Extensions(v)
+    }
+}
+impl From<Vec<M4ConfigurationIE_Extensions_Entry>> for M4ConfigurationIE_Extensions {
+    fn from(v: Vec<M4ConfigurationIE_Extensions_Entry>) -> Self {
+        M4ConfigurationIE_Extensions(v)
+    }
+}
+impl From<Vec<M5ConfigurationIE_Extensions_Entry>> for M5ConfigurationIE_Extensions {
+    fn from(v: Vec<M5ConfigurationIE_Extensions_Entry>) -> Self {
+        M5ConfigurationIE_Extensions(v)
+    }
+}
+impl From<Vec<M6ConfigurationIE_Extensions_Entry>> for M6ConfigurationIE_Extensions {
+    fn from(v: Vec<M6ConfigurationIE_Extensions_Entry>) -> Self {
+        M6ConfigurationIE_Extensions(v)
+    }
+}
+impl From<Vec<M7ConfigurationIE_Extensions_Entry>> for M7ConfigurationIE_Extensions {
+    fn from(v: Vec<M7ConfigurationIE_Extensions_Entry>) -> Self {
+        M7ConfigurationIE_Extensions(v)
+    }
+}
+impl From<Vec<MDT_ConfigurationIE_Extensions_Entry>> for MDT_ConfigurationIE_Extensions {
+    fn from(v: Vec<MDT_ConfigurationIE_Extensions_Entry>) -> Self {
+        MDT_ConfigurationIE_Extensions(v)
+    }
+}
+impl From<Vec<MDT_Configuration_NRIE_Extensions_Entry>> for MDT_Configuration_NRIE_Extensions {
+    fn from(v: Vec<MDT_Configuration_NRIE_Extensions_Entry>) -> Self {
+        MDT_Configuration_NRIE_Extensions(v)
+    }
+}
+impl From<Vec<MDT_Location_InfoIE_Extensions_Entry>> for MDT_Location_InfoIE_Extensions {
+    fn from(v: Vec<MDT_Location_InfoIE_Extensions_Entry>) -> Self {
+        MDT_Location_InfoIE_Extensions(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for N3IWF_ID_n3IWF_ID {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        N3IWF_ID_n3IWF_ID(v)
+    }
+}
+impl From<Vec<NASNonDeliveryIndicationProtocolIEs_Entry>> for NASNonDeliveryIndicationProtocolIEs {
+    fn from(v: Vec<NASNonDeliveryIndicationProtocolIEs_Entry>) -> Self {
+        NASNonDeliveryIndicationProtocolIEs(v)
+    }
+}
+impl From<Vec<NB_IoT_Paging_eDRXInfoIE_Extensions_Entry>> for NB_IoT_Paging_eDRXInfoIE_Extensions {
+    fn from(v: Vec<NB_IoT_Paging_eDRXInfoIE_Extensions_Entry>) -> Self {
+        NB_IoT_Paging_eDRXInfoIE_Extensions(v)
+    }
+}
+impl From<Vec<NGResetProtocolIEs_Entry>> for NGResetProtocolIEs {
+    fn from(v: Vec<NGResetProtocolIEs_Entry>) -> Self {
+        NGResetProtocolIEs(v)
+    }
+}
+impl From<Vec<NGResetAcknowledgeProtocolIEs_Entry>> for NGResetAcknowledgeProtocolIEs {
+    fn from(v: Vec<NGResetAcknowledgeProtocolIEs_Entry>) -> Self {
+        NGResetAcknowledgeProtocolIEs(v)
+    }
+}
+impl From<Vec<NGSetupFailureProtocolIEs_Entry>> for NGSetupFailureProtocolIEs {
+    fn from(v: Vec<NGSetupFailureProtocolIEs_Entry>) -> Self {
+        NGSetupFailureProtocolIEs(v)
+    }
+}
+impl From<Vec<NGSetupRequestProtocolIEs_Entry>> for NGSetupRequestProtocolIEs {
+    fn from(v: Vec<NGSetupRequestProtocolIEs_Entry>) -> Self {
+        NGSetupRequestProtocolIEs(v)
+    }
+}
+impl From<Vec<NGSetupResponseProtocolIEs_Entry>> for NGSetupResponseProtocolIEs {
+    fn from(v: Vec<NGSetupResponseProtocolIEs_Entry>) -> Self {
+        NGSetupResponseProtocolIEs(v)
+    }
+}
+impl From<Vec<NR_CGIIE_Extensions_Entry>> for NR_CGIIE_Extensions {
+    fn from(v: Vec<NR_CGIIE_Extensions_Entry>) -> Self {
+        NR_CGIIE_Extensions(v)
+    }
+}
+impl From<Vec<NRFrequencyBandItemIE_Extension_Entry>> for NRFrequencyBandItemIE_Extension {
+    fn from(v: Vec<NRFrequencyBandItemIE_Extension_Entry>) -> Self {
+        NRFrequencyBandItemIE_Extension(v)
+    }
+}
+impl From<Vec<NRFrequencyInfoIE_Extension_Entry>> for NRFrequencyInfoIE_Extension {
+    fn from(v: Vec<NRFrequencyInfoIE_Extension_Entry>) -> Self {
+        NRFrequencyInfoIE_Extension(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for NgENB_ID_macroNgENB_ID {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        NgENB_ID_macroNgENB_ID(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for NgENB_ID_shortMacroNgENB_ID {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        NgENB_ID_shortMacroNgENB_ID(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for NgENB_ID_longMacroNgENB_ID {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        NgENB_ID_longMacroNgENB_ID(v)
+    }
+}
+impl From<Vec<OverloadStartProtocolIEs_Entry>> for OverloadStartProtocolIEs {
+    fn from(v: Vec<OverloadStartProtocolIEs_Entry>) -> Self {
+        OverloadStartProtocolIEs(v)
+    }
+}
+impl From<Vec<OverloadStartNSSAIItemIE_Extensions_Entry>> for OverloadStartNSSAIItemIE_Extensions {
+    fn from(v: Vec<OverloadStartNSSAIItemIE_Extensions_Entry>) -> Self {
+        OverloadStartNSSAIItemIE_Extensions(v)
+    }
+}
+impl From<Vec<OverloadStopProtocolIEs_Entry>> for OverloadStopProtocolIEs {
+    fn from(v: Vec<OverloadStopProtocolIEs_Entry>) -> Self {
+        OverloadStopProtocolIEs(v)
+    }
+}
+impl From<Vec<PC5FlowBitRatesIE_Extensions_Entry>> for PC5FlowBitRatesIE_Extensions {
+    fn from(v: Vec<PC5FlowBitRatesIE_Extensions_Entry>) -> Self {
+        PC5FlowBitRatesIE_Extensions(v)
+    }
+}
+impl From<Vec<PC5QoSFlowItemIE_Extensions_Entry>> for PC5QoSFlowItemIE_Extensions {
+    fn from(v: Vec<PC5QoSFlowItemIE_Extensions_Entry>) -> Self {
+        PC5QoSFlowItemIE_Extensions(v)
+    }
+}
+impl From<Vec<PC5QoSParametersIE_Extensions_Entry>> for PC5QoSParametersIE_Extensions {
+    fn from(v: Vec<PC5QoSParametersIE_Extensions_Entry>) -> Self {
+        PC5QoSParametersIE_Extensions(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceAdmittedItemHandoverRequestAcknowledgeTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceAdmittedItemHandoverRequestAcknowledgeTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceHandoverItemHandoverCommandTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceHandoverItemHandoverCommandTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceItemHORqdHandoverRequiredTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceItemHORqdHandoverRequiredTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceModifyItemModCfmPDUSessionResourceModifyConfirmTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceModifyItemModCfmPDUSessionResourceModifyConfirmTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceModifyItemModReqPDUSessionResourceModifyRequestTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceModifyItemModReqPDUSessionResourceModifyRequestTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceModifyItemModResPDUSessionResourceModifyResponseTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceModifyItemModResPDUSessionResourceModifyResponseTransfer(v)
+    }
+}
+impl From<Vec<PDUSessionResourceNotifyProtocolIEs_Entry>> for PDUSessionResourceNotifyProtocolIEs {
+    fn from(v: Vec<PDUSessionResourceNotifyProtocolIEs_Entry>) -> Self {
+        PDUSessionResourceNotifyProtocolIEs(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceNotifyItemPDUSessionResourceNotifyTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceNotifyItemPDUSessionResourceNotifyTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceReleasedItemNotPDUSessionResourceNotifyReleasedTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceReleasedItemNotPDUSessionResourceNotifyReleasedTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceReleasedItemPSAckPathSwitchRequestUnsuccessfulTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceReleasedItemPSAckPathSwitchRequestUnsuccessfulTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceReleasedItemPSFailPathSwitchRequestUnsuccessfulTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceReleasedItemPSFailPathSwitchRequestUnsuccessfulTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceResumeItemRESReqUEContextResumeRequestTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceResumeItemRESReqUEContextResumeRequestTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceResumeItemRESResUEContextResumeResponseTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceResumeItemRESResUEContextResumeResponseTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceSecondaryRATUsageItemSecondaryRATDataUsageReportTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceSecondaryRATUsageItemSecondaryRATDataUsageReportTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceSetupItemCxtReqPDUSessionResourceSetupRequestTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceSetupItemCxtReqPDUSessionResourceSetupRequestTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceSetupItemCxtResPDUSessionResourceSetupResponseTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceSetupItemCxtResPDUSessionResourceSetupResponseTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceSetupItemHOReqHandoverRequestTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceSetupItemHOReqHandoverRequestTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceSetupItemSUReqPDUSessionResourceSetupRequestTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceSetupItemSUReqPDUSessionResourceSetupRequestTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceSetupItemSUResPDUSessionResourceSetupResponseTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceSetupItemSUResPDUSessionResourceSetupResponseTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceSuspendItemSUSReqUEContextSuspendRequestTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceSuspendItemSUSReqUEContextSuspendRequestTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceSwitchedItemPathSwitchRequestAcknowledgeTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceSwitchedItemPathSwitchRequestAcknowledgeTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceToBeSwitchedDLItemPathSwitchRequestTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceToBeSwitchedDLItemPathSwitchRequestTransfer(v)
+    }
+}
+impl From<Vec<u8>> for PDUSessionResourceToReleaseItemHOCmdHandoverPreparationUnsuccessfulTransfer {
+    fn from(v: Vec<u8>) -> Self {
+        PDUSessionResourceToReleaseItemHOCmdHandoverPreparationUnsuccessfulTransfer(v)
+    }
+}
+impl From<u8> for PDUSessionUsageReportRATType {
+    fn from(v: u8) -> Self {
+        PDUSessionUsageReportRATType(v)
+    }
+}
+impl From<Vec<PDUSessionUsageReportIE_Extensions_Entry>> for PDUSessionUsageReportIE_Extensions {
+    fn from(v: Vec<PDUSessionUsageReportIE_Extensions_Entry>) -> Self {
+        PDUSessionUsageReportIE_Extensions(v)
+    }
+}
+impl From<Vec<PLMNSupportItemIE_Extensions_Entry>> for PLMNSupportItemIE_Extensions {
+    fn from(v: Vec<PLMNSupportItemIE_Extensions_Entry>) -> Self {
+        PLMNSupportItemIE_Extensions(v)
+    }
+}
+impl From<Vec<PWSCancelRequestProtocolIEs_Entry>> for PWSCancelRequestProtocolIEs {
+    fn from(v: Vec<PWSCancelRequestProtocolIEs_Entry>) -> Self {
+        PWSCancelRequestProtocolIEs(v)
+    }
+}
+impl From<Vec<PWSCancelResponseProtocolIEs_Entry>> for PWSCancelResponseProtocolIEs {
+    fn from(v: Vec<PWSCancelResponseProtocolIEs_Entry>) -> Self {
+        PWSCancelResponseProtocolIEs(v)
+    }
+}
+impl From<Vec<PWSFailureIndicationProtocolIEs_Entry>> for PWSFailureIndicationProtocolIEs {
+    fn from(v: Vec<PWSFailureIndicationProtocolIEs_Entry>) -> Self {
+        PWSFailureIndicationProtocolIEs(v)
+    }
+}
+impl From<Vec<PWSRestartIndicationProtocolIEs_Entry>> for PWSRestartIndicationProtocolIEs {
+    fn from(v: Vec<PWSRestartIndicationProtocolIEs_Entry>) -> Self {
+        PWSRestartIndicationProtocolIEs(v)
+    }
+}
+impl From<u8> for PacketErrorRatePERScalar {
+    fn from(v: u8) -> Self {
+        PacketErrorRatePERScalar(v)
+    }
+}
+impl From<u8> for PacketErrorRatePERExponent {
+    fn from(v: u8) -> Self {
+        PacketErrorRatePERExponent(v)
+    }
+}
+impl From<Vec<PacketErrorRateIE_Extensions_Entry>> for PacketErrorRateIE_Extensions {
+    fn from(v: Vec<PacketErrorRateIE_Extensions_Entry>) -> Self {
+        PacketErrorRateIE_Extensions(v)
+    }
+}
+impl From<Vec<PagingProtocolIEs_Entry>> for PagingProtocolIEs {
+    fn from(v: Vec<PagingProtocolIEs_Entry>) -> Self {
+        PagingProtocolIEs(v)
+    }
+}
+impl From<Vec<PagingeDRXInformationIE_Extensions_Entry>> for PagingeDRXInformationIE_Extensions {
+    fn from(v: Vec<PagingeDRXInformationIE_Extensions_Entry>) -> Self {
+        PagingeDRXInformationIE_Extensions(v)
+    }
+}
+impl From<Vec<PathSwitchRequestProtocolIEs_Entry>> for PathSwitchRequestProtocolIEs {
+    fn from(v: Vec<PathSwitchRequestProtocolIEs_Entry>) -> Self {
+        PathSwitchRequestProtocolIEs(v)
+    }
+}
+impl From<Vec<PathSwitchRequestFailureProtocolIEs_Entry>> for PathSwitchRequestFailureProtocolIEs {
+    fn from(v: Vec<PathSwitchRequestFailureProtocolIEs_Entry>) -> Self {
+        PathSwitchRequestFailureProtocolIEs(v)
+    }
+}
+impl From<u16> for PrivateIE_ID_local {
+    fn from(v: u16) -> Self {
+        PrivateIE_ID_local(v)
+    }
+}
+impl From<Vec<PrivateMessagePrivateIEs_Entry>> for PrivateMessagePrivateIEs {
+    fn from(v: Vec<PrivateMessagePrivateIEs_Entry>) -> Self {
+        PrivateMessagePrivateIEs(v)
+    }
+}
+impl From<u8> for QoSFlowsUsageReport_ItemRATType {
+    fn from(v: u8) -> Self {
+        QoSFlowsUsageReport_ItemRATType(v)
+    }
+}
+impl From<Vec<QosFlowAcceptedItemIE_Extensions_Entry>> for QosFlowAcceptedItemIE_Extensions {
+    fn from(v: Vec<QosFlowAcceptedItemIE_Extensions_Entry>) -> Self {
+        QosFlowAcceptedItemIE_Extensions(v)
+    }
+}
+impl From<Vec<QosFlowFeedbackItemIE_Extensions_Entry>> for QosFlowFeedbackItemIE_Extensions {
+    fn from(v: Vec<QosFlowFeedbackItemIE_Extensions_Entry>) -> Self {
+        QosFlowFeedbackItemIE_Extensions(v)
+    }
+}
+impl From<Vec<QosFlowInformationItemIE_Extensions_Entry>> for QosFlowInformationItemIE_Extensions {
+    fn from(v: Vec<QosFlowInformationItemIE_Extensions_Entry>) -> Self {
+        QosFlowInformationItemIE_Extensions(v)
+    }
+}
+impl From<Vec<QosFlowNotifyItemIE_Extensions_Entry>> for QosFlowNotifyItemIE_Extensions {
+    fn from(v: Vec<QosFlowNotifyItemIE_Extensions_Entry>) -> Self {
+        QosFlowNotifyItemIE_Extensions(v)
+    }
+}
+impl From<Vec<QosFlowParametersItemIE_Extensions_Entry>> for QosFlowParametersItemIE_Extensions {
+    fn from(v: Vec<QosFlowParametersItemIE_Extensions_Entry>) -> Self {
+        QosFlowParametersItemIE_Extensions(v)
+    }
+}
+impl From<Vec<QosFlowWithCauseItemIE_Extensions_Entry>> for QosFlowWithCauseItemIE_Extensions {
+    fn from(v: Vec<QosFlowWithCauseItemIE_Extensions_Entry>) -> Self {
+        QosFlowWithCauseItemIE_Extensions(v)
+    }
+}
+impl From<Vec<RANConfigurationUpdateProtocolIEs_Entry>> for RANConfigurationUpdateProtocolIEs {
+    fn from(v: Vec<RANConfigurationUpdateProtocolIEs_Entry>) -> Self {
+        RANConfigurationUpdateProtocolIEs(v)
+    }
+}
+impl From<Vec<RATRestrictions_ItemIE_Extensions_Entry>> for RATRestrictions_ItemIE_Extensions {
+    fn from(v: Vec<RATRestrictions_ItemIE_Extensions_Entry>) -> Self {
+        RATRestrictions_ItemIE_Extensions(v)
+    }
+}
+impl From<u8> for RIMInformationRIM_RSDetection {
+    fn from(v: u8) -> Self {
+        RIMInformationRIM_RSDetection(v)
+    }
+}
+impl From<Vec<RIMInformationIE_Extensions_Entry>> for RIMInformationIE_Extensions {
+    fn from(v: Vec<RIMInformationIE_Extensions_Entry>) -> Self {
+        RIMInformationIE_Extensions(v)
+    }
+}
+impl From<Vec<RIMInformationTransferIE_Extensions_Entry>> for RIMInformationTransferIE_Extensions {
+    fn from(v: Vec<RIMInformationTransferIE_Extensions_Entry>) -> Self {
+        RIMInformationTransferIE_Extensions(v)
+    }
+}
+impl From<u16> for RecommendedCellItemTimeStayedInCell {
+    fn from(v: u16) -> Self {
+        RecommendedCellItemTimeStayedInCell(v)
+    }
+}
+impl From<Vec<RecommendedCellItemIE_Extensions_Entry>> for RecommendedCellItemIE_Extensions {
+    fn from(v: Vec<RecommendedCellItemIE_Extensions_Entry>) -> Self {
+        RecommendedCellItemIE_Extensions(v)
+    }
+}
+impl From<Vec<RecommendedRANNodeItemIE_Extensions_Entry>> for RecommendedRANNodeItemIE_Extensions {
+    fn from(v: Vec<RecommendedRANNodeItemIE_Extensions_Entry>) -> Self {
+        RecommendedRANNodeItemIE_Extensions(v)
+    }
+}
+impl From<Vec<RerouteNASRequestProtocolIEs_Entry>> for RerouteNASRequestProtocolIEs {
+    fn from(v: Vec<RerouteNASRequestProtocolIEs_Entry>) -> Self {
+        RerouteNASRequestProtocolIEs(v)
+    }
+}
+impl From<Vec<RetrieveUEInformationProtocolIEs_Entry>> for RetrieveUEInformationProtocolIEs {
+    fn from(v: Vec<RetrieveUEInformationProtocolIEs_Entry>) -> Self {
+        RetrieveUEInformationProtocolIEs(v)
+    }
+}
+impl From<Vec<S_NSSAIIE_Extensions_Entry>> for S_NSSAIIE_Extensions {
+    fn from(v: Vec<S_NSSAIIE_Extensions_Entry>) -> Self {
+        S_NSSAIIE_Extensions(v)
+    }
+}
+impl From<Vec<SONInformationReplyIE_Extensions_Entry>> for SONInformationReplyIE_Extensions {
+    fn from(v: Vec<SONInformationReplyIE_Extensions_Entry>) -> Self {
+        SONInformationReplyIE_Extensions(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for ScheduledCommunicationTimeDayofWeek {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        ScheduledCommunicationTimeDayofWeek(v)
+    }
+}
+impl From<u32> for ScheduledCommunicationTimeTimeofDayStart {
+    fn from(v: u32) -> Self {
+        ScheduledCommunicationTimeTimeofDayStart(v)
+    }
+}
+impl From<u32> for ScheduledCommunicationTimeTimeofDayEnd {
+    fn from(v: u32) -> Self {
+        ScheduledCommunicationTimeTimeofDayEnd(v)
+    }
+}
+impl From<Vec<SecurityContextIE_Extensions_Entry>> for SecurityContextIE_Extensions {
+    fn from(v: Vec<SecurityContextIE_Extensions_Entry>) -> Self {
+        SecurityContextIE_Extensions(v)
+    }
+}
+impl From<Vec<SecurityIndicationIE_Extensions_Entry>> for SecurityIndicationIE_Extensions {
+    fn from(v: Vec<SecurityIndicationIE_Extensions_Entry>) -> Self {
+        SecurityIndicationIE_Extensions(v)
+    }
+}
+impl From<Vec<SecurityResultIE_Extensions_Entry>> for SecurityResultIE_Extensions {
+    fn from(v: Vec<SecurityResultIE_Extensions_Entry>) -> Self {
+        SecurityResultIE_Extensions(v)
+    }
+}
+impl From<u8> for SensorNameConfig_uncompensatedBarometricConfig {
+    fn from(v: u8) -> Self {
+        SensorNameConfig_uncompensatedBarometricConfig(v)
+    }
+}
+impl From<u8> for SensorNameConfig_ueSpeedConfig {
+    fn from(v: u8) -> Self {
+        SensorNameConfig_ueSpeedConfig(v)
+    }
+}
+impl From<u8> for SensorNameConfig_ueOrientationConfig {
+    fn from(v: u8) -> Self {
+        SensorNameConfig_ueOrientationConfig(v)
+    }
+}
+impl From<Vec<ServedGUAMIItemIE_Extensions_Entry>> for ServedGUAMIItemIE_Extensions {
+    fn from(v: Vec<ServedGUAMIItemIE_Extensions_Entry>) -> Self {
+        ServedGUAMIItemIE_Extensions(v)
+    }
+}
+impl From<Vec<SliceOverloadItemIE_Extensions_Entry>> for SliceOverloadItemIE_Extensions {
+    fn from(v: Vec<SliceOverloadItemIE_Extensions_Entry>) -> Self {
+        SliceOverloadItemIE_Extensions(v)
+    }
+}
+impl From<Vec<SliceSupportItemIE_Extensions_Entry>> for SliceSupportItemIE_Extensions {
+    fn from(v: Vec<SliceSupportItemIE_Extensions_Entry>) -> Self {
+        SliceSupportItemIE_Extensions(v)
+    }
+}
+impl From<Vec<SourceRANNodeIDIE_Extensions_Entry>> for SourceRANNodeIDIE_Extensions {
+    fn from(v: Vec<SourceRANNodeIDIE_Extensions_Entry>) -> Self {
+        SourceRANNodeIDIE_Extensions(v)
+    }
+}
+impl From<Vec<SupportedTAItemIE_Extensions_Entry>> for SupportedTAItemIE_Extensions {
+    fn from(v: Vec<SupportedTAItemIE_Extensions_Entry>) -> Self {
+        SupportedTAItemIE_Extensions(v)
+    }
+}
+impl From<Vec<TABasedMDTIE_Extensions_Entry>> for TABasedMDTIE_Extensions {
+    fn from(v: Vec<TABasedMDTIE_Extensions_Entry>) -> Self {
+        TABasedMDTIE_Extensions(v)
+    }
+}
+impl From<Vec<TAIIE_Extensions_Entry>> for TAIIE_Extensions {
+    fn from(v: Vec<TAIIE_Extensions_Entry>) -> Self {
+        TAIIE_Extensions(v)
+    }
+}
+impl From<Vec<TAIBasedMDTIE_Extensions_Entry>> for TAIBasedMDTIE_Extensions {
+    fn from(v: Vec<TAIBasedMDTIE_Extensions_Entry>) -> Self {
+        TAIBasedMDTIE_Extensions(v)
+    }
+}
+impl From<Vec<TAIBroadcastEUTRA_ItemIE_Extensions_Entry>> for TAIBroadcastEUTRA_ItemIE_Extensions {
+    fn from(v: Vec<TAIBroadcastEUTRA_ItemIE_Extensions_Entry>) -> Self {
+        TAIBroadcastEUTRA_ItemIE_Extensions(v)
+    }
+}
+impl From<Vec<TAIBroadcastNR_ItemIE_Extensions_Entry>> for TAIBroadcastNR_ItemIE_Extensions {
+    fn from(v: Vec<TAIBroadcastNR_ItemIE_Extensions_Entry>) -> Self {
+        TAIBroadcastNR_ItemIE_Extensions(v)
+    }
+}
+impl From<Vec<TAICancelledEUTRA_ItemIE_Extensions_Entry>> for TAICancelledEUTRA_ItemIE_Extensions {
+    fn from(v: Vec<TAICancelledEUTRA_ItemIE_Extensions_Entry>) -> Self {
+        TAICancelledEUTRA_ItemIE_Extensions(v)
+    }
+}
+impl From<Vec<TAICancelledNR_ItemIE_Extensions_Entry>> for TAICancelledNR_ItemIE_Extensions {
+    fn from(v: Vec<TAICancelledNR_ItemIE_Extensions_Entry>) -> Self {
+        TAICancelledNR_ItemIE_Extensions(v)
+    }
+}
+impl From<Vec<TAIListForInactiveItemIE_Extensions_Entry>> for TAIListForInactiveItemIE_Extensions {
+    fn from(v: Vec<TAIListForInactiveItemIE_Extensions_Entry>) -> Self {
+        TAIListForInactiveItemIE_Extensions(v)
+    }
+}
+impl From<Vec<TAIListForPagingItemIE_Extensions_Entry>> for TAIListForPagingItemIE_Extensions {
+    fn from(v: Vec<TAIListForPagingItemIE_Extensions_Entry>) -> Self {
+        TAIListForPagingItemIE_Extensions(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for TNGF_ID_tNGF_ID {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        TNGF_ID_tNGF_ID(v)
+    }
+}
+impl From<Vec<TNLAssociationItemIE_Extensions_Entry>> for TNLAssociationItemIE_Extensions {
+    fn from(v: Vec<TNLAssociationItemIE_Extensions_Entry>) -> Self {
+        TNLAssociationItemIE_Extensions(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for TWIF_ID_tWIF_ID {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        TWIF_ID_tWIF_ID(v)
+    }
+}
+impl From<Vec<TargetRANNodeIDIE_Extensions_Entry>> for TargetRANNodeIDIE_Extensions {
+    fn from(v: Vec<TargetRANNodeIDIE_Extensions_Entry>) -> Self {
+        TargetRANNodeIDIE_Extensions(v)
+    }
+}
+impl From<Vec<TargetRNC_IDIE_Extensions_Entry>> for TargetRNC_IDIE_Extensions {
+    fn from(v: Vec<TargetRNC_IDIE_Extensions_Entry>) -> Self {
+        TargetRNC_IDIE_Extensions(v)
+    }
+}
+impl From<Vec<TargeteNB_IDIE_Extensions_Entry>> for TargeteNB_IDIE_Extensions {
+    fn from(v: Vec<TargeteNB_IDIE_Extensions_Entry>) -> Self {
+        TargeteNB_IDIE_Extensions(v)
+    }
+}
+impl From<Vec<TooearlyIntersystemHOIE_Extensions_Entry>> for TooearlyIntersystemHOIE_Extensions {
+    fn from(v: Vec<TooearlyIntersystemHOIE_Extensions_Entry>) -> Self {
+        TooearlyIntersystemHOIE_Extensions(v)
+    }
+}
+impl From<Vec<TraceActivationIE_Extensions_Entry>> for TraceActivationIE_Extensions {
+    fn from(v: Vec<TraceActivationIE_Extensions_Entry>) -> Self {
+        TraceActivationIE_Extensions(v)
+    }
+}
+impl From<Vec<TraceFailureIndicationProtocolIEs_Entry>> for TraceFailureIndicationProtocolIEs {
+    fn from(v: Vec<TraceFailureIndicationProtocolIEs_Entry>) -> Self {
+        TraceFailureIndicationProtocolIEs(v)
+    }
+}
+impl From<Vec<TraceStartProtocolIEs_Entry>> for TraceStartProtocolIEs {
+    fn from(v: Vec<TraceStartProtocolIEs_Entry>) -> Self {
+        TraceStartProtocolIEs(v)
+    }
+}
+impl From<u8> for UE_DifferentiationInfoPeriodicCommunicationIndicator {
+    fn from(v: u8) -> Self {
+        UE_DifferentiationInfoPeriodicCommunicationIndicator(v)
+    }
+}
+impl From<u16> for UE_DifferentiationInfoPeriodicTime {
+    fn from(v: u16) -> Self {
+        UE_DifferentiationInfoPeriodicTime(v)
+    }
+}
+impl From<u8> for UE_DifferentiationInfoStationaryIndication {
+    fn from(v: u8) -> Self {
+        UE_DifferentiationInfoStationaryIndication(v)
+    }
+}
+impl From<u8> for UE_DifferentiationInfoTrafficProfile {
+    fn from(v: u8) -> Self {
+        UE_DifferentiationInfoTrafficProfile(v)
+    }
+}
+impl From<u8> for UE_DifferentiationInfoBatteryIndication {
+    fn from(v: u8) -> Self {
+        UE_DifferentiationInfoBatteryIndication(v)
+    }
+}
+impl From<Vec<UE_DifferentiationInfoIE_Extensions_Entry>> for UE_DifferentiationInfoIE_Extensions {
+    fn from(v: Vec<UE_DifferentiationInfoIE_Extensions_Entry>) -> Self {
+        UE_DifferentiationInfoIE_Extensions(v)
+    }
+}
+impl From<Vec<UE_NGAP_ID_pairIE_Extensions_Entry>> for UE_NGAP_ID_pairIE_Extensions {
+    fn from(v: Vec<UE_NGAP_ID_pairIE_Extensions_Entry>) -> Self {
+        UE_NGAP_ID_pairIE_Extensions(v)
+    }
+}
+impl From<Vec<UEContextReleaseCommandProtocolIEs_Entry>> for UEContextReleaseCommandProtocolIEs {
+    fn from(v: Vec<UEContextReleaseCommandProtocolIEs_Entry>) -> Self {
+        UEContextReleaseCommandProtocolIEs(v)
+    }
+}
+impl From<Vec<UEContextReleaseCompleteProtocolIEs_Entry>> for UEContextReleaseCompleteProtocolIEs {
+    fn from(v: Vec<UEContextReleaseCompleteProtocolIEs_Entry>) -> Self {
+        UEContextReleaseCompleteProtocolIEs(v)
+    }
+}
+impl From<Vec<UEContextReleaseRequestProtocolIEs_Entry>> for UEContextReleaseRequestProtocolIEs {
+    fn from(v: Vec<UEContextReleaseRequestProtocolIEs_Entry>) -> Self {
+        UEContextReleaseRequestProtocolIEs(v)
+    }
+}
+impl From<Vec<UEContextResumeFailureProtocolIEs_Entry>> for UEContextResumeFailureProtocolIEs {
+    fn from(v: Vec<UEContextResumeFailureProtocolIEs_Entry>) -> Self {
+        UEContextResumeFailureProtocolIEs(v)
+    }
+}
+impl From<Vec<UEContextResumeRequestProtocolIEs_Entry>> for UEContextResumeRequestProtocolIEs {
+    fn from(v: Vec<UEContextResumeRequestProtocolIEs_Entry>) -> Self {
+        UEContextResumeRequestProtocolIEs(v)
+    }
+}
+impl From<Vec<UEContextResumeResponseProtocolIEs_Entry>> for UEContextResumeResponseProtocolIEs {
+    fn from(v: Vec<UEContextResumeResponseProtocolIEs_Entry>) -> Self {
+        UEContextResumeResponseProtocolIEs(v)
+    }
+}
+impl From<Vec<UEContextSuspendFailureProtocolIEs_Entry>> for UEContextSuspendFailureProtocolIEs {
+    fn from(v: Vec<UEContextSuspendFailureProtocolIEs_Entry>) -> Self {
+        UEContextSuspendFailureProtocolIEs(v)
+    }
+}
+impl From<Vec<UEContextSuspendRequestProtocolIEs_Entry>> for UEContextSuspendRequestProtocolIEs {
+    fn from(v: Vec<UEContextSuspendRequestProtocolIEs_Entry>) -> Self {
+        UEContextSuspendRequestProtocolIEs(v)
+    }
+}
+impl From<Vec<UEContextSuspendResponseProtocolIEs_Entry>> for UEContextSuspendResponseProtocolIEs {
+    fn from(v: Vec<UEContextSuspendResponseProtocolIEs_Entry>) -> Self {
+        UEContextSuspendResponseProtocolIEs(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for UEIdentityIndexValue_indexLength10 {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        UEIdentityIndexValue_indexLength10(v)
+    }
+}
+impl From<Vec<UEInformationTransferProtocolIEs_Entry>> for UEInformationTransferProtocolIEs {
+    fn from(v: Vec<UEInformationTransferProtocolIEs_Entry>) -> Self {
+        UEInformationTransferProtocolIEs(v)
+    }
+}
+impl From<Vec<UESecurityCapabilitiesIE_Extensions_Entry>> for UESecurityCapabilitiesIE_Extensions {
+    fn from(v: Vec<UESecurityCapabilitiesIE_Extensions_Entry>) -> Self {
+        UESecurityCapabilitiesIE_Extensions(v)
+    }
+}
+impl From<Vec<UnavailableGUAMIItemIE_Extensions_Entry>> for UnavailableGUAMIItemIE_Extensions {
+    fn from(v: Vec<UnavailableGUAMIItemIE_Extensions_Entry>) -> Self {
+        UnavailableGUAMIItemIE_Extensions(v)
+    }
+}
+impl From<Vec<UplinkNASTransportProtocolIEs_Entry>> for UplinkNASTransportProtocolIEs {
+    fn from(v: Vec<UplinkNASTransportProtocolIEs_Entry>) -> Self {
+        UplinkNASTransportProtocolIEs(v)
+    }
+}
+impl From<Vec<UplinkRANStatusTransferProtocolIEs_Entry>> for UplinkRANStatusTransferProtocolIEs {
+    fn from(v: Vec<UplinkRANStatusTransferProtocolIEs_Entry>) -> Self {
+        UplinkRANStatusTransferProtocolIEs(v)
+    }
+}
+impl From<Vec<u8>> for VolumeTimedReport_ItemStartTimeStamp {
+    fn from(v: Vec<u8>) -> Self {
+        VolumeTimedReport_ItemStartTimeStamp(v)
+    }
+}
+impl From<Vec<u8>> for VolumeTimedReport_ItemEndTimeStamp {
+    fn from(v: Vec<u8>) -> Self {
+        VolumeTimedReport_ItemEndTimeStamp(v)
+    }
+}
+impl From<u64> for VolumeTimedReport_ItemUsageCountUL {
+    fn from(v: u64) -> Self {
+        VolumeTimedReport_ItemUsageCountUL(v)
+    }
+}
+impl From<u64> for VolumeTimedReport_ItemUsageCountDL {
+    fn from(v: u64) -> Self {
+        VolumeTimedReport_ItemUsageCountDL(v)
+    }
+}
+impl From<Vec<VolumeTimedReport_ItemIE_Extensions_Entry>> for VolumeTimedReport_ItemIE_Extensions {
+    fn from(v: Vec<VolumeTimedReport_ItemIE_Extensions_Entry>) -> Self {
+        VolumeTimedReport_ItemIE_Extensions(v)
+    }
+}
+impl From<bitvec::vec::BitVec<u8, bitvec::order::Msb0>> for W_AGF_ID_w_AGF_ID {
+    fn from(v: bitvec::vec::BitVec<u8, bitvec::order::Msb0>) -> Self {
+        W_AGF_ID_w_AGF_ID(v)
+    }
+}
+impl From<Vec<WLANMeasConfigNameItemIE_Extensions_Entry>> for WLANMeasConfigNameItemIE_Extensions {
+    fn from(v: Vec<WLANMeasConfigNameItemIE_Extensions_Entry>) -> Self {
+        WLANMeasConfigNameItemIE_Extensions(v)
+    }
+}
+impl From<u8> for WLANMeasurementConfigurationWlan_rssi {
+    fn from(v: u8) -> Self {
+        WLANMeasurementConfigurationWlan_rssi(v)
+    }
+}
+impl From<u8> for WLANMeasurementConfigurationWlan_rtt {
+    fn from(v: u8) -> Self {
+        WLANMeasurementConfigurationWlan_rtt(v)
+    }
+}
+impl From<Vec<XnExtTLA_ItemIE_Extensions_Entry>> for XnExtTLA_ItemIE_Extensions {
+    fn from(v: Vec<XnExtTLA_ItemIE_Extensions_Entry>) -> Self {
+        XnExtTLA_ItemIE_Extensions(v)
+    }
+}
+impl From<Vec<XnTNLConfigurationInfoIE_Extensions_Entry>> for XnTNLConfigurationInfoIE_Extensions {
+    fn from(v: Vec<XnTNLConfigurationInfoIE_Extensions_Entry>) -> Self {
+        XnTNLConfigurationInfoIE_Extensions(v)
+    }
+}
+
+// Auto-generated IE ID lookup macro (derived from #[asn(key = N)] attributes)
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __ngap_ie_id {
+    (AMFName) => {
+        1u16
+    };
+    (AMFOverloadResponse) => {
+        2u16
+    };
+    (AMFSetID) => {
+        3u16
+    };
+    (AMFTrafficLoadReductionIndication) => {
+        9u16
+    };
+    (AMF_TNLAssociationFailedToSetupList) => {
+        4u16
+    };
+    (AMF_TNLAssociationSetupList) => {
+        5u16
+    };
+    (AMF_TNLAssociationToAddList) => {
+        6u16
+    };
+    (AMF_TNLAssociationToRemoveList) => {
+        7u16
+    };
+    (AMF_TNLAssociationToUpdateList) => {
+        8u16
+    };
+    (AMF_UE_NGAP_ID) => {
+        10u16
+    };
+    (AdditionalRedundantUL_NGU_UP_TNLInformation) => {
+        186u16
+    };
+    (AdditionalUL_NGU_UP_TNLInformation) => {
+        126u16
+    };
+    (AllowedNSSAI) => {
+        0u16
+    };
+    (AssistanceDataForPaging) => {
+        11u16
+    };
+    (AuthenticatedIndication) => {
+        245u16
+    };
+    (BroadcastCancelledAreaList) => {
+        12u16
+    };
+    (BroadcastCompletedAreaList) => {
+        13u16
+    };
+    (CEmodeBSupport_Indicator) => {
+        224u16
+    };
+    (CEmodeBrestricted) => {
+        222u16
+    };
+    (CNAssistedRANTuning) => {
+        165u16
+    };
+    (CancelAllWarningMessages) => {
+        14u16
+    };
+    (Cause) => {
+        15u16
+    };
+    (CellIDListForRestart) => {
+        16u16
+    };
+    (CommonNetworkInstance) => {
+        166u16
+    };
+    (ConcurrentWarningMessageInd) => {
+        17u16
+    };
+    (CoreNetworkAssistanceInformationForInactive) => {
+        18u16
+    };
+    (CriticalityDiagnostics) => {
+        19u16
+    };
+    (DL_CP_SecurityInformation) => {
+        212u16
+    };
+    (DataCodingScheme) => {
+        20u16
+    };
+    (DataForwardingNotPossible) => {
+        127u16
+    };
+    (DefaultPagingDRX) => {
+        21u16
+    };
+    (DirectForwardingPathAvailability) => {
+        22u16
+    };
+    (EDT_Session) => {
+        227u16
+    };
+    (ENDC_SONConfigurationTransferDL) => {
+        157u16
+    };
+    (ENDC_SONConfigurationTransferUL) => {
+        158u16
+    };
+    (EUTRA_CGI) => {
+        25u16
+    };
+    (EarlyStatusTransfer_TransparentContainer) => {
+        268u16
+    };
+    (EmergencyAreaIDListForRestart) => {
+        23u16
+    };
+    (EmergencyFallbackIndicator) => {
+        24u16
+    };
+    (EndIndication) => {
+        226u16
+    };
+    (Enhanced_CoverageRestriction) => {
+        205u16
+    };
+    (Extended_AMFName) => {
+        274u16
+    };
+    (Extended_ConnectedTime) => {
+        206u16
+    };
+    (Extended_RANNodeName) => {
+        273u16
+    };
+    (FiveG_S_TMSI) => {
+        26u16
+    };
+    (GUAMI) => {
+        28u16
+    };
+    (GlobalRANNodeID) => {
+        27u16
+    };
+    (HandoverFlag) => {
+        143u16
+    };
+    (HandoverType) => {
+        29u16
+    };
+    (IABNodeIndication) => {
+        201u16
+    };
+    (IAB_Authorized) => {
+        199u16
+    };
+    (IAB_Supported) => {
+        200u16
+    };
+    (IMSVoiceSupportIndicator) => {
+        30u16
+    };
+    (IndexToRFSP) => {
+        31u16
+    };
+    (InfoOnRecommendedCellsAndRANNodesForPaging) => {
+        32u16
+    };
+    (IntersystemSONConfigurationTransferDL) => {
+        250u16
+    };
+    (IntersystemSONConfigurationTransferUL) => {
+        251u16
+    };
+    (LTEM_Indication) => {
+        225u16
+    };
+    (LTEUESidelinkAggregateMaximumBitrate) => {
+        217u16
+    };
+    (LTEV2XServicesAuthorized) => {
+        215u16
+    };
+    (LocationReportingRequestType) => {
+        33u16
+    };
+    (ManagementBasedMDTPLMNList) => {
+        254u16
+    };
+    (MaskedIMEISV) => {
+        34u16
+    };
+    (MessageIdentifier) => {
+        35u16
+    };
+    (MobilityRestrictionList) => {
+        36u16
+    };
+    (NASC) => {
+        37u16
+    };
+    (NASSecurityParametersFromNGRAN) => {
+        39u16
+    };
+    (NAS_PDU) => {
+        38u16
+    };
+    (NB_IoT_DefaultPagingDRX) => {
+        204u16
+    };
+    (NB_IoT_PagingDRX) => {
+        202u16
+    };
+    (NB_IoT_Paging_eDRXInfo) => {
+        203u16
+    };
+    (NB_IoT_UEPriority) => {
+        210u16
+    };
+    (NGRANTraceID) => {
+        44u16
+    };
+    (NGRAN_CGI) => {
+        43u16
+    };
+    (NGRAN_TNLAssociationToRemoveList) => {
+        167u16
+    };
+    (NPN_AccessInformation) => {
+        259u16
+    };
+    (NRPPa_PDU) => {
+        46u16
+    };
+    (NRUESidelinkAggregateMaximumBitrate) => {
+        218u16
+    };
+    (NRV2XServicesAuthorized) => {
+        216u16
+    };
+    (NetworkInstance) => {
+        129u16
+    };
+    (NewAMF_UE_NGAP_ID) => {
+        40u16
+    };
+    (NewGUAMI) => {
+        162u16
+    };
+    (NewSecurityContextInd) => {
+        41u16
+    };
+    (NotifySourceNGRANNode) => {
+        269u16
+    };
+    (NumberOfBroadcastsRequested) => {
+        47u16
+    };
+    (OldAMF) => {
+        48u16
+    };
+    (OverloadStartNSSAIList) => {
+        49u16
+    };
+    (PC5QoSParameters) => {
+        219u16
+    };
+    (PDUSessionAggregateMaximumBitRate) => {
+        130u16
+    };
+    (PDUSessionResourceAdmittedList) => {
+        53u16
+    };
+    (PDUSessionResourceFailedToModifyListModCfm) => {
+        131u16
+    };
+    (PDUSessionResourceFailedToModifyListModRes) => {
+        54u16
+    };
+    (PDUSessionResourceFailedToResumeListRESReq) => {
+        229u16
+    };
+    (PDUSessionResourceFailedToResumeListRESRes) => {
+        230u16
+    };
+    (PDUSessionResourceFailedToSetupListCxtFail) => {
+        132u16
+    };
+    (PDUSessionResourceFailedToSetupListCxtRes) => {
+        55u16
+    };
+    (PDUSessionResourceFailedToSetupListHOAck) => {
+        56u16
+    };
+    (PDUSessionResourceFailedToSetupListPSReq) => {
+        57u16
+    };
+    (PDUSessionResourceFailedToSetupListSURes) => {
+        58u16
+    };
+    (PDUSessionResourceHandoverList) => {
+        59u16
+    };
+    (PDUSessionResourceListCxtRelCpl) => {
+        60u16
+    };
+    (PDUSessionResourceListCxtRelReq) => {
+        133u16
+    };
+    (PDUSessionResourceListHORqd) => {
+        61u16
+    };
+    (PDUSessionResourceModifyListModCfm) => {
+        62u16
+    };
+    (PDUSessionResourceModifyListModInd) => {
+        63u16
+    };
+    (PDUSessionResourceModifyListModReq) => {
+        64u16
+    };
+    (PDUSessionResourceModifyListModRes) => {
+        65u16
+    };
+    (PDUSessionResourceNotifyList) => {
+        66u16
+    };
+    (PDUSessionResourceReleasedListNot) => {
+        67u16
+    };
+    (PDUSessionResourceReleasedListPSAck) => {
+        68u16
+    };
+    (PDUSessionResourceReleasedListPSFail) => {
+        69u16
+    };
+    (PDUSessionResourceReleasedListRelRes) => {
+        70u16
+    };
+    (PDUSessionResourceResumeListRESReq) => {
+        232u16
+    };
+    (PDUSessionResourceResumeListRESRes) => {
+        233u16
+    };
+    (PDUSessionResourceSecondaryRATUsageList) => {
+        142u16
+    };
+    (PDUSessionResourceSetupListCxtReq) => {
+        71u16
+    };
+    (PDUSessionResourceSetupListCxtRes) => {
+        72u16
+    };
+    (PDUSessionResourceSetupListHOReq) => {
+        73u16
+    };
+    (PDUSessionResourceSetupListSUReq) => {
+        74u16
+    };
+    (PDUSessionResourceSetupListSURes) => {
+        75u16
+    };
+    (PDUSessionResourceSuspendListSUSReq) => {
+        231u16
+    };
+    (PDUSessionResourceSwitchedList) => {
+        77u16
+    };
+    (PDUSessionResourceToBeSwitchedDLList) => {
+        76u16
+    };
+    (PDUSessionResourceToReleaseListHOCmd) => {
+        78u16
+    };
+    (PDUSessionResourceToReleaseListRelCmd) => {
+        79u16
+    };
+    (PDUSessionType) => {
+        134u16
+    };
+    (PLMNSupportList) => {
+        80u16
+    };
+    (PWSFailedCellIDList) => {
+        81u16
+    };
+    (PagingAssisDataforCEcapabUE) => {
+        207u16
+    };
+    (PagingDRX) => {
+        50u16
+    };
+    (PagingOrigin) => {
+        51u16
+    };
+    (PagingPriority) => {
+        52u16
+    };
+    (PagingeDRXInformation) => {
+        223u16
+    };
+    (PrivacyIndicator) => {
+        256u16
+    };
+    (QosFlowAddOrModifyRequestList) => {
+        135u16
+    };
+    (QosFlowSetupRequestList) => {
+        136u16
+    };
+    (QosFlowToReleaseList) => {
+        137u16
+    };
+    (RANNodeName) => {
+        82u16
+    };
+    (RANPagingPriority) => {
+        83u16
+    };
+    (RANStatusTransfer_TransparentContainer) => {
+        84u16
+    };
+    (RAN_UE_NGAP_ID) => {
+        85u16
+    };
+    (RGLevelWirelineAccessCharacteristics) => {
+        238u16
+    };
+    (RIMInformationTransfer) => {
+        175u16
+    };
+    (RRCEstablishmentCause) => {
+        90u16
+    };
+    (RRCInactiveTransitionReportRequest) => {
+        91u16
+    };
+    (RRCState) => {
+        92u16
+    };
+    (RRC_Resume_Cause) => {
+        237u16
+    };
+    (RedirectionVoiceFallback) => {
+        146u16
+    };
+    (RedundantCommonNetworkInstance) => {
+        190u16
+    };
+    (RedundantPDUSessionInformation) => {
+        197u16
+    };
+    (RedundantUL_NGU_UP_TNLInformation) => {
+        195u16
+    };
+    (RelativeAMFCapacity) => {
+        86u16
+    };
+    (RepetitionPeriod) => {
+        87u16
+    };
+    (ResetType) => {
+        88u16
+    };
+    (RoutingID) => {
+        89u16
+    };
+    (SONConfigurationTransferDL) => {
+        98u16
+    };
+    (SONConfigurationTransferUL) => {
+        99u16
+    };
+    (SRVCCOperationPossible) => {
+        177u16
+    };
+    (S_NSSAI) => {
+        148u16
+    };
+    (SecurityContext) => {
+        93u16
+    };
+    (SecurityIndication) => {
+        138u16
+    };
+    (SecurityKey) => {
+        94u16
+    };
+    (SelectedPLMNIdentity) => {
+        174u16
+    };
+    (SerialNumber) => {
+        95u16
+    };
+    (ServedGUAMIList) => {
+        96u16
+    };
+    (SourceAMF_UE_NGAP_ID) => {
+        100u16
+    };
+    (SourceToTarget_AMFInformationReroute) => {
+        171u16
+    };
+    (SourceToTarget_TransparentContainer) => {
+        101u16
+    };
+    (SupportedTAList) => {
+        102u16
+    };
+    (Suspend_Request_Indication) => {
+        235u16
+    };
+    (Suspend_Response_Indication) => {
+        236u16
+    };
+    (TAI) => {
+        213u16
+    };
+    (TAIListForPaging) => {
+        103u16
+    };
+    (TAIListForRestart) => {
+        104u16
+    };
+    (TargetID) => {
+        105u16
+    };
+    (TargetToSource_TransparentContainer) => {
+        106u16
+    };
+    (TargettoSource_Failure_TransparentContainer) => {
+        262u16
+    };
+    (TimeToWait) => {
+        107u16
+    };
+    (TraceActivation) => {
+        108u16
+    };
+    (TraceCollectionEntityIPAddress) => {
+        109u16
+    };
+    (TraceCollectionEntityURI) => {
+        257u16
+    };
+    (UEAggregateMaximumBitRate) => {
+        110u16
+    };
+    (UECapabilityInfoRequest) => {
+        228u16
+    };
+    (UEContextRequest) => {
+        112u16
+    };
+    (UEPagingIdentity) => {
+        115u16
+    };
+    (UEPresenceInAreaOfInterestList) => {
+        116u16
+    };
+    (UERadioCapability) => {
+        117u16
+    };
+    (UERadioCapabilityForPaging) => {
+        118u16
+    };
+    (UERadioCapabilityID) => {
+        264u16
+    };
+    (UERadioCapability_EUTRA_Format) => {
+        265u16
+    };
+    (UERetentionInformation) => {
+        147u16
+    };
+    (UESecurityCapabilities) => {
+        119u16
+    };
+    (UE_DifferentiationInfo) => {
+        209u16
+    };
+    (UE_NGAP_IDs) => {
+        114u16
+    };
+    (UE_UP_CIoT_Support) => {
+        234u16
+    };
+    (UE_associatedLogicalNG_connectionList) => {
+        111u16
+    };
+    (UL_CP_SecurityInformation) => {
+        211u16
+    };
+    (UL_NGU_UP_TNLInformation) => {
+        139u16
+    };
+    (UL_NGU_UP_TNLModifyList) => {
+        140u16
+    };
+    (UnavailableGUAMIList) => {
+        120u16
+    };
+    (UserLocationInformation) => {
+        121u16
+    };
+    (WUS_Assistance_Information) => {
+        208u16
+    };
+    (WarningAreaCoordinates) => {
+        141u16
+    };
+    (WarningAreaList) => {
+        122u16
+    };
+    (WarningMessageContents) => {
+        123u16
+    };
+    (WarningSecurityInfo) => {
+        124u16
+    };
+    (WarningType) => {
+        125u16
+    };
+}
+
+// Auto-generated procedure code lookup macro (derived from {Direction}Value enums)
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __ngap_proc_code {
+    (AMFCPRelocationIndication) => {
+        64u8
+    };
+    (AMFConfigurationUpdate) => {
+        0u8
+    };
+    (AMFStatusIndication) => {
+        1u8
+    };
+    (CellTrafficTrace) => {
+        2u8
+    };
+    (ConnectionEstablishmentIndication) => {
+        65u8
+    };
+    (DeactivateTrace) => {
+        3u8
+    };
+    (DownlinkNASTransport) => {
+        4u8
+    };
+    (DownlinkNonUEAssociatedNRPPaTransport) => {
+        5u8
+    };
+    (DownlinkRANConfigurationTransfer) => {
+        6u8
+    };
+    (DownlinkRANEarlyStatusTransfer) => {
+        63u8
+    };
+    (DownlinkRANStatusTransfer) => {
+        7u8
+    };
+    (DownlinkRIMInformationTransfer) => {
+        54u8
+    };
+    (DownlinkUEAssociatedNRPPaTransport) => {
+        8u8
+    };
+    (ErrorIndication) => {
+        9u8
+    };
+    (HandoverCancel) => {
+        10u8
+    };
+    (HandoverNotification) => {
+        11u8
+    };
+    (HandoverPreparation) => {
+        12u8
+    };
+    (HandoverResourceAllocation) => {
+        13u8
+    };
+    (HandoverSuccess) => {
+        61u8
+    };
+    (InitialContextSetup) => {
+        14u8
+    };
+    (InitialUEMessage) => {
+        15u8
+    };
+    (LocationReport) => {
+        18u8
+    };
+    (LocationReportingControl) => {
+        16u8
+    };
+    (LocationReportingFailureIndication) => {
+        17u8
+    };
+    (NASNonDeliveryIndication) => {
+        19u8
+    };
+    (NGReset) => {
+        20u8
+    };
+    (NGSetup) => {
+        21u8
+    };
+    (OverloadStart) => {
+        22u8
+    };
+    (OverloadStop) => {
+        23u8
+    };
+    (PDUSessionResourceModify) => {
+        26u8
+    };
+    (PDUSessionResourceModifyIndication) => {
+        27u8
+    };
+    (PDUSessionResourceNotify) => {
+        30u8
+    };
+    (PDUSessionResourceRelease) => {
+        28u8
+    };
+    (PDUSessionResourceSetup) => {
+        29u8
+    };
+    (PWSCancel) => {
+        32u8
+    };
+    (PWSFailureIndication) => {
+        33u8
+    };
+    (PWSRestartIndication) => {
+        34u8
+    };
+    (Paging) => {
+        24u8
+    };
+    (PathSwitchRequest) => {
+        25u8
+    };
+    (PrivateMessage) => {
+        31u8
+    };
+    (RANCPRelocationIndication) => {
+        57u8
+    };
+    (RANConfigurationUpdate) => {
+        35u8
+    };
+    (RRCInactiveTransitionReport) => {
+        37u8
+    };
+    (RerouteNASRequest) => {
+        36u8
+    };
+    (RetrieveUEInformation) => {
+        55u8
+    };
+    (SecondaryRATDataUsageReport) => {
+        52u8
+    };
+    (TraceFailureIndication) => {
+        38u8
+    };
+    (TraceStart) => {
+        39u8
+    };
+    (UEContextModification) => {
+        40u8
+    };
+    (UEContextRelease) => {
+        41u8
+    };
+    (UEContextReleaseRequest) => {
+        42u8
+    };
+    (UEContextResume) => {
+        58u8
+    };
+    (UEContextSuspend) => {
+        59u8
+    };
+    (UEInformationTransfer) => {
+        56u8
+    };
+    (UERadioCapabilityCheck) => {
+        43u8
+    };
+    (UERadioCapabilityIDMapping) => {
+        60u8
+    };
+    (UERadioCapabilityInfoIndication) => {
+        44u8
+    };
+    (UETNLABindingRelease) => {
+        45u8
+    };
+    (UplinkNASTransport) => {
+        46u8
+    };
+    (UplinkNonUEAssociatedNRPPaTransport) => {
+        47u8
+    };
+    (UplinkRANConfigurationTransfer) => {
+        48u8
+    };
+    (UplinkRANEarlyStatusTransfer) => {
+        62u8
+    };
+    (UplinkRANStatusTransfer) => {
+        49u8
+    };
+    (UplinkRIMInformationTransfer) => {
+        53u8
+    };
+    (UplinkUEAssociatedNRPPaTransport) => {
+        50u8
+    };
+    (WriteReplaceWarning) => {
+        51u8
+    };
+}
+
+// Auto-generated NGAP_PDU inspection methods and Display impl
+impl NGAP_PDU {
+    /// Return the procedure code of this PDU.
+    pub fn procedure_code(&self) -> u8 {
+        match self {
+            NGAP_PDU::InitiatingMessage(m) => m.procedure_code.0,
+            NGAP_PDU::SuccessfulOutcome(m) => m.procedure_code.0,
+            NGAP_PDU::UnsuccessfulOutcome(m) => m.procedure_code.0,
+        }
+    }
+    /// Return the PDU direction as a human-readable string.
+    pub fn direction(&self) -> &'static str {
+        match self {
+            NGAP_PDU::InitiatingMessage(_) => "InitiatingMessage",
+            NGAP_PDU::SuccessfulOutcome(_) => "SuccessfulOutcome",
+            NGAP_PDU::UnsuccessfulOutcome(_) => "UnsuccessfulOutcome",
+        }
+    }
+    /// Returns `true` if this is an initiating message.
+    pub fn is_initiating(&self) -> bool {
+        matches!(self, NGAP_PDU::InitiatingMessage(_))
+    }
+    /// Returns `true` if this is a successful outcome.
+    pub fn is_successful(&self) -> bool {
+        matches!(self, NGAP_PDU::SuccessfulOutcome(_))
+    }
+    /// Returns `true` if this is an unsuccessful outcome.
+    pub fn is_unsuccessful(&self) -> bool {
+        matches!(self, NGAP_PDU::UnsuccessfulOutcome(_))
+    }
+    /// Return the procedure name as a human-readable string.
+    pub fn procedure_name(&self) -> &'static str {
+        match self {
+            NGAP_PDU::InitiatingMessage(m) => match &m.value {
+                InitiatingMessageValue::Id_AMFCPRelocationIndication(_) => {
+                    "AMFCPRelocationIndication"
+                }
+                InitiatingMessageValue::Id_AMFConfigurationUpdate(_) => "AMFConfigurationUpdate",
+                InitiatingMessageValue::Id_AMFStatusIndication(_) => "AMFStatusIndication",
+                InitiatingMessageValue::Id_CellTrafficTrace(_) => "CellTrafficTrace",
+                InitiatingMessageValue::Id_ConnectionEstablishmentIndication(_) => {
+                    "ConnectionEstablishmentIndication"
+                }
+                InitiatingMessageValue::Id_DeactivateTrace(_) => "DeactivateTrace",
+                InitiatingMessageValue::Id_DownlinkNASTransport(_) => "DownlinkNASTransport",
+                InitiatingMessageValue::Id_DownlinkNonUEAssociatedNRPPaTransport(_) => {
+                    "DownlinkNonUEAssociatedNRPPaTransport"
+                }
+                InitiatingMessageValue::Id_DownlinkRANConfigurationTransfer(_) => {
+                    "DownlinkRANConfigurationTransfer"
+                }
+                InitiatingMessageValue::Id_DownlinkRANEarlyStatusTransfer(_) => {
+                    "DownlinkRANEarlyStatusTransfer"
+                }
+                InitiatingMessageValue::Id_DownlinkRANStatusTransfer(_) => {
+                    "DownlinkRANStatusTransfer"
+                }
+                InitiatingMessageValue::Id_DownlinkRIMInformationTransfer(_) => {
+                    "DownlinkRIMInformationTransfer"
+                }
+                InitiatingMessageValue::Id_DownlinkUEAssociatedNRPPaTransport(_) => {
+                    "DownlinkUEAssociatedNRPPaTransport"
+                }
+                InitiatingMessageValue::Id_ErrorIndication(_) => "ErrorIndication",
+                InitiatingMessageValue::Id_HandoverCancel(_) => "HandoverCancel",
+                InitiatingMessageValue::Id_HandoverNotification(_) => "HandoverNotification",
+                InitiatingMessageValue::Id_HandoverPreparation(_) => "HandoverPreparation",
+                InitiatingMessageValue::Id_HandoverResourceAllocation(_) => {
+                    "HandoverResourceAllocation"
+                }
+                InitiatingMessageValue::Id_HandoverSuccess(_) => "HandoverSuccess",
+                InitiatingMessageValue::Id_InitialContextSetup(_) => "InitialContextSetup",
+                InitiatingMessageValue::Id_InitialUEMessage(_) => "InitialUEMessage",
+                InitiatingMessageValue::Id_LocationReport(_) => "LocationReport",
+                InitiatingMessageValue::Id_LocationReportingControl(_) => {
+                    "LocationReportingControl"
+                }
+                InitiatingMessageValue::Id_LocationReportingFailureIndication(_) => {
+                    "LocationReportingFailureIndication"
+                }
+                InitiatingMessageValue::Id_NASNonDeliveryIndication(_) => {
+                    "NASNonDeliveryIndication"
+                }
+                InitiatingMessageValue::Id_NGReset(_) => "NGReset",
+                InitiatingMessageValue::Id_NGSetup(_) => "NGSetup",
+                InitiatingMessageValue::Id_OverloadStart(_) => "OverloadStart",
+                InitiatingMessageValue::Id_OverloadStop(_) => "OverloadStop",
+                InitiatingMessageValue::Id_PDUSessionResourceModify(_) => {
+                    "PDUSessionResourceModify"
+                }
+                InitiatingMessageValue::Id_PDUSessionResourceModifyIndication(_) => {
+                    "PDUSessionResourceModifyIndication"
+                }
+                InitiatingMessageValue::Id_PDUSessionResourceNotify(_) => {
+                    "PDUSessionResourceNotify"
+                }
+                InitiatingMessageValue::Id_PDUSessionResourceRelease(_) => {
+                    "PDUSessionResourceRelease"
+                }
+                InitiatingMessageValue::Id_PDUSessionResourceSetup(_) => "PDUSessionResourceSetup",
+                InitiatingMessageValue::Id_PWSCancel(_) => "PWSCancel",
+                InitiatingMessageValue::Id_PWSFailureIndication(_) => "PWSFailureIndication",
+                InitiatingMessageValue::Id_PWSRestartIndication(_) => "PWSRestartIndication",
+                InitiatingMessageValue::Id_Paging(_) => "Paging",
+                InitiatingMessageValue::Id_PathSwitchRequest(_) => "PathSwitchRequest",
+                InitiatingMessageValue::Id_PrivateMessage(_) => "PrivateMessage",
+                InitiatingMessageValue::Id_RANCPRelocationIndication(_) => {
+                    "RANCPRelocationIndication"
+                }
+                InitiatingMessageValue::Id_RANConfigurationUpdate(_) => "RANConfigurationUpdate",
+                InitiatingMessageValue::Id_RRCInactiveTransitionReport(_) => {
+                    "RRCInactiveTransitionReport"
+                }
+                InitiatingMessageValue::Id_RerouteNASRequest(_) => "RerouteNASRequest",
+                InitiatingMessageValue::Id_RetrieveUEInformation(_) => "RetrieveUEInformation",
+                InitiatingMessageValue::Id_SecondaryRATDataUsageReport(_) => {
+                    "SecondaryRATDataUsageReport"
+                }
+                InitiatingMessageValue::Id_TraceFailureIndication(_) => "TraceFailureIndication",
+                InitiatingMessageValue::Id_TraceStart(_) => "TraceStart",
+                InitiatingMessageValue::Id_UEContextModification(_) => "UEContextModification",
+                InitiatingMessageValue::Id_UEContextRelease(_) => "UEContextRelease",
+                InitiatingMessageValue::Id_UEContextReleaseRequest(_) => "UEContextReleaseRequest",
+                InitiatingMessageValue::Id_UEContextResume(_) => "UEContextResume",
+                InitiatingMessageValue::Id_UEContextSuspend(_) => "UEContextSuspend",
+                InitiatingMessageValue::Id_UEInformationTransfer(_) => "UEInformationTransfer",
+                InitiatingMessageValue::Id_UERadioCapabilityCheck(_) => "UERadioCapabilityCheck",
+                InitiatingMessageValue::Id_UERadioCapabilityIDMapping(_) => {
+                    "UERadioCapabilityIDMapping"
+                }
+                InitiatingMessageValue::Id_UERadioCapabilityInfoIndication(_) => {
+                    "UERadioCapabilityInfoIndication"
+                }
+                InitiatingMessageValue::Id_UETNLABindingRelease(_) => "UETNLABindingRelease",
+                InitiatingMessageValue::Id_UplinkNASTransport(_) => "UplinkNASTransport",
+                InitiatingMessageValue::Id_UplinkNonUEAssociatedNRPPaTransport(_) => {
+                    "UplinkNonUEAssociatedNRPPaTransport"
+                }
+                InitiatingMessageValue::Id_UplinkRANConfigurationTransfer(_) => {
+                    "UplinkRANConfigurationTransfer"
+                }
+                InitiatingMessageValue::Id_UplinkRANEarlyStatusTransfer(_) => {
+                    "UplinkRANEarlyStatusTransfer"
+                }
+                InitiatingMessageValue::Id_UplinkRANStatusTransfer(_) => "UplinkRANStatusTransfer",
+                InitiatingMessageValue::Id_UplinkRIMInformationTransfer(_) => {
+                    "UplinkRIMInformationTransfer"
+                }
+                InitiatingMessageValue::Id_UplinkUEAssociatedNRPPaTransport(_) => {
+                    "UplinkUEAssociatedNRPPaTransport"
+                }
+                InitiatingMessageValue::Id_WriteReplaceWarning(_) => "WriteReplaceWarning",
+            },
+            NGAP_PDU::SuccessfulOutcome(m) => match &m.value {
+                SuccessfulOutcomeValue::Id_AMFConfigurationUpdate(_) => "AMFConfigurationUpdate",
+                SuccessfulOutcomeValue::Id_HandoverCancel(_) => "HandoverCancel",
+                SuccessfulOutcomeValue::Id_HandoverPreparation(_) => "HandoverPreparation",
+                SuccessfulOutcomeValue::Id_HandoverResourceAllocation(_) => {
+                    "HandoverResourceAllocation"
+                }
+                SuccessfulOutcomeValue::Id_InitialContextSetup(_) => "InitialContextSetup",
+                SuccessfulOutcomeValue::Id_NGReset(_) => "NGReset",
+                SuccessfulOutcomeValue::Id_NGSetup(_) => "NGSetup",
+                SuccessfulOutcomeValue::Id_PDUSessionResourceModify(_) => {
+                    "PDUSessionResourceModify"
+                }
+                SuccessfulOutcomeValue::Id_PDUSessionResourceModifyIndication(_) => {
+                    "PDUSessionResourceModifyIndication"
+                }
+                SuccessfulOutcomeValue::Id_PDUSessionResourceRelease(_) => {
+                    "PDUSessionResourceRelease"
+                }
+                SuccessfulOutcomeValue::Id_PDUSessionResourceSetup(_) => "PDUSessionResourceSetup",
+                SuccessfulOutcomeValue::Id_PWSCancel(_) => "PWSCancel",
+                SuccessfulOutcomeValue::Id_PathSwitchRequest(_) => "PathSwitchRequest",
+                SuccessfulOutcomeValue::Id_RANConfigurationUpdate(_) => "RANConfigurationUpdate",
+                SuccessfulOutcomeValue::Id_UEContextModification(_) => "UEContextModification",
+                SuccessfulOutcomeValue::Id_UEContextRelease(_) => "UEContextRelease",
+                SuccessfulOutcomeValue::Id_UEContextResume(_) => "UEContextResume",
+                SuccessfulOutcomeValue::Id_UEContextSuspend(_) => "UEContextSuspend",
+                SuccessfulOutcomeValue::Id_UERadioCapabilityCheck(_) => "UERadioCapabilityCheck",
+                SuccessfulOutcomeValue::Id_UERadioCapabilityIDMapping(_) => {
+                    "UERadioCapabilityIDMapping"
+                }
+                SuccessfulOutcomeValue::Id_WriteReplaceWarning(_) => "WriteReplaceWarning",
+            },
+            NGAP_PDU::UnsuccessfulOutcome(m) => match &m.value {
+                UnsuccessfulOutcomeValue::Id_AMFConfigurationUpdate(_) => "AMFConfigurationUpdate",
+                UnsuccessfulOutcomeValue::Id_HandoverPreparation(_) => "HandoverPreparation",
+                UnsuccessfulOutcomeValue::Id_HandoverResourceAllocation(_) => {
+                    "HandoverResourceAllocation"
+                }
+                UnsuccessfulOutcomeValue::Id_InitialContextSetup(_) => "InitialContextSetup",
+                UnsuccessfulOutcomeValue::Id_NGSetup(_) => "NGSetup",
+                UnsuccessfulOutcomeValue::Id_PathSwitchRequest(_) => "PathSwitchRequest",
+                UnsuccessfulOutcomeValue::Id_RANConfigurationUpdate(_) => "RANConfigurationUpdate",
+                UnsuccessfulOutcomeValue::Id_UEContextModification(_) => "UEContextModification",
+                UnsuccessfulOutcomeValue::Id_UEContextResume(_) => "UEContextResume",
+                UnsuccessfulOutcomeValue::Id_UEContextSuspend(_) => "UEContextSuspend",
+            },
+        }
+    }
+}
+impl std::fmt::Display for NGAP_PDU {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{} {} (code={})",
+            self.direction(),
+            self.procedure_name(),
+            self.procedure_code()
+        )
+    }
+}

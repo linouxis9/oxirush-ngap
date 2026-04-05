@@ -17,13 +17,18 @@ Part of the [OxiRush](https://github.com/linouxis9/oxirush) project — a 5G Cor
 - **Round-trip fidelity** — encode then decode produces identical structures
 - **Builder macros** — `build_ngap!` and `build_ngap_ie!` eliminate the deeply nested ProtocolIEs boilerplate
 - **Extraction macro** — `extract_ngap_ies!` pulls typed fields from decoded messages with `req`/`opt` semantics
-- **IE ID / procedure code constants** — all TS 38.413 §9.1-9.2 constants in `macros` module
+- **Auto-derived IE IDs and procedure codes** — no manual constants needed, derived at build time from ASN.1 `#[asn(key = N)]` attributes
+- **Encode/decode convenience** — `pdu.encode()` and `NGAP_PDU::decode(&bytes)` wrap the raw APER codec
+- **PDU inspection** — `pdu.procedure_name()`, `pdu.direction()`, `pdu.procedure_code()`, `pdu.is_initiating()`
+- **Display impl** — `format!("{pdu}")` → `"InitiatingMessage NGSetup (code=21)"`
+- **Type builders** — `plmn()`, `guami()`, `tai()`, `nr_cgi()`, `global_gnb_id()`, `s_nssai()` for common NGAP IEs
+- **Bitvec helpers** — `int_to_bitvec()`, `bytes_to_bitvec()` for AMF identity, security keys, cell IDs
 
 ## Quick start
 
 ```toml
 [dependencies]
-oxirush-ngap = "0.1"
+oxirush-ngap = "0.3"
 ```
 
 ### Encode an NGAP PDU (with macros)
@@ -31,37 +36,57 @@ oxirush-ngap = "0.1"
 The auto-generated types are deeply nested. The `build_ngap!` macro provides a concise DSL:
 
 ```rust
-use oxirush_ngap::{build_ngap, build_ngap_ie, ngap::*};
-use asn1_codecs::{aper::AperCodec, PerCodecData};
+use oxirush_ngap::{build_ngap, ngap::*};
+use oxirush_ngap::helpers::*;
 
-// Build a complete NGAP PDU in one expression.
-// Use the auto-generated ID_* constants from ngap.rs for procedure codes and IE IDs.
-let pdu = build_ngap!(InitiatingMessage, Id_UEContextReleaseRequest,
-    ID_UE_CONTEXT_RELEASE_REQUEST, REJECT, UEContextReleaseRequest,
-    REJECT ID_AMF_UE_NGAP_ID => Id_AMF_UE_NGAP_ID(AMF_UE_NGAP_ID(1)),
-    REJECT ID_RAN_UE_NGAP_ID => Id_RAN_UE_NGAP_ID(RAN_UE_NGAP_ID(0)),
-    IGNORE ID_CAUSE => Id_Cause(
-        Cause::RadioNetwork(CauseRadioNetwork(CauseRadioNetwork::USER_INACTIVITY))
-    ),
+// Simple: UEContextReleaseRequest with a cause
+let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
+    REJECT, UEContextReleaseRequest,
+    REJECT AMF_UE_NGAP_ID(1u64),
+    REJECT RAN_UE_NGAP_ID(0u32),
+    IGNORE Cause(Cause::RadioNetwork(CauseRadioNetwork(CauseRadioNetwork::USER_INACTIVITY))),
+);
+
+// Complex: InitialContextSetupRequest with GUAMI, NSSAI, security key helpers
+let pdu = build_ngap!(InitiatingMessage, InitialContextSetup,
+    REJECT, InitialContextSetupRequest,
+    REJECT AMF_UE_NGAP_ID(1u64),
+    REJECT RAN_UE_NGAP_ID(0u32),
+    REJECT UEAggregateMaximumBitRate(UEAggregateMaximumBitRate {
+        ue_aggregate_maximum_bit_rate_dl: BitRate(1_000_000_000),
+        ue_aggregate_maximum_bit_rate_ul: BitRate(1_000_000_000),
+        ie_extensions: None,
+    }),
+    REJECT GUAMI(guami(plmn("208", "93"), 1, 1, 0)),
+    REJECT AllowedNSSAI(vec![AllowedNSSAI_Item {
+        s_nssai: s_nssai(1, Some([0x00, 0x00, 0x01])),
+        ie_extensions: None,
+    }]),
+    REJECT SecurityKey(bytes_to_bitvec(&[0u8; 32])),
+    IGNORE NAS_PDU(vec![0x7e, 0x00, 0x42]),
 );
 
 // Encode to APER wire format
-let mut output = PerCodecData::new_aper();
-pdu.aper_encode(&mut output).unwrap();
-let wire_bytes = output.into_bytes();
+let wire_bytes = pdu.encode().unwrap();
+
+// Inspect the PDU
+println!("{pdu}");                        // "InitiatingMessage InitialContextSetup (code=14)"
+assert_eq!(pdu.procedure_name(), "InitialContextSetup");
+assert!(pdu.is_initiating());
 ```
 
-`build_ngap!` arguments: `(Direction, OuterVariant, ProcedureCode, Criticality, MessageType, IEs...)`
+`build_ngap!` arguments: `(Direction, Procedure, Criticality, MessageType, IEs...)`
 
-Each IE: `Criticality ID_CONSTANT => VariantName(value)` — use auto-generated `ID_*` constants from `ngap::*`.
+Each IE: `Criticality IeName(value)` — IE IDs and procedure codes are auto-derived at build time.
+Raw values (e.g. `u64`) auto-convert to newtypes via `.into()`.
 
 Build individual IEs when you need conditional logic:
 
 ```rust
 use oxirush_ngap::{build_ngap_ie, ngap::*};
 
-let cause_ie = build_ngap_ie!(UEContextReleaseRequest, IGNORE ID_CAUSE =>
-    Id_Cause(Cause::RadioNetwork(CauseRadioNetwork(CauseRadioNetwork::USER_INACTIVITY)))
+let cause_ie = build_ngap_ie!(UEContextReleaseRequest, IGNORE
+    Cause(Cause::RadioNetwork(CauseRadioNetwork(CauseRadioNetwork::USER_INACTIVITY)))
 );
 ```
 
@@ -71,103 +96,87 @@ The `extract_ngap_ies!` macro pulls typed fields from a decoded message. Require
 
 ```rust
 use oxirush_ngap::{extract_ngap_ies, ngap::*, macros::MissingIeError};
-use asn1_codecs::{aper::AperCodec, PerCodecData};
 
-fn handle(aper_bytes: &[u8]) -> Result<(), MissingIeError> {
-    let mut codec = PerCodecData::from_slice_aper(aper_bytes);
-    let pdu = NGAP_PDU::aper_decode(&mut codec).unwrap();
+// Simple: extract UE IDs and an optional cause
+fn handle_release(req: UEContextReleaseRequest) -> Result<(), MissingIeError> {
+    extract_ngap_ies!(req, UEContextReleaseRequest,
+        req amf_id: u64     = AMF_UE_NGAP_ID(id),           // required, default .0
+        req ran_id: u32     = RAN_UE_NGAP_ID(id),           // required, default .0
+        opt cause:  String  = Cause(c) => format!("{c:?}"), // optional + custom expr
+    );
+    // amf_id: u64, ran_id: u32, cause: Option<String>
+    println!("AMF={amf_id} RAN={ran_id} cause={cause:?}");
+    Ok(())
+}
 
-    if let NGAP_PDU::InitiatingMessage(msg) = pdu {
-        if let InitiatingMessageValue::Id_UEContextReleaseRequest(req) = msg.value {
-            extract_ngap_ies!(&req.protocol_i_es.0, UEContextReleaseRequestProtocolIEs_EntryValue,
-                req amf_id: u64     = Id_AMF_UE_NGAP_ID(id),           // required
-                req ran_id: u32     = Id_RAN_UE_NGAP_ID(id),           // required
-                opt cause:  String  = Id_Cause(c) => format!("{c:?}"), // optional + custom expr
-            );
-            // amf_id: u64, ran_id: u32, cause: Option<String>
-            println!("AMF={amf_id} RAN={ran_id} cause={cause:?}");
-        }
-    }
+// Complex: extract many IEs with pattern matching and type conversions
+fn handle_handover(req: HandoverRequired) -> Result<(), MissingIeError> {
+    extract_ngap_ies!(req, HandoverRequired,
+        req amf_id: u64 = AMF_UE_NGAP_ID(id),
+        req ran_id: u32 = RAN_UE_NGAP_ID(id),
+        opt cause_rn: u8 = Cause(c) =>
+            if let Cause::RadioNetwork(rn) = c { rn.0 } else { 0 },
+        opt ho_type: u8 = HandoverType(ht),           // default .0
+        opt container: Vec<u8> =
+            SourceToTarget_TransparentContainer(c) => c.0.clone(),
+    );
+    println!("HO UE {} type {:?} cause {:?}", amf_id, ho_type, cause_rn);
     Ok(())
 }
 ```
 
-`extract_ngap_ies!` arguments: `(&ies_slice, EntryValueEnum, fields...)`
+`extract_ngap_ies!` arguments: `(msg_var, MessageType, fields...)`
 
-Each field: `req|opt name: Type = Variant(binding)` with optional `=> custom_expr`
+Each field: `req|opt name: Type = IeName(binding)` with optional `=> custom_expr`
 
 When `=> expr` is omitted, defaults to `binding.0` (newtype unwrap).
 
-### Decode an NGAP PDU (without macros)
+### Encode / Decode
 
 ```rust
-use oxirush_ngap::ngap::*;
-use asn1_codecs::{aper::AperCodec, PerCodecData};
+use oxirush_ngap::ngap::NGAP_PDU;
 
-let aper_bytes: &[u8] = &[/* ... APER-encoded NGAP PDU ... */];
-let mut codec_data = PerCodecData::from_slice_aper(aper_bytes);
-let pdu = NGAP_PDU::aper_decode(&mut codec_data).unwrap();
+// Encode NGAP_PDU to APER bytes
+let bytes = pdu.encode().unwrap();
 
-match pdu {
-    NGAP_PDU::InitiatingMessage(msg) => {
-        println!("Initiating: procedure_code={}", msg.procedure_code.0);
-    }
-    NGAP_PDU::SuccessfulOutcome(msg) => {
-        println!("Success: procedure_code={}", msg.procedure_code.0);
-    }
-    NGAP_PDU::UnsuccessfulOutcome(msg) => {
-        println!("Failure: procedure_code={}", msg.procedure_code.0);
-    }
-}
+// Decode APER bytes to NGAP_PDU
+let decoded = NGAP_PDU::decode(&bytes).unwrap();
 ```
 
-### Encode an NGAP PDU (without macros)
+### Type builders (helpers module)
 
 ```rust
-use oxirush_ngap::ngap::*;
-use asn1_codecs::{aper::AperCodec, PerCodecData};
+use oxirush_ngap::helpers::*;
 
-let pdu = NGAP_PDU::SuccessfulOutcome(SuccessfulOutcome {
-    procedure_code: ProcedureCode(14),
-    criticality: Criticality(Criticality::REJECT),
-    value: SuccessfulOutcomeValue::Id_InitialContextSetup(
-        InitialContextSetupResponse {
-            protocol_i_es: InitialContextSetupResponseProtocolIEs(vec![
-                InitialContextSetupResponseProtocolIEs_Entry {
-                    id: ProtocolIE_ID(10),
-                    criticality: Criticality(Criticality::IGNORE),
-                    value: InitialContextSetupResponseProtocolIEs_EntryValue
-                        ::Id_AMF_UE_NGAP_ID(AMF_UE_NGAP_ID(1)),
-                },
-                InitialContextSetupResponseProtocolIEs_Entry {
-                    id: ProtocolIE_ID(85),
-                    criticality: Criticality(Criticality::IGNORE),
-                    value: InitialContextSetupResponseProtocolIEs_EntryValue
-                        ::Id_RAN_UE_NGAP_ID(RAN_UE_NGAP_ID(0)),
-                },
-            ]),
-        },
-    ),
-});
+let p = plmn("208", "93");                          // PLMNIdentity (3-byte TBCD)
+let g = guami(plmn("208", "93"), 1, 1, 0);          // GUAMI (PLMN + AMF identity)
+let t = tai(plmn("208", "93"), &[0x00, 0x00, 0x01]); // TAI (PLMN + TAC)
+let cgi = nr_cgi(plmn("208", "93"), 0x000001, 1);    // NR-CGI (36-bit cell ID)
+let gnb = global_gnb_id(plmn("208", "93"), 0x000001); // GlobalGNB-ID (24-bit gNB-ID)
+let nssai = s_nssai(1, Some([0x00, 0x00, 0x01]));    // S-NSSAI (SST + optional SD)
+let sec = ue_security_capabilities(&[0xE0, 0xE0]);   // UESecurityCapabilities
 
-let mut output = PerCodecData::new_aper();
-pdu.aper_encode(&mut output).unwrap();
-let wire_bytes = output.into_bytes();
+// Bitvec conversion for NGAP bitstring fields
+let key = bytes_to_bitvec(&[0u8; 32]);               // SecurityKey (256 bits)
+let region = int_to_bitvec(1, 8);                     // AMFRegionID (8 bits)
 ```
+
+### Without macros
+
+The auto-generated types are fully usable without macros — you can construct `NGAP_PDU` values directly and pattern-match on decoded ones. The macros simply eliminate the repetitive `ProtocolIE_ID(...)`, `Criticality(...)`, and `{Msg}ProtocolIEs_EntryValue::Id_...` boilerplate. See `examples/decode_manually.rs` for a complete encode → decode → inspect example without macros.
 
 ## How code generation works
 
 The build script (`build/main.rs`) runs at `cargo build` time:
 
-1. Reads the 3GPP ASN.1 source files from `ngap/`:
-   - `NGAP-PDU-Descriptions.asn` — top-level PDU definitions
-   - `NGAP-PDU-Contents.asn` — procedure message contents
-   - `NGAP-IEs.asn` — information element definitions
-   - `NGAP-CommonDataTypes.asn` — shared types
-   - `NGAP-Constants.asn` — protocol constants
-   - `NGAP-Containers.asn` — generic container types
-2. Compiles ASN.1 to Rust using [`asn1-compiler`](https://crates.io/crates/asn1-compiler)
-3. Outputs `src/ngap.rs` — the complete APER codec (~21K lines)
+1. **ASN.1 compilation** — reads the 3GPP ASN.1 source files from `ngap/` (`NGAP-PDU-Descriptions.asn`, `NGAP-PDU-Contents.asn`, `NGAP-IEs.asn`, `NGAP-CommonDataTypes.asn`, `NGAP-Constants.asn`, `NGAP-Containers.asn`) and compiles them to Rust using [`asn1-compiler`](https://crates.io/crates/asn1-compiler)
+2. **Post-processing** — the build script then parses the generated code to emit:
+   - `From<InnerType>` impls for all single-field newtypes (enables `.into()` auto-conversion in `build_ngap!`)
+   - `__ngap_ie_id!` macro — maps IE variant names to numeric IDs by parsing `#[asn(key = N)]` attributes on `ProtocolIEs_EntryValue` enums (207 arms)
+   - `__ngap_proc_code!` macro — maps procedure names to codes by parsing `{Direction}Value` enums (66 arms)
+   - `impl NGAP_PDU` — `procedure_code()`, `direction()`, `procedure_name()`, `is_initiating()` / `is_successful()` / `is_unsuccessful()`
+   - `impl Display for NGAP_PDU` — human-readable PDU formatting
+3. **Output** — `src/ngap.rs`, the complete APER codec with helper macros and impls (~21K lines)
 
 **Do not edit `src/ngap.rs` manually.** Modify the ASN.1 files in `ngap/` or the build script in `build/` instead.
 
@@ -178,18 +187,33 @@ The build script (`build/main.rs`) runs at `cargo build` time:
 | `NGAP_PDU` | Top-level enum: `InitiatingMessage`, `SuccessfulOutcome`, `UnsuccessfulOutcome` |
 | `InitiatingMessage` | Procedure code + criticality + value (e.g., `NGSetupRequest`, `InitialUEMessage`) |
 | `SuccessfulOutcome` | Response to initiating message (e.g., `NGSetupResponse`) |
+| `UnsuccessfulOutcome` | Failure response (e.g., `NGSetupFailure`, `HandoverPreparationFailure`) |
+| `AMF_UE_NGAP_ID` / `RAN_UE_NGAP_ID` | UE context identifiers (u64 / u32 newtypes) |
+| `Cause` | Enum: `RadioNetwork`, `Transport`, `NAS`, `Protocol`, `Misc` sub-causes |
 | `PLMNIdentity` | 3-byte TBCD-encoded PLMN (MCC + MNC) |
+| `S_NSSAI` | Network slice: SST (1 byte) + optional SD (3 bytes) |
+| `TAI` | Tracking Area Identity: PLMN + TAC |
 | `NAS_PDU` | Opaque NAS payload (decode with [oxirush-nas](https://github.com/linouxis9/oxirush-nas)) |
 | `GNB_ID` | gNodeB identifier (22-32 bits) |
-| `AMF_UE_NGAP_ID` / `RAN_UE_NGAP_ID` | UE context identifiers |
+| `Criticality` | IE criticality: `REJECT`, `IGNORE`, or `NOTIFY` |
 | `MissingIeError` | Error returned by `extract_ngap_ies!` when a required IE is absent |
+
+## Macro reference
+
+| Macro | Purpose |
+|-------|---------|
+| `build_ngap!(Dir, Proc, Crit, Msg, IEs...)` | Build a complete `NGAP_PDU` |
+| `build_ngap_ie!(Msg, Crit IE(val))` | Build a single `ProtocolIEs_Entry` |
+| `extract_ngap_ies!(var, Msg, fields...)` | Extract typed fields from a decoded message |
+
+`build_ngap!` and `build_ngap_ie!` auto-derive IE IDs, procedure codes, and `Id_` variant names. Raw values auto-convert to newtypes via `.into()`. `extract_ngap_ies!` accesses `.protocol_i_es.0` internally — pass the message variable directly.
 
 ## Examples
 
 ```bash
-cargo run --example decode_ngsetup   # Decode an NGSetupResponse from APER bytes
-cargo run --example build_pdu        # Build NGAP PDUs using build_ngap! and build_ngap_ie!
-cargo run --example extract_ies      # Extract IEs from a decoded PDU using extract_ngap_ies!
+cargo run --example build_pdu         # Build NGAP PDUs using build_ngap! and build_ngap_ie!
+cargo run --example extract_ies       # Extract IEs from a decoded PDU using extract_ngap_ies!
+cargo run --example decode_manually   # Encode/decode without macros (raw types)
 ```
 
 ## 3GPP references

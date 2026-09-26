@@ -1,117 +1,92 @@
-//! Encode and decode NGAP PDUs **without macros** — using the raw auto-generated types.
+//! Encode and decode NGAP PDUs **without macros** using rasn and the generated types.
 //!
-//! This example shows how to work with the APER codec directly:
-//! - Constructing an `NGAP_PDU` by hand (ProtocolIE_ID, Criticality, EntryValue, ...)
-//! - Encoding to APER wire bytes
-//! - Decoding from APER wire bytes
-//! - Pattern-matching on decoded IEs
-//! - Verifying encode -> decode round-trip fidelity
+//! This example demonstrates the complete raw-codec workflow:
+//! - Constructing an `NGAP_PDU` by hand (`ProtocolIEID`, `Criticality`, `Any`)
+//! - Encoding and decoding with the raw rasn APER functions
+//! - Decoding and pattern-matching open protocol IE values
+//! - Verifying encode → decode round-trip fidelity
 //!
-//! For the same operations using the ergonomic `build_ngap!` / `extract_ngap_ies!`
-//! macros, see `build_pdu.rs` and `extract_ies.rs`.
+//! For the ergonomic `build_ngap!` / `extract_ngap_ies!` versions, see
+//! `build_pdu.rs` and `extract_ies.rs`.
 
-use asn1_codecs::PerCodecData;
-use asn1_codecs::aper::AperCodec;
-use bitvec::prelude::*;
+use rasn::types::{FixedBitString, FixedOctetString, PrintableString};
+
 use oxirush_ngap::ngap::*;
 
 fn main() {
     // ── 1. Build an NGSetupResponse by hand ─────────────────────────────────
     //
-    // Every IE must specify its numeric ID, criticality, and typed EntryValue
-    // variant. This is what the build_ngap! macro automates.
+    // The response identifies its served GUAMIs, capacity, PLMNs, and slices.
 
-    // AMF Region ID = 1 (8 bits), AMF Set ID = 1 (10 bits), AMF Pointer = 0 (6 bits)
-    let mut region_bv = BitVec::<u8, Msb0>::from_slice(&[0x01]);
-    region_bv.truncate(8);
-    let mut set_bv = BitVec::<u8, Msb0>::from_slice(&[0x00, 0x40]);
-    set_bv.truncate(10);
-    let mut ptr_bv = BitVec::<u8, Msb0>::from_slice(&[0x00]);
-    ptr_bv.truncate(6);
-
-    let guami = GUAMI {
-        plmn_identity: PLMNIdentity(vec![0x02, 0xF8, 0x39]), // MCC=208, MNC=93
-        amf_region_id: AMFRegionID(region_bv),
-        amf_set_id: AMFSetID(set_bv),
-        amf_pointer: AMFPointer(ptr_bv),
-        ie_extensions: None,
-    };
-
-    // Each IE is a ProtocolIEs_Entry with:
-    //   - id: the numeric IE ID (e.g. ID_AMF_NAME = 1)
-    //   - criticality: REJECT, IGNORE, or NOTIFY
-    //   - value: the typed EntryValue variant (e.g. Id_AMFName(...))
-    let ies = vec![
-        NGSetupResponseProtocolIEs_Entry {
-            id: ProtocolIE_ID(ID_AMF_NAME),
-            criticality: Criticality(Criticality::REJECT),
-            value: NGSetupResponseProtocolIEs_EntryValue::Id_AMFName(AMFName(
-                "OxiRushAMF".to_string(),
-            )),
-        },
-        NGSetupResponseProtocolIEs_Entry {
-            id: ProtocolIE_ID(ID_SERVED_GUAMI_LIST),
-            criticality: Criticality(Criticality::REJECT),
-            value: NGSetupResponseProtocolIEs_EntryValue::Id_ServedGUAMIList(ServedGUAMIList(
-                vec![ServedGUAMIItem {
-                    guami,
-                    backup_amf_name: None,
-                    ie_extensions: None,
-                }],
-            )),
-        },
-        NGSetupResponseProtocolIEs_Entry {
-            id: ProtocolIE_ID(ID_RELATIVE_AMF_CAPACITY),
-            criticality: Criticality(Criticality::IGNORE),
-            value: NGSetupResponseProtocolIEs_EntryValue::Id_RelativeAMFCapacity(
-                RelativeAMFCapacity(255),
+    let plmn_identity = PLMNIdentity(FixedOctetString::new([0x02, 0xF8, 0x39]));
+    let guami = GUAMI::new(
+        plmn_identity.clone(),
+        AMFRegionID(fixed_bits::<8>(1)),
+        AMFSetID(fixed_bits::<10>(1)),
+        AMFPointer(fixed_bits::<6>(0)),
+        None,
+    );
+    let served_guamis = ServedGUAMIList(vec![ServedGUAMIItem::new(guami, None, None)]);
+    let plmn_support = PLMNSupportList(vec![PLMNSupportItem::new(
+        plmn_identity,
+        SliceSupportList(vec![SliceSupportItem::new(
+            SNSSAI::new(
+                SST(FixedOctetString::new([1])),
+                Some(SD(FixedOctetString::new([0x00, 0x00, 0x01]))),
+                None,
             ),
-        },
-        NGSetupResponseProtocolIEs_Entry {
-            id: ProtocolIE_ID(ID_PLMN_SUPPORT_LIST),
-            criticality: Criticality(Criticality::REJECT),
-            value: NGSetupResponseProtocolIEs_EntryValue::Id_PLMNSupportList(PLMNSupportList(
-                vec![PLMNSupportItem {
-                    plmn_identity: PLMNIdentity(vec![0x02, 0xF8, 0x39]),
-                    slice_support_list: SliceSupportList(vec![SliceSupportItem {
-                        s_nssai: S_NSSAI {
-                            sst: SST(vec![1]),
-                            sd: Some(SD(vec![0x00, 0x00, 0x01])),
-                            ie_extensions: None,
-                        },
-                        ie_extensions: None,
-                    }]),
-                    ie_extensions: None,
-                }],
-            )),
-        },
-    ];
+            None,
+        )]),
+        None,
+    )]);
+    let amf_name = AMFName(PrintableString::try_from("OxiRushAMF").expect("valid AMF name"));
 
-    // The outer PDU wraps the message in a direction + procedure code.
-    let pdu = NGAP_PDU::SuccessfulOutcome(SuccessfulOutcome {
-        procedure_code: ProcedureCode(ID_NG_SETUP),
-        criticality: Criticality(Criticality::REJECT),
-        value: SuccessfulOutcomeValue::Id_NGSetup(NGSetupResponse {
-            protocol_i_es: NGSetupResponseProtocolIEs(ies),
-        }),
-    });
+    // In rasn's stable opaque-open-type representation, every entry holds its
+    // numeric ID, criticality, and the APER bytes of its concrete NGAP value.
+    let ies = vec![
+        AnonymousNGSetupResponseProtocolIEs::new(
+            ID_AMFNAME,
+            Criticality::reject,
+            encode_open_type(&amf_name).expect("encode AMF name"),
+        ),
+        AnonymousNGSetupResponseProtocolIEs::new(
+            ID_SERVED_GUAMILIST,
+            Criticality::reject,
+            encode_open_type(&served_guamis).expect("encode served GUAMIs"),
+        ),
+        AnonymousNGSetupResponseProtocolIEs::new(
+            ID_RELATIVE_AMFCAPACITY,
+            Criticality::ignore,
+            encode_open_type(&RelativeAMFCapacity(255)).expect("encode AMF capacity"),
+        ),
+        AnonymousNGSetupResponseProtocolIEs::new(
+            ID_PLMNSUPPORT_LIST,
+            Criticality::reject,
+            encode_open_type(&plmn_support).expect("encode PLMN support"),
+        ),
+    ];
+    let response = NGSetupResponse::new(NGSetupResponseProtocolIEs(ies));
+
+    // The outer PDU wraps the APER-encoded message in its direction and
+    // ASN.1-derived procedure code.
+    let pdu = NGAP_PDU::successfulOutcome(SuccessfulOutcome::new(
+        ID_NGSETUP,
+        Criticality::reject,
+        encode_open_type(&response).expect("encode NG Setup Response"),
+    ));
 
     // ── 2. Encode to APER ───────────────────────────────────────────────────
-    // Note: the ergonomic way is `pdu.encode()` — here we show the raw codec API.
+    // `pdu.encode()` is the convenience API; this deliberately uses raw rasn.
 
-    let mut output = PerCodecData::new_aper();
-    pdu.aper_encode(&mut output).expect("APER encode failed");
-    let aper_bytes = output.into_bytes();
+    let aper_bytes = rasn::aper::encode(&pdu).expect("APER encode failed");
     println!("Encoded NGSetupResponse: {} bytes", aper_bytes.len());
     println!("APER hex: {}", hex::encode(&aper_bytes));
 
     // ── 3. Decode from APER ─────────────────────────────────────────────────
-    // Note: the ergonomic way is `NGAP_PDU::decode(&bytes)` — here we show the raw API.
+    // `NGAP_PDU::decode(&bytes)` is the equivalent convenience API.
 
-    let mut codec_data = PerCodecData::from_slice_aper(&aper_bytes);
-    let decoded = NGAP_PDU::aper_decode(&mut codec_data).expect("APER decode failed");
+    let decoded: NGAP_PDU = rasn::aper::decode(&aper_bytes).expect("APER decode failed");
 
-    // Display impl and inspection helpers (generated by build script)
     println!("\n=== Decoded: {decoded} ===");
     println!(
         "Procedure: {}, Direction: {}\n",
@@ -119,52 +94,62 @@ fn main() {
         decoded.direction()
     );
 
-    // ── 4. Inspect decoded PDU by pattern-matching ──────────────────────────
+    // ── 4. Inspect the decoded PDU and its typed open values ────────────────
     //
-    // Without macros, you match on the direction, then the procedure variant,
-    // then iterate over protocol_i_es and match each EntryValue variant.
-    // This is what the extract_ngap_ies! macro automates.
+    // Without extraction macros, match the direction, decode the message open
+    // type, iterate `protocol_ies`, then decode each recognized IE open type.
 
     match &decoded {
-        NGAP_PDU::SuccessfulOutcome(outcome) => {
+        NGAP_PDU::successfulOutcome(outcome) => {
             println!("Type:           SuccessfulOutcome");
             println!("Procedure code: {}", outcome.procedure_code.0);
-            println!("Criticality:    {:?}", outcome.criticality.0);
+            println!("Criticality:    {:?}", outcome.criticality);
 
-            if let SuccessfulOutcomeValue::Id_NGSetup(ref resp) = outcome.value {
-                for ie in &resp.protocol_i_es.0 {
-                    match &ie.value {
-                        NGSetupResponseProtocolIEs_EntryValue::Id_AMFName(name) => {
-                            println!("AMF Name:       {}", name.0);
-                        }
-                        NGSetupResponseProtocolIEs_EntryValue::Id_RelativeAMFCapacity(cap) => {
-                            println!("AMF Capacity:   {}", cap.0);
-                        }
-                        NGSetupResponseProtocolIEs_EntryValue::Id_ServedGUAMIList(list) => {
-                            println!("Served GUAMIs:  {} entries", list.0.len());
-                            for guami_item in &list.0 {
-                                let plmn = &guami_item.guami.plmn_identity.0;
-                                println!(
-                                    "  PLMN: {}",
-                                    plmn.iter().map(|b| format!("{b:02x}")).collect::<String>()
-                                );
-                            }
-                        }
-                        NGSetupResponseProtocolIEs_EntryValue::Id_PLMNSupportList(list) => {
-                            println!("PLMN Support:   {} entries", list.0.len());
-                            for item in &list.0 {
-                                let plmn = &item.plmn_identity.0;
-                                println!(
-                                    "  PLMN: {}, slices: {}",
-                                    plmn.iter().map(|b| format!("{b:02x}")).collect::<String>(),
-                                    item.slice_support_list.0.len()
-                                );
-                            }
-                        }
-                        _ => {
-                            println!("  (other IE: id={})", ie.id.0);
+            let response: NGSetupResponse =
+                decode_open_type(&outcome.value).expect("decode NG Setup Response");
+            for ie in &response.protocol_ies.0 {
+                match ie.id {
+                    ID_AMFNAME => {
+                        let name: AMFName = decode_open_type(&ie.value).expect("decode AMF name");
+                        println!(
+                            "AMF Name:       {}",
+                            String::from_utf8_lossy(name.0.as_bytes())
+                        );
+                    }
+                    ID_RELATIVE_AMFCAPACITY => {
+                        let capacity: RelativeAMFCapacity =
+                            decode_open_type(&ie.value).expect("decode AMF capacity");
+                        println!("AMF Capacity:   {}", capacity.0);
+                    }
+                    ID_SERVED_GUAMILIST => {
+                        let list: ServedGUAMIList =
+                            decode_open_type(&ie.value).expect("decode served GUAMIs");
+                        println!("Served GUAMIs:  {} entries", list.0.len());
+                        for item in &list.0 {
+                            let plmn = &item.g_uami.p_lmnidentity.0;
+                            println!(
+                                "  PLMN: {}",
+                                plmn.iter().map(|b| format!("{b:02x}")).collect::<String>()
+                            );
                         }
                     }
+                    ID_PLMNSUPPORT_LIST => {
+                        let list: PLMNSupportList =
+                            decode_open_type(&ie.value).expect("decode PLMN support");
+                        println!("PLMN Support:   {} entries", list.0.len());
+                        for item in &list.0 {
+                            println!(
+                                "  PLMN: {}, slices: {}",
+                                item.p_lmnidentity
+                                    .0
+                                    .iter()
+                                    .map(|b| format!("{b:02x}"))
+                                    .collect::<String>(),
+                                item.slice_support_list.0.len()
+                            );
+                        }
+                    }
+                    _ => println!("  (other IE: id={})", ie.id.0),
                 }
             }
         }
@@ -176,4 +161,12 @@ fn main() {
     let re_encoded = decoded.encode().expect("re-encode failed");
     assert_eq!(aper_bytes, re_encoded, "Round-trip mismatch!");
     println!("\nRound-trip OK ({} bytes)", re_encoded.len());
+}
+
+fn fixed_bits<const N: usize>(value: u64) -> FixedBitString<N> {
+    let mut bits = FixedBitString::<N>::ZERO;
+    for index in 0..N {
+        bits.set(index, (value >> (N - index - 1)) & 1 == 1);
+    }
+    bits
 }

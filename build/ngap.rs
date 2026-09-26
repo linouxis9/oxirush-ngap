@@ -1,302 +1,493 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::Write;
 use std::fs;
+use std::path::{Path, PathBuf};
 
-use asn1_compiler::{
-    Asn1Compiler,
-    generator::{Codec, Derive, Visibility},
-};
-
-use anyhow::Result;
-use regex::Regex;
+use anyhow::{Context, Result, anyhow};
+use rasn_compiler::OutputMode;
+use rasn_compiler::prelude::{Compiler, RasnBackend, RasnConfig};
+use regex::{Captures, Regex};
 
 pub fn generate_ngap() -> Result<()> {
-    let files: Vec<_> = fs::read_dir("ngap")
-        .unwrap()
-        .map(|f| f.unwrap().path())
-        .collect();
+    let mut files: Vec<PathBuf> = fs::read_dir("ngap")
+        .context("read NGAP ASN.1 source directory")?
+        .map(|entry| entry.map(|entry| entry.path()))
+        .collect::<std::io::Result<_>>()?;
+    files.sort();
 
-    let mut compiler = Asn1Compiler::new(
-        "src/ngap.rs",
-        &Visibility::Public,
-        vec![Codec::Aper],
-        vec![
-            Derive::Debug,
-            Derive::PartialEq,
-            Derive::Serialize,
-            Derive::Deserialize,
-        ],
+    let config = RasnConfig {
+        // rasn-compiler's typed open types are experimental and currently emit
+        // invalid bindings for TS 38.413. Stable opaque open types are wrapped
+        // by the generated macros below, retaining a typed public API.
+        opaque_open_types: true,
+        generate_from_impls: true,
+        ..RasnConfig::default()
+    };
+    let output = Path::new("src/ngap.rs");
+
+    let warnings = Compiler::<RasnBackend, _>::new_with_config(config)
+        .add_asn_sources_by_path(files.iter())
+        .set_output_mode(OutputMode::SingleFile(output.into()))
+        .compile()
+        .map_err(|error| anyhow!("compile NGAP ASN.1 definitions: {error}"))?;
+
+    for warning in warnings {
+        println!("cargo:warning={warning}");
+    }
+
+    post_process(output, &files)
+}
+
+fn post_process(path: &Path, asn_files: &[PathBuf]) -> Result<()> {
+    let mut generated = fs::read_to_string(path).context("read generated NGAP bindings")?;
+    generated.insert_str(0, "#![allow(clippy::large_enum_variant)]\n\n");
+
+    // Plain bracketed specification references are otherwise parsed as rustdoc links.
+    generated = generated.replace("[16]", "(reference 16)");
+
+    // rasn-compiler already resolves every parameterized container invocation to
+    // a concrete anonymous type. These now-unused imports refer to parameterized
+    // definitions that intentionally have no standalone Rust representation.
+    let container_imports = Regex::new(r"(?ms)^    use super::ngap_containers::\{.*?^    \};\n")?;
+    generated = container_imports.replace_all(&generated, "").into_owned();
+    generated = crate::aper_fix::fix_constrained_sequences(&generated)?;
+
+    // The concrete private/extension containers below use these common types,
+    // but rasn-compiler omits both from the generated module import list.
+    generated = generated.replacen(
+        "    use super::ngap_common_data_types::{Criticality, Presence, ProtocolIEID};",
+        "    use super::ngap_common_data_types::{Criticality, Presence, PrivateIEID, ProtocolIEID};",
+        1,
     );
-    compiler.compile_files(&files)?;
 
-    let content = fs::read_to_string("src/ngap.rs")?;
-    let mut extra = String::new();
-
-    // ── 1. Generate From<InnerType> impls for newtype structs ────────────────
-    // Enables the build_ngap! macro to use `.into()` for automatic conversion:
-    // raw values (e.g. u64) convert to newtypes, already-correct types use identity From.
-    let re_newtype = Regex::new(r"(?m)^pub struct (\w+)\(pub (.+)\);$")?;
-    writeln!(
-        extra,
-        "\n// Auto-generated From impls for newtype structs (used by build_ngap! macro)"
+    // Some resolved ProtocolIE containers use primitive/anonymous field types
+    // while equivalent containers use the named common types. Normalize only
+    // message ProtocolIE entries; their APER representations are identical.
+    let protocol_ie_block = Regex::new(
+        r"(?ms)(    pub struct Anonymous[A-Za-z0-9_]+ProtocolIEs \{.*?^    \}\n    impl Anonymous[A-Za-z0-9_]+ProtocolIEs \{.*?^    \}\n)",
     )?;
-    for cap in re_newtype.captures_iter(&content) {
-        let name = &cap[1];
-        let inner = &cap[2];
-        // Skip multi-field tuple structs (contain commas outside of generics)
-        if inner.contains(',') && !inner.contains('<') {
-            continue;
+    let anonymous_criticality = Regex::new(r"Anonymous[A-Za-z0-9_]+ProtocolIEsCriticality")?;
+    generated = protocol_ie_block
+        .replace_all(&generated, |captures: &Captures<'_>| {
+            let block = captures[1]
+                .replace("pub id: u16", "pub id: ProtocolIEID")
+                .replace("id: u16,", "id: ProtocolIEID,");
+            anonymous_criticality
+                .replace_all(&block, "Criticality")
+                .into_owned()
+        })
+        .into_owned();
+
+    let support = generate_support(&generated, asn_files)?;
+    generated.push_str(&support);
+    fs::write(path, generated).context("write post-processed NGAP bindings")
+}
+
+fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
+    let mut asn = String::new();
+    for file in asn_files {
+        asn.push_str(&fs::read_to_string(file)?);
+        asn.push('\n');
+    }
+
+    let generated_type = Regex::new(r"(?m)^    pub (?:struct|enum|type) ([A-Za-z][A-Za-z0-9_]*)")?;
+    let mut rust_types = BTreeMap::new();
+    for captures in generated_type.captures_iter(generated) {
+        let name = captures[1].to_string();
+        if !name.starts_with("Anonymous") {
+            rust_types.entry(canonical(&name)).or_insert(name);
         }
+    }
+
+    let newtype = Regex::new(r"(?m)^    pub struct ([A-Za-z][A-Za-z0-9_]*)\(pub ([^;\n]+)\);$")?;
+    let mut newtypes = BTreeMap::new();
+    for captures in newtype.captures_iter(generated) {
+        let name = captures[1].to_string();
+        let inner = captures[2].to_string();
+        if !inner.contains(", pub ") {
+            newtypes.entry(name).or_insert(inner);
+        }
+    }
+
+    let ie_constant =
+        Regex::new(r"(?m)^\s*(id-[A-Za-z][A-Za-z0-9-]*)\s+ProtocolIE-ID\s+::=\s+(\d+)")?;
+    let ie_constants: BTreeMap<String, u16> = ie_constant
+        .captures_iter(&asn)
+        .map(|captures| Ok((captures[1].to_string(), captures[2].parse()?)))
+        .collect::<Result<_>>()?;
+
+    let ie_object = Regex::new(
+        r"(?s)\{\s*ID\s+(id-[A-Za-z][A-Za-z0-9-]*)\s+CRITICALITY\s+[A-Za-z-]+\s+TYPE\s+([A-Za-z][A-Za-z0-9-]*)\s+PRESENCE",
+    )?;
+    let mut ies: BTreeMap<String, (u16, String)> = BTreeMap::new();
+    for captures in ie_object.captures_iter(&asn) {
+        let id_name = &captures[1];
+        let asn_type = &captures[2];
+        let Some(id) = ie_constants.get(id_name).copied() else {
+            continue;
+        };
+        let Some(rust_type) = rust_types.get(&canonical(asn_type)).cloned() else {
+            continue;
+        };
+
+        // The rasn type name is the concise spelling. Also expose the IE-name
+        // spelling used by TS 38.413 so duplicate-type IEs remain addressable.
+        ies.entry(rust_type.clone())
+            .or_insert((id, rust_type.clone()));
+        ies.entry(macro_ident(id_name.trim_start_matches("id-")))
+            .or_insert((id, rust_type));
+    }
+
+    let procedure_constant =
+        Regex::new(r"(?m)^\s*(id-[A-Za-z][A-Za-z0-9-]*)\s+ProcedureCode\s+::=\s+(\d+)")?;
+    let mut procedures = BTreeMap::new();
+    let mut procedure_ids = BTreeMap::new();
+    for captures in procedure_constant.captures_iter(&asn) {
+        let id_name = captures[1].to_string();
+        let code: u8 = captures[2].parse()?;
+        let name = macro_ident(id_name.trim_start_matches("id-"));
+        procedures.insert(name.clone(), code);
+        procedure_ids.insert(id_name, name);
+    }
+
+    let procedure_block =
+        Regex::new(r"(?ms)^[A-Za-z][A-Za-z0-9-]*\s+NGAP-ELEMENTARY-PROCEDURE\s+::=\s*\{(.*?)^\}")?;
+    let procedure_ref = Regex::new(r"PROCEDURE CODE\s+(id-[A-Za-z][A-Za-z0-9-]*)")?;
+    let mut directions: BTreeMap<&str, BTreeSet<String>> = BTreeMap::new();
+    for captures in procedure_block.captures_iter(&asn) {
+        let body = &captures[1];
+        let Some(id) = procedure_ref
+            .captures(body)
+            .map(|capture| capture[1].to_string())
+        else {
+            continue;
+        };
+        let Some(name) = procedure_ids.get(&id).cloned() else {
+            continue;
+        };
+        for (label, direction) in [
+            ("INITIATING MESSAGE", "Initiating"),
+            ("SUCCESSFUL OUTCOME", "Successful"),
+            ("UNSUCCESSFUL OUTCOME", "Unsuccessful"),
+        ] {
+            if body.contains(label) {
+                directions
+                    .entry(direction)
+                    .or_default()
+                    .insert(name.clone());
+            }
+        }
+    }
+
+    let mut out = String::new();
+    writeln!(
+        out,
+        "\n// Auto-generated NGAP compatibility surface and ASN.1-derived lookups."
+    )?;
+    writeln!(out, "pub use ngap_common_data_types::*;")?;
+    writeln!(out, "pub use ngap_constants::*;")?;
+    writeln!(out, "pub use ngap_ies::*;")?;
+    writeln!(out, "pub use ngap_pdu_contents::*;")?;
+    writeln!(out, "pub use ngap_pdu_descriptions::*;")?;
+    writeln!(out, "#[allow(non_camel_case_types)]")?;
+    writeln!(out, "pub type NGAP_PDU = NGAPPDU;")?;
+    if rust_types.values().any(|name| name == "AMFUENGAPID") {
+        writeln!(out, "#[allow(non_camel_case_types)]")?;
+        writeln!(out, "pub type AMF_UE_NGAP_ID = AMFUENGAPID;")?;
+    }
+    if rust_types.values().any(|name| name == "RANUENGAPID") {
+        writeln!(out, "#[allow(non_camel_case_types)]")?;
+        writeln!(out, "pub type RAN_UE_NGAP_ID = RANUENGAPID;")?;
+    }
+
+    writeln!(
+        out,
+        "use rasn::prelude::{{BitString, FixedBitString, FixedOctetString, Integer, OctetString, PrintableString, SequenceOf, Utf8String, VisibleString}};"
+    )?;
+    writeln!(
+        out,
+        "\n// Auto-generated newtype conversions used by the builder macros."
+    )?;
+    for (name, inner) in &newtypes {
         writeln!(
-            extra,
-            "impl From<{inner}> for {name} {{ fn from(v: {inner}) -> Self {{ {name}(v) }} }}"
+            out,
+            "impl From<{inner}> for {name} {{ fn from(value: {inner}) -> Self {{ Self(value) }} }}"
+        )?;
+        if inner == "OctetString" {
+            writeln!(
+                out,
+                "impl From<Vec<u8>> for {name} {{ fn from(value: Vec<u8>) -> Self {{ Self(value.into()) }} }}"
+            )?;
+        } else if let Some(size) = inner
+            .strip_prefix("FixedOctetString<")
+            .and_then(|value| value.strip_suffix('>'))
+        {
+            writeln!(
+                out,
+                "impl From<[u8; {size}]> for {name} {{ fn from(value: [u8; {size}]) -> Self {{ Self(value.into()) }} }}"
+            )?;
+        }
+    }
+
+    writeln!(out, "#[macro_export]")?;
+    writeln!(out, "#[doc(hidden)]")?;
+    writeln!(out, "macro_rules! __ngap_ie_id {{")?;
+    for (name, (id, _)) in &ies {
+        writeln!(out, "    ({name}) => {{ {id}u16 }};")?;
+    }
+    writeln!(out, "}}")?;
+
+    writeln!(out, "#[macro_export]")?;
+    writeln!(out, "#[doc(hidden)]")?;
+    writeln!(out, "macro_rules! __ngap_encode_ie {{")?;
+    for (name, (_, rust_type)) in &ies {
+        writeln!(
+            out,
+            "    ({name}, $value:expr) => {{ {{ let value: $crate::ngap::{rust_type} = ($value).into(); $crate::ngap::encode_open_type(&value) }} }};"
         )?;
     }
+    writeln!(out, "}}")?;
 
-    // ── 2. Generate __ngap_ie_id! macro from #[asn(key = N)] attributes ─────
-    // Parses ProtocolIEs_EntryValue enums to extract the IE ID for each variant.
-    // This lets the build_ngap! macro auto-derive the IE ID from the variant suffix,
-    // avoiding manual IE_ID constants and fragile paste! case conversion.
-    let re_asn_key = Regex::new(r"#\[asn\(key = (\d+)")?;
-    let re_variant = Regex::new(r"^\s+Id_(\w+)\(")?;
-    let re_entry_value_enum = Regex::new(r"pub enum \w+ProtocolIEs_EntryValue")?;
+    writeln!(out, "#[macro_export]")?;
+    writeln!(out, "#[doc(hidden)]")?;
+    writeln!(out, "macro_rules! __ngap_decode_ie {{")?;
+    for (name, (_, rust_type)) in &ies {
+        writeln!(
+            out,
+            "    ({name}, $value:expr) => {{ $crate::ngap::decode_open_type::<$crate::ngap::{rust_type}>($value) }};"
+        )?;
+    }
+    writeln!(out, "}}")?;
 
-    let mut ie_id_map: HashMap<String, u16> = HashMap::new();
-    let lines: Vec<&str> = content.lines().collect();
-    let mut in_entry_value_enum = false;
-    let mut pending_key: Option<u16> = None;
+    writeln!(out, "#[macro_export]")?;
+    writeln!(out, "#[doc(hidden)]")?;
+    writeln!(out, "macro_rules! __ngap_proc_code {{")?;
+    for (name, code) in &procedures {
+        writeln!(out, "    ({name}) => {{ {code}u8 }};")?;
+    }
+    writeln!(out, "}}")?;
 
-    for line in &lines {
-        if re_entry_value_enum.is_match(line) {
-            in_entry_value_enum = true;
-            continue;
-        }
-        if in_entry_value_enum {
-            // Detect end of enum
-            if line.starts_with('}') {
-                in_entry_value_enum = false;
-                pending_key = None;
-                continue;
-            }
-            if let Some(cap) = re_asn_key.captures(line) {
-                pending_key = Some(cap[1].parse::<u16>()?);
-            }
-            if let Some(cap) = re_variant.captures(line) {
-                if let Some(key) = pending_key {
-                    let variant_suffix = cap[1].to_string();
-                    // Deduplicate: same variant always has the same key
-                    ie_id_map.entry(variant_suffix).or_insert(key);
-                    pending_key = None;
-                }
+    writeln!(out, "#[allow(non_camel_case_types)]")?;
+    writeln!(out, "#[derive(Clone, Debug, PartialEq, Eq)]")?;
+    writeln!(out, "#[non_exhaustive]")?;
+    writeln!(out, "pub enum NgapPduKind {{")?;
+    for direction in ["Initiating", "Successful", "Unsuccessful"] {
+        if let Some(names) = directions.get(direction) {
+            for name in names {
+                writeln!(out, "    {direction}_{name},")?;
             }
         }
     }
-
-    // Sort by variant name for stable output
-    let mut entries: Vec<_> = ie_id_map.into_iter().collect();
-    entries.sort_by(|a, b| a.0.cmp(&b.0));
-
     writeln!(
-        extra,
-        "\n// Auto-generated IE ID lookup macro (derived from #[asn(key = N)] attributes)"
+        out,
+        "    Other {{ direction: &'static str, procedure_code: u8 }},"
     )?;
-    writeln!(extra, "#[macro_export]")?;
-    writeln!(extra, "#[doc(hidden)]")?;
-    writeln!(extra, "macro_rules! __ngap_ie_id {{")?;
-    for (variant_suffix, key) in &entries {
-        writeln!(extra, "    ({variant_suffix}) => {{ {key}u16 }};")?;
-    }
-    writeln!(extra, "}}")?;
+    writeln!(out, "}}")?;
 
-    // ── 3. Generate __ngap_proc_code! macro from {Direction}Value enums ──
-    // Parses InitiatingMessageValue, SuccessfulOutcomeValue, UnsuccessfulOutcomeValue
-    // to map procedure suffixes (e.g. InitialContextSetup) to procedure codes (u8).
-    let re_direction_enum =
-        Regex::new(r"pub enum (InitiatingMessage|SuccessfulOutcome|UnsuccessfulOutcome)Value")?;
-
-    let mut proc_code_map: HashMap<String, u8> = HashMap::new();
-    // Track which variants belong to each direction (for procedure_name/Display generation)
-    let mut direction_variants: HashMap<String, Vec<String>> = HashMap::new();
-    let mut in_direction_enum = false;
-    let mut current_direction = String::new();
-    pending_key = None;
-
-    for line in &lines {
-        if let Some(cap) = re_direction_enum.captures(line) {
-            in_direction_enum = true;
-            current_direction = cap[1].to_string();
-            direction_variants
-                .entry(current_direction.clone())
-                .or_default();
-            continue;
-        }
-        if in_direction_enum {
-            if line.starts_with('}') {
-                in_direction_enum = false;
-                pending_key = None;
-                continue;
-            }
-            if let Some(cap) = re_asn_key.captures(line) {
-                pending_key = Some(cap[1].parse::<u16>()?);
-            }
-            if let Some(cap) = re_variant.captures(line) {
-                if let Some(key) = pending_key {
-                    let variant_suffix = cap[1].to_string();
-                    proc_code_map
-                        .entry(variant_suffix.clone())
-                        .or_insert(key as u8);
-                    direction_variants
-                        .entry(current_direction.clone())
-                        .or_default()
-                        .push(variant_suffix);
-                    pending_key = None;
-                }
-            }
-        }
-    }
-
-    let mut proc_entries: Vec<_> = proc_code_map.into_iter().collect();
-    proc_entries.sort_by(|a, b| a.0.cmp(&b.0));
-
+    writeln!(out, "impl NGAPPDU {{")?;
+    writeln!(out, "    /// Encode this PDU using Aligned PER.")?;
     writeln!(
-        extra,
-        "\n// Auto-generated procedure code lookup macro (derived from {{Direction}}Value enums)"
+        out,
+        "    pub fn encode(&self) -> Result<Vec<u8>, rasn::error::EncodeError> {{"
     )?;
-    writeln!(extra, "#[macro_export]")?;
-    writeln!(extra, "#[doc(hidden)]")?;
-    writeln!(extra, "macro_rules! __ngap_proc_code {{")?;
-    for (variant_suffix, code) in &proc_entries {
-        writeln!(extra, "    ({variant_suffix}) => {{ {code}u8 }};")?;
-    }
-    writeln!(extra, "}}")?;
-
-    // ── 4. Generate impl NGAP_PDU: procedure_code, direction, procedure_name ──
-    // Generates runtime inspection methods by matching on the inner Value enum variants.
+    writeln!(out, "        rasn::aper::encode(self)")?;
+    writeln!(out, "    }}")?;
+    writeln!(out, "    /// Decode an NGAP PDU from Aligned PER bytes.")?;
     writeln!(
-        extra,
-        "\n// Auto-generated NGAP_PDU inspection methods and Display impl"
+        out,
+        "    pub fn decode(bytes: &[u8]) -> Result<Self, rasn::error::DecodeError> {{"
     )?;
-    writeln!(extra, "impl NGAP_PDU {{")?;
-
-    // procedure_code()
-    writeln!(extra, "    /// Return the procedure code of this PDU.")?;
-    writeln!(extra, "    pub fn procedure_code(&self) -> u8 {{")?;
-    writeln!(extra, "        match self {{")?;
+    writeln!(out, "        rasn::aper::decode(bytes)")?;
+    writeln!(out, "    }}")?;
     writeln!(
-        extra,
-        "            NGAP_PDU::InitiatingMessage(m) => m.procedure_code.0,"
+        out,
+        "    /// Decode the typed message held by this PDU's open type."
     )?;
     writeln!(
-        extra,
-        "            NGAP_PDU::SuccessfulOutcome(m) => m.procedure_code.0,"
+        out,
+        "    pub fn decode_value<T: rasn::Decode>(&self) -> Result<T, rasn::error::DecodeError> {{"
+    )?;
+    writeln!(out, "        let value = match self {{")?;
+    writeln!(
+        out,
+        "            NGAPPDU::initiatingMessage(message) => &message.value,"
     )?;
     writeln!(
-        extra,
-        "            NGAP_PDU::UnsuccessfulOutcome(m) => m.procedure_code.0,"
+        out,
+        "            NGAPPDU::successfulOutcome(message) => &message.value,"
     )?;
-    writeln!(extra, "        }}")?;
-    writeln!(extra, "    }}")?;
-
-    // direction()
     writeln!(
-        extra,
+        out,
+        "            NGAPPDU::unsuccessfulOutcome(message) => &message.value,"
+    )?;
+    writeln!(out, "        }};")?;
+    writeln!(out, "        rasn::aper::decode(value.as_bytes())")?;
+    writeln!(out, "    }}")?;
+    writeln!(out, "    /// Return the procedure code of this PDU.")?;
+    writeln!(out, "    pub fn procedure_code(&self) -> u8 {{")?;
+    writeln!(out, "        match self {{")?;
+    writeln!(
+        out,
+        "            NGAPPDU::initiatingMessage(message) => message.procedure_code.0,"
+    )?;
+    writeln!(
+        out,
+        "            NGAPPDU::successfulOutcome(message) => message.procedure_code.0,"
+    )?;
+    writeln!(
+        out,
+        "            NGAPPDU::unsuccessfulOutcome(message) => message.procedure_code.0,"
+    )?;
+    writeln!(out, "        }}")?;
+    writeln!(out, "    }}")?;
+    writeln!(
+        out,
         "    /// Return the PDU direction as a human-readable string."
     )?;
-    writeln!(extra, "    pub fn direction(&self) -> &'static str {{")?;
-    writeln!(extra, "        match self {{")?;
+    writeln!(out, "    pub fn direction(&self) -> &'static str {{")?;
+    writeln!(out, "        match self {{")?;
     writeln!(
-        extra,
-        "            NGAP_PDU::InitiatingMessage(_) => \"InitiatingMessage\","
+        out,
+        "            NGAPPDU::initiatingMessage(_) => \"InitiatingMessage\","
     )?;
     writeln!(
-        extra,
-        "            NGAP_PDU::SuccessfulOutcome(_) => \"SuccessfulOutcome\","
+        out,
+        "            NGAPPDU::successfulOutcome(_) => \"SuccessfulOutcome\","
     )?;
     writeln!(
-        extra,
-        "            NGAP_PDU::UnsuccessfulOutcome(_) => \"UnsuccessfulOutcome\","
+        out,
+        "            NGAPPDU::unsuccessfulOutcome(_) => \"UnsuccessfulOutcome\","
     )?;
-    writeln!(extra, "        }}")?;
-    writeln!(extra, "    }}")?;
-
-    // is_initiating / is_successful / is_unsuccessful
+    writeln!(out, "        }}")?;
+    writeln!(out, "    }}")?;
+    writeln!(out, "    /// Returns `true` for an initiating message.")?;
     writeln!(
-        extra,
-        "    /// Returns `true` if this is an initiating message."
+        out,
+        "    pub fn is_initiating(&self) -> bool {{ matches!(self, NGAPPDU::initiatingMessage(_)) }}"
     )?;
+    writeln!(out, "    /// Returns `true` for a successful outcome.")?;
     writeln!(
-        extra,
-        "    pub fn is_initiating(&self) -> bool {{ matches!(self, NGAP_PDU::InitiatingMessage(_)) }}"
+        out,
+        "    pub fn is_successful(&self) -> bool {{ matches!(self, NGAPPDU::successfulOutcome(_)) }}"
     )?;
+    writeln!(out, "    /// Returns `true` for an unsuccessful outcome.")?;
     writeln!(
-        extra,
-        "    /// Returns `true` if this is a successful outcome."
+        out,
+        "    pub fn is_unsuccessful(&self) -> bool {{ matches!(self, NGAPPDU::unsuccessfulOutcome(_)) }}"
     )?;
+    writeln!(out, "    /// Return the ASN.1 procedure name.")?;
+    writeln!(out, "    pub fn procedure_name(&self) -> &'static str {{")?;
+    writeln!(out, "        match self.procedure_code() {{")?;
+    for (name, code) in &procedures {
+        writeln!(out, "            {code} => \"{name}\",")?;
+    }
+    writeln!(out, "            _ => \"Unknown\",")?;
+    writeln!(out, "        }}")?;
+    writeln!(out, "    }}")?;
     writeln!(
-        extra,
-        "    pub fn is_successful(&self) -> bool {{ matches!(self, NGAP_PDU::SuccessfulOutcome(_)) }}"
+        out,
+        "    /// Return the canonical direction/procedure kind."
     )?;
-    writeln!(
-        extra,
-        "    /// Returns `true` if this is an unsuccessful outcome."
-    )?;
-    writeln!(
-        extra,
-        "    pub fn is_unsuccessful(&self) -> bool {{ matches!(self, NGAP_PDU::UnsuccessfulOutcome(_)) }}"
-    )?;
-
-    // procedure_name() — requires matching on all Value enum variants
-    writeln!(
-        extra,
-        "    /// Return the procedure name as a human-readable string."
-    )?;
-    writeln!(extra, "    pub fn procedure_name(&self) -> &'static str {{")?;
-    writeln!(extra, "        match self {{")?;
-
-    for direction in &[
-        "InitiatingMessage",
-        "SuccessfulOutcome",
-        "UnsuccessfulOutcome",
+    writeln!(out, "    pub fn kind(&self) -> NgapPduKind {{")?;
+    writeln!(out, "        let code = self.procedure_code();")?;
+    writeln!(out, "        match self {{")?;
+    for (variant, direction) in [
+        ("initiatingMessage", "Initiating"),
+        ("successfulOutcome", "Successful"),
+        ("unsuccessfulOutcome", "Unsuccessful"),
     ] {
-        if let Some(variants) = direction_variants.get(*direction) {
-            let mut sorted = variants.clone();
-            sorted.sort();
-            writeln!(
-                extra,
-                "            NGAP_PDU::{direction}(m) => match &m.value {{"
-            )?;
-            for v in &sorted {
-                writeln!(
-                    extra,
-                    "                {direction}Value::Id_{v}(_) => \"{v}\","
-                )?;
+        writeln!(out, "            NGAPPDU::{variant}(_) => match code {{")?;
+        if let Some(names) = directions.get(direction) {
+            for name in names {
+                if let Some(code) = procedures.get(name) {
+                    writeln!(
+                        out,
+                        "                {code} => NgapPduKind::{direction}_{name},"
+                    )?;
+                }
             }
-            writeln!(extra, "            }},")?;
+        }
+        writeln!(
+            out,
+            "                _ => NgapPduKind::Other {{ direction: \"{direction}\", procedure_code: code }},"
+        )?;
+        writeln!(out, "            }},")?;
+    }
+    writeln!(out, "        }}")?;
+    writeln!(out, "    }}")?;
+    writeln!(out, "}}")?;
+
+    writeln!(out, "impl NgapPduKind {{")?;
+    writeln!(out, "    /// Return this kind's NGAP procedure code.")?;
+    writeln!(out, "    pub fn procedure_code(&self) -> u8 {{")?;
+    writeln!(out, "        match self {{")?;
+    for direction in ["Initiating", "Successful", "Unsuccessful"] {
+        if let Some(names) = directions.get(direction) {
+            for name in names {
+                if let Some(code) = procedures.get(name) {
+                    writeln!(
+                        out,
+                        "            NgapPduKind::{direction}_{name} => {code},"
+                    )?;
+                }
+            }
         }
     }
-
-    writeln!(extra, "        }}")?;
-    writeln!(extra, "    }}")?;
-    writeln!(extra, "}}")?;
-
-    // ── 5. Generate Display for NGAP_PDU ────────────────────────────────────
-    // Format: "InitiatingMessage NGSetup (code=21)"
-    writeln!(extra, "impl std::fmt::Display for NGAP_PDU {{")?;
     writeln!(
-        extra,
-        "    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {{"
+        out,
+        "            NgapPduKind::Other {{ procedure_code, .. }} => *procedure_code,"
+    )?;
+    writeln!(out, "        }}")?;
+    writeln!(out, "    }}")?;
+    writeln!(out, "}}")?;
+
+    writeln!(out, "impl std::fmt::Display for NGAPPDU {{")?;
+    writeln!(
+        out,
+        "    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {{"
     )?;
     writeln!(
-        extra,
-        "        write!(f, \"{{}} {{}} (code={{}})\", self.direction(), self.procedure_name(), self.procedure_code())"
+        out,
+        "        write!(formatter, \"{{}} {{}} (code={{}})\", self.direction(), self.procedure_name(), self.procedure_code())"
     )?;
-    writeln!(extra, "    }}")?;
-    writeln!(extra, "}}")?;
+    writeln!(out, "    }}")?;
+    writeln!(out, "}}")?;
 
-    // Write all extra code to ngap.rs
-    let mut file = fs::OpenOptions::new().append(true).open("src/ngap.rs")?;
-    use std::io::Write as IoWrite;
-    file.write_all(extra.as_bytes())?;
+    writeln!(
+        out,
+        "/// Encode a typed ASN.1 value for an NGAP open type using APER."
+    )?;
+    writeln!(
+        out,
+        "pub fn encode_open_type<T: rasn::Encode>(value: &T) -> Result<rasn::types::Any, rasn::error::EncodeError> {{"
+    )?;
+    writeln!(
+        out,
+        "    rasn::aper::encode(value).map(rasn::types::Any::new)"
+    )?;
+    writeln!(out, "}}")?;
+    writeln!(
+        out,
+        "/// Decode a typed ASN.1 value from an NGAP open type using APER."
+    )?;
+    writeln!(
+        out,
+        "pub fn decode_open_type<T: rasn::Decode>(value: &rasn::types::Any) -> Result<T, rasn::error::DecodeError> {{"
+    )?;
+    writeln!(out, "    rasn::aper::decode(value.as_bytes())")?;
+    writeln!(out, "}}")?;
 
-    Ok(())
+    Ok(out)
+}
+
+fn canonical(value: &str) -> String {
+    value
+        .chars()
+        .filter(|character| character.is_ascii_alphanumeric())
+        .flat_map(char::to_lowercase)
+        .collect()
+}
+
+fn macro_ident(value: &str) -> String {
+    value.replace('-', "_")
 }

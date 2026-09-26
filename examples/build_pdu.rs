@@ -1,8 +1,11 @@
 //! Build NGAP PDUs using the `build_ngap!` and `build_ngap_ie!` ergonomic macros.
 //!
-//! These macros eliminate the deeply nested ProtocolIEs boilerplate that APER-generated
-//! types require. Compare the macro invocation with the equivalent hand-written code
-//! at the bottom of this example.
+//! The examples cover simple and complex context setup, UE release, handover
+//! outcomes, failure handling, and standalone IE construction. The macro
+//! invocations hide numeric IDs and rasn open-type encoding; the commented
+//! construction at the end shows the equivalent generated types.
+
+use rasn::types::FixedBitString;
 
 use oxirush_ngap::helpers::*;
 use oxirush_ngap::ngap::*;
@@ -18,6 +21,7 @@ fn main() {
         REJECT, InitialContextSetupResponse,
         IGNORE AMF_UE_NGAP_ID(amf_ue_id),
         IGNORE RAN_UE_NGAP_ID(ran_ue_id),
+        IGNORE PDUSessionResourceSetupListCxtRes(session_setup_response_list()),
     );
 
     println!("=== 1. InitialContextSetupResponse ===");
@@ -26,54 +30,65 @@ fn main() {
     // ── 2. UEContextReleaseRequest with Cause ──────────────────────────────
 
     let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        REJECT, UEContextReleaseRequest,
+        IGNORE, UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(amf_ue_id),
         REJECT RAN_UE_NGAP_ID(ran_ue_id),
-        IGNORE Cause(Cause::RadioNetwork(CauseRadioNetwork(CauseRadioNetwork::USER_INACTIVITY))),
+        IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
     );
 
     println!("\n=== 2. UEContextReleaseRequest ===");
     print_and_encode(&pdu);
 
-    // ── 3. Complex: InitialContextSetupRequest with security + NSSAI ───────
+    // ── 3. Complex: InitialContextSetupRequest with PDU session + security ─
     //
-    // Demonstrates nested struct construction, bitvec security keys, and
-    // S-NSSAI lists — a real-world AMF → gNB message (TS 38.413 §8.3.1).
+    // NGAP carries the optional 5GS NAS PDU inside a PDU-session item. This
+    // demonstrates that nested payload, fixed-size security key, GUAMI, NSSAI,
+    // and UE security capabilities.
 
+    let network = plmn("208", "93");
+    let sessions = session_setup_request_list(vec![0x7e, 0x00, 0x42]);
     let pdu = build_ngap!(InitiatingMessage, InitialContextSetup,
         REJECT, InitialContextSetupRequest,
         REJECT AMF_UE_NGAP_ID(amf_ue_id),
         REJECT RAN_UE_NGAP_ID(ran_ue_id),
-        REJECT UEAggregateMaximumBitRate(UEAggregateMaximumBitRate {
-            ue_aggregate_maximum_bit_rate_dl: BitRate(1_000_000_000),
-            ue_aggregate_maximum_bit_rate_ul: BitRate(500_000_000),
-            ie_extensions: None,
-        }),
-        REJECT GUAMI(guami(plmn("208", "93"), 1, 1, 0)),
-        REJECT AllowedNSSAI(vec![AllowedNSSAI_Item {
-            s_nssai: s_nssai(1, Some([0x00, 0x00, 0x01])),
-            ie_extensions: None,
-        }]),
-        REJECT SecurityKey(bytes_to_bitvec(&[0u8; 32])),
-        IGNORE NAS_PDU(vec![0x7e, 0x00, 0x42]),
+        REJECT UEAggregateMaximumBitRate(UEAggregateMaximumBitRate::new(
+            BitRate(1_000_000_000u64.into()),
+            BitRate(500_000_000u64.into()),
+            None,
+        )),
+        REJECT GUAMI(guami(network.clone(), 1, 1, 0)),
+        REJECT PDUSessionResourceSetupListCxtReq(sessions),
+        REJECT AllowedNSSAI(AllowedNSSAI(vec![AllowedNSSAIItem::new(
+            s_nssai(1, Some([0x00, 0x00, 0x01])),
+            None,
+        )])),
+        REJECT UESecurityCapabilities(ue_security_capabilities(&[0xe0, 0xe0])),
+        REJECT SecurityKey(SecurityKey(FixedBitString::<256>::ZERO)),
     );
 
     println!("\n=== 3. InitialContextSetupRequest (complex) ===");
     print_and_encode(&pdu);
 
-    // ── 4. Handover: procedure name ≠ message name ─────────────────────────
+    // ── 4. Handover: procedure name differs from message name ──────────────
     //
-    // HandoverPreparation procedure → HandoverRequired message.
-    // Also shows SourceToTarget_TransparentContainer (underscore in IE name).
+    // HandoverPreparation procedure → HandoverRequired message. The target gNB
+    // and PDU-session resource list are mandatory NGAP IEs.
 
+    let target = TargetID::targetRANNodeID(TargetRANNodeID::new(
+        GlobalRANNodeID::globalGNB_ID(global_gnb_id(network.clone(), 0x123456)),
+        tai(network, &[0x00, 0x00, 0x01]),
+        None,
+    ));
     let pdu = build_ngap!(InitiatingMessage, HandoverPreparation,
         REJECT, HandoverRequired,
         REJECT AMF_UE_NGAP_ID(amf_ue_id),
         REJECT RAN_UE_NGAP_ID(ran_ue_id),
-        REJECT HandoverType(HandoverType::INTRA5GS),
-        IGNORE Cause(Cause::RadioNetwork(CauseRadioNetwork(
-            CauseRadioNetwork::HANDOVER_DESIRABLE_FOR_RADIO_REASON,
-        ))),
+        REJECT HandoverType(HandoverType::intra5gs),
+        IGNORE Cause(Cause::radioNetwork(
+            CauseRadioNetwork::handover_desirable_for_radio_reason,
+        )),
+        REJECT TargetID(target),
+        REJECT PDUSessionResourceListHORqd(handover_required_sessions()),
         REJECT SourceToTarget_TransparentContainer(vec![0x00, 0x01, 0x02]),
     );
 
@@ -86,6 +101,7 @@ fn main() {
         REJECT, HandoverRequestAcknowledge,
         IGNORE AMF_UE_NGAP_ID(amf_ue_id),
         IGNORE RAN_UE_NGAP_ID(ran_ue_id),
+        IGNORE PDUSessionResourceAdmittedList(admitted_sessions()),
         REJECT TargetToSource_TransparentContainer(vec![0xAA, 0xBB]),
     );
 
@@ -94,7 +110,7 @@ fn main() {
 
     let pdu = build_ngap!(UnsuccessfulOutcome, NGSetup,
         REJECT, NGSetupFailure,
-        IGNORE Cause(Cause::Misc(CauseMisc(CauseMisc::UNKNOWN_PLMN_OR_SNPN))),
+        IGNORE Cause(Cause::misc(CauseMisc::unknown_PLMN_or_SNPN)),
     );
 
     println!("\n=== 5. NGSetupFailure (UnsuccessfulOutcome) ===");
@@ -103,52 +119,86 @@ fn main() {
     // ── 6. build_ngap_ie! for conditional IE construction ──────────────────
 
     let cause_ie = build_ngap_ie!(UEContextReleaseRequest, IGNORE
-        Cause(Cause::RadioNetwork(CauseRadioNetwork(CauseRadioNetwork::USER_INACTIVITY)))
+        Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity))
     );
     println!("\n=== 6. Single IE (via build_ngap_ie!) ===");
     println!(
         "IE ID: {}, Criticality: {:?}",
-        cause_ie.id.0, cause_ie.criticality.0
+        cause_ie.id.0, cause_ie.criticality
     );
 
-    // ── Equivalent hand-written code (for comparison) ───────────────────
-    // Without macros, the same InitialContextSetupResponse (example 1) would be:
+    // ── Equivalent hand-written code (for comparison) ──────────────────────
+    // Without macros, the same InitialContextSetupResponse (example 1) is:
     //
-    //   NGAP_PDU::SuccessfulOutcome(SuccessfulOutcome {
-    //       procedure_code: ProcedureCode(14),
-    //       criticality: Criticality(Criticality::REJECT),
-    //       value: SuccessfulOutcomeValue::Id_InitialContextSetup(
-    //           InitialContextSetupResponse {
-    //               protocol_i_es: InitialContextSetupResponseProtocolIEs(vec![
-    //                   InitialContextSetupResponseProtocolIEs_Entry {
-    //                       id: ProtocolIE_ID(10),
-    //                       criticality: Criticality(Criticality::IGNORE),
-    //                       value: InitialContextSetupResponseProtocolIEs_EntryValue
-    //                           ::Id_AMF_UE_NGAP_ID(AMF_UE_NGAP_ID(1)),
-    //                   },
-    //                   InitialContextSetupResponseProtocolIEs_Entry {
-    //                       id: ProtocolIE_ID(85),
-    //                       criticality: Criticality(Criticality::IGNORE),
-    //                       value: InitialContextSetupResponseProtocolIEs_EntryValue
-    //                           ::Id_RAN_UE_NGAP_ID(RAN_UE_NGAP_ID(0)),
-    //                   },
-    //               ]),
-    //           },
-    //       ),
-    //   })
+    //   let response = InitialContextSetupResponse::new(
+    //       InitialContextSetupResponseProtocolIEs(vec![
+    //           AnonymousInitialContextSetupResponseProtocolIEs::new(
+    //               ProtocolIEID(10),
+    //               Criticality::ignore,
+    //               encode_open_type(&AMFUENGAPID(1))?,
+    //           ),
+    //           AnonymousInitialContextSetupResponseProtocolIEs::new(
+    //               ProtocolIEID(85),
+    //               Criticality::ignore,
+    //               encode_open_type(&RANUENGAPID(0))?,
+    //           ),
+    //           AnonymousInitialContextSetupResponseProtocolIEs::new(
+    //               ProtocolIEID(75),
+    //               Criticality::ignore,
+    //               encode_open_type(&session_setup_response_list())?,
+    //           ),
+    //       ]),
+    //   );
+    //   let pdu = NGAP_PDU::successfulOutcome(SuccessfulOutcome::new(
+    //       ProcedureCode(14),
+    //       Criticality::reject,
+    //       encode_open_type(&response)?,
+    //   ));
+}
+
+fn session_setup_response_list() -> PDUSessionResourceSetupListCxtRes {
+    PDUSessionResourceSetupListCxtRes(vec![PDUSessionResourceSetupItemCxtRes::new(
+        PDUSessionID(1),
+        vec![0x01].into(),
+        None,
+    )])
+}
+
+fn session_setup_request_list(nas: Vec<u8>) -> PDUSessionResourceSetupListCxtReq {
+    PDUSessionResourceSetupListCxtReq(vec![PDUSessionResourceSetupItemCxtReq::new(
+        PDUSessionID(1),
+        Some(NASPDU::from(nas)),
+        s_nssai(1, Some([0x00, 0x00, 0x01])),
+        vec![0x01].into(),
+        None,
+    )])
+}
+
+fn handover_required_sessions() -> PDUSessionResourceListHORqd {
+    PDUSessionResourceListHORqd(vec![PDUSessionResourceItemHORqd::new(
+        PDUSessionID(1),
+        vec![0x01].into(),
+        None,
+    )])
+}
+
+fn admitted_sessions() -> PDUSessionResourceAdmittedList {
+    PDUSessionResourceAdmittedList(vec![PDUSessionResourceAdmittedItem::new(
+        PDUSessionID(1),
+        vec![0x01].into(),
+        None,
+    )])
 }
 
 fn print_and_encode(pdu: &NGAP_PDU) {
-    // Display impl shows: "InitiatingMessage NGSetup (code=21)"
+    // Display example: "InitiatingMessage NGSetup (code=21)".
     println!("{pdu}");
-    // Inspect helpers
     println!(
         "  procedure: {}  direction: {}  code: {}",
         pdu.procedure_name(),
         pdu.direction(),
         pdu.procedure_code()
     );
-    // encode() method on NGAP_PDU
     let bytes = pdu.encode().expect("APER encode failed");
     println!("  APER ({} bytes): {}", bytes.len(), hex::encode(&bytes));
 }

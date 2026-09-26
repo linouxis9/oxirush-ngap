@@ -1,48 +1,29 @@
 [package]
 name = "oxirush-ngap"
-version = "0.3.1"
+version = "0.4.0"
 edition = "2024"
-# build = "build/main.rs"
 description = "5G NGAP (NG Application Protocol) APER codec — auto-generated from 3GPP ASN.1 definitions"
-license.workspace = true
-repository.workspace = true
-authors.workspace = true
-rust-version.workspace = true
+license = "Apache-2.0"
+repository = "https://github.com/linouxis9/oxirush-ngap"
+authors = ["Valentin D'Emmanuele"]
+rust-version = "1.85"
 keywords = ["5g", "ngap", "3gpp", "asn1", "aper"]
 categories = ["network-programming", "encoding", "parser-implementations"]
 readme = "README.md"
+include = [
+    "src/**/*.rs",
+    "examples/**/*.rs",
+    "tests/**/*.rs",
+    "README.md",
+    "LICENSE",
+]
 
 [dependencies]
 paste = "1"
-asn1-codecs = { version = "0.7.0" }
-asn1_codecs_derive = { version = "0.7.0" }
-log = { version = "0.4" }
-bitvec = { version = "1.0", features = ["serde"] }
-serde = { version = "1.0", features = ["derive"] }
+rasn = { version = "0.28.15", default-features = false, features = ["bytes"] }
 
 [dev-dependencies]
-trybuild = { version = "1.0" }
-hex = { version = "0.4" }
-criterion = { version = "0.5.1", features = ["rayon"] }
-env_logger = { version = "0.11.6" }
+hex = "0.4"
 
 [package.metadata.docs.rs]
 rustc-args = ["--cfg", "docsrs"]
-
-[[example]]
-name = "build_pdu"
-doc-scrape-examples = false
-
-[[example]]
-name = "decode_manually"
-doc-scrape-examples = false
-
-[[example]]
-name = "extract_ies"
-doc-scrape-examples = false
-
-[build-dependencies]
-asn1-compiler = "0.7.0"
-csv = "1.4.0"
-regex = "1"
-anyhow = "1.0"

@@ -1,115 +1,137 @@
-//! Ergonomic macros for building and extracting NGAP protocol IEs.
+//! Ergonomic macros for building, extracting, and mutating NGAP protocol IEs.
+//!
+//! `rasn-compiler` represents NGAP information-object open types as
+//! [`rasn::types::Any`]. The macros keep that representation internal: callers
+//! construct and receive concrete NGAP types, while values are APER-encoded into
+//! and decoded from the open type at the protocol boundary.
 //!
 //! # Builder macros
 //!
 //! ## `build_ngap!` — build a complete NGAP PDU
 //!
-//! IE IDs are auto-derived from the variant suffix via `__ngap_ie_id!` (generated
-//! by the build script from `#[asn(key = N)]` attributes in the auto-generated code).
-//! Values are auto-converted via `.into()`: raw values (e.g. `u64`) are converted
-//! to newtypes, already-correct types use the identity `From<T> for T`.
+//! IE IDs and procedure codes are generated from the ASN.1 object sets. Values
+//! are converted with `.into()`, so primitive values such as `u32` can be passed
+//! directly for generated newtypes.
 //!
 //! ```ignore
 //! use oxirush_ngap::{build_ngap, ngap::*};
 //!
-//! let pdu = build_ngap!(SuccessfulOutcome, InitialContextSetup,
-//!     REJECT, InitialContextSetupResponse,
-//!     IGNORE AMF_UE_NGAP_ID(1u64),
-//!     IGNORE RAN_UE_NGAP_ID(0u32),
+//! let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
+//!     IGNORE, UEContextReleaseRequest,
+//!     REJECT AMF_UE_NGAP_ID(1u64),
+//!     REJECT RAN_UE_NGAP_ID(7u32),
+//!     IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
 //! );
 //! ```
 //!
 //! Arguments:
 //! - `$direction` — `InitiatingMessage`, `SuccessfulOutcome`, or `UnsuccessfulOutcome`
-//! - `$proc` — procedure suffix (e.g. `InitialContextSetup`) — auto-derives `Id_` variant and procedure code
+//! - `$proc` — procedure name, used to derive its ASN.1 procedure code
 //! - `$outer_crit` — outer criticality: `REJECT`, `IGNORE`, or `NOTIFY`
-//! - `$msg` — the message struct name (e.g. `InitialContextSetupResponse`)
-//! - IEs: `$ie_crit $ie_name($ie_value)` — IE name derives both `Id_` variant and IE ID
+//! - `$msg` — message struct name, such as `UEContextReleaseRequest`
+//! - IEs — `$ie_crit $ie_name($ie_value)`, with the IE ID derived from its name
 //!
-//! ## `build_ngap_ie!` — build a single Protocol IE entry
+//! ## `build_ngap_ie!` — build one Protocol IE entry
 //!
-//! Useful when you need to conditionally include IEs or build them separately.
+//! This is useful for conditionally included IEs or IEs built separately.
 //!
 //! ```ignore
 //! use oxirush_ngap::{build_ngap_ie, ngap::*};
 //!
-//! let ie = build_ngap_ie!(NGSetupResponse, REJECT AMFName("test".to_string()));
+//! let ie = build_ngap_ie!(UEContextReleaseRequest,
+//!     REJECT AMF_UE_NGAP_ID(1u64)
+//! );
 //! ```
 //!
 //! # Extraction macro
 //!
 //! ## `extract_ngap_ies!` — extract IEs from a decoded NGAP message
 //!
-//! Iterates over a `&[ProtocolIEs_Entry]` slice, pattern-matching each IE's
-//! `EntryValue` variant. Required fields are unwrapped; if any required field
-//! is missing, returns `Err(MissingIeError)` from the enclosing function.
-//! Optional fields stay as `Option<T>`.
+//! The macro iterates through `protocol_ies`, matches generated ASN.1 IE IDs,
+//! and APER-decodes each matching open type into its concrete generated type.
+//! Required fields are unwrapped; a missing or invalid required field returns
+//! [`MissingIeError`] from the enclosing function. Optional fields remain
+//! `Option<T>`.
 //!
-//! The enclosing function must return `Result<_, MissingIeError>` (or a type
-//! that implements `From<MissingIeError>`).
-//!
-//! When `=> expr` is omitted, defaults to `binding.0` (newtype unwrap).
+//! The enclosing function must return `Result<_, MissingIeError>` or a type that
+//! implements `From<MissingIeError>`. Without `=> expression`, extraction uses
+//! `binding.0`, which unwraps the usual single-field generated newtype.
 //!
 //! ```ignore
-//! use oxirush_ngap::{extract_ngap_ies, ngap::*, macros::MissingIeError};
+//! use oxirush_ngap::{extract_ngap_ies, macros::MissingIeError, ngap::*};
 //!
-//! fn handle(msg: &UplinkNASTransport) -> Result<Vec<String>, MissingIeError> {
+//! fn handle(msg: &UplinkNASTransport) -> Result<Vec<u8>, MissingIeError> {
 //!     extract_ngap_ies!(msg, UplinkNASTransport,
-//!         req amf_id:  u64      = AMF_UE_NGAP_ID(id),              // default .0
-//!         req nas_pdu: Vec<u8>  = NAS_PDU(pdu) => pdu.0.clone(),   // custom expr
-//!         opt cause:   String   = Cause(c) => format!("{c:?}"),     // optional
+//!         req amf_id: u64 = AMF_UE_NGAP_ID(id),
+//!         req nas_pdu: Vec<u8> = NAS_PDU(pdu) => pdu.0.to_vec(),
+//!         opt ran_id: u32 = RAN_UE_NGAP_ID(id),
 //!     );
-//!     // amf_id: u64, nas_pdu: Vec<u8>, cause: Option<String>
-//!     Ok(vec![])
+//!     let _ = (amf_id, ran_id);
+//!     Ok(nas_pdu)
 //! }
 //! ```
+//!
+//! ## `with_ngap_ie_mut!` — locate and mutate one decoded NGAP IE
+//!
+//! This decodes the matching open type, passes the concrete value into the
+//! expression, then re-encodes it. It returns `true` only when the IE was found,
+//! decoded and re-encoded successfully, and the expression returned `true`.
+//! The setter form `IeName(binding) = value` expands to `binding.0 = value`.
+//!
+//! ```ignore
+//! use oxirush_ngap::{ngap::*, with_ngap_ie_mut};
+//!
+//! let updated = with_ngap_ie_mut!(message, UplinkNASTransport,
+//!     AMF_UE_NGAP_ID(id) = 42u64
+//! );
+//! assert!(updated);
+//! ```
+
 use core::fmt;
 
-/// Error returned by [`extract_ngap_ies!`] when a required IE is missing.
+/// Error returned by `extract_ngap_ies!` when a required IE is absent or invalid.
 #[derive(Debug, Clone)]
 pub struct MissingIeError {
-    /// Name of the missing required IE field (as written in the macro invocation).
+    /// Name of the required field as written in the macro invocation.
     pub ie_name: &'static str,
 }
 
 impl fmt::Display for MissingIeError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "missing required NGAP IE: {}", self.ie_name)
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            formatter,
+            "missing or invalid required NGAP IE: {}",
+            self.ie_name
+        )
     }
 }
 
 impl std::error::Error for MissingIeError {}
 
-/// Extract NGAP protocol IEs with `req` (required) and `opt` (optional) fields.
-///
-/// See [module-level documentation](self) for usage.
+/// Extract typed NGAP protocol IEs with `req` and `opt` semantics.
 #[macro_export]
 macro_rules! extract_ngap_ies {
     ($msg_var:expr, $msg:ident,
-        $($kind:ident $name:ident : $ty:ty = $variant:ident ($bind:ident) $(=> $expr:expr)?),+
+        $($kind:ident $name:ident : $ty:ty = $ie_name:ident ($bind:ident) $(=> $expr:expr)?),+
         $(,)?
     ) => {
-        paste::paste! {
-            $( let mut $name : Option<$ty> = None; )+
-            for _ie in &$msg_var.protocol_i_es.0 {
-                match &_ie.value {
-                    $( [< $msg ProtocolIEs_EntryValue >] :: [< Id_ $variant >] ( $bind ) => {
+        $( let mut $name: Option<$ty> = None; )+
+        for _ie in &$msg_var.protocol_ies.0 {
+            $(
+                if _ie.id.0 == $crate::__ngap_ie_id!($ie_name) {
+                    if let Ok($bind) = $crate::__ngap_decode_ie!($ie_name, &_ie.value) {
                         $name = Some($crate::extract_ngap_ies!(@val $bind $(, $expr)?));
-                    } )+
-                    _ => {}
+                    }
                 }
-            }
-            $( $crate::extract_ngap_ies!(@check $kind $name); )+
+            )+
         }
+        $( $crate::extract_ngap_ies!(@check $kind $name); )+
     };
-    // Default: newtype .0
     (@val $bind:ident) => { $bind.0 };
-    // Custom expression
     (@val $_bind:ident, $expr:expr) => { $expr };
-    // Required: unwrap or return Err
     (@check req $name:ident) => {
         let $name = match $name {
-            Some(_v) => _v,
+            Some(value) => value,
             None => {
                 return Err($crate::macros::MissingIeError {
                     ie_name: stringify!($name),
@@ -117,13 +139,37 @@ macro_rules! extract_ngap_ies {
             }
         };
     };
-    // Optional: no-op (stays as Option<T>)
     (@check opt $name:ident) => {};
 }
 
-/// Build a complete `NGAP_PDU` from a direction, procedure code, message type, and IEs.
-///
-/// See [module-level documentation](self) for usage.
+/// Locate, decode, mutate, and re-encode one NGAP protocol IE.
+#[macro_export]
+macro_rules! with_ngap_ie_mut {
+    ($msg_var:expr, $msg:ident, $ie_name:ident($bind:ident) = $value:expr $(,)?) => {{
+        $crate::with_ngap_ie_mut!($msg_var, $msg, $ie_name($bind) => {
+            $bind.0 = $value;
+            true
+        })
+    }};
+    ($msg_var:expr, $msg:ident, $ie_name:ident($bind:ident) => $expr:expr $(,)?) => {{
+        let mut matched = false;
+        for ie in &mut $msg_var.protocol_ies.0 {
+            if ie.id.0 == $crate::__ngap_ie_id!($ie_name) {
+                if let Ok(mut $bind) = $crate::__ngap_decode_ie!($ie_name, &ie.value) {
+                    let result = $expr;
+                    if let Ok(value) = $crate::ngap::encode_open_type(&$bind) {
+                        ie.value = value;
+                        matched = result;
+                    }
+                }
+                break;
+            }
+        }
+        matched
+    }};
+}
+
+/// Build a complete `NGAP_PDU` from a direction, procedure, message, and IEs.
 #[macro_export]
 macro_rules! build_ngap {
     ($direction:ident, $proc:ident,
@@ -131,39 +177,114 @@ macro_rules! build_ngap {
      $($ie_crit:ident $ie_name:ident ($($ie_value:tt)+)),*
      $(,)?
     ) => {
-        paste::paste! {
-            {
-                let ies = vec![
-                    $( [< $msg ProtocolIEs_Entry >] {
-                        id: $crate::ngap::ProtocolIE_ID($crate::__ngap_ie_id!($ie_name)),
-                        criticality: $crate::ngap::Criticality($crate::ngap::Criticality::$ie_crit),
-                        value: [< $msg ProtocolIEs_EntryValue >]::[< Id_ $ie_name >](($($ie_value)+).into()),
-                    }, )*
-                ];
-                $crate::ngap::NGAP_PDU::$direction($crate::ngap::$direction {
-                    procedure_code: $crate::ngap::ProcedureCode($crate::__ngap_proc_code!($proc)),
-                    criticality: $crate::ngap::Criticality($crate::ngap::Criticality::$outer_crit),
-                    value: [< $direction Value >]::[< Id_ $proc >]($msg {
-                        protocol_i_es: [< $msg ProtocolIEs >](ies),
-                    }),
-                })
+        $crate::__paste::paste! {{
+            let ies = vec![
+                $( $crate::ngap::[< Anonymous $msg ProtocolIEs >] {
+                    id: $crate::ngap::ProtocolIEID($crate::__ngap_ie_id!($ie_name)),
+                    criticality: $crate::build_ngap!(@criticality $ie_crit),
+                    value: $crate::__ngap_encode_ie!($ie_name, ($($ie_value)+))
+                        .expect("failed to APER-encode NGAP IE open type"),
+                }, )*
+            ];
+            let message = $crate::ngap::$msg::new(
+                $crate::ngap::[< $msg ProtocolIEs >](ies),
+            );
+            let value = $crate::ngap::encode_open_type(&message)
+                .expect("failed to APER-encode NGAP message open type");
+            $crate::build_ngap!(@pdu $direction, $proc, $outer_crit, value)
+        }}
+    };
+    (@criticality REJECT) => { $crate::ngap::Criticality::reject };
+    (@criticality IGNORE) => { $crate::ngap::Criticality::ignore };
+    (@criticality NOTIFY) => { $crate::ngap::Criticality::notify };
+    (@pdu InitiatingMessage, $proc:ident, $criticality:ident, $value:expr) => {
+        $crate::ngap::NGAP_PDU::initiatingMessage($crate::ngap::InitiatingMessage {
+            procedure_code: $crate::ngap::ProcedureCode($crate::__ngap_proc_code!($proc)),
+            criticality: $crate::build_ngap!(@criticality $criticality),
+            value: $value,
+        })
+    };
+    (@pdu SuccessfulOutcome, $proc:ident, $criticality:ident, $value:expr) => {
+        $crate::ngap::NGAP_PDU::successfulOutcome($crate::ngap::SuccessfulOutcome {
+            procedure_code: $crate::ngap::ProcedureCode($crate::__ngap_proc_code!($proc)),
+            criticality: $crate::build_ngap!(@criticality $criticality),
+            value: $value,
+        })
+    };
+    (@pdu UnsuccessfulOutcome, $proc:ident, $criticality:ident, $value:expr) => {
+        $crate::ngap::NGAP_PDU::unsuccessfulOutcome($crate::ngap::UnsuccessfulOutcome {
+            procedure_code: $crate::ngap::ProcedureCode($crate::__ngap_proc_code!($proc)),
+            criticality: $crate::build_ngap!(@criticality $criticality),
+            value: $value,
+        })
+    };
+}
+
+/// Build one NGAP Protocol IE entry for a message type.
+#[macro_export]
+macro_rules! build_ngap_ie {
+    ($msg:ident, $criticality:ident $ie_name:ident ($($value:tt)+)) => {
+        $crate::__paste::paste! {
+            $crate::ngap::[< Anonymous $msg ProtocolIEs >] {
+                id: $crate::ngap::ProtocolIEID($crate::__ngap_ie_id!($ie_name)),
+                criticality: $crate::build_ngap!(@criticality $criticality),
+                value: $crate::__ngap_encode_ie!($ie_name, ($($value)+))
+                    .expect("failed to APER-encode NGAP IE open type"),
             }
         }
     };
 }
 
-/// Build a single NGAP Protocol IE entry for a given message type.
-///
-/// See [module-level documentation](self) for usage.
-#[macro_export]
-macro_rules! build_ngap_ie {
-    ($msg:ident, $crit:ident $ie_name:ident ($($value:tt)+)) => {
-        paste::paste! {
-            [< $msg ProtocolIEs_Entry >] {
-                id: $crate::ngap::ProtocolIE_ID($crate::__ngap_ie_id!($ie_name)),
-                criticality: $crate::ngap::Criticality($crate::ngap::Criticality::$crit),
-                value: [< $msg ProtocolIEs_EntryValue >]::[< Id_ $ie_name >](($($value)+).into()),
-            }
-        }
-    };
+#[cfg(test)]
+mod tests {
+    use crate::ngap::*;
+
+    #[test]
+    fn mutating_macro_updates_newtype_payload() {
+        let mut pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
+            IGNORE, UEContextReleaseRequest,
+            REJECT AMF_UE_NGAP_ID(1u64),
+            REJECT RAN_UE_NGAP_ID(7u32),
+            IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
+        );
+
+        let NGAP_PDU::initiatingMessage(message) = &mut pdu else {
+            panic!("expected initiating message");
+        };
+        let request: UEContextReleaseRequest =
+            rasn::aper::decode(message.value.as_bytes()).expect("decode request");
+        let mut request = request;
+
+        assert!(with_ngap_ie_mut!(
+            request,
+            UEContextReleaseRequest,
+            AMF_UE_NGAP_ID(id) = 42u64
+        ));
+
+        let ie = request
+            .protocol_ies
+            .0
+            .iter()
+            .find(|ie| ie.id.0 == 10)
+            .expect("AMF UE ID");
+        let id: AMFUENGAPID = rasn::aper::decode(ie.value.as_bytes()).expect("decode ID");
+        assert_eq!(id.0, 42);
+    }
+
+    #[test]
+    fn builder_macros_cover_ie_and_outcome_forms() {
+        let ie = build_ngap_ie!(
+            UEContextReleaseRequest,
+            REJECT AMF_UE_NGAP_ID(1u64)
+        );
+        assert_eq!(ie.id.0, 10);
+
+        let successful = build_ngap!(SuccessfulOutcome, NGSetup, REJECT, NGSetupResponse,);
+        assert!(successful.is_successful());
+        assert_eq!(successful.procedure_code(), 21);
+
+        let unsuccessful = build_ngap!(UnsuccessfulOutcome, NGSetup, REJECT, NGSetupFailure,);
+        assert!(unsuccessful.is_unsuccessful());
+        assert_eq!(unsuccessful.procedure_code(), 21);
+    }
 }

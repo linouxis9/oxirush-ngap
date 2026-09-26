@@ -1,6 +1,6 @@
 [package]
 name = "oxirush-ngap"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2024"
 description = "5G NGAP (NG Application Protocol) APER codec — auto-generated from 3GPP ASN.1 definitions"
 license = "Apache-2.0"
@@ -25,5 +25,14 @@ rasn = { version = "0.28.15", default-features = false, features = ["bytes"] }
 [dev-dependencies]
 hex = "0.4"
 
-[package.metadata.docs.rs]
-rustc-args = ["--cfg", "docsrs"]
+[[example]]
+name = "build_pdu"
+doc-scrape-examples = false
+
+[[example]]
+name = "decode_manually"
+doc-scrape-examples = false
+
+[[example]]
+name = "extract_ies"
+doc-scrape-examples = false

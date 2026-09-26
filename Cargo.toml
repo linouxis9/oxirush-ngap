@@ -1,6 +1,6 @@
 [package]
 name = "oxirush-ngap"
-version = "0.4.1"
+version = "0.4.2"
 edition = "2024"
 description = "5G NGAP (NG Application Protocol) APER codec — auto-generated from 3GPP ASN.1 definitions"
 license = "Apache-2.0"

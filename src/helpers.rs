@@ -39,6 +39,10 @@ fn fixed_bit_string<const N: usize>(value: u64) -> FixedBitString<N> {
 /// Encode MCC/MNC as a 3-octet TBCD `PLMNIdentity`.
 ///
 /// MCC must contain three decimal digits; MNC must contain two or three.
+///
+/// # Panics
+///
+/// Panics if `mcc` is not three ASCII digits or `mnc` not two or three.
 pub fn plmn(mcc: &str, mnc: &str) -> PLMNIdentity {
     assert!(
         mcc.len() == 3 && mcc.bytes().all(|byte| byte.is_ascii_digit()),
@@ -187,13 +191,22 @@ mod tests {
     #[test]
     fn common_identifiers_have_the_required_widths() {
         let plmn = plmn("208", "93");
-        let cgi = nr_cgi(plmn.clone(), 1, 1);
-        assert_eq!(cgi.n_rcell_identity.0[..36].len(), 36);
-        let gnb = global_gnb_id(plmn, 1);
+        // The 24-bit gNB ID and the 12-bit cell: a 36-bit NR cell identity,
+        // octet-aligned after the PLMN (X.691 (07/2002) §15.10).
+        let cgi = nr_cgi(plmn.clone(), 0xab_cdef, 0x123);
+        assert_eq!(
+            cgi.n_rcell_identity.0[..36],
+            int_to_bitvec(0xa_bcde_f123, 36)[..]
+        );
+        assert_eq!(
+            rasn::aper::encode(&cgi).unwrap(),
+            [0x00, 0x02, 0xf8, 0x39, 0xab, 0xcd, 0xef, 0x12, 0x30]
+        );
+        let gnb = global_gnb_id(plmn, 0xab_cdef);
         let GNBID::gNB_ID(bits) = gnb.g_nb_id else {
             panic!("expected gNB ID");
         };
-        assert_eq!(bits.len(), 24);
+        assert_eq!(bits, int_to_bitvec(0xab_cdef, 24));
     }
 
     #[test]

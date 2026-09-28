@@ -40,6 +40,7 @@
 pub mod helpers;
 pub mod macros;
 pub mod ngap;
+pub mod sized;
 
 #[doc(hidden)]
 pub use paste as __paste;

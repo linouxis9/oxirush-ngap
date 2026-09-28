@@ -135,7 +135,7 @@ pub fn fix_utf8_strings(generated: &str) -> Result<String> {
         .into_owned();
 
     ensure!(
-        replacements > 0,
+        replacements > 0 || !generated.contains("(pub Utf8String);"),
         "no size-constrained UTF8String declarations found"
     );
     Ok(generated)
@@ -201,15 +201,20 @@ pub fn fix_fixed_bit_strings(generated: &str) -> Result<String> {
     let choice = Regex::new(
         r#"(?ms)^(    #\[derive\(AsnType, Debug, Clone, )Decode, Encode(, PartialEq, Eq, Hash\)\]
     #\[rasn\(choice, automatic_tags(?:, identifier = "[^"]+")?\)\]
-    pub enum ([A-Za-z0-9_]+) \{
+(?:    #\[non_exhaustive\]
+)?    pub enum ([A-Za-z0-9_]+) \{
 (.*?)^    \}
 )"#,
     )?;
     let variant = Regex::new(
         r#"(?m)^        (?:#\[rasn\(([^\n]*)\)\]\n        )?([A-Za-z0-9_]+)\(([A-Za-z0-9_]+)\),$"#,
     )?;
-    let fixed_size = Regex::new(r#"^size\("([0-9]+)"(, extensible)?\), identifier = "[^"]+"$"#)?;
-    let identifier_only = Regex::new(r#"^identifier = "[^"]+"$"#)?;
+    // Extension alternatives are open types, which start octet-aligned: the
+    // same decoders read them.
+    let fixed_size = Regex::new(
+        r#"^(?:extension_addition, )?size\("([0-9]+)"(, extensible)?\), identifier = "[^"]+"$"#,
+    )?;
+    let identifier_only = Regex::new(r#"^(?:extension_addition, )?identifier = "[^"]+"$"#)?;
     let variant_line = Regex::new(r"(?m)^        [A-Za-z0-9_]+\(")?;
     let mut failure = None;
     let mut choices = 0usize;
@@ -318,6 +323,79 @@ pub fn fix_fixed_bit_strings(generated: &str) -> Result<String> {
         "no CHOICE with a fixed-size BIT STRING longer than 16 bits found"
     );
     Ok(generated)
+}
+
+/// Work around rasn 0.28 APER encoding of inline `OCTET STRING` and
+/// `BIT STRING` values whose size range is 256 or more with an upper bound
+/// below 64K.
+///
+/// Their length determinant is one or two octet-aligned octets (X.691
+/// (02/2021) §11.5.7.2, §11.5.7.3), which rasn writes unaligned. A named type
+/// always starts on an octet boundary where it is used, but a SEQUENCE
+/// component or CHOICE alternative need not, so those take the
+/// `crate::sized` types, which encode the length as rasn encodes a
+/// constrained integer: aligned. The generated `new` constructors take the
+/// same types.
+pub fn fix_long_inline_strings(generated: &str) -> Result<String> {
+    let field = Regex::new(
+        r#"(?m)^        #\[rasn\(size\("([0-9]+)\.\.=([0-9]+)"(, extensible)?\)(?:, (identifier = "[^"]+"))?\)\]
+        (pub [a-z0-9_]+: |[A-Za-z0-9_]+\()(Option<)?(OctetString|BitString)(>?)([,)])"#,
+    )?;
+    let mut output = String::with_capacity(generated.len());
+    let mut rest = 0usize;
+    let mut replacements = 0usize;
+    for captures in field.captures_iter(generated) {
+        let whole = captures.get(0).expect("whole match");
+        let lower: usize = captures[1].parse()?;
+        let upper: usize = captures[2].parse()?;
+        let extensible = captures.get(3).is_some();
+        let sized = match (&captures[7], extensible) {
+            _ if upper - lower < 255 || upper >= 65536 => continue,
+            ("OctetString", false) => format!("crate::sized::SizedOctetString<{lower}, {upper}>"),
+            ("BitString", _) => format!("crate::sized::SizedBitString<{lower}, {upper}, {extensible}>"),
+            _ => bail!("no sized type for an extensible OCTET STRING in `{}`", whole.as_str()),
+        };
+        replacements += 1;
+        let attribute = captures
+            .get(4)
+            .map(|identifier| format!("        #[rasn({})]\n", identifier.as_str()))
+            .unwrap_or_default();
+        let option = captures.get(6).map_or("", |option| option.as_str());
+        let declaration = &captures[5];
+        output.push_str(&generated[rest..whole.start()]);
+        write!(
+            output,
+            "{attribute}        {declaration}{option}{sized}{}{}",
+            &captures[8], &captures[9]
+        )
+        .expect("write to String");
+        rest = whole.end();
+        // The struct's own `new` follows it and takes the same type.
+        if let Some(name) = declaration
+            .strip_prefix("pub ")
+            .and_then(|name| name.strip_suffix(": "))
+        {
+            let plain = format!("            {name}: {option}{}{},", &captures[7], &captures[8]);
+            let constructor = generated[rest..]
+                .find("        pub fn new(")
+                .map(|offset| rest + offset)
+                .ok_or_else(|| anyhow::anyhow!("no constructor after field `{name}`"))?;
+            let parameter = generated[constructor..]
+                .find(&plain)
+                .map(|offset| constructor + offset)
+                .ok_or_else(|| anyhow::anyhow!("no constructor parameter `{name}`"))?;
+            output.push_str(&generated[rest..parameter]);
+            write!(output, "            {name}: {option}{sized}{},", &captures[8])
+                .expect("write to String");
+            rest = parameter + plain.len();
+        }
+    }
+    output.push_str(&generated[rest..]);
+    ensure!(
+        replacements > 0,
+        "no inline OCTET STRING or BIT STRING with a two-octet length found"
+    );
+    Ok(output)
 }
 
 /// Statements that decode an octet-aligned bit string of `length` bits into

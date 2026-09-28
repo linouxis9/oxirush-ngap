@@ -123,11 +123,21 @@ six modules. `Any` stays inside the generated representation; the public macros
 provide typed construction, extraction, and mutation.
 
 The crate enables rasn's efficient `bytes` storage and leaves its unused `f32`
-and `f64` features disabled. rasn 0.28's derived APER codec can disagree with
-its decoder for the constrained `SEQUENCE OF` containers used by NGAP. The
-generator therefore emits narrowly scoped `Encode` and `Decode`
-implementations for those containers through rasn's public codec traits. All
-other values use rasn-derived codecs unchanged.
+and `f64` features disabled. rasn 0.28's APER codec departs from ITU-T X.691
+where NGAP reaches it, so the generator replaces the derived codec there with
+narrowly scoped `Encode` and `Decode` implementations written against rasn's
+public codec traits:
+
+- constrained `SEQUENCE OF` containers, whose length determinant and
+  components rasn misaligns;
+- size-constrained `UTF8String` values, whose size is not PER-visible, so
+  their length is an unconstrained count of octets;
+- fixed-size `BIT STRING` values longer than 16 bits, which are
+  octet-aligned;
+- `OCTET STRING` and `BIT STRING` components and alternatives with a
+  two-octet length determinant, which take the types of the `sized` module.
+
+All other values use rasn-derived codecs unchanged.
 
 ## Key types
 

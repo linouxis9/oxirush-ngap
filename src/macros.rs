@@ -197,6 +197,11 @@ macro_rules! with_ngap_ie_mut {
 }
 
 /// Build a complete `NGAP_PDU` from a direction, procedure, message, and IEs.
+///
+/// # Panics
+///
+/// Panics if a value cannot be APER-encoded into its open type, such as an
+/// integer outside its constraint.
 #[macro_export]
 macro_rules! build_ngap {
     ($direction:ident, $proc:ident,
@@ -248,6 +253,10 @@ macro_rules! build_ngap {
 }
 
 /// Build one NGAP Protocol IE entry for a message type.
+///
+/// # Panics
+///
+/// Panics if the value cannot be APER-encoded into its open type.
 #[macro_export]
 macro_rules! build_ngap_ie {
     ($msg:ident, $criticality:ident $ie_name:ident ($($value:tt)+)) => {
@@ -313,5 +322,31 @@ mod tests {
         let unsuccessful = build_ngap!(UnsuccessfulOutcome, NGSetup, REJECT, NGSetupFailure,);
         assert!(unsuccessful.is_unsuccessful());
         assert_eq!(unsuccessful.procedure_code(), 21);
+    }
+
+    /// The IEs whose type is an OCTET STRING (CONTAINING ...) carry the
+    /// encoded transfer as octets.
+    #[test]
+    fn octet_string_containing_ies_have_macros() -> Result<(), crate::macros::MissingIeError> {
+        let transfer = MBSSessionSetupOrModRequestTransfer::new(
+            MBSSessionSetupOrModRequestTransferProtocolIEs(vec![]),
+        );
+        let octets = rasn::aper::encode(&transfer).expect("encode transfer");
+        let ie = build_ngap_ie!(
+            BroadcastSessionSetupRequest,
+            REJECT MBSSessionSetupRequestTransfer(octets.clone())
+        );
+        assert_eq!(ie.id.0, 315);
+
+        let request =
+            BroadcastSessionSetupRequest::new(BroadcastSessionSetupRequestProtocolIEs(vec![ie]));
+        extract_ngap_ies!(request, BroadcastSessionSetupRequest,
+            req extracted: Vec<u8> = MBSSessionSetupRequestTransfer(value) => value.to_vec(),
+        );
+        assert_eq!(extracted, octets);
+        let decoded: MBSSessionSetupOrModRequestTransfer =
+            rasn::aper::decode(&extracted).expect("decode transfer");
+        assert_eq!(decoded, transfer);
+        Ok(())
     }
 }

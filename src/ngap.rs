@@ -2006,10 +2006,8 @@ pub mod ngap_ies {
         identifier = "AIoT-DeviceIdentificationRequested"
     )]
     pub enum AIoTDeviceIdentificationRequested {
-        #[rasn(size("1..=1024", extensible))]
-        singleDevice(BitString),
-        #[rasn(size("1..=1024", extensible))]
-        groupDevices(BitString),
+        singleDevice(crate::sized::SizedBitString<1, 1024, true>),
+        groupDevices(crate::sized::SizedBitString<1, 1024, true>),
         allDevices(()),
         #[rasn(identifier = "choice-Extensions")]
         choice_Extensions(AIoTDeviceIdentificationRequestedChoiceExtensions),
@@ -16136,15 +16134,15 @@ pub mod ngap_ies {
     pub struct DRBStatusUL12 {
         #[rasn(identifier = "uL-COUNTValue")]
         pub u_l_countvalue: COUNTValueForPDCPSN12,
-        #[rasn(size("1..=2048"), identifier = "receiveStatusOfUL-PDCP-SDUs")]
-        pub receive_status_of_ul_pdcp_sdus: Option<BitString>,
+        #[rasn(identifier = "receiveStatusOfUL-PDCP-SDUs")]
+        pub receive_status_of_ul_pdcp_sdus: Option<crate::sized::SizedBitString<1, 2048, false>>,
         #[rasn(identifier = "iE-Extension")]
         pub i_e_extension: Option<DRBStatusUL12IEExtension>,
     }
     impl DRBStatusUL12 {
         pub fn new(
             u_l_countvalue: COUNTValueForPDCPSN12,
-            receive_status_of_ul_pdcp_sdus: Option<BitString>,
+            receive_status_of_ul_pdcp_sdus: Option<crate::sized::SizedBitString<1, 2048, false>>,
             i_e_extension: Option<DRBStatusUL12IEExtension>,
         ) -> Self {
             Self {
@@ -68828,8 +68826,8 @@ pub mod ngap_ies {
         pub meas_coll_entity_ipaddress: TransportLayerAddress,
         #[rasn(identifier = "qoEMeasurementStatus")]
         pub qo_emeasurement_status: Option<UEAppLayerMeasConfigInfoQoEMeasurementStatus>,
-        #[rasn(size("1..=8000"), identifier = "containerForAppLayerMeasConfig")]
-        pub container_for_app_layer_meas_config: Option<OctetString>,
+        #[rasn(identifier = "containerForAppLayerMeasConfig")]
+        pub container_for_app_layer_meas_config: Option<crate::sized::SizedOctetString<1, 8000>>,
         #[rasn(value("0..=15", extensible), identifier = "measConfigAppLayerID")]
         pub meas_config_app_layer_id: Option<Integer>,
         #[rasn(identifier = "sliceSupportListQMC")]
@@ -68848,7 +68846,7 @@ pub mod ngap_ies {
             area_scope_of_qmc: Option<AreaScopeOfQMC>,
             meas_coll_entity_ipaddress: TransportLayerAddress,
             qo_emeasurement_status: Option<UEAppLayerMeasConfigInfoQoEMeasurementStatus>,
-            container_for_app_layer_meas_config: Option<OctetString>,
+            container_for_app_layer_meas_config: Option<crate::sized::SizedOctetString<1, 8000>>,
             meas_config_app_layer_id: Option<Integer>,
             slice_support_list_qmc: Option<SliceSupportListQMC>,
             m_dt_alignment_info: Option<MDTAlignmentInfo>,
@@ -90394,6 +90392,15 @@ macro_rules! __ngap_ie_id {
     (AIOTFName) => {
         476u16
     };
+    (AIOTSessionReleaseCommandTransfer) => {
+        463u16
+    };
+    (AIOTSessionReleaseCompleteTransfer) => {
+        464u16
+    };
+    (AIOTSessionReleaseRequestTransfer) => {
+        465u16
+    };
     (AIoTCommandAssistanceInformation) => {
         473u16
     };
@@ -90532,6 +90539,15 @@ macro_rules! __ngap_ie_id {
     (BroadcastCompletedAreaList) => {
         13u16
     };
+    (BroadcastTransportFailureTransfer) => {
+        417u16
+    };
+    (BroadcastTransportRequestTransfer) => {
+        418u16
+    };
+    (BroadcastTransportResponseTransfer) => {
+        419u16
+    };
     (CEmodeBSupportIndicator) => {
         224u16
     };
@@ -90552,6 +90568,15 @@ macro_rules! __ngap_ie_id {
     };
     (CellIDListForRestart) => {
         16u16
+    };
+    (CommandFailureTransfer) => {
+        462u16
+    };
+    (CommandRequestTransfer) => {
+        460u16
+    };
+    (CommandResponseTransfer) => {
+        461u16
     };
     (CommonNetworkInstance) => {
         166u16
@@ -90802,6 +90827,18 @@ macro_rules! __ngap_ie_id {
     (IntersystemSONInformationRequest) => {
         290u16
     };
+    (InventoryFailureTransfer) => {
+        458u16
+    };
+    (InventoryReportTransfer) => {
+        459u16
+    };
+    (InventoryRequestTransfer) => {
+        456u16
+    };
+    (InventoryResponseTransfer) => {
+        457u16
+    };
     (LPWUSDisableIndication) => {
         495u16
     };
@@ -90850,8 +90887,29 @@ macro_rules! __ngap_ie_id {
     (MBSSessionID) => {
         299u16
     };
+    (MBSSessionModificationFailureTransfer) => {
+        348u16
+    };
+    (MBSSessionModificationRequestTransfer) => {
+        349u16
+    };
+    (MBSSessionModificationResponseTransfer) => {
+        350u16
+    };
+    (MBSSessionReleaseResponseTransfer) => {
+        358u16
+    };
+    (MBSSessionSetupFailureTransfer) => {
+        314u16
+    };
     (MBSSessionSetupRequestList) => {
         318u16
+    };
+    (MBSSessionSetupRequestTransfer) => {
+        315u16
+    };
+    (MBSSessionSetupResponseTransfer) => {
+        316u16
     };
     (MBSSessionSetuporModifyRequestList) => {
         319u16
@@ -90867,6 +90925,18 @@ macro_rules! __ngap_ie_id {
     };
     (MBS_AreaSessionID) => {
         295u16
+    };
+    (MBS_DistributionReleaseRequestTransfer) => {
+        300u16
+    };
+    (MBS_DistributionSetupRequestTransfer) => {
+        301u16
+    };
+    (MBS_DistributionSetupResponseTransfer) => {
+        302u16
+    };
+    (MBS_DistributionSetupUnsuccessfulTransfer) => {
+        303u16
     };
     (MBS_NGUFailureIndication) => {
         434u16
@@ -90931,6 +91001,15 @@ macro_rules! __ngap_ie_id {
     (MulticastGroupPagingAreaList) => {
         307u16
     };
+    (MulticastSessionActivationRequestTransfer) => {
+        304u16
+    };
+    (MulticastSessionDeactivationRequestTransfer) => {
+        305u16
+    };
+    (MulticastSessionUpdateRequestTransfer) => {
+        306u16
+    };
     (NASC) => {
         37u16
     };
@@ -90981,9 +91060,6 @@ macro_rules! __ngap_ie_id {
     };
     (NGRAN_TNLAssociationToRemoveList) => {
         167u16
-    };
-    (NID) => {
-        371u16
     };
     (NPNAccessInformation) => {
         259u16
@@ -91647,6 +91723,18 @@ macro_rules! __ngap_encode_ie {
         let value: $crate::ngap::AIOTFName = ($value).into();
         $crate::ngap::encode_open_type(&value)
     }};
+    (AIOTSessionReleaseCommandTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (AIOTSessionReleaseCompleteTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (AIOTSessionReleaseRequestTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
     (AIoTCommandAssistanceInformation, $value:expr) => {{
         let value: $crate::ngap::AIoTCommandAssistanceInformation = ($value).into();
         $crate::ngap::encode_open_type(&value)
@@ -91831,6 +91919,18 @@ macro_rules! __ngap_encode_ie {
         let value: $crate::ngap::BroadcastCompletedAreaList = ($value).into();
         $crate::ngap::encode_open_type(&value)
     }};
+    (BroadcastTransportFailureTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (BroadcastTransportRequestTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (BroadcastTransportResponseTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
     (CEmodeBSupportIndicator, $value:expr) => {{
         let value: $crate::ngap::CEmodeBSupportIndicator = ($value).into();
         $crate::ngap::encode_open_type(&value)
@@ -91857,6 +91957,18 @@ macro_rules! __ngap_encode_ie {
     }};
     (CellIDListForRestart, $value:expr) => {{
         let value: $crate::ngap::CellIDListForRestart = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (CommandFailureTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (CommandRequestTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (CommandResponseTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
         $crate::ngap::encode_open_type(&value)
     }};
     (CommonNetworkInstance, $value:expr) => {{
@@ -92191,6 +92303,22 @@ macro_rules! __ngap_encode_ie {
         let value: $crate::ngap::IntersystemSONInformationRequest = ($value).into();
         $crate::ngap::encode_open_type(&value)
     }};
+    (InventoryFailureTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (InventoryReportTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (InventoryRequestTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (InventoryResponseTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
     (LPWUSDisableIndication, $value:expr) => {{
         let value: $crate::ngap::LPWUSDisableIndication = ($value).into();
         $crate::ngap::encode_open_type(&value)
@@ -92255,8 +92383,36 @@ macro_rules! __ngap_encode_ie {
         let value: $crate::ngap::MBSSessionID = ($value).into();
         $crate::ngap::encode_open_type(&value)
     }};
+    (MBSSessionModificationFailureTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (MBSSessionModificationRequestTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (MBSSessionModificationResponseTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (MBSSessionReleaseResponseTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (MBSSessionSetupFailureTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
     (MBSSessionSetupRequestList, $value:expr) => {{
         let value: $crate::ngap::MBSSessionSetupRequestList = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (MBSSessionSetupRequestTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (MBSSessionSetupResponseTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
         $crate::ngap::encode_open_type(&value)
     }};
     (MBSSessionSetuporModifyRequestList, $value:expr) => {{
@@ -92277,6 +92433,22 @@ macro_rules! __ngap_encode_ie {
     }};
     (MBS_AreaSessionID, $value:expr) => {{
         let value: $crate::ngap::MBSAreaSessionID = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (MBS_DistributionReleaseRequestTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (MBS_DistributionSetupRequestTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (MBS_DistributionSetupResponseTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (MBS_DistributionSetupUnsuccessfulTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
         $crate::ngap::encode_open_type(&value)
     }};
     (MBS_NGUFailureIndication, $value:expr) => {{
@@ -92363,6 +92535,18 @@ macro_rules! __ngap_encode_ie {
         let value: $crate::ngap::MulticastGroupPagingAreaList = ($value).into();
         $crate::ngap::encode_open_type(&value)
     }};
+    (MulticastSessionActivationRequestTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (MulticastSessionDeactivationRequestTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (MulticastSessionUpdateRequestTransfer, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
     (NASC, $value:expr) => {{
         let value: $crate::ngap::NASPDU = ($value).into();
         $crate::ngap::encode_open_type(&value)
@@ -92429,10 +92613,6 @@ macro_rules! __ngap_encode_ie {
     }};
     (NGRAN_TNLAssociationToRemoveList, $value:expr) => {{
         let value: $crate::ngap::NGRANTNLAssociationToRemoveList = ($value).into();
-        $crate::ngap::encode_open_type(&value)
-    }};
-    (NID, $value:expr) => {{
-        let value: $crate::ngap::NID = ($value).into();
         $crate::ngap::encode_open_type(&value)
     }};
     (NPNAccessInformation, $value:expr) => {{
@@ -93299,6 +93479,9 @@ macro_rules! __ngap_decode_ie {
     (A2X_PC5_QoS_Parameters, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::A2XPC5QoSParameters>($value) };
     (AIOTFIdentifier, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::AIOTFIdentifier>($value) };
     (AIOTFName, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::AIOTFName>($value) };
+    (AIOTSessionReleaseCommandTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
+    (AIOTSessionReleaseCompleteTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
+    (AIOTSessionReleaseRequestTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
     (AIoTCommandAssistanceInformation, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::AIoTCommandAssistanceInformation>($value) };
     (AIoTCorrelationIdentifier, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::AIoTCorrelationIdentifier>($value) };
     (AIoTDeviceIdentificationRequested, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::AIoTDeviceIdentificationRequested>($value) };
@@ -93345,6 +93528,9 @@ macro_rules! __ngap_decode_ie {
     (AuthenticatedIndication, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::AuthenticatedIndication>($value) };
     (BroadcastCancelledAreaList, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::BroadcastCancelledAreaList>($value) };
     (BroadcastCompletedAreaList, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::BroadcastCompletedAreaList>($value) };
+    (BroadcastTransportFailureTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
+    (BroadcastTransportRequestTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
+    (BroadcastTransportResponseTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
     (CEmodeBSupportIndicator, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::CEmodeBSupportIndicator>($value) };
     (CEmodeBSupport_Indicator, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::CEmodeBSupportIndicator>($value) };
     (CEmodeBrestricted, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::CEmodeBrestricted>($value) };
@@ -93352,6 +93538,9 @@ macro_rules! __ngap_decode_ie {
     (CancelAllWarningMessages, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::CancelAllWarningMessages>($value) };
     (Cause, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::Cause>($value) };
     (CellIDListForRestart, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::CellIDListForRestart>($value) };
+    (CommandFailureTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
+    (CommandRequestTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
+    (CommandResponseTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
     (CommonNetworkInstance, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::CommonNetworkInstance>($value) };
     (ConcurrentWarningMessageInd, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::ConcurrentWarningMessageInd>($value) };
     (CoreNetworkAssistanceInformationForInactive, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::CoreNetworkAssistanceInformationForInactive>($value) };
@@ -93435,6 +93624,10 @@ macro_rules! __ngap_decode_ie {
     (IntersystemSONConfigurationTransferUL, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::IntersystemSONConfigurationTransfer>($value) };
     (IntersystemSONInformationReply, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::IntersystemSONInformationReply>($value) };
     (IntersystemSONInformationRequest, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::IntersystemSONInformationRequest>($value) };
+    (InventoryFailureTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
+    (InventoryReportTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
+    (InventoryRequestTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
+    (InventoryResponseTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
     (LPWUSDisableIndication, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::LPWUSDisableIndication>($value) };
     (LPWUSPSAssistanceInformation, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::LPWUSPSAssistanceInformation>($value) };
     (LTEA2XServicesAuthorized, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::LTEA2XServicesAuthorized>($value) };
@@ -93451,12 +93644,23 @@ macro_rules! __ngap_decode_ie {
     (MBSServiceArea, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::MBSServiceArea>($value) };
     (MBSSessionFSAIDList, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::MBSSessionFSAIDList>($value) };
     (MBSSessionID, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::MBSSessionID>($value) };
+    (MBSSessionModificationFailureTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
+    (MBSSessionModificationRequestTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
+    (MBSSessionModificationResponseTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
+    (MBSSessionReleaseResponseTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
+    (MBSSessionSetupFailureTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
     (MBSSessionSetupRequestList, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::MBSSessionSetupRequestList>($value) };
+    (MBSSessionSetupRequestTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
+    (MBSSessionSetupResponseTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
     (MBSSessionSetuporModifyRequestList, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::MBSSessionSetuporModifyRequestList>($value) };
     (MBSSessionTNLInfo5GC, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::MBSSessionTNLInfo5GC>($value) };
     (MBSSessionToReleaseList, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::MBSSessionToReleaseList>($value) };
     (MBSUPFailureIndication, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::MBSUPFailureIndication>($value) };
     (MBS_AreaSessionID, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::MBSAreaSessionID>($value) };
+    (MBS_DistributionReleaseRequestTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
+    (MBS_DistributionSetupRequestTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
+    (MBS_DistributionSetupResponseTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
+    (MBS_DistributionSetupUnsuccessfulTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
     (MBS_NGUFailureIndication, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::MBSNGUFailureIndication>($value) };
     (MBS_QoSFlowToReleaseList, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::QosFlowListWithCause>($value) };
     (MBS_QoSFlowsToBeSetupModList, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::MBSQoSFlowsToBeSetupList>($value) };
@@ -93478,6 +93682,9 @@ macro_rules! __ngap_decode_ie {
     (MobileIAB_Supported, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::MobileIABSupported>($value) };
     (MobilityRestrictionList, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::MobilityRestrictionList>($value) };
     (MulticastGroupPagingAreaList, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::MulticastGroupPagingAreaList>($value) };
+    (MulticastSessionActivationRequestTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
+    (MulticastSessionDeactivationRequestTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
+    (MulticastSessionUpdateRequestTransfer, $value:expr) => { $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value) };
     (NASC, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::NASPDU>($value) };
     (NASSecurityParametersFromNGRAN, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::NASSecurityParametersFromNGRAN>($value) };
     (NAS_PDU, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::NASPDU>($value) };
@@ -93495,7 +93702,6 @@ macro_rules! __ngap_decode_ie {
     (NGRANTraceID, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::NGRANTraceID>($value) };
     (NGRAN_CGI, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::NGRANCGI>($value) };
     (NGRAN_TNLAssociationToRemoveList, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::NGRANTNLAssociationToRemoveList>($value) };
-    (NID, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::NID>($value) };
     (NPNAccessInformation, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::NPNAccessInformation>($value) };
     (NPN_AccessInformation, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::NPNAccessInformation>($value) };
     (NRA2XServicesAuthorized, $value:expr) => { $crate::ngap::decode_open_type::<$crate::ngap::NRA2XServicesAuthorized>($value) };

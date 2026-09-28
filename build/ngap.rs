@@ -53,6 +53,7 @@ fn post_process(path: &Path, asn_files: &[PathBuf]) -> Result<()> {
     generated = crate::aper_fix::fix_constrained_sequences(&generated)?;
     generated = crate::aper_fix::fix_utf8_strings(&generated)?;
     generated = crate::aper_fix::fix_fixed_bit_strings(&generated)?;
+    generated = crate::aper_fix::fix_long_inline_strings(&generated)?;
 
     // The concrete private/extension containers below use these common types,
     // but rasn-compiler omits both from the generated module import list.
@@ -131,7 +132,7 @@ fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
         .collect::<Result<_>>()?;
 
     let ie_object = Regex::new(
-        r"(?s)\{\s*ID\s+(id-[A-Za-z][A-Za-z0-9-]*)\s+CRITICALITY\s+[A-Za-z-]+\s+TYPE\s+(OCTET\s+STRING|[A-Za-z][A-Za-z0-9-]*)\s+PRESENCE",
+        r"(?s)\{\s*ID\s+(id-[A-Za-z][A-Za-z0-9-]*)\s+CRITICALITY\s+[A-Za-z-]+\s+TYPE\s+(OCTET\s+STRING(?:\s*\(CONTAINING\s+[A-Za-z][A-Za-z0-9-]*\s*\))?|[A-Za-z][A-Za-z0-9-]*)\s+PRESENCE",
     )?;
     let mut ies: BTreeMap<String, (u16, String)> = BTreeMap::new();
     let mut type_aliases: BTreeMap<String, BTreeSet<u16>> = BTreeMap::new();
@@ -141,8 +142,10 @@ fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
         let Some(id) = ie_constants.get(id_name).copied() else {
             continue;
         };
-        // Paths below `$crate`. A plain OCTET STRING, such as the type of
-        // id-NGAP-Message, has no generated type.
+        // Paths below `$crate`. An inline OCTET STRING, such as the type of
+        // id-NGAP-Message or the OCTET STRING (CONTAINING
+        // MBSSessionSetupOrModRequestTransfer) of
+        // id-MBSSessionSetupRequestTransfer, has no generated type.
         let (rust_type, path) = if asn_type.starts_with("OCTET") {
             (None, "__rasn::types::OctetString".to_string())
         } else {
@@ -164,8 +167,17 @@ fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
     }
     // A type name is an alias only for the one IE of that type: the type of
     // id-SONConfigurationTransferDL and -UL could otherwise address either.
+    // Nor is it one when an IE outside the macros' reach has that name:
+    // id-SelectedNID is the one NID, but `NID` would read as id-NID, an
+    // extension IE.
+    let ie_names: BTreeSet<String> = ie_constants
+        .keys()
+        .map(|id_name| macro_ident(id_name.trim_start_matches("id-")))
+        .collect();
     for (rust_type, ids) in type_aliases {
-        if let [id] = ids.into_iter().collect::<Vec<_>>()[..] {
+        if let [id] = ids.into_iter().collect::<Vec<_>>()[..]
+            && !ie_names.contains(&rust_type)
+        {
             ies.entry(rust_type.clone())
                 .or_insert((id, format!("ngap::{rust_type}")));
         }

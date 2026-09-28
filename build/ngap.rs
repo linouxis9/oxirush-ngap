@@ -61,6 +61,18 @@ fn post_process(path: &Path, asn_files: &[PathBuf]) -> Result<()> {
         "    use super::ngap_common_data_types::{Criticality, Presence, PrivateIEID, ProtocolIEID};",
         1,
     );
+    // The resolved extension containers of the IEs module need the common
+    // types their IMPORTS name only through the parameterized containers.
+    let ies_module = "pub mod ngap_ies {\n    extern crate alloc;\n";
+    if !generated.contains("    use super::ngap_common_data_types::{Presence, ProtocolExtensionID};") {
+        generated = generated.replacen(
+            ies_module,
+            &format!(
+                "{ies_module}    use super::ngap_common_data_types::{{Presence, ProtocolExtensionID}};\n"
+            ),
+            1,
+        );
+    }
 
     // Some resolved ProtocolIE containers use primitive/anonymous field types
     // while equivalent containers use the named common types. Normalize only

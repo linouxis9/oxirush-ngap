@@ -17,7 +17,7 @@ shape, macros, generated-source release model, and example workflow for TS 36.41
 ## Features
 
 - Bindings generated from the six normative TS 38.413 ASN.1 modules sourced
-  from the official 3GPP 38.413 v16.6.0 (`38413-g60.zip`) archive.
+  from the official 3GPP 38.413 v19.4.0 (`38413-j40.zip`) archive.
 - Checked-in Rust bindings; normal builds and docs.rs do not run a generator,
   and the published crate excludes its raw ASN.1 inputs.
 - Aligned PER encoding and decoding through `rasn`.
@@ -34,7 +34,7 @@ shape, macros, generated-source release model, and example workflow for TS 36.41
 
 ```toml
 [dependencies]
-oxirush-ngap = "0.4"
+oxirush-ngap = "0.5"
 ```
 
 ```rust
@@ -109,7 +109,7 @@ pipeline. It reads the six locally supplied `.asn` modules in `ngap/`, then
 adds the flat API, typed-open-type macros, procedure metadata, convenience
 methods, and `Display` implementation. The `.asn` and `.asn1` inputs are
 ignored by Git and must be obtained directly from the official 3GPP 38.413
-v16.6.0 (`38413-g60.zip`) archive before regeneration.
+v19.4.0 (`38413-j40.zip`) archive before regeneration.
 
 Commit `src/ngap.rs` after regenerating it. Do not edit generated bindings by
 hand.

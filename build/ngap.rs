@@ -51,6 +51,8 @@ fn post_process(path: &Path, asn_files: &[PathBuf]) -> Result<()> {
     let container_imports = Regex::new(r"(?ms)^    use super::ngap_containers::\{.*?^    \};\n")?;
     generated = container_imports.replace_all(&generated, "").into_owned();
     generated = crate::aper_fix::fix_constrained_sequences(&generated)?;
+    generated = crate::aper_fix::fix_utf8_strings(&generated)?;
+    generated = crate::aper_fix::fix_fixed_bit_strings(&generated)?;
 
     // The concrete private/extension containers below use these common types,
     // but rasn-compiler omits both from the generated module import list.
@@ -117,25 +119,44 @@ fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
         .collect::<Result<_>>()?;
 
     let ie_object = Regex::new(
-        r"(?s)\{\s*ID\s+(id-[A-Za-z][A-Za-z0-9-]*)\s+CRITICALITY\s+[A-Za-z-]+\s+TYPE\s+([A-Za-z][A-Za-z0-9-]*)\s+PRESENCE",
+        r"(?s)\{\s*ID\s+(id-[A-Za-z][A-Za-z0-9-]*)\s+CRITICALITY\s+[A-Za-z-]+\s+TYPE\s+(OCTET\s+STRING|[A-Za-z][A-Za-z0-9-]*)\s+PRESENCE",
     )?;
     let mut ies: BTreeMap<String, (u16, String)> = BTreeMap::new();
+    let mut type_aliases: BTreeMap<String, BTreeSet<u16>> = BTreeMap::new();
     for captures in ie_object.captures_iter(&asn) {
         let id_name = &captures[1];
         let asn_type = &captures[2];
         let Some(id) = ie_constants.get(id_name).copied() else {
             continue;
         };
-        let Some(rust_type) = rust_types.get(&canonical(asn_type)).cloned() else {
-            continue;
+        // Paths below `$crate`. A plain OCTET STRING, such as the type of
+        // id-NGAP-Message, has no generated type.
+        let (rust_type, path) = if asn_type.starts_with("OCTET") {
+            (None, "__rasn::types::OctetString".to_string())
+        } else {
+            let Some(rust_type) = rust_types.get(&canonical(asn_type)).cloned() else {
+                continue;
+            };
+            let path = format!("ngap::{rust_type}");
+            (Some(rust_type), path)
         };
 
-        // The rasn type name is the concise spelling. Also expose the IE-name
-        // spelling used by TS 38.413 so duplicate-type IEs remain addressable.
-        ies.entry(rust_type.clone())
-            .or_insert((id, rust_type.clone()));
+        // The IE-name spelling used by TS 38.413 names its own IE. The rasn
+        // type name is a concise alias, added below, unless an IE has that
+        // name: id-OldAMF is an AMFName, but `AMFName` names id-AMFName.
         ies.entry(macro_ident(id_name.trim_start_matches("id-")))
-            .or_insert((id, rust_type));
+            .or_insert((id, path));
+        if let Some(rust_type) = rust_type {
+            type_aliases.entry(rust_type).or_default().insert(id);
+        }
+    }
+    // A type name is an alias only for the one IE of that type: the type of
+    // id-SONConfigurationTransferDL and -UL could otherwise address either.
+    for (rust_type, ids) in type_aliases {
+        if let [id] = ids.into_iter().collect::<Vec<_>>()[..] {
+            ies.entry(rust_type.clone())
+                .or_insert((id, format!("ngap::{rust_type}")));
+        }
     }
 
     let procedure_constant =
@@ -240,10 +261,10 @@ fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
     writeln!(out, "#[macro_export]")?;
     writeln!(out, "#[doc(hidden)]")?;
     writeln!(out, "macro_rules! __ngap_encode_ie {{")?;
-    for (name, (_, rust_type)) in &ies {
+    for (name, (_, path)) in &ies {
         writeln!(
             out,
-            "    ({name}, $value:expr) => {{ {{ let value: $crate::ngap::{rust_type} = ($value).into(); $crate::ngap::encode_open_type(&value) }} }};"
+            "    ({name}, $value:expr) => {{ {{ let value: $crate::{path} = ($value).into(); $crate::ngap::encode_open_type(&value) }} }};"
         )?;
     }
     writeln!(out, "}}")?;
@@ -251,10 +272,10 @@ fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
     writeln!(out, "#[macro_export]")?;
     writeln!(out, "#[doc(hidden)]")?;
     writeln!(out, "macro_rules! __ngap_decode_ie {{")?;
-    for (name, (_, rust_type)) in &ies {
+    for (name, (_, path)) in &ies {
         writeln!(
             out,
-            "    ({name}, $value:expr) => {{ $crate::ngap::decode_open_type::<$crate::ngap::{rust_type}>($value) }};"
+            "    ({name}, $value:expr) => {{ $crate::ngap::decode_open_type::<$crate::{path}>($value) }};"
         )?;
     }
     writeln!(out, "}}")?;
@@ -457,14 +478,24 @@ fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
         out,
         "/// Encode a typed ASN.1 value for an NGAP open type using APER."
     )?;
+    writeln!(out, "///")?;
+    writeln!(
+        out,
+        "/// An open type holds a complete encoding, in which an empty encoding"
+    )?;
+    writeln!(
+        out,
+        "/// becomes one zero octet (X.691 (07/2002) §10.1.4, §10.2.1)."
+    )?;
     writeln!(
         out,
         "pub fn encode_open_type<T: rasn::Encode>(value: &T) -> Result<rasn::types::Any, rasn::error::EncodeError> {{"
     )?;
-    writeln!(
-        out,
-        "    rasn::aper::encode(value).map(rasn::types::Any::new)"
-    )?;
+    writeln!(out, "    let mut bytes = rasn::aper::encode(value)?;")?;
+    writeln!(out, "    if bytes.is_empty() {{")?;
+    writeln!(out, "        bytes.push(0);")?;
+    writeln!(out, "    }}")?;
+    writeln!(out, "    Ok(rasn::types::Any::new(bytes))")?;
     writeln!(out, "}}")?;
     writeln!(
         out,

@@ -1,4 +1,6 @@
-use anyhow::{Result, ensure};
+use std::fmt::Write;
+
+use anyhow::{Result, bail, ensure};
 use regex::{Captures, Regex};
 
 /// Work around rasn 0.28 APER handling for constrained `SEQUENCE OF` values.
@@ -7,11 +9,15 @@ use regex::{Captures, Regex};
 /// containers. The derived encoder can disagree with its decoder about length
 /// and element alignment. The generated implementations below use rasn's public
 /// constrained-integer codec path for APER and retain the normal sequence codec
-/// for every other encoding rule.
+/// for every other encoding rule. A list whose upper bound is 64K or more
+/// has an unconstrained length determinant (X.691 §11.9.3.5). The decoded
+/// list grows with the elements read, so that a count alone reserves no
+/// memory, as in rasn's own sequence-of decoder.
 pub fn fix_constrained_sequences(generated: &str) -> Result<String> {
+    // rustfmt splits a long `rasn` attribute over several lines.
     let sequence = Regex::new(
         r#"(?ms)(    #\[derive\(AsnType, Debug, Clone, )Decode, Encode(, PartialEq, Eq, Hash\)\]
-    #\[rasn\(delegate, size\("([0-9]+)\.\.=([0-9]+)"\)(?:, identifier = "[^"]+")?\)\]
+    #\[rasn\(\s*delegate,\s*size\("([0-9]+)\.\.=([0-9]+)"\)(?:,\s*identifier = "[^"]+")?,?\s*\)\]
     pub struct ([A-Za-z0-9_]+)\(\s*pub SequenceOf<([A-Za-z0-9_]+)>,?\s*\);)"#,
     )?;
 
@@ -24,6 +30,9 @@ pub fn fix_constrained_sequences(generated: &str) -> Result<String> {
             let maximum = &captures[4];
             let name = &captures[5];
             let element = &captures[6];
+            if maximum.parse::<u64>().is_ok_and(|maximum| maximum >= 65536) {
+                return unconstrained_length(&declaration, minimum, maximum, name, element);
+            }
             format!(
                 r#"{declaration}
     impl Encode for {name} {{
@@ -67,7 +76,7 @@ pub fn fix_constrained_sequences(generated: &str) -> Result<String> {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!({minimum}, {maximum}));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {{
                 values.push({element}::decode(decoder)?);
             }}
@@ -83,4 +92,311 @@ pub fn fix_constrained_sequences(generated: &str) -> Result<String> {
         "no constrained SEQUENCE OF declarations found"
     );
     Ok(generated)
+}
+
+/// Work around rasn 0.28 APER decoding of size-constrained `UTF8String` values.
+///
+/// A constraint on a character string type that is not a known-multiplier
+/// type is not PER-visible (X.691 §9.3.6): the value is an unconstrained
+/// length in octets followed by its UTF-8 octets (§27.6, 07/2002 numbering).
+/// rasn encodes it that way but applies the size constraint when decoding.
+pub fn fix_utf8_strings(generated: &str) -> Result<String> {
+    let string = Regex::new(
+        r#"(?m)^(    #\[derive\(AsnType, Debug, Clone, )Decode, Encode(, PartialEq, Eq, Hash\)\]
+    #\[rasn\(delegate, size\("[^"]+"(?:, extensible)?\)\)\]
+    pub struct ([A-Za-z0-9_]+)\(pub Utf8String\);)$"#,
+    )?;
+
+    let mut replacements = 0usize;
+    let generated = string
+        .replace_all(generated, |captures: &Captures<'_>| {
+            replacements += 1;
+            let declaration = captures[0].replacen("Decode, Encode, ", "Encode, ", 1);
+            let name = &captures[3];
+            format!(
+                r#"{declaration}
+    impl Decode for {name} {{
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            constraints: Constraints,
+        ) -> Result<Self, D::Error> {{
+            if decoder.codec() != rasn::Codec::Aper {{
+                return Utf8String::decode_with_tag_and_constraints(decoder, tag, constraints)
+                    .map(Self);
+            }}
+            decoder
+                .decode_utf8_string(tag, Constraints::default())
+                .map(Self)
+        }}
+    }}"#
+            )
+        })
+        .into_owned();
+
+    ensure!(
+        replacements > 0,
+        "no size-constrained UTF8String declarations found"
+    );
+    Ok(generated)
+}
+
+/// Work around rasn 0.28 APER decoding of fixed-size `BIT STRING` values
+/// longer than 16 bits.
+///
+/// Such a bit string is octet-aligned in APER, with no length determinant
+/// (X.691 (07/2002) §15.10). rasn encodes it that way but decodes it from the
+/// current bit offset. The generated decoders read the first octet as an
+/// octet-aligned integer (0..255) and the remaining bits as a short bit string
+/// that is then octet-aligned; every other encoding rule keeps rasn's codec.
+/// This covers the newtypes over `FixedBitString` and the CHOICE alternatives
+/// that are such bit strings, including those with an extensible size.
+pub fn fix_fixed_bit_strings(generated: &str) -> Result<String> {
+    let newtype = Regex::new(
+        r#"(?m)^(    #\[derive\(AsnType, Debug, Clone, )Decode, Encode(, PartialEq, Eq, Hash\)\]
+    #\[rasn\(delegate(?:, identifier = "[^"]+")?\)\]
+    pub struct ([A-Za-z0-9_]+)\(pub FixedBitString<([0-9]+)usize>\);)$"#,
+    )?;
+    let mut replacements = 0usize;
+    let generated = newtype
+        .replace_all(generated, |captures: &Captures<'_>| {
+            let length: usize = captures[4].parse().expect("bit string length");
+            if length <= 16 {
+                return captures[0].to_string();
+            }
+            replacements += 1;
+            let declaration = captures[0].replacen("Decode, Encode, ", "Encode, ", 1);
+            let name = &captures[3];
+            let bits = aligned_bits(length, "            ");
+            format!(
+                r#"{declaration}
+    impl Decode for {name} {{
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            constraints: Constraints,
+        ) -> Result<Self, D::Error> {{
+            if decoder.codec() != rasn::Codec::Aper {{
+                return FixedBitString::<{length}usize>::decode_with_tag_and_constraints(
+                    decoder,
+                    tag,
+                    constraints,
+                )
+                .map(Self);
+            }}
+{bits}
+            let mut value = FixedBitString::<{length}usize>::ZERO;
+            value[..{length}].copy_from_bitslice(&bits);
+            Ok(Self(value))
+        }}
+    }}"#
+            )
+        })
+        .into_owned();
+    ensure!(
+        replacements > 0,
+        "no fixed-size BIT STRING newtypes longer than 16 bits found"
+    );
+
+    let choice = Regex::new(
+        r#"(?ms)^(    #\[derive\(AsnType, Debug, Clone, )Decode, Encode(, PartialEq, Eq, Hash\)\]
+    #\[rasn\(choice, automatic_tags(?:, identifier = "[^"]+")?\)\]
+    pub enum ([A-Za-z0-9_]+) \{
+(.*?)^    \}
+)"#,
+    )?;
+    let variant = Regex::new(
+        r#"(?m)^        (?:#\[rasn\(([^\n]*)\)\]\n        )?([A-Za-z0-9_]+)\(([A-Za-z0-9_]+)\),$"#,
+    )?;
+    let fixed_size = Regex::new(r#"^size\("([0-9]+)"(, extensible)?\), identifier = "[^"]+"$"#)?;
+    let identifier_only = Regex::new(r#"^identifier = "[^"]+"$"#)?;
+    let variant_line = Regex::new(r"(?m)^        [A-Za-z0-9_]+\(")?;
+    let mut failure = None;
+    let mut choices = 0usize;
+    let generated = choice
+        .replace_all(&generated, |captures: &Captures<'_>| {
+            let name = &captures[3];
+            let alternatives: Vec<_> = variant.captures_iter(&captures[4]).collect();
+            let length = |attributes: &str, variant_type: &str| {
+                fixed_size
+                    .captures(attributes)
+                    .and_then(|size| Some((size[1].parse::<usize>().ok()?, size.get(2).is_some())))
+                    .filter(|(length, _)| *length > 16 && variant_type == "BitString")
+            };
+            if !alternatives.iter().any(|alternative| {
+                length(alternative.get(1).map_or("", |value| value.as_str()), &alternative[3])
+                    .is_some()
+            }) {
+                return captures[0].to_string();
+            }
+            // Automatic tags number the alternatives, so every one must be read.
+            if alternatives.len() != variant_line.find_iter(&captures[4]).count() {
+                failure.get_or_insert_with(|| format!("unrecognized alternative in {name}"));
+            }
+            let mut decoders = String::new();
+            for (index, alternative) in alternatives.iter().enumerate() {
+                let attributes = alternative.get(1).map_or("", |value| value.as_str());
+                let variant_name = &alternative[2];
+                let variant_type = &alternative[3];
+                if let Some((length, extensible)) = length(attributes, variant_type) {
+                    let bits = aligned_bits(length, "                ");
+                    // Outside an extensible root, a semi-constrained length
+                    // precedes the bits (X.691 (07/2002) §15.6).
+                    let (size, extension) = if extensible {
+                        (
+                            format!("{length}, extensible"),
+                            format!(
+                                r#"
+                if decoder.decode_bool(Tag::BOOL)? {{
+                    return decoder
+                        .decode_bit_string(Tag::BIT_STRING, Constraints::default())
+                        .map(Self::{variant_name});
+                }}"#
+                            ),
+                        )
+                    } else {
+                        (length.to_string(), String::new())
+                    };
+                    write!(
+                        decoders,
+                        r#"
+            if tag == Tag::new(Class::Context, {index}) {{
+                const SIZE: Constraints = rasn::constraints!(rasn::size_constraint!({size}));
+                if decoder.codec() != rasn::Codec::Aper {{
+                    return BitString::decode_with_tag_and_constraints(decoder, tag, SIZE)
+                        .map(Self::{variant_name});
+                }}{extension}
+{bits}
+                return Ok(Self::{variant_name}(bits));
+            }}"#
+                    )
+                    .expect("write to String");
+                } else if attributes.is_empty() || identifier_only.is_match(attributes) {
+                    write!(
+                        decoders,
+                        r#"
+            if tag == Tag::new(Class::Context, {index}) {{
+                return {variant_type}::decode_with_tag(decoder, tag).map(Self::{variant_name});
+            }}"#
+                    )
+                    .expect("write to String");
+                } else {
+                    failure.get_or_insert_with(|| {
+                        format!("unsupported alternative {name}::{variant_name}")
+                    });
+                }
+            }
+            choices += 1;
+            let declaration = captures[0].replacen("Decode, Encode, ", "Encode, ", 1);
+            format!(
+                r#"{declaration}    impl rasn::types::DecodeChoice for {name} {{
+        fn from_tag<D: Decoder>(decoder: &mut D, tag: Tag) -> Result<Self, D::Error> {{{decoders}
+            Err(rasn::de::Error::no_valid_choice("{name}", decoder.codec()))
+        }}
+    }}
+    impl Decode for {name} {{
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            _: Constraints,
+        ) -> Result<Self, D::Error> {{
+            decoder.decode_explicit_prefix(tag)
+        }}
+        fn decode<D: Decoder>(decoder: &mut D) -> Result<Self, D::Error> {{
+            decoder.decode_choice(Self::CONSTRAINTS)
+        }}
+    }}
+"#
+            )
+        })
+        .into_owned();
+    if let Some(failure) = failure {
+        bail!("fixed-size BIT STRING CHOICE: {failure}");
+    }
+    ensure!(
+        choices > 0,
+        "no CHOICE with a fixed-size BIT STRING longer than 16 bits found"
+    );
+    Ok(generated)
+}
+
+/// Statements that decode an octet-aligned bit string of `length` bits into
+/// `bits`, a `BitString`.
+fn aligned_bits(length: usize, indent: &str) -> String {
+    let rest = length - 8;
+    [
+        "const OCTET: Constraints = rasn::constraints!(rasn::value_constraint!(0, 255));".to_string(),
+        format!("const REST: Constraints = rasn::constraints!(rasn::size_constraint!({rest}));"),
+        "let first = decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?;".to_string(),
+        "let mut bits = BitString::from_element(first);".to_string(),
+        "bits.extend_from_bitslice(&decoder.decode_bit_string(Tag::BIT_STRING, REST)?);".to_string(),
+    ]
+    .map(|line| format!("{indent}{line}"))
+    .join("\n")
+}
+
+/// APER codecs for a `SEQUENCE (SIZE(minimum..maximum)) OF` whose upper bound
+/// is 64K or more: an unconstrained length determinant, then the elements.
+fn unconstrained_length(
+    declaration: &str,
+    minimum: &str,
+    maximum: &str,
+    name: &str,
+    element: &str,
+) -> String {
+    format!(
+        r#"{declaration}
+    impl Encode for {name} {{
+        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
+            &self,
+            encoder: &mut E,
+            tag: Tag,
+            constraints: Constraints,
+            identifier: Identifier,
+        ) -> Result<(), E::Error> {{
+            if encoder.codec() != rasn::Codec::Aper {{
+                return encoder
+                    .encode_sequence_of(tag, &self.0, constraints, identifier)
+                    .map(drop);
+            }}
+            if !({minimum}..={maximum}).contains(&self.0.len()) {{
+                return Err(rasn::error::EncodeError::size_constraint_not_satisfied(
+                    self.0.len(),
+                    &rasn::types::constraints::Size::new(
+                        rasn::types::constraints::Bounded::new({minimum}, {maximum}),
+                    ),
+                    encoder.codec(),
+                )
+                .into());
+            }}
+            encoder
+                .encode_sequence_of(tag, &self.0, Constraints::default(), identifier)
+                .map(drop)
+        }}
+    }}
+    impl Decode for {name} {{
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            constraints: Constraints,
+        ) -> Result<Self, D::Error> {{
+            if decoder.codec() != rasn::Codec::Aper {{
+                return decoder
+                    .decode_sequence_of::<{element}>(tag, constraints)
+                    .map(Self);
+            }}
+            let values =
+                decoder.decode_sequence_of::<{element}>(tag, Constraints::default())?;
+            if !({minimum}..={maximum}).contains(&values.len()) {{
+                return Err(rasn::error::DecodeError::size_constraint_not_satisfied(
+                    Some(values.len()),
+                    "{minimum}..={maximum}".into(),
+                    decoder.codec(),
+                )
+                .into());
+            }}
+            Ok(Self(values))
+        }}
+    }}"#
+    )
 }

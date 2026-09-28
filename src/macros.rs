@@ -43,6 +43,27 @@
 //! );
 //! ```
 //!
+//! An IE name is its ASN.1 identifier without `id-` and with `_` for `-`. The
+//! name of a type is an alias only for the one IE of that type: the type of
+//! both id-SONConfigurationTransferDL and id-SONConfigurationTransferUL is
+//! addressed by the IE names.
+//!
+//! ```
+//! use oxirush_ngap::{build_ngap_ie, ngap::*};
+//!
+//! fn downlink(transfer: SONConfigurationTransfer) -> AnonymousDownlinkRANConfigurationTransferProtocolIEs {
+//!     build_ngap_ie!(DownlinkRANConfigurationTransfer, IGNORE SONConfigurationTransferDL(transfer))
+//! }
+//! ```
+//!
+//! ```compile_fail
+//! use oxirush_ngap::{build_ngap_ie, ngap::*};
+//!
+//! fn downlink(transfer: SONConfigurationTransfer) -> AnonymousDownlinkRANConfigurationTransferProtocolIEs {
+//!     build_ngap_ie!(DownlinkRANConfigurationTransfer, IGNORE SONConfigurationTransfer(transfer))
+//! }
+//! ```
+//!
 //! # Extraction macro
 //!
 //! ## `extract_ngap_ies!` — extract IEs from a decoded NGAP message
@@ -119,8 +140,14 @@ macro_rules! extract_ngap_ies {
         for _ie in &$msg_var.protocol_ies.0 {
             $(
                 if _ie.id.0 == $crate::__ngap_ie_id!($ie_name) {
-                    if let Ok($bind) = $crate::__ngap_decode_ie!($ie_name, &_ie.value) {
-                        $name = Some($crate::extract_ngap_ies!(@val $bind $(, $expr)?));
+                    // `$bind` is out of scope where `$name` is assigned, as
+                    // both may have the same name.
+                    let _value: Option<$ty> = match $crate::__ngap_decode_ie!($ie_name, &_ie.value) {
+                        Ok($bind) => Some($crate::extract_ngap_ies!(@val $bind $(, $expr)?)),
+                        Err(_) => None,
+                    };
+                    if _value.is_some() {
+                        $name = _value;
                     }
                 }
             )+

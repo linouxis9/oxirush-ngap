@@ -141,6 +141,12 @@ pub fn s_nssai(sst: u8, sd: Option<[u8; 3]>) -> SNSSAI {
 }
 
 /// Build 5G UE security capabilities from encryption and integrity octets.
+///
+/// Each octet is the first octet of an NGAP bitmap, whose leading bit is
+/// 128-NEA1 or 128-NIA1 (TS 38.413 §9.3.1.86). The octets of the NAS UE
+/// security capability IE lead with 5G-EA0 and 5G-IA0 (TS 24.501 §9.11.3.54),
+/// so shift them left by one bit first. The E-UTRA bitmaps are all zeros:
+/// EEA0 and EIA0 only.
 pub fn ue_security_capabilities(capabilities: &[u8]) -> UESecurityCapabilities {
     let encryption = capabilities.first().copied().unwrap_or(0);
     let integrity = capabilities.get(1).copied().unwrap_or(0);
@@ -188,6 +194,21 @@ mod tests {
             panic!("expected gNB ID");
         };
         assert_eq!(bits.len(), 24);
+    }
+
+    #[test]
+    fn security_capability_octets_lead_with_the_first_algorithm() {
+        // 128-NEA1 and 128-NEA2; 128-NIA2.
+        let capabilities = ue_security_capabilities(&[0xC0, 0x40]);
+        let leading = |bits: &BitString| bits.iter().take(3).map(|bit| *bit).collect::<Vec<_>>();
+        assert_eq!(
+            leading(&capabilities.n_rencryption_algorithms.0),
+            [true, true, false]
+        );
+        assert_eq!(
+            leading(&capabilities.n_rintegrity_protection_algorithms.0),
+            [false, true, false]
+        );
     }
 
     #[test]

@@ -696,7 +696,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAMFTNLAssociationSetupItemIEExtensions::decode(
                     decoder,
@@ -769,7 +769,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 32));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AMFTNLAssociationSetupItem::decode(decoder)?);
             }
@@ -857,7 +857,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAMFTNLAssociationToAddItemIEExtensions::decode(
                     decoder,
@@ -938,7 +938,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 32));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AMFTNLAssociationToAddItem::decode(decoder)?);
             }
@@ -1026,7 +1026,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAMFTNLAssociationToRemoveItemIEExtensions::decode(
                     decoder,
@@ -1055,13 +1055,61 @@ pub mod ngap_ies {
             }
         }
     }
-    #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
+    #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(
         delegate,
         size("1..=32"),
         identifier = "AMF-TNLAssociationToRemoveList"
     )]
     pub struct AMFTNLAssociationToRemoveList(pub SequenceOf<AMFTNLAssociationToRemoveItem>);
+    impl Encode for AMFTNLAssociationToRemoveList {
+        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
+            &self,
+            encoder: &mut E,
+            tag: Tag,
+            constraints: Constraints,
+            identifier: Identifier,
+        ) -> Result<(), E::Error> {
+            if encoder.codec() != rasn::Codec::Aper {
+                return encoder
+                    .encode_sequence_of(tag, &self.0, constraints, identifier)
+                    .map(drop);
+            }
+            const LENGTH_CONSTRAINTS: Constraints =
+                rasn::constraints!(rasn::value_constraint!(1, 32));
+            let _ = encoder.encode_integer(
+                Tag::INTEGER,
+                LENGTH_CONSTRAINTS,
+                &self.0.len(),
+                Identifier::EMPTY,
+            )?;
+            for value in &self.0 {
+                value.encode(encoder)?;
+            }
+            Ok(())
+        }
+    }
+    impl Decode for AMFTNLAssociationToRemoveList {
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            constraints: Constraints,
+        ) -> Result<Self, D::Error> {
+            if decoder.codec() != rasn::Codec::Aper {
+                return decoder
+                    .decode_sequence_of::<AMFTNLAssociationToRemoveItem>(tag, constraints)
+                    .map(Self);
+            }
+            const LENGTH_CONSTRAINTS: Constraints =
+                rasn::constraints!(rasn::value_constraint!(1, 32));
+            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
+            let mut values = Vec::new();
+            for _ in 0..length {
+                values.push(AMFTNLAssociationToRemoveItem::decode(decoder)?);
+            }
+            Ok(Self(values))
+        }
+    }
     #[doc = " Inner type "]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
@@ -1143,7 +1191,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAMFTNLAssociationToUpdateItemIEExtensions::decode(
                     decoder,
@@ -1180,22 +1228,85 @@ pub mod ngap_ies {
             }
         }
     }
-    #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
+    #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(
         delegate,
         size("1..=32"),
         identifier = "AMF-TNLAssociationToUpdateList"
     )]
     pub struct AMFTNLAssociationToUpdateList(pub SequenceOf<AMFTNLAssociationToUpdateItem>);
+    impl Encode for AMFTNLAssociationToUpdateList {
+        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
+            &self,
+            encoder: &mut E,
+            tag: Tag,
+            constraints: Constraints,
+            identifier: Identifier,
+        ) -> Result<(), E::Error> {
+            if encoder.codec() != rasn::Codec::Aper {
+                return encoder
+                    .encode_sequence_of(tag, &self.0, constraints, identifier)
+                    .map(drop);
+            }
+            const LENGTH_CONSTRAINTS: Constraints =
+                rasn::constraints!(rasn::value_constraint!(1, 32));
+            let _ = encoder.encode_integer(
+                Tag::INTEGER,
+                LENGTH_CONSTRAINTS,
+                &self.0.len(),
+                Identifier::EMPTY,
+            )?;
+            for value in &self.0 {
+                value.encode(encoder)?;
+            }
+            Ok(())
+        }
+    }
+    impl Decode for AMFTNLAssociationToUpdateList {
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            constraints: Constraints,
+        ) -> Result<Self, D::Error> {
+            if decoder.codec() != rasn::Codec::Aper {
+                return decoder
+                    .decode_sequence_of::<AMFTNLAssociationToUpdateItem>(tag, constraints)
+                    .map(Self);
+            }
+            const LENGTH_CONSTRAINTS: Constraints =
+                rasn::constraints!(rasn::value_constraint!(1, 32));
+            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
+            let mut values = Vec::new();
+            for _ in 0..length {
+                values.push(AMFTNLAssociationToUpdateItem::decode(decoder)?);
+            }
+            Ok(Self(values))
+        }
+    }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "AMF-UE-NGAP-ID", value("0..=1099511627775"))]
     pub struct AMFUENGAPID(pub u64);
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=150", extensible))]
     pub struct AMFName(pub PrintableString);
-    #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
+    #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=150", extensible))]
     pub struct AMFNameUTF8String(pub Utf8String);
+    impl Decode for AMFNameUTF8String {
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            constraints: Constraints,
+        ) -> Result<Self, D::Error> {
+            if decoder.codec() != rasn::Codec::Aper {
+                return Utf8String::decode_with_tag_and_constraints(decoder, tag, constraints)
+                    .map(Self);
+            }
+            decoder
+                .decode_utf8_string(tag, Constraints::default())
+                .map(Self)
+        }
+    }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=150", extensible))]
     pub struct AMFNameVisibleString(pub VisibleString);
@@ -1339,7 +1450,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousAdditionalDLUPTNLInformationForHOItemIEExtensions::decode(decoder)?,
@@ -1423,7 +1534,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 3));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AdditionalDLUPTNLInformationForHOItem::decode(decoder)?);
             }
@@ -1518,7 +1629,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAllocationAndRetentionPriorityIEExtensions::decode(
                     decoder,
@@ -1599,7 +1710,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(CAGID::decode(decoder)?);
             }
@@ -1693,7 +1804,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAllowedPNINPNItemIEExtensions::decode(decoder)?);
             }
@@ -1772,7 +1883,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 16));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AllowedPNINPNItem::decode(decoder)?);
             }
@@ -1823,7 +1934,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 8));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AllowedNSSAIItem::decode(decoder)?);
             }
@@ -1906,7 +2017,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAllowedNSSAIItemIEExtensions::decode(decoder)?);
             }
@@ -1974,7 +2085,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 16));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(TAC::decode(decoder)?);
             }
@@ -2065,7 +2176,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAlternativeQoSParaSetItemIEExtensions::decode(
                     decoder,
@@ -2154,7 +2265,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 8));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AlternativeQoSParaSetItem::decode(decoder)?);
             }
@@ -2240,7 +2351,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAreaOfInterestIEExtensions::decode(decoder)?);
             }
@@ -2356,7 +2467,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAreaOfInterestCellItemIEExtensions::decode(
                     decoder,
@@ -2429,7 +2540,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AreaOfInterestCellItem::decode(decoder)?);
             }
@@ -2514,7 +2625,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAreaOfInterestItemIEExtensions::decode(decoder)?);
             }
@@ -2589,7 +2700,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 64));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AreaOfInterestItem::decode(decoder)?);
             }
@@ -2677,7 +2788,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAreaOfInterestRANNodeItemIEExtensions::decode(
                     decoder,
@@ -2750,7 +2861,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 64));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AreaOfInterestRANNodeItem::decode(decoder)?);
             }
@@ -2838,7 +2949,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAreaOfInterestTAIItemIEExtensions::decode(decoder)?);
             }
@@ -2906,7 +3017,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 16));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AreaOfInterestTAIItem::decode(decoder)?);
             }
@@ -3124,7 +3235,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAreaScopeOfNeighCellsItemIEExtensions::decode(
                     decoder,
@@ -3201,7 +3312,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 8));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AreaScopeOfNeighCellsItem::decode(decoder)?);
             }
@@ -3289,7 +3400,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAssistanceDataForPagingIEExtensions::decode(
                     decoder,
@@ -3403,7 +3514,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousAssistanceDataForRecommendedCellsIEExtensions::decode(decoder)?);
@@ -3520,7 +3631,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAssociatedQosFlowItemIEExtensions::decode(decoder)?);
             }
@@ -3595,7 +3706,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 64));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AssociatedQosFlowItem::decode(decoder)?);
             }
@@ -3703,7 +3814,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousBluetoothMeasConfigNameItemIEExtensions::decode(
                     decoder,
@@ -3776,7 +3887,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 4));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(BluetoothMeasConfigNameItem::decode(decoder)?);
             }
@@ -3872,7 +3983,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousBluetoothMeasurementConfigurationIEExtensions::decode(decoder)?);
@@ -4143,7 +4254,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousBroadcastPLMNItemIEExtensions::decode(decoder)?);
             }
@@ -4218,7 +4329,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 12));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(BroadcastPLMNItem::decode(decoder)?);
             }
@@ -4229,9 +4340,33 @@ pub mod ngap_ies {
     #[rasn(delegate)]
     pub struct BurstArrivalTime(pub OctetString);
     #[doc = " C"]
-    #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
+    #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "CAG-ID")]
     pub struct CAGID(pub FixedBitString<32usize>);
+    impl Decode for CAGID {
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            constraints: Constraints,
+        ) -> Result<Self, D::Error> {
+            if decoder.codec() != rasn::Codec::Aper {
+                return FixedBitString::<32usize>::decode_with_tag_and_constraints(
+                    decoder,
+                    tag,
+                    constraints,
+                )
+                .map(Self);
+            }
+            const OCTET: Constraints = rasn::constraints!(rasn::value_constraint!(0, 255));
+            const REST: Constraints = rasn::constraints!(rasn::size_constraint!(24));
+            let first = decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?;
+            let mut bits = BitString::from_element(first);
+            bits.extend_from_bitslice(&decoder.decode_bit_string(Tag::BIT_STRING, REST)?);
+            let mut value = FixedBitString::<32usize>::ZERO;
+            value[..32].copy_from_bitslice(&bits);
+            Ok(Self(value))
+        }
+    }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated, identifier = "CEmodeBSupport-Indicator")]
     #[non_exhaustive]
@@ -4327,7 +4462,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCNAssistedRANTuningIEExtensions::decode(decoder)?);
             }
@@ -4398,7 +4533,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 15));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(CNTypeRestrictionsForEquivalentItem::decode(decoder)?);
             }
@@ -4496,7 +4631,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousCNTypeRestrictionsForEquivalentItemIEExtensions::decode(decoder)?,
@@ -4617,7 +4752,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCOUNTValueForPDCPSN12IEExtensions::decode(decoder)?);
             }
@@ -4729,7 +4864,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCOUNTValueForPDCPSN18IEExtensions::decode(decoder)?);
             }
@@ -4858,7 +4993,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(CancelledCellsInEAIEUTRAItem::decode(decoder)?);
             }
@@ -4946,7 +5081,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCancelledCellsInEAIEUTRAItemIEExtensions::decode(
                     decoder,
@@ -5023,7 +5158,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(CancelledCellsInEAINRItem::decode(decoder)?);
             }
@@ -5111,7 +5246,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCancelledCellsInEAINRItemIEExtensions::decode(
                     decoder,
@@ -5188,7 +5323,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(CancelledCellsInTAIEUTRAItem::decode(decoder)?);
             }
@@ -5276,7 +5411,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCancelledCellsInTAIEUTRAItemIEExtensions::decode(
                     decoder,
@@ -5353,7 +5488,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(CancelledCellsInTAINRItem::decode(decoder)?);
             }
@@ -5441,7 +5576,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCancelledCellsInTAINRItemIEExtensions::decode(
                     decoder,
@@ -5603,7 +5738,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCandidateCellIDIEExtensions::decode(decoder)?);
             }
@@ -5708,7 +5843,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCandidateCellItemIEExtensions::decode(decoder)?);
             }
@@ -5779,7 +5914,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 32));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(CandidateCellItem::decode(decoder)?);
             }
@@ -5862,7 +5997,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCandidatePCIIEExtensions::decode(decoder)?);
             }
@@ -6201,7 +6336,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCellCAGInformationIEExtensions::decode(decoder)?);
             }
@@ -6310,7 +6445,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCellBasedMDTEUTRAIEExtensions::decode(decoder)?);
             }
@@ -6413,7 +6548,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCellBasedMDTNRIEExtensions::decode(decoder)?);
             }
@@ -6484,7 +6619,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 64));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(CAGID::decode(decoder)?);
             }
@@ -6535,7 +6670,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(CellIDBroadcastEUTRAItem::decode(decoder)?);
             }
@@ -6623,7 +6758,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCellIDBroadcastEUTRAItemIEExtensions::decode(
                     decoder,
@@ -6696,7 +6831,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(CellIDBroadcastNRItem::decode(decoder)?);
             }
@@ -6784,7 +6919,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCellIDBroadcastNRItemIEExtensions::decode(decoder)?);
             }
@@ -6855,7 +6990,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(CellIDCancelledEUTRAItem::decode(decoder)?);
             }
@@ -6943,7 +7078,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCellIDCancelledEUTRAItemIEExtensions::decode(
                     decoder,
@@ -7020,7 +7155,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(CellIDCancelledNRItem::decode(decoder)?);
             }
@@ -7108,7 +7243,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCellIDCancelledNRItemIEExtensions::decode(decoder)?);
             }
@@ -7238,7 +7373,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 32));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(EUTRACGI::decode(decoder)?);
             }
@@ -7289,7 +7424,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 32));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(NRCGI::decode(decoder)?);
             }
@@ -7381,7 +7516,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCellTypeIEExtensions::decode(decoder)?);
             }
@@ -7452,7 +7587,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(CompletedCellsInEAIEUTRAItem::decode(decoder)?);
             }
@@ -7540,7 +7675,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCompletedCellsInEAIEUTRAItemIEExtensions::decode(
                     decoder,
@@ -7613,7 +7748,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(CompletedCellsInEAINRItem::decode(decoder)?);
             }
@@ -7701,7 +7836,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCompletedCellsInEAINRItemIEExtensions::decode(
                     decoder,
@@ -7774,7 +7909,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(CompletedCellsInTAIEUTRAItem::decode(decoder)?);
             }
@@ -7862,7 +7997,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCompletedCellsInTAIEUTRAItemIEExtensions::decode(
                     decoder,
@@ -7935,7 +8070,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(CompletedCellsInTAINRItem::decode(decoder)?);
             }
@@ -8023,7 +8158,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCompletedCellsInTAINRItemIEExtensions::decode(
                     decoder,
@@ -8165,7 +8300,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousCoreNetworkAssistanceInformationForInactiveIEExtensions::decode(
@@ -8300,7 +8435,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCriticalityDiagnosticsIEExtensions::decode(
                     decoder,
@@ -8422,7 +8557,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCriticalityDiagnosticsIEItemIEExtensions::decode(
                     decoder,
@@ -8459,13 +8594,61 @@ pub mod ngap_ies {
             }
         }
     }
-    #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
+    #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(
         delegate,
         size("1..=256"),
         identifier = "CriticalityDiagnostics-IE-List"
     )]
     pub struct CriticalityDiagnosticsIEList(pub SequenceOf<CriticalityDiagnosticsIEItem>);
+    impl Encode for CriticalityDiagnosticsIEList {
+        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
+            &self,
+            encoder: &mut E,
+            tag: Tag,
+            constraints: Constraints,
+            identifier: Identifier,
+        ) -> Result<(), E::Error> {
+            if encoder.codec() != rasn::Codec::Aper {
+                return encoder
+                    .encode_sequence_of(tag, &self.0, constraints, identifier)
+                    .map(drop);
+            }
+            const LENGTH_CONSTRAINTS: Constraints =
+                rasn::constraints!(rasn::value_constraint!(1, 256));
+            let _ = encoder.encode_integer(
+                Tag::INTEGER,
+                LENGTH_CONSTRAINTS,
+                &self.0.len(),
+                Identifier::EMPTY,
+            )?;
+            for value in &self.0 {
+                value.encode(encoder)?;
+            }
+            Ok(())
+        }
+    }
+    impl Decode for CriticalityDiagnosticsIEList {
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            constraints: Constraints,
+        ) -> Result<Self, D::Error> {
+            if decoder.codec() != rasn::Codec::Aper {
+                return decoder
+                    .decode_sequence_of::<CriticalityDiagnosticsIEItem>(tag, constraints)
+                    .map(Self);
+            }
+            const LENGTH_CONSTRAINTS: Constraints =
+                rasn::constraints!(rasn::value_constraint!(1, 256));
+            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
+            let mut values = Vec::new();
+            for _ in 0..length {
+                values.push(CriticalityDiagnosticsIEItem::decode(decoder)?);
+            }
+            Ok(Self(values))
+        }
+    }
     #[doc = " Inner type "]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
@@ -8550,7 +8733,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousDAPSRequestInfoIEExtensions::decode(decoder)?);
             }
@@ -8663,7 +8846,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousDAPSResponseInfoIEExtensions::decode(decoder)?);
             }
@@ -8770,7 +8953,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousDAPSResponseInfoItemIEExtension::decode(decoder)?);
             }
@@ -8845,7 +9028,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 32));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(DAPSResponseInfoItem::decode(decoder)?);
             }
@@ -8933,7 +9116,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousDLCPSecurityInformationIEExtensions::decode(
                     decoder,
@@ -9111,7 +9294,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousDRBStatusDL12IEExtension::decode(decoder)?);
             }
@@ -9214,7 +9397,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousDRBStatusDL18IEExtension::decode(decoder)?);
             }
@@ -9370,7 +9553,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousDRBStatusUL12IEExtension::decode(decoder)?);
             }
@@ -9477,7 +9660,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousDRBStatusUL18IEExtension::decode(decoder)?);
             }
@@ -9589,7 +9772,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousDRBsSubjectToEarlyStatusTransferItemIEExtension::decode(decoder)?,
@@ -9622,7 +9805,7 @@ pub mod ngap_ies {
             }
         }
     }
-    #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
+    #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(
         delegate,
         size("1..=32"),
@@ -9631,6 +9814,54 @@ pub mod ngap_ies {
     pub struct DRBsSubjectToEarlyStatusTransferList(
         pub SequenceOf<DRBsSubjectToEarlyStatusTransferItem>,
     );
+    impl Encode for DRBsSubjectToEarlyStatusTransferList {
+        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
+            &self,
+            encoder: &mut E,
+            tag: Tag,
+            constraints: Constraints,
+            identifier: Identifier,
+        ) -> Result<(), E::Error> {
+            if encoder.codec() != rasn::Codec::Aper {
+                return encoder
+                    .encode_sequence_of(tag, &self.0, constraints, identifier)
+                    .map(drop);
+            }
+            const LENGTH_CONSTRAINTS: Constraints =
+                rasn::constraints!(rasn::value_constraint!(1, 32));
+            let _ = encoder.encode_integer(
+                Tag::INTEGER,
+                LENGTH_CONSTRAINTS,
+                &self.0.len(),
+                Identifier::EMPTY,
+            )?;
+            for value in &self.0 {
+                value.encode(encoder)?;
+            }
+            Ok(())
+        }
+    }
+    impl Decode for DRBsSubjectToEarlyStatusTransferList {
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            constraints: Constraints,
+        ) -> Result<Self, D::Error> {
+            if decoder.codec() != rasn::Codec::Aper {
+                return decoder
+                    .decode_sequence_of::<DRBsSubjectToEarlyStatusTransferItem>(tag, constraints)
+                    .map(Self);
+            }
+            const LENGTH_CONSTRAINTS: Constraints =
+                rasn::constraints!(rasn::value_constraint!(1, 32));
+            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
+            let mut values = Vec::new();
+            for _ in 0..length {
+                values.push(DRBsSubjectToEarlyStatusTransferItem::decode(decoder)?);
+            }
+            Ok(Self(values))
+        }
+    }
     #[doc = " Inner type "]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
@@ -9712,7 +9943,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousDRBsSubjectToStatusTransferItemIEExtension::decode(
                     decoder,
@@ -9793,7 +10024,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 32));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(DRBsSubjectToStatusTransferItem::decode(decoder)?);
             }
@@ -9881,7 +10112,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousDRBsToQosFlowsMappingItemIEExtensions::decode(
                     decoder,
@@ -9958,7 +10189,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 32));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(DRBsToQosFlowsMappingItem::decode(decoder)?);
             }
@@ -10064,7 +10295,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousDataForwardingResponseDRBItemIEExtensions::decode(
                     decoder,
@@ -10145,7 +10376,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 32));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(DataForwardingResponseDRBItem::decode(decoder)?);
             }
@@ -10196,7 +10427,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(DataForwardingResponseERABListItem::decode(decoder)?);
             }
@@ -10284,7 +10515,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousDataForwardingResponseERABListItemIEExtensions::decode(decoder)?,
@@ -10414,7 +10645,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousDynamic5QIDescriptorIEExtensions::decode(decoder)?);
             }
@@ -10549,7 +10780,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousERABInformationItemIEExtensions::decode(decoder)?);
             }
@@ -10624,7 +10855,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(ERABInformationItem::decode(decoder)?);
             }
@@ -10667,7 +10898,7 @@ pub mod ngap_ies {
             }
         }
     }
-    #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
+    #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "ENB-ID")]
     pub enum ENBID {
         #[rasn(size("20"), identifier = "macroENB-ID")]
@@ -10680,6 +10911,79 @@ pub mod ngap_ies {
         long_macroENB_ID(BitString),
         #[rasn(identifier = "choice-Extensions")]
         choice_Extensions(ENBIDChoiceExtensions),
+    }
+    impl rasn::types::DecodeChoice for ENBID {
+        fn from_tag<D: Decoder>(decoder: &mut D, tag: Tag) -> Result<Self, D::Error> {
+            if tag == Tag::new(Class::Context, 0) {
+                const SIZE: Constraints = rasn::constraints!(rasn::size_constraint!(20));
+                if decoder.codec() != rasn::Codec::Aper {
+                    return BitString::decode_with_tag_and_constraints(decoder, tag, SIZE)
+                        .map(Self::macroENB_ID);
+                }
+                const OCTET: Constraints = rasn::constraints!(rasn::value_constraint!(0, 255));
+                const REST: Constraints = rasn::constraints!(rasn::size_constraint!(12));
+                let first = decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?;
+                let mut bits = BitString::from_element(first);
+                bits.extend_from_bitslice(&decoder.decode_bit_string(Tag::BIT_STRING, REST)?);
+                return Ok(Self::macroENB_ID(bits));
+            }
+            if tag == Tag::new(Class::Context, 1) {
+                const SIZE: Constraints = rasn::constraints!(rasn::size_constraint!(28));
+                if decoder.codec() != rasn::Codec::Aper {
+                    return BitString::decode_with_tag_and_constraints(decoder, tag, SIZE)
+                        .map(Self::homeENB_ID);
+                }
+                const OCTET: Constraints = rasn::constraints!(rasn::value_constraint!(0, 255));
+                const REST: Constraints = rasn::constraints!(rasn::size_constraint!(20));
+                let first = decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?;
+                let mut bits = BitString::from_element(first);
+                bits.extend_from_bitslice(&decoder.decode_bit_string(Tag::BIT_STRING, REST)?);
+                return Ok(Self::homeENB_ID(bits));
+            }
+            if tag == Tag::new(Class::Context, 2) {
+                const SIZE: Constraints = rasn::constraints!(rasn::size_constraint!(18));
+                if decoder.codec() != rasn::Codec::Aper {
+                    return BitString::decode_with_tag_and_constraints(decoder, tag, SIZE)
+                        .map(Self::short_macroENB_ID);
+                }
+                const OCTET: Constraints = rasn::constraints!(rasn::value_constraint!(0, 255));
+                const REST: Constraints = rasn::constraints!(rasn::size_constraint!(10));
+                let first = decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?;
+                let mut bits = BitString::from_element(first);
+                bits.extend_from_bitslice(&decoder.decode_bit_string(Tag::BIT_STRING, REST)?);
+                return Ok(Self::short_macroENB_ID(bits));
+            }
+            if tag == Tag::new(Class::Context, 3) {
+                const SIZE: Constraints = rasn::constraints!(rasn::size_constraint!(21));
+                if decoder.codec() != rasn::Codec::Aper {
+                    return BitString::decode_with_tag_and_constraints(decoder, tag, SIZE)
+                        .map(Self::long_macroENB_ID);
+                }
+                const OCTET: Constraints = rasn::constraints!(rasn::value_constraint!(0, 255));
+                const REST: Constraints = rasn::constraints!(rasn::size_constraint!(13));
+                let first = decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?;
+                let mut bits = BitString::from_element(first);
+                bits.extend_from_bitslice(&decoder.decode_bit_string(Tag::BIT_STRING, REST)?);
+                return Ok(Self::long_macroENB_ID(bits));
+            }
+            if tag == Tag::new(Class::Context, 4) {
+                return ENBIDChoiceExtensions::decode_with_tag(decoder, tag)
+                    .map(Self::choice_Extensions);
+            }
+            Err(rasn::de::Error::no_valid_choice("ENBID", decoder.codec()))
+        }
+    }
+    impl Decode for ENBID {
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            _: Constraints,
+        ) -> Result<Self, D::Error> {
+            decoder.decode_explicit_prefix(tag)
+        }
+        fn decode<D: Decoder>(decoder: &mut D) -> Result<Self, D::Error> {
+            decoder.decode_choice(Self::CONSTRAINTS)
+        }
     }
     impl From<ENBIDChoiceExtensions> for ENBID {
         fn from(value: ENBIDChoiceExtensions) -> Self {
@@ -10765,7 +11069,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousEPSTAIIEExtensions::decode(decoder)?);
             }
@@ -10872,7 +11176,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousEUTRACGIIEExtensions::decode(decoder)?);
             }
@@ -10947,7 +11251,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(EUTRACGI::decode(decoder)?);
             }
@@ -10998,16 +11302,40 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(EUTRACGI::decode(decoder)?);
             }
             Ok(Self(values))
         }
     }
-    #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
+    #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct EUTRACellIdentity(pub FixedBitString<28usize>);
+    impl Decode for EUTRACellIdentity {
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            constraints: Constraints,
+        ) -> Result<Self, D::Error> {
+            if decoder.codec() != rasn::Codec::Aper {
+                return FixedBitString::<28usize>::decode_with_tag_and_constraints(
+                    decoder,
+                    tag,
+                    constraints,
+                )
+                .map(Self);
+            }
+            const OCTET: Constraints = rasn::constraints!(rasn::value_constraint!(0, 255));
+            const REST: Constraints = rasn::constraints!(rasn::size_constraint!(20));
+            let first = decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?;
+            let mut bits = BitString::from_element(first);
+            bits.extend_from_bitslice(&decoder.decode_bit_string(Tag::BIT_STRING, REST)?);
+            let mut value = FixedBitString::<28usize>::ZERO;
+            value[..28].copy_from_bitslice(&bits);
+            Ok(Self(value))
+        }
+    }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("16", extensible))]
     pub struct EUTRAencryptionAlgorithms(pub BitString);
@@ -11092,7 +11420,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousEarlyStatusTransferTransparentContainerIEExtensions::decode(decoder)?,
@@ -11172,7 +11500,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(EmergencyAreaIDBroadcastEUTRAItem::decode(decoder)?);
             }
@@ -11260,7 +11588,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousEmergencyAreaIDBroadcastEUTRAItemIEExtensions::decode(decoder)?);
@@ -11336,7 +11664,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(EmergencyAreaIDBroadcastNRItem::decode(decoder)?);
             }
@@ -11424,7 +11752,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousEmergencyAreaIDBroadcastNRItemIEExtensions::decode(
                     decoder,
@@ -11501,7 +11829,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(EmergencyAreaIDCancelledEUTRAItem::decode(decoder)?);
             }
@@ -11589,7 +11917,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousEmergencyAreaIDCancelledEUTRAItemIEExtensions::decode(decoder)?);
@@ -11665,7 +11993,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(EmergencyAreaIDCancelledNRItem::decode(decoder)?);
             }
@@ -11753,7 +12081,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousEmergencyAreaIDCancelledNRItemIEExtensions::decode(
                     decoder,
@@ -11830,7 +12158,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(EmergencyAreaID::decode(decoder)?);
             }
@@ -11881,7 +12209,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(EmergencyAreaID::decode(decoder)?);
             }
@@ -11969,7 +12297,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousEmergencyFallbackIndicatorIEExtensions::decode(
                     decoder,
@@ -12106,7 +12434,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousEndpointIPAddressAndPortIEExtensions::decode(
                     decoder,
@@ -12188,7 +12516,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 15));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PLMNIdentity::decode(decoder)?);
             }
@@ -12276,7 +12604,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousEventL1LoggedMDTConfigIEExtensions::decode(
                     decoder,
@@ -12489,7 +12817,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousExpectedUEActivityBehaviourIEExtensions::decode(
                     decoder,
@@ -12610,7 +12938,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousExpectedUEBehaviourIEExtensions::decode(decoder)?);
             }
@@ -12700,7 +13028,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 16));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(ExpectedUEMovingTrajectoryItem::decode(decoder)?);
             }
@@ -12788,7 +13116,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousExpectedUEMovingTrajectoryItemIEExtensions::decode(
                     decoder,
@@ -12897,7 +13225,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousExtendedAMFNameIEExtensions::decode(decoder)?);
             }
@@ -13012,7 +13340,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousExtendedRANNodeNameIEExtensions::decode(decoder)?);
             }
@@ -13127,7 +13455,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousExtendedRATRestrictionInformationIEExtensions::decode(decoder)?);
@@ -13206,7 +13534,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(SliceSupportItem::decode(decoder)?);
             }
@@ -13294,7 +13622,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousFailureIndicationIEExtensions::decode(decoder)?);
             }
@@ -13398,7 +13726,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousFirstDLCountIEExtension::decode(decoder)?);
             }
@@ -13501,7 +13829,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousFiveGSTMSIIEExtensions::decode(decoder)?);
             }
@@ -13586,7 +13914,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 16));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(ForbiddenAreaInformationItem::decode(decoder)?);
             }
@@ -13674,7 +14002,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousForbiddenAreaInformationItemIEExtensions::decode(
                     decoder,
@@ -13751,7 +14079,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 4096));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(TAC::decode(decoder)?);
             }
@@ -13836,7 +14164,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousFromEUTRANtoNGRANIEExtensions::decode(decoder)?);
             }
@@ -13944,7 +14272,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousFromNGRANtoEUTRANIEExtensions::decode(decoder)?);
             }
@@ -14052,7 +14380,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousGBRQosInformationIEExtensions::decode(decoder)?);
             }
@@ -14148,9 +14476,33 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
+    #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct GNBSetID(pub FixedBitString<22usize>);
+    impl Decode for GNBSetID {
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            constraints: Constraints,
+        ) -> Result<Self, D::Error> {
+            if decoder.codec() != rasn::Codec::Aper {
+                return FixedBitString::<22usize>::decode_with_tag_and_constraints(
+                    decoder,
+                    tag,
+                    constraints,
+                )
+                .map(Self);
+            }
+            const OCTET: Constraints = rasn::constraints!(rasn::value_constraint!(0, 255));
+            const REST: Constraints = rasn::constraints!(rasn::size_constraint!(14));
+            let first = decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?;
+            let mut bits = BitString::from_element(first);
+            bits.extend_from_bitslice(&decoder.decode_bit_string(Tag::BIT_STRING, REST)?);
+            let mut value = FixedBitString::<22usize>::ZERO;
+            value[..22].copy_from_bitslice(&bits);
+            Ok(Self(value))
+        }
+    }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "GTP-TEID")]
     pub struct GTPTEID(pub FixedOctetString<4usize>);
@@ -14230,7 +14582,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousGTPTunnelIEExtensions::decode(decoder)?);
             }
@@ -14337,7 +14689,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousGUAMIIEExtensions::decode(decoder)?);
             }
@@ -14462,7 +14814,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousGlobalENBIDIEExtensions::decode(decoder)?);
             }
@@ -14569,7 +14921,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousGlobalGNBIDIEExtensions::decode(decoder)?);
             }
@@ -14676,7 +15028,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousGlobalLineIDIEExtensions::decode(decoder)?);
             }
@@ -14786,7 +15138,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousGlobalN3IWFIDIEExtensions::decode(decoder)?);
             }
@@ -14893,7 +15245,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousGlobalNgENBIDIEExtensions::decode(decoder)?);
             }
@@ -15062,7 +15414,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousGlobalTNGFIDIEExtensions::decode(decoder)?);
             }
@@ -15169,7 +15521,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousGlobalTWIFIDIEExtensions::decode(decoder)?);
             }
@@ -15276,7 +15628,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousGlobalWAGFIDIEExtensions::decode(decoder)?);
             }
@@ -15398,7 +15750,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousHOReportIEExtensions::decode(decoder)?);
             }
@@ -15538,7 +15890,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousHandoverCommandTransferIEExtensions::decode(
                     decoder,
@@ -15661,7 +16013,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousHandoverPreparationUnsuccessfulTransferIEExtensions::decode(decoder)?,
@@ -15770,7 +16122,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousHandoverRequestAcknowledgeTransferIEExtensions::decode(decoder)?,
@@ -15900,7 +16252,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousHandoverRequiredTransferIEExtensions::decode(
                     decoder,
@@ -16008,7 +16360,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousHandoverResourceAllocationUnsuccessfulTransferIEExtensions::decode(
@@ -16164,7 +16516,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousImmediateMDTNrIEExtensions::decode(decoder)?);
             }
@@ -16308,7 +16660,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousInfoOnRecommendedCellsAndRANNodesForPagingIEExtensions::decode(
@@ -16444,7 +16796,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousInterSystemFailureIndicationIEExtensions::decode(
                     decoder,
@@ -16554,7 +16906,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousInterSystemHOReportIEExtensions::decode(decoder)?);
             }
@@ -16718,7 +17070,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousIntersystemSONConfigurationTransferIEExtensions::decode(decoder)?,
@@ -16932,7 +17284,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousIntersystemSONNGRANnodeIDIEExtensions::decode(
                     decoder,
@@ -17099,7 +17451,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousIntersystemSONeNBIDIEExtensions::decode(decoder)?);
             }
@@ -17221,7 +17573,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousIntersystemUnnecessaryHOIEExtensions::decode(
                     decoder,
@@ -17344,7 +17696,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousLAIIEExtensions::decode(decoder)?);
             }
@@ -17463,7 +17815,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousLTEUESidelinkAggregateMaximumBitrateIEExtensions::decode(decoder)?,
@@ -17573,7 +17925,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousLTEV2XServicesAuthorizedIEExtensions::decode(
                     decoder,
@@ -17752,7 +18104,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousLastVisitedCellItemIEExtensions::decode(decoder)?);
             }
@@ -17866,7 +18218,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousLastVisitedNGRANCellInformationIEExtensions::decode(decoder)?);
             }
@@ -18021,7 +18373,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousLocationReportingRequestTypeIEExtensions::decode(
                     decoder,
@@ -18138,7 +18490,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousLoggedMDTNrIEExtensions::decode(decoder)?);
             }
@@ -18345,7 +18697,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousM1ConfigurationIEExtensions::decode(decoder)?);
             }
@@ -18461,7 +18813,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousM1PeriodicReportingIEExtensions::decode(decoder)?);
             }
@@ -18579,7 +18931,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousM1ThresholdEventA2IEExtensions::decode(decoder)?);
             }
@@ -18744,7 +19096,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousM4ConfigurationIEExtensions::decode(decoder)?);
             }
@@ -18860,7 +19212,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousM5ConfigurationIEExtensions::decode(decoder)?);
             }
@@ -18976,7 +19328,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousM6ConfigurationIEExtensions::decode(decoder)?);
             }
@@ -19102,7 +19454,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousM7ConfigurationIEExtensions::decode(decoder)?);
             }
@@ -19222,7 +19574,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousMDTConfigurationIEExtensions::decode(decoder)?);
             }
@@ -19334,7 +19686,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousMDTConfigurationEUTRAIEExtensions::decode(decoder)?);
             }
@@ -19451,7 +19803,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousMDTConfigurationNRIEExtensions::decode(decoder)?);
             }
@@ -19566,7 +19918,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousMDTLocationInfoIEExtensions::decode(decoder)?);
             }
@@ -19692,7 +20044,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 16));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PLMNIdentity::decode(decoder)?);
             }
@@ -19707,9 +20059,33 @@ pub mod ngap_ies {
         R_true = 0,
     }
     #[doc = " M"]
-    #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
+    #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct MaskedIMEISV(pub FixedBitString<64usize>);
+    impl Decode for MaskedIMEISV {
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            constraints: Constraints,
+        ) -> Result<Self, D::Error> {
+            if decoder.codec() != rasn::Codec::Aper {
+                return FixedBitString::<64usize>::decode_with_tag_and_constraints(
+                    decoder,
+                    tag,
+                    constraints,
+                )
+                .map(Self);
+            }
+            const OCTET: Constraints = rasn::constraints!(rasn::value_constraint!(0, 255));
+            const REST: Constraints = rasn::constraints!(rasn::size_constraint!(56));
+            let first = decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?;
+            let mut bits = BitString::from_element(first);
+            bits.extend_from_bitslice(&decoder.decode_bit_string(Tag::BIT_STRING, REST)?);
+            let mut value = FixedBitString::<64usize>::ZERO;
+            value[..64].copy_from_bitslice(&bits);
+            Ok(Self(value))
+        }
+    }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("0..=4095", extensible))]
     pub struct MaximumDataBurstVolume(pub Integer);
@@ -19866,7 +20242,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousMobilityRestrictionListIEExtensions::decode(
                     decoder,
@@ -20092,7 +20468,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousNBIoTPagingEDRXInfoIEExtensions::decode(decoder)?);
             }
@@ -20273,7 +20649,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousNGRANTNLAssociationToRemoveItemIEExtensions::decode(decoder)?);
             }
@@ -20303,19 +20679,91 @@ pub mod ngap_ies {
             }
         }
     }
-    #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
+    #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(
         delegate,
         size("1..=32"),
         identifier = "NGRAN-TNLAssociationToRemoveList"
     )]
     pub struct NGRANTNLAssociationToRemoveList(pub SequenceOf<NGRANTNLAssociationToRemoveItem>);
+    impl Encode for NGRANTNLAssociationToRemoveList {
+        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
+            &self,
+            encoder: &mut E,
+            tag: Tag,
+            constraints: Constraints,
+            identifier: Identifier,
+        ) -> Result<(), E::Error> {
+            if encoder.codec() != rasn::Codec::Aper {
+                return encoder
+                    .encode_sequence_of(tag, &self.0, constraints, identifier)
+                    .map(drop);
+            }
+            const LENGTH_CONSTRAINTS: Constraints =
+                rasn::constraints!(rasn::value_constraint!(1, 32));
+            let _ = encoder.encode_integer(
+                Tag::INTEGER,
+                LENGTH_CONSTRAINTS,
+                &self.0.len(),
+                Identifier::EMPTY,
+            )?;
+            for value in &self.0 {
+                value.encode(encoder)?;
+            }
+            Ok(())
+        }
+    }
+    impl Decode for NGRANTNLAssociationToRemoveList {
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            constraints: Constraints,
+        ) -> Result<Self, D::Error> {
+            if decoder.codec() != rasn::Codec::Aper {
+                return decoder
+                    .decode_sequence_of::<NGRANTNLAssociationToRemoveItem>(tag, constraints)
+                    .map(Self);
+            }
+            const LENGTH_CONSTRAINTS: Constraints =
+                rasn::constraints!(rasn::value_constraint!(1, 32));
+            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
+            let mut values = Vec::new();
+            for _ in 0..length {
+                values.push(NGRANTNLAssociationToRemoveItem::decode(decoder)?);
+            }
+            Ok(Self(values))
+        }
+    }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct NGRANTraceID(pub FixedOctetString<8usize>);
-    #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
+    #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct NID(pub FixedBitString<44usize>);
+    impl Decode for NID {
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            constraints: Constraints,
+        ) -> Result<Self, D::Error> {
+            if decoder.codec() != rasn::Codec::Aper {
+                return FixedBitString::<44usize>::decode_with_tag_and_constraints(
+                    decoder,
+                    tag,
+                    constraints,
+                )
+                .map(Self);
+            }
+            const OCTET: Constraints = rasn::constraints!(rasn::value_constraint!(0, 255));
+            const REST: Constraints = rasn::constraints!(rasn::size_constraint!(36));
+            let first = decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?;
+            let mut bits = BitString::from_element(first);
+            bits.extend_from_bitslice(&decoder.decode_bit_string(Tag::BIT_STRING, REST)?);
+            let mut value = FixedBitString::<44usize>::ZERO;
+            value[..44].copy_from_bitslice(&bits);
+            Ok(Self(value))
+        }
+    }
     #[doc = " Inner type "]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
@@ -20590,7 +21038,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousNRCGIIEExtensions::decode(decoder)?);
             }
@@ -20665,7 +21113,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 16384));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(NRCGI::decode(decoder)?);
             }
@@ -20716,7 +21164,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(NRCGI::decode(decoder)?);
             }
@@ -20729,9 +21177,33 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("0..=3279165"))]
     pub struct NRARFCN(pub u32);
-    #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
+    #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct NRCellIdentity(pub FixedBitString<36usize>);
+    impl Decode for NRCellIdentity {
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            constraints: Constraints,
+        ) -> Result<Self, D::Error> {
+            if decoder.codec() != rasn::Codec::Aper {
+                return FixedBitString::<36usize>::decode_with_tag_and_constraints(
+                    decoder,
+                    tag,
+                    constraints,
+                )
+                .map(Self);
+            }
+            const OCTET: Constraints = rasn::constraints!(rasn::value_constraint!(0, 255));
+            const REST: Constraints = rasn::constraints!(rasn::size_constraint!(28));
+            let first = decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?;
+            let mut bits = BitString::from_element(first);
+            bits.extend_from_bitslice(&decoder.decode_bit_string(Tag::BIT_STRING, REST)?);
+            let mut value = FixedBitString::<36usize>::ZERO;
+            value[..36].copy_from_bitslice(&bits);
+            Ok(Self(value))
+        }
+    }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("1..=1024", extensible))]
     pub struct NRFrequencyBand(pub Integer);
@@ -20779,7 +21251,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 32));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(NRFrequencyBandItem::decode(decoder)?);
             }
@@ -20864,7 +21336,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousNRFrequencyBandItemIEExtension::decode(decoder)?);
             }
@@ -20967,7 +21439,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousNRFrequencyInfoIEExtension::decode(decoder)?);
             }
@@ -21088,7 +21560,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousNRUESidelinkAggregateMaximumBitrateIEExtensions::decode(decoder)?,
@@ -21198,7 +21670,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousNRV2XServicesAuthorizedIEExtensions::decode(
                     decoder,
@@ -21283,7 +21755,7 @@ pub mod ngap_ies {
             }
         }
     }
-    #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
+    #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "NgENB-ID")]
     pub enum NgENBID {
         #[rasn(size("20"), identifier = "macroNgENB-ID")]
@@ -21294,6 +21766,66 @@ pub mod ngap_ies {
         longMacroNgENB_ID(BitString),
         #[rasn(identifier = "choice-Extensions")]
         choice_Extensions(NgENBIDChoiceExtensions),
+    }
+    impl rasn::types::DecodeChoice for NgENBID {
+        fn from_tag<D: Decoder>(decoder: &mut D, tag: Tag) -> Result<Self, D::Error> {
+            if tag == Tag::new(Class::Context, 0) {
+                const SIZE: Constraints = rasn::constraints!(rasn::size_constraint!(20));
+                if decoder.codec() != rasn::Codec::Aper {
+                    return BitString::decode_with_tag_and_constraints(decoder, tag, SIZE)
+                        .map(Self::macroNgENB_ID);
+                }
+                const OCTET: Constraints = rasn::constraints!(rasn::value_constraint!(0, 255));
+                const REST: Constraints = rasn::constraints!(rasn::size_constraint!(12));
+                let first = decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?;
+                let mut bits = BitString::from_element(first);
+                bits.extend_from_bitslice(&decoder.decode_bit_string(Tag::BIT_STRING, REST)?);
+                return Ok(Self::macroNgENB_ID(bits));
+            }
+            if tag == Tag::new(Class::Context, 1) {
+                const SIZE: Constraints = rasn::constraints!(rasn::size_constraint!(18));
+                if decoder.codec() != rasn::Codec::Aper {
+                    return BitString::decode_with_tag_and_constraints(decoder, tag, SIZE)
+                        .map(Self::shortMacroNgENB_ID);
+                }
+                const OCTET: Constraints = rasn::constraints!(rasn::value_constraint!(0, 255));
+                const REST: Constraints = rasn::constraints!(rasn::size_constraint!(10));
+                let first = decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?;
+                let mut bits = BitString::from_element(first);
+                bits.extend_from_bitslice(&decoder.decode_bit_string(Tag::BIT_STRING, REST)?);
+                return Ok(Self::shortMacroNgENB_ID(bits));
+            }
+            if tag == Tag::new(Class::Context, 2) {
+                const SIZE: Constraints = rasn::constraints!(rasn::size_constraint!(21));
+                if decoder.codec() != rasn::Codec::Aper {
+                    return BitString::decode_with_tag_and_constraints(decoder, tag, SIZE)
+                        .map(Self::longMacroNgENB_ID);
+                }
+                const OCTET: Constraints = rasn::constraints!(rasn::value_constraint!(0, 255));
+                const REST: Constraints = rasn::constraints!(rasn::size_constraint!(13));
+                let first = decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?;
+                let mut bits = BitString::from_element(first);
+                bits.extend_from_bitslice(&decoder.decode_bit_string(Tag::BIT_STRING, REST)?);
+                return Ok(Self::longMacroNgENB_ID(bits));
+            }
+            if tag == Tag::new(Class::Context, 3) {
+                return NgENBIDChoiceExtensions::decode_with_tag(decoder, tag)
+                    .map(Self::choice_Extensions);
+            }
+            Err(rasn::de::Error::no_valid_choice("NgENBID", decoder.codec()))
+        }
+    }
+    impl Decode for NgENBID {
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            _: Constraints,
+        ) -> Result<Self, D::Error> {
+            decoder.decode_explicit_prefix(tag)
+        }
+        fn decode<D: Decoder>(decoder: &mut D) -> Result<Self, D::Error> {
+            decoder.decode_choice(Self::CONSTRAINTS)
+        }
     }
     impl From<NgENBIDChoiceExtensions> for NgENBID {
         fn from(value: NgENBIDChoiceExtensions) -> Self {
@@ -21381,7 +21913,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousNonDynamic5QIDescriptorIEExtensions::decode(
                     decoder,
@@ -21466,7 +21998,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 16));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(TAC::decode(decoder)?);
             }
@@ -21642,7 +22174,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousOverloadStartNSSAIItemIEExtensions::decode(
                     decoder,
@@ -21723,7 +22255,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 1024));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(OverloadStartNSSAIItem::decode(decoder)?);
             }
@@ -21806,7 +22338,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPC5FlowBitRatesIEExtensions::decode(decoder)?);
             }
@@ -21913,7 +22445,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPC5QoSFlowItemIEExtensions::decode(decoder)?);
             }
@@ -21991,7 +22523,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 2048));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PC5QoSFlowItem::decode(decoder)?);
             }
@@ -22074,7 +22606,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPC5QoSParametersIEExtensions::decode(decoder)?);
             }
@@ -22149,7 +22681,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 32));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(NRPCI::decode(decoder)?);
             }
@@ -22237,7 +22769,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousPDUSessionAggregateMaximumBitRateIEExtensions::decode(decoder)?);
@@ -22353,7 +22885,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPDUSessionResourceAdmittedItemIEExtensions::decode(
                     decoder,
@@ -22430,7 +22962,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceAdmittedItem::decode(decoder)?);
             }
@@ -22515,7 +23047,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceFailedToModifyItemModCfmIEExtensions::decode(
@@ -22631,7 +23163,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceFailedToModifyItemModResIEExtensions::decode(
@@ -22718,7 +23250,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceFailedToModifyItemModCfm::decode(decoder)?);
             }
@@ -22774,7 +23306,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceFailedToModifyItemModRes::decode(decoder)?);
             }
@@ -22859,7 +23391,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceFailedToResumeItemRESReqIEExtensions::decode(
@@ -22971,7 +23503,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceFailedToResumeItemRESResIEExtensions::decode(
@@ -23054,7 +23586,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceFailedToResumeItemRESReq::decode(decoder)?);
             }
@@ -23110,7 +23642,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceFailedToResumeItemRESRes::decode(decoder)?);
             }
@@ -23195,7 +23727,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceFailedToSetupItemCxtFailIEExtensions::decode(
@@ -23311,7 +23843,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceFailedToSetupItemCxtResIEExtensions::decode(
@@ -23427,7 +23959,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceFailedToSetupItemHOAckIEExtensions::decode(decoder)?,
@@ -23541,7 +24073,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceFailedToSetupItemPSReqIEExtensions::decode(decoder)?,
@@ -23652,7 +24184,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceFailedToSetupItemSUResIEExtensions::decode(decoder)?,
@@ -23737,7 +24269,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceFailedToSetupItemCxtFail::decode(decoder)?);
             }
@@ -23793,7 +24325,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceFailedToSetupItemCxtRes::decode(decoder)?);
             }
@@ -23849,7 +24381,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceFailedToSetupItemHOAck::decode(decoder)?);
             }
@@ -23905,7 +24437,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceFailedToSetupItemPSReq::decode(decoder)?);
             }
@@ -23961,7 +24493,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceFailedToSetupItemSURes::decode(decoder)?);
             }
@@ -24049,7 +24581,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPDUSessionResourceHandoverItemIEExtensions::decode(
                     decoder,
@@ -24126,7 +24658,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceHandoverItem::decode(decoder)?);
             }
@@ -24214,7 +24746,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousPDUSessionResourceInformationItemIEExtensions::decode(decoder)?);
@@ -24294,7 +24826,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceInformationItem::decode(decoder)?);
             }
@@ -24382,7 +24914,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPDUSessionResourceItemCxtRelCplIEExtensions::decode(decoder)?);
             }
@@ -24490,7 +25022,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPDUSessionResourceItemCxtRelReqIEExtensions::decode(decoder)?);
             }
@@ -24598,7 +25130,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPDUSessionResourceItemHORqdIEExtensions::decode(
                     decoder,
@@ -24675,7 +25207,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceItemCxtRelCpl::decode(decoder)?);
             }
@@ -24726,7 +25258,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceItemCxtRelReq::decode(decoder)?);
             }
@@ -24777,7 +25309,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceItemHORqd::decode(decoder)?);
             }
@@ -24862,7 +25394,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceModifyConfirmTransferIEExtensions::decode(decoder)?,
@@ -24981,7 +25513,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceModifyIndicationTransferIEExtensions::decode(
@@ -25095,7 +25627,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPDUSessionResourceModifyIndicationUnsuccessfulTransferIEExtensions::decode(decoder)?);
             }
@@ -25205,7 +25737,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceModifyItemModCfmIEExtensions::decode(decoder)?,
@@ -25319,7 +25851,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceModifyItemModIndIEExtensions::decode(decoder)?,
@@ -25436,7 +25968,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceModifyItemModReqIEExtensions::decode(decoder)?,
@@ -25554,7 +26086,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceModifyItemModResIEExtensions::decode(decoder)?,
@@ -25633,7 +26165,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceModifyItemModCfm::decode(decoder)?);
             }
@@ -25686,7 +26218,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceModifyItemModInd::decode(decoder)?);
             }
@@ -25739,7 +26271,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceModifyItemModReq::decode(decoder)?);
             }
@@ -25792,7 +26324,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceModifyItemModRes::decode(decoder)?);
             }
@@ -25872,7 +26404,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceModifyRequestTransferProtocolIEs::decode(decoder)?,
@@ -25971,7 +26503,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceModifyResponseTransferIEExtensions::decode(decoder)?,
@@ -26095,7 +26627,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceModifyUnsuccessfulTransferIEExtensions::decode(
@@ -26210,7 +26742,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPDUSessionResourceNotifyItemIEExtensions::decode(
                     decoder,
@@ -26287,7 +26819,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceNotifyItem::decode(decoder)?);
             }
@@ -26372,7 +26904,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceNotifyReleasedTransferIEExtensions::decode(decoder)?,
@@ -26481,7 +27013,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousPDUSessionResourceNotifyTransferIEExtensions::decode(decoder)?);
@@ -26591,7 +27123,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceReleaseCommandTransferIEExtensions::decode(decoder)?,
@@ -26697,7 +27229,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceReleaseResponseTransferIEExtensions::decode(
@@ -26803,7 +27335,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousPDUSessionResourceReleasedItemNotIEExtensions::decode(decoder)?);
@@ -26916,7 +27448,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceReleasedItemPSAckIEExtensions::decode(decoder)?,
@@ -27027,7 +27559,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceReleasedItemPSFailIEExtensions::decode(decoder)?,
@@ -27138,7 +27670,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceReleasedItemRelResIEExtensions::decode(decoder)?,
@@ -27215,7 +27747,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceReleasedItemNot::decode(decoder)?);
             }
@@ -27268,7 +27800,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceReleasedItemPSAck::decode(decoder)?);
             }
@@ -27321,7 +27853,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceReleasedItemPSFail::decode(decoder)?);
             }
@@ -27374,7 +27906,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceReleasedItemRelRes::decode(decoder)?);
             }
@@ -27462,7 +27994,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceResumeItemRESReqIEExtensions::decode(decoder)?,
@@ -27576,7 +28108,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceResumeItemRESResIEExtensions::decode(decoder)?,
@@ -27655,7 +28187,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceResumeItemRESReq::decode(decoder)?);
             }
@@ -27708,7 +28240,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceResumeItemRESRes::decode(decoder)?);
             }
@@ -27793,7 +28325,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceSecondaryRATUsageItemIEExtensions::decode(decoder)?,
@@ -27872,7 +28404,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceSecondaryRATUsageItem::decode(decoder)?);
             }
@@ -27960,7 +28492,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousPDUSessionResourceSetupItemCxtReqIEExtensions::decode(decoder)?);
@@ -28081,7 +28613,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousPDUSessionResourceSetupItemCxtResIEExtensions::decode(decoder)?);
@@ -28194,7 +28726,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousPDUSessionResourceSetupItemHOReqIEExtensions::decode(decoder)?);
@@ -28311,7 +28843,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousPDUSessionResourceSetupItemSUReqIEExtensions::decode(decoder)?);
@@ -28432,7 +28964,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousPDUSessionResourceSetupItemSUResIEExtensions::decode(decoder)?);
@@ -28508,7 +29040,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceSetupItemCxtReq::decode(decoder)?);
             }
@@ -28559,7 +29091,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceSetupItemCxtRes::decode(decoder)?);
             }
@@ -28610,7 +29142,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceSetupItemHOReq::decode(decoder)?);
             }
@@ -28661,7 +29193,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceSetupItemSUReq::decode(decoder)?);
             }
@@ -28712,7 +29244,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceSetupItemSURes::decode(decoder)?);
             }
@@ -28792,7 +29324,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceSetupRequestTransferProtocolIEs::decode(decoder)?,
@@ -28891,7 +29423,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceSetupResponseTransferIEExtensions::decode(decoder)?,
@@ -29011,7 +29543,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceSetupUnsuccessfulTransferIEExtensions::decode(
@@ -29126,7 +29658,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceSuspendItemSUSReqIEExtensions::decode(decoder)?,
@@ -29205,7 +29737,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceSuspendItemSUSReq::decode(decoder)?);
             }
@@ -29293,7 +29825,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPDUSessionResourceSwitchedItemIEExtensions::decode(
                     decoder,
@@ -29370,7 +29902,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceSwitchedItem::decode(decoder)?);
             }
@@ -29455,7 +29987,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceToBeSwitchedDLItemIEExtensions::decode(decoder)?,
@@ -29534,7 +30066,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceToBeSwitchedDLItem::decode(decoder)?);
             }
@@ -29619,7 +30151,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceToReleaseItemHOCmdIEExtensions::decode(decoder)?,
@@ -29730,7 +30262,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPDUSessionResourceToReleaseItemRelCmdIEExtensions::decode(decoder)?,
@@ -29809,7 +30341,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceToReleaseItemHOCmd::decode(decoder)?);
             }
@@ -29862,7 +30394,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PDUSessionResourceToReleaseItemRelCmd::decode(decoder)?);
             }
@@ -29972,7 +30504,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPDUSessionUsageReportIEExtensions::decode(decoder)?);
             }
@@ -30082,7 +30614,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPLMNSupportItemIEExtensions::decode(decoder)?);
             }
@@ -30157,7 +30689,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 12));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(PLMNSupportItem::decode(decoder)?);
             }
@@ -30245,7 +30777,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPNINPNMobilityInformationIEExtensions::decode(
                     decoder,
@@ -30409,7 +30941,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPacketErrorRateIEExtensions::decode(decoder)?);
             }
@@ -30564,7 +31096,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPagingAssisDataforCEcapabUEIEExtensions::decode(
                     decoder,
@@ -30681,7 +31213,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPagingAttemptInformationIEExtensions::decode(
                     decoder,
@@ -30854,7 +31386,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPagingeDRXInformationIEExtensions::decode(decoder)?);
             }
@@ -30963,7 +31495,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPathSwitchRequestAcknowledgeTransferIEExtensions::decode(decoder)?,
@@ -31074,7 +31606,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPathSwitchRequestSetupFailedTransferIEExtensions::decode(decoder)?,
@@ -31183,7 +31715,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPathSwitchRequestTransferIEExtensions::decode(
                     decoder,
@@ -31302,7 +31834,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousPathSwitchRequestUnsuccessfulTransferIEExtensions::decode(decoder)?,
@@ -31512,7 +32044,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousQoSFlowsUsageReportItemIEExtensions::decode(
                     decoder,
@@ -31593,7 +32125,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 64));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(QoSFlowsUsageReportItem::decode(decoder)?);
             }
@@ -31713,7 +32245,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousQosFlowAcceptedItemIEExtensions::decode(decoder)?);
             }
@@ -31784,7 +32316,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 64));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(QosFlowAcceptedItem::decode(decoder)?);
             }
@@ -31863,7 +32395,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousQosFlowAddOrModifyRequestItemIEExtensions::decode(
                     decoder,
@@ -31944,7 +32476,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 64));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(QosFlowAddOrModifyRequestItem::decode(decoder)?);
             }
@@ -32023,7 +32555,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousQosFlowAddOrModifyResponseItemIEExtensions::decode(
                     decoder,
@@ -32096,7 +32628,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 64));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(QosFlowAddOrModifyResponseItem::decode(decoder)?);
             }
@@ -32175,7 +32707,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousQosFlowFeedbackItemIEExtensions::decode(decoder)?);
             }
@@ -32258,7 +32790,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 64));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(QosFlowFeedbackItem::decode(decoder)?);
             }
@@ -32340,7 +32872,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousQosFlowInformationItemIEExtensions::decode(
                     decoder,
@@ -32417,7 +32949,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 64));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(QosFlowInformationItem::decode(decoder)?);
             }
@@ -32496,7 +33028,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousQosFlowItemWithDataForwardingIEExtensions::decode(
                     decoder,
@@ -32601,7 +33133,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousQosFlowLevelQosParametersIEExtensions::decode(
                     decoder,
@@ -32690,7 +33222,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 64));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(QosFlowWithCauseItem::decode(decoder)?);
             }
@@ -32741,7 +33273,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 64));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(QosFlowItemWithDataForwarding::decode(decoder)?);
             }
@@ -32820,7 +33352,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousQosFlowModifyConfirmItemIEExtensions::decode(
                     decoder,
@@ -32893,7 +33425,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 64));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(QosFlowModifyConfirmItem::decode(decoder)?);
             }
@@ -32969,7 +33501,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousQosFlowNotifyItemIEExtensions::decode(decoder)?);
             }
@@ -33044,7 +33576,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 64));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(QosFlowNotifyItem::decode(decoder)?);
             }
@@ -33123,7 +33655,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousQosFlowParametersItemIEExtensions::decode(decoder)?);
             }
@@ -33198,7 +33730,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 64));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(QosFlowParametersItem::decode(decoder)?);
             }
@@ -33277,7 +33809,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousQosFlowPerTNLInformationIEExtensions::decode(
                     decoder,
@@ -33382,7 +33914,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousQosFlowPerTNLInformationItemIEExtensions::decode(
                     decoder,
@@ -33455,7 +33987,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 3));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(QosFlowPerTNLInformationItem::decode(decoder)?);
             }
@@ -33534,7 +34066,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousQosFlowSetupRequestItemIEExtensions::decode(
                     decoder,
@@ -33615,7 +34147,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 64));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(QosFlowSetupRequestItem::decode(decoder)?);
             }
@@ -33694,7 +34226,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousQosFlowToBeForwardedItemIEExtensions::decode(
                     decoder,
@@ -33767,7 +34299,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 64));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(QosFlowToBeForwardedItem::decode(decoder)?);
             }
@@ -33846,7 +34378,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousQosFlowWithCauseItemIEExtensions::decode(decoder)?);
             }
@@ -33895,9 +34427,24 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=150", extensible))]
     pub struct RANNodeName(pub PrintableString);
-    #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
+    #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=150", extensible))]
     pub struct RANNodeNameUTF8String(pub Utf8String);
+    impl Decode for RANNodeNameUTF8String {
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            constraints: Constraints,
+        ) -> Result<Self, D::Error> {
+            if decoder.codec() != rasn::Codec::Aper {
+                return Utf8String::decode_with_tag_and_constraints(decoder, tag, constraints)
+                    .map(Self);
+            }
+            decoder
+                .decode_utf8_string(tag, Constraints::default())
+                .map(Self)
+        }
+    }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=150", extensible))]
     pub struct RANNodeNameVisibleString(pub VisibleString);
@@ -33973,7 +34520,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousRANStatusTransferTransparentContainerIEExtensions::decode(decoder)?,
@@ -34057,7 +34604,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 16));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(RATRestrictionsItem::decode(decoder)?);
             }
@@ -34136,7 +34683,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousRATRestrictionsItemIEExtensions::decode(decoder)?);
             }
@@ -34247,7 +34794,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousRIMInformationIEExtensions::decode(decoder)?);
             }
@@ -34350,7 +34897,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousRIMInformationTransferIEExtensions::decode(
                     decoder,
@@ -34532,7 +35079,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousRecommendedCellItemIEExtensions::decode(decoder)?);
             }
@@ -34607,7 +35154,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 16));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(RecommendedCellItem::decode(decoder)?);
             }
@@ -34686,7 +35233,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousRecommendedCellsForPagingIEExtensions::decode(
                     decoder,
@@ -34787,7 +35334,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousRecommendedRANNodeItemIEExtensions::decode(
                     decoder,
@@ -34860,7 +35407,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 16));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(RecommendedRANNodeItem::decode(decoder)?);
             }
@@ -34939,7 +35486,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousRecommendedRANNodesForPagingIEExtensions::decode(
                     decoder,
@@ -35048,7 +35595,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousRedundantPDUSessionInformationIEExtensions::decode(
                     decoder,
@@ -35258,7 +35805,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousSNSSAIIEExtensions::decode(decoder)?);
             }
@@ -35329,7 +35876,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 2));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(TransportLayerAddress::decode(decoder)?);
             }
@@ -35411,7 +35958,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousSNPNMobilityInformationIEExtensions::decode(
                     decoder,
@@ -35512,7 +36059,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousSONConfigurationTransferIEExtensions::decode(
                     decoder,
@@ -35665,7 +36212,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousSONInformationReplyIEExtensions::decode(decoder)?);
             }
@@ -35823,7 +36370,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousScheduledCommunicationTimeIEExtensions::decode(
                     decoder,
@@ -35933,7 +36480,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousSecondaryRATDataUsageReportTransferIEExtensions::decode(decoder)?,
@@ -36034,7 +36581,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousSecondaryRATUsageInformationIEExtension::decode(
                     decoder,
@@ -36134,7 +36681,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousSecurityContextIEExtensions::decode(decoder)?);
             }
@@ -36234,7 +36781,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousSecurityIndicationIEExtensions::decode(decoder)?);
             }
@@ -36269,9 +36816,33 @@ pub mod ngap_ies {
             }
         }
     }
-    #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
+    #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct SecurityKey(pub FixedBitString<256usize>);
+    impl Decode for SecurityKey {
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            constraints: Constraints,
+        ) -> Result<Self, D::Error> {
+            if decoder.codec() != rasn::Codec::Aper {
+                return FixedBitString::<256usize>::decode_with_tag_and_constraints(
+                    decoder,
+                    tag,
+                    constraints,
+                )
+                .map(Self);
+            }
+            const OCTET: Constraints = rasn::constraints!(rasn::value_constraint!(0, 255));
+            const REST: Constraints = rasn::constraints!(rasn::size_constraint!(248));
+            let first = decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?;
+            let mut bits = BitString::from_element(first);
+            bits.extend_from_bitslice(&decoder.decode_bit_string(Tag::BIT_STRING, REST)?);
+            let mut value = FixedBitString::<256usize>::ZERO;
+            value[..256].copy_from_bitslice(&bits);
+            Ok(Self(value))
+        }
+    }
     #[doc = " Anonymous SEQUENCE OF member "]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "SEQUENCE")]
@@ -36339,7 +36910,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousSecurityResultIEExtensions::decode(decoder)?);
             }
@@ -36448,7 +37019,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousSensorMeasConfigNameItemIEExtensions::decode(
                     decoder,
@@ -36521,7 +37092,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 3));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(SensorMeasConfigNameItem::decode(decoder)?);
             }
@@ -36600,7 +37171,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousSensorMeasurementConfigurationIEExtensions::decode(
                     decoder,
@@ -36773,7 +37344,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousServedGUAMIItemIEExtensions::decode(decoder)?);
             }
@@ -36848,7 +37419,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(ServedGUAMIItem::decode(decoder)?);
             }
@@ -36899,7 +37470,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 16));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(ServiceAreaInformationItem::decode(decoder)?);
             }
@@ -36978,7 +37549,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousServiceAreaInformationItemIEExtensions::decode(
                     decoder,
@@ -37087,7 +37658,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousSliceOverloadItemIEExtensions::decode(decoder)?);
             }
@@ -37155,7 +37726,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 1024));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(SliceOverloadItem::decode(decoder)?);
             }
@@ -37229,7 +37800,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousSliceSupportItemIEExtensions::decode(decoder)?);
             }
@@ -37297,7 +37868,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 1024));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(SliceSupportItem::decode(decoder)?);
             }
@@ -37373,7 +37944,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousSourceNGRANNodeToTargetNGRANNodeTransparentContainerIEExtensions::decode(decoder)?);
             }
@@ -37501,7 +38072,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousSourceRANNodeIDIEExtensions::decode(decoder)?);
             }
@@ -37604,7 +38175,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousSourceToTargetAMFInformationRerouteIEExtensions::decode(decoder)?,
@@ -37713,7 +38284,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousSupportedTAItemIEExtensions::decode(decoder)?);
             }
@@ -37788,7 +38359,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(SupportedTAItem::decode(decoder)?);
             }
@@ -37883,7 +38454,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTABasedMDTIEExtensions::decode(decoder)?);
             }
@@ -37981,7 +38552,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTAIIEExtensions::decode(decoder)?);
             }
@@ -38079,7 +38650,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTAIBasedMDTIEExtensions::decode(decoder)?);
             }
@@ -38150,7 +38721,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(TAIBroadcastEUTRAItem::decode(decoder)?);
             }
@@ -38229,7 +38800,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTAIBroadcastEUTRAItemIEExtensions::decode(decoder)?);
             }
@@ -38304,7 +38875,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(TAIBroadcastNRItem::decode(decoder)?);
             }
@@ -38380,7 +38951,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTAIBroadcastNRItemIEExtensions::decode(decoder)?);
             }
@@ -38455,7 +39026,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(TAICancelledEUTRAItem::decode(decoder)?);
             }
@@ -38534,7 +39105,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTAICancelledEUTRAItemIEExtensions::decode(decoder)?);
             }
@@ -38609,7 +39180,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(TAICancelledNRItem::decode(decoder)?);
             }
@@ -38685,7 +39256,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTAICancelledNRItemIEExtensions::decode(decoder)?);
             }
@@ -38760,7 +39331,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 16));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(TAIListForInactiveItem::decode(decoder)?);
             }
@@ -38839,7 +39410,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTAIListForInactiveItemIEExtensions::decode(
                     decoder,
@@ -38909,7 +39480,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 16));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(TAIListForPagingItem::decode(decoder)?);
             }
@@ -38988,7 +39559,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTAIListForPagingItemIEExtensions::decode(decoder)?);
             }
@@ -39056,7 +39627,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 2048));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(TAI::decode(decoder)?);
             }
@@ -39107,7 +39678,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(TAI::decode(decoder)?);
             }
@@ -39158,7 +39729,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 8));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(TAI::decode(decoder)?);
             }
@@ -39209,7 +39780,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 8));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(TAC::decode(decoder)?);
             }
@@ -39236,13 +39807,53 @@ pub mod ngap_ies {
             }
         }
     }
-    #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
+    #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "TNGF-ID")]
     pub enum TNGFID {
         #[rasn(size("32", extensible), identifier = "tNGF-ID")]
         tNGF_ID(BitString),
         #[rasn(identifier = "choice-Extensions")]
         choice_Extensions(TNGFIDChoiceExtensions),
+    }
+    impl rasn::types::DecodeChoice for TNGFID {
+        fn from_tag<D: Decoder>(decoder: &mut D, tag: Tag) -> Result<Self, D::Error> {
+            if tag == Tag::new(Class::Context, 0) {
+                const SIZE: Constraints =
+                    rasn::constraints!(rasn::size_constraint!(32, extensible));
+                if decoder.codec() != rasn::Codec::Aper {
+                    return BitString::decode_with_tag_and_constraints(decoder, tag, SIZE)
+                        .map(Self::tNGF_ID);
+                }
+                if decoder.decode_bool(Tag::BOOL)? {
+                    return decoder
+                        .decode_bit_string(Tag::BIT_STRING, Constraints::default())
+                        .map(Self::tNGF_ID);
+                }
+                const OCTET: Constraints = rasn::constraints!(rasn::value_constraint!(0, 255));
+                const REST: Constraints = rasn::constraints!(rasn::size_constraint!(24));
+                let first = decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?;
+                let mut bits = BitString::from_element(first);
+                bits.extend_from_bitslice(&decoder.decode_bit_string(Tag::BIT_STRING, REST)?);
+                return Ok(Self::tNGF_ID(bits));
+            }
+            if tag == Tag::new(Class::Context, 1) {
+                return TNGFIDChoiceExtensions::decode_with_tag(decoder, tag)
+                    .map(Self::choice_Extensions);
+            }
+            Err(rasn::de::Error::no_valid_choice("TNGFID", decoder.codec()))
+        }
+    }
+    impl Decode for TNGFID {
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            _: Constraints,
+        ) -> Result<Self, D::Error> {
+            decoder.decode_explicit_prefix(tag)
+        }
+        fn decode<D: Decoder>(decoder: &mut D) -> Result<Self, D::Error> {
+            decoder.decode_choice(Self::CONSTRAINTS)
+        }
     }
     impl From<BitString> for TNGFID {
         fn from(value: BitString) -> Self {
@@ -39326,7 +39937,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTNLAssociationItemIEExtensions::decode(decoder)?);
             }
@@ -39400,7 +40011,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 32));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(TNLAssociationItem::decode(decoder)?);
             }
@@ -39488,7 +40099,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTSCAssistanceInformationIEExtensions::decode(
                     decoder,
@@ -39592,7 +40203,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTSCTrafficCharacteristicsIEExtensions::decode(
                     decoder,
@@ -39645,13 +40256,53 @@ pub mod ngap_ies {
             }
         }
     }
-    #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
+    #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "TWIF-ID")]
     pub enum TWIFID {
         #[rasn(size("32", extensible), identifier = "tWIF-ID")]
         tWIF_ID(BitString),
         #[rasn(identifier = "choice-Extensions")]
         choice_Extensions(TWIFIDChoiceExtensions),
+    }
+    impl rasn::types::DecodeChoice for TWIFID {
+        fn from_tag<D: Decoder>(decoder: &mut D, tag: Tag) -> Result<Self, D::Error> {
+            if tag == Tag::new(Class::Context, 0) {
+                const SIZE: Constraints =
+                    rasn::constraints!(rasn::size_constraint!(32, extensible));
+                if decoder.codec() != rasn::Codec::Aper {
+                    return BitString::decode_with_tag_and_constraints(decoder, tag, SIZE)
+                        .map(Self::tWIF_ID);
+                }
+                if decoder.decode_bool(Tag::BOOL)? {
+                    return decoder
+                        .decode_bit_string(Tag::BIT_STRING, Constraints::default())
+                        .map(Self::tWIF_ID);
+                }
+                const OCTET: Constraints = rasn::constraints!(rasn::value_constraint!(0, 255));
+                const REST: Constraints = rasn::constraints!(rasn::size_constraint!(24));
+                let first = decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?;
+                let mut bits = BitString::from_element(first);
+                bits.extend_from_bitslice(&decoder.decode_bit_string(Tag::BIT_STRING, REST)?);
+                return Ok(Self::tWIF_ID(bits));
+            }
+            if tag == Tag::new(Class::Context, 1) {
+                return TWIFIDChoiceExtensions::decode_with_tag(decoder, tag)
+                    .map(Self::choice_Extensions);
+            }
+            Err(rasn::de::Error::no_valid_choice("TWIFID", decoder.codec()))
+        }
+    }
+    impl Decode for TWIFID {
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            _: Constraints,
+        ) -> Result<Self, D::Error> {
+            decoder.decode_explicit_prefix(tag)
+        }
+        fn decode<D: Decoder>(decoder: &mut D) -> Result<Self, D::Error> {
+            decoder.decode_choice(Self::CONSTRAINTS)
+        }
     }
     impl From<BitString> for TWIFID {
         fn from(value: BitString) -> Self {
@@ -39829,7 +40480,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTargetNGRANNodeToSourceNGRANNodeTransparentContainerIEExtensions::decode(decoder)?);
             }
@@ -39929,7 +40580,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTargetRANNodeIDIEExtensions::decode(decoder)?);
             }
@@ -40027,7 +40678,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTargetRNCIDIEExtensions::decode(decoder)?);
             }
@@ -40132,7 +40783,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTargeteNBIDIEExtensions::decode(decoder)?);
             }
@@ -40298,7 +40949,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTooearlyIntersystemHOIEExtensions::decode(decoder)?);
             }
@@ -40400,7 +41051,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTraceActivationIEExtensions::decode(decoder)?);
             }
@@ -40576,7 +41227,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUEDifferentiationInfoIEExtensions::decode(decoder)?);
             }
@@ -40693,7 +41344,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUENGAPIDPairIEExtensions::decode(decoder)?);
             }
@@ -40844,7 +41495,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousUEAssociatedLogicalNGConnectionItemIEExtensions::decode(decoder)?,
@@ -40877,7 +41528,7 @@ pub mod ngap_ies {
             }
         }
     }
-    #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
+    #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(
         delegate,
         size("1..=65536"),
@@ -40886,6 +41537,60 @@ pub mod ngap_ies {
     pub struct UEAssociatedLogicalNGConnectionList(
         pub SequenceOf<UEAssociatedLogicalNGConnectionItem>,
     );
+    impl Encode for UEAssociatedLogicalNGConnectionList {
+        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
+            &self,
+            encoder: &mut E,
+            tag: Tag,
+            constraints: Constraints,
+            identifier: Identifier,
+        ) -> Result<(), E::Error> {
+            if encoder.codec() != rasn::Codec::Aper {
+                return encoder
+                    .encode_sequence_of(tag, &self.0, constraints, identifier)
+                    .map(drop);
+            }
+            if !(1..=65536).contains(&self.0.len()) {
+                return Err(rasn::error::EncodeError::size_constraint_not_satisfied(
+                    self.0.len(),
+                    &rasn::types::constraints::Size::new(rasn::types::constraints::Bounded::new(
+                        1, 65536,
+                    )),
+                    encoder.codec(),
+                )
+                .into());
+            }
+            encoder
+                .encode_sequence_of(tag, &self.0, Constraints::default(), identifier)
+                .map(drop)
+        }
+    }
+    impl Decode for UEAssociatedLogicalNGConnectionList {
+        fn decode_with_tag_and_constraints<D: Decoder>(
+            decoder: &mut D,
+            tag: Tag,
+            constraints: Constraints,
+        ) -> Result<Self, D::Error> {
+            if decoder.codec() != rasn::Codec::Aper {
+                return decoder
+                    .decode_sequence_of::<UEAssociatedLogicalNGConnectionItem>(tag, constraints)
+                    .map(Self);
+            }
+            let values = decoder.decode_sequence_of::<UEAssociatedLogicalNGConnectionItem>(
+                tag,
+                Constraints::default(),
+            )?;
+            if !(1..=65536).contains(&values.len()) {
+                return Err(rasn::error::DecodeError::size_constraint_not_satisfied(
+                    Some(values.len()),
+                    "1..=65536".into(),
+                    decoder.codec(),
+                )
+                .into());
+            }
+            Ok(Self(values))
+        }
+    }
     #[doc = " Anonymous SEQUENCE OF member "]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "SEQUENCE")]
@@ -40958,7 +41663,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUEAggregateMaximumBitRateIEExtensions::decode(
                     decoder,
@@ -41076,7 +41781,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUEContextResumeRequestTransferIEExtensions::decode(
                     decoder,
@@ -41177,7 +41882,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUEContextResumeResponseTransferIEExtensions::decode(decoder)?);
             }
@@ -41276,7 +41981,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUEContextSuspendRequestTransferIEExtensions::decode(decoder)?);
             }
@@ -41347,7 +42052,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 16));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(LastVisitedCellItem::decode(decoder)?);
             }
@@ -41539,7 +42244,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUEPresenceInAreaOfInterestItemIEExtensions::decode(
                     decoder,
@@ -41616,7 +42321,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 64));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(UEPresenceInAreaOfInterestItem::decode(decoder)?);
             }
@@ -41738,7 +42443,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUERadioCapabilityForPagingIEExtensions::decode(
                     decoder,
@@ -41862,7 +42567,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUESecurityCapabilitiesIEExtensions::decode(
                     decoder,
@@ -41975,7 +42680,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousULCPSecurityInformationIEExtensions::decode(
                     decoder,
@@ -42086,7 +42791,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousULNGUUPTNLModifyItemIEExtensions::decode(decoder)?);
             }
@@ -42161,7 +42866,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 4));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(ULNGUUPTNLModifyItem::decode(decoder)?);
             }
@@ -42281,7 +42986,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUPTransportLayerInformationItemIEExtensions::decode(decoder)?);
             }
@@ -42352,7 +43057,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 3));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(UPTransportLayerInformationItem::decode(decoder)?);
             }
@@ -42431,7 +43136,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousUPTransportLayerInformationPairItemIEExtensions::decode(decoder)?,
@@ -42510,7 +43215,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 3));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(UPTransportLayerInformationPairItem::decode(decoder)?);
             }
@@ -42592,7 +43297,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUnavailableGUAMIItemIEExtensions::decode(decoder)?);
             }
@@ -42671,7 +43376,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 256));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(UnavailableGUAMIItem::decode(decoder)?);
             }
@@ -42799,7 +43504,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUserLocationInformationEUTRAIEExtensions::decode(
                     decoder,
@@ -42908,7 +43613,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUserLocationInformationN3IWFIEExtensions::decode(
                     decoder,
@@ -43013,7 +43718,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUserLocationInformationNRIEExtensions::decode(
                     decoder,
@@ -43122,7 +43827,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUserLocationInformationTNGFIEExtensions::decode(
                     decoder,
@@ -43231,7 +43936,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUserLocationInformationTWIFIEExtensions::decode(
                     decoder,
@@ -43382,7 +44087,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUserPlaneSecurityInformationIEExtensions::decode(
                     decoder,
@@ -43495,7 +44200,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousVolumeTimedReportItemIEExtensions::decode(decoder)?);
             }
@@ -43579,7 +44284,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 2));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(VolumeTimedReportItem::decode(decoder)?);
             }
@@ -43700,7 +44405,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousWLANMeasConfigNameItemIEExtensions::decode(
                     decoder,
@@ -43773,7 +44478,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 4));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(WLANMeasConfigNameItem::decode(decoder)?);
             }
@@ -43868,7 +44573,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousWLANMeasurementConfigurationIEExtensions::decode(
                     decoder,
@@ -43984,7 +44689,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousWUSAssistanceInformationIEExtensions::decode(
                     decoder,
@@ -44146,7 +44851,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousXnExtTLAItemIEExtensions::decode(decoder)?);
             }
@@ -44222,7 +44927,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 16));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(XnExtTLAItem::decode(decoder)?);
             }
@@ -44273,7 +44978,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 16));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(TransportLayerAddress::decode(decoder)?);
             }
@@ -44324,7 +45029,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 2));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(TransportLayerAddress::decode(decoder)?);
             }
@@ -44403,7 +45108,7 @@ pub mod ngap_ies {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousXnTNLConfigurationInfoIEExtensions::decode(
                     decoder,
@@ -44608,7 +45313,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAMFCPRelocationIndicationProtocolIEs::decode(
                     decoder,
@@ -44710,7 +45415,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAMFConfigurationUpdateProtocolIEs::decode(decoder)?);
             }
@@ -44815,7 +45520,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousAMFConfigurationUpdateAcknowledgeProtocolIEs::decode(decoder)?);
@@ -44916,7 +45621,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAMFConfigurationUpdateFailureProtocolIEs::decode(
                     decoder,
@@ -45015,7 +45720,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousAMFStatusIndicationProtocolIEs::decode(decoder)?);
             }
@@ -45115,7 +45820,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousCellTrafficTraceProtocolIEs::decode(decoder)?);
             }
@@ -45215,7 +45920,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousConnectionEstablishmentIndicationProtocolIEs::decode(decoder)?);
@@ -45311,7 +46016,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousDeactivateTraceProtocolIEs::decode(decoder)?);
             }
@@ -45411,7 +46116,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousDownlinkNASTransportProtocolIEs::decode(decoder)?);
             }
@@ -45508,7 +46213,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousDownlinkNonUEAssociatedNRPPaTransportProtocolIEs::decode(decoder)?,
@@ -45610,7 +46315,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousDownlinkRANConfigurationTransferProtocolIEs::decode(decoder)?);
             }
@@ -45710,7 +46415,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousDownlinkRANEarlyStatusTransferProtocolIEs::decode(
                     decoder,
@@ -45817,7 +46522,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousDownlinkRANStatusTransferProtocolIEs::decode(
                     decoder,
@@ -45924,7 +46629,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousDownlinkRIMInformationTransferProtocolIEs::decode(
                     decoder,
@@ -46026,7 +46731,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousDownlinkUEAssociatedNRPPaTransportProtocolIEs::decode(decoder)?);
@@ -46127,7 +46832,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousErrorIndicationProtocolIEs::decode(decoder)?);
             }
@@ -46227,7 +46932,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousHandoverCancelProtocolIEs::decode(decoder)?);
             }
@@ -46332,7 +47037,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousHandoverCancelAcknowledgeProtocolIEs::decode(
                     decoder,
@@ -46429,7 +47134,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousHandoverCommandProtocolIEs::decode(decoder)?);
             }
@@ -46524,7 +47229,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousHandoverFailureProtocolIEs::decode(decoder)?);
             }
@@ -46619,7 +47324,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousHandoverNotifyProtocolIEs::decode(decoder)?);
             }
@@ -46724,7 +47429,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousHandoverPreparationFailureProtocolIEs::decode(
                     decoder,
@@ -46821,7 +47526,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousHandoverRequestProtocolIEs::decode(decoder)?);
             }
@@ -46926,7 +47631,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousHandoverRequestAcknowledgeProtocolIEs::decode(
                     decoder,
@@ -47023,7 +47728,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousHandoverRequiredProtocolIEs::decode(decoder)?);
             }
@@ -47128,7 +47833,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousHandoverSuccessProtocolIEs::decode(decoder)?);
             }
@@ -47233,7 +47938,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousInitialContextSetupFailureProtocolIEs::decode(
                     decoder,
@@ -47335,7 +48040,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousInitialContextSetupRequestProtocolIEs::decode(
                     decoder,
@@ -47447,7 +48152,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousInitialContextSetupResponseProtocolIEs::decode(
                     decoder,
@@ -47544,7 +48249,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousInitialUEMessageProtocolIEs::decode(decoder)?);
             }
@@ -47644,7 +48349,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousLocationReportProtocolIEs::decode(decoder)?);
             }
@@ -47744,7 +48449,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousLocationReportingControlProtocolIEs::decode(
                     decoder,
@@ -47851,7 +48556,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousLocationReportingFailureIndicationProtocolIEs::decode(decoder)?);
@@ -47952,7 +48657,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousNASNonDeliveryIndicationProtocolIEs::decode(
                     decoder,
@@ -48049,7 +48754,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousNGResetProtocolIEs::decode(decoder)?);
             }
@@ -48151,7 +48856,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousNGResetAcknowledgeProtocolIEs::decode(decoder)?);
             }
@@ -48246,7 +48951,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousNGSetupFailureProtocolIEs::decode(decoder)?);
             }
@@ -48341,7 +49046,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousNGSetupRequestProtocolIEs::decode(decoder)?);
             }
@@ -48446,7 +49151,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousNGSetupResponseProtocolIEs::decode(decoder)?);
             }
@@ -48541,7 +49246,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousOverloadStartProtocolIEs::decode(decoder)?);
             }
@@ -48636,7 +49341,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousOverloadStopProtocolIEs::decode(decoder)?);
             }
@@ -48736,7 +49441,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPDUSessionResourceModifyConfirmProtocolIEs::decode(
                     decoder,
@@ -48838,7 +49543,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousPDUSessionResourceModifyIndicationProtocolIEs::decode(decoder)?);
@@ -48944,7 +49649,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPDUSessionResourceModifyRequestProtocolIEs::decode(
                     decoder,
@@ -49051,7 +49756,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPDUSessionResourceModifyResponseProtocolIEs::decode(decoder)?);
             }
@@ -49151,7 +49856,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPDUSessionResourceNotifyProtocolIEs::decode(
                     decoder,
@@ -49258,7 +49963,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPDUSessionResourceReleaseCommandProtocolIEs::decode(decoder)?);
             }
@@ -49363,7 +50068,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousPDUSessionResourceReleaseResponseProtocolIEs::decode(decoder)?);
@@ -49464,7 +50169,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPDUSessionResourceSetupRequestProtocolIEs::decode(
                     decoder,
@@ -49576,7 +50281,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPDUSessionResourceSetupResponseProtocolIEs::decode(
                     decoder,
@@ -49673,7 +50378,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPWSCancelRequestProtocolIEs::decode(decoder)?);
             }
@@ -49773,7 +50478,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPWSCancelResponseProtocolIEs::decode(decoder)?);
             }
@@ -49873,7 +50578,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPWSFailureIndicationProtocolIEs::decode(decoder)?);
             }
@@ -49978,7 +50683,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPWSRestartIndicationProtocolIEs::decode(decoder)?);
             }
@@ -50078,7 +50783,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPagingProtocolIEs::decode(decoder)?);
             }
@@ -50178,7 +50883,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPathSwitchRequestProtocolIEs::decode(decoder)?);
             }
@@ -50283,7 +50988,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPathSwitchRequestAcknowledgeProtocolIEs::decode(
                     decoder,
@@ -50385,7 +51090,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPathSwitchRequestFailureProtocolIEs::decode(
                     decoder,
@@ -50473,7 +51178,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(1, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousPrivateMessagePrivateIEs::decode(decoder)?);
             }
@@ -50569,7 +51274,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousRANCPRelocationIndicationProtocolIEs::decode(
                     decoder,
@@ -50662,7 +51367,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousRANConfigurationUpdateProtocolIEs::decode(decoder)?);
             }
@@ -50758,7 +51463,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousRANConfigurationUpdateAcknowledgeProtocolIEs::decode(decoder)?);
@@ -50850,7 +51555,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousRANConfigurationUpdateFailureProtocolIEs::decode(
                     decoder,
@@ -50943,7 +51648,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousRRCInactiveTransitionReportProtocolIEs::decode(
                     decoder,
@@ -51031,7 +51736,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousRerouteNASRequestProtocolIEs::decode(decoder)?);
             }
@@ -51122,7 +51827,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousRetrieveUEInformationProtocolIEs::decode(decoder)?);
             }
@@ -51213,7 +51918,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousSecondaryRATDataUsageReportProtocolIEs::decode(
                     decoder,
@@ -51311,7 +52016,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTraceFailureIndicationProtocolIEs::decode(decoder)?);
             }
@@ -51397,7 +52102,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousTraceStartProtocolIEs::decode(decoder)?);
             }
@@ -51493,7 +52198,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUEContextModificationFailureProtocolIEs::decode(
                     decoder,
@@ -51586,7 +52291,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUEContextModificationRequestProtocolIEs::decode(
                     decoder,
@@ -51684,7 +52389,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUEContextModificationResponseProtocolIEs::decode(
                     decoder,
@@ -51777,7 +52482,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUEContextReleaseCommandProtocolIEs::decode(
                     decoder,
@@ -51875,7 +52580,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUEContextReleaseCompleteProtocolIEs::decode(
                     decoder,
@@ -51968,7 +52673,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUEContextReleaseRequestProtocolIEs::decode(
                     decoder,
@@ -52066,7 +52771,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUEContextResumeFailureProtocolIEs::decode(decoder)?);
             }
@@ -52157,7 +52862,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUEContextResumeRequestProtocolIEs::decode(decoder)?);
             }
@@ -52253,7 +52958,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUEContextResumeResponseProtocolIEs::decode(
                     decoder,
@@ -52346,7 +53051,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUEContextSuspendFailureProtocolIEs::decode(
                     decoder,
@@ -52439,7 +53144,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUEContextSuspendRequestProtocolIEs::decode(
                     decoder,
@@ -52537,7 +53242,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUEContextSuspendResponseProtocolIEs::decode(
                     decoder,
@@ -52630,7 +53335,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUEInformationTransferProtocolIEs::decode(decoder)?);
             }
@@ -52720,7 +53425,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUERadioCapabilityCheckRequestProtocolIEs::decode(
                     decoder,
@@ -52818,7 +53523,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUERadioCapabilityCheckResponseProtocolIEs::decode(
                     decoder,
@@ -52911,7 +53616,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousUERadioCapabilityIDMappingRequestProtocolIEs::decode(decoder)?);
@@ -53008,7 +53713,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values
                     .push(AnonymousUERadioCapabilityIDMappingResponseProtocolIEs::decode(decoder)?);
@@ -53100,7 +53805,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUERadioCapabilityInfoIndicationProtocolIEs::decode(
                     decoder,
@@ -53198,7 +53903,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUETNLABindingReleaseRequestProtocolIEs::decode(
                     decoder,
@@ -53293,7 +53998,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUplinkNASTransportProtocolIEs::decode(decoder)?);
             }
@@ -53384,7 +54089,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(
                     AnonymousUplinkNonUEAssociatedNRPPaTransportProtocolIEs::decode(decoder)?,
@@ -53477,7 +54182,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUplinkRANConfigurationTransferProtocolIEs::decode(
                     decoder,
@@ -53575,7 +54280,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUplinkRANEarlyStatusTransferProtocolIEs::decode(
                     decoder,
@@ -53673,7 +54378,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUplinkRANStatusTransferProtocolIEs::decode(
                     decoder,
@@ -53771,7 +54476,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUplinkRIMInformationTransferProtocolIEs::decode(
                     decoder,
@@ -53869,7 +54574,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousUplinkUEAssociatedNRPPaTransportProtocolIEs::decode(decoder)?);
             }
@@ -53960,7 +54665,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousWriteReplaceWarningRequestProtocolIEs::decode(
                     decoder,
@@ -54063,7 +54768,7 @@ pub mod ngap_pdu_contents {
             const LENGTH_CONSTRAINTS: Constraints =
                 rasn::constraints!(rasn::value_constraint!(0, 65535));
             let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::with_capacity(length);
+            let mut values = Vec::new();
             for _ in 0..length {
                 values.push(AnonymousWriteReplaceWarningResponseProtocolIEs::decode(
                     decoder,
@@ -56267,7 +56972,7 @@ impl From<SequenceOf<TransportLayerAddress>> for XnTLAs {
 #[doc(hidden)]
 macro_rules! __ngap_ie_id {
     (AMFName) => {
-        48u16
+        1u16
     };
     (AMFOverloadResponse) => {
         2u16
@@ -56289,9 +56994,6 @@ macro_rules! __ngap_ie_id {
     };
     (AMFTrafficLoadReductionIndication) => {
         9u16
-    };
-    (AMFUENGAPID) => {
-        10u16
     };
     (AMF_TNLAssociationFailedToSetupList) => {
         4u16
@@ -56388,9 +57090,6 @@ macro_rules! __ngap_ie_id {
     };
     (EDT_Session) => {
         227u16
-    };
-    (ENDCSONConfigurationTransfer) => {
-        158u16
     };
     (ENDC_SONConfigurationTransferDL) => {
         157u16
@@ -56512,9 +57211,6 @@ macro_rules! __ngap_ie_id {
     (InfoOnRecommendedCellsAndRANNodesForPaging) => {
         32u16
     };
-    (IntersystemSONConfigurationTransfer) => {
-        251u16
-    };
     (IntersystemSONConfigurationTransferDL) => {
         250u16
     };
@@ -56554,9 +57250,6 @@ macro_rules! __ngap_ie_id {
     (NASC) => {
         37u16
     };
-    (NASPDU) => {
-        38u16
-    };
     (NASSecurityParametersFromNGRAN) => {
         39u16
     };
@@ -56586,6 +57279,9 @@ macro_rules! __ngap_ie_id {
     };
     (NB_IoT_UEPriority) => {
         210u16
+    };
+    (NGAP_Message) => {
+        42u16
     };
     (NGRANCGI) => {
         43u16
@@ -56828,7 +57524,7 @@ macro_rules! __ngap_ie_id {
         175u16
     };
     (RRCEstablishmentCause) => {
-        237u16
+        90u16
     };
     (RRCInactiveTransitionReportRequest) => {
         91u16
@@ -56865,9 +57561,6 @@ macro_rules! __ngap_ie_id {
     };
     (SNSSAI) => {
         148u16
-    };
-    (SONConfigurationTransfer) => {
-        99u16
     };
     (SONConfigurationTransferDL) => {
         98u16
@@ -56941,8 +57634,14 @@ macro_rules! __ngap_ie_id {
     (TAIListForRestart) => {
         104u16
     };
+    (TNGFIdentityInformation) => {
+        246u16
+    };
     (TNLAssociationList) => {
         4u16
+    };
+    (TWIFIdentityInformation) => {
+        247u16
     };
     (TargetID) => {
         105u16
@@ -57055,12 +57754,6 @@ macro_rules! __ngap_ie_id {
     (UL_NGU_UP_TNLModifyList) => {
         140u16
     };
-    (UPTransportLayerInformation) => {
-        195u16
-    };
-    (UPTransportLayerInformationList) => {
-        126u16
-    };
     (URIAddress) => {
         257u16
     };
@@ -57087,6 +57780,9 @@ macro_rules! __ngap_ie_id {
     };
     (WUS_Assistance_Information) => {
         208u16
+    };
+    (W_AGFIdentityInformation) => {
+        239u16
     };
     (WarningAreaCoordinates) => {
         141u16
@@ -57137,10 +57833,6 @@ macro_rules! __ngap_encode_ie {
     }};
     (AMFTrafficLoadReductionIndication, $value:expr) => {{
         let value: $crate::ngap::TrafficLoadReductionIndication = ($value).into();
-        $crate::ngap::encode_open_type(&value)
-    }};
-    (AMFUENGAPID, $value:expr) => {{
-        let value: $crate::ngap::AMFUENGAPID = ($value).into();
         $crate::ngap::encode_open_type(&value)
     }};
     (AMF_TNLAssociationFailedToSetupList, $value:expr) => {{
@@ -57269,10 +57961,6 @@ macro_rules! __ngap_encode_ie {
     }};
     (EDT_Session, $value:expr) => {{
         let value: $crate::ngap::EDTSession = ($value).into();
-        $crate::ngap::encode_open_type(&value)
-    }};
-    (ENDCSONConfigurationTransfer, $value:expr) => {{
-        let value: $crate::ngap::ENDCSONConfigurationTransfer = ($value).into();
         $crate::ngap::encode_open_type(&value)
     }};
     (ENDC_SONConfigurationTransferDL, $value:expr) => {{
@@ -57435,10 +58123,6 @@ macro_rules! __ngap_encode_ie {
         let value: $crate::ngap::InfoOnRecommendedCellsAndRANNodesForPaging = ($value).into();
         $crate::ngap::encode_open_type(&value)
     }};
-    (IntersystemSONConfigurationTransfer, $value:expr) => {{
-        let value: $crate::ngap::IntersystemSONConfigurationTransfer = ($value).into();
-        $crate::ngap::encode_open_type(&value)
-    }};
     (IntersystemSONConfigurationTransferDL, $value:expr) => {{
         let value: $crate::ngap::IntersystemSONConfigurationTransfer = ($value).into();
         $crate::ngap::encode_open_type(&value)
@@ -57491,10 +58175,6 @@ macro_rules! __ngap_encode_ie {
         let value: $crate::ngap::NASPDU = ($value).into();
         $crate::ngap::encode_open_type(&value)
     }};
-    (NASPDU, $value:expr) => {{
-        let value: $crate::ngap::NASPDU = ($value).into();
-        $crate::ngap::encode_open_type(&value)
-    }};
     (NASSecurityParametersFromNGRAN, $value:expr) => {{
         let value: $crate::ngap::NASSecurityParametersFromNGRAN = ($value).into();
         $crate::ngap::encode_open_type(&value)
@@ -57533,6 +58213,10 @@ macro_rules! __ngap_encode_ie {
     }};
     (NB_IoT_UEPriority, $value:expr) => {{
         let value: $crate::ngap::NBIoTUEPriority = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (NGAP_Message, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
         $crate::ngap::encode_open_type(&value)
     }};
     (NGRANCGI, $value:expr) => {{
@@ -57907,10 +58591,6 @@ macro_rules! __ngap_encode_ie {
         let value: $crate::ngap::SNSSAI = ($value).into();
         $crate::ngap::encode_open_type(&value)
     }};
-    (SONConfigurationTransfer, $value:expr) => {{
-        let value: $crate::ngap::SONConfigurationTransfer = ($value).into();
-        $crate::ngap::encode_open_type(&value)
-    }};
     (SONConfigurationTransferDL, $value:expr) => {{
         let value: $crate::ngap::SONConfigurationTransfer = ($value).into();
         $crate::ngap::encode_open_type(&value)
@@ -58007,8 +58687,16 @@ macro_rules! __ngap_encode_ie {
         let value: $crate::ngap::TAIListForRestart = ($value).into();
         $crate::ngap::encode_open_type(&value)
     }};
+    (TNGFIdentityInformation, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
     (TNLAssociationList, $value:expr) => {{
         let value: $crate::ngap::TNLAssociationList = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (TWIFIdentityInformation, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
         $crate::ngap::encode_open_type(&value)
     }};
     (TargetID, $value:expr) => {{
@@ -58159,14 +58847,6 @@ macro_rules! __ngap_encode_ie {
         let value: $crate::ngap::ULNGUUPTNLModifyList = ($value).into();
         $crate::ngap::encode_open_type(&value)
     }};
-    (UPTransportLayerInformation, $value:expr) => {{
-        let value: $crate::ngap::UPTransportLayerInformation = ($value).into();
-        $crate::ngap::encode_open_type(&value)
-    }};
-    (UPTransportLayerInformationList, $value:expr) => {{
-        let value: $crate::ngap::UPTransportLayerInformationList = ($value).into();
-        $crate::ngap::encode_open_type(&value)
-    }};
     (URIAddress, $value:expr) => {{
         let value: $crate::ngap::URIAddress = ($value).into();
         $crate::ngap::encode_open_type(&value)
@@ -58201,6 +58881,10 @@ macro_rules! __ngap_encode_ie {
     }};
     (WUS_Assistance_Information, $value:expr) => {{
         let value: $crate::ngap::WUSAssistanceInformation = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+    (W_AGFIdentityInformation, $value:expr) => {{
+        let value: $crate::__rasn::types::OctetString = ($value).into();
         $crate::ngap::encode_open_type(&value)
     }};
     (WarningAreaCoordinates, $value:expr) => {{
@@ -58250,9 +58934,6 @@ macro_rules! __ngap_decode_ie {
     };
     (AMFTrafficLoadReductionIndication, $value:expr) => {
         $crate::ngap::decode_open_type::<$crate::ngap::TrafficLoadReductionIndication>($value)
-    };
-    (AMFUENGAPID, $value:expr) => {
-        $crate::ngap::decode_open_type::<$crate::ngap::AMFUENGAPID>($value)
     };
     (AMF_TNLAssociationFailedToSetupList, $value:expr) => {
         $crate::ngap::decode_open_type::<$crate::ngap::TNLAssociationList>($value)
@@ -58351,9 +59032,6 @@ macro_rules! __ngap_decode_ie {
     };
     (EDT_Session, $value:expr) => {
         $crate::ngap::decode_open_type::<$crate::ngap::EDTSession>($value)
-    };
-    (ENDCSONConfigurationTransfer, $value:expr) => {
-        $crate::ngap::decode_open_type::<$crate::ngap::ENDCSONConfigurationTransfer>($value)
     };
     (ENDC_SONConfigurationTransferDL, $value:expr) => {
         $crate::ngap::decode_open_type::<$crate::ngap::ENDCSONConfigurationTransfer>($value)
@@ -58481,9 +59159,6 @@ macro_rules! __ngap_decode_ie {
             $value,
         )
     };
-    (IntersystemSONConfigurationTransfer, $value:expr) => {
-        $crate::ngap::decode_open_type::<$crate::ngap::IntersystemSONConfigurationTransfer>($value)
-    };
     (IntersystemSONConfigurationTransferDL, $value:expr) => {
         $crate::ngap::decode_open_type::<$crate::ngap::IntersystemSONConfigurationTransfer>($value)
     };
@@ -58523,9 +59198,6 @@ macro_rules! __ngap_decode_ie {
     (NASC, $value:expr) => {
         $crate::ngap::decode_open_type::<$crate::ngap::NASPDU>($value)
     };
-    (NASPDU, $value:expr) => {
-        $crate::ngap::decode_open_type::<$crate::ngap::NASPDU>($value)
-    };
     (NASSecurityParametersFromNGRAN, $value:expr) => {
         $crate::ngap::decode_open_type::<$crate::ngap::NASSecurityParametersFromNGRAN>($value)
     };
@@ -58555,6 +59227,9 @@ macro_rules! __ngap_decode_ie {
     };
     (NB_IoT_UEPriority, $value:expr) => {
         $crate::ngap::decode_open_type::<$crate::ngap::NBIoTUEPriority>($value)
+    };
+    (NGAP_Message, $value:expr) => {
+        $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value)
     };
     (NGRANCGI, $value:expr) => {
         $crate::ngap::decode_open_type::<$crate::ngap::NGRANCGI>($value)
@@ -58861,9 +59536,6 @@ macro_rules! __ngap_decode_ie {
     (SNSSAI, $value:expr) => {
         $crate::ngap::decode_open_type::<$crate::ngap::SNSSAI>($value)
     };
-    (SONConfigurationTransfer, $value:expr) => {
-        $crate::ngap::decode_open_type::<$crate::ngap::SONConfigurationTransfer>($value)
-    };
     (SONConfigurationTransferDL, $value:expr) => {
         $crate::ngap::decode_open_type::<$crate::ngap::SONConfigurationTransfer>($value)
     };
@@ -58936,8 +59608,14 @@ macro_rules! __ngap_decode_ie {
     (TAIListForRestart, $value:expr) => {
         $crate::ngap::decode_open_type::<$crate::ngap::TAIListForRestart>($value)
     };
+    (TNGFIdentityInformation, $value:expr) => {
+        $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value)
+    };
     (TNLAssociationList, $value:expr) => {
         $crate::ngap::decode_open_type::<$crate::ngap::TNLAssociationList>($value)
+    };
+    (TWIFIdentityInformation, $value:expr) => {
+        $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value)
     };
     (TargetID, $value:expr) => {
         $crate::ngap::decode_open_type::<$crate::ngap::TargetID>($value)
@@ -59054,12 +59732,6 @@ macro_rules! __ngap_decode_ie {
     (UL_NGU_UP_TNLModifyList, $value:expr) => {
         $crate::ngap::decode_open_type::<$crate::ngap::ULNGUUPTNLModifyList>($value)
     };
-    (UPTransportLayerInformation, $value:expr) => {
-        $crate::ngap::decode_open_type::<$crate::ngap::UPTransportLayerInformation>($value)
-    };
-    (UPTransportLayerInformationList, $value:expr) => {
-        $crate::ngap::decode_open_type::<$crate::ngap::UPTransportLayerInformationList>($value)
-    };
     (URIAddress, $value:expr) => {
         $crate::ngap::decode_open_type::<$crate::ngap::URIAddress>($value)
     };
@@ -59086,6 +59758,9 @@ macro_rules! __ngap_decode_ie {
     };
     (WUS_Assistance_Information, $value:expr) => {
         $crate::ngap::decode_open_type::<$crate::ngap::WUSAssistanceInformation>($value)
+    };
+    (W_AGFIdentityInformation, $value:expr) => {
+        $crate::ngap::decode_open_type::<$crate::__rasn::types::OctetString>($value)
     };
     (WarningAreaCoordinates, $value:expr) => {
         $crate::ngap::decode_open_type::<$crate::ngap::WarningAreaCoordinates>($value)
@@ -59768,10 +60443,17 @@ impl std::fmt::Display for NGAPPDU {
     }
 }
 /// Encode a typed ASN.1 value for an NGAP open type using APER.
+///
+/// An open type holds a complete encoding, in which an empty encoding
+/// becomes one zero octet (X.691 (07/2002) §10.1.4, §10.2.1).
 pub fn encode_open_type<T: rasn::Encode>(
     value: &T,
 ) -> Result<rasn::types::Any, rasn::error::EncodeError> {
-    rasn::aper::encode(value).map(rasn::types::Any::new)
+    let mut bytes = rasn::aper::encode(value)?;
+    if bytes.is_empty() {
+        bytes.push(0);
+    }
+    Ok(rasn::types::Any::new(bytes))
 }
 /// Decode a typed ASN.1 value from an NGAP open type using APER.
 pub fn decode_open_type<T: rasn::Decode>(

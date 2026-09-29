@@ -54,6 +54,7 @@ fn post_process(path: &Path, asn_files: &[PathBuf]) -> Result<()> {
     generated = crate::aper_fix::fix_utf8_strings(&generated)?;
     generated = crate::aper_fix::fix_fixed_bit_strings(&generated)?;
     generated = crate::aper_fix::fix_long_inline_strings(&generated)?;
+    generated = crate::aper_fix::fix_extensible_sequences(&generated)?;
 
     // The concrete private/extension containers below use these common types,
     // but rasn-compiler omits both from the generated module import list.
@@ -342,7 +343,7 @@ fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
         out,
         "    pub fn decode(bytes: &[u8]) -> Result<Self, rasn::error::DecodeError> {{"
     )?;
-    writeln!(out, "        rasn::aper::decode(bytes)")?;
+    writeln!(out, "        decode_complete(bytes)")?;
     writeln!(out, "    }}")?;
     writeln!(
         out,
@@ -366,7 +367,7 @@ fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
         "            NGAPPDU::unsuccessfulOutcome(message) => &message.value,"
     )?;
     writeln!(out, "        }};")?;
-    writeln!(out, "        rasn::aper::decode(value.as_bytes())")?;
+    writeln!(out, "        decode_open_type(value)")?;
     writeln!(out, "    }}")?;
     writeln!(out, "    /// Return the procedure code of this PDU.")?;
     writeln!(out, "    pub fn procedure_code(&self) -> u8 {{")?;
@@ -529,7 +530,23 @@ fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
         out,
         "pub fn decode_open_type<T: rasn::Decode>(value: &rasn::types::Any) -> Result<T, rasn::error::DecodeError> {{"
     )?;
-    writeln!(out, "    rasn::aper::decode(value.as_bytes())")?;
+    writeln!(out, "    decode_complete(value.as_bytes())")?;
+    writeln!(out, "}}")?;
+    writeln!(out, "fn decode_complete<T: rasn::Decode>(bytes: &[u8]) -> Result<T, rasn::error::DecodeError> {{")?;
+    writeln!(out, "    if bytes.is_empty() {{")?;
+    writeln!(out, "        return Err(<rasn::error::DecodeError as rasn::de::Error>::custom(")?;
+    writeln!(out, "            \"APER value must contain a complete encoding\", rasn::Codec::Aper,")?;
+    writeln!(out, "        ));")?;
+    writeln!(out, "    }}")?;
+    writeln!(out, "    let (decoded, remainder) = rasn::aper::decode_with_remainder(bytes)?;")?;
+    writeln!(out, "    // A zero-bit field-list has exactly one zero octet as its complete encoding.")?;
+    writeln!(out, "    let zero_bit_encoding = bytes == [0] && remainder == bytes;")?;
+    writeln!(out, "    if !remainder.is_empty() && !zero_bit_encoding {{")?;
+    writeln!(out, "        return Err(<rasn::error::DecodeError as rasn::de::Error>::custom(")?;
+    writeln!(out, "            \"APER complete encoding has trailing whole octets\", rasn::Codec::Aper,")?;
+    writeln!(out, "        ));")?;
+    writeln!(out, "    }}")?;
+    writeln!(out, "    Ok(decoded)")?;
     writeln!(out, "}}")?;
 
     Ok(out)

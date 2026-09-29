@@ -6,7 +6,7 @@ description = "5G NGAP (NG Application Protocol) APER codec — auto-generated f
 license = "Apache-2.0"
 repository = "https://github.com/linouxis9/oxirush-ngap"
 authors = ["Valentin D'Emmanuele"]
-rust-version = "1.85"
+rust-version = "1.88"
 keywords = ["5g", "ngap", "3gpp", "asn1", "aper"]
 categories = ["network-programming", "encoding", "parser-implementations"]
 readme = "README.md"
@@ -14,6 +14,7 @@ include = [
     "src/**/*.rs",
     "examples/**/*.rs",
     "tests/**/*.rs",
+    "tests/fixtures/*.tsv",
     "README.md",
     "LICENSE",
 ]

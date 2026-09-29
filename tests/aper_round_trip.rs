@@ -179,6 +179,42 @@ fn every_constrained_list_encodes_its_length_per_x691() {
     assert_eq!(NGAP_PDU::decode(&wire).expect("decode"), reset);
 }
 
+/// A long element name makes rustfmt split both the SEQUENCE OF attribute
+/// and declaration. The count still uses aligned PER's constrained integer
+/// encoding (X.691 (02/2021) §20.6, §11.9.3.3, §11.5.7.3).
+#[test]
+fn multiline_extension_list_has_an_aligned_count() {
+    let list =
+        NGAPIESupportInformationResponseList(vec![NGAPIESupportInformationResponseItem::new(
+            ProtocolIEID(10),
+            NGAPIESupportInformationResponseItemNgapProtocolIESupportInfo::supported,
+            NGAPIESupportInformationResponseItemNgapProtocolIEPresenceInfo::present,
+            None,
+        )]);
+    let extension =
+        AnonymousTargetNGRANNodeToSourceNGRANNodeFailureTransparentContainerIEExtensions::new(
+            ProtocolExtensionID(356),
+            Criticality::ignore,
+            encode_open_type(&list).unwrap(),
+        );
+    let value = TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainer::new(
+        None,
+        Some(
+            TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainerIEExtensions(vec![
+                extension.clone(),
+                extension,
+            ]),
+        ),
+    );
+    let wire = hex::decode("2000010164400400000a000164400400000a00").unwrap();
+    assert_eq!(rasn::aper::encode(&value).unwrap(), wire);
+    assert_eq!(
+        rasn::aper::decode::<TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainer>(&wire)
+            .unwrap(),
+        value,
+    );
+}
+
 /// A size constraint on a UTF8String, which is not a known-multiplier
 /// character string type, is not PER-visible (X.691 §9.3.6): the value is an
 /// unconstrained length in octets, then its UTF-8 octets (§27.6, 07/2002

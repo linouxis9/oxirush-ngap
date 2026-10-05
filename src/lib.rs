@@ -38,6 +38,10 @@
 //! ```
 
 pub mod helpers;
+#[cfg(feature = "inspect")]
+pub mod inspect;
+#[cfg(feature = "inspect")]
+mod inspect_registry;
 pub mod macros;
 pub mod ngap;
 mod per;

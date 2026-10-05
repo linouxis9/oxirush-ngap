@@ -96,6 +96,15 @@ fn post_process(path: &Path, asn_files: &[PathBuf]) -> Result<()> {
 
     let support = generate_support(&generated, asn_files)?;
     generated.push_str(&support);
+    let asn = asn_files
+        .iter()
+        .map(fs::read_to_string)
+        .collect::<std::io::Result<Vec<_>>>()?
+        .join("\n");
+    fs::write(
+        "src/inspect_registry.rs",
+        crate::inspection::generate("NGAP", &generated, &asn)?,
+    )?;
     fs::write(path, generated).context("write post-processed NGAP bindings")
 }
 

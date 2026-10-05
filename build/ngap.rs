@@ -196,8 +196,9 @@ fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
         procedure_ids.insert(id_name, name);
     }
 
-    let procedure_block =
-        Regex::new(r"(?ms)^[A-Za-z][A-Za-z0-9-]*\s+NGAP-ELEMENTARY-PROCEDURE\s+::=\s*\{(.*?)^\}")?;
+    let procedure_block = Regex::new(
+        r"(?ms)^[\t ]*[A-Za-z][A-Za-z0-9-]*\s+NGAP-ELEMENTARY-PROCEDURE\s+::=\s*\{(.*?)^[\t ]*\}",
+    )?;
     let procedure_ref = Regex::new(r"PROCEDURE CODE\s+(id-[A-Za-z][A-Za-z0-9-]*)")?;
     let mut directions: BTreeMap<&str, BTreeSet<String>> = BTreeMap::new();
     for captures in procedure_block.captures_iter(&asn) {

@@ -1,0 +1,16 @@
+[package]
+name = "oxirush-ngap-generator"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[[bin]]
+name = "oxirush-ngap-generator"
+path = "main.rs"
+
+[dependencies]
+rasn-compiler = "=0.16.0"
+anyhow = "1"
+regex = "1"

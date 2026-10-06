@@ -44,28 +44,28 @@ fn main() {
     // In rasn's stable opaque-open-type representation, every entry holds its
     // numeric ID, criticality, and the APER bytes of its concrete NGAP value.
     let ies = vec![
-        AnonymousNGSetupResponseProtocolIEs::new(
+        ProtocolIEField::new(
             ID_AMFNAME,
             Criticality::reject,
             encode_open_type(&amf_name).expect("encode AMF name"),
         ),
-        AnonymousNGSetupResponseProtocolIEs::new(
+        ProtocolIEField::new(
             ID_SERVED_GUAMILIST,
             Criticality::reject,
             encode_open_type(&served_guamis).expect("encode served GUAMIs"),
         ),
-        AnonymousNGSetupResponseProtocolIEs::new(
+        ProtocolIEField::new(
             ID_RELATIVE_AMFCAPACITY,
             Criticality::ignore,
             encode_open_type(&RelativeAMFCapacity(255)).expect("encode AMF capacity"),
         ),
-        AnonymousNGSetupResponseProtocolIEs::new(
+        ProtocolIEField::new(
             ID_PLMNSUPPORT_LIST,
             Criticality::reject,
             encode_open_type(&plmn_support).expect("encode PLMN support"),
         ),
     ];
-    let response = NGSetupResponse::new(NGSetupResponseProtocolIEs(ies));
+    let response = NGSetupResponse::new(ProtocolIEContainer(ies));
 
     // The outer PDU wraps the APER-encoded message in its direction and
     // ASN.1-derived procedure code.

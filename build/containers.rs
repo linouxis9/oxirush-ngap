@@ -5,7 +5,7 @@
 //! own: a field SEQUENCE, its criticality ENUMERATED and their SEQUENCE OF,
 //! for each message and each extensible type. An open type is opaque here, so
 //! all the fields of one kind have the same members and the same encoding.
-//! Each kind becomes one type, and the resolved names are re-exports of it.
+//! Each kind becomes one type, which takes the place of the resolved ones.
 use std::collections::BTreeMap;
 
 use anyhow::{Result, anyhow, bail, ensure};
@@ -62,8 +62,8 @@ const SHARED: &str = r#"    #[doc = " `ProtocolIE-Field`: an IE of a protocol IE
 "#;
 
 /// Replace the resolved containers of `generated` by the types above, which
-/// go into its `containers` module. `common` is the module of `Criticality`.
-pub fn share(generated: &str, containers: &str, common: &str) -> Result<String> {
+/// go into its `containers` module.
+pub fn share(generated: &str, containers: &str) -> Result<String> {
     // The resolved name of each replaced type, and the type it now names.
     let mut shared: BTreeMap<String, &str> = BTreeMap::new();
 
@@ -93,7 +93,7 @@ pub fn share(generated: &str, containers: &str, common: &str) -> Result<String> 
             failure.get_or_insert_with(|| format!("unrecognized container field {name}"));
         }
         shared.insert(name.to_string(), kind);
-        format!("    pub use super::{containers}::{kind} as {name};\n")
+        String::new()
     });
     if let Some(failure) = failure {
         bail!(failure);
@@ -109,11 +109,10 @@ pub fn share(generated: &str, containers: &str, common: &str) -> Result<String> 
     \}
 "#,
     )?;
+    let mut criticalities = Vec::new();
     let generated = criticality.replace_all(&generated, |captures: &Captures<'_>| {
-        format!(
-            "    pub use super::{common}::Criticality as {};\n",
-            &captures[1]
-        )
+        criticalities.push((captures[1].to_string(), "Criticality"));
+        String::new()
     });
 
     let container = Regex::new(
@@ -130,23 +129,21 @@ pub fn share(generated: &str, containers: &str, common: &str) -> Result<String> 
             _ => return captures[0].to_string(),
         };
         lists.push((captures[2].to_string(), kind));
-        format!(
-            "    pub use super::{containers}::{kind} as {};\n",
-            &captures[2]
-        )
+        String::new()
     });
     ensure!(
         !shared.is_empty() && !lists.is_empty(),
         "no protocol containers found"
     );
     shared.extend(lists);
+    shared.extend(criticalities);
 
     // What refers to a resolved name refers to the shared type. The names are
     // identifiers of rasn-compiler's own making: no string has one.
     let identifier = Regex::new(r"[A-Za-z_][A-Za-z0-9_]*")?;
     let mut output = String::with_capacity(generated.len());
     for line in generated.split_inclusive('\n') {
-        if line.starts_with("    pub use ") || line.contains('"') {
+        if line.contains('"') {
             output.push_str(line);
         } else {
             output.push_str(&identifier.replace_all(line, |captures: &Captures<'_>| {

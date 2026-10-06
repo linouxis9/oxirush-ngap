@@ -14,11 +14,11 @@ is not source compatible with 0.4.2.
   every procedure, IE and extension up to Release 19.
 - Each protocol IE container, each extension container and their fields are
   one type: `ProtocolIEContainer` of `ProtocolIEField`, and
-  `ProtocolExtensionContainer` of `ProtocolExtensionField`. The name that
-  each use of one had, such as `InitialUEMessageProtocolIEs`, is a re-export
-  of that type. The `id` of a field is a `ProtocolIEID` or a
-  `ProtocolExtensionID`, where an extension field had a `u16`, and every
-  `criticality` is a `Criticality`.
+  `ProtocolExtensionContainer` of `ProtocolExtensionField`. The types that
+  each use of one had, such as `InitialUEMessageProtocolIEs` and
+  `AnonymousInitialUEMessageProtocolIEs`, are gone. The `id` of a field is a
+  `ProtocolIEID` or a `ProtocolExtensionID`, where an extension field had a
+  `u16`, and every `criticality` is a `Criticality`.
 - The macros name each IE by its own identifier before any type alias, and a
   type name is an alias only for the one IE of that type: `AMFName` built
   id-OldAMF, and `SONConfigurationTransfer` the uplink IE in a downlink

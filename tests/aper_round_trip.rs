@@ -191,20 +191,17 @@ fn multiline_extension_list_has_an_aligned_count() {
             NGAPIESupportInformationResponseItemNgapProtocolIEPresenceInfo::present,
             None,
         )]);
-    let extension =
-        AnonymousTargetNGRANNodeToSourceNGRANNodeFailureTransparentContainerIEExtensions::new(
-            ProtocolExtensionID(356),
-            Criticality::ignore,
-            encode_open_type(&list).unwrap(),
-        );
+    let extension = ProtocolExtensionField::new(
+        ProtocolExtensionID(356),
+        Criticality::ignore,
+        encode_open_type(&list).unwrap(),
+    );
     let value = TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainer::new(
         None,
-        Some(
-            TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainerIEExtensions(vec![
-                extension.clone(),
-                extension,
-            ]),
-        ),
+        Some(ProtocolExtensionContainer(vec![
+            extension.clone(),
+            extension,
+        ])),
     );
     let wire = hex::decode("2000010164400400000a000164400400000a00").unwrap();
     assert_eq!(rasn::aper::encode(&value).unwrap(), wire);

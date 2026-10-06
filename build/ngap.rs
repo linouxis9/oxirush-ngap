@@ -45,8 +45,7 @@ fn post_process(path: &Path, asn_files: &[PathBuf]) -> Result<()> {
     // Plain bracketed specification references are otherwise parsed as rustdoc links.
     generated = generated.replace("[16]", "(reference 16)");
 
-    generated =
-        crate::containers::share(&generated, "ngap_containers", "ngap_common_data_types")?;
+    generated = crate::containers::share(&generated, "ngap_containers")?;
     generated = crate::aper_fix::fix_constrained_sequences(&generated)?;
     generated = crate::aper_fix::fix_utf8_strings(&generated)?;
     generated = crate::aper_fix::fix_fixed_bit_strings(&generated)?;

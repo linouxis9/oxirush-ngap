@@ -51,7 +51,7 @@
 //! ```
 //! use oxirush_ngap::{build_ngap_ie, ngap::*};
 //!
-//! fn downlink(transfer: SONConfigurationTransfer) -> AnonymousDownlinkRANConfigurationTransferProtocolIEs {
+//! fn downlink(transfer: SONConfigurationTransfer) -> ProtocolIEField {
 //!     build_ngap_ie!(DownlinkRANConfigurationTransfer, IGNORE SONConfigurationTransferDL(transfer))
 //! }
 //! ```
@@ -59,7 +59,7 @@
 //! ```compile_fail
 //! use oxirush_ngap::{build_ngap_ie, ngap::*};
 //!
-//! fn downlink(transfer: SONConfigurationTransfer) -> AnonymousDownlinkRANConfigurationTransferProtocolIEs {
+//! fn downlink(transfer: SONConfigurationTransfer) -> ProtocolIEField {
 //!     build_ngap_ie!(DownlinkRANConfigurationTransfer, IGNORE SONConfigurationTransfer(transfer))
 //! }
 //! ```
@@ -211,7 +211,7 @@ macro_rules! build_ngap {
     ) => {
         $crate::__paste::paste! {{
             let ies = vec![
-                $( $crate::ngap::[< Anonymous $msg ProtocolIEs >] {
+                $( $crate::ngap::ProtocolIEField {
                     id: $crate::ngap::ProtocolIEID($crate::__ngap_ie_id!($ie_name)),
                     criticality: $crate::build_ngap!(@criticality $ie_crit),
                     value: $crate::__ngap_encode_ie!($ie_name, ($($ie_value)+))
@@ -219,7 +219,7 @@ macro_rules! build_ngap {
                 }, )*
             ];
             let message = $crate::ngap::$msg::new(
-                $crate::ngap::[< $msg ProtocolIEs >](ies),
+                $crate::ngap::ProtocolIEContainer(ies),
             );
             let value = $crate::ngap::encode_open_type(&message)
                 .expect("failed to APER-encode NGAP message open type");
@@ -252,7 +252,8 @@ macro_rules! build_ngap {
     };
 }
 
-/// Build one NGAP Protocol IE entry for a message type.
+/// Build one NGAP protocol IE entry. Every message takes the same
+/// `ProtocolIEField`: the message name says where the IE goes and is not used.
 ///
 /// # Panics
 ///
@@ -261,7 +262,7 @@ macro_rules! build_ngap {
 macro_rules! build_ngap_ie {
     ($msg:ident, $criticality:ident $ie_name:ident ($($value:tt)+)) => {
         $crate::__paste::paste! {
-            $crate::ngap::[< Anonymous $msg ProtocolIEs >] {
+            $crate::ngap::ProtocolIEField {
                 id: $crate::ngap::ProtocolIEID($crate::__ngap_ie_id!($ie_name)),
                 criticality: $crate::build_ngap!(@criticality $criticality),
                 value: $crate::__ngap_encode_ie!($ie_name, ($($value)+))
@@ -328,9 +329,7 @@ mod tests {
     /// encoded transfer as octets.
     #[test]
     fn octet_string_containing_ies_have_macros() -> Result<(), crate::macros::MissingIeError> {
-        let transfer = MBSSessionSetupOrModRequestTransfer::new(
-            MBSSessionSetupOrModRequestTransferProtocolIEs(vec![]),
-        );
+        let transfer = MBSSessionSetupOrModRequestTransfer::new(ProtocolIEContainer(vec![]));
         let octets = rasn::aper::encode(&transfer).expect("encode transfer");
         let ie = build_ngap_ie!(
             BroadcastSessionSetupRequest,
@@ -338,8 +337,7 @@ mod tests {
         );
         assert_eq!(ie.id.0, 315);
 
-        let request =
-            BroadcastSessionSetupRequest::new(BroadcastSessionSetupRequestProtocolIEs(vec![ie]));
+        let request = BroadcastSessionSetupRequest::new(ProtocolIEContainer(vec![ie]));
         extract_ngap_ies!(request, BroadcastSessionSetupRequest,
             req extracted: Vec<u8> = MBSSessionSetupRequestTransfer(value) => value.to_vec(),
         );

@@ -903,7 +903,6 @@ pub mod ngap_containers {
 )]
 pub mod ngap_ies {
     extern crate alloc;
-    pub use super::ngap_common_data_types::Criticality as AnonymousA2XPC5FlowBitRatesIEExtensionsCriticality;
     use super::ngap_common_data_types::{
         Criticality, ProcedureCode, ProtocolIEID, TriggeringMessage,
     };
@@ -1043,8 +1042,6 @@ pub mod ngap_ies {
         MAXNOOF_UEAPP_LAYER_MEAS, MAXNOOF_UESFOR_PAGING, MAXNOOF_UETYPES, MAXNOOF_WLANNAME,
         MAXNOOF_XN_EXT_TLAS, MAXNOOF_XN_GTP_TLAS, MAXNOOF_XN_TLAS,
     };
-    pub use super::ngap_containers::ProtocolExtensionContainer as A2XPC5FlowBitRatesIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousA2XPC5FlowBitRatesIEExtensions;
     use super::ngap_containers::*;
     use core::borrow::Borrow;
     use rasn::prelude::*;
@@ -1096,9 +1093,6 @@ pub mod ngap_ies {
         m700 = 7,
         m1000 = 8,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousA2XPC5QoSFlowItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as A2XPC5QoSFlowItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousA2XPC5QoSFlowItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "A2X-PC5-QoS-Flow-Item")]
     #[non_exhaustive]
@@ -1141,9 +1135,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=2048"), identifier = "A2X-PC5-QoS-Flow-List")]
     pub struct A2XPC5QoSFlowList(pub SequenceOf<A2XPC5QoSFlowItem>);
     crate::per::sequence_of! { A2XPC5QoSFlowList, 1, 2048 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousA2XPC5QoSParametersIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as A2XPC5QoSParametersIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousA2XPC5QoSParametersIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "A2X-PC5-QoS-Parameters")]
     #[non_exhaustive]
@@ -1179,9 +1170,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("16..=36", extensible))]
     pub struct AIOTFIdentifier(pub OctetString);
-    pub use super::ngap_common_data_types::Criticality as AnonymousAIOTFNameIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AIOTFNameIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAIOTFNameIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -1235,9 +1223,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=150", extensible))]
     pub struct AIOTFNameVisibleString(pub VisibleString);
-    pub use super::ngap_common_data_types::Criticality as AnonymousAIOTSessionReleaseCommandTransferProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as AIOTSessionReleaseCommandTransferProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousAIOTSessionReleaseCommandTransferProtocolIEs;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -1254,9 +1239,6 @@ pub mod ngap_ies {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAIOTSessionReleaseCompleteTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AIOTSessionReleaseCompleteTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAIOTSessionReleaseCompleteTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -1289,9 +1271,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAIOTSessionReleaseRequestTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AIOTSessionReleaseRequestTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAIOTSessionReleaseRequestTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -1322,9 +1301,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAIoTCommandAssistanceInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AIoTCommandAssistanceInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAIoTCommandAssistanceInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "AIoT-CommandAssistanceInformation")]
     #[non_exhaustive]
@@ -1364,8 +1340,6 @@ pub mod ngap_ies {
         value("0..=65535", extensible)
     )]
     pub struct AIoTCorrelationIdentifier(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AIoTDeviceIdentificationRequestedChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as AIoTDeviceIdentificationRequestedChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(
         choice,
@@ -1389,9 +1363,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAIoTDeviceReportItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AIoTDeviceReportItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAIoTDeviceReportItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "AIoT-DeviceReportItem")]
     #[non_exhaustive]
@@ -1435,9 +1406,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAIoTInventoryAssistanceInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AIoTInventoryAssistanceInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAIoTInventoryAssistanceInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "AIoT-InventoryAssistanceInformation")]
     #[non_exhaustive]
@@ -1492,9 +1460,6 @@ pub mod ngap_ies {
         value("1..=65535", extensible)
     )]
     pub struct AIoTReaderIndex(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AnonymousAIoTReaderReportItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AIoTReaderReportItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAIoTReaderReportItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "AIoT-ReaderReportItem")]
     #[non_exhaustive]
@@ -1535,9 +1500,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=256"), identifier = "AIoT-RequestedAIoTAreaList")]
     pub struct AIoTRequestedAIoTAreaList(pub SequenceOf<AIoTAreaID>);
     crate::per::sequence_of! { AIoTRequestedAIoTAreaList, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAIoTRequestedReaderItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AIoTRequestedReaderItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAIoTRequestedReaderItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "AIoT-RequestedReaderItem")]
     #[non_exhaustive]
@@ -1574,9 +1536,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"), identifier = "AIoT-RequestedReaderList")]
     pub struct AIoTRequestedReaderList(pub SequenceOf<AIoTRequestedReaderItem>);
     crate::per::sequence_of! { AIoTRequestedReaderList, 1, 65535 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAIoTRequestedServiceAreaInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AIoTRequestedServiceAreaInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAIoTRequestedServiceAreaInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "AIoT-RequestedServiceAreaInformation")]
     #[non_exhaustive]
@@ -1609,8 +1568,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AIoTSecurityInfoChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as AIoTSecurityInfoChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "AIoT-SecurityInfo")]
     pub enum AIoTSecurityInfo {
@@ -1680,9 +1637,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "aIoT-and-NRUu")]
         aIoT_and_NRUu = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAIoTAreaIDIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AIoTAreaIDIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAIoTAreaIDIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -1721,9 +1675,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAMFTNLAssociationSetupItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AMFTNLAssociationSetupItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAMFTNLAssociationSetupItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "AMF-TNLAssociationSetupItem")]
     #[non_exhaustive]
@@ -1754,9 +1705,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=32"), identifier = "AMF-TNLAssociationSetupList")]
     pub struct AMFTNLAssociationSetupList(pub SequenceOf<AMFTNLAssociationSetupItem>);
     crate::per::sequence_of! { AMFTNLAssociationSetupList, 1, 32 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAMFTNLAssociationToAddItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AMFTNLAssociationToAddItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAMFTNLAssociationToAddItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "AMF-TNLAssociationToAddItem")]
     #[non_exhaustive]
@@ -1799,9 +1747,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=32"), identifier = "AMF-TNLAssociationToAddList")]
     pub struct AMFTNLAssociationToAddList(pub SequenceOf<AMFTNLAssociationToAddItem>);
     crate::per::sequence_of! { AMFTNLAssociationToAddList, 1, 32 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAMFTNLAssociationToRemoveItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AMFTNLAssociationToRemoveItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAMFTNLAssociationToRemoveItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "AMF-TNLAssociationToRemoveItem")]
     #[non_exhaustive]
@@ -1836,9 +1781,6 @@ pub mod ngap_ies {
     )]
     pub struct AMFTNLAssociationToRemoveList(pub SequenceOf<AMFTNLAssociationToRemoveItem>);
     crate::per::sequence_of! { AMFTNLAssociationToRemoveList, 1, 32 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAMFTNLAssociationToUpdateItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AMFTNLAssociationToUpdateItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAMFTNLAssociationToUpdateItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "AMF-TNLAssociationToUpdateItem")]
     #[non_exhaustive]
@@ -1912,8 +1854,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=150", extensible))]
     pub struct AMFNameVisibleString(pub VisibleString);
-    pub use super::ngap_common_data_types::Criticality as AMFPagingTargetChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as AMFPagingTargetChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum AMFPagingTarget {
@@ -1964,9 +1904,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "false")]
         R_false = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAUN3DeviceAccessInfoIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AUN3DeviceAccessInfoIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAUN3DeviceAccessInfoIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -2012,9 +1949,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "not-active")]
         not_active = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAdditionalCancelledlocationReportingReferenceIDItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AdditionalCancelledlocationReportingReferenceIDItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAdditionalCancelledlocationReportingReferenceIDItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -2047,9 +1981,6 @@ pub mod ngap_ies {
         pub SequenceOf<AdditionalCancelledlocationReportingReferenceIDItem>,
     );
     crate::per::sequence_of! { AdditionalCancelledlocationReportingReferenceIDList, 1, 63 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAdditionalDLUPTNLInformationForHOItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AdditionalDLUPTNLInformationForHOItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAdditionalDLUPTNLInformationForHOItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -2102,9 +2033,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "more-likely")]
         more_likely = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAdditionalULIIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AdditionalULIIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAdditionalULIIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -2137,9 +2065,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAerialUEFlightInformationReportingIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AerialUEFlightInformationReportingIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAerialUEFlightInformationReportingIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "Aerial-UE-FlightInformationReporting")]
     #[non_exhaustive]
@@ -2170,9 +2095,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAerialUEFlightInformationReportingControlIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AerialUEFlightInformationReportingControlIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAerialUEFlightInformationReportingControlIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(
         automatic_tags,
@@ -2220,9 +2142,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAerialUEFlightInformationReportingControlItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AerialUEFlightInformationReportingControlItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAerialUEFlightInformationReportingControlItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(
         automatic_tags,
@@ -2290,9 +2209,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "not-allowed")]
         not_allowed = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAllocationAndRetentionPriorityIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AllocationAndRetentionPriorityIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAllocationAndRetentionPriorityIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -2344,9 +2260,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "not-restricted")]
         not_restricted = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAllowedPNINPNItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AllowedPNINPNItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAllowedPNINPNItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "Allowed-PNI-NPN-Item")]
     #[non_exhaustive]
@@ -2393,9 +2306,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=8"))]
     pub struct AllowedNSSAI(pub SequenceOf<AllowedNSSAIItem>);
     crate::per::sequence_of! { AllowedNSSAI, 1, 8 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAllowedNSSAIItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AllowedNSSAIItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAllowedNSSAIItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "AllowedNSSAI-Item")]
     #[non_exhaustive]
@@ -2430,9 +2340,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("1..=8", extensible))]
     pub struct AlternativeQoSParaSetIndex(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AnonymousAlternativeQoSParaSetItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AlternativeQoSParaSetItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAlternativeQoSParaSetItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -2493,8 +2400,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("-420..=10000", extensible))]
     pub struct Altitude(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AreaIDChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as AreaIDChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "Area-ID")]
     pub enum AreaID {
@@ -2525,9 +2430,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAreaOfInterestIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AreaOfInterestIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAreaOfInterestIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -2566,9 +2468,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAreaOfInterestCellItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AreaOfInterestCellItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAreaOfInterestCellItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -2599,9 +2498,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=256"))]
     pub struct AreaOfInterestCellList(pub SequenceOf<AreaOfInterestCellItem>);
     crate::per::sequence_of! { AreaOfInterestCellList, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAreaOfInterestItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AreaOfInterestItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAreaOfInterestItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -2638,9 +2534,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"))]
     pub struct AreaOfInterestList(pub SequenceOf<AreaOfInterestItem>);
     crate::per::sequence_of! { AreaOfInterestList, 1, 64 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAreaOfInterestRANNodeItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AreaOfInterestRANNodeItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAreaOfInterestRANNodeItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -2671,9 +2564,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"))]
     pub struct AreaOfInterestRANNodeList(pub SequenceOf<AreaOfInterestRANNodeItem>);
     crate::per::sequence_of! { AreaOfInterestRANNodeList, 1, 64 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAreaOfInterestTAIItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AreaOfInterestTAIItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAreaOfInterestTAIItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -2701,8 +2591,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=16"))]
     pub struct AreaOfInterestTAIList(pub SequenceOf<AreaOfInterestTAIItem>);
     crate::per::sequence_of! { AreaOfInterestTAIList, 1, 16 }
-    pub use super::ngap_common_data_types::Criticality as AreaScopeOfMDTEUTRAChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as AreaScopeOfMDTEUTRAChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "AreaScopeOfMDT-EUTRA")]
     pub enum AreaScopeOfMDTEUTRA {
@@ -2738,8 +2626,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AreaScopeOfMDTNRChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as AreaScopeOfMDTNRChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "AreaScopeOfMDT-NR")]
     pub enum AreaScopeOfMDTNR {
@@ -2775,9 +2661,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAreaScopeOfNeighCellsItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AreaScopeOfNeighCellsItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAreaScopeOfNeighCellsItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -2814,8 +2697,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=8"))]
     pub struct AreaScopeOfNeighCellsList(pub SequenceOf<AreaScopeOfNeighCellsItem>);
     crate::per::sequence_of! { AreaScopeOfNeighCellsList, 1, 8 }
-    pub use super::ngap_common_data_types::Criticality as AreaScopeOfQMCChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as AreaScopeOfQMCChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum AreaScopeOfQMC {
@@ -2851,9 +2732,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAssistanceDataForPagingIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AssistanceDataForPagingIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAssistanceDataForPagingIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -2886,9 +2764,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAssistanceDataForRecommendedCellsIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AssistanceDataForRecommendedCellsIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAssistanceDataForRecommendedCellsIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -2922,9 +2797,6 @@ pub mod ngap_ies {
         value("1..=16", extensible)
     )]
     pub struct AssistanceInformationQoEMeas(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AnonymousAssociatedMBSQosFlowSetupRequestItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AssociatedMBSQosFlowSetupRequestItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAssociatedMBSQosFlowSetupRequestItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -2963,9 +2835,6 @@ pub mod ngap_ies {
         pub SequenceOf<AssociatedMBSQosFlowSetupRequestItem>,
     );
     crate::per::sequence_of! { AssociatedMBSQosFlowSetupRequestList, 1, 64 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAssociatedMBSQosFlowSetuporModifyRequestItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AssociatedMBSQosFlowSetuporModifyRequestItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAssociatedMBSQosFlowSetuporModifyRequestItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -3012,9 +2881,6 @@ pub mod ngap_ies {
         ul = 0,
         dl = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAssociatedQosFlowItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AssociatedQosFlowItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAssociatedQosFlowItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -3061,9 +2927,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAvailableBitrateReportThresholdItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AvailableBitrateReportThresholdItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAvailableBitrateReportThresholdItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -3112,9 +2975,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAvailableRANVisibleQoEMetricsIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as AvailableRANVisibleQoEMetricsIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousAvailableRANVisibleQoEMetricsIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -3156,9 +3016,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("0..=4095", extensible))]
     pub struct AveragingWindow(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AnonymousBeamMeasurementsReportConfigurationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as BeamMeasurementsReportConfigurationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousBeamMeasurementsReportConfigurationIEExtensions;
     #[doc = " B"]
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
@@ -3222,9 +3079,6 @@ pub mod ngap_ies {
         #[rasn(extension_addition, identifier = "false")]
         R_false = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousBeamMeasurementsReportQuantityIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as BeamMeasurementsReportQuantityIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousBeamMeasurementsReportQuantityIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -3272,9 +3126,6 @@ pub mod ngap_ies {
     pub enum BluetoothMeasConfig {
         setup = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousBluetoothMeasConfigNameItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as BluetoothMeasConfigNameItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousBluetoothMeasConfigNameItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -3313,9 +3164,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousBluetoothMeasurementConfigurationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as BluetoothMeasurementConfigurationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousBluetoothMeasurementConfigurationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -3357,8 +3205,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=248"))]
     pub struct BluetoothName(pub OctetString);
-    pub use super::ngap_common_data_types::Criticality as BroadcastCancelledAreaListChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as BroadcastCancelledAreaListChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum BroadcastCancelledAreaList {
@@ -3406,8 +3252,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as BroadcastCompletedAreaListChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as BroadcastCompletedAreaListChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum BroadcastCompletedAreaList {
@@ -3455,9 +3299,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousBroadcastPLMNItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as BroadcastPLMNItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousBroadcastPLMNItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -3494,9 +3335,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=12"))]
     pub struct BroadcastPLMNList(pub SequenceOf<BroadcastPLMNItem>);
     crate::per::sequence_of! { BroadcastPLMNList, 1, 12 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousBroadcastTransportFailureTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as BroadcastTransportFailureTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousBroadcastTransportFailureTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -3533,9 +3371,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousBroadcastTransportRequestTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as BroadcastTransportRequestTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousBroadcastTransportRequestTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -3568,9 +3403,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousBroadcastTransportResponseTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as BroadcastTransportResponseTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousBroadcastTransportResponseTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -3600,9 +3432,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct BurstArrivalTime(pub OctetString);
-    pub use super::ngap_common_data_types::Criticality as AnonymousBurstArrivalTimeWindowIEExtensionCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as BurstArrivalTimeWindowIEExtension;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousBurstArrivalTimeWindowIEExtension;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -3682,9 +3511,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=256"))]
     pub struct CAGListforMDT(pub SequenceOf<CAGListforMDTItem>);
     crate::per::sequence_of! { CAGListforMDT, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCAGListforMDTItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CAGListforMDTItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCAGListforMDTItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -3737,9 +3563,6 @@ pub mod ngap_ies {
     pub enum CNMTCommunicationHandling {
         supported = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCNAssistedRANTuningIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CNAssistedRANTuningIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCNAssistedRANTuningIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -3780,9 +3603,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "fiveGC-forbidden")]
         fiveGC_forbidden = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCNTypeRestrictionsForEquivalentItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CNTypeRestrictionsForEquivalentItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCNTypeRestrictionsForEquivalentItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -3825,9 +3645,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("0..=7", extensible))]
     pub struct CNsubgroupID(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AnonymousCOUNTValueForPDCPSN12IEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as COUNTValueForPDCPSN12IEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCOUNTValueForPDCPSN12IEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "COUNTValueForPDCP-SN12")]
     #[non_exhaustive]
@@ -3860,9 +3677,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCOUNTValueForPDCPSN18IEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as COUNTValueForPDCPSN18IEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCOUNTValueForPDCPSN18IEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "COUNTValueForPDCP-SN18")]
     #[non_exhaustive]
@@ -3895,8 +3709,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as CPTransportLayerInformationChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as CPTransportLayerInformationChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum CPTransportLayerInformation {
@@ -3925,9 +3737,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"), identifier = "CancelledCellsInEAI-EUTRA")]
     pub struct CancelledCellsInEAIEUTRA(pub SequenceOf<CancelledCellsInEAIEUTRAItem>);
     crate::per::sequence_of! { CancelledCellsInEAIEUTRA, 1, 65535 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCancelledCellsInEAIEUTRAItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CancelledCellsInEAIEUTRAItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCancelledCellsInEAIEUTRAItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "CancelledCellsInEAI-EUTRA-Item")]
     #[non_exhaustive]
@@ -3964,9 +3773,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"), identifier = "CancelledCellsInEAI-NR")]
     pub struct CancelledCellsInEAINR(pub SequenceOf<CancelledCellsInEAINRItem>);
     crate::per::sequence_of! { CancelledCellsInEAINR, 1, 65535 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCancelledCellsInEAINRItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CancelledCellsInEAINRItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCancelledCellsInEAINRItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "CancelledCellsInEAI-NR-Item")]
     #[non_exhaustive]
@@ -4003,9 +3809,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"), identifier = "CancelledCellsInTAI-EUTRA")]
     pub struct CancelledCellsInTAIEUTRA(pub SequenceOf<CancelledCellsInTAIEUTRAItem>);
     crate::per::sequence_of! { CancelledCellsInTAIEUTRA, 1, 65535 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCancelledCellsInTAIEUTRAItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CancelledCellsInTAIEUTRAItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCancelledCellsInTAIEUTRAItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "CancelledCellsInTAI-EUTRA-Item")]
     #[non_exhaustive]
@@ -4042,9 +3845,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"), identifier = "CancelledCellsInTAI-NR")]
     pub struct CancelledCellsInTAINR(pub SequenceOf<CancelledCellsInTAINRItem>);
     crate::per::sequence_of! { CancelledCellsInTAINR, 1, 65535 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCancelledCellsInTAINRItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CancelledCellsInTAINRItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCancelledCellsInTAINRItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "CancelledCellsInTAI-NR-Item")]
     #[non_exhaustive]
@@ -4077,8 +3877,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as CandidateCellChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as CandidateCellChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum CandidateCell {
@@ -4102,9 +3900,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCandidateCellIDIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CandidateCellIDIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCandidateCellIDIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -4131,9 +3926,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCandidateCellItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CandidateCellItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCandidateCellItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -4164,9 +3956,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=32"))]
     pub struct CandidateCellList(pub SequenceOf<CandidateCellItem>);
     crate::per::sequence_of! { CandidateCellList, 1, 32 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCandidatePCIIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CandidatePCIIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCandidatePCIIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -4226,9 +4015,6 @@ pub mod ngap_ies {
             Ok(Self(value))
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCandidateRelayUEInformationItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CandidateRelayUEInformationItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCandidateRelayUEInformationItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -4259,8 +4045,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=32"))]
     pub struct CandidateRelayUEInformationList(pub SequenceOf<CandidateRelayUEInformationItem>);
     crate::per::sequence_of! { CandidateRelayUEInformationList, 1, 32 }
-    pub use super::ngap_common_data_types::Criticality as CauseChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as CauseChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum Cause {
@@ -4514,9 +4298,6 @@ pub mod ngap_ies {
         transport_resource_unavailable = 0,
         unspecified = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCellCAGInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CellCAGInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCellCAGInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "Cell-CAGInformation")]
     #[non_exhaustive]
@@ -4549,9 +4330,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCellBasedMDTEUTRAIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CellBasedMDTEUTRAIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCellBasedMDTEUTRAIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "CellBasedMDT-EUTRA")]
     #[non_exhaustive]
@@ -4578,9 +4356,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCellBasedMDTNRIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CellBasedMDTNRIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCellBasedMDTNRIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "CellBasedMDT-NR")]
     #[non_exhaustive]
@@ -4607,9 +4382,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCellBasedQMCIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CellBasedQMCIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCellBasedQMCIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -4644,9 +4416,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"))]
     pub struct CellIDBroadcastEUTRA(pub SequenceOf<CellIDBroadcastEUTRAItem>);
     crate::per::sequence_of! { CellIDBroadcastEUTRA, 1, 65535 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCellIDBroadcastEUTRAItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CellIDBroadcastEUTRAItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCellIDBroadcastEUTRAItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "CellIDBroadcastEUTRA-Item")]
     #[non_exhaustive]
@@ -4677,9 +4446,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"))]
     pub struct CellIDBroadcastNR(pub SequenceOf<CellIDBroadcastNRItem>);
     crate::per::sequence_of! { CellIDBroadcastNR, 1, 65535 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCellIDBroadcastNRItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CellIDBroadcastNRItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCellIDBroadcastNRItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "CellIDBroadcastNR-Item")]
     #[non_exhaustive]
@@ -4707,9 +4473,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"))]
     pub struct CellIDCancelledEUTRA(pub SequenceOf<CellIDCancelledEUTRAItem>);
     crate::per::sequence_of! { CellIDCancelledEUTRA, 1, 65535 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCellIDCancelledEUTRAItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CellIDCancelledEUTRAItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCellIDCancelledEUTRAItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "CellIDCancelledEUTRA-Item")]
     #[non_exhaustive]
@@ -4746,9 +4509,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"))]
     pub struct CellIDCancelledNR(pub SequenceOf<CellIDCancelledNRItem>);
     crate::per::sequence_of! { CellIDCancelledNR, 1, 65535 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCellIDCancelledNRItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CellIDCancelledNRItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCellIDCancelledNRItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "CellIDCancelledNR-Item")]
     #[non_exhaustive]
@@ -4781,8 +4541,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as CellIDListForRestartChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as CellIDListForRestartChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum CellIDListForRestart {
@@ -4829,9 +4587,6 @@ pub mod ngap_ies {
         medium = 2,
         large = 3,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCellTypeIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CellTypeIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCellTypeIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -4862,8 +4617,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=16384"))]
     pub struct CellsToActivateList(pub SequenceOf<NGRANCGI>);
     crate::per::sequence_of! { CellsToActivateList, 1, 16384 }
-    pub use super::ngap_common_data_types::Criticality as ClockAccuracyChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as ClockAccuracyChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum ClockAccuracy {
@@ -4895,9 +4648,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousClockQualityAcceptanceCriteriaIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as ClockQualityAcceptanceCriteriaIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousClockQualityAcceptanceCriteriaIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -4954,9 +4704,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousClockQualityAcceptanceIndicationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as ClockQualityAcceptanceIndicationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousClockQualityAcceptanceIndicationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -4983,8 +4730,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as ClockQualityDetailLevelChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as ClockQualityDetailLevelChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum ClockQualityDetailLevel {
@@ -5008,9 +4753,6 @@ pub mod ngap_ies {
             Self::choice_extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousClockQualityReportingControlInfoIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as ClockQualityReportingControlInfoIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousClockQualityReportingControlInfoIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -5048,9 +4790,6 @@ pub mod ngap_ies {
         #[rasn(extension_addition)]
         unicast = 2,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCommandFailureTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CommandFailureTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCommandFailureTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -5093,9 +4832,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCommandRequestTransferProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as CommandRequestTransferProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousCommandRequestTransferProtocolIEs;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -5112,9 +4848,6 @@ pub mod ngap_ies {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCommandResponseTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CommandResponseTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCommandResponseTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -5166,9 +4899,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"), identifier = "CompletedCellsInEAI-EUTRA")]
     pub struct CompletedCellsInEAIEUTRA(pub SequenceOf<CompletedCellsInEAIEUTRAItem>);
     crate::per::sequence_of! { CompletedCellsInEAIEUTRA, 1, 65535 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCompletedCellsInEAIEUTRAItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CompletedCellsInEAIEUTRAItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCompletedCellsInEAIEUTRAItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "CompletedCellsInEAI-EUTRA-Item")]
     #[non_exhaustive]
@@ -5199,9 +4929,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"), identifier = "CompletedCellsInEAI-NR")]
     pub struct CompletedCellsInEAINR(pub SequenceOf<CompletedCellsInEAINRItem>);
     crate::per::sequence_of! { CompletedCellsInEAINR, 1, 65535 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCompletedCellsInEAINRItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CompletedCellsInEAINRItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCompletedCellsInEAINRItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "CompletedCellsInEAI-NR-Item")]
     #[non_exhaustive]
@@ -5229,9 +4956,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"), identifier = "CompletedCellsInTAI-EUTRA")]
     pub struct CompletedCellsInTAIEUTRA(pub SequenceOf<CompletedCellsInTAIEUTRAItem>);
     crate::per::sequence_of! { CompletedCellsInTAIEUTRA, 1, 65535 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCompletedCellsInTAIEUTRAItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CompletedCellsInTAIEUTRAItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCompletedCellsInTAIEUTRAItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "CompletedCellsInTAI-EUTRA-Item")]
     #[non_exhaustive]
@@ -5262,9 +4986,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"), identifier = "CompletedCellsInTAI-NR")]
     pub struct CompletedCellsInTAINR(pub SequenceOf<CompletedCellsInTAINRItem>);
     crate::per::sequence_of! { CompletedCellsInTAINR, 1, 65535 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCompletedCellsInTAINRItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CompletedCellsInTAINRItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCompletedCellsInTAINRItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "CompletedCellsInTAI-NR-Item")]
     #[non_exhaustive]
@@ -5288,9 +5009,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCompositeAvailableCapacityIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CompositeAvailableCapacityIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCompositeAvailableCapacityIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -5366,9 +5084,6 @@ pub mod ngap_ies {
         both = 2,
         stop = 3,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCoreNetworkAssistanceInformationForInactiveIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CoreNetworkAssistanceInformationForInactiveIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCoreNetworkAssistanceInformationForInactiveIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -5428,9 +5143,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct CoverageEnhancementLevel(pub OctetString);
-    pub use super::ngap_common_data_types::Criticality as AnonymousCriticalityDiagnosticsIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CriticalityDiagnosticsIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCriticalityDiagnosticsIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -5475,9 +5187,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCriticalityDiagnosticsIEItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as CriticalityDiagnosticsIEItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousCriticalityDiagnosticsIEItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "CriticalityDiagnostics-IE-Item")]
     #[non_exhaustive]
@@ -5532,9 +5241,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "daps-ho-required")]
         daps_ho_required = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDAPSRequestInfoIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as DAPSRequestInfoIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousDAPSRequestInfoIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -5571,9 +5277,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "daps-ho-not-accepted")]
         daps_ho_not_accepted = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDAPSResponseInfoIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as DAPSResponseInfoIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousDAPSResponseInfoIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -5598,9 +5301,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDAPSResponseInfoItemIEExtensionCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as DAPSResponseInfoItemIEExtension;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousDAPSResponseInfoItemIEExtension;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -5637,9 +5337,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=32"))]
     pub struct DAPSResponseInfoList(pub SequenceOf<DAPSResponseInfoItem>);
     crate::per::sequence_of! { DAPSResponseInfoList, 1, 32 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDLCPSecurityInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as DLCPSecurityInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousDLCPSecurityInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "DL-CP-SecurityInformation")]
     #[non_exhaustive]
@@ -5683,8 +5380,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as DLCountChoiceChoiceExtensionCriticality;
-    pub use super::ngap_containers::ProtocolIEField as DLCountChoiceChoiceExtension;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum DLCountChoice {
@@ -5708,9 +5403,6 @@ pub mod ngap_ies {
             Self::choice_extension(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDLDiscardingIEExtensionCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as DLDiscardingIEExtension;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousDLDiscardingIEExtension;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -5754,8 +5446,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "DRB-ID", value("1..=32", extensible))]
     pub struct DRBID(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as DRBStatusDLChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as DRBStatusDLChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum DRBStatusDL {
@@ -5779,9 +5469,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDRBStatusDL12IEExtensionCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as DRBStatusDL12IEExtension;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousDRBStatusDL12IEExtension;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -5808,9 +5495,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDRBStatusDL18IEExtensionCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as DRBStatusDL18IEExtension;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousDRBStatusDL18IEExtension;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -5837,8 +5521,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as DRBStatusULChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as DRBStatusULChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum DRBStatusUL {
@@ -5862,9 +5544,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDRBStatusUL12IEExtensionCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as DRBStatusUL12IEExtension;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousDRBStatusUL12IEExtension;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -5897,9 +5576,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDRBStatusUL18IEExtensionCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as DRBStatusUL18IEExtension;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousDRBStatusUL18IEExtension;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -5932,9 +5608,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDRBsSubjectToDLDiscardingItemIEExtensionCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as DRBsSubjectToDLDiscardingItemIEExtension;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousDRBsSubjectToDLDiscardingItemIEExtension;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "DRBsSubjectToDLDiscarding-Item")]
     #[non_exhaustive]
@@ -5975,9 +5648,6 @@ pub mod ngap_ies {
     )]
     pub struct DRBsSubjectToDLDiscardingList(pub SequenceOf<DRBsSubjectToDLDiscardingItem>);
     crate::per::sequence_of! { DRBsSubjectToDLDiscardingList, 1, 32 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDRBsSubjectToEarlyStatusTransferItemIEExtensionCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as DRBsSubjectToEarlyStatusTransferItemIEExtension;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousDRBsSubjectToEarlyStatusTransferItemIEExtension;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "DRBsSubjectToEarlyStatusTransfer-Item")]
     #[non_exhaustive]
@@ -6020,9 +5690,6 @@ pub mod ngap_ies {
         pub SequenceOf<DRBsSubjectToEarlyStatusTransferItem>,
     );
     crate::per::sequence_of! { DRBsSubjectToEarlyStatusTransferList, 1, 32 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDRBsSubjectToStatusTransferItemIEExtensionCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as DRBsSubjectToStatusTransferItemIEExtension;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousDRBsSubjectToStatusTransferItemIEExtension;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -6065,9 +5732,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=32"))]
     pub struct DRBsSubjectToStatusTransferList(pub SequenceOf<DRBsSubjectToStatusTransferItem>);
     crate::per::sequence_of! { DRBsSubjectToStatusTransferList, 1, 32 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDRBsToQosFlowsMappingItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as DRBsToQosFlowsMappingItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousDRBsToQosFlowsMappingItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -6122,9 +5786,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "data-forwarding-not-possible")]
         data_forwarding_not_possible = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDataForwardingResponseDRBItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as DataForwardingResponseDRBItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousDataForwardingResponseDRBItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -6171,9 +5832,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=256"))]
     pub struct DataForwardingResponseERABList(pub SequenceOf<DataForwardingResponseERABListItem>);
     crate::per::sequence_of! { DataForwardingResponseERABList, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDataForwardingResponseERABListItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as DataForwardingResponseERABListItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousDataForwardingResponseERABListItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -6222,9 +5880,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "direct-path-available")]
         direct_path_available = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDynamic5QIDescriptorIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as Dynamic5QIDescriptorIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousDynamic5QIDescriptorIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -6290,9 +5945,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "E-RAB-ID", value("0..=15", extensible))]
     pub struct ERABID(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AnonymousERABInformationItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as ERABInformationItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousERABInformationItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "E-RABInformationItem")]
     #[non_exhaustive]
@@ -6347,8 +5999,6 @@ pub mod ngap_ies {
         both = 2,
         stop = 3,
     }
-    pub use super::ngap_common_data_types::Criticality as ECNMarkingorCongestionInformationReportingRequestChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as ECNMarkingorCongestionInformationReportingRequestChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum ECNMarkingorCongestionInformationReportingRequest {
@@ -6384,9 +6034,6 @@ pub mod ngap_ies {
         pub SequenceOf<ECNMarkingorCongestionInformationReportingStatusItem>,
     );
     crate::per::sequence_of! { ECNMarkingorCongestionInformationReportingStatus, 1, 64 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousECNMarkingorCongestionInformationReportingStatusItemIEExtensionCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as ECNMarkingorCongestionInformationReportingStatusItemIEExtension;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousECNMarkingorCongestionInformationReportingStatusItemIEExtension;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(
         automatic_tags,
@@ -6432,8 +6079,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "EN-DCSONConfigurationTransfer")]
     pub struct ENDCSONConfigurationTransfer(pub OctetString);
-    pub use super::ngap_common_data_types::Criticality as ENBIDChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as ENBIDChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "ENB-ID")]
     pub enum ENBID {
@@ -6528,9 +6173,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "EPS-TAC")]
     pub struct EPSTAC(pub FixedOctetString<2usize>);
-    pub use super::ngap_common_data_types::Criticality as AnonymousEPSTAIIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as EPSTAIIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousEPSTAIIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "EPS-TAI")]
     #[non_exhaustive]
@@ -6570,9 +6212,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousEUTRACGIIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as EUTRACGIIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousEUTRACGIIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "EUTRA-CGI")]
     #[non_exhaustive]
@@ -6653,9 +6292,6 @@ pub mod ngap_ies {
         hf128 = 12,
         hf256 = 13,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousEUTRAPagingeDRXInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as EUTRAPagingeDRXInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousEUTRAPagingeDRXInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "EUTRA-PagingeDRXInformation")]
     #[non_exhaustive]
@@ -6715,9 +6351,6 @@ pub mod ngap_ies {
             Ok(Self(value))
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousEUTRANCellReportItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as EUTRANCellReportItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousEUTRANCellReportItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "EUTRAN-CellReportItem")]
     #[non_exhaustive]
@@ -6772,9 +6405,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=256"), identifier = "EUTRAN-CellReportList")]
     pub struct EUTRANCellReportList(pub SequenceOf<EUTRANCellReportItem>);
     crate::per::sequence_of! { EUTRANCellReportList, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousEUTRANCellToReportItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as EUTRANCellToReportItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousEUTRANCellToReportItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "EUTRAN-CellToReportItem")]
     #[non_exhaustive]
@@ -6802,9 +6432,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=256"), identifier = "EUTRAN-CellToReportList")]
     pub struct EUTRANCellToReportList(pub SequenceOf<EUTRANCellToReportItem>);
     crate::per::sequence_of! { EUTRANCellToReportList, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousEUTRANCompositeAvailableCapacityGroupIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as EUTRANCompositeAvailableCapacityGroupIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousEUTRANCompositeAvailableCapacityGroupIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "EUTRAN-CompositeAvailableCapacityGroup")]
     #[non_exhaustive]
@@ -6844,9 +6471,6 @@ pub mod ngap_ies {
         value("0..=16777215", extensible)
     )]
     pub struct EUTRANNumberOfActiveUEs(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AnonymousEUTRANRadioResourceStatusIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as EUTRANRadioResourceStatusIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousEUTRANRadioResourceStatusIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "EUTRAN-RadioResourceStatus")]
     #[non_exhaustive]
@@ -6915,9 +6539,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousEUTRANReportingStatusIEsIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as EUTRANReportingStatusIEsIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousEUTRANReportingStatusIEsIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "EUTRAN-ReportingStatusIEs")]
     #[non_exhaustive]
@@ -6944,9 +6565,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousEUTRANReportingSystemIEsIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as EUTRANReportingSystemIEsIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousEUTRANReportingSystemIEsIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "EUTRAN-ReportingSystemIEs")]
     #[non_exhaustive]
@@ -6987,9 +6605,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousEarlyStatusTransferTransparentContainerIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as EarlyStatusTransferTransparentContainerIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousEarlyStatusTransferTransparentContainerIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(
         automatic_tags,
@@ -7026,9 +6641,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"))]
     pub struct EmergencyAreaIDBroadcastEUTRA(pub SequenceOf<EmergencyAreaIDBroadcastEUTRAItem>);
     crate::per::sequence_of! { EmergencyAreaIDBroadcastEUTRA, 1, 65535 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousEmergencyAreaIDBroadcastEUTRAItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as EmergencyAreaIDBroadcastEUTRAItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousEmergencyAreaIDBroadcastEUTRAItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "EmergencyAreaIDBroadcastEUTRA-Item")]
     #[non_exhaustive]
@@ -7065,9 +6677,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"))]
     pub struct EmergencyAreaIDBroadcastNR(pub SequenceOf<EmergencyAreaIDBroadcastNRItem>);
     crate::per::sequence_of! { EmergencyAreaIDBroadcastNR, 1, 65535 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousEmergencyAreaIDBroadcastNRItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as EmergencyAreaIDBroadcastNRItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousEmergencyAreaIDBroadcastNRItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "EmergencyAreaIDBroadcastNR-Item")]
     #[non_exhaustive]
@@ -7104,9 +6713,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"))]
     pub struct EmergencyAreaIDCancelledEUTRA(pub SequenceOf<EmergencyAreaIDCancelledEUTRAItem>);
     crate::per::sequence_of! { EmergencyAreaIDCancelledEUTRA, 1, 65535 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousEmergencyAreaIDCancelledEUTRAItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as EmergencyAreaIDCancelledEUTRAItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousEmergencyAreaIDCancelledEUTRAItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "EmergencyAreaIDCancelledEUTRA-Item")]
     #[non_exhaustive]
@@ -7143,9 +6749,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"))]
     pub struct EmergencyAreaIDCancelledNR(pub SequenceOf<EmergencyAreaIDCancelledNRItem>);
     crate::per::sequence_of! { EmergencyAreaIDCancelledNR, 1, 65535 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousEmergencyAreaIDCancelledNRItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as EmergencyAreaIDCancelledNRItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousEmergencyAreaIDCancelledNRItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "EmergencyAreaIDCancelledNR-Item")]
     #[non_exhaustive]
@@ -7186,9 +6789,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=256"))]
     pub struct EmergencyAreaIDListForRestart(pub SequenceOf<EmergencyAreaID>);
     crate::per::sequence_of! { EmergencyAreaIDListForRestart, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousEmergencyFallbackIndicatorIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as EmergencyFallbackIndicatorIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousEmergencyFallbackIndicatorIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -7244,9 +6844,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "further-data-exists")]
         further_data_exists = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousEndpointIPAddressAndPortIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as EndpointIPAddressAndPortIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousEndpointIPAddressAndPortIEExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     pub struct EndpointIPAddressAndPort {
@@ -7280,9 +6877,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=15"))]
     pub struct EquivalentPLMNs(pub SequenceOf<PLMNIdentity>);
     crate::per::sequence_of! { EquivalentPLMNs, 1, 15 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousEquivalentSNPNsItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as EquivalentSNPNsItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousEquivalentSNPNsItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -7319,9 +6913,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=15"))]
     pub struct EquivalentSNPNsList(pub SequenceOf<EquivalentSNPNsItem>);
     crate::per::sequence_of! { EquivalentSNPNsList, 1, 15 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousEventBasedReportingIEsIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as EventBasedReportingIEsIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousEventBasedReportingIEsIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -7360,9 +6951,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousEventL1LoggedMDTConfigIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as EventL1LoggedMDTConfigIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousEventL1LoggedMDTConfigIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -7407,8 +6995,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as EventTriggerChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as EventTriggerChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum EventTrigger {
@@ -7469,9 +7055,6 @@ pub mod ngap_ies {
         pub SequenceOf<ExcessPacketDelayThresholdItem>,
     );
     crate::per::sequence_of! { ExcessPacketDelayThresholdConfiguration, 1, 255 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousExcessPacketDelayThresholdItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as ExcessPacketDelayThresholdItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousExcessPacketDelayThresholdItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -7547,9 +7130,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("1..=181", extensible))]
     pub struct ExpectedIdlePeriod(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AnonymousExpectedUEActivityBehaviourIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as ExpectedUEActivityBehaviourIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousExpectedUEActivityBehaviourIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -7591,9 +7171,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousExpectedUEBehaviourIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as ExpectedUEBehaviourIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousExpectedUEBehaviourIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -7649,9 +7226,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=16"))]
     pub struct ExpectedUEMovingTrajectory(pub SequenceOf<ExpectedUEMovingTrajectoryItem>);
     crate::per::sequence_of! { ExpectedUEMovingTrajectory, 1, 16 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousExpectedUEMovingTrajectoryItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as ExpectedUEMovingTrajectoryItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousExpectedUEMovingTrajectoryItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -7684,9 +7258,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousExtendedAMFNameIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as ExtendedAMFNameIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousExtendedAMFNameIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "Extended-AMFName")]
     #[non_exhaustive]
@@ -7722,9 +7293,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "Extended-ConnectedTime", value("0..=255"))]
     pub struct ExtendedConnectedTime(pub u8);
-    pub use super::ngap_common_data_types::Criticality as AnonymousExtendedRANNodeNameIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as ExtendedRANNodeNameIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousExtendedRANNodeNameIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "Extended-RANNodeName")]
     #[non_exhaustive]
@@ -7787,9 +7355,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("1..=65535", extensible))]
     pub struct ExtendedPacketDelayBudget(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AnonymousExtendedRATRestrictionInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as ExtendedRATRestrictionInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousExtendedRATRestrictionInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -7839,9 +7404,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct ExtendedUEIdentityIndexValue(pub FixedBitString<16usize>);
-    pub use super::ngap_common_data_types::Criticality as AnonymousFailureIndicationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as FailureIndicationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousFailureIndicationIEExtensions;
     #[doc = " F"]
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
@@ -7869,9 +7431,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousFirstDLCountIEExtensionCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as FirstDLCountIEExtension;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousFirstDLCountIEExtension;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -7898,9 +7457,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousFiveGProSeAuthorizedIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as FiveGProSeAuthorizedIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousFiveGProSeAuthorizedIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "FiveG-ProSeAuthorized")]
     #[non_exhaustive]
@@ -7951,9 +7507,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousFiveGProSePC5QoSParametersIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as FiveGProSePC5QoSParametersIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousFiveGProSePC5QoSParametersIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "FiveG-ProSePC5QoSParameters")]
     #[non_exhaustive]
@@ -7986,9 +7539,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousFiveGSTMSIIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as FiveGSTMSIIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousFiveGSTMSIIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "FiveG-S-TMSI")]
     #[non_exhaustive]
@@ -8030,8 +7580,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "FiveG-TMSI")]
     pub struct FiveGTMSI(pub FixedOctetString<4usize>);
-    pub use super::ngap_common_data_types::Criticality as FiveGCActionChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as FiveGCActionChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum FiveGCAction {
@@ -8151,9 +7699,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "not-authorized")]
         not_authorized = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousFiveGProSePC5FlowBitRatesIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as FiveGProSePC5FlowBitRatesIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousFiveGProSePC5FlowBitRatesIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -8186,9 +7731,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousFiveGProSePC5QoSFlowItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as FiveGProSePC5QoSFlowItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousFiveGProSePC5QoSFlowItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -8238,9 +7780,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=16"))]
     pub struct ForbiddenAreaInformation(pub SequenceOf<ForbiddenAreaInformationItem>);
     crate::per::sequence_of! { ForbiddenAreaInformation, 1, 16 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousForbiddenAreaInformationItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as ForbiddenAreaInformationItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousForbiddenAreaInformationItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "ForbiddenAreaInformation-Item")]
     #[non_exhaustive]
@@ -8277,9 +7816,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=4096"))]
     pub struct ForbiddenTACs(pub SequenceOf<TAC>);
     crate::per::sequence_of! { ForbiddenTACs, 1, 4096 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousFromEUTRANtoNGRANIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as FromEUTRANtoNGRANIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousFromEUTRANtoNGRANIEExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     pub struct FromEUTRANtoNGRAN {
@@ -8303,9 +7839,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousFromNGRANtoEUTRANIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as FromNGRANtoEUTRANIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousFromNGRANtoEUTRANIEExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     pub struct FromNGRANtoEUTRAN {
@@ -8356,9 +7889,6 @@ pub mod ngap_ies {
             Ok(Self(value))
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousGBRQosInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as GBRQosInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousGBRQosInformationIEExtensions;
     #[doc = " G"]
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "GBR-QosInformation")]
@@ -8422,8 +7952,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as GNBIDChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as GNBIDChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "GNB-ID")]
     pub enum GNBID {
@@ -8472,9 +8000,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "GTP-TEID")]
     pub struct GTPTEID(pub FixedOctetString<4usize>);
-    pub use super::ngap_common_data_types::Criticality as AnonymousGTPTunnelIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as GTPTunnelIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousGTPTunnelIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -8507,9 +8032,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousGUAMIIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as GUAMIIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousGUAMIIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -8558,9 +8080,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=1024"))]
     pub struct GUAMIList(pub SequenceOf<GUAMIListItem>);
     crate::per::sequence_of! { GUAMIList, 1, 1024 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousGUAMIListItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as GUAMIListItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousGUAMIListItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "GUAMIList-Item")]
     #[non_exhaustive]
@@ -8598,9 +8117,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousGeographyBasedMDTIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as GeographyBasedMDTIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousGeographyBasedMDTIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -8636,9 +8152,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "GlobalCable-ID")]
     pub struct GlobalCableID(pub OctetString);
-    pub use super::ngap_common_data_types::Criticality as AnonymousGlobalCableIDNewIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as GlobalCableIDNewIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousGlobalCableIDNewIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "GlobalCable-ID-new")]
     #[non_exhaustive]
@@ -8671,9 +8184,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousGlobalENBIDIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as GlobalENBIDIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousGlobalENBIDIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "GlobalENB-ID")]
     #[non_exhaustive]
@@ -8706,9 +8216,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousGlobalGNBIDIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as GlobalGNBIDIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousGlobalGNBIDIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "GlobalGNB-ID")]
     #[non_exhaustive]
@@ -8741,9 +8248,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousGlobalLineIDIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as GlobalLineIDIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousGlobalLineIDIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "GlobalLine-ID")]
     #[non_exhaustive]
@@ -8779,9 +8283,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct GlobalLineIdentity(pub OctetString);
-    pub use super::ngap_common_data_types::Criticality as AnonymousGlobalN3IWFIDIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as GlobalN3IWFIDIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousGlobalN3IWFIDIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "GlobalN3IWF-ID")]
     #[non_exhaustive]
@@ -8814,9 +8315,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousGlobalNgENBIDIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as GlobalNgENBIDIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousGlobalNgENBIDIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "GlobalNgENB-ID")]
     #[non_exhaustive]
@@ -8849,8 +8347,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as GlobalRANNodeIDChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as GlobalRANNodeIDChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum GlobalRANNodeID {
@@ -8883,9 +8379,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousGlobalTNGFIDIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as GlobalTNGFIDIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousGlobalTNGFIDIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "GlobalTNGF-ID")]
     #[non_exhaustive]
@@ -8918,9 +8411,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousGlobalTWIFIDIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as GlobalTWIFIDIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousGlobalTWIFIDIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "GlobalTWIF-ID")]
     #[non_exhaustive]
@@ -8953,9 +8443,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousGlobalWAGFIDIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as GlobalWAGFIDIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousGlobalWAGFIDIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "GlobalW-AGF-ID")]
     #[non_exhaustive]
@@ -8991,9 +8478,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "HFCNode-ID")]
     pub struct HFCNodeID(pub OctetString);
-    pub use super::ngap_common_data_types::Criticality as AnonymousHFCNodeIDNewIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as HFCNodeIDNewIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousHFCNodeIDNewIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "HFCNode-ID-new")]
     #[non_exhaustive]
@@ -9026,9 +8510,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousHLComActivateIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as HLComActivateIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousHLComActivateIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -9064,9 +8545,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousHLComDeactivateIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as HLComDeactivateIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousHLComDeactivateIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -9105,9 +8583,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "intersystem-ping-pong")]
         intersystem_ping_pong = 2,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousHOReportIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as HOReportIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousHOReportIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -9182,9 +8657,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousHandoverCommandTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as HandoverCommandTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousHandoverCommandTransferIEExtensions;
     #[doc = " H"]
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
@@ -9231,9 +8703,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "handover-preparation")]
         handover_preparation = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousHandoverPreparationUnsuccessfulTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as HandoverPreparationUnsuccessfulTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousHandoverPreparationUnsuccessfulTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -9255,9 +8724,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousHandoverRequestAcknowledgeTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as HandoverRequestAcknowledgeTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousHandoverRequestAcknowledgeTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -9314,9 +8780,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousHandoverRequiredTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as HandoverRequiredTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousHandoverRequiredTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -9343,9 +8806,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousHandoverResourceAllocationUnsuccessfulTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as HandoverResourceAllocationUnsuccessfulTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousHandoverResourceAllocationUnsuccessfulTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -9431,9 +8891,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "not-supported")]
         not_supported = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousImmediateMDTNrIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as ImmediateMDTNrIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousImmediateMDTNrIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -9530,9 +8987,6 @@ pub mod ngap_ies {
     pub enum IndicationOfBitrateAdaptation {
         uplink = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousInfoOnRecommendedCellsAndRANNodesForPagingIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as InfoOnRecommendedCellsAndRANNodesForPagingIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousInfoOnRecommendedCellsAndRANNodesForPagingIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -9588,9 +9042,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct IntendedServiceAreaCoordinates(pub OctetString);
-    pub use super::ngap_common_data_types::Criticality as AnonymousInterSystemFailureIndicationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as InterSystemFailureIndicationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousInterSystemFailureIndicationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -9617,9 +9068,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousInterSystemHOReportIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as InterSystemHOReportIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousInterSystemHOReportIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -9646,8 +9094,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as InterSystemHandoverReportTypeChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as InterSystemHandoverReportTypeChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum InterSystemHandoverReportType {
@@ -9674,9 +9120,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct InterfacesToTrace(pub FixedBitString<8usize>);
-    pub use super::ngap_common_data_types::Criticality as AnonymousIntersystemCellActivationReplyIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as IntersystemCellActivationReplyIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousIntersystemCellActivationReplyIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -9709,9 +9152,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousIntersystemCellActivationRequestIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as IntersystemCellActivationRequestIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousIntersystemCellActivationRequestIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -9744,9 +9184,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousIntersystemCellStateIndicationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as IntersystemCellStateIndicationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousIntersystemCellStateIndicationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -9773,9 +9210,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousIntersystemMobilityFailureforVoiceFallbackIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as IntersystemMobilityFailureforVoiceFallbackIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousIntersystemMobilityFailureforVoiceFallbackIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -9820,9 +9254,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousIntersystemResourceStatusReplyIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as IntersystemResourceStatusReplyIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousIntersystemResourceStatusReplyIEExtensions;
     #[doc = " "]
     #[doc = ""]
     #[doc = ""]
@@ -9884,9 +9315,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousIntersystemResourceStatusReportIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as IntersystemResourceStatusReportIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousIntersystemResourceStatusReportIEExtensions;
     #[doc = " "]
     #[doc = ""]
     #[doc = ""]
@@ -9950,9 +9378,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousIntersystemResourceStatusRequestIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as IntersystemResourceStatusRequestIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousIntersystemResourceStatusRequestIEExtensions;
     #[doc = " "]
     #[doc = ""]
     #[doc = ""]
@@ -10031,9 +9456,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("0..=100"))]
     pub struct IntersystemResourceThreshold(pub u8);
-    pub use super::ngap_common_data_types::Criticality as AnonymousIntersystemSONConfigurationTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as IntersystemSONConfigurationTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousIntersystemSONConfigurationTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -10066,8 +9488,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as IntersystemSONInformationChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as IntersystemSONInformationChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum IntersystemSONInformation {
@@ -10085,8 +9505,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as IntersystemSONInformationReplyChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as IntersystemSONInformationReplyChoiceExtensions;
     #[doc = " "]
     #[doc = ""]
     #[doc = ""]
@@ -10148,8 +9566,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as IntersystemSONInformationReportChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as IntersystemSONInformationReportChoiceExtensions;
     #[doc = " "]
     #[doc = ""]
     #[doc = ""]
@@ -10210,8 +9626,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as IntersystemSONInformationRequestChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as IntersystemSONInformationRequestChoiceExtensions;
     #[doc = " "]
     #[doc = ""]
     #[doc = ""]
@@ -10273,9 +9687,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousIntersystemSONNGRANnodeIDIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as IntersystemSONNGRANnodeIDIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousIntersystemSONNGRANnodeIDIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -10308,8 +9719,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as IntersystemSONTransferTypeChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as IntersystemSONTransferTypeChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum IntersystemSONTransferType {
@@ -10333,9 +9742,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousIntersystemSONeNBIDIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as IntersystemSONeNBIDIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousIntersystemSONeNBIDIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -10378,9 +9784,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "false")]
         R_false = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousIntersystemUnnecessaryHOIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as IntersystemUnnecessaryHOIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousIntersystemUnnecessaryHOIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -10425,9 +9828,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousInventoryFailureTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as InventoryFailureTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousInventoryFailureTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -10472,9 +9872,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousInventoryReportTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as InventoryReportTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousInventoryReportTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -10522,9 +9919,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousInventoryRequestTransferProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as InventoryRequestTransferProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousInventoryRequestTransferProtocolIEs;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -10541,9 +9935,6 @@ pub mod ngap_ies {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousInventoryResponseTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as InventoryResponseTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousInventoryResponseTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -10582,9 +9973,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct LAC(pub FixedOctetString<2usize>);
-    pub use super::ngap_common_data_types::Criticality as AnonymousLAIIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as LAIIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousLAIIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -10627,9 +10015,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousLPWUSPSAssistanceInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as LPWUSPSAssistanceInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousLPWUSPSAssistanceInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -10674,9 +10059,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "not-authorized")]
         not_authorized = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousLTEA2XServicesAuthorizedIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as LTEA2XServicesAuthorizedIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousLTEA2XServicesAuthorizedIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "LTE-A2X-ServicesAuthorized")]
     #[non_exhaustive]
@@ -10719,9 +10101,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct LTEUERLFReportContainer(pub OctetString);
-    pub use super::ngap_common_data_types::Criticality as AnonymousLTEUESidelinkAggregateMaximumBitrateIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as LTEUESidelinkAggregateMaximumBitrateIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousLTEUESidelinkAggregateMaximumBitrateIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -10748,9 +10127,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousLTEV2XServicesAuthorizedIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as LTEV2XServicesAuthorizedIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousLTEV2XServicesAuthorizedIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -10783,8 +10159,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as LastVisitedCellInformationChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as LastVisitedCellInformationChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum LastVisitedCellInformation {
@@ -10820,9 +10194,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousLastVisitedCellItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as LastVisitedCellItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousLastVisitedCellItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -10855,9 +10226,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct LastVisitedGERANCellInformation(pub OctetString);
-    pub use super::ngap_common_data_types::Criticality as AnonymousLastVisitedNGRANCellInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as LastVisitedNGRANCellInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousLastVisitedNGRANCellInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -10911,9 +10279,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousLastVisitedPSCellInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as LastVisitedPSCellInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousLastVisitedPSCellInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -10978,9 +10343,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("1..=64", extensible))]
     pub struct LocationReportingReferenceID(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AnonymousLocationReportingRequestTypeIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as LocationReportingRequestTypeIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousLocationReportingRequestTypeIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -11025,9 +10387,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousLoggedMDTNrIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as LoggedMDTNrIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousLoggedMDTNrIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -11090,8 +10449,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as LoggedMDTTriggerChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as LoggedMDTTriggerChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum LoggedMDTTrigger {
@@ -11142,9 +10499,6 @@ pub mod ngap_ies {
         ms61440 = 9,
         infinity = 10,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousM1ConfigurationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as M1ConfigurationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousM1ConfigurationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -11183,9 +10537,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousM1PeriodicReportingIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as M1PeriodicReportingIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousM1PeriodicReportingIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -11227,9 +10578,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "a2eventtriggered-periodic")]
         a2eventtriggered_periodic = 2,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousM1ThresholdEventA2IEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as M1ThresholdEventA2IEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousM1ThresholdEventA2IEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -11256,8 +10604,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as M1ThresholdTypeChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as M1ThresholdTypeChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum M1ThresholdType {
@@ -11290,9 +10636,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousM4ConfigurationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as M4ConfigurationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousM4ConfigurationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -11346,9 +10689,6 @@ pub mod ngap_ies {
         ms10240 = 3,
         min1 = 4,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousM5ConfigurationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as M5ConfigurationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousM5ConfigurationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -11402,9 +10742,6 @@ pub mod ngap_ies {
         ms10240 = 3,
         min1 = 4,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousM6ConfigurationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as M6ConfigurationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousM6ConfigurationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -11469,9 +10806,6 @@ pub mod ngap_ies {
         min12 = 12,
         min30 = 13,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousM7ConfigurationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as M7ConfigurationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousM7ConfigurationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -11518,9 +10852,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("1..=60", extensible))]
     pub struct M7period(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSActiveSessionInformationSourcetoTargetItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSActiveSessionInformationSourcetoTargetItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSActiveSessionInformationSourcetoTargetItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(
         automatic_tags,
@@ -11587,9 +10918,6 @@ pub mod ngap_ies {
         pub SequenceOf<MBSActiveSessionInformationSourcetoTargetItem>,
     );
     crate::per::sequence_of! { MBSActiveSessionInformationSourcetoTargetList, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSActiveSessionInformationTargettoSourceItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSActiveSessionInformationTargettoSourceItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSActiveSessionInformationTargettoSourceItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(
         automatic_tags,
@@ -11653,9 +10981,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSDataForwardingResponseMRBItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSDataForwardingResponseMRBItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSDataForwardingResponseMRBItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "MBS-DataForwardingResponseMRBItem")]
     #[non_exhaustive]
@@ -11702,9 +11027,6 @@ pub mod ngap_ies {
     )]
     pub struct MBSDataForwardingResponseMRBList(pub SequenceOf<MBSDataForwardingResponseMRBItem>);
     crate::per::sequence_of! { MBSDataForwardingResponseMRBList, 1, 32 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSDistributionReleaseRequestTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSDistributionReleaseRequestTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSDistributionReleaseRequestTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "MBS-DistributionReleaseRequestTransfer")]
     #[non_exhaustive]
@@ -11747,9 +11069,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSDistributionSetupRequestTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSDistributionSetupRequestTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSDistributionSetupRequestTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "MBS-DistributionSetupRequestTransfer")]
     #[non_exhaustive]
@@ -11788,9 +11107,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSDistributionSetupResponseTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSDistributionSetupResponseTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSDistributionSetupResponseTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "MBS-DistributionSetupResponseTransfer")]
     #[non_exhaustive]
@@ -11847,9 +11163,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSDistributionSetupUnsuccessfulTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSDistributionSetupUnsuccessfulTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSDistributionSetupUnsuccessfulTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(
         automatic_tags,
@@ -11903,9 +11216,6 @@ pub mod ngap_ies {
     )]
     pub struct MBSIntendedServiceAreaList(pub SequenceOf<IntendedServiceAreaCoordinates>);
     crate::per::sequence_of! { MBSIntendedServiceAreaList, 1, 65536, unconstrained }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSMappingandDataForwardingRequestItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSMappingandDataForwardingRequestItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSMappingandDataForwardingRequestItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "MBS-MappingandDataForwardingRequestItem")]
     #[non_exhaustive]
@@ -11954,8 +11264,6 @@ pub mod ngap_ies {
         pub SequenceOf<MBSMappingandDataForwardingRequestItem>,
     );
     crate::per::sequence_of! { MBSMappingandDataForwardingRequestList, 1, 32 }
-    pub use super::ngap_common_data_types::Criticality as MBSNGUFailureIndicationChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as MBSNGUFailureIndicationChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "MBS-NGUFailureIndication")]
     pub enum MBSNGUFailureIndication {
@@ -11983,9 +11291,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"), identifier = "MBS-QoSFlowList")]
     pub struct MBSQoSFlowList(pub SequenceOf<QosFlowIdentifier>);
     crate::per::sequence_of! { MBSQoSFlowList, 1, 64 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSQoSFlowsToBeSetupItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSQoSFlowsToBeSetupItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSQoSFlowsToBeSetupItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "MBS-QoSFlowsToBeSetupItem")]
     #[non_exhaustive]
@@ -12022,8 +11327,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"), identifier = "MBS-QoSFlowsToBeSetupList")]
     pub struct MBSQoSFlowsToBeSetupList(pub SequenceOf<MBSQoSFlowsToBeSetupItem>);
     crate::per::sequence_of! { MBSQoSFlowsToBeSetupList, 1, 64 }
-    pub use super::ngap_common_data_types::Criticality as MBSServiceAreaChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as MBSServiceAreaChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "MBS-ServiceArea")]
     pub enum MBSServiceArea {
@@ -12051,9 +11354,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=8192"), identifier = "MBS-ServiceAreaCellList")]
     pub struct MBSServiceAreaCellList(pub SequenceOf<NRCGI>);
     crate::per::sequence_of! { MBSServiceAreaCellList, 1, 8192 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSServiceAreaInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSServiceAreaInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSServiceAreaInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "MBS-ServiceAreaInformation")]
     #[non_exhaustive]
@@ -12086,9 +11386,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSServiceAreaInformationItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSServiceAreaInformationItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSServiceAreaInformationItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "MBS-ServiceAreaInformationItem")]
     #[non_exhaustive]
@@ -12140,9 +11437,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"), identifier = "MBS-SessionFSAIDList")]
     pub struct MBSSessionFSAIDList(pub SequenceOf<MBSSessionFSAID>);
     crate::per::sequence_of! { MBSSessionFSAIDList, 1, 64 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSSessionIDIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSSessionIDIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSSessionIDIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "MBS-SessionID")]
     #[non_exhaustive]
@@ -12175,8 +11469,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as MBSSessionTNLInfo5GCChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as MBSSessionTNLInfo5GCChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "MBS-SessionTNLInfo5GC")]
     pub enum MBSSessionTNLInfo5GC {
@@ -12200,9 +11492,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSSessionTNLInfo5GCItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSSessionTNLInfo5GCItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSSessionTNLInfo5GCItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "MBS-SessionTNLInfo5GCItem")]
     #[non_exhaustive]
@@ -12239,8 +11528,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=256"), identifier = "MBS-SessionTNLInfo5GCList")]
     pub struct MBSSessionTNLInfo5GCList(pub SequenceOf<MBSSessionTNLInfo5GCItem>);
     crate::per::sequence_of! { MBSSessionTNLInfo5GCList, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as MBSSessionTNLInfoNGRANChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as MBSSessionTNLInfoNGRANChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "MBS-SessionTNLInfoNGRAN")]
     pub enum MBSSessionTNLInfoNGRAN {
@@ -12264,9 +11551,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSSessionTNLInfoNGRANItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSSessionTNLInfoNGRANItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSSessionTNLInfoNGRANItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "MBS-SessionTNLInfoNGRANItem")]
     #[non_exhaustive]
@@ -12322,9 +11606,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "ng-u-path-failure-detected")]
         ng_u_path_failure_detected = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSUPFailureIndicationItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSUPFailureIndicationItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSUPFailureIndicationItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "MBS-UP-FailureIndicationItem")]
     #[non_exhaustive]
@@ -12361,9 +11642,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=256"), identifier = "MBS-UP-FailureIndicationList")]
     pub struct MBSUPFailureIndicationList(pub SequenceOf<MBSUPFailureIndicationItem>);
     crate::per::sequence_of! { MBSUPFailureIndicationList, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSSessionFailedtoSetupItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSSessionFailedtoSetupItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSSessionFailedtoSetupItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -12404,9 +11682,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=32"))]
     pub struct MBSSessionFailedtoSetupList(pub SequenceOf<MBSSessionFailedtoSetupItem>);
     crate::per::sequence_of! { MBSSessionFailedtoSetupList, 1, 32 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSSessionReleaseResponseTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSSessionReleaseResponseTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSSessionReleaseResponseTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -12433,9 +11708,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSSessionSetupOrModFailureTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSSessionSetupOrModFailureTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSSessionSetupOrModFailureTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -12466,9 +11738,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSSessionSetupOrModRequestTransferProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as MBSSessionSetupOrModRequestTransferProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousMBSSessionSetupOrModRequestTransferProtocolIEs;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -12485,9 +11754,6 @@ pub mod ngap_ies {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSSessionSetupOrModResponseTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSSessionSetupOrModResponseTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSSessionSetupOrModResponseTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -12514,9 +11780,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSSessionSetupRequestItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSSessionSetupRequestItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSSessionSetupRequestItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -12559,9 +11822,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=32"))]
     pub struct MBSSessionSetupRequestList(pub SequenceOf<MBSSessionSetupRequestItem>);
     crate::per::sequence_of! { MBSSessionSetupRequestList, 1, 32 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSSessionSetupResponseItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSSessionSetupResponseItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSSessionSetupResponseItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -12598,9 +11858,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=32"))]
     pub struct MBSSessionSetupResponseList(pub SequenceOf<MBSSessionSetupResponseItem>);
     crate::per::sequence_of! { MBSSessionSetupResponseList, 1, 32 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSSessionSetuporModifyRequestItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSSessionSetuporModifyRequestItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSSessionSetuporModifyRequestItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -12661,9 +11918,6 @@ pub mod ngap_ies {
         activated = 0,
         deactivated = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMBSSessionToReleaseItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MBSSessionToReleaseItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSSessionToReleaseItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -12709,8 +11963,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "immediate-MDT-and-Trace")]
         immediate_MDT_and_Trace = 2,
     }
-    pub use super::ngap_common_data_types::Criticality as MDTAlignmentInfoChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as MDTAlignmentInfoChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "MDT-AlignmentInfo")]
     pub enum MDTAlignmentInfo {
@@ -12729,9 +11981,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMDTConfigurationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MDTConfigurationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMDTConfigurationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "MDT-Configuration")]
     #[non_exhaustive]
@@ -12764,9 +12013,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMDTConfigurationEUTRAIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MDTConfigurationEUTRAIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMDTConfigurationEUTRAIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "MDT-Configuration-EUTRA")]
     #[non_exhaustive]
@@ -12811,9 +12057,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMDTConfigurationNRIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MDTConfigurationNRIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMDTConfigurationNRIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "MDT-Configuration-NR")]
     #[non_exhaustive]
@@ -12858,9 +12101,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMDTLocationInfoIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MDTLocationInfoIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMDTLocationInfoIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "MDT-Location-Info")]
     #[non_exhaustive]
@@ -12890,9 +12130,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "MDT-Location-Information")]
     pub struct MDTLocationInformation(pub FixedBitString<8usize>);
-    pub use super::ngap_common_data_types::Criticality as AnonymousMDTCircleIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MDTCircleIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMDTCircleIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "MDT-circle")]
     #[non_exhaustive]
@@ -12931,8 +12168,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct MDTModeEutra(pub OctetString);
-    pub use super::ngap_common_data_types::Criticality as MDTModeNrChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as MDTModeNrChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum MDTModeNr {
@@ -12984,8 +12219,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "MRB-ID", value("1..=512", extensible))]
     pub struct MRBID(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as MRBProgressInformationChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as MRBProgressInformationChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "MRB-ProgressInformation")]
     pub enum MRBProgressInformation {
@@ -13057,8 +12290,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "maximum-UE-rate")]
         maximum_UE_rate = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as MeasurementThresholdL1LoggedMDTChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as MeasurementThresholdL1LoggedMDTChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum MeasurementThresholdL1LoggedMDT {
@@ -13105,9 +12336,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "not-authorized")]
         not_authorized = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMobileIABMTUserLocationInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MobileIABMTUserLocationInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMobileIABMTUserLocationInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "MobileIAB-MTUserLocationInformation")]
     #[non_exhaustive]
@@ -13157,9 +12385,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct MobilityInformation(pub FixedBitString<16usize>);
-    pub use super::ngap_common_data_types::Criticality as AnonymousMobilityRestrictionListIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MobilityRestrictionListIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMobilityRestrictionListIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -13219,9 +12444,6 @@ pub mod ngap_ies {
         both = 2,
         stop = 3,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMonitoringRequestonAvailableBitrateIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MonitoringRequestonAvailableBitrateIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMonitoringRequestonAvailableBitrateIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -13260,9 +12482,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMulticastGroupPagingAreaIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MulticastGroupPagingAreaIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMulticastGroupPagingAreaIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -13289,9 +12508,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMulticastGroupPagingAreaItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MulticastGroupPagingAreaItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMulticastGroupPagingAreaItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -13328,9 +12544,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"))]
     pub struct MulticastGroupPagingAreaList(pub SequenceOf<MulticastGroupPagingAreaItem>);
     crate::per::sequence_of! { MulticastGroupPagingAreaList, 1, 64 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMulticastSessionActivationRequestTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MulticastSessionActivationRequestTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMulticastSessionActivationRequestTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -13357,9 +12570,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMulticastSessionDeactivationRequestTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as MulticastSessionDeactivationRequestTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousMulticastSessionDeactivationRequestTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -13386,9 +12596,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMulticastSessionUpdateRequestTransferProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as MulticastSessionUpdateRequestTransferProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousMulticastSessionUpdateRequestTransferProtocolIEs;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -13405,8 +12612,6 @@ pub mod ngap_ies {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as N3IWFIDChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as N3IWFIDChoiceExtensions;
     #[doc = " N"]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "N3IWF-ID")]
@@ -13426,9 +12631,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousN6JitterInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as N6JitterInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousN6JitterInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -13516,9 +12718,6 @@ pub mod ngap_ies {
         hf512 = 12,
         hf1024 = 13,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNBIoTPagingEDRXInfoIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NBIoTPagingEDRXInfoIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNBIoTPagingEDRXInfoIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "NB-IoT-Paging-eDRXInfo")]
     #[non_exhaustive]
@@ -13569,9 +12768,6 @@ pub mod ngap_ies {
         value("0..=255", extensible)
     )]
     pub struct NBIoTUEPriority(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AnonymousNGAPIESupportInformationRequestItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NGAPIESupportInformationRequestItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNGAPIESupportInformationRequestItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -13622,9 +12818,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "not-present")]
         not_present = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNGAPIESupportInformationResponseItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NGAPIESupportInformationResponseItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNGAPIESupportInformationResponseItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -13671,8 +12864,6 @@ pub mod ngap_ies {
         pub SequenceOf<NGAPIESupportInformationResponseItem>,
     );
     crate::per::sequence_of! { NGAPIESupportInformationResponseList, 1, 32 }
-    pub use super::ngap_common_data_types::Criticality as NGRANCGIChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as NGRANCGIChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "NGRAN-CGI")]
     pub enum NGRANCGI {
@@ -13698,9 +12889,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNGRANCellReportItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NGRANCellReportItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNGRANCellReportItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "NGRAN-CellReportItem")]
     #[non_exhaustive]
@@ -13755,9 +12943,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=256"), identifier = "NGRAN-CellReportList")]
     pub struct NGRANCellReportList(pub SequenceOf<NGRANCellReportItem>);
     crate::per::sequence_of! { NGRANCellReportList, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNGRANCellToReportItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NGRANCellToReportItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNGRANCellToReportItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "NGRAN-CellToReportItem")]
     #[non_exhaustive]
@@ -13802,9 +12987,6 @@ pub mod ngap_ies {
         value("0..=16777215", extensible)
     )]
     pub struct NGRANNumberOfActiveUEs(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AnonymousNGRANRadioResourceStatusIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NGRANRadioResourceStatusIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNGRANRadioResourceStatusIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "NGRAN-RadioResourceStatus")]
     #[non_exhaustive]
@@ -13861,9 +13043,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNGRANReportingStatusIEsIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NGRANReportingStatusIEsIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNGRANReportingStatusIEsIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "NGRAN-ReportingStatusIEs")]
     #[non_exhaustive]
@@ -13890,9 +13069,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNGRANReportingSystemIEsIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NGRANReportingSystemIEsIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNGRANReportingSystemIEsIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "NGRAN-ReportingSystemIEs")]
     #[non_exhaustive]
@@ -13919,9 +13095,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNGRANTNLAssociationToRemoveItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NGRANTNLAssociationToRemoveItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNGRANTNLAssociationToRemoveItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "NGRAN-TNLAssociationToRemoveItem")]
     pub struct NGRANTNLAssociationToRemoveItem {
@@ -13983,8 +13156,6 @@ pub mod ngap_ies {
             Ok(Self(value))
         }
     }
-    pub use super::ngap_common_data_types::Criticality as NPNAccessInformationChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as NPNAccessInformationChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "NPN-AccessInformation")]
     pub enum NPNAccessInformation {
@@ -14003,8 +13174,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as NPNMobilityInformationChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as NPNMobilityInformationChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "NPN-MobilityInformation")]
     pub enum NPNMobilityInformation {
@@ -14030,8 +13199,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as NPNPagingAssistanceInformationChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as NPNPagingAssistanceInformationChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "NPN-PagingAssistanceInformation")]
     pub enum NPNPagingAssistanceInformation {
@@ -14050,8 +13217,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as NPNSupportChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as NPNSupportChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "NPN-Support")]
     pub enum NPNSupport {
@@ -14087,9 +13252,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "not-authorized")]
         not_authorized = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNRA2XServicesAuthorizedIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NRA2XServicesAuthorizedIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNRA2XServicesAuthorizedIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "NR-A2X-ServicesAuthorized")]
     #[non_exhaustive]
@@ -14122,9 +13284,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNRCGIIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NRCGIIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNRCGIIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "NR-CGI")]
     #[non_exhaustive]
@@ -14183,9 +13342,6 @@ pub mod ngap_ies {
         hf512 = 8,
         hf1024 = 9,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNRPagingLongEDRXInformationForRRCINACTIVEIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NRPagingLongEDRXInformationForRRCINACTIVEIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNRPagingLongEDRXInformationForRRCINACTIVEIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(
         automatic_tags,
@@ -14329,9 +13485,6 @@ pub mod ngap_ies {
         hf512 = 11,
         hf1024 = 12,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNRPagingeDRXInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NRPagingeDRXInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNRPagingeDRXInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "NR-PagingeDRXInformation")]
     #[non_exhaustive]
@@ -14401,9 +13554,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=32"), identifier = "NRFrequencyBand-List")]
     pub struct NRFrequencyBandList(pub SequenceOf<NRFrequencyBandItem>);
     crate::per::sequence_of! { NRFrequencyBandList, 1, 32 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNRFrequencyBandItemIEExtensionCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NRFrequencyBandItemIEExtension;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNRFrequencyBandItemIEExtension;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -14430,9 +13580,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNRFrequencyInfoIEExtensionCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NRFrequencyInfoIEExtension;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNRFrequencyInfoIEExtension;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -14468,9 +13615,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct NRMobilityHistoryReport(pub OctetString);
-    pub use super::ngap_common_data_types::Criticality as AnonymousNRNTNTAIInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NRNTNTAIInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNRNTNTAIInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -14515,9 +13659,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct NRUERLFReportContainer(pub OctetString);
-    pub use super::ngap_common_data_types::Criticality as AnonymousNRUESidelinkAggregateMaximumBitrateIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NRUESidelinkAggregateMaximumBitrateIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNRUESidelinkAggregateMaximumBitrateIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -14544,9 +13685,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNRV2XServicesAuthorizedIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NRV2XServicesAuthorizedIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNRV2XServicesAuthorizedIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -14588,8 +13726,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "NSAG-ID", value("0..=255", extensible))]
     pub struct NSAGID(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as NTNGeographicalAreaItemChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as NTNGeographicalAreaItemChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "NTN-Geographical-Area-Item")]
     pub enum NTNGeographicalAreaItem {
@@ -14628,9 +13764,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("1..=256", extensible))]
     pub struct NetworkInstance(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AnonymousNetworkSliceAreaScopeofMDTIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NetworkSliceAreaScopeofMDTIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNetworkSliceAreaScopeofMDTIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -14657,9 +13790,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNetworkSliceItemforMDTIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NetworkSliceItemforMDTIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNetworkSliceItemforMDTIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -14713,8 +13843,6 @@ pub mod ngap_ies {
         same = 0,
         changed = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as NgENBIDChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as NgENBIDChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "NgENB-ID")]
     pub enum NgENBID {
@@ -14798,9 +13926,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNonDynamic5QIDescriptorIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NonDynamic5QIDescriptorIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNonDynamic5QIDescriptorIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -14869,9 +13994,6 @@ pub mod ngap_ies {
         activated = 0,
         deactivated = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNotificationCellItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as NotificationCellItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousNotificationCellItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "NotificationCell-Item")]
     #[non_exhaustive]
@@ -14960,8 +14082,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "permit-high-priority-sessions-and-mobile-terminated-services-only")]
         permit_high_priority_sessions_and_mobile_terminated_services_only = 3,
     }
-    pub use super::ngap_common_data_types::Criticality as OverloadResponseChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as OverloadResponseChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum OverloadResponse {
@@ -14979,9 +14099,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousOverloadStartNSSAIItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as OverloadStartNSSAIItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousOverloadStartNSSAIItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15024,9 +14141,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=1024"))]
     pub struct OverloadStartNSSAIList(pub SequenceOf<OverloadStartNSSAIItem>);
     crate::per::sequence_of! { OverloadStartNSSAIList, 1, 1024 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPC5FlowBitRatesIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PC5FlowBitRatesIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPC5FlowBitRatesIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15059,9 +14173,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPC5QoSFlowItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PC5QoSFlowItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPC5QoSFlowItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15102,9 +14213,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=2048"))]
     pub struct PC5QoSFlowList(pub SequenceOf<PC5QoSFlowItem>);
     crate::per::sequence_of! { PC5QoSFlowList, 1, 2048 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPC5QoSParametersIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PC5QoSParametersIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPC5QoSParametersIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15141,9 +14249,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=32"))]
     pub struct PCIListForMDT(pub SequenceOf<NRPCI>);
     crate::per::sequence_of! { PCIListForMDT, 1, 32 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionAggregateMaximumBitRateIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionAggregateMaximumBitRateIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionAggregateMaximumBitRateIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15176,9 +14281,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionForPagingItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionForPagingItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionForPagingItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15222,9 +14324,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionListMTCommHReq(pub SequenceOf<PDUSessionListMTCommHReqItem>);
     crate::per::sequence_of! { PDUSessionListMTCommHReq, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionListMTCommHReqItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionListMTCommHReqItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionListMTCommHReqItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "PDUSessionListMTCommHReq-Item")]
     #[non_exhaustive]
@@ -15254,9 +14353,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("0..=255", extensible))]
     pub struct PDUSessionPairID(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceAdmittedItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceAdmittedItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceAdmittedItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15293,9 +14389,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceAdmittedList(pub SequenceOf<PDUSessionResourceAdmittedItem>);
     crate::per::sequence_of! { PDUSessionResourceAdmittedList, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceFailedToModifyItemModCfmIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceFailedToModifyItemModCfmIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceFailedToModifyItemModCfmIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15334,9 +14427,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceFailedToModifyItemModResIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceFailedToModifyItemModResIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceFailedToModifyItemModResIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15387,9 +14477,6 @@ pub mod ngap_ies {
         pub SequenceOf<PDUSessionResourceFailedToModifyItemModRes>,
     );
     crate::per::sequence_of! { PDUSessionResourceFailedToModifyListModRes, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceFailedToResumeItemRESReqIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceFailedToResumeItemRESReqIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceFailedToResumeItemRESReqIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15420,9 +14507,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceFailedToResumeItemRESResIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceFailedToResumeItemRESResIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceFailedToResumeItemRESResIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15465,9 +14549,6 @@ pub mod ngap_ies {
         pub SequenceOf<PDUSessionResourceFailedToResumeItemRESRes>,
     );
     crate::per::sequence_of! { PDUSessionResourceFailedToResumeListRESRes, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceFailedToSetupItemCxtFailIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceFailedToSetupItemCxtFailIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceFailedToSetupItemCxtFailIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15506,9 +14587,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceFailedToSetupItemCxtResIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceFailedToSetupItemCxtResIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceFailedToSetupItemCxtResIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15547,9 +14625,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceFailedToSetupItemHOAckIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceFailedToSetupItemHOAckIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceFailedToSetupItemHOAckIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15588,9 +14663,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceFailedToSetupItemPSReqIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceFailedToSetupItemPSReqIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceFailedToSetupItemPSReqIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15623,9 +14695,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceFailedToSetupItemSUResIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceFailedToSetupItemSUResIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceFailedToSetupItemSUResIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15694,9 +14763,6 @@ pub mod ngap_ies {
         pub SequenceOf<PDUSessionResourceFailedToSetupItemSURes>,
     );
     crate::per::sequence_of! { PDUSessionResourceFailedToSetupListSURes, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceHandoverItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceHandoverItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceHandoverItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15733,9 +14799,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceHandoverList(pub SequenceOf<PDUSessionResourceHandoverItem>);
     crate::per::sequence_of! { PDUSessionResourceHandoverList, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceInformationItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceInformationItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceInformationItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15778,9 +14841,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceInformationList(pub SequenceOf<PDUSessionResourceInformationItem>);
     crate::per::sequence_of! { PDUSessionResourceInformationList, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceItemCxtRelCplIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceItemCxtRelCplIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceItemCxtRelCplIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15807,9 +14867,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceItemCxtRelReqIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceItemCxtRelReqIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceItemCxtRelReqIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15836,9 +14893,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceItemHORqdIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceItemHORqdIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceItemHORqdIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15883,9 +14937,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceListHORqd(pub SequenceOf<PDUSessionResourceItemHORqd>);
     crate::per::sequence_of! { PDUSessionResourceListHORqd, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceModifyConfirmTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceModifyConfirmTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceModifyConfirmTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15930,9 +14981,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceModifyIndicationTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceModifyIndicationTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceModifyIndicationTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15965,9 +15013,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceModifyIndicationUnsuccessfulTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceModifyIndicationUnsuccessfulTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceModifyIndicationUnsuccessfulTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -15989,9 +15034,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceModifyItemModCfmIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceModifyItemModCfmIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceModifyItemModCfmIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16024,9 +15066,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceModifyItemModIndIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceModifyItemModIndIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceModifyItemModIndIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16065,9 +15104,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceModifyItemModReqIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceModifyItemModReqIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceModifyItemModReqIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16106,9 +15142,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceModifyItemModResIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceModifyItemModResIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceModifyItemModResIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16165,9 +15198,6 @@ pub mod ngap_ies {
         pub SequenceOf<PDUSessionResourceModifyItemModRes>,
     );
     crate::per::sequence_of! { PDUSessionResourceModifyListModRes, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceModifyRequestTransferProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as PDUSessionResourceModifyRequestTransferProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousPDUSessionResourceModifyRequestTransferProtocolIEs;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16184,9 +15214,6 @@ pub mod ngap_ies {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceModifyResponseTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceModifyResponseTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceModifyResponseTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16237,9 +15264,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceModifyUnsuccessfulTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceModifyUnsuccessfulTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceModifyUnsuccessfulTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16270,9 +15294,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceNotifyItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceNotifyItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceNotifyItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16309,9 +15330,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceNotifyList(pub SequenceOf<PDUSessionResourceNotifyItem>);
     crate::per::sequence_of! { PDUSessionResourceNotifyList, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceNotifyReleasedTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceNotifyReleasedTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceNotifyReleasedTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16333,9 +15351,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceNotifyTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceNotifyTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceNotifyTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16368,9 +15383,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceReleaseCommandTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceReleaseCommandTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceReleaseCommandTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16392,9 +15404,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceReleaseResponseTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceReleaseResponseTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceReleaseResponseTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16411,9 +15420,6 @@ pub mod ngap_ies {
             Self { i_e_extensions }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceReleasedItemNotIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceReleasedItemNotIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceReleasedItemNotIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16446,9 +15452,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceReleasedItemPSAckIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceReleasedItemPSAckIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceReleasedItemPSAckIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16481,9 +15484,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceReleasedItemPSFailIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceReleasedItemPSFailIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceReleasedItemPSFailIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16516,9 +15516,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceReleasedItemRelResIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceReleasedItemRelResIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceReleasedItemRelResIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16573,9 +15570,6 @@ pub mod ngap_ies {
         pub SequenceOf<PDUSessionResourceReleasedItemRelRes>,
     );
     crate::per::sequence_of! { PDUSessionResourceReleasedListRelRes, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceResumeItemRESReqIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceResumeItemRESReqIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceResumeItemRESReqIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16608,9 +15602,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceResumeItemRESResIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceResumeItemRESResIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceResumeItemRESResIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16655,9 +15646,6 @@ pub mod ngap_ies {
         pub SequenceOf<PDUSessionResourceResumeItemRESRes>,
     );
     crate::per::sequence_of! { PDUSessionResourceResumeListRESRes, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceSecondaryRATUsageItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceSecondaryRATUsageItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceSecondaryRATUsageItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16696,9 +15684,6 @@ pub mod ngap_ies {
         pub SequenceOf<PDUSessionResourceSecondaryRATUsageItem>,
     );
     crate::per::sequence_of! { PDUSessionResourceSecondaryRATUsageList, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceSetupItemCxtReqIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceSetupItemCxtReqIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceSetupItemCxtReqIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16743,9 +15728,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceSetupItemCxtResIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceSetupItemCxtResIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceSetupItemCxtResIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16778,9 +15760,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceSetupItemHOReqIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceSetupItemHOReqIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceSetupItemHOReqIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16819,9 +15798,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceSetupItemSUReqIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceSetupItemSUReqIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceSetupItemSUReqIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16866,9 +15842,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceSetupItemSUResIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceSetupItemSUResIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceSetupItemSUResIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16921,9 +15894,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceSetupListSURes(pub SequenceOf<PDUSessionResourceSetupItemSURes>);
     crate::per::sequence_of! { PDUSessionResourceSetupListSURes, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceSetupRequestTransferProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as PDUSessionResourceSetupRequestTransferProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousPDUSessionResourceSetupRequestTransferProtocolIEs;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16940,9 +15910,6 @@ pub mod ngap_ies {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceSetupResponseTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceSetupResponseTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceSetupResponseTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -16987,9 +15954,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceSetupUnsuccessfulTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceSetupUnsuccessfulTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceSetupUnsuccessfulTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -17020,9 +15984,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceSuspendItemSUSReqIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceSuspendItemSUSReqIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceSuspendItemSUSReqIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -17061,9 +16022,6 @@ pub mod ngap_ies {
         pub SequenceOf<PDUSessionResourceSuspendItemSUSReq>,
     );
     crate::per::sequence_of! { PDUSessionResourceSuspendListSUSReq, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceSwitchedItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceSwitchedItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceSwitchedItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -17100,9 +16058,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceSwitchedList(pub SequenceOf<PDUSessionResourceSwitchedItem>);
     crate::per::sequence_of! { PDUSessionResourceSwitchedList, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceToBeSwitchedDLItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceToBeSwitchedDLItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceToBeSwitchedDLItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -17141,9 +16096,6 @@ pub mod ngap_ies {
         pub SequenceOf<PDUSessionResourceToBeSwitchedDLItem>,
     );
     crate::per::sequence_of! { PDUSessionResourceToBeSwitchedDLList, 1, 256 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceToReleaseItemHOCmdIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceToReleaseItemHOCmdIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceToReleaseItemHOCmdIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -17176,9 +16128,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceToReleaseItemRelCmdIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceToReleaseItemRelCmdIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceToReleaseItemRelCmdIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -17245,9 +16194,6 @@ pub mod ngap_ies {
         #[rasn(extension_addition, identifier = "e-utra-unlicensed")]
         e_utra_unlicensed = 3,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionUsageReportIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionUsageReportIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionUsageReportIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -17296,9 +16242,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "false")]
         R_false = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUsetQoSInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUsetQoSInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUsetQoSInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -17340,9 +16283,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUsetQoSParametersIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PDUsetQoSParametersIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUsetQoSParametersIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -17375,9 +16315,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPEIPSassistanceInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PEIPSassistanceInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPEIPSassistanceInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -17404,9 +16341,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPLMNAreaBasedQMCIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PLMNAreaBasedQMCIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPLMNAreaBasedQMCIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -17440,9 +16374,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=16"))]
     pub struct PLMNListforQMC(pub SequenceOf<PLMNIdentity>);
     crate::per::sequence_of! { PLMNListforQMC, 1, 16 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPLMNSupportItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PLMNSupportItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPLMNSupportItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -17479,9 +16410,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=12"))]
     pub struct PLMNSupportList(pub SequenceOf<PLMNSupportItem>);
     crate::per::sequence_of! { PLMNSupportList, 1, 12 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPNINPNAreaScopeofMDTIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PNINPNAreaScopeofMDTIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPNINPNAreaScopeofMDTIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "PNI-NPN-AreaScopeofMDT")]
     #[non_exhaustive]
@@ -17508,9 +16436,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPNINPNMobilityInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PNINPNMobilityInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPNINPNMobilityInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "PNI-NPN-MobilityInformation")]
     #[non_exhaustive]
@@ -17537,9 +16462,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPNINPNBasedMDTIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PNINPNBasedMDTIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPNINPNBasedMDTIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "PNI-NPNBasedMDT")]
     #[non_exhaustive]
@@ -17566,8 +16488,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as PWSFailedCellIDListChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as PWSFailedCellIDListChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum PWSFailedCellIDList {
@@ -17597,9 +16517,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("0..=1023", extensible))]
     pub struct PacketDelayBudget(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AnonymousPacketErrorRateIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PacketErrorRateIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPacketErrorRateIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -17635,9 +16552,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("0..=1000", extensible))]
     pub struct PacketLossRate(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AnonymousPagingAssisDataforCEcapabUEIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PagingAssisDataforCEcapabUEIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPagingAssisDataforCEcapabUEIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -17673,9 +16587,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("1..=16", extensible))]
     pub struct PagingAttemptCount(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AnonymousPagingAttemptInformationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PagingAttemptInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPagingAttemptInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -17742,9 +16653,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "non-3gpp")]
         non_3gpp = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPagingPolicyDifferentiationIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PagingPolicyDifferentiationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPagingPolicyDifferentiationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -17771,9 +16679,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPagingPolicyDifferentiationItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PagingPolicyDifferentiationItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPagingPolicyDifferentiationItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -17888,9 +16793,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=8"), identifier = "Partially-Allowed-NSSAI")]
     pub struct PartiallyAllowedNSSAI(pub SequenceOf<PartiallyAllowedNSSAIItem>);
     crate::per::sequence_of! { PartiallyAllowedNSSAI, 1, 8 }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPartiallyAllowedNSSAIItemIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PartiallyAllowedNSSAIItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPartiallyAllowedNSSAIItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "PartiallyAllowedNSSAI-Item")]
     #[non_exhaustive]
@@ -17914,9 +16816,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPathSwitchRequestAcknowledgeTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PathSwitchRequestAcknowledgeTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPathSwitchRequestAcknowledgeTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -17949,9 +16848,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPathSwitchRequestSetupFailedTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PathSwitchRequestSetupFailedTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPathSwitchRequestSetupFailedTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -17973,9 +16869,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPathSwitchRequestTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PathSwitchRequestTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPathSwitchRequestTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18020,9 +16913,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPathSwitchRequestUnsuccessfulTransferIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PathSwitchRequestUnsuccessfulTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPathSwitchRequestUnsuccessfulTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18055,9 +16945,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct PeriodicRegistrationUpdateTimer(pub FixedBitString<8usize>);
-    pub use super::ngap_common_data_types::Criticality as AnonymousPeriodicReportingIEsIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PeriodicReportingIEsIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPeriodicReportingIEsIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18087,9 +16974,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("0..=640000", extensible))]
     pub struct Periodicity(pub Integer);
-    pub use super::ngap_common_data_types::Criticality as AnonymousPeriodicityBoundIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PeriodicityBoundIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPeriodicityBoundIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18122,9 +17006,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPeriodicityListIEExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolExtensionContainer as PeriodicityListIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousPeriodicityListIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18151,8 +17032,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as PeriodicityRangeChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as PeriodicityRangeChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum PeriodicityRange {
@@ -18212,8 +17091,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "logged-MDT")]
         logged_MDT = 1,
     }
-    pub use super::ngap_common_data_types::Criticality as ProcedureStageChoiceChoiceExtensionsCriticality;
-    pub use super::ngap_containers::ProtocolIEField as ProcedureStageChoiceChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum ProcedureStageChoice {
@@ -18232,8 +17109,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QMCConfigInfoIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQMCConfigInfoIEExtensions;
     #[doc = " Q"]
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
@@ -18261,8 +17136,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QMCDeactivationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQMCDeactivationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18305,8 +17178,6 @@ pub mod ngap_ies {
         srb4 = 0,
         srb5 = 1,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QoERVQoEReportingPathsIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQoERVQoEReportingPathsIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18350,8 +17221,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"))]
     pub struct QoSFlowList(pub SequenceOf<QosFlowIdentifier>);
     crate::per::sequence_of! { QoSFlowList, 1, 64 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QoSFlowTSCItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQoSFlowTSCItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18406,8 +17275,6 @@ pub mod ngap_ies {
         #[rasn(extension_addition, identifier = "e-utra-unlicensed")]
         e_utra_unlicensed = 3,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QoSFlowsUsageReportItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQoSFlowsUsageReportItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "QoSFlowsUsageReport-Item")]
     #[non_exhaustive]
@@ -18450,7 +17317,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"))]
     pub struct QoSFlowsUsageReportList(pub SequenceOf<QoSFlowsUsageReportItem>);
     crate::per::sequence_of! { QoSFlowsUsageReportList, 1, 64 }
-    pub use super::ngap_containers::ProtocolIEField as QosCharacteristicsChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum QosCharacteristics {
@@ -18474,8 +17340,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowAcceptedItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowAcceptedItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18506,8 +17370,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowAcceptedList(pub SequenceOf<QosFlowAcceptedItem>);
     crate::per::sequence_of! { QosFlowAcceptedList, 1, 64 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowAddOrModifyRequestItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowAddOrModifyRequestItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18550,8 +17412,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowAddOrModifyRequestList(pub SequenceOf<QosFlowAddOrModifyRequestItem>);
     crate::per::sequence_of! { QosFlowAddOrModifyRequestList, 1, 64 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowAddOrModifyResponseItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowAddOrModifyResponseItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18582,8 +17442,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowAddOrModifyResponseList(pub SequenceOf<QosFlowAddOrModifyResponseItem>);
     crate::per::sequence_of! { QosFlowAddOrModifyResponseList, 1, 64 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowAdditionalInfoItemRelComIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowAdditionalInfoItemRelComIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18616,8 +17474,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowAdditionalInfoItemRelResIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowAdditionalInfoItemRelResIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18658,8 +17514,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowAdditionalInfoListRelRes(pub SequenceOf<QosFlowAdditionalInfoItemRelRes>);
     crate::per::sequence_of! { QosFlowAdditionalInfoListRelRes, 1, 64 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowFeedbackItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowFeedbackItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18711,8 +17565,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("0..=63", extensible))]
     pub struct QosFlowIdentifier(pub Integer);
-    pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowInformationItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowInformationItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18749,8 +17601,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowInformationList(pub SequenceOf<QosFlowInformationItem>);
     crate::per::sequence_of! { QosFlowInformationList, 1, 64 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowItemWithDataForwardingIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowItemWithDataForwardingIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18783,8 +17633,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowLevelQosParametersIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowLevelQosParametersIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18843,8 +17691,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowListWithDataForwarding(pub SequenceOf<QosFlowItemWithDataForwarding>);
     crate::per::sequence_of! { QosFlowListWithDataForwarding, 1, 64 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowModifyConfirmItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowModifyConfirmItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18875,8 +17721,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowModifyConfirmList(pub SequenceOf<QosFlowModifyConfirmItem>);
     crate::per::sequence_of! { QosFlowModifyConfirmList, 1, 64 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowNotifyItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowNotifyItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18913,8 +17757,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowNotifyList(pub SequenceOf<QosFlowNotifyItem>);
     crate::per::sequence_of! { QosFlowNotifyList, 1, 64 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowParametersItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowParametersItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18951,8 +17793,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowParametersList(pub SequenceOf<QosFlowParametersItem>);
     crate::per::sequence_of! { QosFlowParametersList, 1, 64 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowPerTNLInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowPerTNLInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -18985,8 +17825,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowPerTNLInformationItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowPerTNLInformationItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -19017,8 +17855,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=3"))]
     pub struct QosFlowPerTNLInformationList(pub SequenceOf<QosFlowPerTNLInformationItem>);
     crate::per::sequence_of! { QosFlowPerTNLInformationList, 1, 3 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowSetupRequestItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowSetupRequestItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -19061,8 +17897,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowSetupRequestList(pub SequenceOf<QosFlowSetupRequestItem>);
     crate::per::sequence_of! { QosFlowSetupRequestList, 1, 64 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowToBeForwardedItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowToBeForwardedItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -19093,8 +17927,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowToBeForwardedList(pub SequenceOf<QosFlowToBeForwardedItem>);
     crate::per::sequence_of! { QosFlowToBeForwardedList, 1, 64 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowWithCauseItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowWithCauseItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -19152,7 +17984,6 @@ pub mod ngap_ies {
         start = 0,
         stop = 1,
     }
-    pub use super::ngap_containers::ProtocolIEField as RANTSSScopeChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "RAN-TSSScope")]
     pub enum RANTSSScope {
@@ -19206,8 +18037,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("1..=256"))]
     pub struct RANPagingPriority(pub u16);
-    pub use super::ngap_containers::ProtocolExtensionContainer as RANStatusTransferTransparentContainerIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousRANStatusTransferTransparentContainerIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "RANStatusTransfer-TransparentContainer")]
     #[non_exhaustive]
@@ -19234,8 +18063,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as RANTSSCellItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousRANTSSCellItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -19292,8 +18119,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "false")]
         R_false = 1,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as RANTimingSynchronisationStatusInfoIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousRANTimingSynchronisationStatusInfoIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -19350,7 +18175,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolIEField as RANfeedbacktypeChoiceExtensions;
     #[doc = " R"]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
@@ -19375,8 +18199,6 @@ pub mod ngap_ies {
             Self::choice_extensions(value)
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as RANfeedbacktypeProactiveIEExtension;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousRANfeedbacktypeProactiveIEExtension;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "RANfeedbacktype-proactive")]
     #[non_exhaustive]
@@ -19417,8 +18239,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as RANfeedbacktypeReactiveIEExtension;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousRANfeedbacktypeReactiveIEExtension;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "RANfeedbacktype-reactive")]
     #[non_exhaustive]
@@ -19468,8 +18288,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=16"))]
     pub struct RATRestrictions(pub SequenceOf<RATRestrictionsItem>);
     crate::per::sequence_of! { RATRestrictions, 1, 16 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as RATRestrictionsItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousRATRestrictionsItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "RATRestrictions-Item")]
     #[non_exhaustive]
@@ -19515,8 +18333,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "rs-disappeared")]
         rs_disappeared = 1,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as RIMInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousRIMInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -19549,8 +18365,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as RIMInformationTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousRIMInformationTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -19647,8 +18461,6 @@ pub mod ngap_ies {
         v1 = 0,
         v2 = 1,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as RSPPFlowBitRatesIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousRSPPFlowBitRatesIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -19681,8 +18493,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as RSPPQoSFlowItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousRSPPQoSFlowItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -19737,8 +18547,6 @@ pub mod ngap_ies {
         m700 = 7,
         m1000 = 8,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as RecommendedCellItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousRecommendedCellItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -19775,8 +18583,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=16"))]
     pub struct RecommendedCellList(pub SequenceOf<RecommendedCellItem>);
     crate::per::sequence_of! { RecommendedCellList, 1, 16 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as RecommendedCellsForPagingIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousRecommendedCellsForPagingIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -19803,8 +18609,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as RecommendedRANNodeItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousRecommendedRANNodeItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -19835,8 +18639,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=16"))]
     pub struct RecommendedRANNodeList(pub SequenceOf<RecommendedRANNodeItem>);
     crate::per::sequence_of! { RecommendedRANNodeList, 1, 16 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as RecommendedRANNodesForPagingIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousRecommendedRANNodesForPagingIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -19877,8 +18679,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "not-possible")]
         not_possible = 1,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as RedundantPDUSessionInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousRedundantPDUSessionInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -19991,7 +18791,6 @@ pub mod ngap_ies {
         min30 = 11,
         min60 = 12,
     }
-    pub use super::ngap_containers::ProtocolIEField as ReportTypeChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum ReportType {
@@ -20026,7 +18825,6 @@ pub mod ngap_ies {
         ms5000 = 4,
         ms10000 = 5,
     }
-    pub use super::ngap_containers::ProtocolIEField as ReportingSystemChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum ReportingSystem {
@@ -20063,8 +18861,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=8"))]
     pub struct RequestedNSSAI(pub SequenceOf<RequestedNSSAIItem>);
     crate::per::sequence_of! { RequestedNSSAI, 1, 8 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as RequestedNSSAIItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousRequestedNSSAIItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -20088,8 +18884,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as RequestedTNLInfoIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousRequestedTNLInfoIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -20123,7 +18917,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "reset-all")]
         reset_all = 0,
     }
-    pub use super::ngap_containers::ProtocolIEField as ResetTypeChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum ResetType {
@@ -20149,7 +18942,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_containers::ProtocolIEField as ResourceStatusReportingSystemChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum ResourceStatusReportingSystem {
@@ -20178,8 +18970,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct RoutingID(pub OctetString);
-    pub use super::ngap_containers::ProtocolExtensionContainer as SNSSAIIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSNSSAIIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "S-NSSAI")]
     #[non_exhaustive]
@@ -20230,8 +19020,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "not-authorized")]
         not_authorized = 1,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SLPositioningRangingQoSParametersIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSLPositioningRangingQoSParametersIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -20264,8 +19052,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SLPositioningRangingServiceInfoIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSLPositioningRangingServiceInfoIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -20298,8 +19084,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SNPNBasedMDTIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSNPNBasedMDTIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "SNPN-BasedMDT")]
     #[non_exhaustive]
@@ -20326,8 +19110,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SNPNCellBasedMDTIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSNPNCellBasedMDTIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "SNPN-CellBasedMDT")]
     #[non_exhaustive]
@@ -20354,8 +19136,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SNPNMobilityInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSNPNMobilityInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "SNPN-MobilityInformation")]
     #[non_exhaustive]
@@ -20379,8 +19159,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SNPNTAIBasedMDTIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSNPNTAIBasedMDTIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "SNPN-TAIBasedMDT")]
     #[non_exhaustive]
@@ -20411,8 +19189,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=32"))]
     pub struct SNPNCellIdListforMDT(pub SequenceOf<SNPNCellIdListforMDTItem>);
     crate::per::sequence_of! { SNPNCellIdListforMDT, 1, 32 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SNPNCellIdListforMDTItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSNPNCellIdListforMDTItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -20449,8 +19225,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=16"))]
     pub struct SNPNListforMDT(pub SequenceOf<SNPNListforMDTItem>);
     crate::per::sequence_of! { SNPNListforMDT, 1, 16 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SNPNListforMDTItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSNPNListforMDTItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -20487,8 +19261,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=8"))]
     pub struct SNPNTAIListforMDT(pub SequenceOf<SNPNTAIListforMDTItem>);
     crate::per::sequence_of! { SNPNTAIListforMDT, 1, 8 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SNPNTAIListforMDTItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSNPNTAIListforMDTItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -20521,8 +19293,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SONConfigurationTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSONConfigurationTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -20567,7 +19337,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolIEField as SONInformationChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum SONInformation {
@@ -20591,8 +19360,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SONInformationReplyIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSONInformationReplyIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -20619,7 +19386,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolIEField as SONInformationReportChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum SONInformationReport {
@@ -20662,8 +19428,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct SST(pub FixedOctetString<1usize>);
-    pub use super::ngap_containers::ProtocolExtensionContainer as ScheduledCommunicationTimeIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousScheduledCommunicationTimeIEExtensions;
     #[doc = " S"]
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
@@ -20703,8 +19467,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SecondaryRATDataUsageReportTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSecondaryRATDataUsageReportTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -20731,8 +19493,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SecondaryRATUsageInformationIEExtension;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSecondaryRATUsageInformationIEExtension;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -20765,8 +19525,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SecurityContextIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSecurityContextIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -20799,8 +19557,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SecurityIndicationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSecurityIndicationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -20866,8 +19622,6 @@ pub mod ngap_ies {
             Ok(Self(value))
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SecurityResultIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSecurityResultIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -20906,8 +19660,6 @@ pub mod ngap_ies {
     pub enum SensorMeasConfig {
         setup = 0,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SensorMeasConfigNameItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSensorMeasConfigNameItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -20938,8 +19690,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=3"))]
     pub struct SensorMeasConfigNameList(pub SequenceOf<SensorMeasConfigNameItem>);
     crate::per::sequence_of! { SensorMeasConfigNameList, 1, 3 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SensorMeasurementConfigurationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSensorMeasurementConfigurationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -20996,7 +19746,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_containers::ProtocolIEField as SensorNameConfigChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum SensorNameConfig {
@@ -21029,8 +19778,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct SerialNumber(pub FixedBitString<16usize>);
-    pub use super::ngap_containers::ProtocolExtensionContainer as ServedGUAMIItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousServedGUAMIItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -21071,8 +19818,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=16"))]
     pub struct ServiceAreaInformation(pub SequenceOf<ServiceAreaInformationItem>);
     crate::per::sequence_of! { ServiceAreaInformation, 1, 16 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as ServiceAreaInformationItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousServiceAreaInformationItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "ServiceAreaInformation-Item")]
     #[non_exhaustive]
@@ -21122,8 +19867,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "SgNB-UE-X2AP-ID", value("0..=4294967295"))]
     pub struct SgNBUEX2APID(pub u32);
-    pub use super::ngap_containers::ProtocolExtensionContainer as SharedNGUMulticastTNLInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSharedNGUMulticastTNLInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "SharedNGU-MulticastTNLInformation")]
     #[non_exhaustive]
@@ -21162,8 +19905,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SliceMDTItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSliceMDTItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -21191,8 +19932,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=1024"))]
     pub struct SliceMDTList(pub SequenceOf<SliceMDTItem>);
     crate::per::sequence_of! { SliceMDTList, 1, 1024 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SliceOverloadItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSliceOverloadItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -21220,8 +19959,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=1024"))]
     pub struct SliceOverloadList(pub SequenceOf<SliceOverloadItem>);
     crate::per::sequence_of! { SliceOverloadList, 1, 1024 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SliceSupportItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSliceSupportItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -21253,8 +19990,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=16"))]
     pub struct SliceSupportListQMC(pub SequenceOf<SliceSupportQMCItem>);
     crate::per::sequence_of! { SliceSupportListQMC, 1, 16 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SliceSupportQMCItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSliceSupportQMCItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "SliceSupportQMC-Item")]
     #[non_exhaustive]
@@ -21278,8 +20013,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SourceNGRANNodeToTargetNGRANNodeTransparentContainerIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSourceNGRANNodeToTargetNGRANNodeTransparentContainerIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(
         automatic_tags,
@@ -21339,7 +20072,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolIEField as SourceNodeIDChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum SourceNodeID {
@@ -21366,8 +20098,6 @@ pub mod ngap_ies {
         subscription_information = 0,
         statistics = 1,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SourceRANNodeIDIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSourceRANNodeIDIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -21400,8 +20130,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SourceToTargetAMFInformationRerouteIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSourceToTargetAMFInformationRerouteIEExtensions;
     #[doc = " This IE includes a transparent container from the source RAN node to the target RAN node."]
     #[doc = " The octets of the OCTET STRING are encoded according to the specifications of the target system."]
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -21445,8 +20173,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "SourceToTarget-TransparentContainer")]
     pub struct SourceToTargetTransparentContainer(pub OctetString);
-    pub use super::ngap_containers::ProtocolExtensionContainer as SuccessfulHandoverReportItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSuccessfulHandoverReportItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "SuccessfulHandoverReport-Item")]
     #[non_exhaustive]
@@ -21514,8 +20240,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"))]
     pub struct SuccessfulHandoverReportList(pub SequenceOf<SuccessfulHandoverReportItem>);
     crate::per::sequence_of! { SuccessfulHandoverReportList, 1, 64 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SuccessfulPSCellChangeReportItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSuccessfulPSCellChangeReportItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "SuccessfulPSCellChangeReport-Item")]
     #[non_exhaustive]
@@ -21546,8 +20270,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"))]
     pub struct SuccessfulPSCellChangeReportList(pub SequenceOf<SuccessfulPSCellChangeReportItem>);
     crate::per::sequence_of! { SuccessfulPSCellChangeReportList, 1, 64 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as SupportedTAItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousSupportedTAItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -21621,8 +20343,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TABasedMDTIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTABasedMDTIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -21649,8 +20369,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TABasedQMCIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTABasedQMCIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -21685,8 +20403,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=12"))]
     pub struct TACListInNRNTN(pub SequenceOf<TAC>);
     crate::per::sequence_of! { TACListInNRNTN, 1, 12 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TAIIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAIIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -21719,8 +20435,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TAIBasedMDTIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAIBasedMDTIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -21747,8 +20461,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TAIBasedQMCIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAIBasedQMCIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -21779,8 +20491,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"))]
     pub struct TAIBroadcastEUTRA(pub SequenceOf<TAIBroadcastEUTRAItem>);
     crate::per::sequence_of! { TAIBroadcastEUTRA, 1, 65535 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TAIBroadcastEUTRAItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAIBroadcastEUTRAItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "TAIBroadcastEUTRA-Item")]
     #[non_exhaustive]
@@ -21817,8 +20527,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"))]
     pub struct TAIBroadcastNR(pub SequenceOf<TAIBroadcastNRItem>);
     crate::per::sequence_of! { TAIBroadcastNR, 1, 65535 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TAIBroadcastNRItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAIBroadcastNRItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "TAIBroadcastNR-Item")]
     #[non_exhaustive]
@@ -21855,8 +20563,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"))]
     pub struct TAICancelledEUTRA(pub SequenceOf<TAICancelledEUTRAItem>);
     crate::per::sequence_of! { TAICancelledEUTRA, 1, 65535 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TAICancelledEUTRAItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAICancelledEUTRAItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "TAICancelledEUTRA-Item")]
     #[non_exhaustive]
@@ -21893,8 +20599,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=65535"))]
     pub struct TAICancelledNR(pub SequenceOf<TAICancelledNRItem>);
     crate::per::sequence_of! { TAICancelledNR, 1, 65535 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TAICancelledNRItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAICancelledNRItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "TAICancelledNR-Item")]
     #[non_exhaustive]
@@ -21931,8 +20635,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=16"))]
     pub struct TAIListForInactive(pub SequenceOf<TAIListForInactiveItem>);
     crate::per::sequence_of! { TAIListForInactive, 1, 16 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TAIListForInactiveItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAIListForInactiveItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -21960,8 +20662,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=16"))]
     pub struct TAIListForPaging(pub SequenceOf<TAIListForPagingItem>);
     crate::per::sequence_of! { TAIListForPaging, 1, 16 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TAIListForPagingItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAIListForPagingItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -22001,8 +20701,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=8"))]
     pub struct TAIListforQMC(pub SequenceOf<TAI>);
     crate::per::sequence_of! { TAIListforQMC, 1, 8 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TAIMBSSupportItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAIMBSSupportItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -22030,8 +20728,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=256"))]
     pub struct TAIMBSSupportList(pub SequenceOf<TAIMBSSupportItem>);
     crate::per::sequence_of! { TAIMBSSupportList, 1, 256 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TAINSAGSupportItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAINSAGSupportItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -22085,7 +20781,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "TNAP-ID")]
     pub struct TNAPID(pub OctetString);
-    pub use super::ngap_containers::ProtocolIEField as TNGFIDChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "TNGF-ID")]
     pub enum TNGFID {
@@ -22146,8 +20841,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("0..=255"))]
     pub struct TNLAddressWeightFactor(pub u8);
-    pub use super::ngap_containers::ProtocolExtensionContainer as TNLAssociationItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTNLAssociationItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -22191,8 +20884,6 @@ pub mod ngap_ies {
         non_ue = 1,
         both = 2,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TSCAssistanceInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTSCAssistanceInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -22223,8 +20914,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TSCFeedbackInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTSCFeedbackInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -22263,8 +20952,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TSCTrafficCharacteristicsIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTSCTrafficCharacteristicsIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -22297,8 +20984,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TSCTrafficCharacteristicsFeedbackIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTSCTrafficCharacteristicsFeedbackIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -22334,7 +21019,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "TWAP-ID")]
     pub struct TWAPID(pub OctetString);
-    pub use super::ngap_containers::ProtocolIEField as TWIFIDChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "TWIF-ID")]
     pub enum TWIFID {
@@ -22392,8 +21076,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TargetHomeENBIDIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTargetHomeENBIDIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "TargetHomeENB-ID")]
     #[non_exhaustive]
@@ -22432,7 +21114,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolIEField as TargetIDChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum TargetID {
@@ -22457,8 +21138,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainerIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTargetNGRANNodeToSourceNGRANNodeFailureTransparentContainerIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(
         automatic_tags,
@@ -22488,8 +21167,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TargetNGRANNodeToSourceNGRANNodeTransparentContainerIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTargetNGRANNodeToSourceNGRANNodeTransparentContainerIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(
         automatic_tags,
@@ -22523,8 +21200,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=8"))]
     pub struct TargetNSSAI(pub SequenceOf<TargetNSSAIItem>);
     crate::per::sequence_of! { TargetNSSAI, 1, 8 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TargetNSSAIItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTargetNSSAIItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "TargetNSSAI-Item")]
     #[non_exhaustive]
@@ -22548,8 +21223,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TargetNSSAIInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTargetNSSAIInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -22582,8 +21255,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TargetRANNodeIDIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTargetRANNodeIDIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -22616,8 +21287,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TargetRANNodeIDRIMIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTargetRANNodeIDRIMIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "TargetRANNodeID-RIM")]
     #[non_exhaustive]
@@ -22650,8 +21319,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TargetRANNodeIDSONIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTargetRANNodeIDSONIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "TargetRANNodeID-SON")]
     #[non_exhaustive]
@@ -22684,8 +21351,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TargetRNCIDIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTargetRNCIDIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "TargetRNC-ID")]
     #[non_exhaustive]
@@ -22727,8 +21392,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "TargetToSource-TransparentContainer")]
     pub struct TargetToSourceTransparentContainer(pub OctetString);
-    pub use super::ngap_containers::ProtocolExtensionContainer as TargeteNBIDIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTargeteNBIDIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "TargeteNB-ID")]
     #[non_exhaustive]
@@ -22775,8 +21438,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "Threshold-SINR", value("0..=127"))]
     pub struct ThresholdSINR(pub u8);
-    pub use super::ngap_containers::ProtocolExtensionContainer as TimeBasedHandoverInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTimeBasedHandoverInformationIEExtensions;
     #[doc = " This IE includes a transparent container from the target RAN node to the source RAN node."]
     #[doc = " The octets of the OCTET STRING are encoded according to the specifications of the target system (if applicable)."]
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -22825,8 +21486,6 @@ pub mod ngap_ies {
         enabled = 0,
         disabled = 1,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TimeSyncAssistanceInfoIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTimeSyncAssistanceInfoIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -22903,8 +21562,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "apply-timer")]
         apply_timer = 0,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TooearlyIntersystemHOIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTooearlyIntersystemHOIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -22943,8 +21600,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as TraceActivationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousTraceActivationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -23060,8 +21715,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "not-battery-powered")]
         not_battery_powered = 2,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UEDifferentiationInfoIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUEDifferentiationInfoIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "UE-DifferentiationInfo")]
     #[non_exhaustive]
@@ -23121,8 +21774,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UENGAPIDPairIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUENGAPIDPairIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "UE-NGAP-ID-pair")]
     #[non_exhaustive]
@@ -23155,7 +21806,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolIEField as UENGAPIDsChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "UE-NGAP-IDs")]
     pub enum UENGAPIDs {
@@ -23181,8 +21831,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UEPagingItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUEPagingItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "UE-PagingItem")]
     #[non_exhaustive]
@@ -23225,8 +21873,6 @@ pub mod ngap_ies {
     pub enum UEUPCIoTSupport {
         supported = 0,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UEAssociatedLogicalNGConnectionItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUEAssociatedLogicalNGConnectionItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "UE-associatedLogicalNG-connectionItem")]
     #[non_exhaustive]
@@ -23269,8 +21915,6 @@ pub mod ngap_ies {
         pub SequenceOf<UEAssociatedLogicalNGConnectionItem>,
     );
     crate::per::sequence_of! { UEAssociatedLogicalNGConnectionList, 1, 65536, unconstrained }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UEAggregateMaximumBitRateIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUEAggregateMaximumBitRateIEExtensions;
     #[doc = " U"]
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
@@ -23311,8 +21955,6 @@ pub mod ngap_ies {
     pub enum UEAppLayerMeasConfigInfoQoEMeasurementStatus {
         ongoing = 0,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UEAppLayerMeasConfigInfoIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUEAppLayerMeasConfigInfoIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -23393,8 +22035,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UEAppLayerMeasInfoItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUEAppLayerMeasInfoItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -23437,8 +22077,6 @@ pub mod ngap_ies {
     pub enum UEContextRequest {
         requested = 0,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UEContextResumeRequestTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUEContextResumeRequestTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -23465,8 +22103,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UEContextResumeResponseTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUEContextResumeResponseTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -23493,8 +22129,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UEContextSuspendRequestTransferIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUEContextSuspendRequestTransferIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -23525,7 +22159,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=16"))]
     pub struct UEHistoryInformation(pub SequenceOf<LastVisitedCellItem>);
     crate::per::sequence_of! { UEHistoryInformation, 1, 16 }
-    pub use super::ngap_containers::ProtocolIEField as UEHistoryInformationFromTheUEChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum UEHistoryInformationFromTheUE {
@@ -23543,7 +22176,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_containers::ProtocolIEField as UEIdentityIndexValueChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum UEIdentityIndexValue {
@@ -23562,7 +22194,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_containers::ProtocolIEField as UEPagingIdentityChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum UEPagingIdentity {
@@ -23590,8 +22221,6 @@ pub mod ngap_ies {
         out = 1,
         unknown = 2,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UEPresenceInAreaOfInterestItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUEPresenceInAreaOfInterestItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -23628,7 +22257,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=64"))]
     pub struct UEPresenceInAreaOfInterestList(pub SequenceOf<UEPresenceInAreaOfInterestItem>);
     crate::per::sequence_of! { UEPresenceInAreaOfInterestList, 1, 64 }
-    pub use super::ngap_containers::ProtocolIEField as UERLFReportContainerChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum UERLFReportContainer {
@@ -23655,8 +22283,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct UERadioCapability(pub OctetString);
-    pub use super::ngap_containers::ProtocolExtensionContainer as UERadioCapabilityForPagingIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUERadioCapabilityForPagingIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -23708,8 +22334,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "ues-retained")]
         ues_retained = 0,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UESecurityCapabilitiesIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUESecurityCapabilitiesIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -23754,8 +22378,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UESliceMaximumBitRateItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUESliceMaximumBitRateItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -23798,8 +22420,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=8"))]
     pub struct UESliceMaximumBitRateList(pub SequenceOf<UESliceMaximumBitRateItem>);
     crate::per::sequence_of! { UESliceMaximumBitRateList, 1, 8 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as ULCPSecurityInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousULCPSecurityInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "UL-CP-SecurityInformation")]
     #[non_exhaustive]
@@ -23838,8 +22458,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "UL-NAS-MAC")]
     pub struct ULNASMAC(pub FixedBitString<16usize>);
-    pub use super::ngap_containers::ProtocolExtensionContainer as ULNGUUPTNLModifyItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousULNGUUPTNLModifyItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "UL-NGU-UP-TNLModifyItem")]
     #[non_exhaustive]
@@ -23883,7 +22501,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "ul-forwarding-proposed")]
         ul_forwarding_proposed = 0,
     }
-    pub use super::ngap_containers::ProtocolIEField as UPTransportLayerInformationChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum UPTransportLayerInformation {
@@ -23901,8 +22518,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UPTransportLayerInformationItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUPTransportLayerInformationItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -23933,8 +22548,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=3"))]
     pub struct UPTransportLayerInformationList(pub SequenceOf<UPTransportLayerInformationItem>);
     crate::per::sequence_of! { UPTransportLayerInformationList, 1, 3 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UPTransportLayerInformationPairItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUPTransportLayerInformationPairItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -23976,8 +22589,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "URI-address")]
     pub struct URIAddress(pub VisibleString);
-    pub use super::ngap_containers::ProtocolExtensionContainer as UnavailableGUAMIItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUnavailableGUAMIItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -24023,7 +22634,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("8", extensible))]
     pub struct UpdateFeedback(pub BitString);
-    pub use super::ngap_containers::ProtocolIEField as UserLocationInformationChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum UserLocationInformation {
@@ -24054,8 +22664,6 @@ pub mod ngap_ies {
             Self::choice_Extensions(value)
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UserLocationInformationEUTRAIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUserLocationInformationEUTRAIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -24094,8 +22702,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UserLocationInformationN3IWFWithPortNumberIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUserLocationInformationN3IWFWithPortNumberIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(
         automatic_tags,
@@ -24131,8 +22737,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UserLocationInformationN3IWFWithoutPortNumberIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUserLocationInformationN3IWFWithoutPortNumberIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(
         automatic_tags,
@@ -24168,8 +22772,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UserLocationInformationNRIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUserLocationInformationNRIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -24208,8 +22810,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UserLocationInformationTNGFIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUserLocationInformationTNGFIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -24248,8 +22848,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UserLocationInformationTWIFIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUserLocationInformationTWIFIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -24288,7 +22886,6 @@ pub mod ngap_ies {
             }
         }
     }
-    pub use super::ngap_containers::ProtocolIEField as UserLocationInformationWAGFChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "UserLocationInformationW-AGF")]
     pub enum UserLocationInformationWAGF {
@@ -24321,8 +22918,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "gTP-U-error-indication-received")]
         gTP_U_error_indication_received = 0,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UserPlaneFailureIndicationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUserPlaneFailureIndicationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -24381,8 +22976,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "up-path-failure")]
         up_path_failure = 1,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as UserPlaneSecurityInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousUserPlaneSecurityInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -24423,8 +23016,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "not-authorized")]
         not_authorized = 1,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as VolumeTimedReportItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousVolumeTimedReportItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "VolumeTimedReport-Item")]
     #[non_exhaustive]
@@ -24474,7 +23065,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=2"))]
     pub struct VolumeTimedReportList(pub SequenceOf<VolumeTimedReportItem>);
     crate::per::sequence_of! { VolumeTimedReportList, 1, 2 }
-    pub use super::ngap_containers::ProtocolIEField as WAGFIDChoiceExtensions;
     #[doc = " W"]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags, identifier = "W-AGF-ID")]
@@ -24500,8 +23090,6 @@ pub mod ngap_ies {
     pub enum WLANMeasConfig {
         setup = 0,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as WLANMeasConfigNameItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousWLANMeasConfigNameItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -24548,8 +23136,6 @@ pub mod ngap_ies {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_containers::ProtocolExtensionContainer as WLANMeasurementConfigurationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousWLANMeasurementConfigurationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -24597,8 +23183,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"))]
     pub struct WLANName(pub OctetString);
-    pub use super::ngap_containers::ProtocolExtensionContainer as WUSAssistanceInformationIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousWUSAssistanceInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "WUS-Assistance-Information")]
     #[non_exhaustive]
@@ -24628,7 +23212,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=1024"))]
     pub struct WarningAreaCoordinates(pub OctetString);
-    pub use super::ngap_containers::ProtocolIEField as WarningAreaListChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
     pub enum WarningAreaList {
@@ -24675,8 +23258,6 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct WarningType(pub FixedOctetString<2usize>);
-    pub use super::ngap_containers::ProtocolExtensionContainer as XnExtTLAItemIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousXnExtTLAItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "XnExtTLA-Item")]
     #[non_exhaustive]
@@ -24722,8 +23303,6 @@ pub mod ngap_ies {
     #[rasn(delegate, size("1..=2"))]
     pub struct XnTLAs(pub SequenceOf<TransportLayerAddress>);
     crate::per::sequence_of! { XnTLAs, 1, 2 }
-    pub use super::ngap_containers::ProtocolExtensionContainer as XnTNLConfigurationInfoIEExtensions;
-    pub use super::ngap_containers::ProtocolExtensionField as AnonymousXnTNLConfigurationInfoIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags)]
     #[non_exhaustive]
@@ -24773,7 +23352,6 @@ pub mod ngap_ies {
 )]
 pub mod ngap_pdu_contents {
     extern crate alloc;
-    pub use super::ngap_common_data_types::Criticality as AnonymousAIOTSessionReleaseCommandProtocolIEsCriticality;
     use super::ngap_common_data_types::{Criticality, Presence, PrivateIEID, ProtocolIEID};
     use super::ngap_constants::{
         ID_A2_X_PC5_QO_S_PARAMETERS, ID_ADDITIONAL_ULI,
@@ -24891,8 +23469,6 @@ pub mod ngap_pdu_contents {
         ID_WARNING_AREA_LIST, ID_WARNING_MESSAGE_CONTENTS, ID_WARNING_SECURITY_INFO,
         ID_WARNING_TYPE, ID_WUS_ASSISTANCE_INFORMATION, ID_XR_DEVICE_WITH2_RX,
     };
-    pub use super::ngap_containers::ProtocolIEContainer as AIOTSessionReleaseCommandProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousAIOTSessionReleaseCommandProtocolIEs;
     use super::ngap_containers::*;
     use super::ngap_ies::*;
     use core::borrow::Borrow;
@@ -24924,9 +23500,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAIOTSessionReleaseCompleteProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as AIOTSessionReleaseCompleteProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousAIOTSessionReleaseCompleteProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " AIOT SESSION RELEASE COMPLETE"]
@@ -24948,9 +23521,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAIOTSessionReleaseRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as AIOTSessionReleaseRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousAIOTSessionReleaseRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " A-IoT Session Release Request Elementary Procedure"]
@@ -24977,9 +23547,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAMFCPRelocationIndicationProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as AMFCPRelocationIndicationProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousAMFCPRelocationIndicationProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " AMF CP Relocation Indication"]
@@ -25001,9 +23568,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAMFConfigurationUpdateProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as AMFConfigurationUpdateProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousAMFConfigurationUpdateProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " AMF Configuration Update Elementary Procedure"]
@@ -25030,9 +23594,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAMFConfigurationUpdateAcknowledgeProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as AMFConfigurationUpdateAcknowledgeProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousAMFConfigurationUpdateAcknowledgeProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " AMF CONFIGURATION UPDATE ACKNOWLEDGE"]
@@ -25054,9 +23615,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAMFConfigurationUpdateFailureProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as AMFConfigurationUpdateFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousAMFConfigurationUpdateFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " AMF CONFIGURATION UPDATE FAILURE"]
@@ -25078,9 +23636,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousAMFStatusIndicationProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as AMFStatusIndicationProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousAMFStatusIndicationProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " AMF Status Indication Elementary Procedure"]
@@ -25117,9 +23672,6 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "true")]
         R_true = 0,
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousBroadcastSessionModificationFailureProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as BroadcastSessionModificationFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousBroadcastSessionModificationFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " BROADCAST SESSION MODIFICATION  FAILURE"]
@@ -25141,9 +23693,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousBroadcastSessionModificationRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as BroadcastSessionModificationRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousBroadcastSessionModificationRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Broadcast Session Modification Elementary Procedure"]
@@ -25170,9 +23719,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousBroadcastSessionModificationResponseProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as BroadcastSessionModificationResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousBroadcastSessionModificationResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " BROADCAST SESSION MODIFICATION RESPONSE"]
@@ -25194,9 +23740,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousBroadcastSessionReleaseRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as BroadcastSessionReleaseRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousBroadcastSessionReleaseRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Broadcast Session Release Elementary Procedure"]
@@ -25223,9 +23766,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousBroadcastSessionReleaseRequiredProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as BroadcastSessionReleaseRequiredProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousBroadcastSessionReleaseRequiredProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Broadcast Session Release Required Elementary Procedure"]
@@ -25252,9 +23792,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousBroadcastSessionReleaseResponseProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as BroadcastSessionReleaseResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousBroadcastSessionReleaseResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " BROADCAST SESSION RELEASE RESPONSE"]
@@ -25276,9 +23813,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousBroadcastSessionSetupFailureProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as BroadcastSessionSetupFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousBroadcastSessionSetupFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " BROADCAST SESSION SETUP FAILURE"]
@@ -25300,9 +23834,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousBroadcastSessionSetupRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as BroadcastSessionSetupRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousBroadcastSessionSetupRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " MBS SESSION MANAGEMENT ELEMENTARY PROCEDURES"]
@@ -25334,9 +23865,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousBroadcastSessionSetupResponseProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as BroadcastSessionSetupResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousBroadcastSessionSetupResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " BROADCAST SESSION SETUP RESPONSE"]
@@ -25358,9 +23886,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousBroadcastSessionTransportFailureProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as BroadcastSessionTransportFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousBroadcastSessionTransportFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " BROADCAST SESSION TRANSPORT FAILURE"]
@@ -25382,9 +23907,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousBroadcastSessionTransportRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as BroadcastSessionTransportRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousBroadcastSessionTransportRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Broadcast Session Transport Elementary Procedure"]
@@ -25411,9 +23933,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousBroadcastSessionTransportResponseProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as BroadcastSessionTransportResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousBroadcastSessionTransportResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " BROADCAST SESSION TRANSPORT RESPONSE"]
@@ -25435,9 +23954,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCellTrafficTraceProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as CellTrafficTraceProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousCellTrafficTraceProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " CELL TRAFFIC TRACE"]
@@ -25459,9 +23975,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCommandFailureProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as CommandFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousCommandFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " COMMAND FAILURE"]
@@ -25483,9 +23996,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCommandRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as CommandRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousCommandRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Command Request Elementary Procedure"]
@@ -25512,9 +24022,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousCommandResponseProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as CommandResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousCommandResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " COMMAND RESPONSE"]
@@ -25536,9 +24043,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousConnectionEstablishmentIndicationProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as ConnectionEstablishmentIndicationProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousConnectionEstablishmentIndicationProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Connection Establishment Indication"]
@@ -25560,9 +24064,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDeactivateTraceProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as DeactivateTraceProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousDeactivateTraceProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " DEACTIVATE TRACE"]
@@ -25584,9 +24085,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDistributionReleaseRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as DistributionReleaseRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousDistributionReleaseRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Distribution Release Elementary Procedure"]
@@ -25613,9 +24111,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDistributionReleaseResponseProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as DistributionReleaseResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousDistributionReleaseResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " DISTRIBUTION RELEASE RESPONSE"]
@@ -25637,9 +24132,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDistributionSetupFailureProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as DistributionSetupFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousDistributionSetupFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " DISTRIBUTION SETUP FAILURE"]
@@ -25661,9 +24153,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDistributionSetupRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as DistributionSetupRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousDistributionSetupRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Distribution Setup Elementary Procedure"]
@@ -25690,9 +24179,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDistributionSetupResponseProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as DistributionSetupResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousDistributionSetupResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " DISTRIBUTION SETUP RESPONSE"]
@@ -25714,9 +24200,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDownlinkNASTransportProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as DownlinkNASTransportProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousDownlinkNASTransportProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " DOWNLINK NAS TRANSPORT"]
@@ -25738,9 +24221,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDownlinkNonUEAssociatedNRPPaTransportProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as DownlinkNonUEAssociatedNRPPaTransportProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousDownlinkNonUEAssociatedNRPPaTransportProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " DOWNLINK NON UE ASSOCIATED NRPPA TRANSPORT"]
@@ -25762,9 +24242,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDownlinkRANConfigurationTransferProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as DownlinkRANConfigurationTransferProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousDownlinkRANConfigurationTransferProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " DOWNLINK RAN CONFIGURATION TRANSFER"]
@@ -25786,9 +24263,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDownlinkRANEarlyStatusTransferProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as DownlinkRANEarlyStatusTransferProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousDownlinkRANEarlyStatusTransferProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " DOWNLINK RAN EARLY STATUS TRANSFER ELEMENTARY PROCEDURE"]
@@ -25815,9 +24289,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDownlinkRANStatusTransferProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as DownlinkRANStatusTransferProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousDownlinkRANStatusTransferProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Downlink RAN Status Transfer Elementary Procedure"]
@@ -25844,9 +24315,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDownlinkRIMInformationTransferProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as DownlinkRIMInformationTransferProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousDownlinkRIMInformationTransferProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " DOWNLINK RIM INFORMATION TRANSFER"]
@@ -25868,9 +24336,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousDownlinkUEAssociatedNRPPaTransportProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as DownlinkUEAssociatedNRPPaTransportProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousDownlinkUEAssociatedNRPPaTransportProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " NRPPA TRANSPORT ELEMENTARY PROCEDURES"]
@@ -25897,9 +24362,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousErrorIndicationProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as ErrorIndicationProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousErrorIndicationProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Error Indication Elementary Procedure"]
@@ -25926,9 +24388,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousHandoverCancelProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as HandoverCancelProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousHandoverCancelProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Handover Cancellation Elementary Procedure"]
@@ -25955,9 +24414,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousHandoverCancelAcknowledgeProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as HandoverCancelAcknowledgeProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousHandoverCancelAcknowledgeProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " HANDOVER CANCEL ACKNOWLEDGE"]
@@ -25979,9 +24435,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousHandoverCommandProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as HandoverCommandProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousHandoverCommandProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " HANDOVER COMMAND"]
@@ -26003,9 +24456,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousHandoverFailureProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as HandoverFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousHandoverFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " HANDOVER FAILURE"]
@@ -26027,9 +24477,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousHandoverNotifyProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as HandoverNotifyProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousHandoverNotifyProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Handover Notification Elementary Procedure"]
@@ -26056,9 +24503,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousHandoverPreparationFailureProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as HandoverPreparationFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousHandoverPreparationFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " HANDOVER PREPARATION FAILURE"]
@@ -26080,9 +24524,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousHandoverRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as HandoverRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousHandoverRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Handover Resource Allocation Elementary Procedure"]
@@ -26109,9 +24550,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousHandoverRequestAcknowledgeProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as HandoverRequestAcknowledgeProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousHandoverRequestAcknowledgeProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " HANDOVER REQUEST ACKNOWLEDGE"]
@@ -26133,9 +24571,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousHandoverRequiredProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as HandoverRequiredProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousHandoverRequiredProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE MOBILITY MANAGEMENT ELEMENTARY PROCEDURES"]
@@ -26167,9 +24602,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousHandoverSuccessProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as HandoverSuccessProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousHandoverSuccessProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " HANDOVER SUCCESS ELEMENTARY PROCEDURE"]
@@ -26196,9 +24628,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousInitialContextSetupFailureProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as InitialContextSetupFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousInitialContextSetupFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " INITIAL CONTEXT SETUP FAILURE"]
@@ -26220,9 +24649,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousInitialContextSetupRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as InitialContextSetupRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousInitialContextSetupRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE CONTEXT MANAGEMENT ELEMENTARY PROCEDURES"]
@@ -26254,9 +24680,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousInitialContextSetupResponseProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as InitialContextSetupResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousInitialContextSetupResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " INITIAL CONTEXT SETUP RESPONSE"]
@@ -26278,9 +24701,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousInitialUEMessageProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as InitialUEMessageProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousInitialUEMessageProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " NAS TRANSPORT ELEMENTARY PROCEDURES"]
@@ -26307,9 +24727,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousInventoryFailureProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as InventoryFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousInventoryFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " INVENTORY FAILURE"]
@@ -26331,9 +24748,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousInventoryReportProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as InventoryReportProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousInventoryReportProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = " Inventory Report procedure"]
     #[doc = ""]
@@ -26359,9 +24773,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousInventoryRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as InventoryRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousInventoryRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " A-IoT ELEMENTARY PROCEDURES"]
@@ -26393,9 +24804,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousInventoryResponseProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as InventoryResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousInventoryResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " INVENTORY RESPONSE"]
@@ -26417,9 +24825,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousLocationReportProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as LocationReportProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousLocationReportProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " LOCATION REPORT"]
@@ -26441,9 +24846,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousLocationReportingControlProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as LocationReportingControlProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousLocationReportingControlProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " LOCATION REPORTING ELEMENTARY PROCEDURES"]
@@ -26470,9 +24872,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousLocationReportingFailureIndicationProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as LocationReportingFailureIndicationProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousLocationReportingFailureIndicationProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " LOCATION REPORTING FAILURE INDICATION"]
@@ -26494,9 +24893,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMTCommunicationHandlingFailureProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as MTCommunicationHandlingFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousMTCommunicationHandlingFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " MT COMMUNICATION HANDLING FAILURE"]
@@ -26518,9 +24914,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMTCommunicationHandlingRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as MTCommunicationHandlingRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousMTCommunicationHandlingRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " MT Communication Handling Elementary Procedure"]
@@ -26547,9 +24940,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMTCommunicationHandlingResponseProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as MTCommunicationHandlingResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousMTCommunicationHandlingResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " MT COMMUNICATION HANDLING RESPONSE"]
@@ -26571,9 +24961,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMulticastGroupPagingProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as MulticastGroupPagingProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousMulticastGroupPagingProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " MULTICAST GROUP PAGING ELEMENTARY PROCEDURE"]
@@ -26600,9 +24987,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMulticastSessionActivationFailureProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as MulticastSessionActivationFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousMulticastSessionActivationFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " MULTICAST SESSION ACTIVATION FAILURE"]
@@ -26624,9 +25008,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMulticastSessionActivationRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as MulticastSessionActivationRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousMulticastSessionActivationRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Multicast Session Activation Elementary Procedure"]
@@ -26653,9 +25034,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMulticastSessionActivationResponseProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as MulticastSessionActivationResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousMulticastSessionActivationResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " MULTICAST SESSION ACTIVATION RESPONSE"]
@@ -26677,9 +25055,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMulticastSessionDeactivationRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as MulticastSessionDeactivationRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousMulticastSessionDeactivationRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Multicast Session Deactivation Elementary Procedure"]
@@ -26706,9 +25081,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMulticastSessionDeactivationResponseProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as MulticastSessionDeactivationResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousMulticastSessionDeactivationResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " MULTICAST SESSION DEACTIVATION RESPONSE"]
@@ -26730,9 +25102,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMulticastSessionUpdateFailureProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as MulticastSessionUpdateFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousMulticastSessionUpdateFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " MULTICAST SESSION UPDATE FAILURE"]
@@ -26754,9 +25123,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMulticastSessionUpdateRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as MulticastSessionUpdateRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousMulticastSessionUpdateRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Multicast Session Update Elementary Procedure"]
@@ -26783,9 +25149,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousMulticastSessionUpdateResponseProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as MulticastSessionUpdateResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousMulticastSessionUpdateResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " MULTICAST SESSION UPDATE RESPONSE"]
@@ -26807,9 +25170,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNASNonDeliveryIndicationProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as NASNonDeliveryIndicationProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousNASNonDeliveryIndicationProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " NAS NON DELIVERY INDICATION"]
@@ -26831,9 +25191,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNGRemovalFailureProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as NGRemovalFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousNGRemovalFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " NG REMOVAL FAILURE"]
@@ -26855,9 +25212,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNGRemovalRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as NGRemovalRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousNGRemovalRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " INTERFACE MANAGEMENT ELEMENTARY PROCEDURES"]
@@ -26889,9 +25243,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNGRemovalResponseProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as NGRemovalResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousNGRemovalResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " NG REMOVAL RESPONSE"]
@@ -26913,9 +25264,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNGResetProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as NGResetProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousNGResetProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " NG Reset Elementary Procedure"]
@@ -26942,9 +25290,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNGResetAcknowledgeProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as NGResetAcknowledgeProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousNGResetAcknowledgeProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " NG RESET ACKNOWLEDGE"]
@@ -26966,9 +25311,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNGSetupFailureProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as NGSetupFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousNGSetupFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " NG SETUP FAILURE"]
@@ -26990,9 +25332,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNGSetupRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as NGSetupRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousNGSetupRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " NG Setup Elementary Procedure"]
@@ -27019,9 +25358,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousNGSetupResponseProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as NGSetupResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousNGSetupResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " NG SETUP RESPONSE"]
@@ -27043,9 +25379,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousOverloadStartProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as OverloadStartProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousOverloadStartProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " OVERLOAD START"]
@@ -27067,9 +25400,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousOverloadStopProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as OverloadStopProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousOverloadStopProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " OVERLOAD STOP"]
@@ -27091,9 +25421,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceModifyConfirmProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as PDUSessionResourceModifyConfirmProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousPDUSessionResourceModifyConfirmProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " PDU SESSION RESOURCE MODIFY CONFIRM"]
@@ -27115,9 +25442,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceModifyIndicationProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as PDUSessionResourceModifyIndicationProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousPDUSessionResourceModifyIndicationProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " PDU Session Resource Modify Indication Elementary Procedure"]
@@ -27144,9 +25468,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceModifyRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as PDUSessionResourceModifyRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousPDUSessionResourceModifyRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " PDU Session Resource Modify Elementary Procedure"]
@@ -27173,9 +25494,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceModifyResponseProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as PDUSessionResourceModifyResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousPDUSessionResourceModifyResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " PDU SESSION RESOURCE MODIFY RESPONSE"]
@@ -27197,9 +25515,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceNotifyProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as PDUSessionResourceNotifyProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousPDUSessionResourceNotifyProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " PDU Session Resource Notify Elementary Procedure"]
@@ -27226,9 +25541,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceReleaseCommandProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as PDUSessionResourceReleaseCommandProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousPDUSessionResourceReleaseCommandProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " PDU Session Resource Release Elementary Procedure"]
@@ -27255,9 +25567,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceReleaseResponseProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as PDUSessionResourceReleaseResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousPDUSessionResourceReleaseResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " PDU SESSION RESOURCE RELEASE RESPONSE"]
@@ -27279,9 +25588,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceSetupRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as PDUSessionResourceSetupRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousPDUSessionResourceSetupRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " PDU SESSION MANAGEMENT ELEMENTARY PROCEDURES"]
@@ -27313,9 +25619,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceSetupResponseProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as PDUSessionResourceSetupResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousPDUSessionResourceSetupResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " PDU SESSION RESOURCE SETUP RESPONSE"]
@@ -27337,9 +25640,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPWSCancelRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as PWSCancelRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousPWSCancelRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " PWS Cancel Elementary Procedure"]
@@ -27366,9 +25666,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPWSCancelResponseProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as PWSCancelResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousPWSCancelResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " PWS CANCEL RESPONSE"]
@@ -27390,9 +25687,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPWSFailureIndicationProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as PWSFailureIndicationProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousPWSFailureIndicationProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " PWS Failure Indication Elementary Procedure"]
@@ -27419,9 +25713,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPWSRestartIndicationProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as PWSRestartIndicationProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousPWSRestartIndicationProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " PWS Restart Indication Elementary Procedure"]
@@ -27448,9 +25739,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPagingProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as PagingProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousPagingProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " PAGING ELEMENTARY PROCEDURE"]
@@ -27477,9 +25765,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPathSwitchRequestProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as PathSwitchRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousPathSwitchRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Path Switch Request Elementary Procedure"]
@@ -27506,9 +25791,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPathSwitchRequestAcknowledgeProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as PathSwitchRequestAcknowledgeProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousPathSwitchRequestAcknowledgeProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " PATH SWITCH REQUEST ACKNOWLEDGE"]
@@ -27530,9 +25812,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_common_data_types::Criticality as AnonymousPathSwitchRequestFailureProtocolIEsCriticality;
-    pub use super::ngap_containers::ProtocolIEContainer as PathSwitchRequestFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousPathSwitchRequestFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " PATH SWITCH REQUEST FAILURE"]
@@ -27602,8 +25881,6 @@ pub mod ngap_pdu_contents {
             Self { private_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as RANCPRelocationIndicationProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousRANCPRelocationIndicationProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " RAN CP Relocation Indication"]
@@ -27625,8 +25902,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as RANConfigurationUpdateProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousRANConfigurationUpdateProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " RAN Configuration Update Elementary Procedure"]
@@ -27653,8 +25928,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as RANConfigurationUpdateAcknowledgeProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousRANConfigurationUpdateAcknowledgeProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " RAN CONFIGURATION UPDATE ACKNOWLEDGE"]
@@ -27676,8 +25949,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as RANConfigurationUpdateFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousRANConfigurationUpdateFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " RAN CONFIGURATION UPDATE FAILURE"]
@@ -27699,8 +25970,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as RANPagingRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousRANPagingRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = " RAN Paging Request procedure"]
     #[doc = ""]
@@ -27726,8 +25995,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as RRCInactiveTransitionReportProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousRRCInactiveTransitionReportProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " RRC INACTIVE TRANSITION REPORT"]
@@ -27749,8 +26016,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as RerouteNASRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousRerouteNASRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " REROUTE NAS REQUEST"]
@@ -27772,8 +26037,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as RetrieveUEInformationProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousRetrieveUEInformationProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Retrieve UE Information"]
@@ -27795,8 +26058,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as SecondaryRATDataUsageReportProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousSecondaryRATDataUsageReportProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " DATA USAGE REPORTING ELEMENTARY PROCEDURES"]
@@ -27823,8 +26084,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as TimingSynchronisationStatusFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousTimingSynchronisationStatusFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " TIMING SYNCHRONISATION STATUS FAILURE"]
@@ -27846,8 +26105,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as TimingSynchronisationStatusReportProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousTimingSynchronisationStatusReportProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Timing Synchronisation Status Reporting Elementary Procedure"]
@@ -27874,8 +26131,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as TimingSynchronisationStatusRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousTimingSynchronisationStatusRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " TIMING SYNCHRONISATION STATUS REPORTING ELEMENTARY PROCEDURES"]
@@ -27907,8 +26162,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as TimingSynchronisationStatusResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousTimingSynchronisationStatusResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " TIMING SYNCHRONISATION STATUS RESPONSE"]
@@ -27930,8 +26183,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as TraceFailureIndicationProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousTraceFailureIndicationProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " TRACE FAILURE INDICATION"]
@@ -27953,8 +26204,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as TraceStartProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousTraceStartProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " TRACE ELEMENTARY PROCEDURES"]
@@ -27981,8 +26230,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UEContextModificationFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUEContextModificationFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE CONTEXT MODIFICATION FAILURE"]
@@ -28004,8 +26251,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UEContextModificationRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUEContextModificationRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE Context Modification Elementary Procedure"]
@@ -28032,8 +26277,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UEContextModificationResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUEContextModificationResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE CONTEXT MODIFICATION RESPONSE"]
@@ -28055,8 +26298,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UEContextReleaseCommandProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUEContextReleaseCommandProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE Context Release Elementary Procedure"]
@@ -28083,8 +26324,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UEContextReleaseCompleteProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUEContextReleaseCompleteProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE CONTEXT RELEASE COMPLETE"]
@@ -28106,8 +26345,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UEContextReleaseRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUEContextReleaseRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE Context Release Request Elementary Procedure"]
@@ -28134,8 +26371,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UEContextResumeFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUEContextResumeFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE CONTEXT RESUME FAILURE"]
@@ -28157,8 +26392,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UEContextResumeRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUEContextResumeRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE Context Resume Elementary Procedure"]
@@ -28185,8 +26418,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UEContextResumeResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUEContextResumeResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE CONTEXT RESUME RESPONSE"]
@@ -28208,8 +26439,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UEContextSuspendFailureProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUEContextSuspendFailureProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE CONTEXT SUSPEND FAILURE"]
@@ -28231,8 +26460,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UEContextSuspendRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUEContextSuspendRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE Context Suspend Elementary Procedure"]
@@ -28259,8 +26486,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UEContextSuspendResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUEContextSuspendResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE CONTEXT SUSPEND RESPONSE"]
@@ -28282,8 +26507,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UEInformationTransferProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUEInformationTransferProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = " UE Information Transfer"]
     #[doc = ""]
@@ -28304,8 +26527,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UERadioCapabilityCheckRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUERadioCapabilityCheckRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE Radio Capability Check Elementary Procedure"]
@@ -28332,8 +26553,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UERadioCapabilityCheckResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUERadioCapabilityCheckResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE RADIO CAPABILITY CHECK RESPONSE"]
@@ -28355,8 +26574,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UERadioCapabilityIDMappingRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUERadioCapabilityIDMappingRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE RADIO CAPABILITY ID MAPPING ELEMENTARY PROCEDURES"]
@@ -28383,8 +26600,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UERadioCapabilityIDMappingResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUERadioCapabilityIDMappingResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE RADIO CAPABILITY ID MAPPING RESPONSE"]
@@ -28406,8 +26621,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UERadioCapabilityInfoIndicationProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUERadioCapabilityInfoIndicationProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE RADIO CAPABILITY MANAGEMENT ELEMENTARY PROCEDURES"]
@@ -28434,8 +26647,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UETNLABindingReleaseRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUETNLABindingReleaseRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UE TNLA BINDING ELEMENTARY PROCEDURES"]
@@ -28462,8 +26673,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UplinkNASTransportProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUplinkNASTransportProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UPLINK NAS TRANSPORT"]
@@ -28485,8 +26694,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UplinkNonUEAssociatedNRPPaTransportProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUplinkNonUEAssociatedNRPPaTransportProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UPLINK NON UE ASSOCIATED NRPPA TRANSPORT"]
@@ -28508,8 +26715,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UplinkRANConfigurationTransferProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUplinkRANConfigurationTransferProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " CONFIGURATION TRANSFER ELEMENTARY PROCEDURES"]
@@ -28536,8 +26741,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UplinkRANEarlyStatusTransferProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUplinkRANEarlyStatusTransferProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UPLINK RAN EARLY STATUS TRANSFER ELEMENTARY PROCEDURE"]
@@ -28564,8 +26767,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UplinkRANStatusTransferProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUplinkRANStatusTransferProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " Uplink RAN Status Transfer Elementary Procedure"]
@@ -28592,8 +26793,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UplinkRIMInformationTransferProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUplinkRIMInformationTransferProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " RIM INFORMATION TRANSFER ELEMENTARY PROCEDURES"]
@@ -28620,8 +26819,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as UplinkUEAssociatedNRPPaTransportProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousUplinkUEAssociatedNRPPaTransportProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " UPLINK UE ASSOCIATED NRPPA TRANSPORT"]
@@ -28643,8 +26840,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as WriteReplaceWarningRequestProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousWriteReplaceWarningRequestProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " WARNING MESSAGE TRANSMISSION ELEMENTARY PROCEDURES"]
@@ -28676,8 +26871,6 @@ pub mod ngap_pdu_contents {
             Self { protocol_ies }
         }
     }
-    pub use super::ngap_containers::ProtocolIEContainer as WriteReplaceWarningResponseProtocolIEs;
-    pub use super::ngap_containers::ProtocolIEField as AnonymousWriteReplaceWarningResponseProtocolIEs;
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " WRITE-REPLACE WARNING RESPONSE"]

@@ -103,9 +103,11 @@ fn editing_a_known_ie_cannot_drop_unknown_sequence_additions() {
     let raw = hex::decode("0002f839000180080801000010").unwrap();
     let list: PLMNSupportList = decode_open_type(&raw.clone().into()).unwrap();
     assert_eq!(list.0[0].slice_support_list.0[1].s_nssai.s_st.0[0], 2);
-    let response = NGSetupResponse::new(NGSetupResponseProtocolIEs(vec![
-        AnonymousNGSetupResponseProtocolIEs::new(ProtocolIEID(80), Criticality::reject, raw.into()),
-    ]));
+    let response = NGSetupResponse::new(ProtocolIEContainer(vec![ProtocolIEField::new(
+        ProtocolIEID(80),
+        Criticality::reject,
+        raw.into(),
+    )]));
     let pdu = NGAP_PDU::successfulOutcome(SuccessfulOutcome::new(
         ProcedureCode(21),
         Criticality::reject,
@@ -153,13 +155,11 @@ fn the_octets_of_an_ie_are_replaced_or_added_as_its_value_without_raw_value() {
 
 #[test]
 fn an_ie_that_does_not_decode_is_edited_as_its_octets() {
-    let request = UEContextReleaseRequest::new(UEContextReleaseRequestProtocolIEs(vec![
-        AnonymousUEContextReleaseRequestProtocolIEs::new(
-            ProtocolIEID(60000),
-            Criticality::ignore,
-            vec![0xC0, 0xFF, 0xEE].into(),
-        ),
-    ]));
+    let request = UEContextReleaseRequest::new(ProtocolIEContainer(vec![ProtocolIEField::new(
+        ProtocolIEID(60000),
+        Criticality::ignore,
+        vec![0xC0, 0xFF, 0xEE].into(),
+    )]));
     let pdu = NGAP_PDU::initiatingMessage(InitiatingMessage::new(
         ProcedureCode(42),
         Criticality::ignore,

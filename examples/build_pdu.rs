@@ -131,18 +131,18 @@ fn main() {
     // Without macros, the same InitialContextSetupResponse (example 1) is:
     //
     //   let response = InitialContextSetupResponse::new(
-    //       InitialContextSetupResponseProtocolIEs(vec![
-    //           AnonymousInitialContextSetupResponseProtocolIEs::new(
+    //       ProtocolIEContainer(vec![
+    //           ProtocolIEField::new(
     //               ProtocolIEID(10),
     //               Criticality::ignore,
     //               encode_open_type(&AMFUENGAPID(1))?,
     //           ),
-    //           AnonymousInitialContextSetupResponseProtocolIEs::new(
+    //           ProtocolIEField::new(
     //               ProtocolIEID(85),
     //               Criticality::ignore,
     //               encode_open_type(&RANUENGAPID(0))?,
     //           ),
-    //           AnonymousInitialContextSetupResponseProtocolIEs::new(
+    //           ProtocolIEField::new(
     //               ProtocolIEID(75),
     //               Criticality::ignore,
     //               encode_open_type(&session_setup_response_list())?,

@@ -45,3 +45,8 @@ doc-scrape-examples = false
 [[example]]
 name = "extract_ies"
 doc-scrape-examples = false
+
+[[example]]
+name = "inspect"
+required-features = ["inspect"]
+doc-scrape-examples = false

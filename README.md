@@ -221,6 +221,7 @@ or all mandatory and conditional IE presence rules; callers enforce those.
 cargo run -p oxirush-ngap --example build_pdu
 cargo run -p oxirush-ngap --example decode_manually
 cargo run -p oxirush-ngap --example extract_ies
+cargo run -p oxirush-ngap --example inspect --features inspect
 ```
 
 - `build_pdu` covers Initial Context Setup request/response, UE Context Release,
@@ -229,8 +230,10 @@ cargo run -p oxirush-ngap --example extract_ies
   raw APER API.
 - `extract_ies` extracts UE release, handover, and nested PDU-session/NAS data
   from decoded NGAP messages.
+- `inspect` decodes a UE Context Release Request, prints its tree, edits one
+  IE, adds another and encodes the PDU again.
 
-The three examples intentionally mirror the corresponding `oxirush-s1ap`
+The examples intentionally mirror the corresponding `oxirush-s1ap`
 examples, substituting the standards-defined NGAP messages and IEs.
 
 ## References

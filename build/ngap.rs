@@ -193,7 +193,8 @@ fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
             ("SUCCESSFUL OUTCOME", "Successful"),
             ("UNSUCCESSFUL OUTCOME", "Unsuccessful"),
         ] {
-            if body.contains(label) {
+            // The label of an unsuccessful outcome ends with that of a successful one.
+            if Regex::new(&format!(r"\b{label}\b"))?.is_match(body) {
                 directions
                     .entry(direction)
                     .or_default()

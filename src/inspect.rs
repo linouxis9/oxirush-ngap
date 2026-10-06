@@ -37,7 +37,7 @@ pub fn ie_names() -> &'static [(u16, &'static str)] {
     registry::IE_NAMES
 }
 
-pub(crate) fn decode_typed<T: rasn::Decode + rasn::Encode>(raw: &[u8]) -> Result<Value, String> {
+fn decode_typed<T: rasn::Decode + rasn::Encode>(raw: &[u8]) -> Result<Value, String> {
     let value = crate::ngap::decode_open_type::<T>(&rasn::types::Any::new(raw.to_vec()))
         .map_err(|e| e.to_string())?;
     serde_json::from_str(&rasn::jer::encode(&value).map_err(|e| e.to_string())?)
@@ -109,7 +109,7 @@ impl<T: RepairOpenTypes> RepairOpenTypes for Box<T> {
     }
 }
 
-pub(crate) fn encode_typed<T: rasn::Decode + rasn::Encode + RepairOpenTypes>(
+fn encode_typed<T: rasn::Decode + rasn::Encode + RepairOpenTypes>(
     value: &Value,
 ) -> Result<Vec<u8>, String> {
     let mut typed = rasn::jer::decode::<T>(&value.to_string()).map_err(|e| e.to_string())?;
@@ -124,6 +124,21 @@ pub(crate) fn encode_typed<T: rasn::Decode + rasn::Encode + RepairOpenTypes>(
         .map_err(|e| e.to_string())?
         .as_bytes()
         .to_vec())
+}
+
+/// The functions of a type of the registry.
+pub(crate) struct Typed {
+    pub(crate) decode: fn(&[u8]) -> Result<Value, String>,
+    pub(crate) encode: fn(&Value) -> Result<Vec<u8>, String>,
+}
+
+impl Typed {
+    pub(crate) fn of<T: rasn::Decode + rasn::Encode + RepairOpenTypes>() -> Self {
+        Self {
+            decode: decode_typed::<T>,
+            encode: encode_typed::<T>,
+        }
+    }
 }
 
 fn hex(raw: &[u8]) -> String {
@@ -176,7 +191,7 @@ fn expand(value: &mut Value, depth: usize) -> Result<(), String> {
             if let Some((_, name)) = ie_names().iter().find(|(key, _)| *key == id) {
                 object.insert("_ie_name".into(), json!(name));
             }
-            match unhex(&raw).and_then(|bytes| registry::decode_ie(id, &bytes)) {
+            match unhex(&raw).and_then(|bytes| (registry::ie(id)?.decode)(&bytes)) {
                 Ok(decoded) => {
                     object.insert(field.into(), decoded);
                 }
@@ -190,7 +205,7 @@ fn expand(value: &mut Value, depth: usize) -> Result<(), String> {
                 if registry::TRANSFER_FIELDS.contains(&key.as_str()) && child.is_string() {
                     let raw = child.clone();
                     let decoded =
-                        unhex(&raw).and_then(|bytes| registry::decode_transfer(key, &bytes));
+                        unhex(&raw).and_then(|bytes| (registry::transfer(key)?.decode)(&bytes));
                     *child = match decoded {
                         Ok(decoded) => json!({"_raw_transfer": raw, "decoded": decoded}),
                         Err(error) => json!({"_raw_transfer": raw, "_decode_error": error}),
@@ -218,16 +233,17 @@ fn collapse(value: &mut Value, depth: usize) -> Result<(), String> {
                 if let Some(raw) = child.get("_raw_transfer").cloned() {
                     if let Some(edited) = child.get("decoded") {
                         let bytes = unhex(&raw)?;
-                        let original = registry::decode_transfer(key, &bytes)?;
+                        let transfer = registry::transfer(key)?;
+                        let original = (transfer.decode)(&bytes)?;
                         if &original == edited {
                             *child = raw;
                         } else {
-                            if registry::encode_transfer(key, &original)? != bytes {
+                            if (transfer.encode)(&original)? != bytes {
                                 return Err(format!(
                                     "{key} does not encode back to the octets received"
                                 ));
                             }
-                            *child = json!(hex(&registry::encode_transfer(key, edited)?));
+                            *child = json!(hex(&(transfer.encode)(edited)?));
                         }
                     } else {
                         *child = raw;
@@ -266,15 +282,16 @@ fn collapse(value: &mut Value, depth: usize) -> Result<(), String> {
                 edited.clone()
             } else {
                 let bytes = unhex(&raw)?;
-                let original = registry::decode_ie(original_id, &bytes)?;
+                let received = registry::ie(original_id)?;
+                let original = (received.decode)(&bytes)?;
                 if &original == edited && id == original_id {
                     raw
-                } else if registry::encode_ie(original_id, &original)? != bytes {
+                } else if (received.encode)(&original)? != bytes {
                     return Err(format!(
                         "IE {original_id} does not encode back to the octets received; replace its octets instead"
                     ));
                 } else {
-                    json!(hex(&registry::encode_ie(id, edited)?))
+                    json!(hex(&(registry::ie(id)?.encode)(edited)?))
                 }
             };
             object.insert(field.into(), wire);
@@ -298,7 +315,7 @@ pub fn inspect_pdu(pdu: &NGAP_PDU) -> Result<Value, String> {
     let code = pdu.procedure_code();
     let direction = pdu.direction();
     let raw = body["value"].clone();
-    let mut message = registry::decode_message(direction, code, &unhex(&raw)?)?;
+    let mut message = (registry::message(direction, code)?.decode)(&unhex(&raw)?)?;
     expand(&mut message, 0)?;
     Ok(
         json!({"procedure_code": code, "direction": direction, "criticality": body["criticality"], "message": message, "_raw_message": raw}),
@@ -338,17 +355,18 @@ pub fn encode_pdu(tree: &Value) -> Result<NGAP_PDU, String> {
     collapse(&mut message, 0)?;
     let raw = if let Some(original) = tree.get("_raw_message") {
         let original = unhex(original)?;
-        let decoded = registry::decode_message(direction, code, &original)?;
+        let typed = registry::message(direction, code)?;
+        let decoded = (typed.decode)(&original)?;
         if decoded == message {
             original
         } else {
-            if registry::encode_message(direction, code, &decoded)? != original {
+            if (typed.encode)(&decoded)? != original {
                 return Err("the message does not encode back to the octets received".into());
             }
-            registry::encode_message(direction, code, &message)?
+            (typed.encode)(&message)?
         }
     } else {
-        registry::encode_message(direction, code, &message)?
+        (registry::message(direction, code)?.encode)(&message)?
     };
     let top = json!({variant: {"procedureCode": code, "criticality": tree["criticality"], "value": hex(&raw)}});
     let mut pdu: NGAP_PDU = rasn::jer::decode(&top.to_string()).map_err(|e| e.to_string())?;

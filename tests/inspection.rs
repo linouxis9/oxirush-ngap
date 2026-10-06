@@ -200,3 +200,30 @@ fn a_changed_raw_value_alone_sends_nothing_else() {
         pdu.encode().unwrap()
     );
 }
+
+#[test]
+fn an_ie_that_contains_a_type_is_decoded_and_edited_like_a_transfer() {
+    // DISTRIBUTION RELEASE REQUEST of the fixtures: its second IE is
+    // id-MBS-DistributionReleaseRequestTransfer, an OCTET STRING (CONTAINING ...).
+    let wire =
+        hex::decode("00460022000003012b000700328d3ee97789012c000a090079f487fab2100000000f40020000")
+            .unwrap();
+    let pdu = NGAP_PDU::decode(&wire).unwrap();
+    let mut tree = inspect::inspect_pdu(&pdu).unwrap();
+    let path = "/message/protocolIEs/1/value/decoded/cause/radioNetwork";
+    assert_eq!(tree.pointer(path), Some(&serde_json::json!("unspecified")));
+    assert_eq!(inspect::encode_pdu(&tree).unwrap().encode().unwrap(), wire);
+
+    *tree.pointer_mut(path).unwrap() = serde_json::json!("user-inactivity");
+    let edited = inspect::encode_pdu(&tree).unwrap();
+    let checked = inspect::inspect_pdu(&edited).unwrap();
+    assert_eq!(
+        checked.pointer(path),
+        Some(&serde_json::json!("user-inactivity"))
+    );
+    // The other IEs keep the octets received.
+    for index in [0, 2] {
+        let raw = format!("/message/protocolIEs/{index}/_raw_value");
+        assert_eq!(checked.pointer(&raw), tree.pointer(&raw));
+    }
+}

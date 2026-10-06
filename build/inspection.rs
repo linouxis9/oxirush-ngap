@@ -153,10 +153,19 @@ pub(super) fn generate(protocol: &str, generated: &str, asn: &str) -> Result<Str
         r"(?s)\{\s*ID\s+(id-[A-Za-z][A-Za-z0-9-]*)\s+CRITICALITY\s+[A-Za-z-]+\s+(?:TYPE|EXTENSION)\s+(OCTET\s+STRING(?:\s*\(CONTAINING\s+[A-Za-z][A-Za-z0-9-]*\s*\))?|[A-Za-z][A-Za-z0-9-]*)\s+PRESENCE",
     )?;
     let mut ies: BTreeMap<u16, (String, std::collections::BTreeSet<String>)> = BTreeMap::new();
+    // The type in the OCTET STRING of an IE declared `OCTET STRING (CONTAINING ...)`.
+    let containing = Regex::new(r"CONTAINING\s+([A-Za-z][A-Za-z0-9-]*)")?;
+    let mut contents: BTreeMap<u16, std::collections::BTreeSet<String>> = BTreeMap::new();
     for c in object.captures_iter(asn) {
         let Some(id) = ids.get(&c[1]).copied() else {
             continue;
         };
+        if let Some(ty) = containing.captures(&c[2]).and_then(|c| resolve(&c[1])) {
+            contents
+                .entry(id)
+                .or_default()
+                .insert(format!("crate::{module}::{ty}"));
+        }
         let ty = if c[2].starts_with("OCTET") {
             "rasn::types::OctetString".to_string()
         } else {
@@ -244,6 +253,23 @@ pub(super) fn generate(protocol: &str, generated: &str, asn: &str) -> Result<Str
         out,
         "_ => return Err(format!(\"{protocol} IE {{id}} is unknown or has several types\")), }}) }}"
     )?;
+    contents.retain(|_, alternatives| alternatives.len() == 1);
+    if contents.is_empty() {
+        writeln!(
+            out,
+            "pub(crate) fn ie_contents(_: u16) -> Option<Typed> {{ None }}"
+        )?;
+    } else {
+        writeln!(
+            out,
+            "pub(crate) fn ie_contents(id: u16) -> Option<Typed> {{ Some(match id {{"
+        )?;
+        for (id, alternatives) in &contents {
+            let ty = alternatives.first().expect("one contained type");
+            writeln!(out, "{id} => Typed::of::<{ty}>(),")?;
+        }
+        writeln!(out, "_ => return None, }}) }}")?;
+    }
     let unknown = format!(
         "Err(format!(\"{protocol} contained transfer {{field}} is unknown or has several types\"))"
     );
@@ -251,7 +277,10 @@ pub(super) fn generate(protocol: &str, generated: &str, asn: &str) -> Result<Str
         out,
         "pub(crate) fn transfer(field: &str) -> Result<Typed, String> {{"
     )?;
-    if transfers.values().any(|alternatives| alternatives.len() == 1) {
+    if transfers
+        .values()
+        .any(|alternatives| alternatives.len() == 1)
+    {
         writeln!(out, "Ok(match field {{")?;
         for (field, alternatives) in &transfers {
             if alternatives.len() == 1 {

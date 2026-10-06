@@ -665,6 +665,39 @@ pub(crate) fn ie(id: u16) -> Result<Typed, String> {
         _ => return Err(format!("NGAP IE {id} is unknown or has several types")),
     })
 }
+pub(crate) fn ie_contents(id: u16) -> Option<Typed> {
+    Some(match id {
+        145 => Typed::of::<crate::ngap::PDUSessionResourceReleaseResponseTransfer>(),
+        300 => Typed::of::<crate::ngap::MBSDistributionReleaseRequestTransfer>(),
+        301 => Typed::of::<crate::ngap::MBSDistributionSetupRequestTransfer>(),
+        302 => Typed::of::<crate::ngap::MBSDistributionSetupResponseTransfer>(),
+        303 => Typed::of::<crate::ngap::MBSDistributionSetupUnsuccessfulTransfer>(),
+        304 => Typed::of::<crate::ngap::MulticastSessionActivationRequestTransfer>(),
+        305 => Typed::of::<crate::ngap::MulticastSessionDeactivationRequestTransfer>(),
+        306 => Typed::of::<crate::ngap::MulticastSessionUpdateRequestTransfer>(),
+        314 => Typed::of::<crate::ngap::MBSSessionSetupOrModFailureTransfer>(),
+        315 => Typed::of::<crate::ngap::MBSSessionSetupOrModRequestTransfer>(),
+        316 => Typed::of::<crate::ngap::MBSSessionSetupOrModResponseTransfer>(),
+        348 => Typed::of::<crate::ngap::MBSSessionSetupOrModFailureTransfer>(),
+        349 => Typed::of::<crate::ngap::MBSSessionSetupOrModRequestTransfer>(),
+        350 => Typed::of::<crate::ngap::MBSSessionSetupOrModResponseTransfer>(),
+        358 => Typed::of::<crate::ngap::MBSSessionReleaseResponseTransfer>(),
+        417 => Typed::of::<crate::ngap::BroadcastTransportFailureTransfer>(),
+        418 => Typed::of::<crate::ngap::BroadcastTransportRequestTransfer>(),
+        419 => Typed::of::<crate::ngap::BroadcastTransportResponseTransfer>(),
+        456 => Typed::of::<crate::ngap::InventoryRequestTransfer>(),
+        457 => Typed::of::<crate::ngap::InventoryResponseTransfer>(),
+        458 => Typed::of::<crate::ngap::InventoryFailureTransfer>(),
+        459 => Typed::of::<crate::ngap::InventoryReportTransfer>(),
+        460 => Typed::of::<crate::ngap::CommandRequestTransfer>(),
+        461 => Typed::of::<crate::ngap::CommandResponseTransfer>(),
+        462 => Typed::of::<crate::ngap::CommandFailureTransfer>(),
+        463 => Typed::of::<crate::ngap::AIOTSessionReleaseCommandTransfer>(),
+        464 => Typed::of::<crate::ngap::AIOTSessionReleaseCompleteTransfer>(),
+        465 => Typed::of::<crate::ngap::AIOTSessionReleaseRequestTransfer>(),
+        _ => return None,
+    })
+}
 pub(crate) fn transfer(field: &str) -> Result<Typed, String> {
     Ok(match field {
         "handoverCommandTransfer" => Typed::of::<crate::ngap::HandoverCommandTransfer>(),

@@ -2,9 +2,9 @@
 //!
 //! [`inspect_pdu`] returns `procedure_code`, `direction`, `criticality` and `message`: the
 //! message in the ASN.1 JSON encoding (JER). An IE whose identifier has one type has its
-//! typed `value` (`extensionValue` in an extension container) in place of its octets, and
-//! a contained transfer is its `decoded` value beside its `_raw_transfer`. Repeated IEs
-//! stay ordered array entries.
+//! typed `value` (`extensionValue` in an extension container) in place of its octets. A
+//! contained transfer, and the value of an IE declared `OCTET STRING (CONTAINING ...)`, is
+//! its `decoded` value beside its `_raw_transfer`. Repeated IEs stay ordered array entries.
 //!
 //! The members that start with `_` say what was received:
 //!
@@ -170,6 +170,14 @@ fn unhex(value: &Value) -> Result<Vec<u8>, String> {
         .collect()
 }
 
+/// The value that the octets `raw` contain, beside them, or why they did not decode.
+fn contained(raw: Value, typed: Result<Typed, String>) -> Value {
+    match typed.and_then(|typed| (typed.decode)(&unhex(&raw)?)) {
+        Ok(decoded) => json!({"_raw_transfer": raw, "decoded": decoded}),
+        Err(error) => json!({"_raw_transfer": raw, "_decode_error": error}),
+    }
+}
+
 fn expand(value: &mut Value, depth: usize) -> Result<(), String> {
     if depth > 64 {
         return Err("inspection nesting exceeds 64".into());
@@ -193,6 +201,11 @@ fn expand(value: &mut Value, depth: usize) -> Result<(), String> {
             }
             match unhex(&raw).and_then(|bytes| (registry::ie(id)?.decode)(&bytes)) {
                 Ok(decoded) => {
+                    // An OCTET STRING (CONTAINING ...) has the form of a transfer.
+                    let decoded = match registry::ie_contents(id) {
+                        Some(contents) => contained(decoded, Ok(contents)),
+                        None => decoded,
+                    };
                     object.insert(field.into(), decoded);
                 }
                 Err(error) => {
@@ -203,13 +216,7 @@ fn expand(value: &mut Value, depth: usize) -> Result<(), String> {
         for (key, child) in object {
             if !key.starts_with('_') {
                 if registry::TRANSFER_FIELDS.contains(&key.as_str()) && child.is_string() {
-                    let raw = child.clone();
-                    let decoded =
-                        unhex(&raw).and_then(|bytes| (registry::transfer(key)?.decode)(&bytes));
-                    *child = match decoded {
-                        Ok(decoded) => json!({"_raw_transfer": raw, "decoded": decoded}),
-                        Err(error) => json!({"_raw_transfer": raw, "_decode_error": error}),
-                    };
+                    *child = contained(child.take(), registry::transfer(key));
                 }
                 expand(child, depth + 1)?;
             }
@@ -227,13 +234,24 @@ fn collapse(value: &mut Value, depth: usize) -> Result<(), String> {
         return Err("inspection nesting exceeds 64".into());
     }
     if let Some(object) = value.as_object_mut() {
+        let id = object
+            .get("id")
+            .and_then(Value::as_u64)
+            .and_then(|v| u16::try_from(v).ok());
         for (key, child) in object.iter_mut() {
             if !key.starts_with('_') {
                 collapse(child, depth + 1)?;
                 if let Some(raw) = child.get("_raw_transfer").cloned() {
                     if let Some(edited) = child.get("decoded") {
                         let bytes = unhex(&raw)?;
-                        let transfer = registry::transfer(key)?;
+                        // An IE's identifier gives the type of what it contains, and
+                        // the name of a transfer field the type of the transfer.
+                        let transfer = match key.as_str() {
+                            "value" | "extensionValue" => id
+                                .and_then(registry::ie_contents)
+                                .ok_or("this IE does not contain a type")?,
+                            _ => registry::transfer(key)?,
+                        };
                         let original = (transfer.decode)(&bytes)?;
                         if &original == edited {
                             *child = raw;

@@ -125,9 +125,8 @@ members of the tree and the rules of an edit.
 
 Limits:
 
-- IEs of type `OCTET STRING (CONTAINING ...)` stay as their octets, as do
-  `id-CurrentQoSParaSetIndex` and `id-QosFlowAdditionalInfoList`, whose type
-  depends on the type they extend.
+- `id-CurrentQoSParaSetIndex` and `id-QosFlowAdditionalInfoList`, whose type
+  depends on the type they extend, stay as their octets.
 - An IE with an integer of 2^63 or more stays as its octets, and one with an
   extensible fixed-size `BIT STRING` of another size cannot be edited as a
   typed value: rasn's JER does not represent them.

@@ -19,8 +19,9 @@
 //! - change a typed `value` or the `decoded` member of a transfer, which is encoded again.
 //!   This is refused when the octets received do not decode and encode back to themselves,
 //!   as with an extension addition that the typed value does not keep;
-//! - to send other octets as an IE, or to add an IE, write them in hexadecimal as `value`
-//!   and leave `_raw_value` out; for a transfer, replace the member with them;
+//! - to send other octets as an IE, or to add an IE, leave `_raw_value` out. A `value` that
+//!   is a JSON string is the octets, in hexadecimal; any other is encoded as the type of the
+//!   IE's identifier. For a transfer, replace the member with its octets;
 //! - an IE with a `_decode_error` has its octets as `value`: change them there.
 //!
 //! `_raw_value` and `_raw_message` are what an edit is compared with, so changing one alone
@@ -273,17 +274,13 @@ fn collapse(value: &mut Value, depth: usize) -> Result<(), String> {
         let original_id = object.remove("_original_id");
         let undecoded = object.remove("_decode_error").is_some();
         object.remove("_ie_name");
+        let field = if object.contains_key("value") {
+            "value"
+        } else {
+            "extensionValue"
+        };
         if let Some(raw) = raw {
-            let id = object
-                .get("id")
-                .and_then(Value::as_u64)
-                .and_then(|v| u16::try_from(v).ok())
-                .ok_or("IE id must be u16")?;
-            let field = if object.contains_key("value") {
-                "value"
-            } else {
-                "extensionValue"
-            };
+            let id = id.ok_or("IE id must be u16")?;
             let edited = object.get(field).ok_or("IE has no value")?;
             let original_id = original_id
                 .as_ref()
@@ -312,6 +309,12 @@ fn collapse(value: &mut Value, depth: usize) -> Result<(), String> {
                     json!(hex(&(registry::ie(id)?.encode)(edited)?))
                 }
             };
+            object.insert(field.into(), wire);
+        } else if let Some(id) = id
+            && let Some(typed) = object.get(field).filter(|v| !v.is_string())
+        {
+            // An IE that was not received, with a typed value.
+            let wire = json!(hex(&(registry::ie(id)?.encode)(typed)?));
             object.insert(field.into(), wire);
         }
     } else if let Some(array) = value.as_array_mut() {

@@ -30,8 +30,9 @@ is not source compatible with 0.4.2.
 
 - The optional `inspect` feature: a decoded PDU as a `serde_json` tree in the
   ASN.1 JSON encoding, which can be edited and encoded again. What is not
-  edited keeps the octets received. The transfers that an `OCTET STRING`
-  contains are decoded in place, as fields and as IEs.
+  edited keeps the octets received, and an IE is added with a typed value.
+  The transfers that an `OCTET STRING` contains are decoded in place, as
+  fields and as IEs.
 - `NgapPduKind` names the seven MBS procedures, whose fourteen messages were
   `Other`.
 - Identifiers, builders and extractors for the IEs whose type is an

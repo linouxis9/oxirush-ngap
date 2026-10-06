@@ -120,8 +120,10 @@ order. An IE or contained transfer that is unknown or does not decode stays as
 its octets beside a `_decode_error`; a PDU whose message does not decode is an
 error. An edit is refused when the value around it does not encode back to the
 octets received, as with an unknown extension addition, and when it has a
-member that the ASN.1 type does not have. The module documentation lists the
-members of the tree and the rules of an edit.
+member that the ASN.1 type does not have. An IE is added as an entry of
+`protocolIEs` with its `id`, its `criticality` and its typed `value`, or its
+octets in hexadecimal. The module documentation lists the members of the tree
+and the rules of an edit.
 
 Limits:
 

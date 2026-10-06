@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use anyhow::{Context, Result, anyhow};
 use rasn_compiler::OutputMode;
 use rasn_compiler::prelude::{Compiler, RasnBackend, RasnConfig};
-use regex::{Captures, Regex};
+use regex::Regex;
 
 pub fn generate_ngap() -> Result<()> {
     let mut files: Vec<PathBuf> = fs::read_dir("ngap")
@@ -45,54 +45,21 @@ fn post_process(path: &Path, asn_files: &[PathBuf]) -> Result<()> {
     // Plain bracketed specification references are otherwise parsed as rustdoc links.
     generated = generated.replace("[16]", "(reference 16)");
 
-    // rasn-compiler already resolves every parameterized container invocation to
-    // a concrete anonymous type. These now-unused imports refer to parameterized
-    // definitions that intentionally have no standalone Rust representation.
-    let container_imports = Regex::new(r"(?ms)^    use super::ngap_containers::\{.*?^    \};\n")?;
-    generated = container_imports.replace_all(&generated, "").into_owned();
+    generated =
+        crate::containers::share(&generated, "ngap_containers", "ngap_common_data_types")?;
     generated = crate::aper_fix::fix_constrained_sequences(&generated)?;
     generated = crate::aper_fix::fix_utf8_strings(&generated)?;
     generated = crate::aper_fix::fix_fixed_bit_strings(&generated)?;
     generated = crate::aper_fix::fix_long_inline_strings(&generated)?;
     generated = crate::aper_fix::fix_extensible_sequences(&generated)?;
 
-    // The concrete private/extension containers below use these common types,
-    // but rasn-compiler omits both from the generated module import list.
+    // The private IE container uses PrivateIE-ID, which rasn-compiler omits
+    // from the import list of its module.
     generated = generated.replacen(
         "    use super::ngap_common_data_types::{Criticality, Presence, ProtocolIEID};",
         "    use super::ngap_common_data_types::{Criticality, Presence, PrivateIEID, ProtocolIEID};",
         1,
     );
-    // The resolved extension containers of the IEs module need the common
-    // types their IMPORTS name only through the parameterized containers.
-    let ies_module = "pub mod ngap_ies {\n    extern crate alloc;\n";
-    if !generated.contains("    use super::ngap_common_data_types::{Presence, ProtocolExtensionID};") {
-        generated = generated.replacen(
-            ies_module,
-            &format!(
-                "{ies_module}    use super::ngap_common_data_types::{{Presence, ProtocolExtensionID}};\n"
-            ),
-            1,
-        );
-    }
-
-    // Some resolved ProtocolIE containers use primitive/anonymous field types
-    // while equivalent containers use the named common types. Normalize only
-    // message ProtocolIE entries; their APER representations are identical.
-    let protocol_ie_block = Regex::new(
-        r"(?ms)(    pub struct Anonymous[A-Za-z0-9_]+ProtocolIEs \{.*?^    \}\n    impl Anonymous[A-Za-z0-9_]+ProtocolIEs \{.*?^    \}\n)",
-    )?;
-    let anonymous_criticality = Regex::new(r"Anonymous[A-Za-z0-9_]+ProtocolIEsCriticality")?;
-    generated = protocol_ie_block
-        .replace_all(&generated, |captures: &Captures<'_>| {
-            let block = captures[1]
-                .replace("pub id: u16", "pub id: ProtocolIEID")
-                .replace("id: u16,", "id: ProtocolIEID,");
-            anonymous_criticality
-                .replace_all(&block, "Criticality")
-                .into_owned()
-        })
-        .into_owned();
 
     let support = generate_support(&generated, asn_files)?;
     generated.push_str(&support);
@@ -242,6 +209,7 @@ fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
     )?;
     writeln!(out, "pub use ngap_common_data_types::*;")?;
     writeln!(out, "pub use ngap_constants::*;")?;
+    writeln!(out, "pub use ngap_containers::*;")?;
     writeln!(out, "pub use ngap_ies::*;")?;
     writeln!(out, "pub use ngap_pdu_contents::*;")?;
     writeln!(out, "pub use ngap_pdu_descriptions::*;")?;

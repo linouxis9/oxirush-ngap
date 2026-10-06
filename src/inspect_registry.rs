@@ -2863,498 +2863,220 @@ open_types! { crate::ngap::ngap_common_data_types::ProcedureCode {} }
 open_types! { crate::ngap::ngap_common_data_types::ProtocolExtensionID {} }
 open_types! { crate::ngap::ngap_common_data_types::ProtocolIEID {} }
 open_types! { crate::ngap::ngap_common_data_types::TriggeringMessage {} }
-open_types! { crate::ngap::ngap_ies::AnonymousA2XPC5FlowBitRatesIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousA2XPC5FlowBitRatesIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::A2XPC5FlowBitRatesIEExtensions { 0 } }
+open_types! { crate::ngap::ngap_containers::ProtocolIEField { value } }
+open_types! { crate::ngap::ngap_containers::ProtocolIEContainer { 0 } }
+open_types! { crate::ngap::ngap_containers::ProtocolExtensionField { extension_value } }
+open_types! { crate::ngap::ngap_containers::ProtocolExtensionContainer { 0 } }
 open_types! { crate::ngap::ngap_ies::A2XPC5FlowBitRates { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::A2XPC5QoSFlowItemA2XRange {} }
-open_types! { crate::ngap::ngap_ies::AnonymousA2XPC5QoSFlowItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousA2XPC5QoSFlowItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::A2XPC5QoSFlowItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::A2XPC5QoSFlowItem { a2_x_pc5_flow_bit_rates, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::A2XPC5QoSFlowList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousA2XPC5QoSParametersIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousA2XPC5QoSParametersIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::A2XPC5QoSParametersIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::A2XPC5QoSParameters { a2_x_pc5_qo_s_flow_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AIOTFIdentifier {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAIOTFNameIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAIOTFNameIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AIOTFNameIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AIOTFName { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AIOTFNameUTF8String {} }
 open_types! { crate::ngap::ngap_ies::AIOTFNameVisibleString {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAIOTSessionReleaseCommandTransferProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAIOTSessionReleaseCommandTransferProtocolIEs { value } }
-open_types! { crate::ngap::ngap_ies::AIOTSessionReleaseCommandTransferProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_ies::AIOTSessionReleaseCommandTransfer { protocol_ies } }
-open_types! { crate::ngap::ngap_ies::AnonymousAIOTSessionReleaseCompleteTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAIOTSessionReleaseCompleteTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AIOTSessionReleaseCompleteTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AIOTSessionReleaseCompleteTransfer { criticality_diagnostics, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousAIOTSessionReleaseRequestTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAIOTSessionReleaseRequestTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AIOTSessionReleaseRequestTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AIOTSessionReleaseRequestTransfer { cause, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousAIoTCommandAssistanceInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAIoTCommandAssistanceInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AIoTCommandAssistanceInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AIoTCommandAssistanceInformation { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AIoTCorrelationIdentifier {} }
-open_types! { crate::ngap::ngap_ies::AIoTDeviceIdentificationRequestedChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AIoTDeviceIdentificationRequestedChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::AIoTDeviceIdentificationRequested { choice_Extensions } else { singleDevice, groupDevices, allDevices } }
-open_types! { crate::ngap::ngap_ies::AnonymousAIoTDeviceReportItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAIoTDeviceReportItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AIoTDeviceReportItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AIoTDeviceReportItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AIoTDeviceReportList { 0 } }
 open_types! { crate::ngap::ngap_ies::AIoTFollowonCommandIndication {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAIoTInventoryAssistanceInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAIoTInventoryAssistanceInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AIoTInventoryAssistanceInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AIoTInventoryAssistanceInformation { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AIoTNASPDU {} }
 open_types! { crate::ngap::ngap_ies::AIoTReaderIndex {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAIoTReaderReportItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAIoTReaderReportItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AIoTReaderReportItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AIoTReaderReportItem { device_report_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AIoTReaderReportList { 0 } }
 open_types! { crate::ngap::ngap_ies::AIoTRequestedAIoTAreaList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousAIoTRequestedReaderItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAIoTRequestedReaderItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AIoTRequestedReaderItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AIoTRequestedReaderItem { globalg_nb_id, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AIoTRequestedReaderList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousAIoTRequestedServiceAreaInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAIoTRequestedServiceAreaInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AIoTRequestedServiceAreaInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AIoTRequestedServiceAreaInformation { requested_reader_list, requested_aio_tarea_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AIoTSecurityInfoChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AIoTSecurityInfoChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::AIoTSecurityInfo { choice_Extensions } else { a_IoT_RAND_n } }
 open_types! { crate::ngap::ngap_ies::AIoTSupport {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAIoTAreaIDIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAIoTAreaIDIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AIoTAreaIDIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AIoTAreaID { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousAMFTNLAssociationSetupItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAMFTNLAssociationSetupItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AMFTNLAssociationSetupItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AMFTNLAssociationSetupItem { a_mf_tnlassociation_address, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AMFTNLAssociationSetupList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousAMFTNLAssociationToAddItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAMFTNLAssociationToAddItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AMFTNLAssociationToAddItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AMFTNLAssociationToAddItem { a_mf_tnlassociation_address, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AMFTNLAssociationToAddList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousAMFTNLAssociationToRemoveItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAMFTNLAssociationToRemoveItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AMFTNLAssociationToRemoveItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AMFTNLAssociationToRemoveItem { a_mf_tnlassociation_address, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AMFTNLAssociationToRemoveList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousAMFTNLAssociationToUpdateItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAMFTNLAssociationToUpdateItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AMFTNLAssociationToUpdateItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AMFTNLAssociationToUpdateItem { a_mf_tnlassociation_address, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AMFTNLAssociationToUpdateList { 0 } }
 open_types! { crate::ngap::ngap_ies::AMFUENGAPID {} }
 open_types! { crate::ngap::ngap_ies::AMFName {} }
 open_types! { crate::ngap::ngap_ies::AMFNameUTF8String {} }
 open_types! { crate::ngap::ngap_ies::AMFNameVisibleString {} }
-open_types! { crate::ngap::ngap_ies::AMFPagingTargetChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AMFPagingTargetChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::AMFPagingTarget { globalRANNodeID, tAI, choice_Extensions } else {} }
 open_types! { crate::ngap::ngap_ies::AMFPointer {} }
 open_types! { crate::ngap::ngap_ies::AMFRegionID {} }
 open_types! { crate::ngap::ngap_ies::AMFSetID {} }
 open_types! { crate::ngap::ngap_ies::AUN3DeviceAccessInfoAUN3DeviceAccess {} }
 open_types! { crate::ngap::ngap_ies::AUN3DeviceAccessInfoExistingNGConnectionwithSameLocation {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAUN3DeviceAccessInfoIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAUN3DeviceAccessInfoIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AUN3DeviceAccessInfoIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AUN3DeviceAccessInfo { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::ActivatedCellList { 0 } }
 open_types! { crate::ngap::ngap_ies::ActivationStatus {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAdditionalCancelledlocationReportingReferenceIDItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAdditionalCancelledlocationReportingReferenceIDItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AdditionalCancelledlocationReportingReferenceIDItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AdditionalCancelledlocationReportingReferenceIDItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AdditionalCancelledlocationReportingReferenceIDList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousAdditionalDLUPTNLInformationForHOItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAdditionalDLUPTNLInformationForHOItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AdditionalDLUPTNLInformationForHOItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AdditionalDLUPTNLInformationForHOItem { additional_dl_ngu_up_tnlinformation, additional_qos_flow_setup_response_list, additional_dlforwarding_uptnlinformation, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AdditionalDLUPTNLInformationForHOList { 0 } }
 open_types! { crate::ngap::ngap_ies::AdditionalQosFlowInformation {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAdditionalULIIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAdditionalULIIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AdditionalULIIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AdditionalULI { n_rcgi, t_ai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousAerialUEFlightInformationReportingIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAerialUEFlightInformationReportingIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AerialUEFlightInformationReportingIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AerialUEFlightInformationReporting { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousAerialUEFlightInformationReportingControlIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAerialUEFlightInformationReportingControlIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AerialUEFlightInformationReportingControlIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AerialUEFlightInformationReportingControl { area_id, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousAerialUEFlightInformationReportingControlItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAerialUEFlightInformationReportingControlItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AerialUEFlightInformationReportingControlItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AerialUEFlightInformationReportingControlItem { aerial_ue_flight_information_reporting_control, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AerialUEFlightInformationReportingControlList { 0 } }
 open_types! { crate::ngap::ngap_ies::AerialUEReportingPeriodicity {} }
 open_types! { crate::ngap::ngap_ies::AerialUEsubscriptionInformation {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAllocationAndRetentionPriorityIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAllocationAndRetentionPriorityIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AllocationAndRetentionPriorityIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AllocationAndRetentionPriority { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AllowedCAGListPerPLMN {} }
 open_types! { crate::ngap::ngap_ies::AllowedPNINPNItemPNINPNRestricted {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAllowedPNINPNItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAllowedPNINPNItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AllowedPNINPNItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AllowedPNINPNItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AllowedPNINPNList { 0 } }
 open_types! { crate::ngap::ngap_ies::AllowedNSSAI { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousAllowedNSSAIItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAllowedNSSAIItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AllowedNSSAIItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AllowedNSSAIItem { s_nssai, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AllowedPeriodicityList {} }
 open_types! { crate::ngap::ngap_ies::AllowedTACs {} }
 open_types! { crate::ngap::ngap_ies::AlternativeQoSParaSetIndex {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAlternativeQoSParaSetItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAlternativeQoSParaSetItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AlternativeQoSParaSetItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AlternativeQoSParaSetItem { packet_error_rate, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AlternativeQoSParaSetList { 0 } }
 open_types! { crate::ngap::ngap_ies::AlternativeQoSParaSetNotifyIndex {} }
 open_types! { crate::ngap::ngap_ies::Altitude {} }
-open_types! { crate::ngap::ngap_ies::AreaIDChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AreaIDChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::AreaID { tAI, globalRANNodeID, nR_CGI, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAreaOfInterestIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAreaOfInterestIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AreaOfInterestIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AreaOfInterest { area_of_interest_tailist, area_of_interest_cell_list, area_of_interest_rannode_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousAreaOfInterestCellItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAreaOfInterestCellItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AreaOfInterestCellItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AreaOfInterestCellItem { n_gran_cgi, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AreaOfInterestCellList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousAreaOfInterestItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAreaOfInterestItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AreaOfInterestItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AreaOfInterestItem { area_of_interest, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AreaOfInterestList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousAreaOfInterestRANNodeItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAreaOfInterestRANNodeItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AreaOfInterestRANNodeItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AreaOfInterestRANNodeItem { global_rannode_id, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AreaOfInterestRANNodeList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousAreaOfInterestTAIItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAreaOfInterestTAIItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AreaOfInterestTAIItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AreaOfInterestTAIItem { t_ai, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AreaOfInterestTAIList { 0 } }
-open_types! { crate::ngap::ngap_ies::AreaScopeOfMDTEUTRAChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AreaScopeOfMDTEUTRAChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::AreaScopeOfMDTEUTRA { cellBased, tABased, tAIBased, choice_Extensions } else { pLMNWide } }
-open_types! { crate::ngap::ngap_ies::AreaScopeOfMDTNRChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AreaScopeOfMDTNRChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::AreaScopeOfMDTNR { cellBased, tABased, tAIBased, choice_Extensions } else { pLMNWide } }
-open_types! { crate::ngap::ngap_ies::AnonymousAreaScopeOfNeighCellsItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAreaScopeOfNeighCellsItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AreaScopeOfNeighCellsItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AreaScopeOfNeighCellsItem { nr_frequency_info, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AreaScopeOfNeighCellsList { 0 } }
-open_types! { crate::ngap::ngap_ies::AreaScopeOfQMCChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AreaScopeOfQMCChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::AreaScopeOfQMC { cellBased, tABased, tAIBased, pLMNAreaBased, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAssistanceDataForPagingIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAssistanceDataForPagingIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AssistanceDataForPagingIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AssistanceDataForPaging { assistance_data_for_recommended_cells, paging_attempt_information, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousAssistanceDataForRecommendedCellsIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAssistanceDataForRecommendedCellsIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AssistanceDataForRecommendedCellsIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AssistanceDataForRecommendedCells { recommended_cells_for_paging, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AssistanceInformationQoEMeas {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAssociatedMBSQosFlowSetupRequestItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAssociatedMBSQosFlowSetupRequestItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AssociatedMBSQosFlowSetupRequestItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AssociatedMBSQosFlowSetupRequestItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AssociatedMBSQosFlowSetupRequestList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousAssociatedMBSQosFlowSetuporModifyRequestItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAssociatedMBSQosFlowSetuporModifyRequestItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AssociatedMBSQosFlowSetuporModifyRequestItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AssociatedMBSQosFlowSetuporModifyRequestItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AssociatedMBSQosFlowSetuporModifyRequestList { 0 } }
 open_types! { crate::ngap::ngap_ies::AssociatedQosFlowItemQosFlowMappingIndication {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAssociatedQosFlowItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAssociatedQosFlowItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AssociatedQosFlowItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AssociatedQosFlowItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AssociatedQosFlowList { 0 } }
 open_types! { crate::ngap::ngap_ies::AssociatedSessionID {} }
 open_types! { crate::ngap::ngap_ies::AuthenticatedIndication {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAvailableBitrateReportThresholdItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAvailableBitrateReportThresholdItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AvailableBitrateReportThresholdItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AvailableBitrateReportThresholdItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AvailableBitrateReportThresholdList { 0 } }
 open_types! { crate::ngap::ngap_ies::AvailableRANVisibleQoEMetricsApplicationLayerBufferLevelList {} }
 open_types! { crate::ngap::ngap_ies::AvailableRANVisibleQoEMetricsPlayoutDelayForMediaStartup {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAvailableRANVisibleQoEMetricsIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousAvailableRANVisibleQoEMetricsIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::AvailableRANVisibleQoEMetricsIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::AvailableRANVisibleQoEMetrics { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AveragingWindow {} }
-open_types! { crate::ngap::ngap_ies::AnonymousBeamMeasurementsReportConfigurationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousBeamMeasurementsReportConfigurationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::BeamMeasurementsReportConfigurationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::BeamMeasurementsReportConfiguration { beam_measurements_report_quantity, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::BeamMeasurementsReportQuantityRSRP {} }
 open_types! { crate::ngap::ngap_ies::BeamMeasurementsReportQuantityRSRQ {} }
 open_types! { crate::ngap::ngap_ies::BeamMeasurementsReportQuantitySINR {} }
-open_types! { crate::ngap::ngap_ies::AnonymousBeamMeasurementsReportQuantityIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousBeamMeasurementsReportQuantityIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::BeamMeasurementsReportQuantityIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::BeamMeasurementsReportQuantity { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::BitRate {} }
 open_types! { crate::ngap::ngap_ies::BluetoothMeasConfig {} }
-open_types! { crate::ngap::ngap_ies::AnonymousBluetoothMeasConfigNameItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousBluetoothMeasConfigNameItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::BluetoothMeasConfigNameItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::BluetoothMeasConfigNameItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::BluetoothMeasConfigNameList { 0 } }
 open_types! { crate::ngap::ngap_ies::BluetoothMeasurementConfigurationBtRssi {} }
-open_types! { crate::ngap::ngap_ies::AnonymousBluetoothMeasurementConfigurationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousBluetoothMeasurementConfigurationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::BluetoothMeasurementConfigurationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::BluetoothMeasurementConfiguration { bluetooth_meas_config_name_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::BluetoothName {} }
-open_types! { crate::ngap::ngap_ies::BroadcastCancelledAreaListChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::BroadcastCancelledAreaListChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::BroadcastCancelledAreaList { cellIDCancelledEUTRA, tAICancelledEUTRA, emergencyAreaIDCancelledEUTRA, cellIDCancelledNR, tAICancelledNR, emergencyAreaIDCancelledNR, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::BroadcastCompletedAreaListChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::BroadcastCompletedAreaListChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::BroadcastCompletedAreaList { cellIDBroadcastEUTRA, tAIBroadcastEUTRA, emergencyAreaIDBroadcastEUTRA, cellIDBroadcastNR, tAIBroadcastNR, emergencyAreaIDBroadcastNR, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::AnonymousBroadcastPLMNItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousBroadcastPLMNItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::BroadcastPLMNItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::BroadcastPLMNItem { t_aislice_support_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::BroadcastPLMNList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousBroadcastTransportFailureTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousBroadcastTransportFailureTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::BroadcastTransportFailureTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::BroadcastTransportFailureTransfer { m_bs_session_id, cause, criticality_diagnostics, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousBroadcastTransportRequestTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousBroadcastTransportRequestTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::BroadcastTransportRequestTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::BroadcastTransportRequestTransfer { m_bs_session_id, m_bs_session_tnlinfo_ngran, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousBroadcastTransportResponseTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousBroadcastTransportResponseTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::BroadcastTransportResponseTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::BroadcastTransportResponseTransfer { m_bs_session_id, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::BurstArrivalTime {} }
-open_types! { crate::ngap::ngap_ies::AnonymousBurstArrivalTimeWindowIEExtensionCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousBurstArrivalTimeWindowIEExtension { extension_value } }
-open_types! { crate::ngap::ngap_ies::BurstArrivalTimeWindowIEExtension { 0 } }
 open_types! { crate::ngap::ngap_ies::BurstArrivalTimeWindow { i_e_extension } }
 open_types! { crate::ngap::ngap_ies::CRNTI {} }
 open_types! { crate::ngap::ngap_ies::CAGID {} }
 open_types! { crate::ngap::ngap_ies::CAGListforMDT { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousCAGListforMDTItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCAGListforMDTItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CAGListforMDTItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CAGListforMDTItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CEmodeBSupportIndicator {} }
 open_types! { crate::ngap::ngap_ies::CEmodeBrestricted {} }
 open_types! { crate::ngap::ngap_ies::CNMTCommunicationHandling {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCNAssistedRANTuningIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCNAssistedRANTuningIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CNAssistedRANTuningIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CNAssistedRANTuning { expected_uebehaviour, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CNTypeRestrictionsForEquivalent { 0 } }
 open_types! { crate::ngap::ngap_ies::CNTypeRestrictionsForEquivalentItemCnType {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCNTypeRestrictionsForEquivalentItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCNTypeRestrictionsForEquivalentItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CNTypeRestrictionsForEquivalentItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CNTypeRestrictionsForEquivalentItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CNTypeRestrictionsForServing {} }
 open_types! { crate::ngap::ngap_ies::CNsubgroupID {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCOUNTValueForPDCPSN12IEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCOUNTValueForPDCPSN12IEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::COUNTValueForPDCPSN12IEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::COUNTValueForPDCPSN12 { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousCOUNTValueForPDCPSN18IEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCOUNTValueForPDCPSN18IEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::COUNTValueForPDCPSN18IEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::COUNTValueForPDCPSN18 { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::CPTransportLayerInformationChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::CPTransportLayerInformationChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::CPTransportLayerInformation { choice_Extensions } else { endpointIPAddress } }
 open_types! { crate::ngap::ngap_ies::CancelAllWarningMessages {} }
 open_types! { crate::ngap::ngap_ies::CancelledCellsInEAIEUTRA { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousCancelledCellsInEAIEUTRAItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCancelledCellsInEAIEUTRAItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CancelledCellsInEAIEUTRAItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CancelledCellsInEAIEUTRAItem { e_utra_cgi, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CancelledCellsInEAINR { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousCancelledCellsInEAINRItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCancelledCellsInEAINRItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CancelledCellsInEAINRItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CancelledCellsInEAINRItem { n_r_cgi, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CancelledCellsInTAIEUTRA { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousCancelledCellsInTAIEUTRAItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCancelledCellsInTAIEUTRAItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CancelledCellsInTAIEUTRAItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CancelledCellsInTAIEUTRAItem { e_utra_cgi, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CancelledCellsInTAINR { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousCancelledCellsInTAINRItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCancelledCellsInTAINRItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CancelledCellsInTAINRItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CancelledCellsInTAINRItem { n_r_cgi, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::CandidateCellChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::CandidateCellChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::CandidateCell { candidateCGI, candidatePCI, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCandidateCellIDIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCandidateCellIDIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CandidateCellIDIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CandidateCellID { candidate_cell_id, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousCandidateCellItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCandidateCellItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CandidateCellItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CandidateCellItem { candidate_cell, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CandidateCellList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousCandidatePCIIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCandidatePCIIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CandidatePCIIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CandidatePCI { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CandidateRelayUEID {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCandidateRelayUEInformationItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCandidateRelayUEInformationItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CandidateRelayUEInformationItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CandidateRelayUEInformationItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CandidateRelayUEInformationList { 0 } }
-open_types! { crate::ngap::ngap_ies::CauseChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::CauseChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::Cause { choice_Extensions } else { radioNetwork, transport, nas, protocol, misc } }
 open_types! { crate::ngap::ngap_ies::CauseMisc {} }
 open_types! { crate::ngap::ngap_ies::CauseNas {} }
 open_types! { crate::ngap::ngap_ies::CauseProtocol {} }
 open_types! { crate::ngap::ngap_ies::CauseRadioNetwork {} }
 open_types! { crate::ngap::ngap_ies::CauseTransport {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCellCAGInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCellCAGInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CellCAGInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CellCAGInformation { n_gran_cgi, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousCellBasedMDTEUTRAIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCellBasedMDTEUTRAIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CellBasedMDTEUTRAIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CellBasedMDTEUTRA { cell_id_listfor_mdt, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousCellBasedMDTNRIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCellBasedMDTNRIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CellBasedMDTNRIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CellBasedMDTNR { cell_id_listfor_mdt, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousCellBasedQMCIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCellBasedQMCIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CellBasedQMCIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CellBasedQMC { cell_id_listfor_qmc, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CellCAGList {} }
 open_types! { crate::ngap::ngap_ies::CellIDBroadcastEUTRA { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousCellIDBroadcastEUTRAItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCellIDBroadcastEUTRAItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CellIDBroadcastEUTRAItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CellIDBroadcastEUTRAItem { e_utra_cgi, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CellIDBroadcastNR { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousCellIDBroadcastNRItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCellIDBroadcastNRItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CellIDBroadcastNRItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CellIDBroadcastNRItem { n_r_cgi, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CellIDCancelledEUTRA { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousCellIDCancelledEUTRAItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCellIDCancelledEUTRAItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CellIDCancelledEUTRAItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CellIDCancelledEUTRAItem { e_utra_cgi, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CellIDCancelledNR { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousCellIDCancelledNRItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCellIDCancelledNRItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CellIDCancelledNRItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CellIDCancelledNRItem { n_r_cgi, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::CellIDListForRestartChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::CellIDListForRestartChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::CellIDListForRestart { eUTRA_CGIListforRestart, nR_CGIListforRestart, choice_Extensions } else {} }
 open_types! { crate::ngap::ngap_ies::CellIdListforMDTEUTRA { 0 } }
 open_types! { crate::ngap::ngap_ies::CellIdListforMDTNR { 0 } }
 open_types! { crate::ngap::ngap_ies::CellIdListforQMC { 0 } }
 open_types! { crate::ngap::ngap_ies::CellSize {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCellTypeIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCellTypeIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CellTypeIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CellType { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CellsToActivateList { 0 } }
-open_types! { crate::ngap::ngap_ies::ClockAccuracyChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::ClockAccuracyChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::ClockAccuracy { choice_Extensions } else { clockAccuracyValue, clockAccuracyIndex } }
 open_types! { crate::ngap::ngap_ies::ClockQualityAcceptanceCriteriaTraceabletoUTC {} }
 open_types! { crate::ngap::ngap_ies::ClockQualityAcceptanceCriteriaTraceabletoGNSS {} }
-open_types! { crate::ngap::ngap_ies::AnonymousClockQualityAcceptanceCriteriaIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousClockQualityAcceptanceCriteriaIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::ClockQualityAcceptanceCriteriaIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::ClockQualityAcceptanceCriteria { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousClockQualityAcceptanceIndicationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousClockQualityAcceptanceIndicationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::ClockQualityAcceptanceIndicationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::ClockQualityAcceptanceIndication { clock_quality_acceptance_criteria, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::ClockQualityDetailLevelChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::ClockQualityDetailLevelChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::ClockQualityDetailLevel { clockQualityAcceptanceIndication, choice_extensions } else { clockQualityMetrics } }
-open_types! { crate::ngap::ngap_ies::AnonymousClockQualityReportingControlInfoIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousClockQualityReportingControlInfoIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::ClockQualityReportingControlInfoIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::ClockQualityReportingControlInfo { clock_quality_detail_level, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CommServiceType {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCommandFailureTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCommandFailureTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CommandFailureTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CommandFailureTransfer { cause, criticality_diagnostics, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousCommandRequestTransferProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCommandRequestTransferProtocolIEs { value } }
-open_types! { crate::ngap::ngap_ies::CommandRequestTransferProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_ies::CommandRequestTransfer { protocol_ies } }
-open_types! { crate::ngap::ngap_ies::AnonymousCommandResponseTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCommandResponseTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CommandResponseTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CommandResponseTransfer { criticality_diagnostics, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CommonNetworkInstance {} }
 open_types! { crate::ngap::ngap_ies::CompletedCellsInEAIEUTRA { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousCompletedCellsInEAIEUTRAItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCompletedCellsInEAIEUTRAItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CompletedCellsInEAIEUTRAItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CompletedCellsInEAIEUTRAItem { e_utra_cgi, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CompletedCellsInEAINR { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousCompletedCellsInEAINRItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCompletedCellsInEAINRItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CompletedCellsInEAINRItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CompletedCellsInEAINRItem { n_r_cgi, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CompletedCellsInTAIEUTRA { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousCompletedCellsInTAIEUTRAItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCompletedCellsInTAIEUTRAItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CompletedCellsInTAIEUTRAItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CompletedCellsInTAIEUTRAItem { e_utra_cgi, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CompletedCellsInTAINR { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousCompletedCellsInTAINRItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCompletedCellsInTAINRItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CompletedCellsInTAINRItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CompletedCellsInTAINRItem { n_r_cgi, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousCompositeAvailableCapacityIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCompositeAvailableCapacityIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CompositeAvailableCapacityIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CompositeAvailableCapacity { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::ConcurrentWarningMessageInd {} }
 open_types! { crate::ngap::ngap_ies::ConfidentialityProtectionIndication {} }
@@ -3362,306 +3084,136 @@ open_types! { crate::ngap::ngap_ies::ConfidentialityProtectionResult {} }
 open_types! { crate::ngap::ngap_ies::ConfiguredNSSAI {} }
 open_types! { crate::ngap::ngap_ies::ConfiguredTACIndication {} }
 open_types! { crate::ngap::ngap_ies::CongestionInformationRequest {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCoreNetworkAssistanceInformationForInactiveIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCoreNetworkAssistanceInformationForInactiveIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CoreNetworkAssistanceInformationForInactiveIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CoreNetworkAssistanceInformationForInactive { u_eidentity_index_value, t_ailist_for_inactive, expected_uebehaviour, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CoverageEnhancementLevel {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCriticalityDiagnosticsIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCriticalityDiagnosticsIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CriticalityDiagnosticsIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CriticalityDiagnostics { i_es_criticality_diagnostics, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousCriticalityDiagnosticsIEItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousCriticalityDiagnosticsIEItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::CriticalityDiagnosticsIEItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::CriticalityDiagnosticsIEItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::CriticalityDiagnosticsIEList { 0 } }
 open_types! { crate::ngap::ngap_ies::DAPSRequestInfoDAPSIndicator {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDAPSRequestInfoIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDAPSRequestInfoIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::DAPSRequestInfoIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::DAPSRequestInfo { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::DAPSResponseInfoDapsresponseindicator {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDAPSResponseInfoIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDAPSResponseInfoIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::DAPSResponseInfoIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::DAPSResponseInfo { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousDAPSResponseInfoItemIEExtensionCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDAPSResponseInfoItemIEExtension { extension_value } }
-open_types! { crate::ngap::ngap_ies::DAPSResponseInfoItemIEExtension { 0 } }
 open_types! { crate::ngap::ngap_ies::DAPSResponseInfoItem { d_apsresponse_info, i_e_extension } }
 open_types! { crate::ngap::ngap_ies::DAPSResponseInfoList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousDLCPSecurityInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDLCPSecurityInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::DLCPSecurityInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::DLCPSecurityInformation { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::DLNASMAC {} }
 open_types! { crate::ngap::ngap_ies::DLNGUTNLInformationReused {} }
 open_types! { crate::ngap::ngap_ies::DLSignalling {} }
-open_types! { crate::ngap::ngap_ies::DLCountChoiceChoiceExtensionCriticality {} }
-open_types! { crate::ngap::ngap_ies::DLCountChoiceChoiceExtension { value } }
 open_types! { crate::ngap::ngap_ies::DLCountChoice { count12bits, count18bits, choice_extension } else {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDLDiscardingIEExtensionCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDLDiscardingIEExtension { extension_value } }
-open_types! { crate::ngap::ngap_ies::DLDiscardingIEExtension { 0 } }
 open_types! { crate::ngap::ngap_ies::DLDiscarding { d_rbs_subject_to_dldiscarding, i_e_extension } }
 open_types! { crate::ngap::ngap_ies::DLForwarding {} }
 open_types! { crate::ngap::ngap_ies::DLPDUSetInformationMarkingSupportIndication {} }
 open_types! { crate::ngap::ngap_ies::DRBID {} }
-open_types! { crate::ngap::ngap_ies::DRBStatusDLChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::DRBStatusDLChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::DRBStatusDL { dRBStatusDL12, dRBStatusDL18, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDRBStatusDL12IEExtensionCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDRBStatusDL12IEExtension { extension_value } }
-open_types! { crate::ngap::ngap_ies::DRBStatusDL12IEExtension { 0 } }
 open_types! { crate::ngap::ngap_ies::DRBStatusDL12 { d_l_countvalue, i_e_extension } }
-open_types! { crate::ngap::ngap_ies::AnonymousDRBStatusDL18IEExtensionCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDRBStatusDL18IEExtension { extension_value } }
-open_types! { crate::ngap::ngap_ies::DRBStatusDL18IEExtension { 0 } }
 open_types! { crate::ngap::ngap_ies::DRBStatusDL18 { d_l_countvalue, i_e_extension } }
-open_types! { crate::ngap::ngap_ies::DRBStatusULChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::DRBStatusULChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::DRBStatusUL { dRBStatusUL12, dRBStatusUL18, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDRBStatusUL12IEExtensionCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDRBStatusUL12IEExtension { extension_value } }
-open_types! { crate::ngap::ngap_ies::DRBStatusUL12IEExtension { 0 } }
 open_types! { crate::ngap::ngap_ies::DRBStatusUL12 { u_l_countvalue, i_e_extension } }
-open_types! { crate::ngap::ngap_ies::AnonymousDRBStatusUL18IEExtensionCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDRBStatusUL18IEExtension { extension_value } }
-open_types! { crate::ngap::ngap_ies::DRBStatusUL18IEExtension { 0 } }
 open_types! { crate::ngap::ngap_ies::DRBStatusUL18 { u_l_countvalue, i_e_extension } }
-open_types! { crate::ngap::ngap_ies::AnonymousDRBsSubjectToDLDiscardingItemIEExtensionCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDRBsSubjectToDLDiscardingItemIEExtension { extension_value } }
-open_types! { crate::ngap::ngap_ies::DRBsSubjectToDLDiscardingItemIEExtension { 0 } }
 open_types! { crate::ngap::ngap_ies::DRBsSubjectToDLDiscardingItem { dl_count, i_e_extension } }
 open_types! { crate::ngap::ngap_ies::DRBsSubjectToDLDiscardingList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousDRBsSubjectToEarlyStatusTransferItemIEExtensionCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDRBsSubjectToEarlyStatusTransferItemIEExtension { extension_value } }
-open_types! { crate::ngap::ngap_ies::DRBsSubjectToEarlyStatusTransferItemIEExtension { 0 } }
 open_types! { crate::ngap::ngap_ies::DRBsSubjectToEarlyStatusTransferItem { first_dlcount, i_e_extension } }
 open_types! { crate::ngap::ngap_ies::DRBsSubjectToEarlyStatusTransferList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousDRBsSubjectToStatusTransferItemIEExtensionCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDRBsSubjectToStatusTransferItemIEExtension { extension_value } }
-open_types! { crate::ngap::ngap_ies::DRBsSubjectToStatusTransferItemIEExtension { 0 } }
 open_types! { crate::ngap::ngap_ies::DRBsSubjectToStatusTransferItem { d_rbstatus_ul, d_rbstatus_dl, i_e_extension } }
 open_types! { crate::ngap::ngap_ies::DRBsSubjectToStatusTransferList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousDRBsToQosFlowsMappingItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDRBsToQosFlowsMappingItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::DRBsToQosFlowsMappingItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::DRBsToQosFlowsMappingItem { associated_qos_flow_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::DRBsToQosFlowsMappingList { 0 } }
 open_types! { crate::ngap::ngap_ies::DataCodingScheme {} }
 open_types! { crate::ngap::ngap_ies::DataForwardingAccepted {} }
 open_types! { crate::ngap::ngap_ies::DataForwardingNotPossible {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDataForwardingResponseDRBItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDataForwardingResponseDRBItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::DataForwardingResponseDRBItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::DataForwardingResponseDRBItem { d_lforwarding_up_tnlinformation, u_lforwarding_up_tnlinformation, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::DataForwardingResponseDRBList { 0 } }
 open_types! { crate::ngap::ngap_ies::DataForwardingResponseERABList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousDataForwardingResponseERABListItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDataForwardingResponseERABListItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::DataForwardingResponseERABListItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::DataForwardingResponseERABListItem { d_lforwarding_up_tnlinformation, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::DelayCritical {} }
 open_types! { crate::ngap::ngap_ies::DirectForwardingPathAvailability {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDynamic5QIDescriptorIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousDynamic5QIDescriptorIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::Dynamic5QIDescriptorIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::Dynamic5QIDescriptor { packet_error_rate, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::ERABID {} }
-open_types! { crate::ngap::ngap_ies::AnonymousERABInformationItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousERABInformationItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::ERABInformationItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::ERABInformationItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::ERABInformationList { 0 } }
 open_types! { crate::ngap::ngap_ies::ECNMarkingAtRANRequest {} }
 open_types! { crate::ngap::ngap_ies::ECNMarkingAtUPFRequest {} }
-open_types! { crate::ngap::ngap_ies::ECNMarkingorCongestionInformationReportingRequestChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::ECNMarkingorCongestionInformationReportingRequestChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::ECNMarkingorCongestionInformationReportingRequest { choice_Extensions } else { eCNMarkingAtRANRequest, eCNMarkingAtUPFRequest, congestionInformationRequest } }
 open_types! { crate::ngap::ngap_ies::ECNMarkingorCongestionInformationReportingStatus { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousECNMarkingorCongestionInformationReportingStatusItemIEExtensionCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousECNMarkingorCongestionInformationReportingStatusItemIEExtension { extension_value } }
-open_types! { crate::ngap::ngap_ies::ECNMarkingorCongestionInformationReportingStatusItemIEExtension { 0 } }
 open_types! { crate::ngap::ngap_ies::ECNMarkingorCongestionInformationReportingStatusItem { i_e_extension } }
 open_types! { crate::ngap::ngap_ies::EDTSession {} }
 open_types! { crate::ngap::ngap_ies::ENDCSONConfigurationTransfer {} }
-open_types! { crate::ngap::ngap_ies::ENBIDChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::ENBIDChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::ENBID { choice_Extensions } else { macroENB_ID, homeENB_ID, short_macroENB_ID, long_macroENB_ID } }
 open_types! { crate::ngap::ngap_ies::EPSTAC {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEPSTAIIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEPSTAIIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::EPSTAIIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::EPSTAI { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::ERedCapIndication {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEUTRACGIIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEUTRACGIIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::EUTRACGIIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::EUTRACGI { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::EUTRACGIList { 0 } }
 open_types! { crate::ngap::ngap_ies::EUTRACGIListForWarning { 0 } }
 open_types! { crate::ngap::ngap_ies::EUTRAPagingTimeWindow {} }
 open_types! { crate::ngap::ngap_ies::EUTRAPagingEDRXCycle {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEUTRAPagingeDRXInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEUTRAPagingeDRXInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::EUTRAPagingeDRXInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::EUTRAPagingeDRXInformation { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::EUTRACellIdentity {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEUTRANCellReportItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEUTRANCellReportItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::EUTRANCellReportItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::EUTRANCellReportItem { e_cgi, e_utran_composite_available_capacity_group, e_utran_radio_resource_status, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::EUTRANCellReportList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousEUTRANCellToReportItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEUTRANCellToReportItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::EUTRANCellToReportItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::EUTRANCellToReportItem { e_cgi, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::EUTRANCellToReportList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousEUTRANCompositeAvailableCapacityGroupIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEUTRANCompositeAvailableCapacityGroupIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::EUTRANCompositeAvailableCapacityGroupIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::EUTRANCompositeAvailableCapacityGroup { d_l_composite_available_capacity, u_l_composite_available_capacity, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::EUTRANNumberOfActiveUEs {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEUTRANRadioResourceStatusIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEUTRANRadioResourceStatusIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::EUTRANRadioResourceStatusIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::EUTRANRadioResourceStatus { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousEUTRANReportingStatusIEsIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEUTRANReportingStatusIEsIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::EUTRANReportingStatusIEsIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::EUTRANReportingStatusIEs { e_utran_cell_report_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousEUTRANReportingSystemIEsIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEUTRANReportingSystemIEsIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::EUTRANReportingSystemIEsIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::EUTRANReportingSystemIEs { e_utran_cell_to_report_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::EUTRAencryptionAlgorithms {} }
 open_types! { crate::ngap::ngap_ies::EUTRAintegrityProtectionAlgorithms {} }
 open_types! { crate::ngap::ngap_ies::EarlyMeasurement {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEarlyStatusTransferTransparentContainerIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEarlyStatusTransferTransparentContainerIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::EarlyStatusTransferTransparentContainerIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::EarlyStatusTransferTransparentContainer { procedure_stage, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::EmergencyAreaID {} }
 open_types! { crate::ngap::ngap_ies::EmergencyAreaIDBroadcastEUTRA { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousEmergencyAreaIDBroadcastEUTRAItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEmergencyAreaIDBroadcastEUTRAItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::EmergencyAreaIDBroadcastEUTRAItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::EmergencyAreaIDBroadcastEUTRAItem { completed_cells_in_eai_eutra, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::EmergencyAreaIDBroadcastNR { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousEmergencyAreaIDBroadcastNRItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEmergencyAreaIDBroadcastNRItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::EmergencyAreaIDBroadcastNRItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::EmergencyAreaIDBroadcastNRItem { completed_cells_in_eai_nr, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::EmergencyAreaIDCancelledEUTRA { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousEmergencyAreaIDCancelledEUTRAItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEmergencyAreaIDCancelledEUTRAItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::EmergencyAreaIDCancelledEUTRAItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::EmergencyAreaIDCancelledEUTRAItem { cancelled_cells_in_eai_eutra, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::EmergencyAreaIDCancelledNR { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousEmergencyAreaIDCancelledNRItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEmergencyAreaIDCancelledNRItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::EmergencyAreaIDCancelledNRItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::EmergencyAreaIDCancelledNRItem { cancelled_cells_in_eai_nr, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::EmergencyAreaIDList {} }
 open_types! { crate::ngap::ngap_ies::EmergencyAreaIDListForRestart {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEmergencyFallbackIndicatorIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEmergencyFallbackIndicatorIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::EmergencyFallbackIndicatorIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::EmergencyFallbackIndicator { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::EmergencyFallbackRequestIndicator {} }
 open_types! { crate::ngap::ngap_ies::EmergencyServiceTargetCN {} }
 open_types! { crate::ngap::ngap_ies::EndIndication {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEndpointIPAddressAndPortIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEndpointIPAddressAndPortIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::EndpointIPAddressAndPortIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::EndpointIPAddressAndPort { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::EnhancedCoverageRestriction {} }
 open_types! { crate::ngap::ngap_ies::EquivalentPLMNs {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEquivalentSNPNsItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEquivalentSNPNsItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::EquivalentSNPNsItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::EquivalentSNPNsItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::EquivalentSNPNsList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousEventBasedReportingIEsIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEventBasedReportingIEsIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::EventBasedReportingIEsIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::EventBasedReportingIEs { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousEventL1LoggedMDTConfigIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousEventL1LoggedMDTConfigIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::EventL1LoggedMDTConfigIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::EventL1LoggedMDTConfig { l1_threshold, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::EventTriggerOutOfCoverage {} }
-open_types! { crate::ngap::ngap_ies::EventTriggerChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::EventTriggerChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::EventTrigger { eventL1LoggedMDTConfig, choice_Extensions } else { outOfCoverage } }
 open_types! { crate::ngap::ngap_ies::EventType {} }
 open_types! { crate::ngap::ngap_ies::ExcessPacketDelayThresholdConfiguration { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousExcessPacketDelayThresholdItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousExcessPacketDelayThresholdItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::ExcessPacketDelayThresholdItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::ExcessPacketDelayThresholdItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::ExcessPacketDelayThresholdValue {} }
 open_types! { crate::ngap::ngap_ies::ExpectedActivityPeriod {} }
 open_types! { crate::ngap::ngap_ies::ExpectedHOInterval {} }
 open_types! { crate::ngap::ngap_ies::ExpectedIdlePeriod {} }
-open_types! { crate::ngap::ngap_ies::AnonymousExpectedUEActivityBehaviourIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousExpectedUEActivityBehaviourIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::ExpectedUEActivityBehaviourIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::ExpectedUEActivityBehaviour { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousExpectedUEBehaviourIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousExpectedUEBehaviourIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::ExpectedUEBehaviourIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::ExpectedUEBehaviour { expected_ueactivity_behaviour, expected_uemoving_trajectory, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::ExpectedUEMobility {} }
 open_types! { crate::ngap::ngap_ies::ExpectedUEMovingTrajectory { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousExpectedUEMovingTrajectoryItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousExpectedUEMovingTrajectoryItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::ExpectedUEMovingTrajectoryItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::ExpectedUEMovingTrajectoryItem { n_gran_cgi, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousExtendedAMFNameIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousExtendedAMFNameIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::ExtendedAMFNameIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::ExtendedAMFName { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::ExtendedConnectedTime {} }
-open_types! { crate::ngap::ngap_ies::AnonymousExtendedRANNodeNameIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousExtendedRANNodeNameIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::ExtendedRANNodeNameIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::ExtendedRANNodeName { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::ExtendedMobilityInformation {} }
 open_types! { crate::ngap::ngap_ies::ExtendedPacketDelayBudget {} }
-open_types! { crate::ngap::ngap_ies::AnonymousExtendedRATRestrictionInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousExtendedRATRestrictionInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::ExtendedRATRestrictionInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::ExtendedRATRestrictionInformation { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::ExtendedRNCID {} }
 open_types! { crate::ngap::ngap_ies::ExtendedReportIntervalMDT {} }
 open_types! { crate::ngap::ngap_ies::ExtendedSliceSupportList { 0 } }
 open_types! { crate::ngap::ngap_ies::ExtendedUEIdentityIndexValue {} }
-open_types! { crate::ngap::ngap_ies::AnonymousFailureIndicationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousFailureIndicationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::FailureIndicationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::FailureIndication { u_erlfreport_container, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousFirstDLCountIEExtensionCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousFirstDLCountIEExtension { extension_value } }
-open_types! { crate::ngap::ngap_ies::FirstDLCountIEExtension { 0 } }
 open_types! { crate::ngap::ngap_ies::FirstDLCount { d_rbs_subject_to_early_status_transfer, i_e_extension } }
-open_types! { crate::ngap::ngap_ies::AnonymousFiveGProSeAuthorizedIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousFiveGProSeAuthorizedIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::FiveGProSeAuthorizedIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::FiveGProSeAuthorized { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousFiveGProSePC5QoSParametersIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousFiveGProSePC5QoSParametersIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::FiveGProSePC5QoSParametersIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::FiveGProSePC5QoSParameters { five_gpro_sepc5_qo_sflow_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousFiveGSTMSIIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousFiveGSTMSIIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::FiveGSTMSIIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::FiveGSTMSI { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::FiveGTMSI {} }
-open_types! { crate::ngap::ngap_ies::FiveGCActionChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::FiveGCActionChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::FiveGCAction { hLComActivate, hLComDeactivate, choice_Extensions } else {} }
 open_types! { crate::ngap::ngap_ies::FiveGProSeDirectCommunication {} }
 open_types! { crate::ngap::ngap_ies::FiveGProSeDirectDiscovery {} }
@@ -3675,139 +3227,51 @@ open_types! { crate::ngap::ngap_ies::FiveGProSeLayer2UEtoUERelay {} }
 open_types! { crate::ngap::ngap_ies::FiveGProSeLayer2UEtoUERemote {} }
 open_types! { crate::ngap::ngap_ies::FiveGProSeLayer3MHUEtoNetworkRelay {} }
 open_types! { crate::ngap::ngap_ies::FiveGProSeLayer3UEtoNetworkRelay {} }
-open_types! { crate::ngap::ngap_ies::AnonymousFiveGProSePC5FlowBitRatesIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousFiveGProSePC5FlowBitRatesIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::FiveGProSePC5FlowBitRatesIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::FiveGProSePC5FlowBitRates { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousFiveGProSePC5QoSFlowItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousFiveGProSePC5QoSFlowItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::FiveGProSePC5QoSFlowItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::FiveGProSePC5QoSFlowItem { five_gpro_sepc5_flow_bit_rates, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::FiveGProSePC5QoSFlowList { 0 } }
 open_types! { crate::ngap::ngap_ies::FiveQI {} }
 open_types! { crate::ngap::ngap_ies::ForbiddenAreaInformation { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousForbiddenAreaInformationItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousForbiddenAreaInformationItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::ForbiddenAreaInformationItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::ForbiddenAreaInformationItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::ForbiddenTACs {} }
-open_types! { crate::ngap::ngap_ies::AnonymousFromEUTRANtoNGRANIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousFromEUTRANtoNGRANIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::FromEUTRANtoNGRANIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::FromEUTRANtoNGRAN { sourcee_nbid, target_ngrannode_id, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousFromNGRANtoEUTRANIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousFromNGRANtoEUTRANIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::FromNGRANtoEUTRANIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::FromNGRANtoEUTRAN { source_ngrannode_id, targete_nbid, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::FurtherExtendedUEIdentityIndexValue {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGBRQosInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGBRQosInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::GBRQosInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::GBRQosInformation { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::GNBIDChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::GNBIDChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::GNBID { choice_Extensions } else { gNB_ID } }
 open_types! { crate::ngap::ngap_ies::GNBSetID {} }
 open_types! { crate::ngap::ngap_ies::GTPTEID {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGTPTunnelIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGTPTunnelIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::GTPTunnelIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::GTPTunnel { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousGUAMIIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGUAMIIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::GUAMIIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::GUAMI { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::GUAMIList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousGUAMIListItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGUAMIListItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::GUAMIListItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::GUAMIListItem { g_uami, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::GUAMIType {} }
 open_types! { crate::ngap::ngap_ies::GWContextReleaseIndication {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGeographyBasedMDTIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGeographyBasedMDTIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::GeographyBasedMDTIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::GeographyBasedMDT { n_tn_geographical_area, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::GlobalCableID {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGlobalCableIDNewIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGlobalCableIDNewIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::GlobalCableIDNewIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::GlobalCableIDNew { t_ai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousGlobalENBIDIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGlobalENBIDIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::GlobalENBIDIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::GlobalENBID { e_nb_id, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousGlobalGNBIDIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGlobalGNBIDIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::GlobalGNBIDIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::GlobalGNBID { g_nb_id, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousGlobalLineIDIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGlobalLineIDIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::GlobalLineIDIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::GlobalLineID { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::GlobalLineIdentity {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGlobalN3IWFIDIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGlobalN3IWFIDIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::GlobalN3IWFIDIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::GlobalN3IWFID { n3_iwf_id, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousGlobalNgENBIDIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGlobalNgENBIDIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::GlobalNgENBIDIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::GlobalNgENBID { ng_enb_id, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::GlobalRANNodeIDChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::GlobalRANNodeIDChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::GlobalRANNodeID { globalGNB_ID, globalNgENB_ID, globalN3IWF_ID, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGlobalTNGFIDIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGlobalTNGFIDIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::GlobalTNGFIDIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::GlobalTNGFID { t_ngf_id, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousGlobalTWIFIDIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGlobalTWIFIDIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::GlobalTWIFIDIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::GlobalTWIFID { t_wif_id, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousGlobalWAGFIDIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousGlobalWAGFIDIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::GlobalWAGFIDIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::GlobalWAGFID { w_agf_id, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::HFCNodeID {} }
-open_types! { crate::ngap::ngap_ies::AnonymousHFCNodeIDNewIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousHFCNodeIDNewIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::HFCNodeIDNewIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::HFCNodeIDNew { t_ai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousHLComActivateIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousHLComActivateIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::HLComActivateIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::HLComActivate { n_r_paging_long_e_drx_information_for_rrc_inactive, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::HLComDeactivateUEReachabilityIndication {} }
-open_types! { crate::ngap::ngap_ies::AnonymousHLComDeactivateIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousHLComDeactivateIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::HLComDeactivateIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::HLComDeactivate { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::HOReportHandoverReportType {} }
-open_types! { crate::ngap::ngap_ies::AnonymousHOReportIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousHOReportIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::HOReportIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::HOReport { handover_cause, sourcecell_cgi, targetcell_cgi, reestablishmentcell_cgi, targetcellin_e_utran, u_erlfreport_container, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousHandoverCommandTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousHandoverCommandTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::HandoverCommandTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::HandoverCommandTransfer { d_lforwarding_up_tnlinformation, qos_flow_to_be_forwarded_list, data_forwarding_response_drblist, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::HandoverFlag {} }
-open_types! { crate::ngap::ngap_ies::AnonymousHandoverPreparationUnsuccessfulTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousHandoverPreparationUnsuccessfulTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::HandoverPreparationUnsuccessfulTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::HandoverPreparationUnsuccessfulTransfer { cause, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousHandoverRequestAcknowledgeTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousHandoverRequestAcknowledgeTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::HandoverRequestAcknowledgeTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::HandoverRequestAcknowledgeTransfer { d_l_ngu_up_tnlinformation, d_lforwarding_up_tnlinformation, security_result, qos_flow_setup_response_list, qos_flow_failed_to_setup_list, data_forwarding_response_drblist, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousHandoverRequiredTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousHandoverRequiredTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::HandoverRequiredTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::HandoverRequiredTransfer { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousHandoverResourceAllocationUnsuccessfulTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousHandoverResourceAllocationUnsuccessfulTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::HandoverResourceAllocationUnsuccessfulTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::HandoverResourceAllocationUnsuccessfulTransfer { cause, criticality_diagnostics, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::HandoverType {} }
 open_types! { crate::ngap::ngap_ies::HandoverWindowDuration {} }
@@ -3818,154 +3282,59 @@ open_types! { crate::ngap::ngap_ies::IABAuthorized {} }
 open_types! { crate::ngap::ngap_ies::IABSupported {} }
 open_types! { crate::ngap::ngap_ies::IABNodeIndication {} }
 open_types! { crate::ngap::ngap_ies::IMSVoiceSupportIndicator {} }
-open_types! { crate::ngap::ngap_ies::AnonymousImmediateMDTNrIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousImmediateMDTNrIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::ImmediateMDTNrIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::ImmediateMDTNr { m1_configuration, m4_configuration, m5_configuration, m6_configuration, m7_configuration, bluetooth_measurement_configuration, w_lanmeasurement_configuration, m_dt_location_info, sensor_measurement_configuration, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::IncludeBeamMeasurementsIndication {} }
 open_types! { crate::ngap::ngap_ies::IndexToRFSP {} }
 open_types! { crate::ngap::ngap_ies::IndicationOfBitrateAdaptation {} }
-open_types! { crate::ngap::ngap_ies::AnonymousInfoOnRecommendedCellsAndRANNodesForPagingIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousInfoOnRecommendedCellsAndRANNodesForPagingIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::InfoOnRecommendedCellsAndRANNodesForPagingIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::InfoOnRecommendedCellsAndRANNodesForPaging { recommended_cells_for_paging, recommend_rannodes_for_paging, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::IntegrityProtectionIndication {} }
 open_types! { crate::ngap::ngap_ies::IntegrityProtectionResult {} }
 open_types! { crate::ngap::ngap_ies::IntendedNumberOfPagingAttempts {} }
 open_types! { crate::ngap::ngap_ies::IntendedServiceAreaCoordinates {} }
-open_types! { crate::ngap::ngap_ies::AnonymousInterSystemFailureIndicationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousInterSystemFailureIndicationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::InterSystemFailureIndicationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::InterSystemFailureIndication { u_erlfreport_container, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousInterSystemHOReportIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousInterSystemHOReportIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::InterSystemHOReportIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::InterSystemHOReport { handover_report_type, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::InterSystemHandoverReportTypeChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::InterSystemHandoverReportTypeChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::InterSystemHandoverReportType { tooearlyIntersystemHO, intersystemUnnecessaryHO, choice_Extensions } else {} }
 open_types! { crate::ngap::ngap_ies::InterfacesToTrace {} }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemCellActivationReplyIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemCellActivationReplyIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::IntersystemCellActivationReplyIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::IntersystemCellActivationReply { activated_cell_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemCellActivationRequestIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemCellActivationRequestIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::IntersystemCellActivationRequestIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::IntersystemCellActivationRequest { cells_to_activate_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemCellStateIndicationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemCellStateIndicationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::IntersystemCellStateIndicationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::IntersystemCellStateIndication { notification_cell_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemMobilityFailureforVoiceFallbackIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemMobilityFailureforVoiceFallbackIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::IntersystemMobilityFailureforVoiceFallbackIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::IntersystemMobilityFailureforVoiceFallback { sourcecell_id, targetcell_id, reconnect_cell_id, u_erlfreport_container, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemResourceStatusReplyIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemResourceStatusReplyIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::IntersystemResourceStatusReplyIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::IntersystemResourceStatusReply { reportingsystem, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemResourceStatusReportIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemResourceStatusReportIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::IntersystemResourceStatusReportIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::IntersystemResourceStatusReport { reporting_system, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemResourceStatusRequestIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemResourceStatusRequestIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::IntersystemResourceStatusRequestIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::IntersystemResourceStatusRequest { reporting_system, report_type, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::IntersystemResourceThreshold {} }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemSONConfigurationTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemSONConfigurationTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::IntersystemSONConfigurationTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::IntersystemSONConfigurationTransfer { transfer_type, intersystem_soninformation, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::IntersystemSONInformationChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::IntersystemSONInformationChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::IntersystemSONInformation { intersystemSONInformationReport, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::IntersystemSONInformationReplyChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::IntersystemSONInformationReplyChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::IntersystemSONInformationReply { nGRAN_CellActivation, resourceStatus, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::IntersystemSONInformationReportChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::IntersystemSONInformationReportChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::IntersystemSONInformationReport { hOReportInformation, failureIndicationInformation, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::IntersystemSONInformationRequestChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::IntersystemSONInformationRequestChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::IntersystemSONInformationRequest { nGRAN_CellActivation, resourceStatus, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemSONNGRANnodeIDIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemSONNGRANnodeIDIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::IntersystemSONNGRANnodeIDIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::IntersystemSONNGRANnodeID { global_rannode_id, selected_tai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::IntersystemSONTransferTypeChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::IntersystemSONTransferTypeChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::IntersystemSONTransferType { fromEUTRANtoNGRAN, fromNGRANtoEUTRAN, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemSONeNBIDIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemSONeNBIDIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::IntersystemSONeNBIDIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::IntersystemSONeNBID { globale_nbid, selected_epstai, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::IntersystemUnnecessaryHOEarlyIRATHO {} }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemUnnecessaryHOIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousIntersystemUnnecessaryHOIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::IntersystemUnnecessaryHOIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::IntersystemUnnecessaryHO { sourcecell_id, targetcell_id, candidate_cell_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousInventoryFailureTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousInventoryFailureTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::InventoryFailureTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::InventoryFailureTransfer { cause, criticality_diagnostics, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::InventoryReportTransferInventoryCompleteIndication {} }
-open_types! { crate::ngap::ngap_ies::AnonymousInventoryReportTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousInventoryReportTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::InventoryReportTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::InventoryReportTransfer { globalg_nb_id, reader_report_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousInventoryRequestTransferProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousInventoryRequestTransferProtocolIEs { value } }
-open_types! { crate::ngap::ngap_ies::InventoryRequestTransferProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_ies::InventoryRequestTransfer { protocol_ies } }
-open_types! { crate::ngap::ngap_ies::AnonymousInventoryResponseTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousInventoryResponseTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::InventoryResponseTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::InventoryResponseTransfer { criticality_diagnostics, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::LAC {} }
-open_types! { crate::ngap::ngap_ies::AnonymousLAIIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousLAIIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::LAIIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::LAI { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::LPWUSCNsubgroupID {} }
 open_types! { crate::ngap::ngap_ies::LPWUSDisableIndication {} }
-open_types! { crate::ngap::ngap_ies::AnonymousLPWUSPSAssistanceInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousLPWUSPSAssistanceInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::LPWUSPSAssistanceInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::LPWUSPSAssistanceInformation { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::LTEA2XServicesAuthorizedAerialUE {} }
 open_types! { crate::ngap::ngap_ies::LTEA2XServicesAuthorizedAerialControllerUE {} }
-open_types! { crate::ngap::ngap_ies::AnonymousLTEA2XServicesAuthorizedIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousLTEA2XServicesAuthorizedIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::LTEA2XServicesAuthorizedIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::LTEA2XServicesAuthorized { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::LTEMIndication {} }
 open_types! { crate::ngap::ngap_ies::LTEUERLFReportContainer {} }
-open_types! { crate::ngap::ngap_ies::AnonymousLTEUESidelinkAggregateMaximumBitrateIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousLTEUESidelinkAggregateMaximumBitrateIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::LTEUESidelinkAggregateMaximumBitrateIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::LTEUESidelinkAggregateMaximumBitrate { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousLTEV2XServicesAuthorizedIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousLTEV2XServicesAuthorizedIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::LTEV2XServicesAuthorizedIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::LTEV2XServicesAuthorized { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::LastVisitedCellInformationChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::LastVisitedCellInformationChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::LastVisitedCellInformation { nGRANCell, choice_Extensions } else { eUTRANCell, uTRANCell, gERANCell } }
-open_types! { crate::ngap::ngap_ies::AnonymousLastVisitedCellItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousLastVisitedCellItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::LastVisitedCellItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::LastVisitedCellItem { last_visited_cell_information, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::LastVisitedEUTRANCellInformation {} }
 open_types! { crate::ngap::ngap_ies::LastVisitedGERANCellInformation {} }
-open_types! { crate::ngap::ngap_ies::AnonymousLastVisitedNGRANCellInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousLastVisitedNGRANCellInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::LastVisitedNGRANCellInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::LastVisitedNGRANCellInformation { global_cell_id, cell_type, h_ocause_value, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousLastVisitedPSCellInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousLastVisitedPSCellInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::LastVisitedPSCellInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::LastVisitedPSCellInformation { p_scell_id, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::LastVisitedPSCellList { 0 } }
 open_types! { crate::ngap::ngap_ies::LastVisitedUTRANCellInformation {} }
@@ -3973,222 +3342,92 @@ open_types! { crate::ngap::ngap_ies::LineType {} }
 open_types! { crate::ngap::ngap_ies::LinksToLog {} }
 open_types! { crate::ngap::ngap_ies::LocationReportingAdditionalInfo {} }
 open_types! { crate::ngap::ngap_ies::LocationReportingReferenceID {} }
-open_types! { crate::ngap::ngap_ies::AnonymousLocationReportingRequestTypeIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousLocationReportingRequestTypeIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::LocationReportingRequestTypeIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::LocationReportingRequestType { area_of_interest_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousLoggedMDTNrIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousLoggedMDTNrIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::LoggedMDTNrIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::LoggedMDTNr { logged_mdttrigger, bluetooth_measurement_configuration, w_lanmeasurement_configuration, sensor_measurement_configuration, area_scope_of_neigh_cells_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::LoggedMDTTriggerChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::LoggedMDTTriggerChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::LoggedMDTTrigger { eventTrigger, choice_Extensions } else { periodical } }
 open_types! { crate::ngap::ngap_ies::LoggingDuration {} }
 open_types! { crate::ngap::ngap_ies::LoggingInterval {} }
-open_types! { crate::ngap::ngap_ies::AnonymousM1ConfigurationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousM1ConfigurationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::M1ConfigurationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::M1Configuration { m1threshold_event_a2, m1periodic_reporting, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousM1PeriodicReportingIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousM1PeriodicReportingIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::M1PeriodicReportingIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::M1PeriodicReporting { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::M1ReportingTrigger {} }
-open_types! { crate::ngap::ngap_ies::AnonymousM1ThresholdEventA2IEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousM1ThresholdEventA2IEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::M1ThresholdEventA2IEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::M1ThresholdEventA2 { m1_threshold_type, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::M1ThresholdTypeChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::M1ThresholdTypeChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::M1ThresholdType { choice_Extensions } else { threshold_RSRP, threshold_RSRQ, threshold_SINR } }
-open_types! { crate::ngap::ngap_ies::AnonymousM4ConfigurationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousM4ConfigurationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::M4ConfigurationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::M4Configuration { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::M4ReportAmountMDT {} }
 open_types! { crate::ngap::ngap_ies::M4period {} }
-open_types! { crate::ngap::ngap_ies::AnonymousM5ConfigurationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousM5ConfigurationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::M5ConfigurationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::M5Configuration { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::M5ReportAmountMDT {} }
 open_types! { crate::ngap::ngap_ies::M5period {} }
-open_types! { crate::ngap::ngap_ies::AnonymousM6ConfigurationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousM6ConfigurationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::M6ConfigurationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::M6Configuration { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::M6ReportAmountMDT {} }
 open_types! { crate::ngap::ngap_ies::M6reportInterval {} }
-open_types! { crate::ngap::ngap_ies::AnonymousM7ConfigurationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousM7ConfigurationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::M7ConfigurationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::M7Configuration { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::M7ReportAmountMDT {} }
 open_types! { crate::ngap::ngap_ies::M7period {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSActiveSessionInformationSourcetoTargetItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSActiveSessionInformationSourcetoTargetItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSActiveSessionInformationSourcetoTargetItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSActiveSessionInformationSourcetoTargetItem { m_bs_session_id, m_bs_service_area, m_bs_qo_sflows_to_be_setup_list, m_bs_mappingand_data_forwarding_request_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MBSActiveSessionInformationSourcetoTargetList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSActiveSessionInformationTargettoSourceItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSActiveSessionInformationTargettoSourceItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSActiveSessionInformationTargettoSourceItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSActiveSessionInformationTargettoSourceItem { m_bs_session_id, m_bs_data_forwarding_response_mrblist, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MBSActiveSessionInformationTargettoSourceList { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSAreaSessionID {} }
 open_types! { crate::ngap::ngap_ies::MBSAreaTAIList { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSAssistanceInformation {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSDataForwardingResponseMRBItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSDataForwardingResponseMRBItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSDataForwardingResponseMRBItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSDataForwardingResponseMRBItem { d_l_forwarding_uptnlinformation, m_rb_progress_information, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MBSDataForwardingResponseMRBList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSDistributionReleaseRequestTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSDistributionReleaseRequestTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSDistributionReleaseRequestTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSDistributionReleaseRequestTransfer { m_bs_session_id, shared_ngu_unicast_tnlinformation, cause, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSDistributionSetupRequestTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSDistributionSetupRequestTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSDistributionSetupRequestTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSDistributionSetupRequestTransfer { m_bs_session_id, shared_ngu_unicast_tnlinformation, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSDistributionSetupResponseTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSDistributionSetupResponseTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSDistributionSetupResponseTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSDistributionSetupResponseTransfer { m_bs_session_id, shared_ngu_multicast_tnlinformation, m_bs_qo_sflows_to_be_setup_list, m_bs_service_area, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSDistributionSetupUnsuccessfulTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSDistributionSetupUnsuccessfulTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSDistributionSetupUnsuccessfulTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSDistributionSetupUnsuccessfulTransfer { m_bs_session_id, cause, criticality_diagnostics, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MBSIntendedServiceAreaList {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSMappingandDataForwardingRequestItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSMappingandDataForwardingRequestItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSMappingandDataForwardingRequestItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSMappingandDataForwardingRequestItem { m_rb_progress_information, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MBSMappingandDataForwardingRequestList { 0 } }
-open_types! { crate::ngap::ngap_ies::MBSNGUFailureIndicationChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::MBSNGUFailureIndicationChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::MBSNGUFailureIndication { locationdependent, choice_Extensions } else { locationindependent } }
 open_types! { crate::ngap::ngap_ies::MBSQoSFlowList {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSQoSFlowsToBeSetupItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSQoSFlowsToBeSetupItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSQoSFlowsToBeSetupItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSQoSFlowsToBeSetupItem { m_bsqos_flow_level_qos_parameters, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MBSQoSFlowsToBeSetupList { 0 } }
-open_types! { crate::ngap::ngap_ies::MBSServiceAreaChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::MBSServiceAreaChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::MBSServiceArea { locationindependent, locationdependent, choice_Extensions } else {} }
 open_types! { crate::ngap::ngap_ies::MBSServiceAreaCellList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSServiceAreaInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSServiceAreaInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSServiceAreaInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSServiceAreaInformation { m_bs_service_area_cell_list, m_bs_service_area_tailist, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSServiceAreaInformationItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSServiceAreaInformationItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSServiceAreaInformationItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSServiceAreaInformationItem { m_bs_service_area_information, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MBSServiceAreaInformationList { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSServiceAreaTAIList { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSSessionFSAID {} }
 open_types! { crate::ngap::ngap_ies::MBSSessionFSAIDList {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionIDIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionIDIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSSessionIDIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSSessionID { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::MBSSessionTNLInfo5GCChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::MBSSessionTNLInfo5GCChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::MBSSessionTNLInfo5GC { locationindependent, locationdependent, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionTNLInfo5GCItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionTNLInfo5GCItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSSessionTNLInfo5GCItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSSessionTNLInfo5GCItem { shared_ngu_multicast_tnlinformation, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MBSSessionTNLInfo5GCList { 0 } }
-open_types! { crate::ngap::ngap_ies::MBSSessionTNLInfoNGRANChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::MBSSessionTNLInfoNGRANChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::MBSSessionTNLInfoNGRAN { locationindependent, locationdependent, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionTNLInfoNGRANItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionTNLInfoNGRANItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSSessionTNLInfoNGRANItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSSessionTNLInfoNGRANItem { shared_ngu_unicast_tnlinformation, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MBSSessionTNLInfoNGRANList { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSSupportIndicator {} }
 open_types! { crate::ngap::ngap_ies::MBSUPFailureIndication {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSUPFailureIndicationItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSUPFailureIndicationItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSUPFailureIndicationItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSUPFailureIndicationItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MBSUPFailureIndicationList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionFailedtoSetupItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionFailedtoSetupItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSSessionFailedtoSetupItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSSessionFailedtoSetupItem { m_bs_session_id, cause, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MBSSessionFailedtoSetupList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionReleaseResponseTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionReleaseResponseTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSSessionReleaseResponseTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSSessionReleaseResponseTransfer { m_bs_session_tnlinfo_ngran, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionSetupOrModFailureTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionSetupOrModFailureTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSSessionSetupOrModFailureTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSSessionSetupOrModFailureTransfer { cause, criticality_diagnostics, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionSetupOrModRequestTransferProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionSetupOrModRequestTransferProtocolIEs { value } }
-open_types! { crate::ngap::ngap_ies::MBSSessionSetupOrModRequestTransferProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSSessionSetupOrModRequestTransfer { protocol_ies } }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionSetupOrModResponseTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionSetupOrModResponseTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSSessionSetupOrModResponseTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSSessionSetupOrModResponseTransfer { m_bs_session_tnlinfo_ngran, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionSetupRequestItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionSetupRequestItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSSessionSetupRequestItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSSessionSetupRequestItem { m_bs_session_id, associated_mbsqos_flow_setup_request_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MBSSessionSetupRequestList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionSetupResponseItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionSetupResponseItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSSessionSetupResponseItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSSessionSetupResponseItem { m_bs_session_id, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MBSSessionSetupResponseList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionSetuporModifyRequestItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionSetuporModifyRequestItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSSessionSetuporModifyRequestItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSSessionSetuporModifyRequestItem { m_bs_session_id, associated_mbsqos_flow_setupor_modify_request_list, m_bs_qos_flow_to_release_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MBSSessionSetuporModifyRequestList { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSSessionStatus {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionToReleaseItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMBSSessionToReleaseItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MBSSessionToReleaseItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MBSSessionToReleaseItem { m_bs_session_id, cause, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MBSSessionToReleaseList { 0 } }
 open_types! { crate::ngap::ngap_ies::MDTActivation {} }
-open_types! { crate::ngap::ngap_ies::MDTAlignmentInfoChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::MDTAlignmentInfoChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::MDTAlignmentInfo { choice_Extensions } else { s_basedMDT } }
-open_types! { crate::ngap::ngap_ies::AnonymousMDTConfigurationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMDTConfigurationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MDTConfigurationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MDTConfiguration { mdt_config_nr, mdt_config_eutra, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousMDTConfigurationEUTRAIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMDTConfigurationEUTRAIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MDTConfigurationEUTRAIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MDTConfigurationEUTRA { area_scope_of_mdt, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousMDTConfigurationNRIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMDTConfigurationNRIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MDTConfigurationNRIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MDTConfigurationNR { area_scope_of_mdt, m_dtmode_nr, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousMDTLocationInfoIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMDTLocationInfoIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MDTLocationInfoIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MDTLocationInfo { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MDTLocationInformation {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMDTCircleIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMDTCircleIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MDTCircleIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MDTCircle { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MDTPolygon {} }
 open_types! { crate::ngap::ngap_ies::MDTModeEutra {} }
-open_types! { crate::ngap::ngap_ies::MDTModeNrChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::MDTModeNrChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::MDTModeNr { immediateMDTNr, loggedMDTNr, choice_Extensions } else {} }
 open_types! { crate::ngap::ngap_ies::MDTPLMNList {} }
 open_types! { crate::ngap::ngap_ies::MDTPLMNModificationList {} }
@@ -4196,220 +3435,107 @@ open_types! { crate::ngap::ngap_ies::MICOModeIndication {} }
 open_types! { crate::ngap::ngap_ies::MMSID {} }
 open_types! { crate::ngap::ngap_ies::MNOnlyMDTCollection {} }
 open_types! { crate::ngap::ngap_ies::MRBID {} }
-open_types! { crate::ngap::ngap_ies::MRBProgressInformationChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::MRBProgressInformationChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::MRBProgressInformation { choice_Extensions } else { pDCP_SN_Length12, pDCP_SN_Length18 } }
 open_types! { crate::ngap::ngap_ies::MaskedIMEISV {} }
 open_types! { crate::ngap::ngap_ies::MaxNrofRSIndexesToReport {} }
 open_types! { crate::ngap::ngap_ies::MaximumDataBurstVolume {} }
 open_types! { crate::ngap::ngap_ies::MaximumIntegrityProtectedDataRate {} }
-open_types! { crate::ngap::ngap_ies::MeasurementThresholdL1LoggedMDTChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::MeasurementThresholdL1LoggedMDTChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::MeasurementThresholdL1LoggedMDT { choice_Extensions } else { threshold_RSRP, threshold_RSRQ } }
 open_types! { crate::ngap::ngap_ies::MeasurementsToActivate {} }
 open_types! { crate::ngap::ngap_ies::MessageIdentifier {} }
 open_types! { crate::ngap::ngap_ies::MicoAllPLMN {} }
 open_types! { crate::ngap::ngap_ies::MobileIABAuthorized {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMobileIABMTUserLocationInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMobileIABMTUserLocationInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MobileIABMTUserLocationInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MobileIABMTUserLocationInformation { n_rcgi, t_ai, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MobileIABSupported {} }
 open_types! { crate::ngap::ngap_ies::MobileIABNodeIndication {} }
 open_types! { crate::ngap::ngap_ies::MobilityInformation {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMobilityRestrictionListIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMobilityRestrictionListIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MobilityRestrictionListIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MobilityRestrictionList { r_atrestrictions, forbidden_area_information, service_area_information, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MonitoringRequest {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMonitoringRequestonAvailableBitrateIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMonitoringRequestonAvailableBitrateIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MonitoringRequestonAvailableBitrateIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MonitoringRequestonAvailableBitrate { dl_available_bitrate_report_thresholds, ul_available_bitrate_report_thresholds, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousMulticastGroupPagingAreaIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMulticastGroupPagingAreaIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MulticastGroupPagingAreaIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MulticastGroupPagingArea { m_bs_area_tailist, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousMulticastGroupPagingAreaItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMulticastGroupPagingAreaItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MulticastGroupPagingAreaItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MulticastGroupPagingAreaItem { multicast_group_paging_area, u_e_paging_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::MulticastGroupPagingAreaList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousMulticastSessionActivationRequestTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMulticastSessionActivationRequestTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MulticastSessionActivationRequestTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MulticastSessionActivationRequestTransfer { m_bs_session_id, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousMulticastSessionDeactivationRequestTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMulticastSessionDeactivationRequestTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::MulticastSessionDeactivationRequestTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::MulticastSessionDeactivationRequestTransfer { m_bs_session_id, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousMulticastSessionUpdateRequestTransferProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousMulticastSessionUpdateRequestTransferProtocolIEs { value } }
-open_types! { crate::ngap::ngap_ies::MulticastSessionUpdateRequestTransferProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_ies::MulticastSessionUpdateRequestTransfer { protocol_ies } }
-open_types! { crate::ngap::ngap_ies::N3IWFIDChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::N3IWFIDChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::N3IWFID { choice_Extensions } else { n3IWF_ID } }
-open_types! { crate::ngap::ngap_ies::AnonymousN6JitterInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousN6JitterInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::N6JitterInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::N6JitterInformation { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::NASPDU {} }
 open_types! { crate::ngap::ngap_ies::NASSecurityParametersFromNGRAN {} }
 open_types! { crate::ngap::ngap_ies::NBIoTDefaultPagingDRX {} }
 open_types! { crate::ngap::ngap_ies::NBIoTPagingTimeWindow {} }
 open_types! { crate::ngap::ngap_ies::NBIoTPagingEDRXCycle {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNBIoTPagingEDRXInfoIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNBIoTPagingEDRXInfoIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NBIoTPagingEDRXInfoIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NBIoTPagingEDRXInfo { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::NBIoTPagingDRX {} }
 open_types! { crate::ngap::ngap_ies::NBIoTUEPriority {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNGAPIESupportInformationRequestItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNGAPIESupportInformationRequestItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NGAPIESupportInformationRequestItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NGAPIESupportInformationRequestItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::NGAPIESupportInformationRequestList { 0 } }
 open_types! { crate::ngap::ngap_ies::NGAPIESupportInformationResponseItemNgapProtocolIESupportInfo {} }
 open_types! { crate::ngap::ngap_ies::NGAPIESupportInformationResponseItemNgapProtocolIEPresenceInfo {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNGAPIESupportInformationResponseItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNGAPIESupportInformationResponseItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NGAPIESupportInformationResponseItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NGAPIESupportInformationResponseItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::NGAPIESupportInformationResponseList { 0 } }
-open_types! { crate::ngap::ngap_ies::NGRANCGIChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::NGRANCGIChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::NGRANCGI { nR_CGI, eUTRA_CGI, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNGRANCellReportItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNGRANCellReportItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NGRANCellReportItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NGRANCellReportItem { n_gran_cgi, n_gran_composite_available_capacity_group, n_gran_radio_resource_status, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::NGRANCellReportList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousNGRANCellToReportItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNGRANCellToReportItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NGRANCellToReportItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NGRANCellToReportItem { n_gran_cgi, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::NGRANCellToReportList { 0 } }
 open_types! { crate::ngap::ngap_ies::NGRANNoofRRCConnections {} }
 open_types! { crate::ngap::ngap_ies::NGRANNumberOfActiveUEs {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNGRANRadioResourceStatusIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNGRANRadioResourceStatusIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NGRANRadioResourceStatusIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NGRANRadioResourceStatus { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousNGRANReportingStatusIEsIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNGRANReportingStatusIEsIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NGRANReportingStatusIEsIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NGRANReportingStatusIEs { n_gran_cell_report_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousNGRANReportingSystemIEsIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNGRANReportingSystemIEsIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NGRANReportingSystemIEsIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NGRANReportingSystemIEs { n_gran_cell_to_report_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousNGRANTNLAssociationToRemoveItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNGRANTNLAssociationToRemoveItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NGRANTNLAssociationToRemoveItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NGRANTNLAssociationToRemoveItem { t_nlassociation_transport_layer_address, t_nlassociation_transport_layer_address_amf, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::NGRANTNLAssociationToRemoveList { 0 } }
 open_types! { crate::ngap::ngap_ies::NGRANTraceID {} }
 open_types! { crate::ngap::ngap_ies::NID {} }
-open_types! { crate::ngap::ngap_ies::NPNAccessInformationChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::NPNAccessInformationChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::NPNAccessInformation { choice_Extensions } else { pNI_NPN_Access_Information } }
-open_types! { crate::ngap::ngap_ies::NPNMobilityInformationChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::NPNMobilityInformationChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::NPNMobilityInformation { sNPN_MobilityInformation, pNI_NPN_MobilityInformation, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::NPNPagingAssistanceInformationChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::NPNPagingAssistanceInformationChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::NPNPagingAssistanceInformation { pNI_NPN_PagingAssistance, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::NPNSupportChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::NPNSupportChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::NPNSupport { choice_Extensions } else { sNPN } }
 open_types! { crate::ngap::ngap_ies::NRA2XServicesAuthorizedAerialUE {} }
 open_types! { crate::ngap::ngap_ies::NRA2XServicesAuthorizedAerialControllerUE {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNRA2XServicesAuthorizedIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNRA2XServicesAuthorizedIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NRA2XServicesAuthorizedIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NRA2XServicesAuthorized { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousNRCGIIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNRCGIIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NRCGIIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NRCGI { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::NRCGIList { 0 } }
 open_types! { crate::ngap::ngap_ies::NRCGIListForWarning { 0 } }
 open_types! { crate::ngap::ngap_ies::NRPCI {} }
 open_types! { crate::ngap::ngap_ies::NRPagingLongEDRXCycleForRRCINACTIVE {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNRPagingLongEDRXInformationForRRCINACTIVEIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNRPagingLongEDRXInformationForRRCINACTIVEIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NRPagingLongEDRXInformationForRRCINACTIVEIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NRPagingLongEDRXInformationForRRCINACTIVE { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::NRPagingTimeWindow {} }
 open_types! { crate::ngap::ngap_ies::NRPagingTimeWindowForRRCINACTIVE {} }
 open_types! { crate::ngap::ngap_ies::NRPagingEDRXCycle {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNRPagingeDRXInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNRPagingeDRXInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NRPagingeDRXInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NRPagingeDRXInformation { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::NRARFCN {} }
 open_types! { crate::ngap::ngap_ies::NRCellIdentity {} }
 open_types! { crate::ngap::ngap_ies::NRFrequencyBand {} }
 open_types! { crate::ngap::ngap_ies::NRFrequencyBandList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousNRFrequencyBandItemIEExtensionCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNRFrequencyBandItemIEExtension { extension_value } }
-open_types! { crate::ngap::ngap_ies::NRFrequencyBandItemIEExtension { 0 } }
 open_types! { crate::ngap::ngap_ies::NRFrequencyBandItem { i_e_extension } }
-open_types! { crate::ngap::ngap_ies::AnonymousNRFrequencyInfoIEExtensionCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNRFrequencyInfoIEExtension { extension_value } }
-open_types! { crate::ngap::ngap_ies::NRFrequencyInfoIEExtension { 0 } }
 open_types! { crate::ngap::ngap_ies::NRFrequencyInfo { frequency_band_list, i_e_extension } }
 open_types! { crate::ngap::ngap_ies::NRMobilityHistoryReport {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNRNTNTAIInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNRNTNTAIInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NRNTNTAIInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NRNTNTAIInformation { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::NRPPaPDU {} }
 open_types! { crate::ngap::ngap_ies::NRUERLFReportContainer {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNRUESidelinkAggregateMaximumBitrateIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNRUESidelinkAggregateMaximumBitrateIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NRUESidelinkAggregateMaximumBitrateIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NRUESidelinkAggregateMaximumBitrate { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousNRV2XServicesAuthorizedIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNRV2XServicesAuthorizedIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NRV2XServicesAuthorizedIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NRV2XServicesAuthorized { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::NRencryptionAlgorithms {} }
 open_types! { crate::ngap::ngap_ies::NRintegrityProtectionAlgorithms {} }
 open_types! { crate::ngap::ngap_ies::NSAGID {} }
-open_types! { crate::ngap::ngap_ies::NTNGeographicalAreaItemChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::NTNGeographicalAreaItemChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::NTNGeographicalAreaItem { circle, choice_Extensions } else { polygon } }
 open_types! { crate::ngap::ngap_ies::NTNGeographicalAreaList { 0 } }
 open_types! { crate::ngap::ngap_ies::NetworkControlledRepeaterAuthorized {} }
 open_types! { crate::ngap::ngap_ies::NetworkInstance {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNetworkSliceAreaScopeofMDTIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNetworkSliceAreaScopeofMDTIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NetworkSliceAreaScopeofMDTIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NetworkSliceAreaScopeofMDT { network_slice_listfor_mdt, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousNetworkSliceItemforMDTIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNetworkSliceItemforMDTIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NetworkSliceItemforMDTIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NetworkSliceItemforMDT { slice_mdtlist, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::NetworkSliceListforMDT { 0 } }
 open_types! { crate::ngap::ngap_ies::NewSecurityContextInd {} }
 open_types! { crate::ngap::ngap_ies::NextHopChainingCount {} }
 open_types! { crate::ngap::ngap_ies::NextPagingAreaScope {} }
-open_types! { crate::ngap::ngap_ies::NgENBIDChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::NgENBIDChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::NgENBID { choice_Extensions } else { macroNgENB_ID, shortMacroNgENB_ID, longMacroNgENB_ID } }
 open_types! { crate::ngap::ngap_ies::NoPDUSessionIndication {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNonDynamic5QIDescriptorIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNonDynamic5QIDescriptorIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NonDynamic5QIDescriptorIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NonDynamic5QIDescriptor { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::NotAllowedTACs {} }
 open_types! { crate::ngap::ngap_ies::NotificationCause {} }
 open_types! { crate::ngap::ngap_ies::NotificationCellItemNotifyFlag {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNotificationCellItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousNotificationCellItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::NotificationCellItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::NotificationCellItem { n_gran_cgi, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::NotificationCellList { 0 } }
 open_types! { crate::ngap::ngap_ies::NotificationControl {} }
@@ -4419,353 +3545,136 @@ open_types! { crate::ngap::ngap_ies::NumberOfBroadcastsRequested {} }
 open_types! { crate::ngap::ngap_ies::NumberOfMeasurementReportingLevels {} }
 open_types! { crate::ngap::ngap_ies::OnboardingSupport {} }
 open_types! { crate::ngap::ngap_ies::OverloadAction {} }
-open_types! { crate::ngap::ngap_ies::OverloadResponseChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::OverloadResponseChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::OverloadResponse { choice_Extensions } else { overloadAction } }
-open_types! { crate::ngap::ngap_ies::AnonymousOverloadStartNSSAIItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousOverloadStartNSSAIItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::OverloadStartNSSAIItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::OverloadStartNSSAIItem { slice_overload_list, slice_overload_response, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::OverloadStartNSSAIList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPC5FlowBitRatesIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPC5FlowBitRatesIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PC5FlowBitRatesIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PC5FlowBitRates { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPC5QoSFlowItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPC5QoSFlowItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PC5QoSFlowItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PC5QoSFlowItem { pc5_flow_bit_rates, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PC5QoSFlowList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPC5QoSParametersIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPC5QoSParametersIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PC5QoSParametersIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PC5QoSParameters { pc5_qo_sflow_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PCIListForMDT {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionAggregateMaximumBitRateIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionAggregateMaximumBitRateIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionAggregateMaximumBitRateIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionAggregateMaximumBitRate { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionForPagingItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionForPagingItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionForPagingItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionForPagingItem { paging_policy_differentiation_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSessionForPagingList { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionID {} }
 open_types! { crate::ngap::ngap_ies::PDUSessionListMTCommHReq { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionListMTCommHReqItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionListMTCommHReqItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionListMTCommHReqItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionListMTCommHReqItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSessionPairID {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceAdmittedItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceAdmittedItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceAdmittedItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceAdmittedItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceAdmittedList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceFailedToModifyItemModCfmIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceFailedToModifyItemModCfmIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToModifyItemModCfmIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToModifyItemModCfm { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceFailedToModifyItemModResIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceFailedToModifyItemModResIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToModifyItemModResIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToModifyItemModRes { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToModifyListModCfm { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToModifyListModRes { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceFailedToResumeItemRESReqIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceFailedToResumeItemRESReqIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToResumeItemRESReqIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToResumeItemRESReq { cause, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceFailedToResumeItemRESResIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceFailedToResumeItemRESResIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToResumeItemRESResIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToResumeItemRESRes { cause, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToResumeListRESReq { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToResumeListRESRes { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceFailedToSetupItemCxtFailIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceFailedToSetupItemCxtFailIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToSetupItemCxtFailIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToSetupItemCxtFail { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceFailedToSetupItemCxtResIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceFailedToSetupItemCxtResIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToSetupItemCxtResIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToSetupItemCxtRes { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceFailedToSetupItemHOAckIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceFailedToSetupItemHOAckIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToSetupItemHOAckIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToSetupItemHOAck { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceFailedToSetupItemPSReqIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceFailedToSetupItemPSReqIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToSetupItemPSReqIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToSetupItemPSReq { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceFailedToSetupItemSUResIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceFailedToSetupItemSUResIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToSetupItemSUResIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToSetupItemSURes { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToSetupListCxtFail { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToSetupListCxtRes { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToSetupListHOAck { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToSetupListPSReq { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceFailedToSetupListSURes { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceHandoverItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceHandoverItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceHandoverItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceHandoverItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceHandoverList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceInformationItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceInformationItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceInformationItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceInformationItem { qos_flow_information_list, d_rbs_to_qos_flows_mapping_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceInformationList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceItemCxtRelCplIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceItemCxtRelCplIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceItemCxtRelCplIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceItemCxtRelCpl { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceItemCxtRelReqIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceItemCxtRelReqIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceItemCxtRelReqIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceItemCxtRelReq { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceItemHORqdIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceItemHORqdIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceItemHORqdIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceItemHORqd { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceListCxtRelCpl { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceListCxtRelReq { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceListHORqd { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyConfirmTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyConfirmTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyConfirmTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyConfirmTransfer { qos_flow_modify_confirm_list, u_lngu_up_tnlinformation, additional_ng_uuptnlinformation, qos_flow_failed_to_modify_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyIndicationTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyIndicationTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyIndicationTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyIndicationTransfer { d_lqos_flow_per_tnlinformation, additional_dlqos_flow_per_tnlinformation, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyIndicationUnsuccessfulTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyIndicationUnsuccessfulTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyIndicationUnsuccessfulTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyIndicationUnsuccessfulTransfer { cause, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyItemModCfmIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyItemModCfmIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyItemModCfmIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyItemModCfm { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyItemModIndIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyItemModIndIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyItemModIndIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyItemModInd { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyItemModReqIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyItemModReqIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyItemModReqIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyItemModReq { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyItemModResIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyItemModResIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyItemModResIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyItemModRes { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyListModCfm { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyListModInd { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyListModReq { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyListModRes { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyRequestTransferProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyRequestTransferProtocolIEs { value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyRequestTransferProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyRequestTransfer { protocol_ies } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyResponseTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyResponseTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyResponseTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyResponseTransfer { d_l_ngu_up_tnlinformation, u_l_ngu_up_tnlinformation, qos_flow_add_or_modify_response_list, additional_dlqos_flow_per_tnlinformation, qos_flow_failed_to_add_or_modify_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyUnsuccessfulTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceModifyUnsuccessfulTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyUnsuccessfulTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceModifyUnsuccessfulTransfer { cause, criticality_diagnostics, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceNotifyItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceNotifyItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceNotifyItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceNotifyItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceNotifyList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceNotifyReleasedTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceNotifyReleasedTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceNotifyReleasedTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceNotifyReleasedTransfer { cause, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceNotifyTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceNotifyTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceNotifyTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceNotifyTransfer { qos_flow_notify_list, qos_flow_released_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceReleaseCommandTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceReleaseCommandTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceReleaseCommandTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceReleaseCommandTransfer { cause, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceReleaseResponseTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceReleaseResponseTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceReleaseResponseTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceReleaseResponseTransfer { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceReleasedItemNotIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceReleasedItemNotIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceReleasedItemNotIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceReleasedItemNot { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceReleasedItemPSAckIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceReleasedItemPSAckIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceReleasedItemPSAckIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceReleasedItemPSAck { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceReleasedItemPSFailIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceReleasedItemPSFailIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceReleasedItemPSFailIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceReleasedItemPSFail { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceReleasedItemRelResIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceReleasedItemRelResIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceReleasedItemRelResIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceReleasedItemRelRes { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceReleasedListNot { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceReleasedListPSAck { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceReleasedListPSFail { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceReleasedListRelRes { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceResumeItemRESReqIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceResumeItemRESReqIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceResumeItemRESReqIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceResumeItemRESReq { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceResumeItemRESResIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceResumeItemRESResIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceResumeItemRESResIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceResumeItemRESRes { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceResumeListRESReq { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceResumeListRESRes { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSecondaryRATUsageItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSecondaryRATUsageItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceSecondaryRATUsageItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceSecondaryRATUsageItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceSecondaryRATUsageList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSetupItemCxtReqIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSetupItemCxtReqIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupItemCxtReqIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupItemCxtReq { s_nssai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSetupItemCxtResIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSetupItemCxtResIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupItemCxtResIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupItemCxtRes { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSetupItemHOReqIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSetupItemHOReqIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupItemHOReqIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupItemHOReq { s_nssai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSetupItemSUReqIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSetupItemSUReqIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupItemSUReqIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupItemSUReq { s_nssai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSetupItemSUResIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSetupItemSUResIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupItemSUResIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupItemSURes { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupListCxtReq { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupListCxtRes { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupListHOReq { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupListSUReq { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupListSURes { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSetupRequestTransferProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSetupRequestTransferProtocolIEs { value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupRequestTransferProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupRequestTransfer { protocol_ies } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSetupResponseTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSetupResponseTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupResponseTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupResponseTransfer { d_lqos_flow_per_tnlinformation, additional_dlqos_flow_per_tnlinformation, security_result, qos_flow_failed_to_setup_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSetupUnsuccessfulTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSetupUnsuccessfulTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupUnsuccessfulTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceSetupUnsuccessfulTransfer { cause, criticality_diagnostics, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSuspendItemSUSReqIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSuspendItemSUSReqIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceSuspendItemSUSReqIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceSuspendItemSUSReq { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceSuspendListSUSReq { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSwitchedItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceSwitchedItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceSwitchedItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceSwitchedItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceSwitchedList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceToBeSwitchedDLItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceToBeSwitchedDLItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceToBeSwitchedDLItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceToBeSwitchedDLItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceToBeSwitchedDLList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceToReleaseItemHOCmdIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceToReleaseItemHOCmdIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceToReleaseItemHOCmdIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceToReleaseItemHOCmd { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceToReleaseItemRelCmdIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionResourceToReleaseItemRelCmdIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionResourceToReleaseItemRelCmdIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceToReleaseItemRelCmd { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceToReleaseListHOCmd { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionResourceToReleaseListRelCmd { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionType {} }
 open_types! { crate::ngap::ngap_ies::PDUSessionUsageReportRATType {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionUsageReportIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUSessionUsageReportIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUSessionUsageReportIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUSessionUsageReport { p_dusession_timed_report_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PDUSetbasedHandlingIndicator {} }
 open_types! { crate::ngap::ngap_ies::PDUsetQoSInformationPduSetIntegratedHandlingInformation {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUsetQoSInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUsetQoSInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUsetQoSInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUsetQoSInformation { pdu_set_error_rate, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUsetQoSParametersIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPDUsetQoSParametersIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PDUsetQoSParametersIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PDUsetQoSParameters { ul_pduset_qo_sinformation, dl_pduset_qo_sinformation, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPEIPSassistanceInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPEIPSassistanceInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PEIPSassistanceInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PEIPSassistanceInformation { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPLMNAreaBasedQMCIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPLMNAreaBasedQMCIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PLMNAreaBasedQMCIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PLMNAreaBasedQMC { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PLMNIdentity {} }
 open_types! { crate::ngap::ngap_ies::PLMNListforQMC {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPLMNSupportItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPLMNSupportItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PLMNSupportItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PLMNSupportItem { slice_support_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PLMNSupportList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPNINPNAreaScopeofMDTIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPNINPNAreaScopeofMDTIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PNINPNAreaScopeofMDTIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PNINPNAreaScopeofMDT { c_aglistfor_mdt, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPNINPNMobilityInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPNINPNMobilityInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PNINPNMobilityInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PNINPNMobilityInformation { allowed_pni_npi_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPNINPNBasedMDTIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPNINPNBasedMDTIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PNINPNBasedMDTIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PNINPNBasedMDT { c_aglistfor_mdt, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::PWSFailedCellIDListChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::PWSFailedCellIDListChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::PWSFailedCellIDList { eUTRA_CGI_PWSFailedList, nR_CGI_PWSFailedList, choice_Extensions } else {} }
 open_types! { crate::ngap::ngap_ies::PacketDelayBudget {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPacketErrorRateIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPacketErrorRateIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PacketErrorRateIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PacketErrorRate { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PacketLossRate {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPagingAssisDataforCEcapabUEIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPagingAssisDataforCEcapabUEIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PagingAssisDataforCEcapabUEIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PagingAssisDataforCEcapabUE { e_utra_cgi, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PagingAttemptCount {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPagingAttemptInformationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPagingAttemptInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PagingAttemptInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PagingAttemptInformation { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PagingCause {} }
 open_types! { crate::ngap::ngap_ies::PagingCauseIndicationForVoiceService {} }
 open_types! { crate::ngap::ngap_ies::PagingDRX {} }
 open_types! { crate::ngap::ngap_ies::PagingOrigin {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPagingPolicyDifferentiationIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPagingPolicyDifferentiationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PagingPolicyDifferentiationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PagingPolicyDifferentiation { p_dusession_for_paging_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPagingPolicyDifferentiationItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPagingPolicyDifferentiationItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PagingPolicyDifferentiationItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PagingPolicyDifferentiationItem { allocation_and_retention_priority, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PagingPolicyDifferentiationList { 0 } }
 open_types! { crate::ngap::ngap_ies::PagingPolicyIndicator {} }
@@ -4773,43 +3682,17 @@ open_types! { crate::ngap::ngap_ies::PagingPriority {} }
 open_types! { crate::ngap::ngap_ies::PagingProbabilityInformation {} }
 open_types! { crate::ngap::ngap_ies::ParentTImeSource {} }
 open_types! { crate::ngap::ngap_ies::PartiallyAllowedNSSAI { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousPartiallyAllowedNSSAIItemIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPartiallyAllowedNSSAIItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PartiallyAllowedNSSAIItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PartiallyAllowedNSSAIItem { s_nssai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPathSwitchRequestAcknowledgeTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPathSwitchRequestAcknowledgeTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PathSwitchRequestAcknowledgeTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PathSwitchRequestAcknowledgeTransfer { u_l_ngu_up_tnlinformation, security_indication, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPathSwitchRequestSetupFailedTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPathSwitchRequestSetupFailedTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PathSwitchRequestSetupFailedTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PathSwitchRequestSetupFailedTransfer { cause, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPathSwitchRequestTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPathSwitchRequestTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PathSwitchRequestTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PathSwitchRequestTransfer { d_l_ngu_up_tnlinformation, user_plane_security_information, qos_flow_accepted_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPathSwitchRequestUnsuccessfulTransferIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPathSwitchRequestUnsuccessfulTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PathSwitchRequestUnsuccessfulTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PathSwitchRequestUnsuccessfulTransfer { cause, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::PedestrianUE {} }
 open_types! { crate::ngap::ngap_ies::PeriodicRegistrationUpdateTimer {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPeriodicReportingIEsIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPeriodicReportingIEsIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PeriodicReportingIEsIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PeriodicReportingIEs { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::Periodicity {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPeriodicityBoundIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPeriodicityBoundIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PeriodicityBoundIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PeriodicityBound { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousPeriodicityListIEExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::AnonymousPeriodicityListIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::PeriodicityListIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::PeriodicityList { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::PeriodicityRangeChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::PeriodicityRangeChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::PeriodicityRange { periodicityBound, choice_extensions } else { periodicityList } }
 open_types! { crate::ngap::ngap_ies::PortNumber {} }
 open_types! { crate::ngap::ngap_ies::PreEmptionCapability {} }
@@ -4817,147 +3700,82 @@ open_types! { crate::ngap::ngap_ies::PreEmptionVulnerability {} }
 open_types! { crate::ngap::ngap_ies::PriorityLevelARP {} }
 open_types! { crate::ngap::ngap_ies::PriorityLevelQos {} }
 open_types! { crate::ngap::ngap_ies::PrivacyIndicator {} }
-open_types! { crate::ngap::ngap_ies::ProcedureStageChoiceChoiceExtensionsCriticality {} }
-open_types! { crate::ngap::ngap_ies::ProcedureStageChoiceChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::ProcedureStageChoice { first_dl_count, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::AnonymousQMCConfigInfoIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QMCConfigInfoIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QMCConfigInfo { u_eapp_layer_meas_info_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousQMCDeactivationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QMCDeactivationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QMCDeactivation { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::QoERVQoEReportingPathsQoEReportingPath {} }
 open_types! { crate::ngap::ngap_ies::QoERVQoEReportingPathsRVQoEReportingPath {} }
-open_types! { crate::ngap::ngap_ies::AnonymousQoERVQoEReportingPathsIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QoERVQoEReportingPathsIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QoERVQoEReportingPaths { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::QoEReference {} }
 open_types! { crate::ngap::ngap_ies::QoEReferenceList {} }
 open_types! { crate::ngap::ngap_ies::QoSFlowList {} }
-open_types! { crate::ngap::ngap_ies::AnonymousQoSFlowTSCItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QoSFlowTSCItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QoSFlowTSCItem { t_sctraffic_characteristics_feedback, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::QoSFlowTSCList { 0 } }
 open_types! { crate::ngap::ngap_ies::QoSFlowsUsageReportItemRATType {} }
-open_types! { crate::ngap::ngap_ies::AnonymousQoSFlowsUsageReportItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QoSFlowsUsageReportItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QoSFlowsUsageReportItem { qo_sflows_timed_report_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::QoSFlowsUsageReportList { 0 } }
-open_types! { crate::ngap::ngap_ies::QosCharacteristicsChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::QosCharacteristics { nonDynamic5QI, dynamic5QI, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::AnonymousQosFlowAcceptedItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QosFlowAcceptedItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowAcceptedItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::QosFlowAcceptedList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousQosFlowAddOrModifyRequestItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QosFlowAddOrModifyRequestItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowAddOrModifyRequestItem { qos_flow_level_qos_parameters, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::QosFlowAddOrModifyRequestList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousQosFlowAddOrModifyResponseItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QosFlowAddOrModifyResponseItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowAddOrModifyResponseItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::QosFlowAddOrModifyResponseList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousQosFlowAdditionalInfoItemRelComIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QosFlowAdditionalInfoItemRelComIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowAdditionalInfoItemRelCom { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousQosFlowAdditionalInfoItemRelResIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QosFlowAdditionalInfoItemRelResIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowAdditionalInfoItemRelRes { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::QosFlowAdditionalInfoListRelCom { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowAdditionalInfoListRelRes { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousQosFlowFeedbackItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QosFlowFeedbackItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowFeedbackItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::QosFlowFeedbackList { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowIdentifier {} }
-open_types! { crate::ngap::ngap_ies::AnonymousQosFlowInformationItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QosFlowInformationItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowInformationItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::QosFlowInformationList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousQosFlowItemWithDataForwardingIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QosFlowItemWithDataForwardingIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowItemWithDataForwarding { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousQosFlowLevelQosParametersIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QosFlowLevelQosParametersIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowLevelQosParameters { qos_characteristics, allocation_and_retention_priority, g_br_qos_information, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::QosFlowListWithCause { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowListWithDataForwarding { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousQosFlowModifyConfirmItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QosFlowModifyConfirmItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowModifyConfirmItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::QosFlowModifyConfirmList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousQosFlowNotifyItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QosFlowNotifyItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowNotifyItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::QosFlowNotifyList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousQosFlowParametersItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QosFlowParametersItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowParametersItem { alternative_qo_spara_set_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::QosFlowParametersList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousQosFlowPerTNLInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QosFlowPerTNLInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowPerTNLInformation { u_ptransport_layer_information, associated_qos_flow_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousQosFlowPerTNLInformationItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QosFlowPerTNLInformationItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowPerTNLInformationItem { qos_flow_per_tnlinformation, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::QosFlowPerTNLInformationList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousQosFlowSetupRequestItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QosFlowSetupRequestItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowSetupRequestItem { qos_flow_level_qos_parameters, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::QosFlowSetupRequestList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousQosFlowToBeForwardedItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QosFlowToBeForwardedItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowToBeForwardedItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::QosFlowToBeForwardedList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousQosFlowWithCauseItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::QosFlowWithCauseItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::QosFlowWithCauseItem { cause, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::QosMonitoringReportingFrequency {} }
 open_types! { crate::ngap::ngap_ies::QosMonitoringRequest {} }
 open_types! { crate::ngap::ngap_ies::RANAIOTDeviceNGAPID {} }
 open_types! { crate::ngap::ngap_ies::RANTSSRequestType {} }
-open_types! { crate::ngap::ngap_ies::RANTSSScopeChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::RANTSSScope { rANNodeLevel, cellListLevel, choice_Extensions } else {} }
 open_types! { crate::ngap::ngap_ies::RANUENGAPID {} }
 open_types! { crate::ngap::ngap_ies::RANNodeName {} }
 open_types! { crate::ngap::ngap_ies::RANNodeNameUTF8String {} }
 open_types! { crate::ngap::ngap_ies::RANNodeNameVisibleString {} }
 open_types! { crate::ngap::ngap_ies::RANPagingPriority {} }
-open_types! { crate::ngap::ngap_ies::AnonymousRANStatusTransferTransparentContainerIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::RANStatusTransferTransparentContainerIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::RANStatusTransferTransparentContainer { d_rbs_subject_to_status_transfer_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousRANTSSCellItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::RANTSSCellItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::RANTSSCellItem { n_rcgi, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::RANTSSCellList { 0 } }
 open_types! { crate::ngap::ngap_ies::RANTimingSynchronisationStatusInfoSynchronisationState {} }
 open_types! { crate::ngap::ngap_ies::RANTimingSynchronisationStatusInfoTraceabletoUTC {} }
 open_types! { crate::ngap::ngap_ies::RANTimingSynchronisationStatusInfoTraceabletoGNSS {} }
-open_types! { crate::ngap::ngap_ies::AnonymousRANTimingSynchronisationStatusInfoIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::RANTimingSynchronisationStatusInfoIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::RANTimingSynchronisationStatusInfo { clock_accuracy, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::RANfeedbacktypeChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::RANfeedbacktype { proactive, reactive, choice_extensions } else {} }
-open_types! { crate::ngap::ngap_ies::AnonymousRANfeedbacktypeProactiveIEExtension { extension_value } }
-open_types! { crate::ngap::ngap_ies::RANfeedbacktypeProactiveIEExtension { 0 } }
 open_types! { crate::ngap::ngap_ies::RANfeedbacktypeProactive { burst_arrival_time_window, periodicity_range, i_e_extension } }
 open_types! { crate::ngap::ngap_ies::RANfeedbacktypeReactiveCapabilityForBATAdaptation {} }
-open_types! { crate::ngap::ngap_ies::AnonymousRANfeedbacktypeReactiveIEExtension { extension_value } }
-open_types! { crate::ngap::ngap_ies::RANfeedbacktypeReactiveIEExtension { 0 } }
 open_types! { crate::ngap::ngap_ies::RANfeedbacktypeReactive { i_e_extension } }
 open_types! { crate::ngap::ngap_ies::RATInformation {} }
 open_types! { crate::ngap::ngap_ies::RATRestrictionInformation {} }
 open_types! { crate::ngap::ngap_ies::RATRestrictions { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousRATRestrictionsItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::RATRestrictionsItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::RATRestrictionsItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::RGLevelWirelineAccessCharacteristics {} }
 open_types! { crate::ngap::ngap_ies::RIMInformationRIMRSDetection {} }
-open_types! { crate::ngap::ngap_ies::AnonymousRIMInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::RIMInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::RIMInformation { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousRIMInformationTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::RIMInformationTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::RIMInformationTransfer { target_rannode_id_rim, source_rannode_id, r_iminformation, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::RNCID {} }
 open_types! { crate::ngap::ngap_ies::RRCContainer {} }
@@ -4965,32 +3783,18 @@ open_types! { crate::ngap::ngap_ies::RRCEstablishmentCause {} }
 open_types! { crate::ngap::ngap_ies::RRCInactiveTransitionReportRequest {} }
 open_types! { crate::ngap::ngap_ies::RRCState {} }
 open_types! { crate::ngap::ngap_ies::RSN {} }
-open_types! { crate::ngap::ngap_ies::AnonymousRSPPFlowBitRatesIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::RSPPFlowBitRatesIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::RSPPFlowBitRates { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousRSPPQoSFlowItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::RSPPQoSFlowItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::RSPPQoSFlowItem { r_sppflow_bit_rates, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::RSPPQoSFlowList { 0 } }
 open_types! { crate::ngap::ngap_ies::Range {} }
-open_types! { crate::ngap::ngap_ies::AnonymousRecommendedCellItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::RecommendedCellItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::RecommendedCellItem { n_gran_cgi, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::RecommendedCellList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousRecommendedCellsForPagingIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::RecommendedCellsForPagingIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::RecommendedCellsForPaging { recommended_cell_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousRecommendedRANNodeItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::RecommendedRANNodeItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::RecommendedRANNodeItem { a_mfpaging_target, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::RecommendedRANNodeList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousRecommendedRANNodesForPagingIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::RecommendedRANNodesForPagingIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::RecommendedRANNodesForPaging { recommended_rannode_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::RedCapIndication {} }
 open_types! { crate::ngap::ngap_ies::RedirectionVoiceFallback {} }
-open_types! { crate::ngap::ngap_ies::AnonymousRedundantPDUSessionInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::RedundantPDUSessionInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::RedundantPDUSessionInformation { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::RedundantQosFlowIndicator {} }
 open_types! { crate::ngap::ngap_ies::ReflectiveQosAttribute {} }
@@ -5002,160 +3806,82 @@ open_types! { crate::ngap::ngap_ies::ReportAmountMDT {} }
 open_types! { crate::ngap::ngap_ies::ReportArea {} }
 open_types! { crate::ngap::ngap_ies::ReportCharacteristics {} }
 open_types! { crate::ngap::ngap_ies::ReportIntervalMDT {} }
-open_types! { crate::ngap::ngap_ies::ReportTypeChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::ReportType { eventBasedReporting, periodicReporting, choice_Extensions } else {} }
 open_types! { crate::ngap::ngap_ies::ReportingPeriodicity {} }
-open_types! { crate::ngap::ngap_ies::ReportingSystemChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::ReportingSystem { eUTRAN, nGRAN, choice_Extensions } else { noReporting } }
 open_types! { crate::ngap::ngap_ies::ReportingThreshold {} }
 open_types! { crate::ngap::ngap_ies::RequestedNSSAI { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousRequestedNSSAIItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::RequestedNSSAIItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::RequestedNSSAIItem { s_nssai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousRequestedTNLInfoIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::RequestedTNLInfoIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::RequestedTNLInfo { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::ResetAll {} }
-open_types! { crate::ngap::ngap_ies::ResetTypeChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::ResetType { partOfNG_Interface, choice_Extensions } else { nG_Interface } }
-open_types! { crate::ngap::ngap_ies::ResourceStatusReportingSystemChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::ResourceStatusReportingSystem { eUTRAN_ReportingStatus, nGRAN_ReportingStatus, choice_Extensions } else {} }
 open_types! { crate::ngap::ngap_ies::RoutingID {} }
-open_types! { crate::ngap::ngap_ies::AnonymousSNSSAIIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SNSSAIIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SNSSAI { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::SCGActivationTime {} }
 open_types! { crate::ngap::ngap_ies::SCTPTLAs {} }
 open_types! { crate::ngap::ngap_ies::SD {} }
 open_types! { crate::ngap::ngap_ies::SLPositioningRangingAuthorized {} }
-open_types! { crate::ngap::ngap_ies::AnonymousSLPositioningRangingQoSParametersIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SLPositioningRangingQoSParametersIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SLPositioningRangingQoSParameters { r_sppqo_sflow_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousSLPositioningRangingServiceInfoIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SLPositioningRangingServiceInfoIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SLPositioningRangingServiceInfo { s_lpositioning_ranging_qo_sparameters, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousSNPNBasedMDTIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SNPNBasedMDTIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SNPNBasedMDT { s_npnlistfor_mdt, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousSNPNCellBasedMDTIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SNPNCellBasedMDTIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SNPNCellBasedMDT { s_npncell_id_listfor_mdt, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousSNPNMobilityInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SNPNMobilityInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SNPNMobilityInformation { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousSNPNTAIBasedMDTIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SNPNTAIBasedMDTIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SNPNTAIBasedMDT { s_npntailistfor_mdt, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::SNPNCellIdListforMDT { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousSNPNCellIdListforMDTItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SNPNCellIdListforMDTItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SNPNCellIdListforMDTItem { n_r_cgi, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::SNPNListforMDT { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousSNPNListforMDTItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SNPNListforMDTItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SNPNListforMDTItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::SNPNTAIListforMDT { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousSNPNTAIListforMDTItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SNPNTAIListforMDTItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SNPNTAIListforMDTItem { t_ai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousSONConfigurationTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SONConfigurationTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SONConfigurationTransfer { target_rannode_id_son, source_rannode_id, s_oninformation, xn_tnlconfiguration_info, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::SONInformationChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::SONInformation { sONInformationReply, choice_Extensions } else { sONInformationRequest } }
-open_types! { crate::ngap::ngap_ies::AnonymousSONInformationReplyIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SONInformationReplyIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SONInformationReply { xn_tnlconfiguration_info, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::SONInformationReportChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::SONInformationReport { failureIndicationInformation, hOReportInformation, choice_Extensions } else {} }
 open_types! { crate::ngap::ngap_ies::SONInformationRequest {} }
 open_types! { crate::ngap::ngap_ies::SRVCCOperationPossible {} }
 open_types! { crate::ngap::ngap_ies::SST {} }
-open_types! { crate::ngap::ngap_ies::AnonymousScheduledCommunicationTimeIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::ScheduledCommunicationTimeIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::ScheduledCommunicationTime { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousSecondaryRATDataUsageReportTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SecondaryRATDataUsageReportTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SecondaryRATDataUsageReportTransfer { secondary_ratusage_information, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousSecondaryRATUsageInformationIEExtension { extension_value } }
-open_types! { crate::ngap::ngap_ies::SecondaryRATUsageInformationIEExtension { 0 } }
 open_types! { crate::ngap::ngap_ies::SecondaryRATUsageInformation { p_dusession_usage_report, qos_flows_usage_report_list, i_e_extension } }
-open_types! { crate::ngap::ngap_ies::AnonymousSecurityContextIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SecurityContextIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SecurityContext { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousSecurityIndicationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SecurityIndicationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SecurityIndication { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::SecurityKey {} }
-open_types! { crate::ngap::ngap_ies::AnonymousSecurityResultIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SecurityResultIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SecurityResult { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::SensorMeasConfig {} }
-open_types! { crate::ngap::ngap_ies::AnonymousSensorMeasConfigNameItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SensorMeasConfigNameItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SensorMeasConfigNameItem { sensor_name_config, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::SensorMeasConfigNameList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousSensorMeasurementConfigurationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SensorMeasurementConfigurationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SensorMeasurementConfiguration { sensor_meas_config_name_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::SensorNameConfigUncompensatedBarometricConfig {} }
 open_types! { crate::ngap::ngap_ies::SensorNameConfigUeSpeedConfig {} }
 open_types! { crate::ngap::ngap_ies::SensorNameConfigUeOrientationConfig {} }
-open_types! { crate::ngap::ngap_ies::SensorNameConfigChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::SensorNameConfig { choice_Extensions } else { uncompensatedBarometricConfig, ueSpeedConfig, ueOrientationConfig } }
 open_types! { crate::ngap::ngap_ies::SerialNumber {} }
-open_types! { crate::ngap::ngap_ies::AnonymousServedGUAMIItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::ServedGUAMIItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::ServedGUAMIItem { g_uami, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::ServedGUAMIList { 0 } }
 open_types! { crate::ngap::ngap_ies::ServiceAreaInformation { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousServiceAreaInformationItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::ServiceAreaInformationItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::ServiceAreaInformationItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::ServiceType {} }
 open_types! { crate::ngap::ngap_ies::SgNBUEX2APID {} }
-open_types! { crate::ngap::ngap_ies::AnonymousSharedNGUMulticastTNLInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SharedNGUMulticastTNLInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SharedNGUMulticastTNLInformation { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousSliceMDTItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SliceMDTItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SliceMDTItem { s_nssai, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::SliceMDTList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousSliceOverloadItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SliceOverloadItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SliceOverloadItem { s_nssai, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::SliceOverloadList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousSliceSupportItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SliceSupportItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SliceSupportItem { s_nssai, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::SliceSupportList { 0 } }
 open_types! { crate::ngap::ngap_ies::SliceSupportListQMC { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousSliceSupportQMCItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SliceSupportQMCItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SliceSupportQMCItem { s_nssai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousSourceNGRANNodeToTargetNGRANNodeTransparentContainerIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SourceNGRANNodeToTargetNGRANNodeTransparentContainerIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SourceNGRANNodeToTargetNGRANNodeTransparentContainer { p_dusession_resource_information_list, e_rabinformation_list, target_cell_id, u_ehistory_information, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::SourceNodeIDChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::SourceNodeID { sourceengNB_ID, choice_Extensions } else {} }
 open_types! { crate::ngap::ngap_ies::SourceOfUEActivityBehaviourInformation {} }
-open_types! { crate::ngap::ngap_ies::AnonymousSourceRANNodeIDIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SourceRANNodeIDIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SourceRANNodeID { global_rannode_id, selected_tai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousSourceToTargetAMFInformationRerouteIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SourceToTargetAMFInformationRerouteIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SourceToTargetAMFInformationReroute { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::SourceToTargetTransparentContainer {} }
-open_types! { crate::ngap::ngap_ies::AnonymousSuccessfulHandoverReportItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SuccessfulHandoverReportItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SuccessfulHandoverReportItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::SuccessfulHandoverReportList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousSuccessfulPSCellChangeReportItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SuccessfulPSCellChangeReportItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SuccessfulPSCellChangeReportItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::SuccessfulPSCellChangeReportList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousSupportedTAItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::SupportedTAItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::SupportedTAItem { broadcast_plmnlist, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::SupportedTAList { 0 } }
 open_types! { crate::ngap::ngap_ies::SupportedUEType {} }
@@ -5164,57 +3890,31 @@ open_types! { crate::ngap::ngap_ies::SurvivalTime {} }
 open_types! { crate::ngap::ngap_ies::SuspendRequestIndication {} }
 open_types! { crate::ngap::ngap_ies::SuspendResponseIndication {} }
 open_types! { crate::ngap::ngap_ies::SuspendIndicator {} }
-open_types! { crate::ngap::ngap_ies::AnonymousTABasedMDTIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TABasedMDTIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TABasedMDT { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousTABasedQMCIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TABasedQMCIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TABasedQMC { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::TAC {} }
 open_types! { crate::ngap::ngap_ies::TACListInNRNTN {} }
-open_types! { crate::ngap::ngap_ies::AnonymousTAIIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TAIIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TAI { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousTAIBasedMDTIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TAIBasedMDTIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TAIBasedMDT { t_ailistfor_mdt, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousTAIBasedQMCIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TAIBasedQMCIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TAIBasedQMC { t_ailistfor_qmc, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::TAIBroadcastEUTRA { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousTAIBroadcastEUTRAItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TAIBroadcastEUTRAItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TAIBroadcastEUTRAItem { t_ai, completed_cells_in_tai_eutra, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::TAIBroadcastNR { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousTAIBroadcastNRItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TAIBroadcastNRItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TAIBroadcastNRItem { t_ai, completed_cells_in_tai_nr, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::TAICancelledEUTRA { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousTAICancelledEUTRAItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TAICancelledEUTRAItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TAICancelledEUTRAItem { t_ai, cancelled_cells_in_tai_eutra, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::TAICancelledNR { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousTAICancelledNRItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TAICancelledNRItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TAICancelledNRItem { t_ai, cancelled_cells_in_tai_nr, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::TAIListForInactive { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousTAIListForInactiveItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TAIListForInactiveItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TAIListForInactiveItem { t_ai, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::TAIListForPaging { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousTAIListForPagingItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TAIListForPagingItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TAIListForPagingItem { t_ai, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::TAIListForRestart { 0 } }
 open_types! { crate::ngap::ngap_ies::TAIListForWarning { 0 } }
 open_types! { crate::ngap::ngap_ies::TAIListforMDT { 0 } }
 open_types! { crate::ngap::ngap_ies::TAIListforQMC { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousTAIMBSSupportItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TAIMBSSupportItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TAIMBSSupportItem { t_ai, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::TAIMBSSupportList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousTAINSAGSupportItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TAINSAGSupportItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TAINSAGSupportItem { n_sagslice_support_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::TAINSAGSupportList { 0 } }
 open_types! { crate::ngap::ngap_ies::TAListforMDT {} }
@@ -5222,86 +3922,45 @@ open_types! { crate::ngap::ngap_ies::TAListforQMC {} }
 open_types! { crate::ngap::ngap_ies::TLContainer {} }
 open_types! { crate::ngap::ngap_ies::TMGI {} }
 open_types! { crate::ngap::ngap_ies::TNAPID {} }
-open_types! { crate::ngap::ngap_ies::TNGFIDChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::TNGFID { choice_Extensions } else { tNGF_ID } }
 open_types! { crate::ngap::ngap_ies::TNLAddressWeightFactor {} }
-open_types! { crate::ngap::ngap_ies::AnonymousTNLAssociationItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TNLAssociationItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TNLAssociationItem { t_nlassociation_address, cause, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::TNLAssociationList { 0 } }
 open_types! { crate::ngap::ngap_ies::TNLAssociationUsage {} }
-open_types! { crate::ngap::ngap_ies::AnonymousTSCAssistanceInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TSCAssistanceInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TSCAssistanceInformation { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousTSCFeedbackInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TSCFeedbackInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TSCFeedbackInformation { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousTSCTrafficCharacteristicsIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TSCTrafficCharacteristicsIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TSCTrafficCharacteristics { t_scassistance_information_dl, t_scassistance_information_ul, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousTSCTrafficCharacteristicsFeedbackIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TSCTrafficCharacteristicsFeedbackIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TSCTrafficCharacteristicsFeedback { t_scfeedback_information_dl, t_scfeedback_information_ul, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::TWAPID {} }
-open_types! { crate::ngap::ngap_ies::TWIFIDChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::TWIFID { choice_Extensions } else { tWIF_ID } }
-open_types! { crate::ngap::ngap_ies::AnonymousTargetHomeENBIDIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TargetHomeENBIDIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TargetHomeENBID { selected_eps_tai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::TargetIDChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::TargetID { targetRANNodeID, targeteNB_ID, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::AnonymousTargetNGRANNodeToSourceNGRANNodeFailureTransparentContainerIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainerIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainer { cell_caginformation, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousTargetNGRANNodeToSourceNGRANNodeTransparentContainerIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TargetNGRANNodeToSourceNGRANNodeTransparentContainerIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TargetNGRANNodeToSourceNGRANNodeTransparentContainer { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::TargetNSSAI { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousTargetNSSAIItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TargetNSSAIItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TargetNSSAIItem { s_nssai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousTargetNSSAIInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TargetNSSAIInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TargetNSSAIInformation { target_nssai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousTargetRANNodeIDIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TargetRANNodeIDIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TargetRANNodeID { global_rannode_id, selected_tai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousTargetRANNodeIDRIMIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TargetRANNodeIDRIMIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TargetRANNodeIDRIM { global_rannode_id, selected_tai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousTargetRANNodeIDSONIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TargetRANNodeIDSONIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TargetRANNodeIDSON { global_rannode_id, selected_tai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousTargetRNCIDIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TargetRNCIDIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TargetRNCID { l_ai, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::TargetToSourceTransparentContainer {} }
-open_types! { crate::ngap::ngap_ies::AnonymousTargeteNBIDIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TargeteNBIDIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TargeteNBID { global_enb_id, selected_eps_tai, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::TargettoSourceFailureTransparentContainer {} }
 open_types! { crate::ngap::ngap_ies::ThresholdRSRP {} }
 open_types! { crate::ngap::ngap_ies::ThresholdRSRQ {} }
 open_types! { crate::ngap::ngap_ies::ThresholdSINR {} }
-open_types! { crate::ngap::ngap_ies::AnonymousTimeBasedHandoverInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TimeBasedHandoverInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TimeBasedHandoverInformation { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::TimeSinceFailure {} }
 open_types! { crate::ngap::ngap_ies::TimeStamp {} }
 open_types! { crate::ngap::ngap_ies::TimeSyncAssistanceInfoTimeDistributionIndication {} }
-open_types! { crate::ngap::ngap_ies::AnonymousTimeSyncAssistanceInfoIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TimeSyncAssistanceInfoIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TimeSyncAssistanceInfo { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::TimeToTrigger {} }
 open_types! { crate::ngap::ngap_ies::TimeToWait {} }
 open_types! { crate::ngap::ngap_ies::TimeUEStayedInCell {} }
 open_types! { crate::ngap::ngap_ies::TimeUEStayedInCellEnhancedGranularity {} }
 open_types! { crate::ngap::ngap_ies::TimerApproachForGUAMIRemoval {} }
-open_types! { crate::ngap::ngap_ies::AnonymousTooearlyIntersystemHOIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TooearlyIntersystemHOIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TooearlyIntersystemHO { sourcecell_id, failurecell_id, u_erlfreport_container, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousTraceActivationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::TraceActivationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::TraceActivation { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::TraceDepth {} }
 open_types! { crate::ngap::ngap_ies::TrafficLoadReductionIndication {} }
@@ -5311,701 +3970,239 @@ open_types! { crate::ngap::ngap_ies::UEDifferentiationInfoPeriodicCommunicationI
 open_types! { crate::ngap::ngap_ies::UEDifferentiationInfoStationaryIndication {} }
 open_types! { crate::ngap::ngap_ies::UEDifferentiationInfoTrafficProfile {} }
 open_types! { crate::ngap::ngap_ies::UEDifferentiationInfoBatteryIndication {} }
-open_types! { crate::ngap::ngap_ies::AnonymousUEDifferentiationInfoIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UEDifferentiationInfoIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UEDifferentiationInfo { scheduled_communication_time, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousUENGAPIDPairIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UENGAPIDPairIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UENGAPIDPair { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::UENGAPIDsChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::UENGAPIDs { uE_NGAP_ID_pair, choice_Extensions } else { aMF_UE_NGAP_ID } }
-open_types! { crate::ngap::ngap_ies::AnonymousUEPagingItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UEPagingItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UEPagingItem { u_eidentity_index_value, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::UEPagingList { 0 } }
 open_types! { crate::ngap::ngap_ies::UEUPCIoTSupport {} }
-open_types! { crate::ngap::ngap_ies::AnonymousUEAssociatedLogicalNGConnectionItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UEAssociatedLogicalNGConnectionItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UEAssociatedLogicalNGConnectionItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::UEAssociatedLogicalNGConnectionList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousUEAggregateMaximumBitRateIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UEAggregateMaximumBitRateIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UEAggregateMaximumBitRate { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::UEAppLayerMeasConfigInfoQoEMeasurementStatus {} }
-open_types! { crate::ngap::ngap_ies::AnonymousUEAppLayerMeasConfigInfoIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UEAppLayerMeasConfigInfoIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UEAppLayerMeasConfigInfo { area_scope_of_qmc, slice_support_list_qmc, m_dt_alignment_info, available_ranvisible_qo_emetrics, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousUEAppLayerMeasInfoItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UEAppLayerMeasInfoItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UEAppLayerMeasInfoItem { u_eapp_layer_meas_config_info, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::UEAppLayerMeasInfoList { 0 } }
 open_types! { crate::ngap::ngap_ies::UECapabilityInfoRequest {} }
 open_types! { crate::ngap::ngap_ies::UEContextRequest {} }
-open_types! { crate::ngap::ngap_ies::AnonymousUEContextResumeRequestTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UEContextResumeRequestTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UEContextResumeRequestTransfer { qos_flow_failed_to_resume_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousUEContextResumeResponseTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UEContextResumeResponseTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UEContextResumeResponseTransfer { qos_flow_failed_to_resume_list, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousUEContextSuspendRequestTransferIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UEContextSuspendRequestTransferIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UEContextSuspendRequestTransfer { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::UEHistoryInformation { 0 } }
-open_types! { crate::ngap::ngap_ies::UEHistoryInformationFromTheUEChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::UEHistoryInformationFromTheUE { choice_Extensions } else { nR } }
-open_types! { crate::ngap::ngap_ies::UEIdentityIndexValueChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::UEIdentityIndexValue { choice_Extensions } else { indexLength10 } }
-open_types! { crate::ngap::ngap_ies::UEPagingIdentityChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::UEPagingIdentity { fiveG_S_TMSI, choice_Extensions } else {} }
 open_types! { crate::ngap::ngap_ies::UEPresence {} }
-open_types! { crate::ngap::ngap_ies::AnonymousUEPresenceInAreaOfInterestItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UEPresenceInAreaOfInterestItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UEPresenceInAreaOfInterestItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::UEPresenceInAreaOfInterestList { 0 } }
-open_types! { crate::ngap::ngap_ies::UERLFReportContainerChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::UERLFReportContainer { choice_Extensions } else { nR, lTE } }
 open_types! { crate::ngap::ngap_ies::UERadioCapability {} }
-open_types! { crate::ngap::ngap_ies::AnonymousUERadioCapabilityForPagingIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UERadioCapabilityForPagingIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UERadioCapabilityForPaging { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::UERadioCapabilityForPagingOfEUTRA {} }
 open_types! { crate::ngap::ngap_ies::UERadioCapabilityForPagingOfNBIoT {} }
 open_types! { crate::ngap::ngap_ies::UERadioCapabilityForPagingOfNR {} }
 open_types! { crate::ngap::ngap_ies::UERadioCapabilityID {} }
 open_types! { crate::ngap::ngap_ies::UERetentionInformation {} }
-open_types! { crate::ngap::ngap_ies::AnonymousUESecurityCapabilitiesIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UESecurityCapabilitiesIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UESecurityCapabilities { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousUESliceMaximumBitRateItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UESliceMaximumBitRateItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UESliceMaximumBitRateItem { s_nssai, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::UESliceMaximumBitRateList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousULCPSecurityInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::ULCPSecurityInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::ULCPSecurityInformation { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::ULNASCount {} }
 open_types! { crate::ngap::ngap_ies::ULNASMAC {} }
-open_types! { crate::ngap::ngap_ies::AnonymousULNGUUPTNLModifyItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::ULNGUUPTNLModifyItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::ULNGUUPTNLModifyItem { u_l_ngu_up_tnlinformation, d_l_ngu_up_tnlinformation, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::ULNGUUPTNLModifyList { 0 } }
 open_types! { crate::ngap::ngap_ies::ULForwarding {} }
-open_types! { crate::ngap::ngap_ies::UPTransportLayerInformationChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::UPTransportLayerInformation { gTPTunnel, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::AnonymousUPTransportLayerInformationItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UPTransportLayerInformationItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UPTransportLayerInformationItem { n_gu_up_tnlinformation, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::UPTransportLayerInformationList { 0 } }
-open_types! { crate::ngap::ngap_ies::AnonymousUPTransportLayerInformationPairItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UPTransportLayerInformationPairItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UPTransportLayerInformationPairItem { u_l_ngu_up_tnlinformation, d_l_ngu_up_tnlinformation, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::UPTransportLayerInformationPairList { 0 } }
 open_types! { crate::ngap::ngap_ies::URIAddress {} }
-open_types! { crate::ngap::ngap_ies::AnonymousUnavailableGUAMIItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UnavailableGUAMIItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UnavailableGUAMIItem { g_uami, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::UnavailableGUAMIList { 0 } }
 open_types! { crate::ngap::ngap_ies::UpdateFeedback {} }
-open_types! { crate::ngap::ngap_ies::UserLocationInformationChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::UserLocationInformation { userLocationInformationEUTRA, userLocationInformationNR, userLocationInformationN3IWF_with_PortNumber, choice_Extensions } else {} }
-open_types! { crate::ngap::ngap_ies::AnonymousUserLocationInformationEUTRAIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UserLocationInformationEUTRAIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UserLocationInformationEUTRA { e_utra_cgi, t_ai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousUserLocationInformationN3IWFWithPortNumberIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UserLocationInformationN3IWFWithPortNumberIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UserLocationInformationN3IWFWithPortNumber { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousUserLocationInformationN3IWFWithoutPortNumberIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UserLocationInformationN3IWFWithoutPortNumberIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UserLocationInformationN3IWFWithoutPortNumber { t_ai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousUserLocationInformationNRIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UserLocationInformationNRIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UserLocationInformationNR { n_r_cgi, t_ai, i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousUserLocationInformationTNGFIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UserLocationInformationTNGFIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UserLocationInformationTNGF { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::AnonymousUserLocationInformationTWIFIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UserLocationInformationTWIFIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UserLocationInformationTWIF { i_e_extensions } }
-open_types! { crate::ngap::ngap_ies::UserLocationInformationWAGFChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::UserLocationInformationWAGF { globalLine_ID, choice_Extensions } else { hFCNode_ID } }
 open_types! { crate::ngap::ngap_ies::UserPlaneErrorIndicator {} }
-open_types! { crate::ngap::ngap_ies::AnonymousUserPlaneFailureIndicationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UserPlaneFailureIndicationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UserPlaneFailureIndication { u_l_ngu_up_tnlinformation, d_l_ngu_up_tnlinformation, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::UserPlaneFailureIndicationReport {} }
 open_types! { crate::ngap::ngap_ies::UserPlaneFailureType {} }
-open_types! { crate::ngap::ngap_ies::AnonymousUserPlaneSecurityInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::UserPlaneSecurityInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::UserPlaneSecurityInformation { security_result, security_indication, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::VehicleUE {} }
-open_types! { crate::ngap::ngap_ies::AnonymousVolumeTimedReportItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::VolumeTimedReportItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::VolumeTimedReportItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::VolumeTimedReportList { 0 } }
-open_types! { crate::ngap::ngap_ies::WAGFIDChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::WAGFID { choice_Extensions } else { w_AGF_ID } }
 open_types! { crate::ngap::ngap_ies::WLANMeasConfig {} }
-open_types! { crate::ngap::ngap_ies::AnonymousWLANMeasConfigNameItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::WLANMeasConfigNameItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::WLANMeasConfigNameItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::WLANMeasConfigNameList { 0 } }
 open_types! { crate::ngap::ngap_ies::WLANMeasurementConfigurationWlanRssi {} }
 open_types! { crate::ngap::ngap_ies::WLANMeasurementConfigurationWlanRtt {} }
-open_types! { crate::ngap::ngap_ies::AnonymousWLANMeasurementConfigurationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::WLANMeasurementConfigurationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::WLANMeasurementConfiguration { wlan_meas_config_name_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::WLANName {} }
-open_types! { crate::ngap::ngap_ies::AnonymousWUSAssistanceInformationIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::WUSAssistanceInformationIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::WUSAssistanceInformation { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::WarningAreaCoordinates {} }
-open_types! { crate::ngap::ngap_ies::WarningAreaListChoiceExtensions { value } }
 open_types! { crate::ngap::ngap_ies::WarningAreaList { eUTRA_CGIListForWarning, nR_CGIListForWarning, tAIListForWarning, choice_Extensions } else { emergencyAreaIDList } }
 open_types! { crate::ngap::ngap_ies::WarningMessageContents {} }
 open_types! { crate::ngap::ngap_ies::WarningSecurityInfo {} }
 open_types! { crate::ngap::ngap_ies::WarningType {} }
-open_types! { crate::ngap::ngap_ies::AnonymousXnExtTLAItemIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::XnExtTLAItemIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::XnExtTLAItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::XnExtTLAs { 0 } }
 open_types! { crate::ngap::ngap_ies::XnGTPTLAs {} }
 open_types! { crate::ngap::ngap_ies::XnTLAs {} }
-open_types! { crate::ngap::ngap_ies::AnonymousXnTNLConfigurationInfoIEExtensions { extension_value } }
-open_types! { crate::ngap::ngap_ies::XnTNLConfigurationInfoIEExtensions { 0 } }
 open_types! { crate::ngap::ngap_ies::XnTNLConfigurationInfo { xn_extended_transport_layer_addresses, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::XrDeviceWith2Rx {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousAIOTSessionReleaseCommandProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousAIOTSessionReleaseCommandProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::AIOTSessionReleaseCommandProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::AIOTSessionReleaseCommand { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousAIOTSessionReleaseCompleteProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousAIOTSessionReleaseCompleteProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::AIOTSessionReleaseCompleteProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::AIOTSessionReleaseComplete { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousAIOTSessionReleaseRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousAIOTSessionReleaseRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::AIOTSessionReleaseRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::AIOTSessionReleaseRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousAMFCPRelocationIndicationProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousAMFCPRelocationIndicationProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::AMFCPRelocationIndicationProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::AMFCPRelocationIndication { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousAMFConfigurationUpdateProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousAMFConfigurationUpdateProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::AMFConfigurationUpdateProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::AMFConfigurationUpdate { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousAMFConfigurationUpdateAcknowledgeProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousAMFConfigurationUpdateAcknowledgeProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::AMFConfigurationUpdateAcknowledgeProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::AMFConfigurationUpdateAcknowledge { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousAMFConfigurationUpdateFailureProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousAMFConfigurationUpdateFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::AMFConfigurationUpdateFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::AMFConfigurationUpdateFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousAMFStatusIndicationProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousAMFStatusIndicationProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::AMFStatusIndicationProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::AMFStatusIndication { protocol_ies } }
 open_types! { crate::ngap::ngap_pdu_contents::AerialUEFlightInformationOngoingReportingFailed {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionModificationFailureProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionModificationFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionModificationFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionModificationFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionModificationRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionModificationRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionModificationRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionModificationRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionModificationResponseProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionModificationResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionModificationResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionModificationResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionReleaseRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionReleaseRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionReleaseRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionReleaseRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionReleaseRequiredProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionReleaseRequiredProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionReleaseRequiredProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionReleaseRequired { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionReleaseResponseProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionReleaseResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionReleaseResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionReleaseResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionSetupFailureProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionSetupFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionSetupFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionSetupFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionSetupRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionSetupRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionSetupRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionSetupRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionSetupResponseProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionSetupResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionSetupResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionSetupResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionTransportFailureProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionTransportFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionTransportFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionTransportFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionTransportRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionTransportRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionTransportRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionTransportRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionTransportResponseProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousBroadcastSessionTransportResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionTransportResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::BroadcastSessionTransportResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousCellTrafficTraceProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousCellTrafficTraceProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::CellTrafficTraceProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::CellTrafficTrace { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousCommandFailureProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousCommandFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::CommandFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::CommandFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousCommandRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousCommandRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::CommandRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::CommandRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousCommandResponseProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousCommandResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::CommandResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::CommandResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousConnectionEstablishmentIndicationProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousConnectionEstablishmentIndicationProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::ConnectionEstablishmentIndicationProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::ConnectionEstablishmentIndication { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDeactivateTraceProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDeactivateTraceProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::DeactivateTraceProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::DeactivateTrace { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDistributionReleaseRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDistributionReleaseRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::DistributionReleaseRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::DistributionReleaseRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDistributionReleaseResponseProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDistributionReleaseResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::DistributionReleaseResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::DistributionReleaseResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDistributionSetupFailureProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDistributionSetupFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::DistributionSetupFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::DistributionSetupFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDistributionSetupRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDistributionSetupRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::DistributionSetupRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::DistributionSetupRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDistributionSetupResponseProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDistributionSetupResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::DistributionSetupResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::DistributionSetupResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDownlinkNASTransportProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDownlinkNASTransportProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::DownlinkNASTransportProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::DownlinkNASTransport { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDownlinkNonUEAssociatedNRPPaTransportProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDownlinkNonUEAssociatedNRPPaTransportProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::DownlinkNonUEAssociatedNRPPaTransportProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::DownlinkNonUEAssociatedNRPPaTransport { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDownlinkRANConfigurationTransferProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDownlinkRANConfigurationTransferProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::DownlinkRANConfigurationTransferProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::DownlinkRANConfigurationTransfer { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDownlinkRANEarlyStatusTransferProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDownlinkRANEarlyStatusTransferProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::DownlinkRANEarlyStatusTransferProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::DownlinkRANEarlyStatusTransfer { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDownlinkRANStatusTransferProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDownlinkRANStatusTransferProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::DownlinkRANStatusTransferProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::DownlinkRANStatusTransfer { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDownlinkRIMInformationTransferProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDownlinkRIMInformationTransferProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::DownlinkRIMInformationTransferProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::DownlinkRIMInformationTransfer { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDownlinkUEAssociatedNRPPaTransportProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousDownlinkUEAssociatedNRPPaTransportProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::DownlinkUEAssociatedNRPPaTransportProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::DownlinkUEAssociatedNRPPaTransport { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousErrorIndicationProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousErrorIndicationProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::ErrorIndicationProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::ErrorIndication { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverCancelProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverCancelProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::HandoverCancelProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::HandoverCancel { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverCancelAcknowledgeProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverCancelAcknowledgeProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::HandoverCancelAcknowledgeProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::HandoverCancelAcknowledge { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverCommandProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverCommandProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::HandoverCommandProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::HandoverCommand { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverFailureProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::HandoverFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::HandoverFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverNotifyProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverNotifyProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::HandoverNotifyProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::HandoverNotify { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverPreparationFailureProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverPreparationFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::HandoverPreparationFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::HandoverPreparationFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::HandoverRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::HandoverRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverRequestAcknowledgeProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverRequestAcknowledgeProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::HandoverRequestAcknowledgeProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::HandoverRequestAcknowledge { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverRequiredProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverRequiredProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::HandoverRequiredProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::HandoverRequired { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverSuccessProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousHandoverSuccessProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::HandoverSuccessProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::HandoverSuccess { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousInitialContextSetupFailureProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousInitialContextSetupFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::InitialContextSetupFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::InitialContextSetupFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousInitialContextSetupRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousInitialContextSetupRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::InitialContextSetupRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::InitialContextSetupRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousInitialContextSetupResponseProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousInitialContextSetupResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::InitialContextSetupResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::InitialContextSetupResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousInitialUEMessageProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousInitialUEMessageProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::InitialUEMessageProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::InitialUEMessage { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousInventoryFailureProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousInventoryFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::InventoryFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::InventoryFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousInventoryReportProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousInventoryReportProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::InventoryReportProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::InventoryReport { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousInventoryRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousInventoryRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::InventoryRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::InventoryRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousInventoryResponseProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousInventoryResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::InventoryResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::InventoryResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousLocationReportProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousLocationReportProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::LocationReportProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::LocationReport { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousLocationReportingControlProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousLocationReportingControlProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::LocationReportingControlProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::LocationReportingControl { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousLocationReportingFailureIndicationProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousLocationReportingFailureIndicationProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::LocationReportingFailureIndicationProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::LocationReportingFailureIndication { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMTCommunicationHandlingFailureProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMTCommunicationHandlingFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::MTCommunicationHandlingFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::MTCommunicationHandlingFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMTCommunicationHandlingRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMTCommunicationHandlingRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::MTCommunicationHandlingRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::MTCommunicationHandlingRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMTCommunicationHandlingResponseProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMTCommunicationHandlingResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::MTCommunicationHandlingResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::MTCommunicationHandlingResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMulticastGroupPagingProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMulticastGroupPagingProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::MulticastGroupPagingProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::MulticastGroupPaging { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMulticastSessionActivationFailureProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMulticastSessionActivationFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::MulticastSessionActivationFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::MulticastSessionActivationFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMulticastSessionActivationRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMulticastSessionActivationRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::MulticastSessionActivationRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::MulticastSessionActivationRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMulticastSessionActivationResponseProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMulticastSessionActivationResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::MulticastSessionActivationResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::MulticastSessionActivationResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMulticastSessionDeactivationRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMulticastSessionDeactivationRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::MulticastSessionDeactivationRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::MulticastSessionDeactivationRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMulticastSessionDeactivationResponseProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMulticastSessionDeactivationResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::MulticastSessionDeactivationResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::MulticastSessionDeactivationResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMulticastSessionUpdateFailureProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMulticastSessionUpdateFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::MulticastSessionUpdateFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::MulticastSessionUpdateFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMulticastSessionUpdateRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMulticastSessionUpdateRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::MulticastSessionUpdateRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::MulticastSessionUpdateRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMulticastSessionUpdateResponseProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousMulticastSessionUpdateResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::MulticastSessionUpdateResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::MulticastSessionUpdateResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousNASNonDeliveryIndicationProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousNASNonDeliveryIndicationProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::NASNonDeliveryIndicationProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::NASNonDeliveryIndication { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousNGRemovalFailureProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousNGRemovalFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::NGRemovalFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::NGRemovalFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousNGRemovalRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousNGRemovalRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::NGRemovalRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::NGRemovalRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousNGRemovalResponseProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousNGRemovalResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::NGRemovalResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::NGRemovalResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousNGResetProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousNGResetProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::NGResetProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::NGReset { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousNGResetAcknowledgeProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousNGResetAcknowledgeProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::NGResetAcknowledgeProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::NGResetAcknowledge { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousNGSetupFailureProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousNGSetupFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::NGSetupFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::NGSetupFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousNGSetupRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousNGSetupRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::NGSetupRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::NGSetupRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousNGSetupResponseProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousNGSetupResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::NGSetupResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::NGSetupResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousOverloadStartProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousOverloadStartProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::OverloadStartProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::OverloadStart { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousOverloadStopProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousOverloadStopProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::OverloadStopProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::OverloadStop { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPDUSessionResourceModifyConfirmProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPDUSessionResourceModifyConfirmProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::PDUSessionResourceModifyConfirmProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::PDUSessionResourceModifyConfirm { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPDUSessionResourceModifyIndicationProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPDUSessionResourceModifyIndicationProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::PDUSessionResourceModifyIndicationProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::PDUSessionResourceModifyIndication { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPDUSessionResourceModifyRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPDUSessionResourceModifyRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::PDUSessionResourceModifyRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::PDUSessionResourceModifyRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPDUSessionResourceModifyResponseProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPDUSessionResourceModifyResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::PDUSessionResourceModifyResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::PDUSessionResourceModifyResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPDUSessionResourceNotifyProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPDUSessionResourceNotifyProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::PDUSessionResourceNotifyProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::PDUSessionResourceNotify { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPDUSessionResourceReleaseCommandProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPDUSessionResourceReleaseCommandProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::PDUSessionResourceReleaseCommandProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::PDUSessionResourceReleaseCommand { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPDUSessionResourceReleaseResponseProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPDUSessionResourceReleaseResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::PDUSessionResourceReleaseResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::PDUSessionResourceReleaseResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPDUSessionResourceSetupRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPDUSessionResourceSetupRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::PDUSessionResourceSetupRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::PDUSessionResourceSetupRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPDUSessionResourceSetupResponseProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPDUSessionResourceSetupResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::PDUSessionResourceSetupResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::PDUSessionResourceSetupResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPWSCancelRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPWSCancelRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::PWSCancelRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::PWSCancelRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPWSCancelResponseProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPWSCancelResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::PWSCancelResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::PWSCancelResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPWSFailureIndicationProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPWSFailureIndicationProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::PWSFailureIndicationProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::PWSFailureIndication { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPWSRestartIndicationProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPWSRestartIndicationProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::PWSRestartIndicationProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::PWSRestartIndication { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPagingProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPagingProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::PagingProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::Paging { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPathSwitchRequestProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPathSwitchRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::PathSwitchRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::PathSwitchRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPathSwitchRequestAcknowledgeProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPathSwitchRequestAcknowledgeProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::PathSwitchRequestAcknowledgeProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::PathSwitchRequestAcknowledge { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPathSwitchRequestFailureProtocolIEsCriticality {} }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousPathSwitchRequestFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::PathSwitchRequestFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::PathSwitchRequestFailure { protocol_ies } }
 open_types! { crate::ngap::ngap_pdu_contents::AnonymousPrivateMessagePrivateIEs { value } }
 open_types! { crate::ngap::ngap_pdu_contents::PrivateMessagePrivateIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::PrivateMessage { private_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousRANCPRelocationIndicationProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::RANCPRelocationIndicationProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::RANCPRelocationIndication { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousRANConfigurationUpdateProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::RANConfigurationUpdateProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::RANConfigurationUpdate { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousRANConfigurationUpdateAcknowledgeProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::RANConfigurationUpdateAcknowledgeProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::RANConfigurationUpdateAcknowledge { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousRANConfigurationUpdateFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::RANConfigurationUpdateFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::RANConfigurationUpdateFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousRANPagingRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::RANPagingRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::RANPagingRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousRRCInactiveTransitionReportProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::RRCInactiveTransitionReportProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::RRCInactiveTransitionReport { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousRerouteNASRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::RerouteNASRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::RerouteNASRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousRetrieveUEInformationProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::RetrieveUEInformationProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::RetrieveUEInformation { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousSecondaryRATDataUsageReportProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::SecondaryRATDataUsageReportProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::SecondaryRATDataUsageReport { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousTimingSynchronisationStatusFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::TimingSynchronisationStatusFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::TimingSynchronisationStatusFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousTimingSynchronisationStatusReportProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::TimingSynchronisationStatusReportProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::TimingSynchronisationStatusReport { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousTimingSynchronisationStatusRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::TimingSynchronisationStatusRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::TimingSynchronisationStatusRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousTimingSynchronisationStatusResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::TimingSynchronisationStatusResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::TimingSynchronisationStatusResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousTraceFailureIndicationProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::TraceFailureIndicationProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::TraceFailureIndication { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousTraceStartProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::TraceStartProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::TraceStart { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUEContextModificationFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UEContextModificationFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UEContextModificationFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUEContextModificationRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UEContextModificationRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UEContextModificationRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUEContextModificationResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UEContextModificationResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UEContextModificationResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUEContextReleaseCommandProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UEContextReleaseCommandProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UEContextReleaseCommand { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUEContextReleaseCompleteProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UEContextReleaseCompleteProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UEContextReleaseComplete { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUEContextReleaseRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UEContextReleaseRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UEContextReleaseRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUEContextResumeFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UEContextResumeFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UEContextResumeFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUEContextResumeRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UEContextResumeRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UEContextResumeRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUEContextResumeResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UEContextResumeResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UEContextResumeResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUEContextSuspendFailureProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UEContextSuspendFailureProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UEContextSuspendFailure { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUEContextSuspendRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UEContextSuspendRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UEContextSuspendRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUEContextSuspendResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UEContextSuspendResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UEContextSuspendResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUEInformationTransferProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UEInformationTransferProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UEInformationTransfer { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUERadioCapabilityCheckRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UERadioCapabilityCheckRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UERadioCapabilityCheckRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUERadioCapabilityCheckResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UERadioCapabilityCheckResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UERadioCapabilityCheckResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUERadioCapabilityIDMappingRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UERadioCapabilityIDMappingRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UERadioCapabilityIDMappingRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUERadioCapabilityIDMappingResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UERadioCapabilityIDMappingResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UERadioCapabilityIDMappingResponse { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUERadioCapabilityInfoIndicationProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UERadioCapabilityInfoIndicationProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UERadioCapabilityInfoIndication { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUETNLABindingReleaseRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UETNLABindingReleaseRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UETNLABindingReleaseRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUplinkNASTransportProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UplinkNASTransportProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UplinkNASTransport { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUplinkNonUEAssociatedNRPPaTransportProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UplinkNonUEAssociatedNRPPaTransportProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UplinkNonUEAssociatedNRPPaTransport { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUplinkRANConfigurationTransferProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UplinkRANConfigurationTransferProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UplinkRANConfigurationTransfer { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUplinkRANEarlyStatusTransferProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UplinkRANEarlyStatusTransferProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UplinkRANEarlyStatusTransfer { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUplinkRANStatusTransferProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UplinkRANStatusTransferProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UplinkRANStatusTransfer { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUplinkRIMInformationTransferProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UplinkRIMInformationTransferProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UplinkRIMInformationTransfer { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousUplinkUEAssociatedNRPPaTransportProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::UplinkUEAssociatedNRPPaTransportProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::UplinkUEAssociatedNRPPaTransport { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousWriteReplaceWarningRequestProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::WriteReplaceWarningRequestProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::WriteReplaceWarningRequest { protocol_ies } }
-open_types! { crate::ngap::ngap_pdu_contents::AnonymousWriteReplaceWarningResponseProtocolIEs { value } }
-open_types! { crate::ngap::ngap_pdu_contents::WriteReplaceWarningResponseProtocolIEs { 0 } }
 open_types! { crate::ngap::ngap_pdu_contents::WriteReplaceWarningResponse { protocol_ies } }
 open_types! { crate::ngap::ngap_pdu_descriptions::InitiatingMessage { value } }
 open_types! { crate::ngap::ngap_pdu_descriptions::NGAPPDU { initiatingMessage, successfulOutcome, unsuccessfulOutcome } else {} }

@@ -1,4 +1,4 @@
-//! Work around rasn 0.28 leaving unknown SEQUENCE additions in its APER input.
+//! APER codecs that the generated bindings use in place of rasn 0.28's.
 
 use rasn::prelude::*;
 
@@ -66,3 +66,123 @@ macro_rules! decode_extensible_sequence {
 }
 
 pub(crate) use decode_extensible_sequence;
+
+/// The codec of a `SEQUENCE (SIZE (lower..upper)) OF` newtype.
+///
+/// rasn's derived encoder can disagree with its decoder about the alignment
+/// of the length and of the elements. In APER the length is encoded as a
+/// constrained whole number, through rasn's integer codec, and the elements
+/// follow it. An `unconstrained` list has an upper bound of 64K or more, so
+/// its length is an unconstrained length determinant (X.691 §11.9.3.5):
+/// rasn's sequence codec without the size, which is checked here. The
+/// decoded list grows with the elements read, so that a count alone reserves
+/// no memory. Every other encoding rule keeps rasn's sequence codec.
+macro_rules! sequence_of {
+    ($name:ident, $lower:literal, $upper:literal) => {
+        impl rasn::Encode for $name {
+            fn encode_with_tag_and_constraints<'b, E: rasn::Encoder<'b>>(
+                &self,
+                encoder: &mut E,
+                tag: rasn::types::Tag,
+                constraints: rasn::types::Constraints,
+                identifier: rasn::types::Identifier,
+            ) -> Result<(), E::Error> {
+                if encoder.codec() != rasn::Codec::Aper {
+                    return encoder
+                        .encode_sequence_of(tag, &self.0, constraints, identifier)
+                        .map(drop);
+                }
+                const LENGTH: rasn::types::Constraints =
+                    rasn::constraints!(rasn::value_constraint!($lower, $upper));
+                let _ = encoder.encode_integer(
+                    rasn::types::Tag::INTEGER,
+                    LENGTH,
+                    &self.0.len(),
+                    rasn::types::Identifier::EMPTY,
+                )?;
+                for value in &self.0 {
+                    rasn::Encode::encode(value, encoder)?;
+                }
+                Ok(())
+            }
+        }
+        impl rasn::Decode for $name {
+            fn decode_with_tag_and_constraints<D: rasn::Decoder>(
+                decoder: &mut D,
+                tag: rasn::types::Tag,
+                constraints: rasn::types::Constraints,
+            ) -> Result<Self, D::Error> {
+                if decoder.codec() != rasn::Codec::Aper {
+                    return decoder.decode_sequence_of(tag, constraints).map(Self);
+                }
+                const LENGTH: rasn::types::Constraints =
+                    rasn::constraints!(rasn::value_constraint!($lower, $upper));
+                let length = decoder.decode_integer::<usize>(rasn::types::Tag::INTEGER, LENGTH)?;
+                let mut values = Vec::new();
+                for _ in 0..length {
+                    values.push(rasn::Decode::decode(decoder)?);
+                }
+                Ok(Self(values))
+            }
+        }
+    };
+    ($name:ident, $lower:literal, $upper:literal, unconstrained) => {
+        impl rasn::Encode for $name {
+            fn encode_with_tag_and_constraints<'b, E: rasn::Encoder<'b>>(
+                &self,
+                encoder: &mut E,
+                tag: rasn::types::Tag,
+                constraints: rasn::types::Constraints,
+                identifier: rasn::types::Identifier,
+            ) -> Result<(), E::Error> {
+                if encoder.codec() != rasn::Codec::Aper {
+                    return encoder
+                        .encode_sequence_of(tag, &self.0, constraints, identifier)
+                        .map(drop);
+                }
+                if !($lower..=$upper).contains(&self.0.len()) {
+                    return Err(rasn::error::EncodeError::size_constraint_not_satisfied(
+                        self.0.len(),
+                        &rasn::types::constraints::Size::new(
+                            rasn::types::constraints::Bounded::new($lower, $upper),
+                        ),
+                        encoder.codec(),
+                    )
+                    .into());
+                }
+                encoder
+                    .encode_sequence_of(
+                        tag,
+                        &self.0,
+                        rasn::types::Constraints::default(),
+                        identifier,
+                    )
+                    .map(drop)
+            }
+        }
+        impl rasn::Decode for $name {
+            fn decode_with_tag_and_constraints<D: rasn::Decoder>(
+                decoder: &mut D,
+                tag: rasn::types::Tag,
+                constraints: rasn::types::Constraints,
+            ) -> Result<Self, D::Error> {
+                if decoder.codec() != rasn::Codec::Aper {
+                    return decoder.decode_sequence_of(tag, constraints).map(Self);
+                }
+                let values =
+                    decoder.decode_sequence_of(tag, rasn::types::Constraints::default())?;
+                if !($lower..=$upper).contains(&values.len()) {
+                    return Err(rasn::error::DecodeError::size_constraint_not_satisfied(
+                        Some(values.len()),
+                        concat!($lower, "..=", $upper).into(),
+                        decoder.codec(),
+                    )
+                    .into());
+                }
+                Ok(Self(values))
+            }
+        }
+    };
+}
+
+pub(crate) use sequence_of;

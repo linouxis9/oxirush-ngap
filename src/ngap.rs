@@ -865,54 +865,7 @@ pub mod ngap_containers {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("0..=65535"), identifier = "ProtocolIE-Container")]
     pub struct ProtocolIEContainer(pub SequenceOf<ProtocolIEField>);
-    impl Encode for ProtocolIEContainer {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(0, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for ProtocolIEContainer {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<ProtocolIEField>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(0, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(ProtocolIEField::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { ProtocolIEContainer, 0, 65535 }
     #[doc = " `ProtocolExtensionField`: an IE of a protocol extension container."]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(automatic_tags, identifier = "ProtocolExtensionField")]
@@ -939,54 +892,7 @@ pub mod ngap_containers {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"), identifier = "ProtocolExtensionContainer")]
     pub struct ProtocolExtensionContainer(pub SequenceOf<ProtocolExtensionField>);
-    impl Encode for ProtocolExtensionContainer {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for ProtocolExtensionContainer {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<ProtocolExtensionField>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(ProtocolExtensionField::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { ProtocolExtensionContainer, 1, 65535 }
 }
 #[allow(
     non_camel_case_types,
@@ -1234,54 +1140,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=2048"), identifier = "A2X-PC5-QoS-Flow-List")]
     pub struct A2XPC5QoSFlowList(pub SequenceOf<A2XPC5QoSFlowItem>);
-    impl Encode for A2XPC5QoSFlowList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 2048));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for A2XPC5QoSFlowList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<A2XPC5QoSFlowItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 2048));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(A2XPC5QoSFlowItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { A2XPC5QoSFlowList, 1, 2048 }
     pub use super::ngap_common_data_types::Criticality as AnonymousA2XPC5QoSParametersIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as A2XPC5QoSParametersIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousA2XPC5QoSParametersIEExtensions;
@@ -1568,54 +1427,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"), identifier = "AIoT-DeviceReportList")]
     pub struct AIoTDeviceReportList(pub SequenceOf<AIoTDeviceReportItem>);
-    impl Encode for AIoTDeviceReportList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AIoTDeviceReportList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AIoTDeviceReportItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AIoTDeviceReportItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AIoTDeviceReportList, 1, 65535 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated, identifier = "AIoT-FollowonCommandIndication")]
     #[non_exhaustive]
@@ -1718,105 +1530,11 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"), identifier = "AIoT-ReaderReportList")]
     pub struct AIoTReaderReportList(pub SequenceOf<AIoTReaderReportItem>);
-    impl Encode for AIoTReaderReportList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AIoTReaderReportList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AIoTReaderReportItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AIoTReaderReportItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AIoTReaderReportList, 1, 65535 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"), identifier = "AIoT-RequestedAIoTAreaList")]
     pub struct AIoTRequestedAIoTAreaList(pub SequenceOf<AIoTAreaID>);
-    impl Encode for AIoTRequestedAIoTAreaList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AIoTRequestedAIoTAreaList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AIoTAreaID>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AIoTAreaID::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AIoTRequestedAIoTAreaList, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousAIoTRequestedReaderItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as AIoTRequestedReaderItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousAIoTRequestedReaderItemIEExtensions;
@@ -1855,54 +1573,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"), identifier = "AIoT-RequestedReaderList")]
     pub struct AIoTRequestedReaderList(pub SequenceOf<AIoTRequestedReaderItem>);
-    impl Encode for AIoTRequestedReaderList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AIoTRequestedReaderList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AIoTRequestedReaderItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AIoTRequestedReaderItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AIoTRequestedReaderList, 1, 65535 }
     pub use super::ngap_common_data_types::Criticality as AnonymousAIoTRequestedServiceAreaInformationIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as AIoTRequestedServiceAreaInformationIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousAIoTRequestedServiceAreaInformationIEExtensions;
@@ -2082,54 +1753,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"), identifier = "AMF-TNLAssociationSetupList")]
     pub struct AMFTNLAssociationSetupList(pub SequenceOf<AMFTNLAssociationSetupItem>);
-    impl Encode for AMFTNLAssociationSetupList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AMFTNLAssociationSetupList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AMFTNLAssociationSetupItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AMFTNLAssociationSetupItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AMFTNLAssociationSetupList, 1, 32 }
     pub use super::ngap_common_data_types::Criticality as AnonymousAMFTNLAssociationToAddItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as AMFTNLAssociationToAddItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousAMFTNLAssociationToAddItemIEExtensions;
@@ -2174,54 +1798,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"), identifier = "AMF-TNLAssociationToAddList")]
     pub struct AMFTNLAssociationToAddList(pub SequenceOf<AMFTNLAssociationToAddItem>);
-    impl Encode for AMFTNLAssociationToAddList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AMFTNLAssociationToAddList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AMFTNLAssociationToAddItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AMFTNLAssociationToAddItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AMFTNLAssociationToAddList, 1, 32 }
     pub use super::ngap_common_data_types::Criticality as AnonymousAMFTNLAssociationToRemoveItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as AMFTNLAssociationToRemoveItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousAMFTNLAssociationToRemoveItemIEExtensions;
@@ -2258,54 +1835,7 @@ pub mod ngap_ies {
         identifier = "AMF-TNLAssociationToRemoveList"
     )]
     pub struct AMFTNLAssociationToRemoveList(pub SequenceOf<AMFTNLAssociationToRemoveItem>);
-    impl Encode for AMFTNLAssociationToRemoveList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AMFTNLAssociationToRemoveList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AMFTNLAssociationToRemoveItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AMFTNLAssociationToRemoveItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AMFTNLAssociationToRemoveList, 1, 32 }
     pub use super::ngap_common_data_types::Criticality as AnonymousAMFTNLAssociationToUpdateItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as AMFTNLAssociationToUpdateItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousAMFTNLAssociationToUpdateItemIEExtensions;
@@ -2354,54 +1884,7 @@ pub mod ngap_ies {
         identifier = "AMF-TNLAssociationToUpdateList"
     )]
     pub struct AMFTNLAssociationToUpdateList(pub SequenceOf<AMFTNLAssociationToUpdateItem>);
-    impl Encode for AMFTNLAssociationToUpdateList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AMFTNLAssociationToUpdateList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AMFTNLAssociationToUpdateItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AMFTNLAssociationToUpdateItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AMFTNLAssociationToUpdateList, 1, 32 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "AMF-UE-NGAP-ID", value("0..=1099511627775"))]
     pub struct AMFUENGAPID(pub u64);
@@ -2520,54 +2003,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16384"))]
     pub struct ActivatedCellList(pub SequenceOf<NGRANCGI>);
-    impl Encode for ActivatedCellList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16384));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for ActivatedCellList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<NGRANCGI>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16384));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(NGRANCGI::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { ActivatedCellList, 1, 16384 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
     #[non_exhaustive]
@@ -2610,59 +2046,7 @@ pub mod ngap_ies {
     pub struct AdditionalCancelledlocationReportingReferenceIDList(
         pub SequenceOf<AdditionalCancelledlocationReportingReferenceIDItem>,
     );
-    impl Encode for AdditionalCancelledlocationReportingReferenceIDList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 63));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AdditionalCancelledlocationReportingReferenceIDList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AdditionalCancelledlocationReportingReferenceIDItem>(
-                        tag,
-                        constraints,
-                    )
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 63));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AdditionalCancelledlocationReportingReferenceIDItem::decode(
-                    decoder,
-                )?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AdditionalCancelledlocationReportingReferenceIDList, 1, 63 }
     pub use super::ngap_common_data_types::Criticality as AnonymousAdditionalDLUPTNLInformationForHOItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as AdditionalDLUPTNLInformationForHOItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousAdditionalDLUPTNLInformationForHOItemIEExtensions;
@@ -2710,54 +2094,7 @@ pub mod ngap_ies {
     pub struct AdditionalDLUPTNLInformationForHOList(
         pub SequenceOf<AdditionalDLUPTNLInformationForHOItem>,
     );
-    impl Encode for AdditionalDLUPTNLInformationForHOList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 3));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AdditionalDLUPTNLInformationForHOList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AdditionalDLUPTNLInformationForHOItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 3));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AdditionalDLUPTNLInformationForHOItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AdditionalDLUPTNLInformationForHOList, 1, 3 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
     #[non_exhaustive]
@@ -2925,59 +2262,7 @@ pub mod ngap_ies {
     pub struct AerialUEFlightInformationReportingControlList(
         pub SequenceOf<AerialUEFlightInformationReportingControlItem>,
     );
-    impl Encode for AerialUEFlightInformationReportingControlList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AerialUEFlightInformationReportingControlList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AerialUEFlightInformationReportingControlItem>(
-                        tag,
-                        constraints,
-                    )
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AerialUEFlightInformationReportingControlItem::decode(
-                    decoder,
-                )?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AerialUEFlightInformationReportingControlList, 1, 64 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
     #[non_exhaustive]
@@ -3049,54 +2334,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"), identifier = "Allowed-CAG-List-per-PLMN")]
     pub struct AllowedCAGListPerPLMN(pub SequenceOf<CAGID>);
-    impl Encode for AllowedCAGListPerPLMN {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AllowedCAGListPerPLMN {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<CAGID>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(CAGID::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AllowedCAGListPerPLMN, 1, 256 }
     #[doc = " Inner type "]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
@@ -3150,105 +2388,11 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"), identifier = "Allowed-PNI-NPN-List")]
     pub struct AllowedPNINPNList(pub SequenceOf<AllowedPNINPNItem>);
-    impl Encode for AllowedPNINPNList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AllowedPNINPNList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AllowedPNINPNItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AllowedPNINPNItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AllowedPNINPNList, 1, 16 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=8"))]
     pub struct AllowedNSSAI(pub SequenceOf<AllowedNSSAIItem>);
-    impl Encode for AllowedNSSAI {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AllowedNSSAI {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AllowedNSSAIItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AllowedNSSAIItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AllowedNSSAI, 1, 8 }
     pub use super::ngap_common_data_types::Criticality as AnonymousAllowedNSSAIItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as AllowedNSSAIItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousAllowedNSSAIItemIEExtensions;
@@ -3278,105 +2422,11 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=8"))]
     pub struct AllowedPeriodicityList(pub SequenceOf<Periodicity>);
-    impl Encode for AllowedPeriodicityList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AllowedPeriodicityList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<Periodicity>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(Periodicity::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AllowedPeriodicityList, 1, 8 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct AllowedTACs(pub SequenceOf<TAC>);
-    impl Encode for AllowedTACs {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AllowedTACs {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAC>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAC::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AllowedTACs, 1, 16 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("1..=8", extensible))]
     pub struct AlternativeQoSParaSetIndex(pub Integer);
@@ -3436,54 +2486,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=8"))]
     pub struct AlternativeQoSParaSetList(pub SequenceOf<AlternativeQoSParaSetItem>);
-    impl Encode for AlternativeQoSParaSetList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AlternativeQoSParaSetList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AlternativeQoSParaSetItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AlternativeQoSParaSetItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AlternativeQoSParaSetList, 1, 8 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("0..=8", extensible))]
     pub struct AlternativeQoSParaSetNotifyIndex(pub Integer);
@@ -3595,54 +2598,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct AreaOfInterestCellList(pub SequenceOf<AreaOfInterestCellItem>);
-    impl Encode for AreaOfInterestCellList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AreaOfInterestCellList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AreaOfInterestCellItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AreaOfInterestCellItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AreaOfInterestCellList, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousAreaOfInterestItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as AreaOfInterestItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousAreaOfInterestItemIEExtensions;
@@ -3681,54 +2637,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct AreaOfInterestList(pub SequenceOf<AreaOfInterestItem>);
-    impl Encode for AreaOfInterestList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AreaOfInterestList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AreaOfInterestItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AreaOfInterestItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AreaOfInterestList, 1, 64 }
     pub use super::ngap_common_data_types::Criticality as AnonymousAreaOfInterestRANNodeItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as AreaOfInterestRANNodeItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousAreaOfInterestRANNodeItemIEExtensions;
@@ -3761,54 +2670,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct AreaOfInterestRANNodeList(pub SequenceOf<AreaOfInterestRANNodeItem>);
-    impl Encode for AreaOfInterestRANNodeList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AreaOfInterestRANNodeList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AreaOfInterestRANNodeItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AreaOfInterestRANNodeItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AreaOfInterestRANNodeList, 1, 64 }
     pub use super::ngap_common_data_types::Criticality as AnonymousAreaOfInterestTAIItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as AreaOfInterestTAIItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousAreaOfInterestTAIItemIEExtensions;
@@ -3838,54 +2700,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct AreaOfInterestTAIList(pub SequenceOf<AreaOfInterestTAIItem>);
-    impl Encode for AreaOfInterestTAIList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AreaOfInterestTAIList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AreaOfInterestTAIItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AreaOfInterestTAIItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AreaOfInterestTAIList, 1, 16 }
     pub use super::ngap_common_data_types::Criticality as AreaScopeOfMDTEUTRAChoiceExtensionsCriticality;
     pub use super::ngap_containers::ProtocolIEField as AreaScopeOfMDTEUTRAChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
@@ -3998,54 +2813,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=8"))]
     pub struct AreaScopeOfNeighCellsList(pub SequenceOf<AreaScopeOfNeighCellsItem>);
-    impl Encode for AreaScopeOfNeighCellsList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AreaScopeOfNeighCellsList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AreaScopeOfNeighCellsItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AreaScopeOfNeighCellsItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AreaScopeOfNeighCellsList, 1, 8 }
     pub use super::ngap_common_data_types::Criticality as AreaScopeOfQMCChoiceExtensionsCriticality;
     pub use super::ngap_containers::ProtocolIEField as AreaScopeOfQMCChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
@@ -4194,54 +2962,7 @@ pub mod ngap_ies {
     pub struct AssociatedMBSQosFlowSetupRequestList(
         pub SequenceOf<AssociatedMBSQosFlowSetupRequestItem>,
     );
-    impl Encode for AssociatedMBSQosFlowSetupRequestList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AssociatedMBSQosFlowSetupRequestList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AssociatedMBSQosFlowSetupRequestItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AssociatedMBSQosFlowSetupRequestItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AssociatedMBSQosFlowSetupRequestList, 1, 64 }
     pub use super::ngap_common_data_types::Criticality as AnonymousAssociatedMBSQosFlowSetuporModifyRequestItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as AssociatedMBSQosFlowSetuporModifyRequestItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousAssociatedMBSQosFlowSetuporModifyRequestItemIEExtensions;
@@ -4282,59 +3003,7 @@ pub mod ngap_ies {
     pub struct AssociatedMBSQosFlowSetuporModifyRequestList(
         pub SequenceOf<AssociatedMBSQosFlowSetuporModifyRequestItem>,
     );
-    impl Encode for AssociatedMBSQosFlowSetuporModifyRequestList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AssociatedMBSQosFlowSetuporModifyRequestList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AssociatedMBSQosFlowSetuporModifyRequestItem>(
-                        tag,
-                        constraints,
-                    )
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AssociatedMBSQosFlowSetuporModifyRequestItem::decode(
-                    decoder,
-                )?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AssociatedMBSQosFlowSetuporModifyRequestList, 1, 64 }
     #[doc = " Inner type "]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
@@ -4381,54 +3050,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct AssociatedQosFlowList(pub SequenceOf<AssociatedQosFlowItem>);
-    impl Encode for AssociatedQosFlowList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AssociatedQosFlowList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AssociatedQosFlowItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AssociatedQosFlowItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AssociatedQosFlowList, 1, 64 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct AssociatedSessionID(pub OctetString);
@@ -4473,54 +3095,7 @@ pub mod ngap_ies {
     pub struct AvailableBitrateReportThresholdList(
         pub SequenceOf<AvailableBitrateReportThresholdItem>,
     );
-    impl Encode for AvailableBitrateReportThresholdList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for AvailableBitrateReportThresholdList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AvailableBitrateReportThresholdItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AvailableBitrateReportThresholdItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { AvailableBitrateReportThresholdList, 1, 8 }
     #[doc = " Inner type "]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
@@ -4729,54 +3304,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=4"))]
     pub struct BluetoothMeasConfigNameList(pub SequenceOf<BluetoothMeasConfigNameItem>);
-    impl Encode for BluetoothMeasConfigNameList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 4));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for BluetoothMeasConfigNameList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<BluetoothMeasConfigNameItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 4));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(BluetoothMeasConfigNameItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { BluetoothMeasConfigNameList, 1, 4 }
     #[doc = " Inner type "]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
@@ -4965,54 +3493,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=12"))]
     pub struct BroadcastPLMNList(pub SequenceOf<BroadcastPLMNItem>);
-    impl Encode for BroadcastPLMNList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 12));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for BroadcastPLMNList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<BroadcastPLMNItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 12));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(BroadcastPLMNItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { BroadcastPLMNList, 1, 12 }
     pub use super::ngap_common_data_types::Criticality as AnonymousBroadcastTransportFailureTransferIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as BroadcastTransportFailureTransferIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousBroadcastTransportFailureTransferIEExtensions;
@@ -5200,54 +3681,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct CAGListforMDT(pub SequenceOf<CAGListforMDTItem>);
-    impl Encode for CAGListforMDT {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CAGListforMDT {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<CAGListforMDTItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(CAGListforMDTItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CAGListforMDT, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousCAGListforMDTItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as CAGListforMDTItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousCAGListforMDTItemIEExtensions;
@@ -5335,54 +3769,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=15"))]
     pub struct CNTypeRestrictionsForEquivalent(pub SequenceOf<CNTypeRestrictionsForEquivalentItem>);
-    impl Encode for CNTypeRestrictionsForEquivalent {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 15));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CNTypeRestrictionsForEquivalent {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<CNTypeRestrictionsForEquivalentItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 15));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(CNTypeRestrictionsForEquivalentItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CNTypeRestrictionsForEquivalent, 1, 15 }
     #[doc = " Inner type "]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
@@ -5537,54 +3924,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"), identifier = "CancelledCellsInEAI-EUTRA")]
     pub struct CancelledCellsInEAIEUTRA(pub SequenceOf<CancelledCellsInEAIEUTRAItem>);
-    impl Encode for CancelledCellsInEAIEUTRA {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CancelledCellsInEAIEUTRA {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<CancelledCellsInEAIEUTRAItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(CancelledCellsInEAIEUTRAItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CancelledCellsInEAIEUTRA, 1, 65535 }
     pub use super::ngap_common_data_types::Criticality as AnonymousCancelledCellsInEAIEUTRAItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as CancelledCellsInEAIEUTRAItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousCancelledCellsInEAIEUTRAItemIEExtensions;
@@ -5623,54 +3963,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"), identifier = "CancelledCellsInEAI-NR")]
     pub struct CancelledCellsInEAINR(pub SequenceOf<CancelledCellsInEAINRItem>);
-    impl Encode for CancelledCellsInEAINR {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CancelledCellsInEAINR {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<CancelledCellsInEAINRItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(CancelledCellsInEAINRItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CancelledCellsInEAINR, 1, 65535 }
     pub use super::ngap_common_data_types::Criticality as AnonymousCancelledCellsInEAINRItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as CancelledCellsInEAINRItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousCancelledCellsInEAINRItemIEExtensions;
@@ -5709,54 +4002,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"), identifier = "CancelledCellsInTAI-EUTRA")]
     pub struct CancelledCellsInTAIEUTRA(pub SequenceOf<CancelledCellsInTAIEUTRAItem>);
-    impl Encode for CancelledCellsInTAIEUTRA {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CancelledCellsInTAIEUTRA {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<CancelledCellsInTAIEUTRAItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(CancelledCellsInTAIEUTRAItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CancelledCellsInTAIEUTRA, 1, 65535 }
     pub use super::ngap_common_data_types::Criticality as AnonymousCancelledCellsInTAIEUTRAItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as CancelledCellsInTAIEUTRAItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousCancelledCellsInTAIEUTRAItemIEExtensions;
@@ -5795,54 +4041,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"), identifier = "CancelledCellsInTAI-NR")]
     pub struct CancelledCellsInTAINR(pub SequenceOf<CancelledCellsInTAINRItem>);
-    impl Encode for CancelledCellsInTAINR {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CancelledCellsInTAINR {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<CancelledCellsInTAINRItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(CancelledCellsInTAINRItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CancelledCellsInTAINR, 1, 65535 }
     pub use super::ngap_common_data_types::Criticality as AnonymousCancelledCellsInTAINRItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as CancelledCellsInTAINRItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousCancelledCellsInTAINRItemIEExtensions;
@@ -5964,54 +4163,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"))]
     pub struct CandidateCellList(pub SequenceOf<CandidateCellItem>);
-    impl Encode for CandidateCellList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CandidateCellList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<CandidateCellItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(CandidateCellItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CandidateCellList, 1, 32 }
     pub use super::ngap_common_data_types::Criticality as AnonymousCandidatePCIIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as CandidatePCIIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousCandidatePCIIEExtensions;
@@ -6106,54 +4258,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"))]
     pub struct CandidateRelayUEInformationList(pub SequenceOf<CandidateRelayUEInformationItem>);
-    impl Encode for CandidateRelayUEInformationList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CandidateRelayUEInformationList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<CandidateRelayUEInformationItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(CandidateRelayUEInformationItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CandidateRelayUEInformationList, 1, 32 }
     pub use super::ngap_common_data_types::Criticality as CauseChoiceExtensionsCriticality;
     pub use super::ngap_containers::ProtocolIEField as CauseChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
@@ -6534,105 +4639,11 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct CellCAGList(pub SequenceOf<CAGID>);
-    impl Encode for CellCAGList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CellCAGList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<CAGID>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(CAGID::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CellCAGList, 1, 64 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"))]
     pub struct CellIDBroadcastEUTRA(pub SequenceOf<CellIDBroadcastEUTRAItem>);
-    impl Encode for CellIDBroadcastEUTRA {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CellIDBroadcastEUTRA {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<CellIDBroadcastEUTRAItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(CellIDBroadcastEUTRAItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CellIDBroadcastEUTRA, 1, 65535 }
     pub use super::ngap_common_data_types::Criticality as AnonymousCellIDBroadcastEUTRAItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as CellIDBroadcastEUTRAItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousCellIDBroadcastEUTRAItemIEExtensions;
@@ -6665,54 +4676,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"))]
     pub struct CellIDBroadcastNR(pub SequenceOf<CellIDBroadcastNRItem>);
-    impl Encode for CellIDBroadcastNR {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CellIDBroadcastNR {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<CellIDBroadcastNRItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(CellIDBroadcastNRItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CellIDBroadcastNR, 1, 65535 }
     pub use super::ngap_common_data_types::Criticality as AnonymousCellIDBroadcastNRItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as CellIDBroadcastNRItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousCellIDBroadcastNRItemIEExtensions;
@@ -6742,54 +4706,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"))]
     pub struct CellIDCancelledEUTRA(pub SequenceOf<CellIDCancelledEUTRAItem>);
-    impl Encode for CellIDCancelledEUTRA {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CellIDCancelledEUTRA {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<CellIDCancelledEUTRAItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(CellIDCancelledEUTRAItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CellIDCancelledEUTRA, 1, 65535 }
     pub use super::ngap_common_data_types::Criticality as AnonymousCellIDCancelledEUTRAItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as CellIDCancelledEUTRAItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousCellIDCancelledEUTRAItemIEExtensions;
@@ -6828,54 +4745,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"))]
     pub struct CellIDCancelledNR(pub SequenceOf<CellIDCancelledNRItem>);
-    impl Encode for CellIDCancelledNR {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CellIDCancelledNR {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<CellIDCancelledNRItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(CellIDCancelledNRItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CellIDCancelledNR, 1, 65535 }
     pub use super::ngap_common_data_types::Criticality as AnonymousCellIDCancelledNRItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as CellIDCancelledNRItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousCellIDCancelledNRItemIEExtensions;
@@ -6941,156 +4811,15 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"), identifier = "CellIdListforMDT-EUTRA")]
     pub struct CellIdListforMDTEUTRA(pub SequenceOf<EUTRACGI>);
-    impl Encode for CellIdListforMDTEUTRA {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CellIdListforMDTEUTRA {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<EUTRACGI>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(EUTRACGI::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CellIdListforMDTEUTRA, 1, 32 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"), identifier = "CellIdListforMDT-NR")]
     pub struct CellIdListforMDTNR(pub SequenceOf<NRCGI>);
-    impl Encode for CellIdListforMDTNR {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CellIdListforMDTNR {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<NRCGI>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(NRCGI::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CellIdListforMDTNR, 1, 32 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"))]
     pub struct CellIdListforQMC(pub SequenceOf<NGRANCGI>);
-    impl Encode for CellIdListforQMC {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CellIdListforQMC {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<NGRANCGI>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(NGRANCGI::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CellIdListforQMC, 1, 32 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
     #[non_exhaustive]
@@ -7132,54 +4861,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16384"))]
     pub struct CellsToActivateList(pub SequenceOf<NGRANCGI>);
-    impl Encode for CellsToActivateList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16384));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CellsToActivateList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<NGRANCGI>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16384));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(NGRANCGI::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CellsToActivateList, 1, 16384 }
     pub use super::ngap_common_data_types::Criticality as ClockAccuracyChoiceExtensionsCriticality;
     pub use super::ngap_containers::ProtocolIEField as ClockAccuracyChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
@@ -7483,54 +5165,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"), identifier = "CompletedCellsInEAI-EUTRA")]
     pub struct CompletedCellsInEAIEUTRA(pub SequenceOf<CompletedCellsInEAIEUTRAItem>);
-    impl Encode for CompletedCellsInEAIEUTRA {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CompletedCellsInEAIEUTRA {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<CompletedCellsInEAIEUTRAItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(CompletedCellsInEAIEUTRAItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CompletedCellsInEAIEUTRA, 1, 65535 }
     pub use super::ngap_common_data_types::Criticality as AnonymousCompletedCellsInEAIEUTRAItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as CompletedCellsInEAIEUTRAItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousCompletedCellsInEAIEUTRAItemIEExtensions;
@@ -7563,54 +5198,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"), identifier = "CompletedCellsInEAI-NR")]
     pub struct CompletedCellsInEAINR(pub SequenceOf<CompletedCellsInEAINRItem>);
-    impl Encode for CompletedCellsInEAINR {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CompletedCellsInEAINR {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<CompletedCellsInEAINRItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(CompletedCellsInEAINRItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CompletedCellsInEAINR, 1, 65535 }
     pub use super::ngap_common_data_types::Criticality as AnonymousCompletedCellsInEAINRItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as CompletedCellsInEAINRItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousCompletedCellsInEAINRItemIEExtensions;
@@ -7640,54 +5228,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"), identifier = "CompletedCellsInTAI-EUTRA")]
     pub struct CompletedCellsInTAIEUTRA(pub SequenceOf<CompletedCellsInTAIEUTRAItem>);
-    impl Encode for CompletedCellsInTAIEUTRA {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CompletedCellsInTAIEUTRA {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<CompletedCellsInTAIEUTRAItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(CompletedCellsInTAIEUTRAItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CompletedCellsInTAIEUTRA, 1, 65535 }
     pub use super::ngap_common_data_types::Criticality as AnonymousCompletedCellsInTAIEUTRAItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as CompletedCellsInTAIEUTRAItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousCompletedCellsInTAIEUTRAItemIEExtensions;
@@ -7720,54 +5261,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"), identifier = "CompletedCellsInTAI-NR")]
     pub struct CompletedCellsInTAINR(pub SequenceOf<CompletedCellsInTAINRItem>);
-    impl Encode for CompletedCellsInTAINR {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CompletedCellsInTAINR {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<CompletedCellsInTAINRItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(CompletedCellsInTAINRItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CompletedCellsInTAINR, 1, 65535 }
     pub use super::ngap_common_data_types::Criticality as AnonymousCompletedCellsInTAINRItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as CompletedCellsInTAINRItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousCompletedCellsInTAINRItemIEExtensions;
@@ -8029,54 +5523,7 @@ pub mod ngap_ies {
         identifier = "CriticalityDiagnostics-IE-List"
     )]
     pub struct CriticalityDiagnosticsIEList(pub SequenceOf<CriticalityDiagnosticsIEItem>);
-    impl Encode for CriticalityDiagnosticsIEList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for CriticalityDiagnosticsIEList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<CriticalityDiagnosticsIEItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(CriticalityDiagnosticsIEItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { CriticalityDiagnosticsIEList, 1, 256 }
     #[doc = " Inner type "]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
@@ -8189,54 +5636,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"))]
     pub struct DAPSResponseInfoList(pub SequenceOf<DAPSResponseInfoItem>);
-    impl Encode for DAPSResponseInfoList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for DAPSResponseInfoList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<DAPSResponseInfoItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(DAPSResponseInfoItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { DAPSResponseInfoList, 1, 32 }
     pub use super::ngap_common_data_types::Criticality as AnonymousDLCPSecurityInformationIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as DLCPSecurityInformationIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousDLCPSecurityInformationIEExtensions;
@@ -8574,54 +5974,7 @@ pub mod ngap_ies {
         identifier = "DRBsSubjectToDLDiscarding-List"
     )]
     pub struct DRBsSubjectToDLDiscardingList(pub SequenceOf<DRBsSubjectToDLDiscardingItem>);
-    impl Encode for DRBsSubjectToDLDiscardingList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for DRBsSubjectToDLDiscardingList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<DRBsSubjectToDLDiscardingItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(DRBsSubjectToDLDiscardingItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { DRBsSubjectToDLDiscardingList, 1, 32 }
     pub use super::ngap_common_data_types::Criticality as AnonymousDRBsSubjectToEarlyStatusTransferItemIEExtensionCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as DRBsSubjectToEarlyStatusTransferItemIEExtension;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousDRBsSubjectToEarlyStatusTransferItemIEExtension;
@@ -8666,54 +6019,7 @@ pub mod ngap_ies {
     pub struct DRBsSubjectToEarlyStatusTransferList(
         pub SequenceOf<DRBsSubjectToEarlyStatusTransferItem>,
     );
-    impl Encode for DRBsSubjectToEarlyStatusTransferList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for DRBsSubjectToEarlyStatusTransferList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<DRBsSubjectToEarlyStatusTransferItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(DRBsSubjectToEarlyStatusTransferItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { DRBsSubjectToEarlyStatusTransferList, 1, 32 }
     pub use super::ngap_common_data_types::Criticality as AnonymousDRBsSubjectToStatusTransferItemIEExtensionCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as DRBsSubjectToStatusTransferItemIEExtension;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousDRBsSubjectToStatusTransferItemIEExtension;
@@ -8758,54 +6064,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"))]
     pub struct DRBsSubjectToStatusTransferList(pub SequenceOf<DRBsSubjectToStatusTransferItem>);
-    impl Encode for DRBsSubjectToStatusTransferList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for DRBsSubjectToStatusTransferList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<DRBsSubjectToStatusTransferItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(DRBsSubjectToStatusTransferItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { DRBsSubjectToStatusTransferList, 1, 32 }
     pub use super::ngap_common_data_types::Criticality as AnonymousDRBsToQosFlowsMappingItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as DRBsToQosFlowsMappingItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousDRBsToQosFlowsMappingItemIEExtensions;
@@ -8844,54 +6103,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"))]
     pub struct DRBsToQosFlowsMappingList(pub SequenceOf<DRBsToQosFlowsMappingItem>);
-    impl Encode for DRBsToQosFlowsMappingList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for DRBsToQosFlowsMappingList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<DRBsToQosFlowsMappingItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(DRBsToQosFlowsMappingItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { DRBsToQosFlowsMappingList, 1, 32 }
     #[doc = " D"]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
@@ -8954,105 +6166,11 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"))]
     pub struct DataForwardingResponseDRBList(pub SequenceOf<DataForwardingResponseDRBItem>);
-    impl Encode for DataForwardingResponseDRBList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for DataForwardingResponseDRBList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<DataForwardingResponseDRBItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(DataForwardingResponseDRBItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { DataForwardingResponseDRBList, 1, 32 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct DataForwardingResponseERABList(pub SequenceOf<DataForwardingResponseERABListItem>);
-    impl Encode for DataForwardingResponseERABList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for DataForwardingResponseERABList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<DataForwardingResponseERABListItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(DataForwardingResponseERABListItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { DataForwardingResponseERABList, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousDataForwardingResponseERABListItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as DataForwardingResponseERABListItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousDataForwardingResponseERABListItemIEExtensions;
@@ -9210,54 +6328,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"), identifier = "E-RABInformationList")]
     pub struct ERABInformationList(pub SequenceOf<ERABInformationItem>);
-    impl Encode for ERABInformationList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for ERABInformationList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<ERABInformationItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(ERABInformationItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { ERABInformationList, 1, 256 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
     #[non_exhaustive]
@@ -9312,57 +6383,7 @@ pub mod ngap_ies {
     pub struct ECNMarkingorCongestionInformationReportingStatus(
         pub SequenceOf<ECNMarkingorCongestionInformationReportingStatusItem>,
     );
-    impl Encode for ECNMarkingorCongestionInformationReportingStatus {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for ECNMarkingorCongestionInformationReportingStatus {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<ECNMarkingorCongestionInformationReportingStatusItem>(
-                        tag,
-                        constraints,
-                    )
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(ECNMarkingorCongestionInformationReportingStatusItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { ECNMarkingorCongestionInformationReportingStatus, 1, 64 }
     pub use super::ngap_common_data_types::Criticality as AnonymousECNMarkingorCongestionInformationReportingStatusItemIEExtensionCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as ECNMarkingorCongestionInformationReportingStatusItemIEExtension;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousECNMarkingorCongestionInformationReportingStatusItemIEExtension;
@@ -9587,105 +6608,11 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"), identifier = "EUTRA-CGIList")]
     pub struct EUTRACGIList(pub SequenceOf<EUTRACGI>);
-    impl Encode for EUTRACGIList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for EUTRACGIList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<EUTRACGI>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(EUTRACGI::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { EUTRACGIList, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"), identifier = "EUTRA-CGIListForWarning")]
     pub struct EUTRACGIListForWarning(pub SequenceOf<EUTRACGI>);
-    impl Encode for EUTRACGIListForWarning {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for EUTRACGIListForWarning {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<EUTRACGI>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(EUTRACGI::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { EUTRACGIListForWarning, 1, 65535 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated, identifier = "EUTRA-Paging-Time-Window")]
     #[non_exhaustive]
@@ -9844,54 +6771,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"), identifier = "EUTRAN-CellReportList")]
     pub struct EUTRANCellReportList(pub SequenceOf<EUTRANCellReportItem>);
-    impl Encode for EUTRANCellReportList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for EUTRANCellReportList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<EUTRANCellReportItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(EUTRANCellReportItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { EUTRANCellReportList, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousEUTRANCellToReportItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as EUTRANCellToReportItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousEUTRANCellToReportItemIEExtensions;
@@ -9921,54 +6801,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"), identifier = "EUTRAN-CellToReportList")]
     pub struct EUTRANCellToReportList(pub SequenceOf<EUTRANCellToReportItem>);
-    impl Encode for EUTRANCellToReportList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for EUTRANCellToReportList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<EUTRANCellToReportItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(EUTRANCellToReportItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { EUTRANCellToReportList, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousEUTRANCompositeAvailableCapacityGroupIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as EUTRANCompositeAvailableCapacityGroupIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousEUTRANCompositeAvailableCapacityGroupIEExtensions;
@@ -10192,54 +7025,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"))]
     pub struct EmergencyAreaIDBroadcastEUTRA(pub SequenceOf<EmergencyAreaIDBroadcastEUTRAItem>);
-    impl Encode for EmergencyAreaIDBroadcastEUTRA {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for EmergencyAreaIDBroadcastEUTRA {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<EmergencyAreaIDBroadcastEUTRAItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(EmergencyAreaIDBroadcastEUTRAItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { EmergencyAreaIDBroadcastEUTRA, 1, 65535 }
     pub use super::ngap_common_data_types::Criticality as AnonymousEmergencyAreaIDBroadcastEUTRAItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as EmergencyAreaIDBroadcastEUTRAItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousEmergencyAreaIDBroadcastEUTRAItemIEExtensions;
@@ -10278,54 +7064,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"))]
     pub struct EmergencyAreaIDBroadcastNR(pub SequenceOf<EmergencyAreaIDBroadcastNRItem>);
-    impl Encode for EmergencyAreaIDBroadcastNR {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for EmergencyAreaIDBroadcastNR {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<EmergencyAreaIDBroadcastNRItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(EmergencyAreaIDBroadcastNRItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { EmergencyAreaIDBroadcastNR, 1, 65535 }
     pub use super::ngap_common_data_types::Criticality as AnonymousEmergencyAreaIDBroadcastNRItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as EmergencyAreaIDBroadcastNRItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousEmergencyAreaIDBroadcastNRItemIEExtensions;
@@ -10364,54 +7103,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"))]
     pub struct EmergencyAreaIDCancelledEUTRA(pub SequenceOf<EmergencyAreaIDCancelledEUTRAItem>);
-    impl Encode for EmergencyAreaIDCancelledEUTRA {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for EmergencyAreaIDCancelledEUTRA {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<EmergencyAreaIDCancelledEUTRAItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(EmergencyAreaIDCancelledEUTRAItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { EmergencyAreaIDCancelledEUTRA, 1, 65535 }
     pub use super::ngap_common_data_types::Criticality as AnonymousEmergencyAreaIDCancelledEUTRAItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as EmergencyAreaIDCancelledEUTRAItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousEmergencyAreaIDCancelledEUTRAItemIEExtensions;
@@ -10450,54 +7142,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"))]
     pub struct EmergencyAreaIDCancelledNR(pub SequenceOf<EmergencyAreaIDCancelledNRItem>);
-    impl Encode for EmergencyAreaIDCancelledNR {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for EmergencyAreaIDCancelledNR {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<EmergencyAreaIDCancelledNRItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(EmergencyAreaIDCancelledNRItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { EmergencyAreaIDCancelledNR, 1, 65535 }
     pub use super::ngap_common_data_types::Criticality as AnonymousEmergencyAreaIDCancelledNRItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as EmergencyAreaIDCancelledNRItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousEmergencyAreaIDCancelledNRItemIEExtensions;
@@ -10536,105 +7181,11 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"))]
     pub struct EmergencyAreaIDList(pub SequenceOf<EmergencyAreaID>);
-    impl Encode for EmergencyAreaIDList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for EmergencyAreaIDList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<EmergencyAreaID>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(EmergencyAreaID::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { EmergencyAreaIDList, 1, 65535 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct EmergencyAreaIDListForRestart(pub SequenceOf<EmergencyAreaID>);
-    impl Encode for EmergencyAreaIDListForRestart {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for EmergencyAreaIDListForRestart {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<EmergencyAreaID>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(EmergencyAreaID::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { EmergencyAreaIDListForRestart, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousEmergencyFallbackIndicatorIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as EmergencyFallbackIndicatorIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousEmergencyFallbackIndicatorIEExtensions;
@@ -10728,54 +7279,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=15"))]
     pub struct EquivalentPLMNs(pub SequenceOf<PLMNIdentity>);
-    impl Encode for EquivalentPLMNs {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 15));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for EquivalentPLMNs {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PLMNIdentity>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 15));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PLMNIdentity::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { EquivalentPLMNs, 1, 15 }
     pub use super::ngap_common_data_types::Criticality as AnonymousEquivalentSNPNsItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as EquivalentSNPNsItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousEquivalentSNPNsItemIEExtensions;
@@ -10814,54 +7318,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=15"))]
     pub struct EquivalentSNPNsList(pub SequenceOf<EquivalentSNPNsItem>);
-    impl Encode for EquivalentSNPNsList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 15));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for EquivalentSNPNsList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<EquivalentSNPNsItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 15));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(EquivalentSNPNsItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { EquivalentSNPNsList, 1, 15 }
     pub use super::ngap_common_data_types::Criticality as AnonymousEventBasedReportingIEsIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as EventBasedReportingIEsIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousEventBasedReportingIEsIEExtensions;
@@ -11011,54 +7468,7 @@ pub mod ngap_ies {
     pub struct ExcessPacketDelayThresholdConfiguration(
         pub SequenceOf<ExcessPacketDelayThresholdItem>,
     );
-    impl Encode for ExcessPacketDelayThresholdConfiguration {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 255));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for ExcessPacketDelayThresholdConfiguration {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<ExcessPacketDelayThresholdItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 255));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(ExcessPacketDelayThresholdItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { ExcessPacketDelayThresholdConfiguration, 1, 255 }
     pub use super::ngap_common_data_types::Criticality as AnonymousExcessPacketDelayThresholdItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as ExcessPacketDelayThresholdItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousExcessPacketDelayThresholdItemIEExtensions;
@@ -11238,54 +7648,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct ExpectedUEMovingTrajectory(pub SequenceOf<ExpectedUEMovingTrajectoryItem>);
-    impl Encode for ExpectedUEMovingTrajectory {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for ExpectedUEMovingTrajectory {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<ExpectedUEMovingTrajectoryItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(ExpectedUEMovingTrajectoryItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { ExpectedUEMovingTrajectory, 1, 16 }
     pub use super::ngap_common_data_types::Criticality as AnonymousExpectedUEMovingTrajectoryItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as ExpectedUEMovingTrajectoryItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousExpectedUEMovingTrajectoryItemIEExtensions;
@@ -11472,54 +7835,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"))]
     pub struct ExtendedSliceSupportList(pub SequenceOf<SliceSupportItem>);
-    impl Encode for ExtendedSliceSupportList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for ExtendedSliceSupportList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<SliceSupportItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(SliceSupportItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { ExtendedSliceSupportList, 1, 65535 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct ExtendedUEIdentityIndexValue(pub FixedBitString<16usize>);
@@ -11914,108 +8230,14 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=2048"))]
     pub struct FiveGProSePC5QoSFlowList(pub SequenceOf<FiveGProSePC5QoSFlowItem>);
-    impl Encode for FiveGProSePC5QoSFlowList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 2048));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for FiveGProSePC5QoSFlowList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<FiveGProSePC5QoSFlowItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 2048));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(FiveGProSePC5QoSFlowItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { FiveGProSePC5QoSFlowList, 1, 2048 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("0..=255", extensible))]
     pub struct FiveQI(pub Integer);
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct ForbiddenAreaInformation(pub SequenceOf<ForbiddenAreaInformationItem>);
-    impl Encode for ForbiddenAreaInformation {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for ForbiddenAreaInformation {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<ForbiddenAreaInformationItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(ForbiddenAreaInformationItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { ForbiddenAreaInformation, 1, 16 }
     pub use super::ngap_common_data_types::Criticality as AnonymousForbiddenAreaInformationItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as ForbiddenAreaInformationItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousForbiddenAreaInformationItemIEExtensions;
@@ -12054,54 +8276,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=4096"))]
     pub struct ForbiddenTACs(pub SequenceOf<TAC>);
-    impl Encode for ForbiddenTACs {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 4096));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for ForbiddenTACs {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAC>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 4096));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAC::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { ForbiddenTACs, 1, 4096 }
     pub use super::ngap_common_data_types::Criticality as AnonymousFromEUTRANtoNGRANIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as FromEUTRANtoNGRANIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousFromEUTRANtoNGRANIEExtensions;
@@ -12382,54 +8557,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=1024"))]
     pub struct GUAMIList(pub SequenceOf<GUAMIListItem>);
-    impl Encode for GUAMIList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 1024));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for GUAMIList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<GUAMIListItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 1024));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(GUAMIListItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { GUAMIList, 1, 1024 }
     pub use super::ngap_common_data_types::Criticality as AnonymousGUAMIListItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as GUAMIListItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousGUAMIListItemIEExtensions;
@@ -14821,54 +10949,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=8"))]
     pub struct LastVisitedPSCellList(pub SequenceOf<LastVisitedPSCellInformation>);
-    impl Encode for LastVisitedPSCellList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for LastVisitedPSCellList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<LastVisitedPSCellInformation>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(LastVisitedPSCellInformation::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { LastVisitedPSCellList, 1, 8 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct LastVisitedUTRANCellInformation(pub OctetString);
@@ -15505,59 +11586,7 @@ pub mod ngap_ies {
     pub struct MBSActiveSessionInformationSourcetoTargetList(
         pub SequenceOf<MBSActiveSessionInformationSourcetoTargetItem>,
     );
-    impl Encode for MBSActiveSessionInformationSourcetoTargetList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MBSActiveSessionInformationSourcetoTargetList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<MBSActiveSessionInformationSourcetoTargetItem>(
-                        tag,
-                        constraints,
-                    )
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(MBSActiveSessionInformationSourcetoTargetItem::decode(
-                    decoder,
-                )?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSActiveSessionInformationSourcetoTargetList, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousMBSActiveSessionInformationTargettoSourceItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as MBSActiveSessionInformationTargettoSourceItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSActiveSessionInformationTargettoSourceItemIEExtensions;
@@ -15605,59 +11634,7 @@ pub mod ngap_ies {
     pub struct MBSActiveSessionInformationTargettoSourceList(
         pub SequenceOf<MBSActiveSessionInformationTargettoSourceItem>,
     );
-    impl Encode for MBSActiveSessionInformationTargettoSourceList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MBSActiveSessionInformationTargettoSourceList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<MBSActiveSessionInformationTargettoSourceItem>(
-                        tag,
-                        constraints,
-                    )
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(MBSActiveSessionInformationTargettoSourceItem::decode(
-                    decoder,
-                )?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSActiveSessionInformationTargettoSourceList, 1, 256 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(
         delegate,
@@ -15668,54 +11645,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"), identifier = "MBS-AreaTAIList")]
     pub struct MBSAreaTAIList(pub SequenceOf<TAI>);
-    impl Encode for MBSAreaTAIList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MBSAreaTAIList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAI>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAI::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSAreaTAIList, 1, 16 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated, identifier = "MBS-AssistanceInformation")]
     #[non_exhaustive]
@@ -15771,54 +11701,7 @@ pub mod ngap_ies {
         identifier = "MBS-DataForwardingResponseMRBList"
     )]
     pub struct MBSDataForwardingResponseMRBList(pub SequenceOf<MBSDataForwardingResponseMRBItem>);
-    impl Encode for MBSDataForwardingResponseMRBList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MBSDataForwardingResponseMRBList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<MBSDataForwardingResponseMRBItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(MBSDataForwardingResponseMRBItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSDataForwardingResponseMRBList, 1, 32 }
     pub use super::ngap_common_data_types::Criticality as AnonymousMBSDistributionReleaseRequestTransferIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as MBSDistributionReleaseRequestTransferIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSDistributionReleaseRequestTransferIEExtensions;
@@ -16019,60 +11902,7 @@ pub mod ngap_ies {
         identifier = "MBS-IntendedServiceAreaList"
     )]
     pub struct MBSIntendedServiceAreaList(pub SequenceOf<IntendedServiceAreaCoordinates>);
-    impl Encode for MBSIntendedServiceAreaList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            if !(1..=65536).contains(&self.0.len()) {
-                return Err(rasn::error::EncodeError::size_constraint_not_satisfied(
-                    self.0.len(),
-                    &rasn::types::constraints::Size::new(rasn::types::constraints::Bounded::new(
-                        1, 65536,
-                    )),
-                    encoder.codec(),
-                )
-                .into());
-            }
-            encoder
-                .encode_sequence_of(tag, &self.0, Constraints::default(), identifier)
-                .map(drop)
-        }
-    }
-    impl Decode for MBSIntendedServiceAreaList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<IntendedServiceAreaCoordinates>(tag, constraints)
-                    .map(Self);
-            }
-            let values = decoder.decode_sequence_of::<IntendedServiceAreaCoordinates>(
-                tag,
-                Constraints::default(),
-            )?;
-            if !(1..=65536).contains(&values.len()) {
-                return Err(rasn::error::DecodeError::size_constraint_not_satisfied(
-                    Some(values.len()),
-                    "1..=65536".into(),
-                    decoder.codec(),
-                )
-                .into());
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSIntendedServiceAreaList, 1, 65536, unconstrained }
     pub use super::ngap_common_data_types::Criticality as AnonymousMBSMappingandDataForwardingRequestItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as MBSMappingandDataForwardingRequestItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSMappingandDataForwardingRequestItemIEExtensions;
@@ -16123,54 +11953,7 @@ pub mod ngap_ies {
     pub struct MBSMappingandDataForwardingRequestList(
         pub SequenceOf<MBSMappingandDataForwardingRequestItem>,
     );
-    impl Encode for MBSMappingandDataForwardingRequestList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MBSMappingandDataForwardingRequestList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<MBSMappingandDataForwardingRequestItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(MBSMappingandDataForwardingRequestItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSMappingandDataForwardingRequestList, 1, 32 }
     pub use super::ngap_common_data_types::Criticality as MBSNGUFailureIndicationChoiceExtensionsCriticality;
     pub use super::ngap_containers::ProtocolIEField as MBSNGUFailureIndicationChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
@@ -16199,54 +11982,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"), identifier = "MBS-QoSFlowList")]
     pub struct MBSQoSFlowList(pub SequenceOf<QosFlowIdentifier>);
-    impl Encode for MBSQoSFlowList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MBSQoSFlowList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QosFlowIdentifier>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QosFlowIdentifier::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSQoSFlowList, 1, 64 }
     pub use super::ngap_common_data_types::Criticality as AnonymousMBSQoSFlowsToBeSetupItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as MBSQoSFlowsToBeSetupItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSQoSFlowsToBeSetupItemIEExtensions;
@@ -16285,54 +12021,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"), identifier = "MBS-QoSFlowsToBeSetupList")]
     pub struct MBSQoSFlowsToBeSetupList(pub SequenceOf<MBSQoSFlowsToBeSetupItem>);
-    impl Encode for MBSQoSFlowsToBeSetupList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MBSQoSFlowsToBeSetupList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<MBSQoSFlowsToBeSetupItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(MBSQoSFlowsToBeSetupItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSQoSFlowsToBeSetupList, 1, 64 }
     pub use super::ngap_common_data_types::Criticality as MBSServiceAreaChoiceExtensionsCriticality;
     pub use super::ngap_containers::ProtocolIEField as MBSServiceAreaChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
@@ -16361,54 +12050,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=8192"), identifier = "MBS-ServiceAreaCellList")]
     pub struct MBSServiceAreaCellList(pub SequenceOf<NRCGI>);
-    impl Encode for MBSServiceAreaCellList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8192));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MBSServiceAreaCellList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<NRCGI>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8192));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(NRCGI::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSServiceAreaCellList, 1, 8192 }
     pub use super::ngap_common_data_types::Criticality as AnonymousMBSServiceAreaInformationIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as MBSServiceAreaInformationIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSServiceAreaInformationIEExtensions;
@@ -16486,159 +12128,18 @@ pub mod ngap_ies {
         identifier = "MBS-ServiceAreaInformationList"
     )]
     pub struct MBSServiceAreaInformationList(pub SequenceOf<MBSServiceAreaInformationItem>);
-    impl Encode for MBSServiceAreaInformationList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MBSServiceAreaInformationList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<MBSServiceAreaInformationItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(MBSServiceAreaInformationItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSServiceAreaInformationList, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=1024"), identifier = "MBS-ServiceAreaTAIList")]
     pub struct MBSServiceAreaTAIList(pub SequenceOf<TAI>);
-    impl Encode for MBSServiceAreaTAIList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 1024));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MBSServiceAreaTAIList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAI>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 1024));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAI::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSServiceAreaTAIList, 1, 1024 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "MBS-SessionFSAID")]
     pub struct MBSSessionFSAID(pub FixedOctetString<3usize>);
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"), identifier = "MBS-SessionFSAIDList")]
     pub struct MBSSessionFSAIDList(pub SequenceOf<MBSSessionFSAID>);
-    impl Encode for MBSSessionFSAIDList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MBSSessionFSAIDList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<MBSSessionFSAID>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(MBSSessionFSAID::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSSessionFSAIDList, 1, 64 }
     pub use super::ngap_common_data_types::Criticality as AnonymousMBSSessionIDIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as MBSSessionIDIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSSessionIDIEExtensions;
@@ -16737,54 +12238,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"), identifier = "MBS-SessionTNLInfo5GCList")]
     pub struct MBSSessionTNLInfo5GCList(pub SequenceOf<MBSSessionTNLInfo5GCItem>);
-    impl Encode for MBSSessionTNLInfo5GCList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MBSSessionTNLInfo5GCList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<MBSSessionTNLInfo5GCItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(MBSSessionTNLInfo5GCItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSSessionTNLInfo5GCList, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as MBSSessionTNLInfoNGRANChoiceExtensionsCriticality;
     pub use super::ngap_containers::ProtocolIEField as MBSSessionTNLInfoNGRANChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
@@ -16848,54 +12302,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"), identifier = "MBS-SessionTNLInfoNGRANList")]
     pub struct MBSSessionTNLInfoNGRANList(pub SequenceOf<MBSSessionTNLInfoNGRANItem>);
-    impl Encode for MBSSessionTNLInfoNGRANList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MBSSessionTNLInfoNGRANList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<MBSSessionTNLInfoNGRANItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(MBSSessionTNLInfoNGRANItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSSessionTNLInfoNGRANList, 1, 256 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated, identifier = "MBS-SupportIndicator")]
     #[non_exhaustive]
@@ -16953,54 +12360,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"), identifier = "MBS-UP-FailureIndicationList")]
     pub struct MBSUPFailureIndicationList(pub SequenceOf<MBSUPFailureIndicationItem>);
-    impl Encode for MBSUPFailureIndicationList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MBSUPFailureIndicationList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<MBSUPFailureIndicationItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(MBSUPFailureIndicationItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSUPFailureIndicationList, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousMBSSessionFailedtoSetupItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as MBSSessionFailedtoSetupItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSSessionFailedtoSetupItemIEExtensions;
@@ -17043,54 +12403,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"))]
     pub struct MBSSessionFailedtoSetupList(pub SequenceOf<MBSSessionFailedtoSetupItem>);
-    impl Encode for MBSSessionFailedtoSetupList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MBSSessionFailedtoSetupList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<MBSSessionFailedtoSetupItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(MBSSessionFailedtoSetupItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSSessionFailedtoSetupList, 1, 32 }
     pub use super::ngap_common_data_types::Criticality as AnonymousMBSSessionReleaseResponseTransferIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as MBSSessionReleaseResponseTransferIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSSessionReleaseResponseTransferIEExtensions;
@@ -17245,54 +12558,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"))]
     pub struct MBSSessionSetupRequestList(pub SequenceOf<MBSSessionSetupRequestItem>);
-    impl Encode for MBSSessionSetupRequestList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MBSSessionSetupRequestList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<MBSSessionSetupRequestItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(MBSSessionSetupRequestItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSSessionSetupRequestList, 1, 32 }
     pub use super::ngap_common_data_types::Criticality as AnonymousMBSSessionSetupResponseItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as MBSSessionSetupResponseItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSSessionSetupResponseItemIEExtensions;
@@ -17331,54 +12597,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"))]
     pub struct MBSSessionSetupResponseList(pub SequenceOf<MBSSessionSetupResponseItem>);
-    impl Encode for MBSSessionSetupResponseList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MBSSessionSetupResponseList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<MBSSessionSetupResponseItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(MBSSessionSetupResponseItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSSessionSetupResponseList, 1, 32 }
     pub use super::ngap_common_data_types::Criticality as AnonymousMBSSessionSetuporModifyRequestItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as MBSSessionSetuporModifyRequestItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousMBSSessionSetuporModifyRequestItemIEExtensions;
@@ -17434,54 +12653,7 @@ pub mod ngap_ies {
     pub struct MBSSessionSetuporModifyRequestList(
         pub SequenceOf<MBSSessionSetuporModifyRequestItem>,
     );
-    impl Encode for MBSSessionSetuporModifyRequestList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MBSSessionSetuporModifyRequestList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<MBSSessionSetuporModifyRequestItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(MBSSessionSetuporModifyRequestItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSSessionSetuporModifyRequestList, 1, 32 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
     #[non_exhaustive]
@@ -17525,54 +12697,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"))]
     pub struct MBSSessionToReleaseList(pub SequenceOf<MBSSessionToReleaseItem>);
-    impl Encode for MBSSessionToReleaseList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MBSSessionToReleaseList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<MBSSessionToReleaseItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(MBSSessionToReleaseItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MBSSessionToReleaseList, 1, 32 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated, identifier = "MDT-Activation")]
     #[non_exhaustive]
@@ -17834,105 +12959,11 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct MDTPLMNList(pub SequenceOf<PLMNIdentity>);
-    impl Encode for MDTPLMNList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MDTPLMNList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PLMNIdentity>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PLMNIdentity::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MDTPLMNList, 1, 16 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("0..=16"))]
     pub struct MDTPLMNModificationList(pub SequenceOf<PLMNIdentity>);
-    impl Encode for MDTPLMNModificationList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(0, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MDTPLMNModificationList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PLMNIdentity>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(0, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PLMNIdentity::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MDTPLMNModificationList, 0, 16 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
     #[non_exhaustive]
@@ -18296,54 +13327,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct MulticastGroupPagingAreaList(pub SequenceOf<MulticastGroupPagingAreaItem>);
-    impl Encode for MulticastGroupPagingAreaList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for MulticastGroupPagingAreaList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<MulticastGroupPagingAreaItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(MulticastGroupPagingAreaItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { MulticastGroupPagingAreaList, 1, 64 }
     pub use super::ngap_common_data_types::Criticality as AnonymousMulticastSessionActivationRequestTransferIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as MulticastSessionActivationRequestTransferIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousMulticastSessionActivationRequestTransferIEExtensions;
@@ -18619,54 +13603,7 @@ pub mod ngap_ies {
     pub struct NGAPIESupportInformationRequestList(
         pub SequenceOf<NGAPIESupportInformationRequestItem>,
     );
-    impl Encode for NGAPIESupportInformationRequestList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for NGAPIESupportInformationRequestList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<NGAPIESupportInformationRequestItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(NGAPIESupportInformationRequestItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { NGAPIESupportInformationRequestList, 1, 32 }
     #[doc = " Inner type "]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
@@ -18733,54 +13670,7 @@ pub mod ngap_ies {
     pub struct NGAPIESupportInformationResponseList(
         pub SequenceOf<NGAPIESupportInformationResponseItem>,
     );
-    impl Encode for NGAPIESupportInformationResponseList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for NGAPIESupportInformationResponseList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<NGAPIESupportInformationResponseItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(NGAPIESupportInformationResponseItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { NGAPIESupportInformationResponseList, 1, 32 }
     pub use super::ngap_common_data_types::Criticality as NGRANCGIChoiceExtensionsCriticality;
     pub use super::ngap_containers::ProtocolIEField as NGRANCGIChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
@@ -18864,54 +13754,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"), identifier = "NGRAN-CellReportList")]
     pub struct NGRANCellReportList(pub SequenceOf<NGRANCellReportItem>);
-    impl Encode for NGRANCellReportList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for NGRANCellReportList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<NGRANCellReportItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(NGRANCellReportItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { NGRANCellReportList, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousNGRANCellToReportItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as NGRANCellToReportItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousNGRANCellToReportItemIEExtensions;
@@ -18944,54 +13787,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"), identifier = "NGRAN-CellToReportList")]
     pub struct NGRANCellToReportList(pub SequenceOf<NGRANCellToReportItem>);
-    impl Encode for NGRANCellToReportList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for NGRANCellToReportList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<NGRANCellToReportItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(NGRANCellToReportItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { NGRANCellToReportList, 1, 256 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(
         delegate,
@@ -19156,54 +13952,7 @@ pub mod ngap_ies {
         identifier = "NGRAN-TNLAssociationToRemoveList"
     )]
     pub struct NGRANTNLAssociationToRemoveList(pub SequenceOf<NGRANTNLAssociationToRemoveItem>);
-    impl Encode for NGRANTNLAssociationToRemoveList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for NGRANTNLAssociationToRemoveList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<NGRANTNLAssociationToRemoveItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(NGRANTNLAssociationToRemoveItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { NGRANTNLAssociationToRemoveList, 1, 32 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct NGRANTraceID(pub FixedOctetString<8usize>);
@@ -19411,105 +14160,11 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16384"), identifier = "NR-CGIList")]
     pub struct NRCGIList(pub SequenceOf<NRCGI>);
-    impl Encode for NRCGIList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16384));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for NRCGIList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<NRCGI>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16384));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(NRCGI::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { NRCGIList, 1, 16384 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"), identifier = "NR-CGIListForWarning")]
     pub struct NRCGIListForWarning(pub SequenceOf<NRCGI>);
-    impl Encode for NRCGIListForWarning {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for NRCGIListForWarning {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<NRCGI>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(NRCGI::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { NRCGIListForWarning, 1, 65535 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "NR-PCI", value("0..=1007", extensible))]
     pub struct NRPCI(pub Integer);
@@ -19745,54 +14400,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"), identifier = "NRFrequencyBand-List")]
     pub struct NRFrequencyBandList(pub SequenceOf<NRFrequencyBandItem>);
-    impl Encode for NRFrequencyBandList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for NRFrequencyBandList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<NRFrequencyBandItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(NRFrequencyBandItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { NRFrequencyBandList, 1, 32 }
     pub use super::ngap_common_data_types::Criticality as AnonymousNRFrequencyBandItemIEExtensionCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as NRFrequencyBandItemIEExtension;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousNRFrequencyBandItemIEExtension;
@@ -20008,54 +14616,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=8"), identifier = "NTN-Geographical-Area-List")]
     pub struct NTNGeographicalAreaList(pub SequenceOf<NTNGeographicalAreaItem>);
-    impl Encode for NTNGeographicalAreaList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for NTNGeographicalAreaList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<NTNGeographicalAreaItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(NTNGeographicalAreaItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { NTNGeographicalAreaList, 1, 8 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
     #[non_exhaustive]
@@ -20134,54 +14695,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct NetworkSliceListforMDT(pub SequenceOf<NetworkSliceItemforMDT>);
-    impl Encode for NetworkSliceListforMDT {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for NetworkSliceListforMDT {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<NetworkSliceItemforMDT>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(NetworkSliceItemforMDT::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { NetworkSliceListforMDT, 1, 16 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
     #[non_exhaustive]
@@ -20334,54 +14848,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct NotAllowedTACs(pub SequenceOf<TAC>);
-    impl Encode for NotAllowedTACs {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for NotAllowedTACs {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAC>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAC::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { NotAllowedTACs, 1, 16 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
     #[non_exhaustive]
@@ -20440,54 +14907,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16384"))]
     pub struct NotificationCellList(pub SequenceOf<NotificationCellItem>);
-    impl Encode for NotificationCellList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16384));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for NotificationCellList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<NotificationCellItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16384));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(NotificationCellItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { NotificationCellList, 1, 16384 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
     #[non_exhaustive]
@@ -20603,54 +15023,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=1024"))]
     pub struct OverloadStartNSSAIList(pub SequenceOf<OverloadStartNSSAIItem>);
-    impl Encode for OverloadStartNSSAIList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 1024));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for OverloadStartNSSAIList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<OverloadStartNSSAIItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 1024));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(OverloadStartNSSAIItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { OverloadStartNSSAIList, 1, 1024 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPC5FlowBitRatesIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PC5FlowBitRatesIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPC5FlowBitRatesIEExtensions;
@@ -20728,54 +15101,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=2048"))]
     pub struct PC5QoSFlowList(pub SequenceOf<PC5QoSFlowItem>);
-    impl Encode for PC5QoSFlowList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 2048));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PC5QoSFlowList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PC5QoSFlowItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 2048));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PC5QoSFlowItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PC5QoSFlowList, 1, 2048 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPC5QoSParametersIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PC5QoSParametersIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPC5QoSParametersIEExtensions;
@@ -20814,54 +15140,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"))]
     pub struct PCIListForMDT(pub SequenceOf<NRPCI>);
-    impl Encode for PCIListForMDT {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PCIListForMDT {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<NRPCI>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(NRPCI::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PCIListForMDT, 1, 32 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionAggregateMaximumBitRateIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionAggregateMaximumBitRateIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionAggregateMaximumBitRateIEExtensions;
@@ -20935,108 +15214,14 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionForPagingList(pub SequenceOf<PDUSessionForPagingItem>);
-    impl Encode for PDUSessionForPagingList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionForPagingList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionForPagingItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionForPagingItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionForPagingList, 1, 256 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("0..=255"))]
     pub struct PDUSessionID(pub u8);
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionListMTCommHReq(pub SequenceOf<PDUSessionListMTCommHReqItem>);
-    impl Encode for PDUSessionListMTCommHReq {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionListMTCommHReq {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionListMTCommHReqItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionListMTCommHReqItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionListMTCommHReq, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionListMTCommHReqItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionListMTCommHReqItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionListMTCommHReqItemIEExtensions;
@@ -21107,54 +15292,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceAdmittedList(pub SequenceOf<PDUSessionResourceAdmittedItem>);
-    impl Encode for PDUSessionResourceAdmittedList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceAdmittedList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceAdmittedItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceAdmittedItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceAdmittedList, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceFailedToModifyItemModCfmIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceFailedToModifyItemModCfmIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceFailedToModifyItemModCfmIEExtensions;
@@ -21242,113 +15380,13 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToModifyListModCfm(
         pub SequenceOf<PDUSessionResourceFailedToModifyItemModCfm>,
     );
-    impl Encode for PDUSessionResourceFailedToModifyListModCfm {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceFailedToModifyListModCfm {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceFailedToModifyItemModCfm>(
-                        tag,
-                        constraints,
-                    )
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceFailedToModifyItemModCfm::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceFailedToModifyListModCfm, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceFailedToModifyListModRes(
         pub SequenceOf<PDUSessionResourceFailedToModifyItemModRes>,
     );
-    impl Encode for PDUSessionResourceFailedToModifyListModRes {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceFailedToModifyListModRes {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceFailedToModifyItemModRes>(
-                        tag,
-                        constraints,
-                    )
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceFailedToModifyItemModRes::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceFailedToModifyListModRes, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceFailedToResumeItemRESReqIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceFailedToResumeItemRESReqIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceFailedToResumeItemRESReqIEExtensions;
@@ -21420,113 +15458,13 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToResumeListRESReq(
         pub SequenceOf<PDUSessionResourceFailedToResumeItemRESReq>,
     );
-    impl Encode for PDUSessionResourceFailedToResumeListRESReq {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceFailedToResumeListRESReq {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceFailedToResumeItemRESReq>(
-                        tag,
-                        constraints,
-                    )
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceFailedToResumeItemRESReq::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceFailedToResumeListRESReq, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceFailedToResumeListRESRes(
         pub SequenceOf<PDUSessionResourceFailedToResumeItemRESRes>,
     );
-    impl Encode for PDUSessionResourceFailedToResumeListRESRes {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceFailedToResumeListRESRes {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceFailedToResumeItemRESRes>(
-                        tag,
-                        constraints,
-                    )
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceFailedToResumeItemRESRes::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceFailedToResumeListRESRes, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceFailedToSetupItemCxtFailIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceFailedToSetupItemCxtFailIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceFailedToSetupItemCxtFailIEExtensions;
@@ -21731,281 +15669,31 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToSetupListCxtFail(
         pub SequenceOf<PDUSessionResourceFailedToSetupItemCxtFail>,
     );
-    impl Encode for PDUSessionResourceFailedToSetupListCxtFail {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceFailedToSetupListCxtFail {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceFailedToSetupItemCxtFail>(
-                        tag,
-                        constraints,
-                    )
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceFailedToSetupItemCxtFail::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceFailedToSetupListCxtFail, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceFailedToSetupListCxtRes(
         pub SequenceOf<PDUSessionResourceFailedToSetupItemCxtRes>,
     );
-    impl Encode for PDUSessionResourceFailedToSetupListCxtRes {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceFailedToSetupListCxtRes {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceFailedToSetupItemCxtRes>(
-                        tag,
-                        constraints,
-                    )
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceFailedToSetupItemCxtRes::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceFailedToSetupListCxtRes, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceFailedToSetupListHOAck(
         pub SequenceOf<PDUSessionResourceFailedToSetupItemHOAck>,
     );
-    impl Encode for PDUSessionResourceFailedToSetupListHOAck {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceFailedToSetupListHOAck {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceFailedToSetupItemHOAck>(
-                        tag,
-                        constraints,
-                    )
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceFailedToSetupItemHOAck::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceFailedToSetupListHOAck, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceFailedToSetupListPSReq(
         pub SequenceOf<PDUSessionResourceFailedToSetupItemPSReq>,
     );
-    impl Encode for PDUSessionResourceFailedToSetupListPSReq {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceFailedToSetupListPSReq {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceFailedToSetupItemPSReq>(
-                        tag,
-                        constraints,
-                    )
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceFailedToSetupItemPSReq::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceFailedToSetupListPSReq, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceFailedToSetupListSURes(
         pub SequenceOf<PDUSessionResourceFailedToSetupItemSURes>,
     );
-    impl Encode for PDUSessionResourceFailedToSetupListSURes {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceFailedToSetupListSURes {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceFailedToSetupItemSURes>(
-                        tag,
-                        constraints,
-                    )
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceFailedToSetupItemSURes::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceFailedToSetupListSURes, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceHandoverItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceHandoverItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceHandoverItemIEExtensions;
@@ -22044,54 +15732,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceHandoverList(pub SequenceOf<PDUSessionResourceHandoverItem>);
-    impl Encode for PDUSessionResourceHandoverList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceHandoverList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceHandoverItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceHandoverItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceHandoverList, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceInformationItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceInformationItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceInformationItemIEExtensions;
@@ -22136,54 +15777,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceInformationList(pub SequenceOf<PDUSessionResourceInformationItem>);
-    impl Encode for PDUSessionResourceInformationList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceInformationList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceInformationItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceInformationItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceInformationList, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceItemCxtRelCplIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceItemCxtRelCplIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceItemCxtRelCplIEExtensions;
@@ -22280,156 +15874,15 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceListCxtRelCpl(pub SequenceOf<PDUSessionResourceItemCxtRelCpl>);
-    impl Encode for PDUSessionResourceListCxtRelCpl {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceListCxtRelCpl {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceItemCxtRelCpl>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceItemCxtRelCpl::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceListCxtRelCpl, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceListCxtRelReq(pub SequenceOf<PDUSessionResourceItemCxtRelReq>);
-    impl Encode for PDUSessionResourceListCxtRelReq {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceListCxtRelReq {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceItemCxtRelReq>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceItemCxtRelReq::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceListCxtRelReq, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceListHORqd(pub SequenceOf<PDUSessionResourceItemHORqd>);
-    impl Encode for PDUSessionResourceListHORqd {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceListHORqd {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceItemHORqd>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceItemHORqd::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceListHORqd, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceModifyConfirmTransferIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceModifyConfirmTransferIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceModifyConfirmTransferIEExtensions;
@@ -22693,213 +16146,25 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceModifyListModCfm(
         pub SequenceOf<PDUSessionResourceModifyItemModCfm>,
     );
-    impl Encode for PDUSessionResourceModifyListModCfm {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceModifyListModCfm {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceModifyItemModCfm>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceModifyItemModCfm::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceModifyListModCfm, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceModifyListModInd(
         pub SequenceOf<PDUSessionResourceModifyItemModInd>,
     );
-    impl Encode for PDUSessionResourceModifyListModInd {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceModifyListModInd {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceModifyItemModInd>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceModifyItemModInd::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceModifyListModInd, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceModifyListModReq(
         pub SequenceOf<PDUSessionResourceModifyItemModReq>,
     );
-    impl Encode for PDUSessionResourceModifyListModReq {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceModifyListModReq {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceModifyItemModReq>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceModifyItemModReq::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceModifyListModReq, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceModifyListModRes(
         pub SequenceOf<PDUSessionResourceModifyItemModRes>,
     );
-    impl Encode for PDUSessionResourceModifyListModRes {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceModifyListModRes {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceModifyItemModRes>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceModifyItemModRes::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceModifyListModRes, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceModifyRequestTransferProtocolIEsCriticality;
     pub use super::ngap_containers::ProtocolIEContainer as PDUSessionResourceModifyRequestTransferProtocolIEs;
     pub use super::ngap_containers::ProtocolIEField as AnonymousPDUSessionResourceModifyRequestTransferProtocolIEs;
@@ -23043,54 +16308,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceNotifyList(pub SequenceOf<PDUSessionResourceNotifyItem>);
-    impl Encode for PDUSessionResourceNotifyList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceNotifyList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceNotifyItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceNotifyItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceNotifyList, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceNotifyReleasedTransferIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceNotifyReleasedTransferIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceNotifyReleasedTransferIEExtensions;
@@ -23336,213 +16554,25 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceReleasedListNot(pub SequenceOf<PDUSessionResourceReleasedItemNot>);
-    impl Encode for PDUSessionResourceReleasedListNot {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceReleasedListNot {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceReleasedItemNot>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceReleasedItemNot::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceReleasedListNot, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceReleasedListPSAck(
         pub SequenceOf<PDUSessionResourceReleasedItemPSAck>,
     );
-    impl Encode for PDUSessionResourceReleasedListPSAck {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceReleasedListPSAck {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceReleasedItemPSAck>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceReleasedItemPSAck::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceReleasedListPSAck, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceReleasedListPSFail(
         pub SequenceOf<PDUSessionResourceReleasedItemPSFail>,
     );
-    impl Encode for PDUSessionResourceReleasedListPSFail {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceReleasedListPSFail {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceReleasedItemPSFail>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceReleasedItemPSFail::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceReleasedListPSFail, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceReleasedListRelRes(
         pub SequenceOf<PDUSessionResourceReleasedItemRelRes>,
     );
-    impl Encode for PDUSessionResourceReleasedListRelRes {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceReleasedListRelRes {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceReleasedItemRelRes>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceReleasedItemRelRes::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceReleasedListRelRes, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceResumeItemRESReqIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceResumeItemRESReqIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceResumeItemRESReqIEExtensions;
@@ -23618,107 +16648,13 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceResumeListRESReq(
         pub SequenceOf<PDUSessionResourceResumeItemRESReq>,
     );
-    impl Encode for PDUSessionResourceResumeListRESReq {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceResumeListRESReq {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceResumeItemRESReq>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceResumeItemRESReq::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceResumeListRESReq, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceResumeListRESRes(
         pub SequenceOf<PDUSessionResourceResumeItemRESRes>,
     );
-    impl Encode for PDUSessionResourceResumeListRESRes {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceResumeListRESRes {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceResumeItemRESRes>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceResumeItemRESRes::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceResumeListRESRes, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceSecondaryRATUsageItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceSecondaryRATUsageItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceSecondaryRATUsageItemIEExtensions;
@@ -23759,54 +16695,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceSecondaryRATUsageList(
         pub SequenceOf<PDUSessionResourceSecondaryRATUsageItem>,
     );
-    impl Encode for PDUSessionResourceSecondaryRATUsageList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceSecondaryRATUsageList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceSecondaryRATUsageItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceSecondaryRATUsageItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceSecondaryRATUsageList, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceSetupItemCxtReqIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceSetupItemCxtReqIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceSetupItemCxtReqIEExtensions;
@@ -24015,258 +16904,23 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceSetupListCxtReq(pub SequenceOf<PDUSessionResourceSetupItemCxtReq>);
-    impl Encode for PDUSessionResourceSetupListCxtReq {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceSetupListCxtReq {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceSetupItemCxtReq>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceSetupItemCxtReq::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceSetupListCxtReq, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceSetupListCxtRes(pub SequenceOf<PDUSessionResourceSetupItemCxtRes>);
-    impl Encode for PDUSessionResourceSetupListCxtRes {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceSetupListCxtRes {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceSetupItemCxtRes>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceSetupItemCxtRes::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceSetupListCxtRes, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceSetupListHOReq(pub SequenceOf<PDUSessionResourceSetupItemHOReq>);
-    impl Encode for PDUSessionResourceSetupListHOReq {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceSetupListHOReq {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceSetupItemHOReq>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceSetupItemHOReq::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceSetupListHOReq, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceSetupListSUReq(pub SequenceOf<PDUSessionResourceSetupItemSUReq>);
-    impl Encode for PDUSessionResourceSetupListSUReq {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceSetupListSUReq {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceSetupItemSUReq>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceSetupItemSUReq::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceSetupListSUReq, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceSetupListSURes(pub SequenceOf<PDUSessionResourceSetupItemSURes>);
-    impl Encode for PDUSessionResourceSetupListSURes {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceSetupListSURes {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceSetupItemSURes>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceSetupItemSURes::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceSetupListSURes, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceSetupRequestTransferProtocolIEsCriticality;
     pub use super::ngap_containers::ProtocolIEContainer as PDUSessionResourceSetupRequestTransferProtocolIEs;
     pub use super::ngap_containers::ProtocolIEField as AnonymousPDUSessionResourceSetupRequestTransferProtocolIEs;
@@ -24406,54 +17060,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceSuspendListSUSReq(
         pub SequenceOf<PDUSessionResourceSuspendItemSUSReq>,
     );
-    impl Encode for PDUSessionResourceSuspendListSUSReq {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceSuspendListSUSReq {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceSuspendItemSUSReq>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceSuspendItemSUSReq::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceSuspendListSUSReq, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceSwitchedItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceSwitchedItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceSwitchedItemIEExtensions;
@@ -24492,54 +17099,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceSwitchedList(pub SequenceOf<PDUSessionResourceSwitchedItem>);
-    impl Encode for PDUSessionResourceSwitchedList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceSwitchedList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceSwitchedItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceSwitchedItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceSwitchedList, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceToBeSwitchedDLItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceToBeSwitchedDLItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceToBeSwitchedDLItemIEExtensions;
@@ -24580,54 +17140,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceToBeSwitchedDLList(
         pub SequenceOf<PDUSessionResourceToBeSwitchedDLItem>,
     );
-    impl Encode for PDUSessionResourceToBeSwitchedDLList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceToBeSwitchedDLList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceToBeSwitchedDLItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceToBeSwitchedDLItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceToBeSwitchedDLList, 1, 256 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPDUSessionResourceToReleaseItemHOCmdIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PDUSessionResourceToReleaseItemHOCmdIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPDUSessionResourceToReleaseItemHOCmdIEExtensions;
@@ -24703,107 +17216,13 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceToReleaseListHOCmd(
         pub SequenceOf<PDUSessionResourceToReleaseItemHOCmd>,
     );
-    impl Encode for PDUSessionResourceToReleaseListHOCmd {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceToReleaseListHOCmd {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceToReleaseItemHOCmd>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceToReleaseItemHOCmd::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceToReleaseListHOCmd, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct PDUSessionResourceToReleaseListRelCmd(
         pub SequenceOf<PDUSessionResourceToReleaseItemRelCmd>,
     );
-    impl Encode for PDUSessionResourceToReleaseListRelCmd {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PDUSessionResourceToReleaseListRelCmd {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PDUSessionResourceToReleaseItemRelCmd>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PDUSessionResourceToReleaseItemRelCmd::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PDUSessionResourceToReleaseListRelCmd, 1, 256 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
     #[non_exhaustive]
@@ -25020,54 +17439,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct PLMNListforQMC(pub SequenceOf<PLMNIdentity>);
-    impl Encode for PLMNListforQMC {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PLMNListforQMC {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PLMNIdentity>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PLMNIdentity::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PLMNListforQMC, 1, 16 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPLMNSupportItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PLMNSupportItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPLMNSupportItemIEExtensions;
@@ -25106,54 +17478,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=12"))]
     pub struct PLMNSupportList(pub SequenceOf<PLMNSupportItem>);
-    impl Encode for PLMNSupportList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 12));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PLMNSupportList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PLMNSupportItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 12));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PLMNSupportItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PLMNSupportList, 1, 12 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPNINPNAreaScopeofMDTIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PNINPNAreaScopeofMDTIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPNINPNAreaScopeofMDTIEExtensions;
@@ -25502,54 +17827,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct PagingPolicyDifferentiationList(pub SequenceOf<PagingPolicyDifferentiationItem>);
-    impl Encode for PagingPolicyDifferentiationList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PagingPolicyDifferentiationList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PagingPolicyDifferentiationItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PagingPolicyDifferentiationItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PagingPolicyDifferentiationList, 1, 64 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("0..=7", extensible))]
     pub struct PagingPolicyIndicator(pub Integer);
@@ -25609,54 +17887,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=8"), identifier = "Partially-Allowed-NSSAI")]
     pub struct PartiallyAllowedNSSAI(pub SequenceOf<PartiallyAllowedNSSAIItem>);
-    impl Encode for PartiallyAllowedNSSAI {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PartiallyAllowedNSSAI {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<PartiallyAllowedNSSAIItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(PartiallyAllowedNSSAIItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PartiallyAllowedNSSAI, 1, 8 }
     pub use super::ngap_common_data_types::Criticality as AnonymousPartiallyAllowedNSSAIItemIEExtensionsCriticality;
     pub use super::ngap_containers::ProtocolExtensionContainer as PartiallyAllowedNSSAIItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousPartiallyAllowedNSSAIItemIEExtensions;
@@ -26114,105 +18345,11 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct QoEReferenceList(pub SequenceOf<QoEReference>);
-    impl Encode for QoEReferenceList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for QoEReferenceList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QoEReference>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QoEReference::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { QoEReferenceList, 1, 16 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct QoSFlowList(pub SequenceOf<QosFlowIdentifier>);
-    impl Encode for QoSFlowList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for QoSFlowList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QosFlowIdentifier>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QosFlowIdentifier::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { QoSFlowList, 1, 64 }
     pub use super::ngap_containers::ProtocolExtensionContainer as QoSFlowTSCItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousQoSFlowTSCItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -26256,54 +18393,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct QoSFlowTSCList(pub SequenceOf<QoSFlowTSCItem>);
-    impl Encode for QoSFlowTSCList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for QoSFlowTSCList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QoSFlowTSCItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QoSFlowTSCItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { QoSFlowTSCList, 1, 64 }
     #[doc = " Inner type "]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
@@ -26359,54 +18449,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct QoSFlowsUsageReportList(pub SequenceOf<QoSFlowsUsageReportItem>);
-    impl Encode for QoSFlowsUsageReportList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for QoSFlowsUsageReportList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QoSFlowsUsageReportItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QoSFlowsUsageReportItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { QoSFlowsUsageReportList, 1, 64 }
     pub use super::ngap_containers::ProtocolIEField as QosCharacteristicsChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
@@ -26462,54 +18505,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowAcceptedList(pub SequenceOf<QosFlowAcceptedItem>);
-    impl Encode for QosFlowAcceptedList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for QosFlowAcceptedList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QosFlowAcceptedItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QosFlowAcceptedItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { QosFlowAcceptedList, 1, 64 }
     pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowAddOrModifyRequestItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowAddOrModifyRequestItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -26553,54 +18549,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowAddOrModifyRequestList(pub SequenceOf<QosFlowAddOrModifyRequestItem>);
-    impl Encode for QosFlowAddOrModifyRequestList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for QosFlowAddOrModifyRequestList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QosFlowAddOrModifyRequestItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QosFlowAddOrModifyRequestItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { QosFlowAddOrModifyRequestList, 1, 64 }
     pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowAddOrModifyResponseItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowAddOrModifyResponseItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -26632,54 +18581,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowAddOrModifyResponseList(pub SequenceOf<QosFlowAddOrModifyResponseItem>);
-    impl Encode for QosFlowAddOrModifyResponseList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for QosFlowAddOrModifyResponseList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QosFlowAddOrModifyResponseItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QosFlowAddOrModifyResponseItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { QosFlowAddOrModifyResponseList, 1, 64 }
     pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowAdditionalInfoItemRelComIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowAdditionalInfoItemRelComIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -26751,105 +18653,11 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowAdditionalInfoListRelCom(pub SequenceOf<QosFlowAdditionalInfoItemRelCom>);
-    impl Encode for QosFlowAdditionalInfoListRelCom {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for QosFlowAdditionalInfoListRelCom {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QosFlowAdditionalInfoItemRelCom>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QosFlowAdditionalInfoItemRelCom::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { QosFlowAdditionalInfoListRelCom, 1, 64 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowAdditionalInfoListRelRes(pub SequenceOf<QosFlowAdditionalInfoItemRelRes>);
-    impl Encode for QosFlowAdditionalInfoListRelRes {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for QosFlowAdditionalInfoListRelRes {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QosFlowAdditionalInfoItemRelRes>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QosFlowAdditionalInfoItemRelRes::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { QosFlowAdditionalInfoListRelRes, 1, 64 }
     pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowFeedbackItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowFeedbackItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -26899,54 +18707,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowFeedbackList(pub SequenceOf<QosFlowFeedbackItem>);
-    impl Encode for QosFlowFeedbackList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for QosFlowFeedbackList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QosFlowFeedbackItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QosFlowFeedbackItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { QosFlowFeedbackList, 1, 64 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("0..=63", extensible))]
     pub struct QosFlowIdentifier(pub Integer);
@@ -26987,54 +18748,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowInformationList(pub SequenceOf<QosFlowInformationItem>);
-    impl Encode for QosFlowInformationList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for QosFlowInformationList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QosFlowInformationItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QosFlowInformationItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { QosFlowInformationList, 1, 64 }
     pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowItemWithDataForwardingIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowItemWithDataForwardingIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -27124,105 +18838,11 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowListWithCause(pub SequenceOf<QosFlowWithCauseItem>);
-    impl Encode for QosFlowListWithCause {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for QosFlowListWithCause {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QosFlowWithCauseItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QosFlowWithCauseItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { QosFlowListWithCause, 1, 64 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowListWithDataForwarding(pub SequenceOf<QosFlowItemWithDataForwarding>);
-    impl Encode for QosFlowListWithDataForwarding {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for QosFlowListWithDataForwarding {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QosFlowItemWithDataForwarding>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QosFlowItemWithDataForwarding::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { QosFlowListWithDataForwarding, 1, 64 }
     pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowModifyConfirmItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowModifyConfirmItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -27254,54 +18874,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowModifyConfirmList(pub SequenceOf<QosFlowModifyConfirmItem>);
-    impl Encode for QosFlowModifyConfirmList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for QosFlowModifyConfirmList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QosFlowModifyConfirmItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QosFlowModifyConfirmItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { QosFlowModifyConfirmList, 1, 64 }
     pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowNotifyItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowNotifyItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -27339,54 +18912,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowNotifyList(pub SequenceOf<QosFlowNotifyItem>);
-    impl Encode for QosFlowNotifyList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for QosFlowNotifyList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QosFlowNotifyItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QosFlowNotifyItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { QosFlowNotifyList, 1, 64 }
     pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowParametersItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowParametersItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -27424,54 +18950,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowParametersList(pub SequenceOf<QosFlowParametersItem>);
-    impl Encode for QosFlowParametersList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for QosFlowParametersList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QosFlowParametersItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QosFlowParametersItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { QosFlowParametersList, 1, 64 }
     pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowPerTNLInformationIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowPerTNLInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -27537,54 +19016,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=3"))]
     pub struct QosFlowPerTNLInformationList(pub SequenceOf<QosFlowPerTNLInformationItem>);
-    impl Encode for QosFlowPerTNLInformationList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 3));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for QosFlowPerTNLInformationList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QosFlowPerTNLInformationItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 3));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QosFlowPerTNLInformationItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { QosFlowPerTNLInformationList, 1, 3 }
     pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowSetupRequestItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowSetupRequestItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -27628,54 +19060,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowSetupRequestList(pub SequenceOf<QosFlowSetupRequestItem>);
-    impl Encode for QosFlowSetupRequestList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for QosFlowSetupRequestList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QosFlowSetupRequestItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QosFlowSetupRequestItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { QosFlowSetupRequestList, 1, 64 }
     pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowToBeForwardedItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowToBeForwardedItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -27707,54 +19092,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct QosFlowToBeForwardedList(pub SequenceOf<QosFlowToBeForwardedItem>);
-    impl Encode for QosFlowToBeForwardedList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for QosFlowToBeForwardedList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<QosFlowToBeForwardedItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(QosFlowToBeForwardedItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { QosFlowToBeForwardedList, 1, 64 }
     pub use super::ngap_containers::ProtocolExtensionContainer as QosFlowWithCauseItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousQosFlowWithCauseItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -27924,54 +19262,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16384"))]
     pub struct RANTSSCellList(pub SequenceOf<RANTSSCellItem>);
-    impl Encode for RANTSSCellList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16384));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for RANTSSCellList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<RANTSSCellItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16384));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(RANTSSCellItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { RANTSSCellList, 1, 16384 }
     #[doc = " Inner type "]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
@@ -28176,54 +19467,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct RATRestrictions(pub SequenceOf<RATRestrictionsItem>);
-    impl Encode for RATRestrictions {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for RATRestrictions {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<RATRestrictionsItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(RATRestrictionsItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { RATRestrictions, 1, 16 }
     pub use super::ngap_containers::ProtocolExtensionContainer as RATRestrictionsItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousRATRestrictionsItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -28478,54 +19722,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=2048"))]
     pub struct RSPPQoSFlowList(pub SequenceOf<RSPPQoSFlowItem>);
-    impl Encode for RSPPQoSFlowList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 2048));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for RSPPQoSFlowList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<RSPPQoSFlowItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 2048));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(RSPPQoSFlowItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { RSPPQoSFlowList, 1, 2048 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
     #[non_exhaustive]
@@ -28577,54 +19774,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct RecommendedCellList(pub SequenceOf<RecommendedCellItem>);
-    impl Encode for RecommendedCellList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for RecommendedCellList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<RecommendedCellItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(RecommendedCellItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { RecommendedCellList, 1, 16 }
     pub use super::ngap_containers::ProtocolExtensionContainer as RecommendedCellsForPagingIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousRecommendedCellsForPagingIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -28684,54 +19834,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct RecommendedRANNodeList(pub SequenceOf<RecommendedRANNodeItem>);
-    impl Encode for RecommendedRANNodeList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for RecommendedRANNodeList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<RecommendedRANNodeItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(RecommendedRANNodeItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { RecommendedRANNodeList, 1, 16 }
     pub use super::ngap_containers::ProtocolExtensionContainer as RecommendedRANNodesForPagingIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousRecommendedRANNodesForPagingIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -28959,54 +20062,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=8"))]
     pub struct RequestedNSSAI(pub SequenceOf<RequestedNSSAIItem>);
-    impl Encode for RequestedNSSAI {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for RequestedNSSAI {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<RequestedNSSAIItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(RequestedNSSAIItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { RequestedNSSAI, 1, 8 }
     pub use super::ngap_containers::ProtocolExtensionContainer as RequestedNSSAIItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousRequestedNSSAIItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -29162,54 +20218,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=2"), identifier = "SCTP-TLAs")]
     pub struct SCTPTLAs(pub SequenceOf<TransportLayerAddress>);
-    impl Encode for SCTPTLAs {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 2));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for SCTPTLAs {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TransportLayerAddress>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 2));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TransportLayerAddress::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { SCTPTLAs, 1, 2 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct SD(pub FixedOctetString<3usize>);
@@ -29401,54 +20410,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"))]
     pub struct SNPNCellIdListforMDT(pub SequenceOf<SNPNCellIdListforMDTItem>);
-    impl Encode for SNPNCellIdListforMDT {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for SNPNCellIdListforMDT {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<SNPNCellIdListforMDTItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(SNPNCellIdListforMDTItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { SNPNCellIdListforMDT, 1, 32 }
     pub use super::ngap_containers::ProtocolExtensionContainer as SNPNCellIdListforMDTItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousSNPNCellIdListforMDTItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -29486,54 +20448,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct SNPNListforMDT(pub SequenceOf<SNPNListforMDTItem>);
-    impl Encode for SNPNListforMDT {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for SNPNListforMDT {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<SNPNListforMDTItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(SNPNListforMDTItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { SNPNListforMDT, 1, 16 }
     pub use super::ngap_containers::ProtocolExtensionContainer as SNPNListforMDTItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousSNPNListforMDTItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -29571,54 +20486,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=8"))]
     pub struct SNPNTAIListforMDT(pub SequenceOf<SNPNTAIListforMDTItem>);
-    impl Encode for SNPNTAIListforMDT {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for SNPNTAIListforMDT {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<SNPNTAIListforMDTItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(SNPNTAIListforMDTItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { SNPNTAIListforMDT, 1, 8 }
     pub use super::ngap_containers::ProtocolExtensionContainer as SNPNTAIListforMDTItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousSNPNTAIListforMDTItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -30069,54 +20937,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=3"))]
     pub struct SensorMeasConfigNameList(pub SequenceOf<SensorMeasConfigNameItem>);
-    impl Encode for SensorMeasConfigNameList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 3));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for SensorMeasConfigNameList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<SensorMeasConfigNameItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 3));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(SensorMeasConfigNameItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { SensorMeasConfigNameList, 1, 3 }
     pub use super::ngap_containers::ProtocolExtensionContainer as SensorMeasurementConfigurationIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousSensorMeasurementConfigurationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -30245,105 +21066,11 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct ServedGUAMIList(pub SequenceOf<ServedGUAMIItem>);
-    impl Encode for ServedGUAMIList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for ServedGUAMIList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<ServedGUAMIItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(ServedGUAMIItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { ServedGUAMIList, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct ServiceAreaInformation(pub SequenceOf<ServiceAreaInformationItem>);
-    impl Encode for ServiceAreaInformation {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for ServiceAreaInformation {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<ServiceAreaInformationItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(ServiceAreaInformationItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { ServiceAreaInformation, 1, 16 }
     pub use super::ngap_containers::ProtocolExtensionContainer as ServiceAreaInformationItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousServiceAreaInformationItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -30463,54 +21190,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=1024"))]
     pub struct SliceMDTList(pub SequenceOf<SliceMDTItem>);
-    impl Encode for SliceMDTList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 1024));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for SliceMDTList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<SliceMDTItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 1024));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(SliceMDTItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { SliceMDTList, 1, 1024 }
     pub use super::ngap_containers::ProtocolExtensionContainer as SliceOverloadItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousSliceOverloadItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -30539,54 +21219,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=1024"))]
     pub struct SliceOverloadList(pub SequenceOf<SliceOverloadItem>);
-    impl Encode for SliceOverloadList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 1024));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for SliceOverloadList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<SliceOverloadItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 1024));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(SliceOverloadItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { SliceOverloadList, 1, 1024 }
     pub use super::ngap_containers::ProtocolExtensionContainer as SliceSupportItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousSliceSupportItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -30615,105 +21248,11 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=1024"))]
     pub struct SliceSupportList(pub SequenceOf<SliceSupportItem>);
-    impl Encode for SliceSupportList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 1024));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for SliceSupportList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<SliceSupportItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 1024));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(SliceSupportItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { SliceSupportList, 1, 1024 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct SliceSupportListQMC(pub SequenceOf<SliceSupportQMCItem>);
-    impl Encode for SliceSupportListQMC {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for SliceSupportListQMC {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<SliceSupportQMCItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(SliceSupportQMCItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { SliceSupportListQMC, 1, 16 }
     pub use super::ngap_containers::ProtocolExtensionContainer as SliceSupportQMCItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousSliceSupportQMCItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -30974,54 +21513,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct SuccessfulHandoverReportList(pub SequenceOf<SuccessfulHandoverReportItem>);
-    impl Encode for SuccessfulHandoverReportList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for SuccessfulHandoverReportList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<SuccessfulHandoverReportItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(SuccessfulHandoverReportItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { SuccessfulHandoverReportList, 1, 64 }
     pub use super::ngap_containers::ProtocolExtensionContainer as SuccessfulPSCellChangeReportItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousSuccessfulPSCellChangeReportItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -31053,54 +21545,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct SuccessfulPSCellChangeReportList(pub SequenceOf<SuccessfulPSCellChangeReportItem>);
-    impl Encode for SuccessfulPSCellChangeReportList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for SuccessfulPSCellChangeReportList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<SuccessfulPSCellChangeReportItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(SuccessfulPSCellChangeReportItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { SuccessfulPSCellChangeReportList, 1, 64 }
     pub use super::ngap_containers::ProtocolExtensionContainer as SupportedTAItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousSupportedTAItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -31138,54 +21583,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct SupportedTAList(pub SequenceOf<SupportedTAItem>);
-    impl Encode for SupportedTAList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for SupportedTAList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<SupportedTAItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(SupportedTAItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { SupportedTAList, 1, 256 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
     #[non_exhaustive]
@@ -31198,54 +21596,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=8"))]
     pub struct SupportedUETypeList(pub SequenceOf<SupportedUEType>);
-    impl Encode for SupportedUETypeList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for SupportedUETypeList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<SupportedUEType>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(SupportedUEType::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { SupportedUETypeList, 1, 8 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, value("0..=1920000", extensible))]
     pub struct SurvivalTime(pub Integer);
@@ -31333,54 +21684,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=12"))]
     pub struct TACListInNRNTN(pub SequenceOf<TAC>);
-    impl Encode for TACListInNRNTN {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 12));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for TACListInNRNTN {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAC>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 12));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAC::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { TACListInNRNTN, 1, 12 }
     pub use super::ngap_containers::ProtocolExtensionContainer as TAIIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAIIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -31474,54 +21778,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"))]
     pub struct TAIBroadcastEUTRA(pub SequenceOf<TAIBroadcastEUTRAItem>);
-    impl Encode for TAIBroadcastEUTRA {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for TAIBroadcastEUTRA {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAIBroadcastEUTRAItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAIBroadcastEUTRAItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { TAIBroadcastEUTRA, 1, 65535 }
     pub use super::ngap_containers::ProtocolExtensionContainer as TAIBroadcastEUTRAItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAIBroadcastEUTRAItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -31559,54 +21816,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"))]
     pub struct TAIBroadcastNR(pub SequenceOf<TAIBroadcastNRItem>);
-    impl Encode for TAIBroadcastNR {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for TAIBroadcastNR {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAIBroadcastNRItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAIBroadcastNRItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { TAIBroadcastNR, 1, 65535 }
     pub use super::ngap_containers::ProtocolExtensionContainer as TAIBroadcastNRItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAIBroadcastNRItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -31644,54 +21854,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"))]
     pub struct TAICancelledEUTRA(pub SequenceOf<TAICancelledEUTRAItem>);
-    impl Encode for TAICancelledEUTRA {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for TAICancelledEUTRA {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAICancelledEUTRAItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAICancelledEUTRAItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { TAICancelledEUTRA, 1, 65535 }
     pub use super::ngap_containers::ProtocolExtensionContainer as TAICancelledEUTRAItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAICancelledEUTRAItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -31729,54 +21892,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"))]
     pub struct TAICancelledNR(pub SequenceOf<TAICancelledNRItem>);
-    impl Encode for TAICancelledNR {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for TAICancelledNR {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAICancelledNRItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAICancelledNRItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { TAICancelledNR, 1, 65535 }
     pub use super::ngap_containers::ProtocolExtensionContainer as TAICancelledNRItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAICancelledNRItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -31814,54 +21930,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct TAIListForInactive(pub SequenceOf<TAIListForInactiveItem>);
-    impl Encode for TAIListForInactive {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for TAIListForInactive {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAIListForInactiveItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAIListForInactiveItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { TAIListForInactive, 1, 16 }
     pub use super::ngap_containers::ProtocolExtensionContainer as TAIListForInactiveItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAIListForInactiveItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -31890,54 +21959,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct TAIListForPaging(pub SequenceOf<TAIListForPagingItem>);
-    impl Encode for TAIListForPaging {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for TAIListForPaging {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAIListForPagingItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAIListForPagingItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { TAIListForPaging, 1, 16 }
     pub use super::ngap_containers::ProtocolExtensionContainer as TAIListForPagingItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAIListForPagingItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -31966,207 +21988,19 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=2048"))]
     pub struct TAIListForRestart(pub SequenceOf<TAI>);
-    impl Encode for TAIListForRestart {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 2048));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for TAIListForRestart {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAI>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 2048));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAI::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { TAIListForRestart, 1, 2048 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"))]
     pub struct TAIListForWarning(pub SequenceOf<TAI>);
-    impl Encode for TAIListForWarning {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for TAIListForWarning {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAI>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAI::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { TAIListForWarning, 1, 65535 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=8"))]
     pub struct TAIListforMDT(pub SequenceOf<TAI>);
-    impl Encode for TAIListforMDT {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for TAIListforMDT {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAI>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAI::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { TAIListforMDT, 1, 8 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=8"))]
     pub struct TAIListforQMC(pub SequenceOf<TAI>);
-    impl Encode for TAIListforQMC {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for TAIListforQMC {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAI>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAI::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { TAIListforQMC, 1, 8 }
     pub use super::ngap_containers::ProtocolExtensionContainer as TAIMBSSupportItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAIMBSSupportItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -32195,54 +22029,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct TAIMBSSupportList(pub SequenceOf<TAIMBSSupportItem>);
-    impl Encode for TAIMBSSupportList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for TAIMBSSupportList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAIMBSSupportItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAIMBSSupportItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { TAIMBSSupportList, 1, 256 }
     pub use super::ngap_containers::ProtocolExtensionContainer as TAINSAGSupportItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousTAINSAGSupportItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -32280,156 +22067,15 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct TAINSAGSupportList(pub SequenceOf<TAINSAGSupportItem>);
-    impl Encode for TAINSAGSupportList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for TAINSAGSupportList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAINSAGSupportItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAINSAGSupportItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { TAINSAGSupportList, 1, 256 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=8"))]
     pub struct TAListforMDT(pub SequenceOf<TAC>);
-    impl Encode for TAListforMDT {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for TAListforMDT {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAC>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAC::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { TAListforMDT, 1, 8 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=8"))]
     pub struct TAListforQMC(pub SequenceOf<TAC>);
-    impl Encode for TAListforQMC {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for TAListforQMC {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TAC>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TAC::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { TAListforQMC, 1, 8 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate)]
     pub struct TLContainer(pub OctetString);
@@ -32535,54 +22181,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=32"))]
     pub struct TNLAssociationList(pub SequenceOf<TNLAssociationItem>);
-    impl Encode for TNLAssociationList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for TNLAssociationList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TNLAssociationItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 32));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TNLAssociationItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { TNLAssociationList, 1, 32 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
     #[non_exhaustive]
@@ -32923,54 +22522,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=8"))]
     pub struct TargetNSSAI(pub SequenceOf<TargetNSSAIItem>);
-    impl Encode for TargetNSSAI {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for TargetNSSAI {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TargetNSSAIItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TargetNSSAIItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { TargetNSSAI, 1, 8 }
     pub use super::ngap_containers::ProtocolExtensionContainer as TargetNSSAIItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousTargetNSSAIItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -33666,54 +23218,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=4096"), identifier = "UE-PagingList")]
     pub struct UEPagingList(pub SequenceOf<UEPagingItem>);
-    impl Encode for UEPagingList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 4096));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for UEPagingList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<UEPagingItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 4096));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(UEPagingItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { UEPagingList, 1, 4096 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated, identifier = "UE-UP-CIoT-Support")]
     #[non_exhaustive]
@@ -33763,60 +23268,7 @@ pub mod ngap_ies {
     pub struct UEAssociatedLogicalNGConnectionList(
         pub SequenceOf<UEAssociatedLogicalNGConnectionItem>,
     );
-    impl Encode for UEAssociatedLogicalNGConnectionList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            if !(1..=65536).contains(&self.0.len()) {
-                return Err(rasn::error::EncodeError::size_constraint_not_satisfied(
-                    self.0.len(),
-                    &rasn::types::constraints::Size::new(rasn::types::constraints::Bounded::new(
-                        1, 65536,
-                    )),
-                    encoder.codec(),
-                )
-                .into());
-            }
-            encoder
-                .encode_sequence_of(tag, &self.0, Constraints::default(), identifier)
-                .map(drop)
-        }
-    }
-    impl Decode for UEAssociatedLogicalNGConnectionList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<UEAssociatedLogicalNGConnectionItem>(tag, constraints)
-                    .map(Self);
-            }
-            let values = decoder.decode_sequence_of::<UEAssociatedLogicalNGConnectionItem>(
-                tag,
-                Constraints::default(),
-            )?;
-            if !(1..=65536).contains(&values.len()) {
-                return Err(rasn::error::DecodeError::size_constraint_not_satisfied(
-                    Some(values.len()),
-                    "1..=65536".into(),
-                    decoder.codec(),
-                )
-                .into());
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { UEAssociatedLogicalNGConnectionList, 1, 65536, unconstrained }
     pub use super::ngap_containers::ProtocolExtensionContainer as UEAggregateMaximumBitRateIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousUEAggregateMaximumBitRateIEExtensions;
     #[doc = " U"]
@@ -33972,54 +23424,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct UEAppLayerMeasInfoList(pub SequenceOf<UEAppLayerMeasInfoItem>);
-    impl Encode for UEAppLayerMeasInfoList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for UEAppLayerMeasInfoList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<UEAppLayerMeasInfoItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(UEAppLayerMeasInfoItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { UEAppLayerMeasInfoList, 1, 16 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
     #[non_exhaustive]
@@ -34119,54 +23524,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct UEHistoryInformation(pub SequenceOf<LastVisitedCellItem>);
-    impl Encode for UEHistoryInformation {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for UEHistoryInformation {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<LastVisitedCellItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(LastVisitedCellItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { UEHistoryInformation, 1, 16 }
     pub use super::ngap_containers::ProtocolIEField as UEHistoryInformationFromTheUEChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
@@ -34269,54 +23627,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=64"))]
     pub struct UEPresenceInAreaOfInterestList(pub SequenceOf<UEPresenceInAreaOfInterestItem>);
-    impl Encode for UEPresenceInAreaOfInterestList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for UEPresenceInAreaOfInterestList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<UEPresenceInAreaOfInterestItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 64));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(UEPresenceInAreaOfInterestItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { UEPresenceInAreaOfInterestList, 1, 64 }
     pub use super::ngap_containers::ProtocolIEField as UERLFReportContainerChoiceExtensions;
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(choice, automatic_tags)]
@@ -34486,54 +23797,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=8"))]
     pub struct UESliceMaximumBitRateList(pub SequenceOf<UESliceMaximumBitRateItem>);
-    impl Encode for UESliceMaximumBitRateList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for UESliceMaximumBitRateList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<UESliceMaximumBitRateItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 8));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(UESliceMaximumBitRateItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { UESliceMaximumBitRateList, 1, 8 }
     pub use super::ngap_containers::ProtocolExtensionContainer as ULCPSecurityInformationIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousULCPSecurityInformationIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -34611,54 +23875,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=4"), identifier = "UL-NGU-UP-TNLModifyList")]
     pub struct ULNGUUPTNLModifyList(pub SequenceOf<ULNGUUPTNLModifyItem>);
-    impl Encode for ULNGUUPTNLModifyList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 4));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for ULNGUUPTNLModifyList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<ULNGUUPTNLModifyItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 4));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(ULNGUUPTNLModifyItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { ULNGUUPTNLModifyList, 1, 4 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
     #[non_exhaustive]
@@ -34715,54 +23932,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=3"))]
     pub struct UPTransportLayerInformationList(pub SequenceOf<UPTransportLayerInformationItem>);
-    impl Encode for UPTransportLayerInformationList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 3));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for UPTransportLayerInformationList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<UPTransportLayerInformationItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 3));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(UPTransportLayerInformationItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { UPTransportLayerInformationList, 1, 3 }
     pub use super::ngap_containers::ProtocolExtensionContainer as UPTransportLayerInformationPairItemIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousUPTransportLayerInformationPairItemIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -34802,54 +23972,7 @@ pub mod ngap_ies {
     pub struct UPTransportLayerInformationPairList(
         pub SequenceOf<UPTransportLayerInformationPairItem>,
     );
-    impl Encode for UPTransportLayerInformationPairList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 3));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for UPTransportLayerInformationPairList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<UPTransportLayerInformationPairItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 3));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(UPTransportLayerInformationPairItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { UPTransportLayerInformationPairList, 1, 3 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, identifier = "URI-address")]
     pub struct URIAddress(pub VisibleString);
@@ -34896,54 +24019,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=256"))]
     pub struct UnavailableGUAMIList(pub SequenceOf<UnavailableGUAMIItem>);
-    impl Encode for UnavailableGUAMIList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for UnavailableGUAMIList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<UnavailableGUAMIItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 256));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(UnavailableGUAMIItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { UnavailableGUAMIList, 1, 256 }
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("8", extensible))]
     pub struct UpdateFeedback(pub BitString);
@@ -35397,54 +24473,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=2"))]
     pub struct VolumeTimedReportList(pub SequenceOf<VolumeTimedReportItem>);
-    impl Encode for VolumeTimedReportList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 2));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for VolumeTimedReportList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<VolumeTimedReportItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 2));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(VolumeTimedReportItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { VolumeTimedReportList, 1, 2 }
     pub use super::ngap_containers::ProtocolIEField as WAGFIDChoiceExtensions;
     #[doc = " W"]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash)]
@@ -35502,54 +24531,7 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=4"))]
     pub struct WLANMeasConfigNameList(pub SequenceOf<WLANMeasConfigNameItem>);
-    impl Encode for WLANMeasConfigNameList {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 4));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for WLANMeasConfigNameList {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<WLANMeasConfigNameItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 4));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(WLANMeasConfigNameItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { WLANMeasConfigNameList, 1, 4 }
     #[doc = " Inner type "]
     #[derive(AsnType, Debug, Clone, Decode, Encode, PartialEq, Eq, Hash, Copy)]
     #[rasn(enumerated)]
@@ -35731,156 +24713,15 @@ pub mod ngap_ies {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"))]
     pub struct XnExtTLAs(pub SequenceOf<XnExtTLAItem>);
-    impl Encode for XnExtTLAs {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for XnExtTLAs {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<XnExtTLAItem>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(XnExtTLAItem::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { XnExtTLAs, 1, 16 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=16"), identifier = "XnGTP-TLAs")]
     pub struct XnGTPTLAs(pub SequenceOf<TransportLayerAddress>);
-    impl Encode for XnGTPTLAs {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for XnGTPTLAs {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TransportLayerAddress>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 16));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TransportLayerAddress::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { XnGTPTLAs, 1, 16 }
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=2"))]
     pub struct XnTLAs(pub SequenceOf<TransportLayerAddress>);
-    impl Encode for XnTLAs {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 2));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for XnTLAs {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<TransportLayerAddress>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 2));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(TransportLayerAddress::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { XnTLAs, 1, 2 }
     pub use super::ngap_containers::ProtocolExtensionContainer as XnTNLConfigurationInfoIEExtensions;
     pub use super::ngap_containers::ProtocolExtensionField as AnonymousXnTNLConfigurationInfoIEExtensions;
     #[derive(AsnType, Debug, Clone, Encode, PartialEq, Eq, Hash)]
@@ -38734,54 +27575,7 @@ pub mod ngap_pdu_contents {
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"))]
     pub struct PrivateMessagePrivateIEs(pub SequenceOf<AnonymousPrivateMessagePrivateIEs>);
-    impl Encode for PrivateMessagePrivateIEs {
-        fn encode_with_tag_and_constraints<'b, E: Encoder<'b>>(
-            &self,
-            encoder: &mut E,
-            tag: Tag,
-            constraints: Constraints,
-            identifier: Identifier,
-        ) -> Result<(), E::Error> {
-            if encoder.codec() != rasn::Codec::Aper {
-                return encoder
-                    .encode_sequence_of(tag, &self.0, constraints, identifier)
-                    .map(drop);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let _ = encoder.encode_integer(
-                Tag::INTEGER,
-                LENGTH_CONSTRAINTS,
-                &self.0.len(),
-                Identifier::EMPTY,
-            )?;
-            for value in &self.0 {
-                value.encode(encoder)?;
-            }
-            Ok(())
-        }
-    }
-    impl Decode for PrivateMessagePrivateIEs {
-        fn decode_with_tag_and_constraints<D: Decoder>(
-            decoder: &mut D,
-            tag: Tag,
-            constraints: Constraints,
-        ) -> Result<Self, D::Error> {
-            if decoder.codec() != rasn::Codec::Aper {
-                return decoder
-                    .decode_sequence_of::<AnonymousPrivateMessagePrivateIEs>(tag, constraints)
-                    .map(Self);
-            }
-            const LENGTH_CONSTRAINTS: Constraints =
-                rasn::constraints!(rasn::value_constraint!(1, 65535));
-            let length = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH_CONSTRAINTS)?;
-            let mut values = Vec::new();
-            for _ in 0..length {
-                values.push(AnonymousPrivateMessagePrivateIEs::decode(decoder)?);
-            }
-            Ok(Self(values))
-        }
-    }
+    crate::per::sequence_of! { PrivateMessagePrivateIEs, 1, 65535 }
     #[doc = " **************************************************************"]
     #[doc = ""]
     #[doc = " PRIVATE MESSAGE ELEMENTARY PROCEDURE"]

@@ -1060,7 +1060,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { A2XPC5FlowBitRates, "A2X-PC5-FlowBitRates" {
+    crate::per::decode_extensible_sequence! { A2XPC5FlowBitRates {
         #[rasn(identifier = "a2X-GuaranteedFlowBitRate")]
         a2_x_guaranteed_flow_bit_rate: [BitRate],
         #[rasn(identifier = "a2X-MaximumFlowBitRate")]
@@ -1112,7 +1112,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { A2XPC5QoSFlowItem, "A2X-PC5-QoS-Flow-Item" {
+    crate::per::decode_extensible_sequence! { A2XPC5QoSFlowItem {
         #[rasn(value("0..=255", extensible), identifier = "a2X-PQI")]
         a2_x_pqi: [Integer],
         #[rasn(identifier = "a2X-PC5-FlowBitRates")]
@@ -1155,7 +1155,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { A2XPC5QoSParameters, "A2X-PC5-QoS-Parameters" {
+    crate::per::decode_extensible_sequence! { A2XPC5QoSParameters {
         #[rasn(identifier = "a2X-PC5-QoS-Flow-List")]
         a2_x_pc5_qo_s_flow_list: [A2XPC5QoSFlowList],
         #[rasn(identifier = "a2X-PC5-LinkAggregateBitRates")]
@@ -1193,7 +1193,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AIOTFName, "AIOTFName" {
+    crate::per::decode_extensible_sequence! { AIOTFName {
         #[rasn(identifier = "aIOTFNameVisibleString")]
         a_iotfname_visible_string: [Option<AIOTFNameVisibleString>],
         #[rasn(identifier = "aIOTFNameUTF8String")]
@@ -1245,7 +1245,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { AIOTSessionReleaseCommandTransfer, "AIOTSessionReleaseCommandTransfer" {
+    crate::per::decode_extensible_sequence! { AIOTSessionReleaseCommandTransfer {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -1268,7 +1268,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AIOTSessionReleaseCompleteTransfer, "AIOTSessionReleaseCompleteTransfer" {
+    crate::per::decode_extensible_sequence! { AIOTSessionReleaseCompleteTransfer {
         #[rasn(identifier = "correlationIdentifier")]
         correlation_identifier: [AIoTCorrelationIdentifier],
         #[rasn(identifier = "criticalityDiagnostics")]
@@ -1302,7 +1302,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AIOTSessionReleaseRequestTransfer, "AIOTSessionReleaseRequestTransfer" {
+    crate::per::decode_extensible_sequence! { AIOTSessionReleaseRequestTransfer {
         #[rasn(identifier = "correlationIdentifier")]
         correlation_identifier: [AIoTCorrelationIdentifier],
         cause: [Cause],
@@ -1337,7 +1337,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AIoTCommandAssistanceInformation, "AIoT-CommandAssistanceInformation" {
+    crate::per::decode_extensible_sequence! { AIoTCommandAssistanceInformation {
         #[rasn(
             value("1..=256", extensible),
             identifier = "estimateofExpectedD2RMsgSize"
@@ -1403,7 +1403,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AIoTDeviceReportItem, "AIoT-DeviceReportItem" {
+    crate::per::decode_extensible_sequence! { AIoTDeviceReportItem {
         #[rasn(identifier = "aIoT-NASPDU")]
         a_io_t_naspdu: [AIoTNASPDU],
         #[rasn(identifier = "rAN-AIOT-Device-NGAP-ID")]
@@ -1454,7 +1454,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AIoTInventoryAssistanceInformation, "AIoT-InventoryAssistanceInformation" {
+    crate::per::decode_extensible_sequence! { AIoTInventoryAssistanceInformation {
         #[rasn(value("1..=256", extensible), identifier = "expectedD2RMsgSize")]
         expected_d2_rmsg_size: [Integer],
         #[rasn(
@@ -1506,7 +1506,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AIoTReaderReportItem, "AIoT-ReaderReportItem" {
+    crate::per::decode_extensible_sequence! { AIoTReaderReportItem {
         #[rasn(identifier = "readerIndex")]
         reader_index: [AIoTReaderIndex],
         #[rasn(identifier = "deviceReportList")]
@@ -1549,7 +1549,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AIoTRequestedReaderItem, "AIoT-RequestedReaderItem" {
+    crate::per::decode_extensible_sequence! { AIoTRequestedReaderItem {
         #[rasn(identifier = "globalgNB-ID")]
         globalg_nb_id: [GlobalGNBID],
         #[rasn(identifier = "readerIndex")]
@@ -1588,7 +1588,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AIoTRequestedServiceAreaInformation, "AIoT-RequestedServiceAreaInformation" {
+    crate::per::decode_extensible_sequence! { AIoTRequestedServiceAreaInformation {
         #[rasn(identifier = "requestedReaderList")]
         requested_reader_list: [Option<AIoTRequestedReaderList>],
         #[rasn(identifier = "requestedAIoTAreaList")]
@@ -1696,7 +1696,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AIoTAreaID, "AIoTAreaID" {
+    crate::per::decode_extensible_sequence! { AIoTAreaID {
         #[rasn(identifier = "pLMNidentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "nID")]
@@ -1733,7 +1733,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AMFTNLAssociationSetupItem, "AMF-TNLAssociationSetupItem" {
+    crate::per::decode_extensible_sequence! { AMFTNLAssociationSetupItem {
         #[rasn(identifier = "aMF-TNLAssociationAddress")]
         a_mf_tnlassociation_address: [CPTransportLayerInformation],
         #[rasn(identifier = "iE-Extensions")]
@@ -1770,7 +1770,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AMFTNLAssociationToAddItem, "AMF-TNLAssociationToAddItem" {
+    crate::per::decode_extensible_sequence! { AMFTNLAssociationToAddItem {
         #[rasn(identifier = "aMF-TNLAssociationAddress")]
         a_mf_tnlassociation_address: [CPTransportLayerInformation],
         #[rasn(identifier = "tNLAssociationUsage")]
@@ -1811,7 +1811,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AMFTNLAssociationToRemoveItem, "AMF-TNLAssociationToRemoveItem" {
+    crate::per::decode_extensible_sequence! { AMFTNLAssociationToRemoveItem {
         #[rasn(identifier = "aMF-TNLAssociationAddress")]
         a_mf_tnlassociation_address: [CPTransportLayerInformation],
         #[rasn(identifier = "iE-Extensions")]
@@ -1852,7 +1852,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AMFTNLAssociationToUpdateItem, "AMF-TNLAssociationToUpdateItem" {
+    crate::per::decode_extensible_sequence! { AMFTNLAssociationToUpdateItem {
         #[rasn(identifier = "aMF-TNLAssociationAddress")]
         a_mf_tnlassociation_address: [CPTransportLayerInformation],
         #[rasn(identifier = "tNLAssociationUsage")]
@@ -1979,7 +1979,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AUN3DeviceAccessInfo, "AUN3DeviceAccessInfo" {
+    crate::per::decode_extensible_sequence! { AUN3DeviceAccessInfo {
         #[rasn(identifier = "aUN3DeviceAccess")]
         a_un3_device_access: [AUN3DeviceAccessInfoAUN3DeviceAccess],
         #[rasn(identifier = "existingNGConnectionwithSameLocation")]
@@ -2024,7 +2024,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AdditionalCancelledlocationReportingReferenceIDItem, "AdditionalCancelledlocationReportingReferenceIDItem" {
+    crate::per::decode_extensible_sequence! { AdditionalCancelledlocationReportingReferenceIDItem {
         #[rasn(identifier = "locationReportingReferenceIDToBeCancelled")]
         location_reporting_reference_idto_be_cancelled: [LocationReportingReferenceID],
         #[rasn(identifier = "iE-Extensions")]
@@ -2063,7 +2063,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AdditionalDLUPTNLInformationForHOItem, "AdditionalDLUPTNLInformationForHOItem" {
+    crate::per::decode_extensible_sequence! { AdditionalDLUPTNLInformationForHOItem {
         #[rasn(identifier = "additionalDL-NGU-UP-TNLInformation")]
         additional_dl_ngu_up_tnlinformation: [UPTransportLayerInformation],
         #[rasn(identifier = "additionalQosFlowSetupResponseList")]
@@ -2116,7 +2116,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AdditionalULI, "AdditionalULI" {
+    crate::per::decode_extensible_sequence! { AdditionalULI {
         #[rasn(identifier = "nRCGI")]
         n_rcgi: [NRCGI],
         #[rasn(identifier = "tAI")]
@@ -2150,7 +2150,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AerialUEFlightInformationReporting, "Aerial-UE-FlightInformationReporting" {
+    crate::per::decode_extensible_sequence! { AerialUEFlightInformationReporting {
         altitude: [Altitude],
         #[rasn(identifier = "timeStamp")]
         time_stamp: [TimeStamp],
@@ -2191,7 +2191,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AerialUEFlightInformationReportingControl, "Aerial-UE-FlightInformationReportingControl" {
+    crate::per::decode_extensible_sequence! { AerialUEFlightInformationReportingControl {
         #[rasn(identifier = "higher-Altitude-Threshold")]
         higher_altitude_threshold: [Altitude],
         #[rasn(identifier = "lower-Altitude-Threshold")]
@@ -2236,7 +2236,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AerialUEFlightInformationReportingControlItem, "Aerial-UE-FlightInformationReportingControlItem" {
+    crate::per::decode_extensible_sequence! { AerialUEFlightInformationReportingControlItem {
         #[rasn(identifier = "aerial-UE-FlightInformationReportingControl")]
         aerial_ue_flight_information_reporting_control: [AerialUEFlightInformationReportingControl],
         #[rasn(identifier = "iE-Extensions")]
@@ -2306,7 +2306,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AllocationAndRetentionPriority, "AllocationAndRetentionPriority" {
+    crate::per::decode_extensible_sequence! { AllocationAndRetentionPriority {
         #[rasn(identifier = "priorityLevelARP")]
         priority_level_arp: [PriorityLevelARP],
         #[rasn(identifier = "pre-emptionCapability")]
@@ -2360,7 +2360,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AllowedPNINPNItem, "Allowed-PNI-NPN-Item" {
+    crate::per::decode_extensible_sequence! { AllowedPNINPNItem {
         #[rasn(identifier = "pLMNIdentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "pNI-NPN-restricted")]
@@ -2405,7 +2405,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AllowedNSSAIItem, "AllowedNSSAI-Item" {
+    crate::per::decode_extensible_sequence! { AllowedNSSAIItem {
         #[rasn(identifier = "s-NSSAI")]
         s_nssai: [SNSSAI],
         #[rasn(identifier = "iE-Extensions")]
@@ -2450,7 +2450,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AlternativeQoSParaSetItem, "AlternativeQoSParaSetItem" {
+    crate::per::decode_extensible_sequence! { AlternativeQoSParaSetItem {
         #[rasn(identifier = "alternativeQoSParaSetIndex")]
         alternative_qo_spara_set_index: [AlternativeQoSParaSetIndex],
         #[rasn(identifier = "guaranteedFlowBitRateDL")]
@@ -2541,7 +2541,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AreaOfInterest, "AreaOfInterest" {
+    crate::per::decode_extensible_sequence! { AreaOfInterest {
         #[rasn(identifier = "areaOfInterestTAIList")]
         area_of_interest_tailist: [Option<AreaOfInterestTAIList>],
         #[rasn(identifier = "areaOfInterestCellList")]
@@ -2578,7 +2578,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AreaOfInterestCellItem, "AreaOfInterestCellItem" {
+    crate::per::decode_extensible_sequence! { AreaOfInterestCellItem {
         #[rasn(identifier = "nGRAN-CGI")]
         n_gran_cgi: [NGRANCGI],
         #[rasn(identifier = "iE-Extensions")]
@@ -2613,7 +2613,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AreaOfInterestItem, "AreaOfInterestItem" {
+    crate::per::decode_extensible_sequence! { AreaOfInterestItem {
         #[rasn(identifier = "areaOfInterest")]
         area_of_interest: [AreaOfInterest],
         #[rasn(identifier = "locationReportingReferenceID")]
@@ -2650,7 +2650,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AreaOfInterestRANNodeItem, "AreaOfInterestRANNodeItem" {
+    crate::per::decode_extensible_sequence! { AreaOfInterestRANNodeItem {
         #[rasn(identifier = "globalRANNodeID")]
         global_rannode_id: [GlobalRANNodeID],
         #[rasn(identifier = "iE-Extensions")]
@@ -2683,7 +2683,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AreaOfInterestTAIItem, "AreaOfInterestTAIItem" {
+    crate::per::decode_extensible_sequence! { AreaOfInterestTAIItem {
         #[rasn(identifier = "tAI")]
         t_ai: [TAI],
         #[rasn(identifier = "iE-Extensions")]
@@ -2789,7 +2789,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AreaScopeOfNeighCellsItem, "AreaScopeOfNeighCellsItem" {
+    crate::per::decode_extensible_sequence! { AreaScopeOfNeighCellsItem {
         #[rasn(identifier = "nrFrequencyInfo")]
         nr_frequency_info: [NRFrequencyInfo],
         #[rasn(identifier = "pciListForMDT")]
@@ -2865,7 +2865,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AssistanceDataForPaging, "AssistanceDataForPaging" {
+    crate::per::decode_extensible_sequence! { AssistanceDataForPaging {
         #[rasn(identifier = "assistanceDataForRecommendedCells")]
         assistance_data_for_recommended_cells: [Option<AssistanceDataForRecommendedCells>],
         #[rasn(identifier = "pagingAttemptInformation")]
@@ -2898,7 +2898,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AssistanceDataForRecommendedCells, "AssistanceDataForRecommendedCells" {
+    crate::per::decode_extensible_sequence! { AssistanceDataForRecommendedCells {
         #[rasn(identifier = "recommendedCellsForPaging")]
         recommended_cells_for_paging: [RecommendedCellsForPaging],
         #[rasn(identifier = "iE-Extensions")]
@@ -2936,7 +2936,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AssociatedMBSQosFlowSetupRequestItem, "AssociatedMBSQosFlowSetupRequestItem" {
+    crate::per::decode_extensible_sequence! { AssociatedMBSQosFlowSetupRequestItem {
         #[rasn(identifier = "mBS-QosFlowIdentifier")]
         m_bs_qos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "associatedUnicastQosFlowIdentifier")]
@@ -2977,7 +2977,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AssociatedMBSQosFlowSetuporModifyRequestItem, "AssociatedMBSQosFlowSetuporModifyRequestItem" {
+    crate::per::decode_extensible_sequence! { AssociatedMBSQosFlowSetuporModifyRequestItem {
         #[rasn(identifier = "mBS-QosFlowIdentifier")]
         m_bs_qos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "associatedUnicastQosFlowIdentifier")]
@@ -3026,7 +3026,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AssociatedQosFlowItem, "AssociatedQosFlowItem" {
+    crate::per::decode_extensible_sequence! { AssociatedQosFlowItem {
         #[rasn(identifier = "qosFlowIdentifier")]
         qos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "qosFlowMappingIndication")]
@@ -3073,7 +3073,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AvailableBitrateReportThresholdItem, "AvailableBitrateReportThresholdItem" {
+    crate::per::decode_extensible_sequence! { AvailableBitrateReportThresholdItem {
         #[rasn(identifier = "reportingThreshold")]
         reporting_threshold: [ReportingThreshold],
         #[rasn(identifier = "iE-Extensions")]
@@ -3128,7 +3128,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { AvailableRANVisibleQoEMetrics, "AvailableRANVisibleQoEMetrics" {
+    crate::per::decode_extensible_sequence! { AvailableRANVisibleQoEMetrics {
         #[rasn(identifier = "applicationLayerBufferLevelList")]
         application_layer_buffer_level_list: [Option<AvailableRANVisibleQoEMetricsApplicationLayerBufferLevelList>],
         #[rasn(identifier = "playoutDelayForMediaStartup")]
@@ -3171,7 +3171,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { BeamMeasurementsReportConfiguration, "BeamMeasurementsReportConfiguration" {
+    crate::per::decode_extensible_sequence! { BeamMeasurementsReportConfiguration {
         #[rasn(identifier = "beamMeasurementsReportQuantity")]
         beam_measurements_report_quantity: [Option<BeamMeasurementsReportQuantity>],
         #[rasn(identifier = "maxNrofRS-IndexesToReport")]
@@ -3238,7 +3238,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { BeamMeasurementsReportQuantity, "BeamMeasurementsReportQuantity" {
+    crate::per::decode_extensible_sequence! { BeamMeasurementsReportQuantity {
         #[rasn(identifier = "rSRP")]
         r_srp: [BeamMeasurementsReportQuantityRSRP],
         #[rasn(identifier = "rSRQ")]
@@ -3284,7 +3284,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { BluetoothMeasConfigNameItem, "BluetoothMeasConfigNameItem" {
+    crate::per::decode_extensible_sequence! { BluetoothMeasConfigNameItem {
         #[rasn(identifier = "bluetoothName")]
         bluetooth_name: [BluetoothName],
         #[rasn(identifier = "iE-Extensions")]
@@ -3329,7 +3329,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { BluetoothMeasurementConfiguration, "BluetoothMeasurementConfiguration" {
+    crate::per::decode_extensible_sequence! { BluetoothMeasurementConfiguration {
         #[rasn(identifier = "bluetoothMeasConfig")]
         bluetooth_meas_config: [BluetoothMeasConfig],
         #[rasn(identifier = "bluetoothMeasConfigNameList")]
@@ -3469,7 +3469,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { BroadcastPLMNItem, "BroadcastPLMNItem" {
+    crate::per::decode_extensible_sequence! { BroadcastPLMNItem {
         #[rasn(identifier = "pLMNIdentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "tAISliceSupportList")]
@@ -3509,7 +3509,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { BroadcastTransportFailureTransfer, "BroadcastTransportFailureTransfer" {
+    crate::per::decode_extensible_sequence! { BroadcastTransportFailureTransfer {
         #[rasn(identifier = "mBS-SessionID")]
         m_bs_session_id: [MBSSessionID],
         cause: [Cause],
@@ -3547,7 +3547,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { BroadcastTransportRequestTransfer, "BroadcastTransportRequestTransfer" {
+    crate::per::decode_extensible_sequence! { BroadcastTransportRequestTransfer {
         #[rasn(identifier = "mBS-SessionID")]
         m_bs_session_id: [MBSSessionID],
         #[rasn(identifier = "mBS-SessionTNLInfoNGRAN")]
@@ -3580,7 +3580,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { BroadcastTransportResponseTransfer, "BroadcastTransportResponseTransfer" {
+    crate::per::decode_extensible_sequence! { BroadcastTransportResponseTransfer {
         #[rasn(identifier = "mBS-SessionID")]
         m_bs_session_id: [MBSSessionID],
         #[rasn(identifier = "iE-Extensions")]
@@ -3620,7 +3620,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extension")]
         pub i_e_extension: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { BurstArrivalTimeWindow, "BurstArrivalTimeWindow" {
+    crate::per::decode_extensible_sequence! { BurstArrivalTimeWindow {
         #[rasn(
             value("0..=640000", extensible),
             identifier = "burstArrivalTimeWindowStart"
@@ -3696,7 +3696,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CAGListforMDTItem, "CAGListforMDTItem" {
+    crate::per::decode_extensible_sequence! { CAGListforMDTItem {
         #[rasn(identifier = "plmnID")]
         plmn_id: [PLMNIdentity],
         #[rasn(identifier = "cAGID")]
@@ -3749,7 +3749,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CNAssistedRANTuning, "CNAssistedRANTuning" {
+    crate::per::decode_extensible_sequence! { CNAssistedRANTuning {
         #[rasn(identifier = "expectedUEBehaviour")]
         expected_uebehaviour: [Option<ExpectedUEBehaviour>],
         #[rasn(identifier = "iE-Extensions")]
@@ -3794,7 +3794,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CNTypeRestrictionsForEquivalentItem, "CNTypeRestrictionsForEquivalentItem" {
+    crate::per::decode_extensible_sequence! { CNTypeRestrictionsForEquivalentItem {
         #[rasn(identifier = "plmnIdentity")]
         plmn_identity: [PLMNIdentity],
         #[rasn(identifier = "cn-Type")]
@@ -3839,7 +3839,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { COUNTValueForPDCPSN12, "COUNTValueForPDCP-SN12" {
+    crate::per::decode_extensible_sequence! { COUNTValueForPDCPSN12 {
         #[rasn(value("0..=4095"), identifier = "pDCP-SN12")]
         p_dcp_sn12: [u16],
         #[rasn(value("0..=1048575"), identifier = "hFN-PDCP-SN12")]
@@ -3874,7 +3874,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { COUNTValueForPDCPSN18, "COUNTValueForPDCP-SN18" {
+    crate::per::decode_extensible_sequence! { COUNTValueForPDCPSN18 {
         #[rasn(value("0..=262143"), identifier = "pDCP-SN18")]
         p_dcp_sn18: [u32],
         #[rasn(value("0..=16383"), identifier = "hFN-PDCP-SN18")]
@@ -3939,7 +3939,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CancelledCellsInEAIEUTRAItem, "CancelledCellsInEAI-EUTRA-Item" {
+    crate::per::decode_extensible_sequence! { CancelledCellsInEAIEUTRAItem {
         #[rasn(identifier = "eUTRA-CGI")]
         e_utra_cgi: [EUTRACGI],
         #[rasn(identifier = "numberOfBroadcasts")]
@@ -3978,7 +3978,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CancelledCellsInEAINRItem, "CancelledCellsInEAI-NR-Item" {
+    crate::per::decode_extensible_sequence! { CancelledCellsInEAINRItem {
         #[rasn(identifier = "nR-CGI")]
         n_r_cgi: [NRCGI],
         #[rasn(identifier = "numberOfBroadcasts")]
@@ -4017,7 +4017,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CancelledCellsInTAIEUTRAItem, "CancelledCellsInTAI-EUTRA-Item" {
+    crate::per::decode_extensible_sequence! { CancelledCellsInTAIEUTRAItem {
         #[rasn(identifier = "eUTRA-CGI")]
         e_utra_cgi: [EUTRACGI],
         #[rasn(identifier = "numberOfBroadcasts")]
@@ -4056,7 +4056,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CancelledCellsInTAINRItem, "CancelledCellsInTAI-NR-Item" {
+    crate::per::decode_extensible_sequence! { CancelledCellsInTAINRItem {
         #[rasn(identifier = "nR-CGI")]
         n_r_cgi: [NRCGI],
         #[rasn(identifier = "numberOfBroadcasts")]
@@ -4114,7 +4114,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CandidateCellID, "CandidateCellID" {
+    crate::per::decode_extensible_sequence! { CandidateCellID {
         #[rasn(identifier = "candidateCellID")]
         candidate_cell_id: [NRCGI],
         #[rasn(identifier = "iE-Extensions")]
@@ -4143,7 +4143,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CandidateCellItem, "CandidateCellItem" {
+    crate::per::decode_extensible_sequence! { CandidateCellItem {
         #[rasn(identifier = "candidateCell")]
         candidate_cell: [CandidateCell],
         #[rasn(identifier = "iE-Extensions")]
@@ -4178,7 +4178,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CandidatePCI, "CandidatePCI" {
+    crate::per::decode_extensible_sequence! { CandidatePCI {
         #[rasn(value("0..=1007", extensible), identifier = "candidatePCI")]
         candidate_pci: [Integer],
         #[rasn(value("0..=3279165"), identifier = "candidateNRARFCN")]
@@ -4238,7 +4238,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CandidateRelayUEInformationItem, "CandidateRelayUEInformationItem" {
+    crate::per::decode_extensible_sequence! { CandidateRelayUEInformationItem {
         #[rasn(identifier = "candidateRelayUE-Id")]
         candidate_relay_ue_id: [CandidateRelayUEID],
         #[rasn(identifier = "iE-Extensions")]
@@ -4528,7 +4528,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CellCAGInformation, "Cell-CAGInformation" {
+    crate::per::decode_extensible_sequence! { CellCAGInformation {
         #[rasn(identifier = "nGRAN-CGI")]
         n_gran_cgi: [NGRANCGI],
         #[rasn(identifier = "cellCAGList")]
@@ -4561,7 +4561,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CellBasedMDTEUTRA, "CellBasedMDT-EUTRA" {
+    crate::per::decode_extensible_sequence! { CellBasedMDTEUTRA {
         #[rasn(identifier = "cellIdListforMDT")]
         cell_id_listfor_mdt: [CellIdListforMDTEUTRA],
         #[rasn(identifier = "iE-Extensions")]
@@ -4590,7 +4590,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CellBasedMDTNR, "CellBasedMDT-NR" {
+    crate::per::decode_extensible_sequence! { CellBasedMDTNR {
         #[rasn(identifier = "cellIdListforMDT")]
         cell_id_listfor_mdt: [CellIdListforMDTNR],
         #[rasn(identifier = "iE-Extensions")]
@@ -4619,7 +4619,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CellBasedQMC, "CellBasedQMC" {
+    crate::per::decode_extensible_sequence! { CellBasedQMC {
         #[rasn(identifier = "cellIdListforQMC")]
         cell_id_listfor_qmc: [CellIdListforQMC],
         #[rasn(identifier = "iE-Extensions")]
@@ -4656,7 +4656,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CellIDBroadcastEUTRAItem, "CellIDBroadcastEUTRA-Item" {
+    crate::per::decode_extensible_sequence! { CellIDBroadcastEUTRAItem {
         #[rasn(identifier = "eUTRA-CGI")]
         e_utra_cgi: [EUTRACGI],
         #[rasn(identifier = "iE-Extensions")]
@@ -4689,7 +4689,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CellIDBroadcastNRItem, "CellIDBroadcastNR-Item" {
+    crate::per::decode_extensible_sequence! { CellIDBroadcastNRItem {
         #[rasn(identifier = "nR-CGI")]
         n_r_cgi: [NRCGI],
         #[rasn(identifier = "iE-Extensions")]
@@ -4721,7 +4721,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CellIDCancelledEUTRAItem, "CellIDCancelledEUTRA-Item" {
+    crate::per::decode_extensible_sequence! { CellIDCancelledEUTRAItem {
         #[rasn(identifier = "eUTRA-CGI")]
         e_utra_cgi: [EUTRACGI],
         #[rasn(identifier = "numberOfBroadcasts")]
@@ -4760,7 +4760,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CellIDCancelledNRItem, "CellIDCancelledNR-Item" {
+    crate::per::decode_extensible_sequence! { CellIDCancelledNRItem {
         #[rasn(identifier = "nR-CGI")]
         n_r_cgi: [NRCGI],
         #[rasn(identifier = "numberOfBroadcasts")]
@@ -4841,7 +4841,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CellType, "CellType" {
+    crate::per::decode_extensible_sequence! { CellType {
         #[rasn(identifier = "cellSize")]
         cell_size: [CellSize],
         #[rasn(identifier = "iE-Extensions")]
@@ -4917,7 +4917,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { ClockQualityAcceptanceCriteria, "ClockQualityAcceptanceCriteria" {
+    crate::per::decode_extensible_sequence! { ClockQualityAcceptanceCriteria {
         #[rasn(size("8", extensible), identifier = "synchronisationState")]
         synchronisation_state: [Option<BitString>],
         #[rasn(identifier = "traceabletoUTC")]
@@ -4966,7 +4966,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { ClockQualityAcceptanceIndication, "ClockQualityAcceptanceIndication" {
+    crate::per::decode_extensible_sequence! { ClockQualityAcceptanceIndication {
         #[rasn(identifier = "clockQualityAcceptanceCriteria")]
         clock_quality_acceptance_criteria: [ClockQualityAcceptanceCriteria],
         #[rasn(identifier = "iE-Extensions")]
@@ -5020,7 +5020,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { ClockQualityReportingControlInfo, "ClockQualityReportingControlInfo" {
+    crate::per::decode_extensible_sequence! { ClockQualityReportingControlInfo {
         #[rasn(identifier = "clockQualityDetailLevel")]
         clock_quality_detail_level: [ClockQualityDetailLevel],
         #[rasn(identifier = "iE-Extensions")]
@@ -5065,7 +5065,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CommandFailureTransfer, "CommandFailureTransfer" {
+    crate::per::decode_extensible_sequence! { CommandFailureTransfer {
         #[rasn(identifier = "correlationIdentifier")]
         correlation_identifier: [AIoTCorrelationIdentifier],
         #[rasn(identifier = "rAN-AIOT-Device-NGAP-ID")]
@@ -5103,7 +5103,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { CommandRequestTransfer, "CommandRequestTransfer" {
+    crate::per::decode_extensible_sequence! { CommandRequestTransfer {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -5130,7 +5130,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CommandResponseTransfer, "CommandResponseTransfer" {
+    crate::per::decode_extensible_sequence! { CommandResponseTransfer {
         #[rasn(identifier = "correlationIdentifier")]
         correlation_identifier: [AIoTCorrelationIdentifier],
         #[rasn(identifier = "rAN-AIOT-Device-NGAP-ID")]
@@ -5178,7 +5178,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CompletedCellsInEAIEUTRAItem, "CompletedCellsInEAI-EUTRA-Item" {
+    crate::per::decode_extensible_sequence! { CompletedCellsInEAIEUTRAItem {
         #[rasn(identifier = "eUTRA-CGI")]
         e_utra_cgi: [EUTRACGI],
         #[rasn(identifier = "iE-Extensions")]
@@ -5211,7 +5211,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CompletedCellsInEAINRItem, "CompletedCellsInEAI-NR-Item" {
+    crate::per::decode_extensible_sequence! { CompletedCellsInEAINRItem {
         #[rasn(identifier = "nR-CGI")]
         n_r_cgi: [NRCGI],
         #[rasn(identifier = "iE-Extensions")]
@@ -5241,7 +5241,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CompletedCellsInTAIEUTRAItem, "CompletedCellsInTAI-EUTRA-Item" {
+    crate::per::decode_extensible_sequence! { CompletedCellsInTAIEUTRAItem {
         #[rasn(identifier = "eUTRA-CGI")]
         e_utra_cgi: [EUTRACGI],
         #[rasn(identifier = "iE-Extensions")]
@@ -5274,7 +5274,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CompletedCellsInTAINRItem, "CompletedCellsInTAI-NR-Item" {
+    crate::per::decode_extensible_sequence! { CompletedCellsInTAINRItem {
         #[rasn(identifier = "nR-CGI")]
         n_r_cgi: [NRCGI],
         #[rasn(identifier = "iE-Extensions")]
@@ -5302,7 +5302,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CompositeAvailableCapacity, "CompositeAvailableCapacity" {
+    crate::per::decode_extensible_sequence! { CompositeAvailableCapacity {
         #[rasn(value("1..=100", extensible), identifier = "cellCapacityClassValue")]
         cell_capacity_class_value: [Option<Integer>],
         #[rasn(value("0..=100"), identifier = "capacityValue")]
@@ -5388,7 +5388,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CoreNetworkAssistanceInformationForInactive, "CoreNetworkAssistanceInformationForInactive" {
+    crate::per::decode_extensible_sequence! { CoreNetworkAssistanceInformationForInactive {
         #[rasn(identifier = "uEIdentityIndexValue")]
         u_eidentity_index_value: [UEIdentityIndexValue],
         #[rasn(identifier = "uESpecificDRX")]
@@ -5446,7 +5446,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CriticalityDiagnostics, "CriticalityDiagnostics" {
+    crate::per::decode_extensible_sequence! { CriticalityDiagnostics {
         #[rasn(identifier = "procedureCode")]
         procedure_code: [Option<ProcedureCode>],
         #[rasn(identifier = "triggeringMessage")]
@@ -5491,7 +5491,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { CriticalityDiagnosticsIEItem, "CriticalityDiagnostics-IE-Item" {
+    crate::per::decode_extensible_sequence! { CriticalityDiagnosticsIEItem {
         #[rasn(identifier = "iECriticality")]
         i_ecriticality: [Criticality],
         #[rasn(identifier = "iE-ID")]
@@ -5544,7 +5544,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { DAPSRequestInfo, "DAPSRequestInfo" {
+    crate::per::decode_extensible_sequence! { DAPSRequestInfo {
         #[rasn(identifier = "dAPSIndicator")]
         d_apsindicator: [DAPSRequestInfoDAPSIndicator],
         #[rasn(identifier = "iE-Extensions")]
@@ -5582,7 +5582,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { DAPSResponseInfo, "DAPSResponseInfo" {
+    crate::per::decode_extensible_sequence! { DAPSResponseInfo {
         dapsresponseindicator: [DAPSResponseInfoDapsresponseindicator],
         #[rasn(identifier = "iE-Extensions")]
         i_e_extensions: [Option<ProtocolExtensionContainer>],
@@ -5612,7 +5612,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extension")]
         pub i_e_extension: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { DAPSResponseInfoItem, "DAPSResponseInfoItem" {
+    crate::per::decode_extensible_sequence! { DAPSResponseInfoItem {
         #[rasn(identifier = "dRB-ID")]
         d_rb_id: [DRBID],
         #[rasn(identifier = "dAPSResponseInfo")]
@@ -5649,7 +5649,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { DLCPSecurityInformation, "DL-CP-SecurityInformation" {
+    crate::per::decode_extensible_sequence! { DLCPSecurityInformation {
         #[rasn(identifier = "dl-NAS-MAC")]
         dl_nas_mac: [DLNASMAC],
         #[rasn(identifier = "iE-Extensions")]
@@ -5720,7 +5720,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extension")]
         pub i_e_extension: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { DLDiscarding, "DLDiscarding" {
+    crate::per::decode_extensible_sequence! { DLDiscarding {
         #[rasn(identifier = "dRBsSubjectToDLDiscarding")]
         d_rbs_subject_to_dldiscarding: [DRBsSubjectToDLDiscardingList],
         #[rasn(identifier = "iE-Extension")]
@@ -5791,7 +5791,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extension")]
         pub i_e_extension: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { DRBStatusDL12, "DRBStatusDL12" {
+    crate::per::decode_extensible_sequence! { DRBStatusDL12 {
         #[rasn(identifier = "dL-COUNTValue")]
         d_l_countvalue: [COUNTValueForPDCPSN12],
         #[rasn(identifier = "iE-Extension")]
@@ -5820,7 +5820,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extension")]
         pub i_e_extension: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { DRBStatusDL18, "DRBStatusDL18" {
+    crate::per::decode_extensible_sequence! { DRBStatusDL18 {
         #[rasn(identifier = "dL-COUNTValue")]
         d_l_countvalue: [COUNTValueForPDCPSN18],
         #[rasn(identifier = "iE-Extension")]
@@ -5876,7 +5876,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extension")]
         pub i_e_extension: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { DRBStatusUL12, "DRBStatusUL12" {
+    crate::per::decode_extensible_sequence! { DRBStatusUL12 {
         #[rasn(identifier = "uL-COUNTValue")]
         u_l_countvalue: [COUNTValueForPDCPSN12],
         #[rasn(identifier = "receiveStatusOfUL-PDCP-SDUs")]
@@ -5911,7 +5911,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extension")]
         pub i_e_extension: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { DRBStatusUL18, "DRBStatusUL18" {
+    crate::per::decode_extensible_sequence! { DRBStatusUL18 {
         #[rasn(identifier = "uL-COUNTValue")]
         u_l_countvalue: [COUNTValueForPDCPSN18],
         #[rasn(size("1..=131072"), identifier = "receiveStatusOfUL-PDCP-SDUs")]
@@ -5946,7 +5946,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extension")]
         pub i_e_extension: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { DRBsSubjectToDLDiscardingItem, "DRBsSubjectToDLDiscarding-Item" {
+    crate::per::decode_extensible_sequence! { DRBsSubjectToDLDiscardingItem {
         #[rasn(identifier = "drbID")]
         drb_id: [DRBID],
         #[rasn(identifier = "dlCount")]
@@ -5989,7 +5989,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extension")]
         pub i_e_extension: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { DRBsSubjectToEarlyStatusTransferItem, "DRBsSubjectToEarlyStatusTransfer-Item" {
+    crate::per::decode_extensible_sequence! { DRBsSubjectToEarlyStatusTransferItem {
         #[rasn(identifier = "dRB-ID")]
         d_rb_id: [DRBID],
         #[rasn(identifier = "firstDLCOUNT")]
@@ -6036,7 +6036,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extension")]
         pub i_e_extension: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { DRBsSubjectToStatusTransferItem, "DRBsSubjectToStatusTransferItem" {
+    crate::per::decode_extensible_sequence! { DRBsSubjectToStatusTransferItem {
         #[rasn(identifier = "dRB-ID")]
         d_rb_id: [DRBID],
         #[rasn(identifier = "dRBStatusUL")]
@@ -6079,7 +6079,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { DRBsToQosFlowsMappingItem, "DRBsToQosFlowsMappingItem" {
+    crate::per::decode_extensible_sequence! { DRBsToQosFlowsMappingItem {
         #[rasn(identifier = "dRB-ID")]
         d_rb_id: [DRBID],
         #[rasn(identifier = "associatedQosFlowList")]
@@ -6138,7 +6138,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { DataForwardingResponseDRBItem, "DataForwardingResponseDRBItem" {
+    crate::per::decode_extensible_sequence! { DataForwardingResponseDRBItem {
         #[rasn(identifier = "dRB-ID")]
         d_rb_id: [DRBID],
         #[rasn(identifier = "dLForwardingUP-TNLInformation")]
@@ -6185,7 +6185,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { DataForwardingResponseERABListItem, "DataForwardingResponseERABListItem" {
+    crate::per::decode_extensible_sequence! { DataForwardingResponseERABListItem {
         #[rasn(identifier = "e-RAB-ID")]
         e_rab_id: [ERABID],
         #[rasn(identifier = "dLForwardingUP-TNLInformation")]
@@ -6246,7 +6246,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { Dynamic5QIDescriptor, "Dynamic5QIDescriptor" {
+    crate::per::decode_extensible_sequence! { Dynamic5QIDescriptor {
         #[rasn(identifier = "priorityLevelQos")]
         priority_level_qos: [PriorityLevelQos],
         #[rasn(identifier = "packetDelayBudget")]
@@ -6304,7 +6304,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { ERABInformationItem, "E-RABInformationItem" {
+    crate::per::decode_extensible_sequence! { ERABInformationItem {
         #[rasn(identifier = "e-RAB-ID")]
         e_rab_id: [ERABID],
         #[rasn(identifier = "dLForwarding")]
@@ -6401,7 +6401,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extension")]
         pub i_e_extension: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { ECNMarkingorCongestionInformationReportingStatusItem, "ECNMarkingorCongestionInformationReportingStatus-Item" {
+    crate::per::decode_extensible_sequence! { ECNMarkingorCongestionInformationReportingStatusItem {
         #[rasn(identifier = "qosFlowIdentifier")]
         qos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "activationStatus")]
@@ -6542,7 +6542,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { EPSTAI, "EPS-TAI" {
+    crate::per::decode_extensible_sequence! { EPSTAI {
         #[rasn(identifier = "pLMNIdentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "ePS-TAC")]
@@ -6584,7 +6584,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { EUTRACGI, "EUTRA-CGI" {
+    crate::per::decode_extensible_sequence! { EUTRACGI {
         #[rasn(identifier = "pLMNIdentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "eUTRACellIdentity")]
@@ -6667,7 +6667,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { EUTRAPagingeDRXInformation, "EUTRA-PagingeDRXInformation" {
+    crate::per::decode_extensible_sequence! { EUTRAPagingeDRXInformation {
         #[rasn(identifier = "eUTRA-paging-eDRX-Cycle")]
         e_utra_paging_e_drx_cycle: [EUTRAPagingEDRXCycle],
         #[rasn(identifier = "eUTRA-paging-Time-Window")]
@@ -6735,7 +6735,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { EUTRANCellReportItem, "EUTRAN-CellReportItem" {
+    crate::per::decode_extensible_sequence! { EUTRANCellReportItem {
         #[rasn(identifier = "eCGI")]
         e_cgi: [EUTRACGI],
         #[rasn(identifier = "eUTRAN-CompositeAvailableCapacityGroup")]
@@ -6784,7 +6784,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { EUTRANCellToReportItem, "EUTRAN-CellToReportItem" {
+    crate::per::decode_extensible_sequence! { EUTRANCellToReportItem {
         #[rasn(identifier = "eCGI")]
         e_cgi: [EUTRACGI],
         #[rasn(identifier = "iE-Extensions")]
@@ -6816,7 +6816,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { EUTRANCompositeAvailableCapacityGroup, "EUTRAN-CompositeAvailableCapacityGroup" {
+    crate::per::decode_extensible_sequence! { EUTRANCompositeAvailableCapacityGroup {
         #[rasn(identifier = "dL-CompositeAvailableCapacity")]
         d_l_composite_available_capacity: [CompositeAvailableCapacity],
         #[rasn(identifier = "uL-CompositeAvailableCapacity")]
@@ -6870,7 +6870,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { EUTRANRadioResourceStatus, "EUTRAN-RadioResourceStatus" {
+    crate::per::decode_extensible_sequence! { EUTRANRadioResourceStatus {
         #[rasn(value("0..=100"), identifier = "dL-GBR-PRB-usage")]
         d_l_gbr_prb_usage: [u8],
         #[rasn(value("0..=100"), identifier = "uL-GBR-PRB-usage")]
@@ -6927,7 +6927,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { EUTRANReportingStatusIEs, "EUTRAN-ReportingStatusIEs" {
+    crate::per::decode_extensible_sequence! { EUTRANReportingStatusIEs {
         #[rasn(identifier = "eUTRAN-CellReportList")]
         e_utran_cell_report_list: [EUTRANCellReportList],
         #[rasn(identifier = "iE-Extensions")]
@@ -6956,7 +6956,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { EUTRANReportingSystemIEs, "EUTRAN-ReportingSystemIEs" {
+    crate::per::decode_extensible_sequence! { EUTRANReportingSystemIEs {
         #[rasn(identifier = "eUTRAN-CellToReportList")]
         e_utran_cell_to_report_list: [EUTRANCellToReportList],
         #[rasn(identifier = "iE-Extensions")]
@@ -7002,7 +7002,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { EarlyStatusTransferTransparentContainer, "EarlyStatusTransfer-TransparentContainer" {
+    crate::per::decode_extensible_sequence! { EarlyStatusTransferTransparentContainer {
         #[rasn(identifier = "procedureStage")]
         procedure_stage: [ProcedureStageChoice],
         #[rasn(identifier = "iE-Extensions")]
@@ -7040,7 +7040,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { EmergencyAreaIDBroadcastEUTRAItem, "EmergencyAreaIDBroadcastEUTRA-Item" {
+    crate::per::decode_extensible_sequence! { EmergencyAreaIDBroadcastEUTRAItem {
         #[rasn(identifier = "emergencyAreaID")]
         emergency_area_id: [EmergencyAreaID],
         #[rasn(identifier = "completedCellsInEAI-EUTRA")]
@@ -7079,7 +7079,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { EmergencyAreaIDBroadcastNRItem, "EmergencyAreaIDBroadcastNR-Item" {
+    crate::per::decode_extensible_sequence! { EmergencyAreaIDBroadcastNRItem {
         #[rasn(identifier = "emergencyAreaID")]
         emergency_area_id: [EmergencyAreaID],
         #[rasn(identifier = "completedCellsInEAI-NR")]
@@ -7118,7 +7118,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { EmergencyAreaIDCancelledEUTRAItem, "EmergencyAreaIDCancelledEUTRA-Item" {
+    crate::per::decode_extensible_sequence! { EmergencyAreaIDCancelledEUTRAItem {
         #[rasn(identifier = "emergencyAreaID")]
         emergency_area_id: [EmergencyAreaID],
         #[rasn(identifier = "cancelledCellsInEAI-EUTRA")]
@@ -7157,7 +7157,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { EmergencyAreaIDCancelledNRItem, "EmergencyAreaIDCancelledNR-Item" {
+    crate::per::decode_extensible_sequence! { EmergencyAreaIDCancelledNRItem {
         #[rasn(identifier = "emergencyAreaID")]
         emergency_area_id: [EmergencyAreaID],
         #[rasn(identifier = "cancelledCellsInEAI-NR")]
@@ -7200,7 +7200,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { EmergencyFallbackIndicator, "EmergencyFallbackIndicator" {
+    crate::per::decode_extensible_sequence! { EmergencyFallbackIndicator {
         #[rasn(identifier = "emergencyFallbackRequestIndicator")]
         emergency_fallback_request_indicator: [EmergencyFallbackRequestIndicator],
         #[rasn(identifier = "emergencyServiceTargetCN")]
@@ -7294,7 +7294,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { EquivalentSNPNsItem, "EquivalentSNPNsItem" {
+    crate::per::decode_extensible_sequence! { EquivalentSNPNsItem {
         #[rasn(identifier = "plmnIdentity")]
         plmn_identity: [PLMNIdentity],
         #[rasn(identifier = "nID")]
@@ -7335,7 +7335,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { EventBasedReportingIEs, "EventBasedReportingIEs" {
+    crate::per::decode_extensible_sequence! { EventBasedReportingIEs {
         #[rasn(identifier = "intersystemResourceThresholdLow")]
         intersystem_resource_threshold_low: [IntersystemResourceThreshold],
         #[rasn(identifier = "intersystemResourceThresholdHigh")]
@@ -7375,7 +7375,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { EventL1LoggedMDTConfig, "EventL1LoggedMDTConfig" {
+    crate::per::decode_extensible_sequence! { EventL1LoggedMDTConfig {
         #[rasn(identifier = "l1Threshold")]
         l1_threshold: [MeasurementThresholdL1LoggedMDT],
         hysteresis: [Hysteresis],
@@ -7483,7 +7483,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { ExcessPacketDelayThresholdItem, "ExcessPacketDelayThresholdItem" {
+    crate::per::decode_extensible_sequence! { ExcessPacketDelayThresholdItem {
         #[rasn(identifier = "fiveQi")]
         five_qi: [FiveQI],
         #[rasn(identifier = "excessPacketDelayThresholdValue")]
@@ -7564,7 +7564,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { ExpectedUEActivityBehaviour, "ExpectedUEActivityBehaviour" {
+    crate::per::decode_extensible_sequence! { ExpectedUEActivityBehaviour {
         #[rasn(identifier = "expectedActivityPeriod")]
         expected_activity_period: [Option<ExpectedActivityPeriod>],
         #[rasn(identifier = "expectedIdlePeriod")]
@@ -7609,7 +7609,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { ExpectedUEBehaviour, "ExpectedUEBehaviour" {
+    crate::per::decode_extensible_sequence! { ExpectedUEBehaviour {
         #[rasn(identifier = "expectedUEActivityBehaviour")]
         expected_ueactivity_behaviour: [Option<ExpectedUEActivityBehaviour>],
         #[rasn(identifier = "expectedHOInterval")]
@@ -7663,7 +7663,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { ExpectedUEMovingTrajectoryItem, "ExpectedUEMovingTrajectoryItem" {
+    crate::per::decode_extensible_sequence! { ExpectedUEMovingTrajectoryItem {
         #[rasn(identifier = "nGRAN-CGI")]
         n_gran_cgi: [NGRANCGI],
         #[rasn(value("0..=4095"), identifier = "timeStayedInCell")]
@@ -7698,7 +7698,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { ExtendedAMFName, "Extended-AMFName" {
+    crate::per::decode_extensible_sequence! { ExtendedAMFName {
         #[rasn(identifier = "aMFNameVisibleString")]
         a_mfname_visible_string: [Option<AMFNameVisibleString>],
         #[rasn(identifier = "aMFNameUTF8String")]
@@ -7736,7 +7736,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { ExtendedRANNodeName, "Extended-RANNodeName" {
+    crate::per::decode_extensible_sequence! { ExtendedRANNodeName {
         #[rasn(identifier = "rANNodeNameVisibleString")]
         r_annode_name_visible_string: [Option<RANNodeNameVisibleString>],
         #[rasn(identifier = "rANNodeNameUTF8String")]
@@ -7801,7 +7801,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { ExtendedRATRestrictionInformation, "ExtendedRATRestrictionInformation" {
+    crate::per::decode_extensible_sequence! { ExtendedRATRestrictionInformation {
         #[rasn(size("8", extensible), identifier = "primaryRATRestriction")]
         primary_ratrestriction: [BitString],
         #[rasn(size("8", extensible), identifier = "secondaryRATRestriction")]
@@ -7852,7 +7852,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { FailureIndication, "FailureIndication" {
+    crate::per::decode_extensible_sequence! { FailureIndication {
         #[rasn(identifier = "uERLFReportContainer")]
         u_erlfreport_container: [UERLFReportContainer],
         #[rasn(identifier = "iE-Extensions")]
@@ -7881,7 +7881,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extension")]
         pub i_e_extension: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { FirstDLCount, "FirstDLCount" {
+    crate::per::decode_extensible_sequence! { FirstDLCount {
         #[rasn(identifier = "dRBsSubjectToEarlyStatusTransfer")]
         d_rbs_subject_to_early_status_transfer: [DRBsSubjectToEarlyStatusTransferList],
         #[rasn(identifier = "iE-Extension")]
@@ -7918,7 +7918,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { FiveGProSeAuthorized, "FiveG-ProSeAuthorized" {
+    crate::per::decode_extensible_sequence! { FiveGProSeAuthorized {
         #[rasn(identifier = "fiveGProSeDirectDiscovery")]
         five_gpro_se_direct_discovery: [Option<FiveGProSeDirectDiscovery>],
         #[rasn(identifier = "fiveGProSeDirectCommunication")]
@@ -7965,7 +7965,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { FiveGProSePC5QoSParameters, "FiveG-ProSePC5QoSParameters" {
+    crate::per::decode_extensible_sequence! { FiveGProSePC5QoSParameters {
         #[rasn(identifier = "fiveGProSepc5QoSFlowList")]
         five_gpro_sepc5_qo_sflow_list: [FiveGProSePC5QoSFlowList],
         #[rasn(identifier = "fiveGProSepc5LinkAggregateBitRates")]
@@ -8002,7 +8002,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { FiveGSTMSI, "FiveG-S-TMSI" {
+    crate::per::decode_extensible_sequence! { FiveGSTMSI {
         #[rasn(identifier = "aMFSetID")]
         a_mfset_id: [AMFSetID],
         #[rasn(identifier = "aMFPointer")]
@@ -8165,7 +8165,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { FiveGProSePC5FlowBitRates, "FiveGProSePC5FlowBitRates" {
+    crate::per::decode_extensible_sequence! { FiveGProSePC5FlowBitRates {
         #[rasn(identifier = "fiveGproSeguaranteedFlowBitRate")]
         five_gpro_seguaranteed_flow_bit_rate: [BitRate],
         #[rasn(identifier = "fiveGproSemaximumFlowBitRate")]
@@ -8202,7 +8202,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { FiveGProSePC5QoSFlowItem, "FiveGProSePC5QoSFlowItem" {
+    crate::per::decode_extensible_sequence! { FiveGProSePC5QoSFlowItem {
         #[rasn(identifier = "fiveGproSepQI")]
         five_gpro_sep_qi: [FiveQI],
         #[rasn(identifier = "fiveGproSepc5FlowBitRates")]
@@ -8252,7 +8252,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { ForbiddenAreaInformationItem, "ForbiddenAreaInformation-Item" {
+    crate::per::decode_extensible_sequence! { ForbiddenAreaInformationItem {
         #[rasn(identifier = "pLMNIdentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "forbiddenTACs")]
@@ -8381,7 +8381,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { GBRQosInformation, "GBR-QosInformation" {
+    crate::per::decode_extensible_sequence! { GBRQosInformation {
         #[rasn(identifier = "maximumFlowBitRateDL")]
         maximum_flow_bit_rate_dl: [BitRate],
         #[rasn(identifier = "maximumFlowBitRateUL")]
@@ -8486,7 +8486,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { GTPTunnel, "GTPTunnel" {
+    crate::per::decode_extensible_sequence! { GTPTunnel {
         #[rasn(identifier = "transportLayerAddress")]
         transport_layer_address: [TransportLayerAddress],
         #[rasn(identifier = "gTP-TEID")]
@@ -8525,7 +8525,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { GUAMI, "GUAMI" {
+    crate::per::decode_extensible_sequence! { GUAMI {
         #[rasn(identifier = "pLMNIdentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "aMFRegionID")]
@@ -8570,7 +8570,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { GUAMIListItem, "GUAMIList-Item" {
+    crate::per::decode_extensible_sequence! { GUAMIListItem {
         #[rasn(identifier = "gUAMI")]
         g_uami: [GUAMI],
         #[rasn(identifier = "iE-Extensions")]
@@ -8612,7 +8612,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { GeographyBasedMDT, "GeographyBasedMDT" {
+    crate::per::decode_extensible_sequence! { GeographyBasedMDT {
         #[rasn(identifier = "nTN-Geographical-Area")]
         n_tn_geographical_area: [NTNGeographicalAreaList],
         #[rasn(identifier = "nTN-PLMN-List")]
@@ -8650,7 +8650,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { GlobalCableIDNew, "GlobalCable-ID-new" {
+    crate::per::decode_extensible_sequence! { GlobalCableIDNew {
         #[rasn(identifier = "globalCable-ID")]
         global_cable_id: [GlobalCableID],
         #[rasn(identifier = "tAI")]
@@ -8685,7 +8685,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { GlobalENBID, "GlobalENB-ID" {
+    crate::per::decode_extensible_sequence! { GlobalENBID {
         #[rasn(identifier = "pLMNidentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "eNB-ID")]
@@ -8720,7 +8720,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { GlobalGNBID, "GlobalGNB-ID" {
+    crate::per::decode_extensible_sequence! { GlobalGNBID {
         #[rasn(identifier = "pLMNIdentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "gNB-ID")]
@@ -8755,7 +8755,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { GlobalLineID, "GlobalLine-ID" {
+    crate::per::decode_extensible_sequence! { GlobalLineID {
         #[rasn(identifier = "globalLineIdentity")]
         global_line_identity: [GlobalLineIdentity],
         #[rasn(identifier = "lineType")]
@@ -8793,7 +8793,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { GlobalN3IWFID, "GlobalN3IWF-ID" {
+    crate::per::decode_extensible_sequence! { GlobalN3IWFID {
         #[rasn(identifier = "pLMNIdentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "n3IWF-ID")]
@@ -8828,7 +8828,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { GlobalNgENBID, "GlobalNgENB-ID" {
+    crate::per::decode_extensible_sequence! { GlobalNgENBID {
         #[rasn(identifier = "pLMNIdentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "ngENB-ID")]
@@ -8897,7 +8897,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { GlobalTNGFID, "GlobalTNGF-ID" {
+    crate::per::decode_extensible_sequence! { GlobalTNGFID {
         #[rasn(identifier = "pLMNIdentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "tNGF-ID")]
@@ -8932,7 +8932,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { GlobalTWIFID, "GlobalTWIF-ID" {
+    crate::per::decode_extensible_sequence! { GlobalTWIFID {
         #[rasn(identifier = "pLMNIdentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "tWIF-ID")]
@@ -8967,7 +8967,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { GlobalWAGFID, "GlobalW-AGF-ID" {
+    crate::per::decode_extensible_sequence! { GlobalWAGFID {
         #[rasn(identifier = "pLMNIdentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "w-AGF-ID")]
@@ -9005,7 +9005,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { HFCNodeIDNew, "HFCNode-ID-new" {
+    crate::per::decode_extensible_sequence! { HFCNodeIDNew {
         #[rasn(identifier = "hFCNode-ID")]
         h_fcnode_id: [HFCNodeID],
         #[rasn(identifier = "tAI")]
@@ -9039,7 +9039,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { HLComActivate, "HLComActivate" {
+    crate::per::decode_extensible_sequence! { HLComActivate {
         #[rasn(identifier = "nR-Paging-Long-eDRX-Information-for-RRC-INACTIVE")]
         n_r_paging_long_e_drx_information_for_rrc_inactive: [NRPagingLongEDRXInformationForRRCINACTIVE],
         #[rasn(identifier = "iE-Extensions")]
@@ -9076,7 +9076,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { HLComDeactivate, "HLComDeactivate" {
+    crate::per::decode_extensible_sequence! { HLComDeactivate {
         #[rasn(identifier = "uEReachabilityIndication")]
         u_ereachability_indication: [HLComDeactivateUEReachabilityIndication],
         #[rasn(identifier = "iE-Extensions")]
@@ -9133,7 +9133,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { HOReport, "HOReport" {
+    crate::per::decode_extensible_sequence! { HOReport {
         #[rasn(identifier = "handoverReportType")]
         handover_report_type: [HOReportHandoverReportType],
         #[rasn(identifier = "handoverCause")]
@@ -9199,7 +9199,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { HandoverCommandTransfer, "HandoverCommandTransfer" {
+    crate::per::decode_extensible_sequence! { HandoverCommandTransfer {
         #[rasn(identifier = "dLForwardingUP-TNLInformation")]
         d_lforwarding_up_tnlinformation: [Option<UPTransportLayerInformation>],
         #[rasn(identifier = "qosFlowToBeForwardedList")]
@@ -9242,7 +9242,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { HandoverPreparationUnsuccessfulTransfer, "HandoverPreparationUnsuccessfulTransfer" {
+    crate::per::decode_extensible_sequence! { HandoverPreparationUnsuccessfulTransfer {
         cause: [Cause],
         #[rasn(identifier = "iE-Extensions")]
         i_e_extensions: [Option<ProtocolExtensionContainer>],
@@ -9277,7 +9277,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { HandoverRequestAcknowledgeTransfer, "HandoverRequestAcknowledgeTransfer" {
+    crate::per::decode_extensible_sequence! { HandoverRequestAcknowledgeTransfer {
         #[rasn(identifier = "dL-NGU-UP-TNLInformation")]
         d_l_ngu_up_tnlinformation: [UPTransportLayerInformation],
         #[rasn(identifier = "dLForwardingUP-TNLInformation")]
@@ -9326,7 +9326,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { HandoverRequiredTransfer, "HandoverRequiredTransfer" {
+    crate::per::decode_extensible_sequence! { HandoverRequiredTransfer {
         #[rasn(identifier = "directForwardingPathAvailability")]
         direct_forwarding_path_availability: [Option<DirectForwardingPathAvailability>],
         #[rasn(identifier = "iE-Extensions")]
@@ -9356,7 +9356,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { HandoverResourceAllocationUnsuccessfulTransfer, "HandoverResourceAllocationUnsuccessfulTransfer" {
+    crate::per::decode_extensible_sequence! { HandoverResourceAllocationUnsuccessfulTransfer {
         cause: [Cause],
         #[rasn(identifier = "criticalityDiagnostics")]
         criticality_diagnostics: [Option<CriticalityDiagnostics>],
@@ -9461,7 +9461,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { ImmediateMDTNr, "ImmediateMDTNr" {
+    crate::per::decode_extensible_sequence! { ImmediateMDTNr {
         #[rasn(identifier = "measurementsToActivate")]
         measurements_to_activate: [MeasurementsToActivate],
         #[rasn(identifier = "m1Configuration")]
@@ -9544,7 +9544,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { InfoOnRecommendedCellsAndRANNodesForPaging, "InfoOnRecommendedCellsAndRANNodesForPaging" {
+    crate::per::decode_extensible_sequence! { InfoOnRecommendedCellsAndRANNodesForPaging {
         #[rasn(identifier = "recommendedCellsForPaging")]
         recommended_cells_for_paging: [RecommendedCellsForPaging],
         #[rasn(identifier = "recommendRANNodesForPaging")]
@@ -9600,7 +9600,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { InterSystemFailureIndication, "InterSystemFailureIndication" {
+    crate::per::decode_extensible_sequence! { InterSystemFailureIndication {
         #[rasn(identifier = "uERLFReportContainer")]
         u_erlfreport_container: [Option<UERLFReportContainer>],
         #[rasn(identifier = "iE-Extensions")]
@@ -9629,7 +9629,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { InterSystemHOReport, "InterSystemHOReport" {
+    crate::per::decode_extensible_sequence! { InterSystemHOReport {
         #[rasn(identifier = "handoverReportType")]
         handover_report_type: [InterSystemHandoverReportType],
         #[rasn(identifier = "iE-Extensions")]
@@ -9688,7 +9688,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { IntersystemCellActivationReply, "IntersystemCellActivationReply" {
+    crate::per::decode_extensible_sequence! { IntersystemCellActivationReply {
         #[rasn(identifier = "activatedCellList")]
         activated_cell_list: [ActivatedCellList],
         #[rasn(value("0..=16384", extensible), identifier = "activation-ID")]
@@ -9723,7 +9723,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { IntersystemCellActivationRequest, "IntersystemCellActivationRequest" {
+    crate::per::decode_extensible_sequence! { IntersystemCellActivationRequest {
         #[rasn(value("0..=16384", extensible), identifier = "activationID")]
         activation_id: [Integer],
         #[rasn(identifier = "cellsToActivateList")]
@@ -9756,7 +9756,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { IntersystemCellStateIndication, "IntersystemCellStateIndication" {
+    crate::per::decode_extensible_sequence! { IntersystemCellStateIndication {
         #[rasn(identifier = "notificationCellList")]
         notification_cell_list: [NotificationCellList],
         #[rasn(identifier = "iE-Extensions")]
@@ -9791,7 +9791,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { IntersystemMobilityFailureforVoiceFallback, "IntersystemMobilityFailureforVoiceFallback" {
+    crate::per::decode_extensible_sequence! { IntersystemMobilityFailureforVoiceFallback {
         #[rasn(identifier = "sourcecellID")]
         sourcecell_id: [NGRANCGI],
         #[rasn(identifier = "targetcellID")]
@@ -9868,7 +9868,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { IntersystemResourceStatusReply, "IntersystemResourceStatusReply" {
+    crate::per::decode_extensible_sequence! { IntersystemResourceStatusReply {
         reportingsystem: [ReportingSystem],
         #[rasn(identifier = "iE-Extensions")]
         i_e_extensions: [Option<ProtocolExtensionContainer>],
@@ -9933,7 +9933,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { IntersystemResourceStatusReport, "IntersystemResourceStatusReport" {
+    crate::per::decode_extensible_sequence! { IntersystemResourceStatusReport {
         #[rasn(identifier = "reportingSystem")]
         reporting_system: [ResourceStatusReportingSystem],
         #[rasn(identifier = "iE-Extensions")]
@@ -10003,7 +10003,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { IntersystemResourceStatusRequest, "IntersystemResourceStatusRequest" {
+    crate::per::decode_extensible_sequence! { IntersystemResourceStatusRequest {
         #[rasn(identifier = "reportingSystem")]
         reporting_system: [ReportingSystem],
         #[rasn(identifier = "reportCharacteristics")]
@@ -10045,7 +10045,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { IntersystemSONConfigurationTransfer, "IntersystemSONConfigurationTransfer" {
+    crate::per::decode_extensible_sequence! { IntersystemSONConfigurationTransfer {
         #[rasn(identifier = "transferType")]
         transfer_type: [IntersystemSONTransferType],
         #[rasn(identifier = "intersystemSONInformation")]
@@ -10287,7 +10287,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { IntersystemSONNGRANnodeID, "IntersystemSONNGRANnodeID" {
+    crate::per::decode_extensible_sequence! { IntersystemSONNGRANnodeID {
         #[rasn(identifier = "globalRANNodeID")]
         global_rannode_id: [GlobalRANNodeID],
         #[rasn(identifier = "selectedTAI")]
@@ -10347,7 +10347,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { IntersystemSONeNBID, "IntersystemSONeNBID" {
+    crate::per::decode_extensible_sequence! { IntersystemSONeNBID {
         #[rasn(identifier = "globaleNBID")]
         globale_nbid: [GlobalENBID],
         #[rasn(identifier = "selectedEPSTAI")]
@@ -10396,7 +10396,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { IntersystemUnnecessaryHO, "IntersystemUnnecessaryHO" {
+    crate::per::decode_extensible_sequence! { IntersystemUnnecessaryHO {
         #[rasn(identifier = "sourcecellID")]
         sourcecell_id: [NGRANCGI],
         #[rasn(identifier = "targetcellID")]
@@ -10440,7 +10440,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { InventoryFailureTransfer, "InventoryFailureTransfer" {
+    crate::per::decode_extensible_sequence! { InventoryFailureTransfer {
         #[rasn(identifier = "correlationIdentifier")]
         correlation_identifier: [AIoTCorrelationIdentifier],
         cause: [Cause],
@@ -10491,7 +10491,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { InventoryReportTransfer, "InventoryReportTransfer" {
+    crate::per::decode_extensible_sequence! { InventoryReportTransfer {
         #[rasn(identifier = "correlationIdentifier")]
         correlation_identifier: [AIoTCorrelationIdentifier],
         #[rasn(identifier = "globalgNB-ID")]
@@ -10532,7 +10532,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { InventoryRequestTransfer, "InventoryRequestTransfer" {
+    crate::per::decode_extensible_sequence! { InventoryRequestTransfer {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -10555,7 +10555,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { InventoryResponseTransfer, "InventoryResponseTransfer" {
+    crate::per::decode_extensible_sequence! { InventoryResponseTransfer {
         #[rasn(identifier = "correlationIdentifier")]
         correlation_identifier: [AIoTCorrelationIdentifier],
         #[rasn(identifier = "criticalityDiagnostics")]
@@ -10596,7 +10596,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { LAI, "LAI" {
+    crate::per::decode_extensible_sequence! { LAI {
         #[rasn(identifier = "pLMNidentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "lAC")]
@@ -10639,7 +10639,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { LPWUSPSAssistanceInformation, "LPWUSPSAssistanceInformation" {
+    crate::per::decode_extensible_sequence! { LPWUSPSAssistanceInformation {
         #[rasn(identifier = "lPWUScNsubgroupID")]
         l_pwusc_nsubgroup_id: [LPWUSCNsubgroupID],
         #[rasn(identifier = "iE-Extensions")]
@@ -10688,7 +10688,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { LTEA2XServicesAuthorized, "LTE-A2X-ServicesAuthorized" {
+    crate::per::decode_extensible_sequence! { LTEA2XServicesAuthorized {
         #[rasn(identifier = "aerialUE")]
         aerial_ue: [Option<LTEA2XServicesAuthorizedAerialUE>],
         #[rasn(identifier = "aerialControllerUE")]
@@ -10731,7 +10731,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { LTEUESidelinkAggregateMaximumBitrate, "LTEUESidelinkAggregateMaximumBitrate" {
+    crate::per::decode_extensible_sequence! { LTEUESidelinkAggregateMaximumBitrate {
         #[rasn(identifier = "uESidelinkAggregateMaximumBitRate")]
         u_esidelink_aggregate_maximum_bit_rate: [BitRate],
         #[rasn(identifier = "iE-Extensions")]
@@ -10762,7 +10762,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { LTEV2XServicesAuthorized, "LTEV2XServicesAuthorized" {
+    crate::per::decode_extensible_sequence! { LTEV2XServicesAuthorized {
         #[rasn(identifier = "vehicleUE")]
         vehicle_ue: [Option<VehicleUE>],
         #[rasn(identifier = "pedestrianUE")]
@@ -10832,7 +10832,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { LastVisitedCellItem, "LastVisitedCellItem" {
+    crate::per::decode_extensible_sequence! { LastVisitedCellItem {
         #[rasn(identifier = "lastVisitedCellInformation")]
         last_visited_cell_information: [LastVisitedCellInformation],
         #[rasn(identifier = "iE-Extensions")]
@@ -10876,7 +10876,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { LastVisitedNGRANCellInformation, "LastVisitedNGRANCellInformation" {
+    crate::per::decode_extensible_sequence! { LastVisitedNGRANCellInformation {
         #[rasn(identifier = "globalCellID")]
         global_cell_id: [NGRANCGI],
         #[rasn(identifier = "cellType")]
@@ -10925,7 +10925,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { LastVisitedPSCellInformation, "LastVisitedPSCellInformation" {
+    crate::per::decode_extensible_sequence! { LastVisitedPSCellInformation {
         #[rasn(identifier = "pSCellID")]
         p_scell_id: [Option<NGRANCGI>],
         #[rasn(value("0..=40950"), identifier = "timeStay")]
@@ -10996,7 +10996,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { LocationReportingRequestType, "LocationReportingRequestType" {
+    crate::per::decode_extensible_sequence! { LocationReportingRequestType {
         #[rasn(identifier = "eventType")]
         event_type: [EventType],
         #[rasn(identifier = "reportArea")]
@@ -11049,7 +11049,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { LoggedMDTNr, "LoggedMDTNr" {
+    crate::per::decode_extensible_sequence! { LoggedMDTNr {
         #[rasn(identifier = "loggingInterval")]
         logging_interval: [LoggingInterval],
         #[rasn(identifier = "loggingDuration")]
@@ -11158,7 +11158,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { M1Configuration, "M1Configuration" {
+    crate::per::decode_extensible_sequence! { M1Configuration {
         #[rasn(identifier = "m1reportingTrigger")]
         m1reporting_trigger: [M1ReportingTrigger],
         #[rasn(identifier = "m1thresholdEventA2")]
@@ -11197,7 +11197,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { M1PeriodicReporting, "M1PeriodicReporting" {
+    crate::per::decode_extensible_sequence! { M1PeriodicReporting {
         #[rasn(identifier = "reportInterval")]
         report_interval: [ReportIntervalMDT],
         #[rasn(identifier = "reportAmount")]
@@ -11239,7 +11239,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { M1ThresholdEventA2, "M1ThresholdEventA2" {
+    crate::per::decode_extensible_sequence! { M1ThresholdEventA2 {
         #[rasn(identifier = "m1ThresholdType")]
         m1_threshold_type: [M1ThresholdType],
         #[rasn(identifier = "iE-Extensions")]
@@ -11303,7 +11303,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { M4Configuration, "M4Configuration" {
+    crate::per::decode_extensible_sequence! { M4Configuration {
         m4period: [M4period],
         #[rasn(identifier = "m4-links-to-log")]
         m4_links_to_log: [LinksToLog],
@@ -11359,7 +11359,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { M5Configuration, "M5Configuration" {
+    crate::per::decode_extensible_sequence! { M5Configuration {
         m5period: [M5period],
         #[rasn(identifier = "m5-links-to-log")]
         m5_links_to_log: [LinksToLog],
@@ -11416,7 +11416,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { M6Configuration, "M6Configuration" {
+    crate::per::decode_extensible_sequence! { M6Configuration {
         #[rasn(identifier = "m6report-Interval")]
         m6report_interval: [M6reportInterval],
         #[rasn(identifier = "m6-links-to-log")]
@@ -11482,7 +11482,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { M7Configuration, "M7Configuration" {
+    crate::per::decode_extensible_sequence! { M7Configuration {
         m7period: [M7period],
         #[rasn(identifier = "m7-links-to-log")]
         m7_links_to_log: [LinksToLog],
@@ -11542,7 +11542,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSActiveSessionInformationSourcetoTargetItem, "MBS-ActiveSessionInformation-SourcetoTargetItem" {
+    crate::per::decode_extensible_sequence! { MBSActiveSessionInformationSourcetoTargetItem {
         #[rasn(identifier = "mBS-SessionID")]
         m_bs_session_id: [MBSSessionID],
         #[rasn(identifier = "mBS-AreaSessionID")]
@@ -11604,7 +11604,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSActiveSessionInformationTargettoSourceItem, "MBS-ActiveSessionInformation-TargettoSourceItem" {
+    crate::per::decode_extensible_sequence! { MBSActiveSessionInformationTargettoSourceItem {
         #[rasn(identifier = "mBS-SessionID")]
         m_bs_session_id: [MBSSessionID],
         #[rasn(identifier = "mBS-DataForwardingResponseMRBList")]
@@ -11669,7 +11669,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSDataForwardingResponseMRBItem, "MBS-DataForwardingResponseMRBItem" {
+    crate::per::decode_extensible_sequence! { MBSDataForwardingResponseMRBItem {
         #[rasn(identifier = "mRB-ID")]
         m_rb_id: [MRBID],
         #[rasn(identifier = "dL-Forwarding-UPTNLInformation")]
@@ -11719,7 +11719,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSDistributionReleaseRequestTransfer, "MBS-DistributionReleaseRequestTransfer" {
+    crate::per::decode_extensible_sequence! { MBSDistributionReleaseRequestTransfer {
         #[rasn(identifier = "mBS-SessionID")]
         m_bs_session_id: [MBSSessionID],
         #[rasn(identifier = "mBS-AreaSessionID")]
@@ -11763,7 +11763,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSDistributionSetupRequestTransfer, "MBS-DistributionSetupRequestTransfer" {
+    crate::per::decode_extensible_sequence! { MBSDistributionSetupRequestTransfer {
         #[rasn(identifier = "mBS-SessionID")]
         m_bs_session_id: [MBSSessionID],
         #[rasn(identifier = "mBS-AreaSessionID")]
@@ -11810,7 +11810,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSDistributionSetupResponseTransfer, "MBS-DistributionSetupResponseTransfer" {
+    crate::per::decode_extensible_sequence! { MBSDistributionSetupResponseTransfer {
         #[rasn(identifier = "mBS-SessionID")]
         m_bs_session_id: [MBSSessionID],
         #[rasn(identifier = "mBS-AreaSessionID")]
@@ -11867,7 +11867,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSDistributionSetupUnsuccessfulTransfer, "MBS-DistributionSetupUnsuccessfulTransfer" {
+    crate::per::decode_extensible_sequence! { MBSDistributionSetupUnsuccessfulTransfer {
         #[rasn(identifier = "mBS-SessionID")]
         m_bs_session_id: [MBSSessionID],
         #[rasn(identifier = "mBS-AreaSessionID")]
@@ -11919,7 +11919,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSMappingandDataForwardingRequestItem, "MBS-MappingandDataForwardingRequestItem" {
+    crate::per::decode_extensible_sequence! { MBSMappingandDataForwardingRequestItem {
         #[rasn(identifier = "mRB-ID")]
         m_rb_id: [MRBID],
         #[rasn(identifier = "mBS-QoSFlowList")]
@@ -11997,7 +11997,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSQoSFlowsToBeSetupItem, "MBS-QoSFlowsToBeSetupItem" {
+    crate::per::decode_extensible_sequence! { MBSQoSFlowsToBeSetupItem {
         #[rasn(identifier = "mBSqosFlowIdentifier")]
         m_bsqos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "mBSqosFlowLevelQosParameters")]
@@ -12065,7 +12065,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSServiceAreaInformation, "MBS-ServiceAreaInformation" {
+    crate::per::decode_extensible_sequence! { MBSServiceAreaInformation {
         #[rasn(identifier = "mBS-ServiceAreaCellList")]
         m_bs_service_area_cell_list: [Option<MBSServiceAreaCellList>],
         #[rasn(identifier = "mBS-ServiceAreaTAIList")]
@@ -12100,7 +12100,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSServiceAreaInformationItem, "MBS-ServiceAreaInformationItem" {
+    crate::per::decode_extensible_sequence! { MBSServiceAreaInformationItem {
         #[rasn(identifier = "mBS-AreaSessionID")]
         m_bs_area_session_id: [MBSAreaSessionID],
         #[rasn(identifier = "mBS-ServiceAreaInformation")]
@@ -12154,7 +12154,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSSessionID, "MBS-SessionID" {
+    crate::per::decode_extensible_sequence! { MBSSessionID {
         #[rasn(identifier = "tMGI")]
         t_mgi: [TMGI],
         #[rasn(identifier = "nID")]
@@ -12214,7 +12214,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSSessionTNLInfo5GCItem, "MBS-SessionTNLInfo5GCItem" {
+    crate::per::decode_extensible_sequence! { MBSSessionTNLInfo5GCItem {
         #[rasn(identifier = "mBS-AreaSessionID")]
         m_bs_area_session_id: [MBSAreaSessionID],
         #[rasn(identifier = "sharedNGU-MulticastTNLInformation")]
@@ -12278,7 +12278,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSSessionTNLInfoNGRANItem, "MBS-SessionTNLInfoNGRANItem" {
+    crate::per::decode_extensible_sequence! { MBSSessionTNLInfoNGRANItem {
         #[rasn(identifier = "mBS-AreaSessionID")]
         m_bs_area_session_id: [MBSAreaSessionID],
         #[rasn(identifier = "sharedNGU-UnicastTNLInformation")]
@@ -12336,7 +12336,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSUPFailureIndicationItem, "MBS-UP-FailureIndicationItem" {
+    crate::per::decode_extensible_sequence! { MBSUPFailureIndicationItem {
         #[rasn(identifier = "mBS-AreaSessionID")]
         m_bs_area_session_id: [MBSAreaSessionID],
         #[rasn(identifier = "mBS-UP-FailureIndication")]
@@ -12376,7 +12376,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSSessionFailedtoSetupItem, "MBSSessionFailedtoSetupItem" {
+    crate::per::decode_extensible_sequence! { MBSSessionFailedtoSetupItem {
         #[rasn(identifier = "mBS-SessionID")]
         m_bs_session_id: [MBSSessionID],
         #[rasn(identifier = "mBS-AreaSessionID")]
@@ -12416,7 +12416,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSSessionReleaseResponseTransfer, "MBSSessionReleaseResponseTransfer" {
+    crate::per::decode_extensible_sequence! { MBSSessionReleaseResponseTransfer {
         #[rasn(identifier = "mBS-SessionTNLInfoNGRAN")]
         m_bs_session_tnlinfo_ngran: [Option<MBSSessionTNLInfoNGRAN>],
         #[rasn(identifier = "iE-Extensions")]
@@ -12446,7 +12446,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSSessionSetupOrModFailureTransfer, "MBSSessionSetupOrModFailureTransfer" {
+    crate::per::decode_extensible_sequence! { MBSSessionSetupOrModFailureTransfer {
         cause: [Cause],
         #[rasn(identifier = "criticalityDiagnostics")]
         criticality_diagnostics: [Option<CriticalityDiagnostics>],
@@ -12476,7 +12476,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { MBSSessionSetupOrModRequestTransfer, "MBSSessionSetupOrModRequestTransfer" {
+    crate::per::decode_extensible_sequence! { MBSSessionSetupOrModRequestTransfer {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -12497,7 +12497,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSSessionSetupOrModResponseTransfer, "MBSSessionSetupOrModResponseTransfer" {
+    crate::per::decode_extensible_sequence! { MBSSessionSetupOrModResponseTransfer {
         #[rasn(identifier = "mBS-SessionTNLInfoNGRAN")]
         m_bs_session_tnlinfo_ngran: [Option<MBSSessionTNLInfoNGRAN>],
         #[rasn(identifier = "iE-Extensions")]
@@ -12530,7 +12530,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSSessionSetupRequestItem, "MBSSessionSetupRequestItem" {
+    crate::per::decode_extensible_sequence! { MBSSessionSetupRequestItem {
         #[rasn(identifier = "mBS-SessionID")]
         m_bs_session_id: [MBSSessionID],
         #[rasn(identifier = "mBS-AreaSessionID")]
@@ -12573,7 +12573,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSSessionSetupResponseItem, "MBSSessionSetupResponseItem" {
+    crate::per::decode_extensible_sequence! { MBSSessionSetupResponseItem {
         #[rasn(identifier = "mBS-SessionID")]
         m_bs_session_id: [MBSSessionID],
         #[rasn(identifier = "mBS-AreaSessionID")]
@@ -12617,7 +12617,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSSessionSetuporModifyRequestItem, "MBSSessionSetuporModifyRequestItem" {
+    crate::per::decode_extensible_sequence! { MBSSessionSetuporModifyRequestItem {
         #[rasn(identifier = "mBS-SessionID")]
         m_bs_session_id: [MBSSessionID],
         #[rasn(identifier = "mBS-AreaSessionID")]
@@ -12674,7 +12674,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MBSSessionToReleaseItem, "MBSSessionToReleaseItem" {
+    crate::per::decode_extensible_sequence! { MBSSessionToReleaseItem {
         #[rasn(identifier = "mBS-SessionID")]
         m_bs_session_id: [MBSSessionID],
         cause: [Cause],
@@ -12743,7 +12743,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MDTConfiguration, "MDT-Configuration" {
+    crate::per::decode_extensible_sequence! { MDTConfiguration {
         #[rasn(identifier = "mdt-Config-NR")]
         mdt_config_nr: [Option<MDTConfigurationNR>],
         #[rasn(identifier = "mdt-Config-EUTRA")]
@@ -12782,7 +12782,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MDTConfigurationEUTRA, "MDT-Configuration-EUTRA" {
+    crate::per::decode_extensible_sequence! { MDTConfigurationEUTRA {
         #[rasn(identifier = "mdt-Activation")]
         mdt_activation: [MDTActivation],
         #[rasn(identifier = "areaScopeOfMDT")]
@@ -12829,7 +12829,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MDTConfigurationNR, "MDT-Configuration-NR" {
+    crate::per::decode_extensible_sequence! { MDTConfigurationNR {
         #[rasn(identifier = "mdt-Activation")]
         mdt_activation: [MDTActivation],
         #[rasn(identifier = "areaScopeOfMDT")]
@@ -12870,7 +12870,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MDTLocationInfo, "MDT-Location-Info" {
+    crate::per::decode_extensible_sequence! { MDTLocationInfo {
         #[rasn(identifier = "mDT-Location-Information")]
         m_dt_location_information: [MDTLocationInformation],
         #[rasn(identifier = "iE-Extensions")]
@@ -12904,7 +12904,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MDTCircle, "MDT-circle" {
+    crate::per::decode_extensible_sequence! { MDTCircle {
         #[rasn(identifier = "reference-location")]
         reference_location: [OctetString],
         #[rasn(value("1..=65535"), identifier = "distance-radius")]
@@ -13119,7 +13119,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MobileIABMTUserLocationInformation, "MobileIAB-MTUserLocationInformation" {
+    crate::per::decode_extensible_sequence! { MobileIABMTUserLocationInformation {
         #[rasn(identifier = "nRCGI")]
         n_rcgi: [NRCGI],
         #[rasn(identifier = "tAI")]
@@ -13177,7 +13177,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MobilityRestrictionList, "MobilityRestrictionList" {
+    crate::per::decode_extensible_sequence! { MobilityRestrictionList {
         #[rasn(identifier = "servingPLMN")]
         serving_plmn: [PLMNIdentity],
         #[rasn(identifier = "equivalentPLMNs")]
@@ -13235,7 +13235,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MonitoringRequestonAvailableBitrate, "MonitoringRequestonAvailableBitrate" {
+    crate::per::decode_extensible_sequence! { MonitoringRequestonAvailableBitrate {
         #[rasn(identifier = "monitoringRequest")]
         monitoring_request: [MonitoringRequest],
         #[rasn(identifier = "dlAvailableBitrateReportThresholds")]
@@ -13272,7 +13272,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MulticastGroupPagingArea, "MulticastGroupPagingArea" {
+    crate::per::decode_extensible_sequence! { MulticastGroupPagingArea {
         #[rasn(identifier = "mBS-AreaTAIList")]
         m_bs_area_tailist: [MBSAreaTAIList],
         #[rasn(identifier = "iE-Extensions")]
@@ -13303,7 +13303,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MulticastGroupPagingAreaItem, "MulticastGroupPagingAreaItem" {
+    crate::per::decode_extensible_sequence! { MulticastGroupPagingAreaItem {
         #[rasn(identifier = "multicastGroupPagingArea")]
         multicast_group_paging_area: [MulticastGroupPagingArea],
         #[rasn(identifier = "uE-PagingList")]
@@ -13340,7 +13340,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MulticastSessionActivationRequestTransfer, "MulticastSessionActivationRequestTransfer" {
+    crate::per::decode_extensible_sequence! { MulticastSessionActivationRequestTransfer {
         #[rasn(identifier = "mBS-SessionID")]
         m_bs_session_id: [MBSSessionID],
         #[rasn(identifier = "iE-Extensions")]
@@ -13369,7 +13369,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { MulticastSessionDeactivationRequestTransfer, "MulticastSessionDeactivationRequestTransfer" {
+    crate::per::decode_extensible_sequence! { MulticastSessionDeactivationRequestTransfer {
         #[rasn(identifier = "mBS-SessionID")]
         m_bs_session_id: [MBSSessionID],
         #[rasn(identifier = "iE-Extensions")]
@@ -13396,7 +13396,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { MulticastSessionUpdateRequestTransfer, "MulticastSessionUpdateRequestTransfer" {
+    crate::per::decode_extensible_sequence! { MulticastSessionUpdateRequestTransfer {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -13440,7 +13440,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { N6JitterInformation, "N6JitterInformation" {
+    crate::per::decode_extensible_sequence! { N6JitterInformation {
         #[rasn(value("-127..=127"), identifier = "n6JitterLowerBound")]
         n6_jitter_lower_bound: [i8],
         #[rasn(value("-127..=127"), identifier = "n6JitterUpperBound")]
@@ -13530,7 +13530,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NBIoTPagingEDRXInfo, "NB-IoT-Paging-eDRXInfo" {
+    crate::per::decode_extensible_sequence! { NBIoTPagingEDRXInfo {
         #[rasn(identifier = "nB-IoT-Paging-eDRXCycle")]
         n_b_io_t_paging_e_drxcycle: [NBIoTPagingEDRXCycle],
         #[rasn(identifier = "nB-IoT-Paging-TimeWindow")]
@@ -13581,7 +13581,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NGAPIESupportInformationRequestItem, "NGAPIESupportInformationRequestItem" {
+    crate::per::decode_extensible_sequence! { NGAPIESupportInformationRequestItem {
         #[rasn(identifier = "ngap-ProtocolIE-Id")]
         ngap_protocol_ie_id: [ProtocolIEID],
         #[rasn(identifier = "iE-Extensions")]
@@ -13640,7 +13640,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NGAPIESupportInformationResponseItem, "NGAPIESupportInformationResponseItem" {
+    crate::per::decode_extensible_sequence! { NGAPIESupportInformationResponseItem {
         #[rasn(identifier = "ngap-ProtocolIE-Id")]
         ngap_protocol_ie_id: [ProtocolIEID],
         #[rasn(identifier = "ngap-ProtocolIESupportInfo")]
@@ -13718,7 +13718,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NGRANCellReportItem, "NGRAN-CellReportItem" {
+    crate::per::decode_extensible_sequence! { NGRANCellReportItem {
         #[rasn(identifier = "nGRAN-CGI")]
         n_gran_cgi: [NGRANCGI],
         #[rasn(identifier = "nGRAN-CompositeAvailableCapacityGroup")]
@@ -13767,7 +13767,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NGRANCellToReportItem, "NGRAN-CellToReportItem" {
+    crate::per::decode_extensible_sequence! { NGRANCellToReportItem {
         #[rasn(identifier = "nGRAN-CGI")]
         n_gran_cgi: [NGRANCGI],
         #[rasn(identifier = "iE-Extensions")]
@@ -13824,7 +13824,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NGRANRadioResourceStatus, "NGRAN-RadioResourceStatus" {
+    crate::per::decode_extensible_sequence! { NGRANRadioResourceStatus {
         #[rasn(value("0..=100"), identifier = "dL-GBR-PRB-usage-for-MIMO")]
         d_l_gbr_prb_usage_for_mimo: [u8],
         #[rasn(value("0..=100"), identifier = "uL-GBR-PRB-usage-for-MIMO")]
@@ -13873,7 +13873,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NGRANReportingStatusIEs, "NGRAN-ReportingStatusIEs" {
+    crate::per::decode_extensible_sequence! { NGRANReportingStatusIEs {
         #[rasn(identifier = "nGRAN-CellReportList")]
         n_gran_cell_report_list: [NGRANCellReportList],
         #[rasn(identifier = "iE-Extensions")]
@@ -13902,7 +13902,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NGRANReportingSystemIEs, "NGRAN-ReportingSystemIEs" {
+    crate::per::decode_extensible_sequence! { NGRANReportingSystemIEs {
         #[rasn(identifier = "nGRAN-CellToReportList")]
         n_gran_cell_to_report_list: [NGRANCellToReportList],
         #[rasn(identifier = "iE-Extensions")]
@@ -14101,7 +14101,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NRA2XServicesAuthorized, "NR-A2X-ServicesAuthorized" {
+    crate::per::decode_extensible_sequence! { NRA2XServicesAuthorized {
         #[rasn(identifier = "aerialUE")]
         aerial_ue: [Option<NRA2XServicesAuthorizedAerialUE>],
         #[rasn(identifier = "aerialControllerUE")]
@@ -14136,7 +14136,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NRCGI, "NR-CGI" {
+    crate::per::decode_extensible_sequence! { NRCGI {
         #[rasn(identifier = "pLMNIdentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "nRCellIdentity")]
@@ -14200,7 +14200,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NRPagingLongEDRXInformationForRRCINACTIVE, "NR-Paging-Long-eDRX-Information-for-RRC-INACTIVE" {
+    crate::per::decode_extensible_sequence! { NRPagingLongEDRXInformationForRRCINACTIVE {
         #[rasn(identifier = "nR-paging-Long-eDRX-Cycle-for-RRC-INACTIVE")]
         n_r_paging_long_e_drx_cycle_for_rrc_inactive: [NRPagingLongEDRXCycleForRRCINACTIVE],
         #[rasn(identifier = "nR-paging-Time-Window-for-RRC-INACTIVE")]
@@ -14343,7 +14343,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NRPagingeDRXInformation, "NR-PagingeDRXInformation" {
+    crate::per::decode_extensible_sequence! { NRPagingeDRXInformation {
         #[rasn(identifier = "nR-paging-eDRX-Cycle")]
         n_r_paging_e_drx_cycle: [NRPagingEDRXCycle],
         #[rasn(identifier = "nR-paging-Time-Window")]
@@ -14413,7 +14413,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extension")]
         pub i_e_extension: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NRFrequencyBandItem, "NRFrequencyBandItem" {
+    crate::per::decode_extensible_sequence! { NRFrequencyBandItem {
         #[rasn(identifier = "nr-frequency-band")]
         nr_frequency_band: [NRFrequencyBand],
         #[rasn(identifier = "iE-Extension")]
@@ -14444,7 +14444,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extension")]
         pub i_e_extension: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NRFrequencyInfo, "NRFrequencyInfo" {
+    crate::per::decode_extensible_sequence! { NRFrequencyInfo {
         #[rasn(identifier = "nrARFCN")]
         nr_arfcn: [NRARFCN],
         #[rasn(identifier = "frequencyBand-List")]
@@ -14484,7 +14484,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NRNTNTAIInformation, "NRNTNTAIInformation" {
+    crate::per::decode_extensible_sequence! { NRNTNTAIInformation {
         #[rasn(identifier = "servingPLMN")]
         serving_plmn: [PLMNIdentity],
         #[rasn(identifier = "tACListInNRNTN")]
@@ -14527,7 +14527,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NRUESidelinkAggregateMaximumBitrate, "NRUESidelinkAggregateMaximumBitrate" {
+    crate::per::decode_extensible_sequence! { NRUESidelinkAggregateMaximumBitrate {
         #[rasn(identifier = "uESidelinkAggregateMaximumBitRate")]
         u_esidelink_aggregate_maximum_bit_rate: [BitRate],
         #[rasn(identifier = "iE-Extensions")]
@@ -14558,7 +14558,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NRV2XServicesAuthorized, "NRV2XServicesAuthorized" {
+    crate::per::decode_extensible_sequence! { NRV2XServicesAuthorized {
         #[rasn(identifier = "vehicleUE")]
         vehicle_ue: [Option<VehicleUE>],
         #[rasn(identifier = "pedestrianUE")]
@@ -14640,7 +14640,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NetworkSliceAreaScopeofMDT, "NetworkSliceAreaScopeofMDT" {
+    crate::per::decode_extensible_sequence! { NetworkSliceAreaScopeofMDT {
         #[rasn(identifier = "networkSliceListforMDT")]
         network_slice_listfor_mdt: [NetworkSliceListforMDT],
         #[rasn(identifier = "iE-Extensions")]
@@ -14671,7 +14671,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NetworkSliceItemforMDT, "NetworkSliceItemforMDT" {
+    crate::per::decode_extensible_sequence! { NetworkSliceItemforMDT {
         #[rasn(identifier = "plmnID")]
         plmn_id: [PLMNIdentity],
         #[rasn(identifier = "sliceMDTList")]
@@ -14816,7 +14816,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NonDynamic5QIDescriptor, "NonDynamic5QIDescriptor" {
+    crate::per::decode_extensible_sequence! { NonDynamic5QIDescriptor {
         #[rasn(identifier = "fiveQI")]
         five_qi: [FiveQI],
         #[rasn(identifier = "priorityLevelQos")]
@@ -14883,7 +14883,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { NotificationCellItem, "NotificationCell-Item" {
+    crate::per::decode_extensible_sequence! { NotificationCellItem {
         #[rasn(identifier = "nGRAN-CGI")]
         n_gran_cgi: [NGRANCGI],
         #[rasn(identifier = "notifyFlag")]
@@ -14995,7 +14995,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { OverloadStartNSSAIItem, "OverloadStartNSSAIItem" {
+    crate::per::decode_extensible_sequence! { OverloadStartNSSAIItem {
         #[rasn(identifier = "sliceOverloadList")]
         slice_overload_list: [SliceOverloadList],
         #[rasn(identifier = "sliceOverloadResponse")]
@@ -15038,7 +15038,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PC5FlowBitRates, "PC5FlowBitRates" {
+    crate::per::decode_extensible_sequence! { PC5FlowBitRates {
         #[rasn(identifier = "guaranteedFlowBitRate")]
         guaranteed_flow_bit_rate: [BitRate],
         #[rasn(identifier = "maximumFlowBitRate")]
@@ -15074,7 +15074,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PC5QoSFlowItem, "PC5QoSFlowItem" {
+    crate::per::decode_extensible_sequence! { PC5QoSFlowItem {
         #[rasn(identifier = "pQI")]
         p_qi: [FiveQI],
         #[rasn(identifier = "pc5FlowBitRates")]
@@ -15116,7 +15116,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PC5QoSParameters, "PC5QoSParameters" {
+    crate::per::decode_extensible_sequence! { PC5QoSParameters {
         #[rasn(identifier = "pc5QoSFlowList")]
         pc5_qo_sflow_list: [PC5QoSFlowList],
         #[rasn(identifier = "pc5LinkAggregateBitRates")]
@@ -15155,7 +15155,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionAggregateMaximumBitRate, "PDUSessionAggregateMaximumBitRate" {
+    crate::per::decode_extensible_sequence! { PDUSessionAggregateMaximumBitRate {
         #[rasn(identifier = "pDUSessionAggregateMaximumBitRateDL")]
         p_dusession_aggregate_maximum_bit_rate_dl: [BitRate],
         #[rasn(identifier = "pDUSessionAggregateMaximumBitRateUL")]
@@ -15190,7 +15190,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionForPagingItem, "PDUSessionForPagingItem" {
+    crate::per::decode_extensible_sequence! { PDUSessionForPagingItem {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(identifier = "pagingPolicyDifferentiationList")]
@@ -15234,7 +15234,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionListMTCommHReqItem, "PDUSessionListMTCommHReq-Item" {
+    crate::per::decode_extensible_sequence! { PDUSessionListMTCommHReqItem {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(identifier = "iE-Extensions")]
@@ -15268,7 +15268,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceAdmittedItem, "PDUSessionResourceAdmittedItem" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceAdmittedItem {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "handoverRequestAcknowledgeTransfer")]
@@ -15310,7 +15310,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceFailedToModifyItemModCfm, "PDUSessionResourceFailedToModifyItemModCfm" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceFailedToModifyItemModCfm {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(
@@ -15351,7 +15351,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceFailedToModifyItemModRes, "PDUSessionResourceFailedToModifyItemModRes" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceFailedToModifyItemModRes {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(
@@ -15400,7 +15400,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceFailedToResumeItemRESReq, "PDUSessionResourceFailedToResumeItemRESReq" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceFailedToResumeItemRESReq {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         cause: [Cause],
@@ -15433,7 +15433,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceFailedToResumeItemRESRes, "PDUSessionResourceFailedToResumeItemRESRes" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceFailedToResumeItemRESRes {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         cause: [Cause],
@@ -15482,7 +15482,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceFailedToSetupItemCxtFail, "PDUSessionResourceFailedToSetupItemCxtFail" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceFailedToSetupItemCxtFail {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(
@@ -15523,7 +15523,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceFailedToSetupItemCxtRes, "PDUSessionResourceFailedToSetupItemCxtRes" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceFailedToSetupItemCxtRes {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(
@@ -15564,7 +15564,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceFailedToSetupItemHOAck, "PDUSessionResourceFailedToSetupItemHOAck" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceFailedToSetupItemHOAck {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(
@@ -15602,7 +15602,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceFailedToSetupItemPSReq, "PDUSessionResourceFailedToSetupItemPSReq" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceFailedToSetupItemPSReq {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "pathSwitchRequestSetupFailedTransfer")]
@@ -15640,7 +15640,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceFailedToSetupItemSURes, "PDUSessionResourceFailedToSetupItemSURes" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceFailedToSetupItemSURes {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(
@@ -15708,7 +15708,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceHandoverItem, "PDUSessionResourceHandoverItem" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceHandoverItem {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "handoverCommandTransfer")]
@@ -15749,7 +15749,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceInformationItem, "PDUSessionResourceInformationItem" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceInformationItem {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(identifier = "qosFlowInformationList")]
@@ -15790,7 +15790,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceItemCxtRelCpl, "PDUSessionResourceItemCxtRelCpl" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceItemCxtRelCpl {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(identifier = "iE-Extensions")]
@@ -15819,7 +15819,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceItemCxtRelReq, "PDUSessionResourceItemCxtRelReq" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceItemCxtRelReq {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(identifier = "iE-Extensions")]
@@ -15850,7 +15850,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceItemHORqd, "PDUSessionResourceItemHORqd" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceItemHORqd {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "handoverRequiredTransfer")]
@@ -15901,7 +15901,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyConfirmTransfer, "PDUSessionResourceModifyConfirmTransfer" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyConfirmTransfer {
         #[rasn(identifier = "qosFlowModifyConfirmList")]
         qos_flow_modify_confirm_list: [QosFlowModifyConfirmList],
         #[rasn(identifier = "uLNGU-UP-TNLInformation")]
@@ -15944,7 +15944,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyIndicationTransfer, "PDUSessionResourceModifyIndicationTransfer" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyIndicationTransfer {
         #[rasn(identifier = "dLQosFlowPerTNLInformation")]
         d_lqos_flow_per_tnlinformation: [QosFlowPerTNLInformation],
         #[rasn(identifier = "additionalDLQosFlowPerTNLInformation")]
@@ -15976,7 +15976,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyIndicationUnsuccessfulTransfer, "PDUSessionResourceModifyIndicationUnsuccessfulTransfer" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyIndicationUnsuccessfulTransfer {
         cause: [Cause],
         #[rasn(identifier = "iE-Extensions")]
         i_e_extensions: [Option<ProtocolExtensionContainer>],
@@ -16003,7 +16003,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyItemModCfm, "PDUSessionResourceModifyItemModCfm" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyItemModCfm {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "pDUSessionResourceModifyConfirmTransfer")]
@@ -16041,7 +16041,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyItemModInd, "PDUSessionResourceModifyItemModInd" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyItemModInd {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(
@@ -16081,7 +16081,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyItemModReq, "PDUSessionResourceModifyItemModReq" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyItemModReq {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(identifier = "nAS-PDU")]
@@ -16120,7 +16120,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyItemModRes, "PDUSessionResourceModifyItemModRes" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyItemModRes {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "pDUSessionResourceModifyResponseTransfer")]
@@ -16175,7 +16175,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyRequestTransfer, "PDUSessionResourceModifyRequestTransfer" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyRequestTransfer {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -16204,7 +16204,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyResponseTransfer, "PDUSessionResourceModifyResponseTransfer" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyResponseTransfer {
         #[rasn(identifier = "dL-NGU-UP-TNLInformation")]
         d_l_ngu_up_tnlinformation: [Option<UPTransportLayerInformation>],
         #[rasn(identifier = "uL-NGU-UP-TNLInformation")]
@@ -16250,7 +16250,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyUnsuccessfulTransfer, "PDUSessionResourceModifyUnsuccessfulTransfer" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyUnsuccessfulTransfer {
         cause: [Cause],
         #[rasn(identifier = "criticalityDiagnostics")]
         criticality_diagnostics: [Option<CriticalityDiagnostics>],
@@ -16284,7 +16284,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceNotifyItem, "PDUSessionResourceNotifyItem" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceNotifyItem {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "pDUSessionResourceNotifyTransfer")]
@@ -16320,7 +16320,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceNotifyReleasedTransfer, "PDUSessionResourceNotifyReleasedTransfer" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceNotifyReleasedTransfer {
         cause: [Cause],
         #[rasn(identifier = "iE-Extensions")]
         i_e_extensions: [Option<ProtocolExtensionContainer>],
@@ -16347,7 +16347,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceNotifyTransfer, "PDUSessionResourceNotifyTransfer" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceNotifyTransfer {
         #[rasn(identifier = "qosFlowNotifyList")]
         qos_flow_notify_list: [Option<QosFlowNotifyList>],
         #[rasn(identifier = "qosFlowReleasedList")]
@@ -16379,7 +16379,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceReleaseCommandTransfer, "PDUSessionResourceReleaseCommandTransfer" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceReleaseCommandTransfer {
         cause: [Cause],
         #[rasn(identifier = "iE-Extensions")]
         i_e_extensions: [Option<ProtocolExtensionContainer>],
@@ -16402,7 +16402,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceReleaseResponseTransfer, "PDUSessionResourceReleaseResponseTransfer" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceReleaseResponseTransfer {
         #[rasn(identifier = "iE-Extensions")]
         i_e_extensions: [Option<ProtocolExtensionContainer>],
     } }
@@ -16425,7 +16425,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceReleasedItemNot, "PDUSessionResourceReleasedItemNot" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceReleasedItemNot {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "pDUSessionResourceNotifyReleasedTransfer")]
@@ -16460,7 +16460,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceReleasedItemPSAck, "PDUSessionResourceReleasedItemPSAck" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceReleasedItemPSAck {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "pathSwitchRequestUnsuccessfulTransfer")]
@@ -16495,7 +16495,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceReleasedItemPSFail, "PDUSessionResourceReleasedItemPSFail" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceReleasedItemPSFail {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "pathSwitchRequestUnsuccessfulTransfer")]
@@ -16530,7 +16530,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceReleasedItemRelRes, "PDUSessionResourceReleasedItemRelRes" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceReleasedItemRelRes {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "pDUSessionResourceReleaseResponseTransfer")]
@@ -16587,7 +16587,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceResumeItemRESReq, "PDUSessionResourceResumeItemRESReq" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceResumeItemRESReq {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "uEContextResumeRequestTransfer")]
@@ -16622,7 +16622,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceResumeItemRESRes, "PDUSessionResourceResumeItemRESRes" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceResumeItemRESRes {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "uEContextResumeResponseTransfer")]
@@ -16669,7 +16669,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceSecondaryRATUsageItem, "PDUSessionResourceSecondaryRATUsageItem" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceSecondaryRATUsageItem {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "secondaryRATDataUsageReportTransfer")]
@@ -16714,7 +16714,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupItemCxtReq, "PDUSessionResourceSetupItemCxtReq" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupItemCxtReq {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(identifier = "nAS-PDU")]
@@ -16757,7 +16757,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupItemCxtRes, "PDUSessionResourceSetupItemCxtRes" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupItemCxtRes {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "pDUSessionResourceSetupResponseTransfer")]
@@ -16794,7 +16794,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupItemHOReq, "PDUSessionResourceSetupItemHOReq" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupItemHOReq {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(identifier = "s-NSSAI")]
@@ -16837,7 +16837,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupItemSUReq, "PDUSessionResourceSetupItemSUReq" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupItemSUReq {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(identifier = "pDUSessionNAS-PDU")]
@@ -16880,7 +16880,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupItemSURes, "PDUSessionResourceSetupItemSURes" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupItemSURes {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "pDUSessionResourceSetupResponseTransfer")]
@@ -16931,7 +16931,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupRequestTransfer, "PDUSessionResourceSetupRequestTransfer" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupRequestTransfer {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -16958,7 +16958,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupResponseTransfer, "PDUSessionResourceSetupResponseTransfer" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupResponseTransfer {
         #[rasn(identifier = "dLQosFlowPerTNLInformation")]
         d_lqos_flow_per_tnlinformation: [QosFlowPerTNLInformation],
         #[rasn(identifier = "additionalDLQosFlowPerTNLInformation")]
@@ -17000,7 +17000,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupUnsuccessfulTransfer, "PDUSessionResourceSetupUnsuccessfulTransfer" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupUnsuccessfulTransfer {
         cause: [Cause],
         #[rasn(identifier = "criticalityDiagnostics")]
         criticality_diagnostics: [Option<CriticalityDiagnostics>],
@@ -17034,7 +17034,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceSuspendItemSUSReq, "PDUSessionResourceSuspendItemSUSReq" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceSuspendItemSUSReq {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "uEContextSuspendRequestTransfer")]
@@ -17075,7 +17075,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceSwitchedItem, "PDUSessionResourceSwitchedItem" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceSwitchedItem {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "pathSwitchRequestAcknowledgeTransfer")]
@@ -17114,7 +17114,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceToBeSwitchedDLItem, "PDUSessionResourceToBeSwitchedDLItem" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceToBeSwitchedDLItem {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "pathSwitchRequestTransfer")]
@@ -17155,7 +17155,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceToReleaseItemHOCmd, "PDUSessionResourceToReleaseItemHOCmd" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceToReleaseItemHOCmd {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "handoverPreparationUnsuccessfulTransfer")]
@@ -17190,7 +17190,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceToReleaseItemRelCmd, "PDUSessionResourceToReleaseItemRelCmd" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceToReleaseItemRelCmd {
         #[rasn(identifier = "pDUSessionID")]
         p_dusession_id: [PDUSessionID],
         #[rasn(value("0.."), identifier = "pDUSessionResourceReleaseCommandTransfer")]
@@ -17259,7 +17259,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionUsageReport, "PDUSessionUsageReport" {
+    crate::per::decode_extensible_sequence! { PDUSessionUsageReport {
         #[rasn(identifier = "rATType")]
         r_attype: [PDUSessionUsageReportRATType],
         #[rasn(identifier = "pDUSessionTimedReportList")]
@@ -17313,7 +17313,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUsetQoSInformation, "PDUsetQoSInformation" {
+    crate::per::decode_extensible_sequence! { PDUsetQoSInformation {
         #[rasn(identifier = "pduSetDelayBudget")]
         pdu_set_delay_budget: [Option<ExtendedPacketDelayBudget>],
         #[rasn(identifier = "pduSetErrorRate")]
@@ -17354,7 +17354,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PDUsetQoSParameters, "PDUsetQoSParameters" {
+    crate::per::decode_extensible_sequence! { PDUsetQoSParameters {
         #[rasn(identifier = "ulPDUSetQoSInformation")]
         ul_pduset_qo_sinformation: [Option<PDUsetQoSInformation>],
         #[rasn(identifier = "dlPDUSetQoSInformation")]
@@ -17387,7 +17387,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PEIPSassistanceInformation, "PEIPSassistanceInformation" {
+    crate::per::decode_extensible_sequence! { PEIPSassistanceInformation {
         #[rasn(identifier = "cNsubgroupID")]
         c_nsubgroup_id: [CNsubgroupID],
         #[rasn(identifier = "iE-Extensions")]
@@ -17416,7 +17416,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PLMNAreaBasedQMC, "PLMNAreaBasedQMC" {
+    crate::per::decode_extensible_sequence! { PLMNAreaBasedQMC {
         #[rasn(identifier = "plmnListforQMC")]
         plmn_listfor_qmc: [PLMNListforQMC],
         #[rasn(identifier = "iE-Extensions")]
@@ -17454,7 +17454,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PLMNSupportItem, "PLMNSupportItem" {
+    crate::per::decode_extensible_sequence! { PLMNSupportItem {
         #[rasn(identifier = "pLMNIdentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "sliceSupportList")]
@@ -17491,7 +17491,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PNINPNAreaScopeofMDT, "PNI-NPN-AreaScopeofMDT" {
+    crate::per::decode_extensible_sequence! { PNINPNAreaScopeofMDT {
         #[rasn(identifier = "cAGListforMDT")]
         c_aglistfor_mdt: [CAGListforMDT],
         #[rasn(identifier = "iE-Extensions")]
@@ -17520,7 +17520,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PNINPNMobilityInformation, "PNI-NPN-MobilityInformation" {
+    crate::per::decode_extensible_sequence! { PNINPNMobilityInformation {
         #[rasn(identifier = "allowed-PNI-NPI-List")]
         allowed_pni_npi_list: [AllowedPNINPNList],
         #[rasn(identifier = "iE-Extensions")]
@@ -17549,7 +17549,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PNINPNBasedMDT, "PNI-NPNBasedMDT" {
+    crate::per::decode_extensible_sequence! { PNINPNBasedMDT {
         #[rasn(identifier = "cAGListforMDT")]
         c_aglistfor_mdt: [CAGListforMDT],
         #[rasn(identifier = "iE-Extensions")]
@@ -17611,7 +17611,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PacketErrorRate, "PacketErrorRate" {
+    crate::per::decode_extensible_sequence! { PacketErrorRate {
         #[rasn(value("0..=9", extensible), identifier = "pERScalar")]
         p_erscalar: [Integer],
         #[rasn(value("0..=9", extensible), identifier = "pERExponent")]
@@ -17649,7 +17649,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PagingAssisDataforCEcapabUE, "PagingAssisDataforCEcapabUE" {
+    crate::per::decode_extensible_sequence! { PagingAssisDataforCEcapabUE {
         #[rasn(identifier = "eUTRA-CGI")]
         e_utra_cgi: [EUTRACGI],
         #[rasn(identifier = "coverageEnhancementLevel")]
@@ -17689,7 +17689,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PagingAttemptInformation, "PagingAttemptInformation" {
+    crate::per::decode_extensible_sequence! { PagingAttemptInformation {
         #[rasn(identifier = "pagingAttemptCount")]
         paging_attempt_count: [PagingAttemptCount],
         #[rasn(identifier = "intendedNumberOfPagingAttempts")]
@@ -17754,7 +17754,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PagingPolicyDifferentiation, "PagingPolicyDifferentiation" {
+    crate::per::decode_extensible_sequence! { PagingPolicyDifferentiation {
         #[rasn(identifier = "pDUSessionForPagingList")]
         p_dusession_for_paging_list: [PDUSessionForPagingList],
         #[rasn(identifier = "iE-Extensions")]
@@ -17791,7 +17791,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PagingPolicyDifferentiationItem, "PagingPolicyDifferentiationItem" {
+    crate::per::decode_extensible_sequence! { PagingPolicyDifferentiationItem {
         #[rasn(identifier = "qosFlowIdentifier")]
         qos_flow_identifier: [Option<QosFlowIdentifier>],
         #[rasn(identifier = "pagingPolicyIndicator")]
@@ -17900,7 +17900,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PartiallyAllowedNSSAIItem, "PartiallyAllowedNSSAI-Item" {
+    crate::per::decode_extensible_sequence! { PartiallyAllowedNSSAIItem {
         #[rasn(identifier = "s-NSSAI")]
         s_nssai: [SNSSAI],
         #[rasn(identifier = "iE-Extensions")]
@@ -17928,7 +17928,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PathSwitchRequestAcknowledgeTransfer, "PathSwitchRequestAcknowledgeTransfer" {
+    crate::per::decode_extensible_sequence! { PathSwitchRequestAcknowledgeTransfer {
         #[rasn(identifier = "uL-NGU-UP-TNLInformation")]
         u_l_ngu_up_tnlinformation: [Option<UPTransportLayerInformation>],
         #[rasn(identifier = "securityIndication")]
@@ -17960,7 +17960,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PathSwitchRequestSetupFailedTransfer, "PathSwitchRequestSetupFailedTransfer" {
+    crate::per::decode_extensible_sequence! { PathSwitchRequestSetupFailedTransfer {
         cause: [Cause],
         #[rasn(identifier = "iE-Extensions")]
         i_e_extensions: [Option<ProtocolExtensionContainer>],
@@ -17991,7 +17991,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PathSwitchRequestTransfer, "PathSwitchRequestTransfer" {
+    crate::per::decode_extensible_sequence! { PathSwitchRequestTransfer {
         #[rasn(identifier = "dL-NGU-UP-TNLInformation")]
         d_l_ngu_up_tnlinformation: [UPTransportLayerInformation],
         #[rasn(identifier = "dL-NGU-TNLInformationReused")]
@@ -18031,7 +18031,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PathSwitchRequestUnsuccessfulTransfer, "PathSwitchRequestUnsuccessfulTransfer" {
+    crate::per::decode_extensible_sequence! { PathSwitchRequestUnsuccessfulTransfer {
         cause: [Cause],
         #[rasn(identifier = "iE-Extensions")]
         i_e_extensions: [Option<ProtocolExtensionContainer>],
@@ -18067,7 +18067,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PeriodicReportingIEs, "PeriodicReportingIEs" {
+    crate::per::decode_extensible_sequence! { PeriodicReportingIEs {
         #[rasn(identifier = "reportingPeriodicity")]
         reporting_periodicity: [ReportingPeriodicity],
         #[rasn(identifier = "iE-Extensions")]
@@ -18101,7 +18101,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PeriodicityBound, "PeriodicityBound" {
+    crate::per::decode_extensible_sequence! { PeriodicityBound {
         #[rasn(identifier = "periodicityLowerBound")]
         periodicity_lower_bound: [Periodicity],
         #[rasn(identifier = "periodicityUpperBound")]
@@ -18134,7 +18134,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { PeriodicityList, "PeriodicityList" {
+    crate::per::decode_extensible_sequence! { PeriodicityList {
         #[rasn(identifier = "allowedPeriodicityList")]
         allowed_periodicity_list: [AllowedPeriodicityList],
         #[rasn(identifier = "iE-Extensions")]
@@ -18244,7 +18244,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QMCConfigInfo, "QMCConfigInfo" {
+    crate::per::decode_extensible_sequence! { QMCConfigInfo {
         #[rasn(identifier = "uEAppLayerMeasInfoList")]
         u_eapp_layer_meas_info_list: [UEAppLayerMeasInfoList],
         #[rasn(identifier = "iE-Extensions")]
@@ -18272,7 +18272,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QMCDeactivation, "QMCDeactivation" {
+    crate::per::decode_extensible_sequence! { QMCDeactivation {
         #[rasn(identifier = "qoEReferenceList")]
         qo_ereference_list: [QoEReferenceList],
         #[rasn(identifier = "iE-Extensions")]
@@ -18318,7 +18318,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QoERVQoEReportingPaths, "QoERVQoEReportingPaths" {
+    crate::per::decode_extensible_sequence! { QoERVQoEReportingPaths {
         #[rasn(identifier = "qoEReportingPath")]
         qo_ereporting_path: [Option<QoERVQoEReportingPathsQoEReportingPath>],
         #[rasn(identifier = "rVQoEReportingPath")]
@@ -18365,7 +18365,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QoSFlowTSCItem, "QoSFlowTSCItem" {
+    crate::per::decode_extensible_sequence! { QoSFlowTSCItem {
         #[rasn(identifier = "qosFlowIdentifier")]
         qos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "tSCTrafficCharacteristicsFeedback")]
@@ -18421,7 +18421,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QoSFlowsUsageReportItem, "QoSFlowsUsageReport-Item" {
+    crate::per::decode_extensible_sequence! { QoSFlowsUsageReportItem {
         #[rasn(identifier = "qosFlowIdentifier")]
         qos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "rATType")]
@@ -18485,7 +18485,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QosFlowAcceptedItem, "QosFlowAcceptedItem" {
+    crate::per::decode_extensible_sequence! { QosFlowAcceptedItem {
         #[rasn(identifier = "qosFlowIdentifier")]
         qos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "iE-Extensions")]
@@ -18521,7 +18521,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QosFlowAddOrModifyRequestItem, "QosFlowAddOrModifyRequestItem" {
+    crate::per::decode_extensible_sequence! { QosFlowAddOrModifyRequestItem {
         #[rasn(identifier = "qosFlowIdentifier")]
         qos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "qosFlowLevelQosParameters")]
@@ -18561,7 +18561,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QosFlowAddOrModifyResponseItem, "QosFlowAddOrModifyResponseItem" {
+    crate::per::decode_extensible_sequence! { QosFlowAddOrModifyResponseItem {
         #[rasn(identifier = "qosFlowIdentifier")]
         qos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "iE-Extensions")]
@@ -18595,7 +18595,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QosFlowAdditionalInfoItemRelCom, "QosFlowAdditionalInfoItemRelCom" {
+    crate::per::decode_extensible_sequence! { QosFlowAdditionalInfoItemRelCom {
         #[rasn(identifier = "qosFlowIdentifier")]
         qos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "downlinkTLContainer")]
@@ -18629,7 +18629,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QosFlowAdditionalInfoItemRelRes, "QosFlowAdditionalInfoItemRelRes" {
+    crate::per::decode_extensible_sequence! { QosFlowAdditionalInfoItemRelRes {
         #[rasn(identifier = "qosFlowIdentifier")]
         qos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "uplinkTLContainer")]
@@ -18675,7 +18675,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QosFlowFeedbackItem, "QosFlowFeedbackItem" {
+    crate::per::decode_extensible_sequence! { QosFlowFeedbackItem {
         #[rasn(identifier = "qosFlowIdentifier")]
         qos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "updateFeedback")]
@@ -18724,7 +18724,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QosFlowInformationItem, "QosFlowInformationItem" {
+    crate::per::decode_extensible_sequence! { QosFlowInformationItem {
         #[rasn(identifier = "qosFlowIdentifier")]
         qos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "dLForwarding")]
@@ -18762,7 +18762,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QosFlowItemWithDataForwarding, "QosFlowItemWithDataForwarding" {
+    crate::per::decode_extensible_sequence! { QosFlowItemWithDataForwarding {
         #[rasn(identifier = "qosFlowIdentifier")]
         qos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "dataForwardingAccepted")]
@@ -18802,7 +18802,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QosFlowLevelQosParameters, "QosFlowLevelQosParameters" {
+    crate::per::decode_extensible_sequence! { QosFlowLevelQosParameters {
         #[rasn(identifier = "qosCharacteristics")]
         qos_characteristics: [QosCharacteristics],
         #[rasn(identifier = "allocationAndRetentionPriority")]
@@ -18854,7 +18854,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QosFlowModifyConfirmItem, "QosFlowModifyConfirmItem" {
+    crate::per::decode_extensible_sequence! { QosFlowModifyConfirmItem {
         #[rasn(identifier = "qosFlowIdentifier")]
         qos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "iE-Extensions")]
@@ -18888,7 +18888,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QosFlowNotifyItem, "QosFlowNotifyItem" {
+    crate::per::decode_extensible_sequence! { QosFlowNotifyItem {
         #[rasn(identifier = "qosFlowIdentifier")]
         qos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "notificationCause")]
@@ -18926,7 +18926,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QosFlowParametersItem, "QosFlowParametersItem" {
+    crate::per::decode_extensible_sequence! { QosFlowParametersItem {
         #[rasn(identifier = "qosFlowIdentifier")]
         qos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "alternativeQoSParaSetList")]
@@ -18964,7 +18964,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QosFlowPerTNLInformation, "QosFlowPerTNLInformation" {
+    crate::per::decode_extensible_sequence! { QosFlowPerTNLInformation {
         #[rasn(identifier = "uPTransportLayerInformation")]
         u_ptransport_layer_information: [UPTransportLayerInformation],
         #[rasn(identifier = "associatedQosFlowList")]
@@ -18996,7 +18996,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QosFlowPerTNLInformationItem, "QosFlowPerTNLInformationItem" {
+    crate::per::decode_extensible_sequence! { QosFlowPerTNLInformationItem {
         #[rasn(identifier = "qosFlowPerTNLInformation")]
         qos_flow_per_tnlinformation: [QosFlowPerTNLInformation],
         #[rasn(identifier = "iE-Extensions")]
@@ -19032,7 +19032,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QosFlowSetupRequestItem, "QosFlowSetupRequestItem" {
+    crate::per::decode_extensible_sequence! { QosFlowSetupRequestItem {
         #[rasn(identifier = "qosFlowIdentifier")]
         qos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "qosFlowLevelQosParameters")]
@@ -19072,7 +19072,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QosFlowToBeForwardedItem, "QosFlowToBeForwardedItem" {
+    crate::per::decode_extensible_sequence! { QosFlowToBeForwardedItem {
         #[rasn(identifier = "qosFlowIdentifier")]
         qos_flow_identifier: [QosFlowIdentifier],
         #[rasn(identifier = "iE-Extensions")]
@@ -19105,7 +19105,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { QosFlowWithCauseItem, "QosFlowWithCauseItem" {
+    crate::per::decode_extensible_sequence! { QosFlowWithCauseItem {
         #[rasn(identifier = "qosFlowIdentifier")]
         qos_flow_identifier: [QosFlowIdentifier],
         cause: [Cause],
@@ -19217,7 +19217,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { RANStatusTransferTransparentContainer, "RANStatusTransfer-TransparentContainer" {
+    crate::per::decode_extensible_sequence! { RANStatusTransferTransparentContainer {
         #[rasn(identifier = "dRBsSubjectToStatusTransferList")]
         d_rbs_subject_to_status_transfer_list: [DRBsSubjectToStatusTransferList],
         #[rasn(identifier = "iE-Extensions")]
@@ -19245,7 +19245,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { RANTSSCellItem, "RANTSSCellItem" {
+    crate::per::decode_extensible_sequence! { RANTSSCellItem {
         #[rasn(identifier = "nRCGI")]
         n_rcgi: [NRCGI],
         #[rasn(identifier = "iE-Extensions")]
@@ -19313,7 +19313,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { RANTimingSynchronisationStatusInfo, "RANTimingSynchronisationStatusInfo" {
+    crate::per::decode_extensible_sequence! { RANTimingSynchronisationStatusInfo {
         #[rasn(identifier = "synchronisationState")]
         synchronisation_state: [Option<RANTimingSynchronisationStatusInfoSynchronisationState>],
         #[rasn(identifier = "traceabletoUTC")]
@@ -19388,7 +19388,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extension")]
         pub i_e_extension: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { RANfeedbacktypeProactive, "RANfeedbacktype-proactive" {
+    crate::per::decode_extensible_sequence! { RANfeedbacktypeProactive {
         #[rasn(identifier = "burstArrivalTimeWindow")]
         burst_arrival_time_window: [BurstArrivalTimeWindow],
         #[rasn(identifier = "periodicityRange")]
@@ -19428,7 +19428,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extension")]
         pub i_e_extension: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { RANfeedbacktypeReactive, "RANfeedbacktype-reactive" {
+    crate::per::decode_extensible_sequence! { RANfeedbacktypeReactive {
         #[rasn(identifier = "capabilityForBATAdaptation")]
         capability_for_batadaptation: [RANfeedbacktypeReactiveCapabilityForBATAdaptation],
         #[rasn(identifier = "iE-Extension")]
@@ -19481,7 +19481,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { RATRestrictionsItem, "RATRestrictions-Item" {
+    crate::per::decode_extensible_sequence! { RATRestrictionsItem {
         #[rasn(identifier = "pLMNIdentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "rATRestrictionInformation")]
@@ -19528,7 +19528,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { RIMInformation, "RIMInformation" {
+    crate::per::decode_extensible_sequence! { RIMInformation {
         #[rasn(identifier = "targetgNBSetID")]
         targetg_nbset_id: [GNBSetID],
         #[rasn(identifier = "rIM-RSDetection")]
@@ -19564,7 +19564,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { RIMInformationTransfer, "RIMInformationTransfer" {
+    crate::per::decode_extensible_sequence! { RIMInformationTransfer {
         #[rasn(identifier = "targetRANNodeID-RIM")]
         target_rannode_id_rim: [TargetRANNodeIDRIM],
         #[rasn(identifier = "sourceRANNodeID")]
@@ -19660,7 +19660,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { RSPPFlowBitRates, "RSPPFlowBitRates" {
+    crate::per::decode_extensible_sequence! { RSPPFlowBitRates {
         #[rasn(identifier = "guaranteedFlowBitRate")]
         guaranteed_flow_bit_rate: [BitRate],
         #[rasn(identifier = "maximumFlowBitRate")]
@@ -19695,7 +19695,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { RSPPQoSFlowItem, "RSPPQoSFlowItem" {
+    crate::per::decode_extensible_sequence! { RSPPQoSFlowItem {
         #[rasn(identifier = "pQI")]
         p_qi: [FiveQI],
         #[rasn(identifier = "rSPPFlowBitRates")]
@@ -19750,7 +19750,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { RecommendedCellItem, "RecommendedCellItem" {
+    crate::per::decode_extensible_sequence! { RecommendedCellItem {
         #[rasn(identifier = "nGRAN-CGI")]
         n_gran_cgi: [NGRANCGI],
         #[rasn(value("0..=4095"), identifier = "timeStayedInCell")]
@@ -19786,7 +19786,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { RecommendedCellsForPaging, "RecommendedCellsForPaging" {
+    crate::per::decode_extensible_sequence! { RecommendedCellsForPaging {
         #[rasn(identifier = "recommendedCellList")]
         recommended_cell_list: [RecommendedCellList],
         #[rasn(identifier = "iE-Extensions")]
@@ -19814,7 +19814,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { RecommendedRANNodeItem, "RecommendedRANNodeItem" {
+    crate::per::decode_extensible_sequence! { RecommendedRANNodeItem {
         #[rasn(identifier = "aMFPagingTarget")]
         a_mfpaging_target: [AMFPagingTarget],
         #[rasn(identifier = "iE-Extensions")]
@@ -19846,7 +19846,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { RecommendedRANNodesForPaging, "RecommendedRANNodesForPaging" {
+    crate::per::decode_extensible_sequence! { RecommendedRANNodesForPaging {
         #[rasn(identifier = "recommendedRANNodeList")]
         recommended_rannode_list: [RecommendedRANNodeList],
         #[rasn(identifier = "iE-Extensions")]
@@ -19888,7 +19888,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { RedundantPDUSessionInformation, "RedundantPDUSessionInformation" {
+    crate::per::decode_extensible_sequence! { RedundantPDUSessionInformation {
         #[rasn(identifier = "rSN")]
         r_sn: [RSN],
         #[rasn(identifier = "iE-Extensions")]
@@ -20074,7 +20074,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { RequestedNSSAIItem, "RequestedNSSAIItem" {
+    crate::per::decode_extensible_sequence! { RequestedNSSAIItem {
         #[rasn(identifier = "s-NSSAI")]
         s_nssai: [SNSSAI],
         #[rasn(identifier = "iE-Extensions")]
@@ -20099,7 +20099,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { RequestedTNLInfo, "RequestedTNLInfo" {
+    crate::per::decode_extensible_sequence! { RequestedTNLInfo {
         #[rasn(identifier = "pLMNIdentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "iE-Extensions")]
@@ -20191,7 +20191,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SNSSAI, "S-NSSAI" {
+    crate::per::decode_extensible_sequence! { SNSSAI {
         #[rasn(identifier = "sST")]
         s_st: [SST],
         #[rasn(identifier = "sD")]
@@ -20243,7 +20243,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SLPositioningRangingQoSParameters, "SLPositioningRangingQoSParameters" {
+    crate::per::decode_extensible_sequence! { SLPositioningRangingQoSParameters {
         #[rasn(identifier = "rSPPQoSFlowList")]
         r_sppqo_sflow_list: [RSPPQoSFlowList],
         #[rasn(identifier = "rSPPLinkAggregateBitRates")]
@@ -20277,7 +20277,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SLPositioningRangingServiceInfo, "SLPositioningRangingServiceInfo" {
+    crate::per::decode_extensible_sequence! { SLPositioningRangingServiceInfo {
         #[rasn(identifier = "sLPositioningRangingAuthorized")]
         s_lpositioning_ranging_authorized: [SLPositioningRangingAuthorized],
         #[rasn(identifier = "sLPositioningRangingQoSParameters")]
@@ -20309,7 +20309,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SNPNBasedMDT, "SNPN-BasedMDT" {
+    crate::per::decode_extensible_sequence! { SNPNBasedMDT {
         #[rasn(identifier = "sNPNListforMDT")]
         s_npnlistfor_mdt: [SNPNListforMDT],
         #[rasn(identifier = "iE-Extensions")]
@@ -20337,7 +20337,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SNPNCellBasedMDT, "SNPN-CellBasedMDT" {
+    crate::per::decode_extensible_sequence! { SNPNCellBasedMDT {
         #[rasn(identifier = "sNPNcellIdListforMDT")]
         s_npncell_id_listfor_mdt: [SNPNCellIdListforMDT],
         #[rasn(identifier = "iE-Extensions")]
@@ -20365,7 +20365,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SNPNMobilityInformation, "SNPN-MobilityInformation" {
+    crate::per::decode_extensible_sequence! { SNPNMobilityInformation {
         #[rasn(identifier = "serving-NID")]
         serving_nid: [NID],
         #[rasn(identifier = "iE-Extensions")]
@@ -20390,7 +20390,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SNPNTAIBasedMDT, "SNPN-TAIBasedMDT" {
+    crate::per::decode_extensible_sequence! { SNPNTAIBasedMDT {
         #[rasn(identifier = "sNPNTAIListforMDT")]
         s_npntailistfor_mdt: [SNPNTAIListforMDT],
         #[rasn(identifier = "iE-Extensions")]
@@ -20424,7 +20424,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SNPNCellIdListforMDTItem, "SNPNCellIdListforMDTItem" {
+    crate::per::decode_extensible_sequence! { SNPNCellIdListforMDTItem {
         #[rasn(identifier = "nR-CGI")]
         n_r_cgi: [NRCGI],
         #[rasn(identifier = "nID")]
@@ -20462,7 +20462,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SNPNListforMDTItem, "SNPNListforMDTItem" {
+    crate::per::decode_extensible_sequence! { SNPNListforMDTItem {
         #[rasn(identifier = "pLMNIdentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "nID")]
@@ -20500,7 +20500,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SNPNTAIListforMDTItem, "SNPNTAIListforMDTItem" {
+    crate::per::decode_extensible_sequence! { SNPNTAIListforMDTItem {
         #[rasn(identifier = "tAI")]
         t_ai: [TAI],
         #[rasn(identifier = "nID")]
@@ -20538,7 +20538,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SONConfigurationTransfer, "SONConfigurationTransfer" {
+    crate::per::decode_extensible_sequence! { SONConfigurationTransfer {
         #[rasn(identifier = "targetRANNodeID-SON")]
         target_rannode_id_son: [TargetRANNodeIDSON],
         #[rasn(identifier = "sourceRANNodeID")]
@@ -20602,7 +20602,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SONInformationReply, "SONInformationReply" {
+    crate::per::decode_extensible_sequence! { SONInformationReply {
         #[rasn(identifier = "xnTNLConfigurationInfo")]
         xn_tnlconfiguration_info: [Option<XnTNLConfigurationInfo>],
         #[rasn(identifier = "iE-Extensions")]
@@ -20678,7 +20678,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { ScheduledCommunicationTime, "ScheduledCommunicationTime" {
+    crate::per::decode_extensible_sequence! { ScheduledCommunicationTime {
         #[rasn(size("7"), identifier = "dayofWeek")]
         dayof_week: [Option<BitString>],
         #[rasn(value("0..=86399", extensible), identifier = "timeofDayStart")]
@@ -20714,7 +20714,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SecondaryRATDataUsageReportTransfer, "SecondaryRATDataUsageReportTransfer" {
+    crate::per::decode_extensible_sequence! { SecondaryRATDataUsageReportTransfer {
         #[rasn(identifier = "secondaryRATUsageInformation")]
         secondary_ratusage_information: [Option<SecondaryRATUsageInformation>],
         #[rasn(identifier = "iE-Extensions")]
@@ -20744,7 +20744,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extension")]
         pub i_e_extension: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SecondaryRATUsageInformation, "SecondaryRATUsageInformation" {
+    crate::per::decode_extensible_sequence! { SecondaryRATUsageInformation {
         #[rasn(identifier = "pDUSessionUsageReport")]
         p_dusession_usage_report: [Option<PDUSessionUsageReport>],
         #[rasn(identifier = "qosFlowsUsageReportList")]
@@ -20778,7 +20778,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SecurityContext, "SecurityContext" {
+    crate::per::decode_extensible_sequence! { SecurityContext {
         #[rasn(identifier = "nextHopChainingCount")]
         next_hop_chaining_count: [NextHopChainingCount],
         #[rasn(identifier = "nextHopNH")]
@@ -20814,7 +20814,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SecurityIndication, "SecurityIndication" {
+    crate::per::decode_extensible_sequence! { SecurityIndication {
         #[rasn(identifier = "integrityProtectionIndication")]
         integrity_protection_indication: [IntegrityProtectionIndication],
         #[rasn(identifier = "confidentialityProtectionIndication")]
@@ -20879,7 +20879,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SecurityResult, "SecurityResult" {
+    crate::per::decode_extensible_sequence! { SecurityResult {
         #[rasn(identifier = "integrityProtectionResult")]
         integrity_protection_result: [IntegrityProtectionResult],
         #[rasn(identifier = "confidentialityProtectionResult")]
@@ -20917,7 +20917,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SensorMeasConfigNameItem, "SensorMeasConfigNameItem" {
+    crate::per::decode_extensible_sequence! { SensorMeasConfigNameItem {
         #[rasn(identifier = "sensorNameConfig")]
         sensor_name_config: [SensorNameConfig],
         #[rasn(identifier = "iE-Extensions")]
@@ -20951,7 +20951,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SensorMeasurementConfiguration, "SensorMeasurementConfiguration" {
+    crate::per::decode_extensible_sequence! { SensorMeasurementConfiguration {
         #[rasn(identifier = "sensorMeasConfig")]
         sensor_meas_config: [SensorMeasConfig],
         #[rasn(identifier = "sensorMeasConfigNameList")]
@@ -21042,7 +21042,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { ServedGUAMIItem, "ServedGUAMIItem" {
+    crate::per::decode_extensible_sequence! { ServedGUAMIItem {
         #[rasn(identifier = "gUAMI")]
         g_uami: [GUAMI],
         #[rasn(identifier = "backupAMFName")]
@@ -21086,7 +21086,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { ServiceAreaInformationItem, "ServiceAreaInformation-Item" {
+    crate::per::decode_extensible_sequence! { ServiceAreaInformationItem {
         #[rasn(identifier = "pLMNIdentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "allowedTACs")]
@@ -21137,7 +21137,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SharedNGUMulticastTNLInformation, "SharedNGU-MulticastTNLInformation" {
+    crate::per::decode_extensible_sequence! { SharedNGUMulticastTNLInformation {
         #[rasn(identifier = "iP-MulticastAddress")]
         i_p_multicast_address: [TransportLayerAddress],
         #[rasn(identifier = "iP-SourceAddress")]
@@ -21173,7 +21173,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SliceMDTItem, "SliceMDTItem" {
+    crate::per::decode_extensible_sequence! { SliceMDTItem {
         #[rasn(identifier = "sNSSAI")]
         s_nssai: [SNSSAI],
         #[rasn(identifier = "iE-Extensions")]
@@ -21202,7 +21202,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SliceOverloadItem, "SliceOverloadItem" {
+    crate::per::decode_extensible_sequence! { SliceOverloadItem {
         #[rasn(identifier = "s-NSSAI")]
         s_nssai: [SNSSAI],
         #[rasn(identifier = "iE-Extensions")]
@@ -21231,7 +21231,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SliceSupportItem, "SliceSupportItem" {
+    crate::per::decode_extensible_sequence! { SliceSupportItem {
         #[rasn(identifier = "s-NSSAI")]
         s_nssai: [SNSSAI],
         #[rasn(identifier = "iE-Extensions")]
@@ -21264,7 +21264,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SliceSupportQMCItem, "SliceSupportQMC-Item" {
+    crate::per::decode_extensible_sequence! { SliceSupportQMCItem {
         #[rasn(identifier = "s-NSSAI")]
         s_nssai: [SNSSAI],
         #[rasn(identifier = "iE-Extensions")]
@@ -21302,7 +21302,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SourceNGRANNodeToTargetNGRANNodeTransparentContainer, "SourceNGRANNode-ToTargetNGRANNode-TransparentContainer" {
+    crate::per::decode_extensible_sequence! { SourceNGRANNodeToTargetNGRANNodeTransparentContainer {
         #[rasn(identifier = "rRCContainer")]
         r_rccontainer: [RRCContainer],
         #[rasn(identifier = "pDUSessionResourceInformationList")]
@@ -21379,7 +21379,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SourceRANNodeID, "SourceRANNodeID" {
+    crate::per::decode_extensible_sequence! { SourceRANNodeID {
         #[rasn(identifier = "globalRANNodeID")]
         global_rannode_id: [GlobalRANNodeID],
         #[rasn(identifier = "selectedTAI")]
@@ -21417,7 +21417,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SourceToTargetAMFInformationReroute, "SourceToTarget-AMFInformationReroute" {
+    crate::per::decode_extensible_sequence! { SourceToTargetAMFInformationReroute {
         #[rasn(identifier = "configuredNSSAI")]
         configured_nssai: [Option<ConfiguredNSSAI>],
         #[rasn(identifier = "rejectedNSSAIinPLMN")]
@@ -21456,7 +21456,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SuccessfulHandoverReportItem, "SuccessfulHandoverReport-Item" {
+    crate::per::decode_extensible_sequence! { SuccessfulHandoverReportItem {
         #[rasn(identifier = "successfulHOReportContainer")]
         successful_horeport_container: [OctetString],
         #[rasn(identifier = "iE-Extensions")]
@@ -21525,7 +21525,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SuccessfulPSCellChangeReportItem, "SuccessfulPSCellChangeReport-Item" {
+    crate::per::decode_extensible_sequence! { SuccessfulPSCellChangeReportItem {
         #[rasn(identifier = "successfulPSCellChangeReportContainer")]
         successful_pscell_change_report_container: [OctetString],
         #[rasn(identifier = "iE-Extensions")]
@@ -21559,7 +21559,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { SupportedTAItem, "SupportedTAItem" {
+    crate::per::decode_extensible_sequence! { SupportedTAItem {
         #[rasn(identifier = "tAC")]
         t_ac: [TAC],
         #[rasn(identifier = "broadcastPLMNList")]
@@ -21632,7 +21632,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TABasedMDT, "TABasedMDT" {
+    crate::per::decode_extensible_sequence! { TABasedMDT {
         #[rasn(identifier = "tAListforMDT")]
         t_alistfor_mdt: [TAListforMDT],
         #[rasn(identifier = "iE-Extensions")]
@@ -21660,7 +21660,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TABasedQMC, "TABasedQMC" {
+    crate::per::decode_extensible_sequence! { TABasedQMC {
         #[rasn(identifier = "tAListforQMC")]
         t_alistfor_qmc: [TAListforQMC],
         #[rasn(identifier = "iE-Extensions")]
@@ -21698,7 +21698,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TAI, "TAI" {
+    crate::per::decode_extensible_sequence! { TAI {
         #[rasn(identifier = "pLMNIdentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(identifier = "tAC")]
@@ -21730,7 +21730,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TAIBasedMDT, "TAIBasedMDT" {
+    crate::per::decode_extensible_sequence! { TAIBasedMDT {
         #[rasn(identifier = "tAIListforMDT")]
         t_ailistfor_mdt: [TAIListforMDT],
         #[rasn(identifier = "iE-Extensions")]
@@ -21758,7 +21758,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TAIBasedQMC, "TAIBasedQMC" {
+    crate::per::decode_extensible_sequence! { TAIBasedQMC {
         #[rasn(identifier = "tAIListforQMC")]
         t_ailistfor_qmc: [TAIListforQMC],
         #[rasn(identifier = "iE-Extensions")]
@@ -21792,7 +21792,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TAIBroadcastEUTRAItem, "TAIBroadcastEUTRA-Item" {
+    crate::per::decode_extensible_sequence! { TAIBroadcastEUTRAItem {
         #[rasn(identifier = "tAI")]
         t_ai: [TAI],
         #[rasn(identifier = "completedCellsInTAI-EUTRA")]
@@ -21830,7 +21830,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TAIBroadcastNRItem, "TAIBroadcastNR-Item" {
+    crate::per::decode_extensible_sequence! { TAIBroadcastNRItem {
         #[rasn(identifier = "tAI")]
         t_ai: [TAI],
         #[rasn(identifier = "completedCellsInTAI-NR")]
@@ -21868,7 +21868,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TAICancelledEUTRAItem, "TAICancelledEUTRA-Item" {
+    crate::per::decode_extensible_sequence! { TAICancelledEUTRAItem {
         #[rasn(identifier = "tAI")]
         t_ai: [TAI],
         #[rasn(identifier = "cancelledCellsInTAI-EUTRA")]
@@ -21906,7 +21906,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TAICancelledNRItem, "TAICancelledNR-Item" {
+    crate::per::decode_extensible_sequence! { TAICancelledNRItem {
         #[rasn(identifier = "tAI")]
         t_ai: [TAI],
         #[rasn(identifier = "cancelledCellsInTAI-NR")]
@@ -21942,7 +21942,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TAIListForInactiveItem, "TAIListForInactiveItem" {
+    crate::per::decode_extensible_sequence! { TAIListForInactiveItem {
         #[rasn(identifier = "tAI")]
         t_ai: [TAI],
         #[rasn(identifier = "iE-Extensions")]
@@ -21971,7 +21971,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TAIListForPagingItem, "TAIListForPagingItem" {
+    crate::per::decode_extensible_sequence! { TAIListForPagingItem {
         #[rasn(identifier = "tAI")]
         t_ai: [TAI],
         #[rasn(identifier = "iE-Extensions")]
@@ -22012,7 +22012,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TAIMBSSupportItem, "TAIMBSSupportItem" {
+    crate::per::decode_extensible_sequence! { TAIMBSSupportItem {
         #[rasn(identifier = "tAI")]
         t_ai: [TAI],
         #[rasn(identifier = "iE-Extensions")]
@@ -22043,7 +22043,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TAINSAGSupportItem, "TAINSAGSupportItem" {
+    crate::per::decode_extensible_sequence! { TAINSAGSupportItem {
         #[rasn(identifier = "nSAG-ID")]
         n_sag_id: [NSAGID],
         #[rasn(identifier = "nSAGSliceSupportList")]
@@ -22158,7 +22158,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TNLAssociationItem, "TNLAssociationItem" {
+    crate::per::decode_extensible_sequence! { TNLAssociationItem {
         #[rasn(identifier = "tNLAssociationAddress")]
         t_nlassociation_address: [CPTransportLayerInformation],
         cause: [Cause],
@@ -22203,7 +22203,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TSCAssistanceInformation, "TSCAssistanceInformation" {
+    crate::per::decode_extensible_sequence! { TSCAssistanceInformation {
         periodicity: [Periodicity],
         #[rasn(identifier = "burstArrivalTime")]
         burst_arrival_time: [Option<BurstArrivalTime>],
@@ -22239,7 +22239,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TSCFeedbackInformation, "TSCFeedbackInformation" {
+    crate::per::decode_extensible_sequence! { TSCFeedbackInformation {
         #[rasn(
             value("-640000..=640000", extensible),
             identifier = "burstArrivalTimeOffset"
@@ -22276,7 +22276,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TSCTrafficCharacteristics, "TSCTrafficCharacteristics" {
+    crate::per::decode_extensible_sequence! { TSCTrafficCharacteristics {
         #[rasn(identifier = "tSCAssistanceInformationDL")]
         t_scassistance_information_dl: [Option<TSCAssistanceInformation>],
         #[rasn(identifier = "tSCAssistanceInformationUL")]
@@ -22310,7 +22310,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TSCTrafficCharacteristicsFeedback, "TSCTrafficCharacteristicsFeedback" {
+    crate::per::decode_extensible_sequence! { TSCTrafficCharacteristicsFeedback {
         #[rasn(identifier = "tSCFeedbackInformationDL")]
         t_scfeedback_information_dl: [Option<TSCFeedbackInformation>],
         #[rasn(identifier = "tSCFeedbackInformationUL")]
@@ -22407,7 +22407,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TargetHomeENBID, "TargetHomeENB-ID" {
+    crate::per::decode_extensible_sequence! { TargetHomeENBID {
         #[rasn(identifier = "pLMNidentity")]
         p_lmnidentity: [PLMNIdentity],
         #[rasn(size("28"), identifier = "homeENB-ID")]
@@ -22471,7 +22471,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainer, "TargetNGRANNode-ToSourceNGRANNode-FailureTransparentContainer" {
+    crate::per::decode_extensible_sequence! { TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainer {
         #[rasn(identifier = "cell-CAGInformation")]
         cell_caginformation: [Option<CellCAGInformation>],
         #[rasn(identifier = "iE-Extensions")]
@@ -22502,7 +22502,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TargetNGRANNodeToSourceNGRANNodeTransparentContainer, "TargetNGRANNode-ToSourceNGRANNode-TransparentContainer" {
+    crate::per::decode_extensible_sequence! { TargetNGRANNodeToSourceNGRANNodeTransparentContainer {
         #[rasn(identifier = "rRCContainer")]
         r_rccontainer: [RRCContainer],
         #[rasn(identifier = "iE-Extensions")]
@@ -22534,7 +22534,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TargetNSSAIItem, "TargetNSSAI-Item" {
+    crate::per::decode_extensible_sequence! { TargetNSSAIItem {
         #[rasn(identifier = "s-NSSAI")]
         s_nssai: [SNSSAI],
         #[rasn(identifier = "iE-Extensions")]
@@ -22561,7 +22561,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TargetNSSAIInformation, "TargetNSSAIInformation" {
+    crate::per::decode_extensible_sequence! { TargetNSSAIInformation {
         #[rasn(identifier = "targetNSSAI")]
         target_nssai: [TargetNSSAI],
         #[rasn(identifier = "indexToRFSP")]
@@ -22595,7 +22595,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TargetRANNodeID, "TargetRANNodeID" {
+    crate::per::decode_extensible_sequence! { TargetRANNodeID {
         #[rasn(identifier = "globalRANNodeID")]
         global_rannode_id: [GlobalRANNodeID],
         #[rasn(identifier = "selectedTAI")]
@@ -22629,7 +22629,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TargetRANNodeIDRIM, "TargetRANNodeID-RIM" {
+    crate::per::decode_extensible_sequence! { TargetRANNodeIDRIM {
         #[rasn(identifier = "globalRANNodeID")]
         global_rannode_id: [GlobalRANNodeID],
         #[rasn(identifier = "selectedTAI")]
@@ -22663,7 +22663,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TargetRANNodeIDSON, "TargetRANNodeID-SON" {
+    crate::per::decode_extensible_sequence! { TargetRANNodeIDSON {
         #[rasn(identifier = "globalRANNodeID")]
         global_rannode_id: [GlobalRANNodeID],
         #[rasn(identifier = "selectedTAI")]
@@ -22699,7 +22699,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TargetRNCID, "TargetRNC-ID" {
+    crate::per::decode_extensible_sequence! { TargetRNCID {
         #[rasn(identifier = "lAI")]
         l_ai: [LAI],
         #[rasn(identifier = "rNC-ID")]
@@ -22740,7 +22740,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TargeteNBID, "TargeteNB-ID" {
+    crate::per::decode_extensible_sequence! { TargeteNBID {
         #[rasn(identifier = "globalENB-ID")]
         global_enb_id: [GlobalNgENBID],
         #[rasn(identifier = "selected-EPS-TAI")]
@@ -22790,7 +22790,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TimeBasedHandoverInformation, "TimeBasedHandoverInformation" {
+    crate::per::decode_extensible_sequence! { TimeBasedHandoverInformation {
         #[rasn(identifier = "hOWindowStart")]
         h_owindow_start: [HandoverWindowStart],
         #[rasn(identifier = "hOWindowDuration")]
@@ -22838,7 +22838,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TimeSyncAssistanceInfo, "TimeSyncAssistanceInfo" {
+    crate::per::decode_extensible_sequence! { TimeSyncAssistanceInfo {
         #[rasn(identifier = "timeDistributionIndication")]
         time_distribution_indication: [TimeSyncAssistanceInfoTimeDistributionIndication],
         #[rasn(value("1..=1000000", extensible), identifier = "uUTimeSyncErrorBudget")]
@@ -22918,7 +22918,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TooearlyIntersystemHO, "TooearlyIntersystemHO" {
+    crate::per::decode_extensible_sequence! { TooearlyIntersystemHO {
         #[rasn(identifier = "sourcecellID")]
         sourcecell_id: [EUTRACGI],
         #[rasn(identifier = "failurecellID")]
@@ -22960,7 +22960,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { TraceActivation, "TraceActivation" {
+    crate::per::decode_extensible_sequence! { TraceActivation {
         #[rasn(identifier = "nGRANTraceID")]
         n_grantrace_id: [NGRANTraceID],
         #[rasn(identifier = "interfacesToTrace")]
@@ -23082,7 +23082,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UEDifferentiationInfo, "UE-DifferentiationInfo" {
+    crate::per::decode_extensible_sequence! { UEDifferentiationInfo {
         #[rasn(identifier = "periodicCommunicationIndicator")]
         periodic_communication_indicator: [Option<UEDifferentiationInfoPeriodicCommunicationIndicator>],
         #[rasn(value("1..=3600", extensible), identifier = "periodicTime")]
@@ -23134,7 +23134,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UENGAPIDPair, "UE-NGAP-ID-pair" {
+    crate::per::decode_extensible_sequence! { UENGAPIDPair {
         #[rasn(identifier = "aMF-UE-NGAP-ID")]
         a_mf_ue_ngap_id: [AMFUENGAPID],
         #[rasn(identifier = "rAN-UE-NGAP-ID")]
@@ -23194,7 +23194,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UEPagingItem, "UE-PagingItem" {
+    crate::per::decode_extensible_sequence! { UEPagingItem {
         #[rasn(identifier = "uEIdentityIndexValue")]
         u_eidentity_index_value: [UEIdentityIndexValue],
         #[rasn(identifier = "pagingDRX")]
@@ -23238,7 +23238,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UEAssociatedLogicalNGConnectionItem, "UE-associatedLogicalNG-connectionItem" {
+    crate::per::decode_extensible_sequence! { UEAssociatedLogicalNGConnectionItem {
         #[rasn(identifier = "aMF-UE-NGAP-ID")]
         a_mf_ue_ngap_id: [Option<AMFUENGAPID>],
         #[rasn(identifier = "rAN-UE-NGAP-ID")]
@@ -23283,7 +23283,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UEAggregateMaximumBitRate, "UEAggregateMaximumBitRate" {
+    crate::per::decode_extensible_sequence! { UEAggregateMaximumBitRate {
         #[rasn(identifier = "uEAggregateMaximumBitRateDL")]
         u_eaggregate_maximum_bit_rate_dl: [BitRate],
         #[rasn(identifier = "uEAggregateMaximumBitRateUL")]
@@ -23340,7 +23340,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UEAppLayerMeasConfigInfo, "UEAppLayerMeasConfigInfo" {
+    crate::per::decode_extensible_sequence! { UEAppLayerMeasConfigInfo {
         #[rasn(identifier = "qoEReference")]
         qo_ereference: [QoEReference],
         #[rasn(identifier = "serviceType")]
@@ -23404,7 +23404,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UEAppLayerMeasInfoItem, "UEAppLayerMeasInfoItem" {
+    crate::per::decode_extensible_sequence! { UEAppLayerMeasInfoItem {
         #[rasn(identifier = "uEAppLayerMeasConfigInfo")]
         u_eapp_layer_meas_config_info: [UEAppLayerMeasConfigInfo],
         #[rasn(identifier = "iE-Extensions")]
@@ -23448,7 +23448,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UEContextResumeRequestTransfer, "UEContextResumeRequestTransfer" {
+    crate::per::decode_extensible_sequence! { UEContextResumeRequestTransfer {
         #[rasn(identifier = "qosFlowFailedToResumeList")]
         qos_flow_failed_to_resume_list: [Option<QosFlowListWithCause>],
         #[rasn(identifier = "iE-Extensions")]
@@ -23476,7 +23476,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UEContextResumeResponseTransfer, "UEContextResumeResponseTransfer" {
+    crate::per::decode_extensible_sequence! { UEContextResumeResponseTransfer {
         #[rasn(identifier = "qosFlowFailedToResumeList")]
         qos_flow_failed_to_resume_list: [Option<QosFlowListWithCause>],
         #[rasn(identifier = "iE-Extensions")]
@@ -23504,7 +23504,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UEContextSuspendRequestTransfer, "UEContextSuspendRequestTransfer" {
+    crate::per::decode_extensible_sequence! { UEContextSuspendRequestTransfer {
         #[rasn(identifier = "suspendIndicator")]
         suspend_indicator: [Option<SuspendIndicator>],
         #[rasn(identifier = "iE-Extensions")]
@@ -23603,7 +23603,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UEPresenceInAreaOfInterestItem, "UEPresenceInAreaOfInterestItem" {
+    crate::per::decode_extensible_sequence! { UEPresenceInAreaOfInterestItem {
         #[rasn(identifier = "locationReportingReferenceID")]
         location_reporting_reference_id: [LocationReportingReferenceID],
         #[rasn(identifier = "uEPresence")]
@@ -23668,7 +23668,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UERadioCapabilityForPaging, "UERadioCapabilityForPaging" {
+    crate::per::decode_extensible_sequence! { UERadioCapabilityForPaging {
         #[rasn(identifier = "uERadioCapabilityForPagingOfNR")]
         u_eradio_capability_for_paging_of_nr: [Option<UERadioCapabilityForPagingOfNR>],
         #[rasn(identifier = "uERadioCapabilityForPagingOfEUTRA")]
@@ -23725,7 +23725,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UESecurityCapabilities, "UESecurityCapabilities" {
+    crate::per::decode_extensible_sequence! { UESecurityCapabilities {
         #[rasn(identifier = "nRencryptionAlgorithms")]
         n_rencryption_algorithms: [NRencryptionAlgorithms],
         #[rasn(identifier = "nRintegrityProtectionAlgorithms")]
@@ -23769,7 +23769,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UESliceMaximumBitRateItem, "UESliceMaximumBitRateItem" {
+    crate::per::decode_extensible_sequence! { UESliceMaximumBitRateItem {
         #[rasn(identifier = "s-NSSAI")]
         s_nssai: [SNSSAI],
         #[rasn(identifier = "uESliceMaximumBitRateDL")]
@@ -23811,7 +23811,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { ULCPSecurityInformation, "UL-CP-SecurityInformation" {
+    crate::per::decode_extensible_sequence! { ULCPSecurityInformation {
         #[rasn(identifier = "ul-NAS-MAC")]
         ul_nas_mac: [ULNASMAC],
         #[rasn(identifier = "ul-NAS-Count")]
@@ -23851,7 +23851,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { ULNGUUPTNLModifyItem, "UL-NGU-UP-TNLModifyItem" {
+    crate::per::decode_extensible_sequence! { ULNGUUPTNLModifyItem {
         #[rasn(identifier = "uL-NGU-UP-TNLInformation")]
         u_l_ngu_up_tnlinformation: [UPTransportLayerInformation],
         #[rasn(identifier = "dL-NGU-UP-TNLInformation")]
@@ -23912,7 +23912,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UPTransportLayerInformationItem, "UPTransportLayerInformationItem" {
+    crate::per::decode_extensible_sequence! { UPTransportLayerInformationItem {
         #[rasn(identifier = "nGU-UP-TNLInformation")]
         n_gu_up_tnlinformation: [UPTransportLayerInformation],
         #[rasn(identifier = "iE-Extensions")]
@@ -23946,7 +23946,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UPTransportLayerInformationPairItem, "UPTransportLayerInformationPairItem" {
+    crate::per::decode_extensible_sequence! { UPTransportLayerInformationPairItem {
         #[rasn(identifier = "uL-NGU-UP-TNLInformation")]
         u_l_ngu_up_tnlinformation: [UPTransportLayerInformation],
         #[rasn(identifier = "dL-NGU-UP-TNLInformation")]
@@ -23991,7 +23991,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UnavailableGUAMIItem, "UnavailableGUAMIItem" {
+    crate::per::decode_extensible_sequence! { UnavailableGUAMIItem {
         #[rasn(identifier = "gUAMI")]
         g_uami: [GUAMI],
         #[rasn(identifier = "timerApproachForGUAMIRemoval")]
@@ -24069,7 +24069,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UserLocationInformationEUTRA, "UserLocationInformationEUTRA" {
+    crate::per::decode_extensible_sequence! { UserLocationInformationEUTRA {
         #[rasn(identifier = "eUTRA-CGI")]
         e_utra_cgi: [EUTRACGI],
         #[rasn(identifier = "tAI")]
@@ -24110,7 +24110,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UserLocationInformationN3IWFWithPortNumber, "UserLocationInformationN3IWF-with-PortNumber" {
+    crate::per::decode_extensible_sequence! { UserLocationInformationN3IWFWithPortNumber {
         #[rasn(identifier = "iPAddress")]
         i_paddress: [TransportLayerAddress],
         #[rasn(identifier = "portNumber")]
@@ -24147,7 +24147,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UserLocationInformationN3IWFWithoutPortNumber, "UserLocationInformationN3IWF-without-PortNumber" {
+    crate::per::decode_extensible_sequence! { UserLocationInformationN3IWFWithoutPortNumber {
         #[rasn(identifier = "iPAddress")]
         i_paddress: [TransportLayerAddress],
         #[rasn(identifier = "tAI")]
@@ -24183,7 +24183,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UserLocationInformationNR, "UserLocationInformationNR" {
+    crate::per::decode_extensible_sequence! { UserLocationInformationNR {
         #[rasn(identifier = "nR-CGI")]
         n_r_cgi: [NRCGI],
         #[rasn(identifier = "tAI")]
@@ -24223,7 +24223,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UserLocationInformationTNGF, "UserLocationInformationTNGF" {
+    crate::per::decode_extensible_sequence! { UserLocationInformationTNGF {
         #[rasn(identifier = "tNAP-ID")]
         t_nap_id: [TNAPID],
         #[rasn(identifier = "iPAddress")]
@@ -24263,7 +24263,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UserLocationInformationTWIF, "UserLocationInformationTWIF" {
+    crate::per::decode_extensible_sequence! { UserLocationInformationTWIF {
         #[rasn(identifier = "tWAP-ID")]
         t_wap_id: [TWAPID],
         #[rasn(identifier = "iPAddress")]
@@ -24336,7 +24336,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UserPlaneFailureIndication, "UserPlaneFailureIndication" {
+    crate::per::decode_extensible_sequence! { UserPlaneFailureIndication {
         #[rasn(identifier = "userPlaneFailureType")]
         user_plane_failure_type: [UserPlaneFailureType],
         #[rasn(identifier = "uL-NGU-UP-TNLInformation")]
@@ -24394,7 +24394,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { UserPlaneSecurityInformation, "UserPlaneSecurityInformation" {
+    crate::per::decode_extensible_sequence! { UserPlaneSecurityInformation {
         #[rasn(identifier = "securityResult")]
         security_result: [SecurityResult],
         #[rasn(identifier = "securityIndication")]
@@ -24440,7 +24440,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { VolumeTimedReportItem, "VolumeTimedReport-Item" {
+    crate::per::decode_extensible_sequence! { VolumeTimedReportItem {
         #[rasn(size("4"), identifier = "startTimeStamp")]
         start_time_stamp: [OctetString],
         #[rasn(size("4"), identifier = "endTimeStamp")]
@@ -24511,7 +24511,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { WLANMeasConfigNameItem, "WLANMeasConfigNameItem" {
+    crate::per::decode_extensible_sequence! { WLANMeasConfigNameItem {
         #[rasn(identifier = "wLANName")]
         w_lanname: [WLANName],
         #[rasn(identifier = "iE-Extensions")]
@@ -24565,7 +24565,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { WLANMeasurementConfiguration, "WLANMeasurementConfiguration" {
+    crate::per::decode_extensible_sequence! { WLANMeasurementConfiguration {
         #[rasn(identifier = "wlanMeasConfig")]
         wlan_meas_config: [WLANMeasConfig],
         #[rasn(identifier = "wlanMeasConfigNameList")]
@@ -24608,7 +24608,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { WUSAssistanceInformation, "WUS-Assistance-Information" {
+    crate::per::decode_extensible_sequence! { WUSAssistanceInformation {
         #[rasn(identifier = "pagingProbabilityInformation")]
         paging_probability_information: [PagingProbabilityInformation],
         #[rasn(identifier = "iE-Extensions")]
@@ -24688,7 +24688,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { XnExtTLAItem, "XnExtTLA-Item" {
+    crate::per::decode_extensible_sequence! { XnExtTLAItem {
         #[rasn(identifier = "iPsecTLA")]
         i_psec_tla: [Option<TransportLayerAddress>],
         #[rasn(identifier = "gTP-TLAs")]
@@ -24735,7 +24735,7 @@ pub mod ngap_ies {
         #[rasn(identifier = "iE-Extensions")]
         pub i_e_extensions: Option<ProtocolExtensionContainer>,
     }
-    crate::per::decode_extensible_sequence! { XnTNLConfigurationInfo, "XnTNLConfigurationInfo" {
+    crate::per::decode_extensible_sequence! { XnTNLConfigurationInfo {
         #[rasn(identifier = "xnTransportLayerAddresses")]
         xn_transport_layer_addresses: [XnTLAs],
         #[rasn(identifier = "xnExtendedTransportLayerAddresses")]
@@ -24915,7 +24915,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { AIOTSessionReleaseCommand, "AIOTSessionReleaseCommand" {
+    crate::per::decode_extensible_sequence! { AIOTSessionReleaseCommand {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -24939,7 +24939,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { AIOTSessionReleaseComplete, "AIOTSessionReleaseComplete" {
+    crate::per::decode_extensible_sequence! { AIOTSessionReleaseComplete {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -24968,7 +24968,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { AIOTSessionReleaseRequest, "AIOTSessionReleaseRequest" {
+    crate::per::decode_extensible_sequence! { AIOTSessionReleaseRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -24992,7 +24992,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { AMFCPRelocationIndication, "AMFCPRelocationIndication" {
+    crate::per::decode_extensible_sequence! { AMFCPRelocationIndication {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25021,7 +25021,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { AMFConfigurationUpdate, "AMFConfigurationUpdate" {
+    crate::per::decode_extensible_sequence! { AMFConfigurationUpdate {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25045,7 +25045,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { AMFConfigurationUpdateAcknowledge, "AMFConfigurationUpdateAcknowledge" {
+    crate::per::decode_extensible_sequence! { AMFConfigurationUpdateAcknowledge {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25069,7 +25069,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { AMFConfigurationUpdateFailure, "AMFConfigurationUpdateFailure" {
+    crate::per::decode_extensible_sequence! { AMFConfigurationUpdateFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25098,7 +25098,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { AMFStatusIndication, "AMFStatusIndication" {
+    crate::per::decode_extensible_sequence! { AMFStatusIndication {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25132,7 +25132,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { BroadcastSessionModificationFailure, "BroadcastSessionModificationFailure" {
+    crate::per::decode_extensible_sequence! { BroadcastSessionModificationFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25161,7 +25161,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { BroadcastSessionModificationRequest, "BroadcastSessionModificationRequest" {
+    crate::per::decode_extensible_sequence! { BroadcastSessionModificationRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25185,7 +25185,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { BroadcastSessionModificationResponse, "BroadcastSessionModificationResponse" {
+    crate::per::decode_extensible_sequence! { BroadcastSessionModificationResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25214,7 +25214,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { BroadcastSessionReleaseRequest, "BroadcastSessionReleaseRequest" {
+    crate::per::decode_extensible_sequence! { BroadcastSessionReleaseRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25243,7 +25243,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { BroadcastSessionReleaseRequired, "BroadcastSessionReleaseRequired" {
+    crate::per::decode_extensible_sequence! { BroadcastSessionReleaseRequired {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25267,7 +25267,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { BroadcastSessionReleaseResponse, "BroadcastSessionReleaseResponse" {
+    crate::per::decode_extensible_sequence! { BroadcastSessionReleaseResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25291,7 +25291,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { BroadcastSessionSetupFailure, "BroadcastSessionSetupFailure" {
+    crate::per::decode_extensible_sequence! { BroadcastSessionSetupFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25325,7 +25325,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { BroadcastSessionSetupRequest, "BroadcastSessionSetupRequest" {
+    crate::per::decode_extensible_sequence! { BroadcastSessionSetupRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25349,7 +25349,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { BroadcastSessionSetupResponse, "BroadcastSessionSetupResponse" {
+    crate::per::decode_extensible_sequence! { BroadcastSessionSetupResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25373,7 +25373,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { BroadcastSessionTransportFailure, "BroadcastSessionTransportFailure" {
+    crate::per::decode_extensible_sequence! { BroadcastSessionTransportFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25402,7 +25402,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { BroadcastSessionTransportRequest, "BroadcastSessionTransportRequest" {
+    crate::per::decode_extensible_sequence! { BroadcastSessionTransportRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25426,7 +25426,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { BroadcastSessionTransportResponse, "BroadcastSessionTransportResponse" {
+    crate::per::decode_extensible_sequence! { BroadcastSessionTransportResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25450,7 +25450,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { CellTrafficTrace, "CellTrafficTrace" {
+    crate::per::decode_extensible_sequence! { CellTrafficTrace {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25474,7 +25474,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { CommandFailure, "CommandFailure" {
+    crate::per::decode_extensible_sequence! { CommandFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25503,7 +25503,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { CommandRequest, "CommandRequest" {
+    crate::per::decode_extensible_sequence! { CommandRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25527,7 +25527,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { CommandResponse, "CommandResponse" {
+    crate::per::decode_extensible_sequence! { CommandResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25551,7 +25551,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { ConnectionEstablishmentIndication, "ConnectionEstablishmentIndication" {
+    crate::per::decode_extensible_sequence! { ConnectionEstablishmentIndication {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25575,7 +25575,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { DeactivateTrace, "DeactivateTrace" {
+    crate::per::decode_extensible_sequence! { DeactivateTrace {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25604,7 +25604,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { DistributionReleaseRequest, "DistributionReleaseRequest" {
+    crate::per::decode_extensible_sequence! { DistributionReleaseRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25628,7 +25628,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { DistributionReleaseResponse, "DistributionReleaseResponse" {
+    crate::per::decode_extensible_sequence! { DistributionReleaseResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25652,7 +25652,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { DistributionSetupFailure, "DistributionSetupFailure" {
+    crate::per::decode_extensible_sequence! { DistributionSetupFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25681,7 +25681,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { DistributionSetupRequest, "DistributionSetupRequest" {
+    crate::per::decode_extensible_sequence! { DistributionSetupRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25705,7 +25705,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { DistributionSetupResponse, "DistributionSetupResponse" {
+    crate::per::decode_extensible_sequence! { DistributionSetupResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25729,7 +25729,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { DownlinkNASTransport, "DownlinkNASTransport" {
+    crate::per::decode_extensible_sequence! { DownlinkNASTransport {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25753,7 +25753,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { DownlinkNonUEAssociatedNRPPaTransport, "DownlinkNonUEAssociatedNRPPaTransport" {
+    crate::per::decode_extensible_sequence! { DownlinkNonUEAssociatedNRPPaTransport {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25777,7 +25777,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { DownlinkRANConfigurationTransfer, "DownlinkRANConfigurationTransfer" {
+    crate::per::decode_extensible_sequence! { DownlinkRANConfigurationTransfer {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25806,7 +25806,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { DownlinkRANEarlyStatusTransfer, "DownlinkRANEarlyStatusTransfer" {
+    crate::per::decode_extensible_sequence! { DownlinkRANEarlyStatusTransfer {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25835,7 +25835,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { DownlinkRANStatusTransfer, "DownlinkRANStatusTransfer" {
+    crate::per::decode_extensible_sequence! { DownlinkRANStatusTransfer {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25859,7 +25859,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { DownlinkRIMInformationTransfer, "DownlinkRIMInformationTransfer" {
+    crate::per::decode_extensible_sequence! { DownlinkRIMInformationTransfer {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25888,7 +25888,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { DownlinkUEAssociatedNRPPaTransport, "DownlinkUEAssociatedNRPPaTransport" {
+    crate::per::decode_extensible_sequence! { DownlinkUEAssociatedNRPPaTransport {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25917,7 +25917,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { ErrorIndication, "ErrorIndication" {
+    crate::per::decode_extensible_sequence! { ErrorIndication {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25946,7 +25946,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { HandoverCancel, "HandoverCancel" {
+    crate::per::decode_extensible_sequence! { HandoverCancel {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25970,7 +25970,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { HandoverCancelAcknowledge, "HandoverCancelAcknowledge" {
+    crate::per::decode_extensible_sequence! { HandoverCancelAcknowledge {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -25994,7 +25994,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { HandoverCommand, "HandoverCommand" {
+    crate::per::decode_extensible_sequence! { HandoverCommand {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26018,7 +26018,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { HandoverFailure, "HandoverFailure" {
+    crate::per::decode_extensible_sequence! { HandoverFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26047,7 +26047,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { HandoverNotify, "HandoverNotify" {
+    crate::per::decode_extensible_sequence! { HandoverNotify {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26071,7 +26071,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { HandoverPreparationFailure, "HandoverPreparationFailure" {
+    crate::per::decode_extensible_sequence! { HandoverPreparationFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26100,7 +26100,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { HandoverRequest, "HandoverRequest" {
+    crate::per::decode_extensible_sequence! { HandoverRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26124,7 +26124,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { HandoverRequestAcknowledge, "HandoverRequestAcknowledge" {
+    crate::per::decode_extensible_sequence! { HandoverRequestAcknowledge {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26158,7 +26158,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { HandoverRequired, "HandoverRequired" {
+    crate::per::decode_extensible_sequence! { HandoverRequired {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26187,7 +26187,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { HandoverSuccess, "HandoverSuccess" {
+    crate::per::decode_extensible_sequence! { HandoverSuccess {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26211,7 +26211,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { InitialContextSetupFailure, "InitialContextSetupFailure" {
+    crate::per::decode_extensible_sequence! { InitialContextSetupFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26245,7 +26245,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { InitialContextSetupRequest, "InitialContextSetupRequest" {
+    crate::per::decode_extensible_sequence! { InitialContextSetupRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26269,7 +26269,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { InitialContextSetupResponse, "InitialContextSetupResponse" {
+    crate::per::decode_extensible_sequence! { InitialContextSetupResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26298,7 +26298,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { InitialUEMessage, "InitialUEMessage" {
+    crate::per::decode_extensible_sequence! { InitialUEMessage {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26322,7 +26322,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { InventoryFailure, "InventoryFailure" {
+    crate::per::decode_extensible_sequence! { InventoryFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26350,7 +26350,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { InventoryReport, "InventoryReport" {
+    crate::per::decode_extensible_sequence! { InventoryReport {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26384,7 +26384,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { InventoryRequest, "InventoryRequest" {
+    crate::per::decode_extensible_sequence! { InventoryRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26408,7 +26408,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { InventoryResponse, "InventoryResponse" {
+    crate::per::decode_extensible_sequence! { InventoryResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26432,7 +26432,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { LocationReport, "LocationReport" {
+    crate::per::decode_extensible_sequence! { LocationReport {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26461,7 +26461,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { LocationReportingControl, "LocationReportingControl" {
+    crate::per::decode_extensible_sequence! { LocationReportingControl {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26485,7 +26485,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { LocationReportingFailureIndication, "LocationReportingFailureIndication" {
+    crate::per::decode_extensible_sequence! { LocationReportingFailureIndication {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26509,7 +26509,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { MTCommunicationHandlingFailure, "MTCommunicationHandlingFailure" {
+    crate::per::decode_extensible_sequence! { MTCommunicationHandlingFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26538,7 +26538,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { MTCommunicationHandlingRequest, "MTCommunicationHandlingRequest" {
+    crate::per::decode_extensible_sequence! { MTCommunicationHandlingRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26562,7 +26562,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { MTCommunicationHandlingResponse, "MTCommunicationHandlingResponse" {
+    crate::per::decode_extensible_sequence! { MTCommunicationHandlingResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26591,7 +26591,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { MulticastGroupPaging, "MulticastGroupPaging" {
+    crate::per::decode_extensible_sequence! { MulticastGroupPaging {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26615,7 +26615,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { MulticastSessionActivationFailure, "MulticastSessionActivationFailure" {
+    crate::per::decode_extensible_sequence! { MulticastSessionActivationFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26644,7 +26644,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { MulticastSessionActivationRequest, "MulticastSessionActivationRequest" {
+    crate::per::decode_extensible_sequence! { MulticastSessionActivationRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26668,7 +26668,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { MulticastSessionActivationResponse, "MulticastSessionActivationResponse" {
+    crate::per::decode_extensible_sequence! { MulticastSessionActivationResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26697,7 +26697,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { MulticastSessionDeactivationRequest, "MulticastSessionDeactivationRequest" {
+    crate::per::decode_extensible_sequence! { MulticastSessionDeactivationRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26721,7 +26721,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { MulticastSessionDeactivationResponse, "MulticastSessionDeactivationResponse" {
+    crate::per::decode_extensible_sequence! { MulticastSessionDeactivationResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26745,7 +26745,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { MulticastSessionUpdateFailure, "MulticastSessionUpdateFailure" {
+    crate::per::decode_extensible_sequence! { MulticastSessionUpdateFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26774,7 +26774,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { MulticastSessionUpdateRequest, "MulticastSessionUpdateRequest" {
+    crate::per::decode_extensible_sequence! { MulticastSessionUpdateRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26798,7 +26798,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { MulticastSessionUpdateResponse, "MulticastSessionUpdateResponse" {
+    crate::per::decode_extensible_sequence! { MulticastSessionUpdateResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26822,7 +26822,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { NASNonDeliveryIndication, "NASNonDeliveryIndication" {
+    crate::per::decode_extensible_sequence! { NASNonDeliveryIndication {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26846,7 +26846,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { NGRemovalFailure, "NGRemovalFailure" {
+    crate::per::decode_extensible_sequence! { NGRemovalFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26880,7 +26880,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { NGRemovalRequest, "NGRemovalRequest" {
+    crate::per::decode_extensible_sequence! { NGRemovalRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26904,7 +26904,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { NGRemovalResponse, "NGRemovalResponse" {
+    crate::per::decode_extensible_sequence! { NGRemovalResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26933,7 +26933,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { NGReset, "NGReset" {
+    crate::per::decode_extensible_sequence! { NGReset {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26957,7 +26957,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { NGResetAcknowledge, "NGResetAcknowledge" {
+    crate::per::decode_extensible_sequence! { NGResetAcknowledge {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -26981,7 +26981,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { NGSetupFailure, "NGSetupFailure" {
+    crate::per::decode_extensible_sequence! { NGSetupFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27010,7 +27010,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { NGSetupRequest, "NGSetupRequest" {
+    crate::per::decode_extensible_sequence! { NGSetupRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27034,7 +27034,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { NGSetupResponse, "NGSetupResponse" {
+    crate::per::decode_extensible_sequence! { NGSetupResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27058,7 +27058,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { OverloadStart, "OverloadStart" {
+    crate::per::decode_extensible_sequence! { OverloadStart {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27082,7 +27082,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { OverloadStop, "OverloadStop" {
+    crate::per::decode_extensible_sequence! { OverloadStop {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27106,7 +27106,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyConfirm, "PDUSessionResourceModifyConfirm" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyConfirm {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27135,7 +27135,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyIndication, "PDUSessionResourceModifyIndication" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyIndication {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27164,7 +27164,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyRequest, "PDUSessionResourceModifyRequest" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27188,7 +27188,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyResponse, "PDUSessionResourceModifyResponse" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceModifyResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27217,7 +27217,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceNotify, "PDUSessionResourceNotify" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceNotify {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27246,7 +27246,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceReleaseCommand, "PDUSessionResourceReleaseCommand" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceReleaseCommand {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27270,7 +27270,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceReleaseResponse, "PDUSessionResourceReleaseResponse" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceReleaseResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27304,7 +27304,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupRequest, "PDUSessionResourceSetupRequest" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27328,7 +27328,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupResponse, "PDUSessionResourceSetupResponse" {
+    crate::per::decode_extensible_sequence! { PDUSessionResourceSetupResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27357,7 +27357,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { PWSCancelRequest, "PWSCancelRequest" {
+    crate::per::decode_extensible_sequence! { PWSCancelRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27381,7 +27381,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { PWSCancelResponse, "PWSCancelResponse" {
+    crate::per::decode_extensible_sequence! { PWSCancelResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27410,7 +27410,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { PWSFailureIndication, "PWSFailureIndication" {
+    crate::per::decode_extensible_sequence! { PWSFailureIndication {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27439,7 +27439,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { PWSRestartIndication, "PWSRestartIndication" {
+    crate::per::decode_extensible_sequence! { PWSRestartIndication {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27468,7 +27468,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { Paging, "Paging" {
+    crate::per::decode_extensible_sequence! { Paging {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27497,7 +27497,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { PathSwitchRequest, "PathSwitchRequest" {
+    crate::per::decode_extensible_sequence! { PathSwitchRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27521,7 +27521,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { PathSwitchRequestAcknowledge, "PathSwitchRequestAcknowledge" {
+    crate::per::decode_extensible_sequence! { PathSwitchRequestAcknowledge {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27545,7 +27545,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { PathSwitchRequestFailure, "PathSwitchRequestFailure" {
+    crate::per::decode_extensible_sequence! { PathSwitchRequestFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27593,7 +27593,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "privateIEs")]
         pub private_ies: PrivateMessagePrivateIEs,
     }
-    crate::per::decode_extensible_sequence! { PrivateMessage, "PrivateMessage" {
+    crate::per::decode_extensible_sequence! { PrivateMessage {
         #[rasn(identifier = "privateIEs")]
         private_ies: [PrivateMessagePrivateIEs],
     } }
@@ -27616,7 +27616,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { RANCPRelocationIndication, "RANCPRelocationIndication" {
+    crate::per::decode_extensible_sequence! { RANCPRelocationIndication {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27644,7 +27644,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { RANConfigurationUpdate, "RANConfigurationUpdate" {
+    crate::per::decode_extensible_sequence! { RANConfigurationUpdate {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27667,7 +27667,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { RANConfigurationUpdateAcknowledge, "RANConfigurationUpdateAcknowledge" {
+    crate::per::decode_extensible_sequence! { RANConfigurationUpdateAcknowledge {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27690,7 +27690,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { RANConfigurationUpdateFailure, "RANConfigurationUpdateFailure" {
+    crate::per::decode_extensible_sequence! { RANConfigurationUpdateFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27717,7 +27717,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { RANPagingRequest, "RANPagingRequest" {
+    crate::per::decode_extensible_sequence! { RANPagingRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27740,7 +27740,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { RRCInactiveTransitionReport, "RRCInactiveTransitionReport" {
+    crate::per::decode_extensible_sequence! { RRCInactiveTransitionReport {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27763,7 +27763,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { RerouteNASRequest, "RerouteNASRequest" {
+    crate::per::decode_extensible_sequence! { RerouteNASRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27786,7 +27786,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { RetrieveUEInformation, "RetrieveUEInformation" {
+    crate::per::decode_extensible_sequence! { RetrieveUEInformation {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27814,7 +27814,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { SecondaryRATDataUsageReport, "SecondaryRATDataUsageReport" {
+    crate::per::decode_extensible_sequence! { SecondaryRATDataUsageReport {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27837,7 +27837,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { TimingSynchronisationStatusFailure, "TimingSynchronisationStatusFailure" {
+    crate::per::decode_extensible_sequence! { TimingSynchronisationStatusFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27865,7 +27865,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { TimingSynchronisationStatusReport, "TimingSynchronisationStatusReport" {
+    crate::per::decode_extensible_sequence! { TimingSynchronisationStatusReport {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27898,7 +27898,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { TimingSynchronisationStatusRequest, "TimingSynchronisationStatusRequest" {
+    crate::per::decode_extensible_sequence! { TimingSynchronisationStatusRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27921,7 +27921,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { TimingSynchronisationStatusResponse, "TimingSynchronisationStatusResponse" {
+    crate::per::decode_extensible_sequence! { TimingSynchronisationStatusResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27944,7 +27944,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { TraceFailureIndication, "TraceFailureIndication" {
+    crate::per::decode_extensible_sequence! { TraceFailureIndication {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27972,7 +27972,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { TraceStart, "TraceStart" {
+    crate::per::decode_extensible_sequence! { TraceStart {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -27995,7 +27995,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UEContextModificationFailure, "UEContextModificationFailure" {
+    crate::per::decode_extensible_sequence! { UEContextModificationFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28023,7 +28023,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UEContextModificationRequest, "UEContextModificationRequest" {
+    crate::per::decode_extensible_sequence! { UEContextModificationRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28046,7 +28046,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UEContextModificationResponse, "UEContextModificationResponse" {
+    crate::per::decode_extensible_sequence! { UEContextModificationResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28074,7 +28074,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UEContextReleaseCommand, "UEContextReleaseCommand" {
+    crate::per::decode_extensible_sequence! { UEContextReleaseCommand {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28097,7 +28097,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UEContextReleaseComplete, "UEContextReleaseComplete" {
+    crate::per::decode_extensible_sequence! { UEContextReleaseComplete {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28125,7 +28125,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UEContextReleaseRequest, "UEContextReleaseRequest" {
+    crate::per::decode_extensible_sequence! { UEContextReleaseRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28148,7 +28148,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UEContextResumeFailure, "UEContextResumeFailure" {
+    crate::per::decode_extensible_sequence! { UEContextResumeFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28176,7 +28176,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UEContextResumeRequest, "UEContextResumeRequest" {
+    crate::per::decode_extensible_sequence! { UEContextResumeRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28199,7 +28199,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UEContextResumeResponse, "UEContextResumeResponse" {
+    crate::per::decode_extensible_sequence! { UEContextResumeResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28222,7 +28222,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UEContextSuspendFailure, "UEContextSuspendFailure" {
+    crate::per::decode_extensible_sequence! { UEContextSuspendFailure {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28250,7 +28250,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UEContextSuspendRequest, "UEContextSuspendRequest" {
+    crate::per::decode_extensible_sequence! { UEContextSuspendRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28273,7 +28273,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UEContextSuspendResponse, "UEContextSuspendResponse" {
+    crate::per::decode_extensible_sequence! { UEContextSuspendResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28295,7 +28295,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UEInformationTransfer, "UEInformationTransfer" {
+    crate::per::decode_extensible_sequence! { UEInformationTransfer {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28323,7 +28323,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UERadioCapabilityCheckRequest, "UERadioCapabilityCheckRequest" {
+    crate::per::decode_extensible_sequence! { UERadioCapabilityCheckRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28346,7 +28346,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UERadioCapabilityCheckResponse, "UERadioCapabilityCheckResponse" {
+    crate::per::decode_extensible_sequence! { UERadioCapabilityCheckResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28374,7 +28374,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UERadioCapabilityIDMappingRequest, "UERadioCapabilityIDMappingRequest" {
+    crate::per::decode_extensible_sequence! { UERadioCapabilityIDMappingRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28397,7 +28397,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UERadioCapabilityIDMappingResponse, "UERadioCapabilityIDMappingResponse" {
+    crate::per::decode_extensible_sequence! { UERadioCapabilityIDMappingResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28425,7 +28425,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UERadioCapabilityInfoIndication, "UERadioCapabilityInfoIndication" {
+    crate::per::decode_extensible_sequence! { UERadioCapabilityInfoIndication {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28453,7 +28453,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UETNLABindingReleaseRequest, "UETNLABindingReleaseRequest" {
+    crate::per::decode_extensible_sequence! { UETNLABindingReleaseRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28476,7 +28476,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UplinkNASTransport, "UplinkNASTransport" {
+    crate::per::decode_extensible_sequence! { UplinkNASTransport {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28499,7 +28499,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UplinkNonUEAssociatedNRPPaTransport, "UplinkNonUEAssociatedNRPPaTransport" {
+    crate::per::decode_extensible_sequence! { UplinkNonUEAssociatedNRPPaTransport {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28527,7 +28527,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UplinkRANConfigurationTransfer, "UplinkRANConfigurationTransfer" {
+    crate::per::decode_extensible_sequence! { UplinkRANConfigurationTransfer {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28555,7 +28555,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UplinkRANEarlyStatusTransfer, "UplinkRANEarlyStatusTransfer" {
+    crate::per::decode_extensible_sequence! { UplinkRANEarlyStatusTransfer {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28583,7 +28583,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UplinkRANStatusTransfer, "UplinkRANStatusTransfer" {
+    crate::per::decode_extensible_sequence! { UplinkRANStatusTransfer {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28611,7 +28611,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UplinkRIMInformationTransfer, "UplinkRIMInformationTransfer" {
+    crate::per::decode_extensible_sequence! { UplinkRIMInformationTransfer {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28634,7 +28634,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { UplinkUEAssociatedNRPPaTransport, "UplinkUEAssociatedNRPPaTransport" {
+    crate::per::decode_extensible_sequence! { UplinkUEAssociatedNRPPaTransport {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28667,7 +28667,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { WriteReplaceWarningRequest, "WriteReplaceWarningRequest" {
+    crate::per::decode_extensible_sequence! { WriteReplaceWarningRequest {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }
@@ -28690,7 +28690,7 @@ pub mod ngap_pdu_contents {
         #[rasn(identifier = "protocolIEs")]
         pub protocol_ies: ProtocolIEContainer,
     }
-    crate::per::decode_extensible_sequence! { WriteReplaceWarningResponse, "WriteReplaceWarningResponse" {
+    crate::per::decode_extensible_sequence! { WriteReplaceWarningResponse {
         #[rasn(identifier = "protocolIEs")]
         protocol_ies: [ProtocolIEContainer],
     } }

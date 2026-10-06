@@ -29,8 +29,12 @@ pub(crate) fn skip_unknown_extensions<D: Decoder>(decoder: &mut D) -> Result<(),
 /// Keep the public SEQUENCE's AsnType and Encode implementations. In APER,
 /// read its extension bit, decode the identical nonextensible root, then
 /// consume the unknown additions. Other codecs use the original structure.
+///
+/// `Fields<false>` is that root and `Fields<true>` the SEQUENCE as declared.
+/// They have one derived decoder and the public type's description of its
+/// components, so the SEQUENCE is described once.
 macro_rules! decode_extensible_sequence {
-    ($name:ident, $identifier:literal {
+    ($name:ident {
         $($(#[$($attribute:tt)*])* $field:ident: [$($field_type:tt)*],)*
     }) => {
         impl rasn::Decode for $name {
@@ -39,23 +43,32 @@ macro_rules! decode_extensible_sequence {
                 tag: rasn::types::Tag,
                 constraints: rasn::types::Constraints,
             ) -> Result<Self, D::Error> {
-                #[derive(rasn::AsnType, rasn::Decode)]
-                #[rasn(automatic_tags, identifier = $identifier)]
-                struct Root {
+                #[derive(rasn::Decode)]
+                #[rasn(automatic_tags)]
+                struct Fields<const EXTENSIBLE: bool> {
                     $($(#[$($attribute)*])* $field: $($field_type)*,)*
                 }
-                #[derive(rasn::AsnType, rasn::Decode)]
-                #[rasn(automatic_tags, identifier = $identifier)]
-                #[non_exhaustive]
-                struct Extensible {
-                    $($(#[$($attribute)*])* $field: $($field_type)*,)*
+                const COUNT: usize = <[&str]>::len(&[$(stringify!($field)),*]);
+                impl<const EXTENSIBLE: bool> rasn::AsnType for Fields<EXTENSIBLE> {
+                    const TAG: rasn::types::Tag = <$name as rasn::AsnType>::TAG;
+                    const IDENTIFIER: rasn::types::Identifier =
+                        <$name as rasn::AsnType>::IDENTIFIER;
+                }
+                impl<const EXTENSIBLE: bool> rasn::types::Constructed<COUNT, 0>
+                    for Fields<EXTENSIBLE>
+                {
+                    const FIELDS: rasn::types::fields::Fields<COUNT> =
+                        <$name as rasn::types::Constructed<COUNT, 0>>::FIELDS;
+                    const IS_EXTENSIBLE: bool = EXTENSIBLE;
                 }
                 if decoder.codec() != rasn::Codec::Aper {
-                    let value = Extensible::decode_with_tag_and_constraints(decoder, tag, constraints)?;
+                    let value =
+                        Fields::<true>::decode_with_tag_and_constraints(decoder, tag, constraints)?;
                     return Ok(Self { $($field: value.$field,)* });
                 }
                 let extensions_present = decoder.decode_bool(rasn::types::Tag::BOOL)?;
-                let value = Root::decode_with_tag_and_constraints(decoder, tag, constraints)?;
+                let value =
+                    Fields::<false>::decode_with_tag_and_constraints(decoder, tag, constraints)?;
                 if extensions_present {
                     $crate::per::skip_unknown_extensions(decoder)?;
                 }

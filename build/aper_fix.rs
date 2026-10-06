@@ -52,7 +52,7 @@ pub fn fix_constrained_sequences(generated: &str) -> Result<String> {
 pub fn fix_extensible_sequences(generated: &str) -> Result<String> {
     let sequence = Regex::new(
         r#"(?ms)(    #\[derive\(AsnType, Debug, Clone, )Decode, (Encode, PartialEq, Eq, Hash\)\]
-    #\[rasn\(\s*automatic_tags(?:,\s*identifier = "([^"]+)")?,?\s*\)\]
+    #\[rasn\(\s*automatic_tags(?:,\s*identifier = "[^"]+")?,?\s*\)\]
     #\[non_exhaustive\]
     pub struct ([A-Za-z0-9_]+) \{
 (.*?)^    \})"#,
@@ -62,9 +62,8 @@ pub fn fix_extensible_sequences(generated: &str) -> Result<String> {
     let mut failure = None;
     let generated = sequence
         .replace_all(generated, |captures: &Captures<'_>| {
-            let name = &captures[4];
-            let identifier = captures.get(3).map_or(name, |value| value.as_str());
-            let fields = &captures[5];
+            let name = &captures[3];
+            let fields = &captures[4];
             if fields.contains("extension_addition") {
                 failure.get_or_insert_with(|| format!("defined SEQUENCE additions in {name}"));
                 return captures[0].to_string();
@@ -103,7 +102,7 @@ pub fn fix_extensible_sequences(generated: &str) -> Result<String> {
             replacements += 1;
             let declaration = captures[0].replacen("Decode, Encode, ", "Encode, ", 1);
             format!(
-                "{declaration}\n    crate::per::decode_extensible_sequence! {{ {name}, \"{identifier}\" {{\n{arguments}    }} }}"
+                "{declaration}\n    crate::per::decode_extensible_sequence! {{ {name} {{\n{arguments}    }} }}"
             )
         })
         .into_owned();

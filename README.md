@@ -132,8 +132,8 @@ Limits:
   extensible fixed-size `BIT STRING` of another size cannot be edited as a
   typed value: rasn's JER does not represent them.
 - The feature compiles JER and APER code for every type of the protocol. A
-  debug build of the crate takes about three times as long as without it and
-  several gigabytes of memory.
+  debug build of the crate takes two to three times as long as without it,
+  and about three times the memory.
 
 ## Code generation
 

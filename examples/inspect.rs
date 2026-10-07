@@ -26,8 +26,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Edit an IE through its typed value. The other IEs keep the octets received.
     let cause = ies.iter_mut().find(|ie| ie["id"] == ie_id("Cause"));
     cause.expect("a Cause")["value"] = json!({"radioNetwork": "user-inactivity"});
-    // Add an IE. Without `_raw_value`, a value that is not a string has the type of the
-    // identifier; a string would be its octets in hexadecimal.
+    // Add an IE: its `value` has the type of the identifier. Given octets would be sent
+    // as `_raw_value`, without `value`.
     ies.push(json!({
         "id": ie_id("PDUSessionResourceListCxtRelReq"),
         "criticality": "reject",

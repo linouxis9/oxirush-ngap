@@ -121,9 +121,10 @@ its octets beside a `_decode_error`; a PDU whose message does not decode is an
 error. An edit is refused when the value around it does not encode back to the
 octets received, as with an unknown extension addition, and when it has a
 member that the ASN.1 type does not have. An IE is added as an entry of
-`protocolIEs` with its `id`, its `criticality` and its typed `value`, or its
-octets in hexadecimal. The module documentation lists the members of the tree
-and the rules of an edit.
+`protocolIEs` with its `id`, its `criticality` and its `value`, which is typed
+whatever JSON it is: an `ENUMERATED` is added by its name. Given octets are
+sent as `_raw_value`, without `value`. The module documentation lists the
+members of the tree and the rules of an edit.
 
 Limits:
 

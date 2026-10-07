@@ -19,14 +19,15 @@
 //! - change a typed `value` or the `decoded` member of a transfer, which is encoded again.
 //!   This is refused when the octets received do not decode and encode back to themselves,
 //!   as with an extension addition that the typed value does not keep;
-//! - to send other octets as an IE, or to add an IE, leave `_raw_value` out. A `value` that
-//!   is a JSON string is the octets, in hexadecimal; any other is encoded as the type of the
-//!   IE's identifier. For a transfer, replace the member with its octets;
+//! - to add an IE, write an entry with its `id`, its `criticality` and its `value`, and no
+//!   `_raw_value`: the value is encoded as the type of the identifier, whatever JSON it is;
+//! - to send given octets as an IE, write them in hexadecimal as `_raw_value` and leave
+//!   `value` out. For a transfer, replace the member with its octets;
 //! - an IE with a `_decode_error` has its octets as `value`: change them there.
 //!
-//! `_raw_value` and `_raw_message` are what an edit is compared with, so changing one alone
-//! sends nothing else. A member that the ASN.1 type does not have is refused, and so is
-//! hexadecimal in lower case.
+//! Beside a `value`, `_raw_value` is what the value is compared with, as `_raw_message` is
+//! for the message, so changing one alone sends nothing else. A member that the ASN.1 type
+//! does not have is refused, and so is hexadecimal in lower case.
 
 use serde_json::{Value, json};
 
@@ -230,7 +231,8 @@ fn expand(value: &mut Value, depth: usize) -> Result<(), String> {
     Ok(())
 }
 
-fn collapse(value: &mut Value, depth: usize) -> Result<(), String> {
+/// `member` is the name of the member that holds `value`, or the list it is in.
+fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String> {
     if depth > 64 {
         return Err("inspection nesting exceeds 64".into());
     }
@@ -241,7 +243,7 @@ fn collapse(value: &mut Value, depth: usize) -> Result<(), String> {
             .and_then(|v| u16::try_from(v).ok());
         for (key, child) in object.iter_mut() {
             if !key.starts_with('_') {
-                collapse(child, depth + 1)?;
+                collapse(child, key, depth + 1)?;
                 if let Some(raw) = child.get("_raw_transfer").cloned() {
                     if let Some(edited) = child.get("decoded") {
                         let bytes = unhex(&raw)?;
@@ -274,52 +276,56 @@ fn collapse(value: &mut Value, depth: usize) -> Result<(), String> {
         let original_id = object.remove("_original_id");
         let undecoded = object.remove("_decode_error").is_some();
         object.remove("_ie_name");
-        let field = if object.contains_key("value") {
-            "value"
-        } else {
-            "extensionValue"
-        };
-        if let Some(raw) = raw {
-            let id = id.ok_or("IE id must be u16")?;
-            let edited = object.get(field).ok_or("IE has no value")?;
-            let original_id = original_id
-                .as_ref()
-                .and_then(Value::as_u64)
-                .and_then(|v| u16::try_from(v).ok())
-                .unwrap_or(id);
-            let wire = if undecoded {
-                // The IE was shown as its octets.
-                if !edited.is_string() {
-                    return Err(format!(
-                        "IE {id} did not decode: its value is its octets in hexadecimal"
-                    ));
-                }
-                edited.clone()
-            } else {
-                let bytes = unhex(&raw)?;
-                let received = registry::ie(original_id)?;
-                let original = (received.decode)(&bytes)?;
-                if &original == edited && id == original_id {
-                    raw
-                } else if (received.encode)(&original)? != bytes {
-                    return Err(format!(
-                        "IE {original_id} does not encode back to the octets received; replace its octets instead"
-                    ));
-                } else {
-                    json!(hex(&(registry::ie(id)?.encode)(edited)?))
-                }
+        if let Some(id) = id {
+            // The value of an IE of an extension container has another name.
+            let field = match member.starts_with("iE-Extension") {
+                true => "extensionValue",
+                false => "value",
             };
-            object.insert(field.into(), wire);
-        } else if let Some(id) = id
-            && let Some(typed) = object.get(field).filter(|v| !v.is_string())
-        {
-            // An IE that was not received, with a typed value.
-            let wire = json!(hex(&(registry::ie(id)?.encode)(typed)?));
+            let typed = |id: u16| {
+                let octets = format!("give its octets as _raw_value, without {field}");
+                registry::ie(id).map_err(|error| format!("{error}: {octets}"))
+            };
+            let wire = match (raw, object.get(field)) {
+                // The octets alone are sent as they are.
+                (Some(raw), None) => raw,
+                // The IE was shown as its octets.
+                (_, Some(edited)) if undecoded => {
+                    if !edited.is_string() {
+                        return Err(format!(
+                            "IE {id} did not decode: its value is its octets in hexadecimal"
+                        ));
+                    }
+                    edited.clone()
+                }
+                (Some(raw), Some(edited)) => {
+                    let original_id = original_id
+                        .as_ref()
+                        .and_then(Value::as_u64)
+                        .and_then(|v| u16::try_from(v).ok())
+                        .unwrap_or(id);
+                    let bytes = unhex(&raw)?;
+                    let received = registry::ie(original_id)?;
+                    let original = (received.decode)(&bytes)?;
+                    if &original == edited && id == original_id {
+                        raw
+                    } else if (received.encode)(&original)? != bytes {
+                        return Err(format!(
+                            "IE {original_id} does not encode back to the octets received; replace its octets instead"
+                        ));
+                    } else {
+                        json!(hex(&(typed(id)?.encode)(edited)?))
+                    }
+                }
+                // An IE that was not received.
+                (None, Some(new)) => json!(hex(&(typed(id)?.encode)(new)?)),
+                (None, None) => return Err(format!("IE {id} has no {field} and no _raw_value")),
+            };
             object.insert(field.into(), wire);
         }
     } else if let Some(array) = value.as_array_mut() {
         for child in array {
-            collapse(child, depth + 1)?;
+            collapse(child, member, depth + 1)?;
         }
     }
     Ok(())
@@ -373,7 +379,7 @@ pub fn encode_pdu(tree: &Value) -> Result<NGAP_PDU, String> {
         _ => return Err("invalid direction".into()),
     };
     let mut message = tree.get("message").ok_or("missing message")?.clone();
-    collapse(&mut message, 0)?;
+    collapse(&mut message, "", 0)?;
     let raw = if let Some(original) = tree.get("_raw_message") {
         let original = unhex(original)?;
         let typed = registry::message(direction, code)?;

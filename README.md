@@ -126,6 +126,23 @@ whatever JSON it is: an `ENUMERATED` is added by its name. Given octets are
 sent as `_raw_value`, without `value`. The module documentation lists the
 members of the tree and the rules of an edit.
 
+The values of well-known types are shown, and taken, as they are usually
+written:
+
+| Type | In the tree |
+| --- | --- |
+| `PLMNIdentity` | `"208-93"`, the MCC and the MNC |
+| `TransportLayerAddress` | `"10.0.0.1"`, `"2001:db8::1"`, or the two with a comma |
+| `TAC`, `EPS-TAC`, `LAC`, `GTP-TEID`, `FiveG-TMSI`, `SST`, `PortNumber`, `AMFRegionID`, `AMFSetID`, `AMFPointer`, `NRCellIdentity`, `EUTRACellIdentity`, `UL-NAS-Count` | a number |
+
+A number is also taken as a `"0x…"` string, each of these values as JER writes
+it, and the name of an `ENUMERATED` value whatever its case, with `-`, `_` and
+space taken as the same. A value that does not fit its form, such as a
+transport layer address of another length, stays as JER writes it. The other
+strings stay in hexadecimal: an SD, keys and algorithm masks, the NAS-PDU and
+the other containers, and the node identifiers, whose length is part of their
+value.
+
 Limits:
 
 - `id-CurrentQoSParaSetIndex` and `id-QosFlowAdditionalInfoList`, whose type
@@ -231,8 +248,8 @@ cargo run -p oxirush-ngap --example inspect --features inspect
   raw APER API.
 - `extract_ies` extracts UE release, handover, and nested PDU-session/NAS data
   from decoded NGAP messages.
-- `inspect` decodes a UE Context Release Request, prints its tree, edits one
-  IE, adds another and encodes the PDU again.
+- `inspect` decodes an NG Setup Request, prints its tree, edits one IE, adds
+  one by its value and one by its octets, and encodes the PDU again.
 
 The examples intentionally mirror the corresponding `oxirush-s1ap`
 examples, substituting the standards-defined NGAP messages and IEs.

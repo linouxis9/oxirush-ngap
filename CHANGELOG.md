@@ -36,6 +36,17 @@ is not source compatible with 0.4.2.
   `decoded` value alone. A PLMN identity, a transport layer address
   and the usual identifiers read and write as they are usually written, and
   an `ENUMERATED` value is named in any case.
+- With the `inspect` feature, the values of a tree by their paths:
+  `inspect::paths` gives each value with the path that selects it,
+  `inspect::select` the values at a path, and `inspect::set`, `remove` and
+  `insert` edit a tree at a path. `/ngap` stands for the IEs of the message,
+  and an IE goes by its name, as in `/ngap/RAN-UE-NGAP-ID/value`, by its
+  position or by its identifier, in the message of the PDU and in a message
+  that a transfer contains.
+- With the `inspect` feature, `inspect::message_name` gives the name that
+  ASN.1 has for the message of a PDU, such as `InitialContextSetupResponse`,
+  `inspect::message_named` the direction and the procedure code of the
+  message of a name, in any case, and `inspect::message_names` all of them.
 - `NgapPduKind` names the seven MBS procedures, whose fourteen messages were
   `Other`.
 - Identifiers, builders and extractors for the IEs whose type is an

@@ -185,18 +185,8 @@ fn main() {
         println!();
     }
 
-    // ── Equivalent hand-written extraction (for comparison) ────────────────
-    // Without `extract_ngap_ies!`, release-request extraction would manually:
-    //
-    //   let mut amf_id = None;
-    //   for ie in &msg.protocol_ies.0 {
-    //       if ie.id == ID_AMF_UE_NGAP_ID {
-    //           if let Ok(value) = decode_open_type::<AMFUENGAPID>(&ie.value) {
-    //               amf_id = Some(value.0);
-    //           }
-    //       }
-    //   }
-    //   let amf_id = amf_id.ok_or(MissingIeError { ie_name: "amf_id" })?;
+    // The `decode_manually` example reads the IEs of a message by hand, which is
+    // what `extract_ngap_ies!` does for each field.
 }
 
 fn decode_initiating<T: rasn::Decode>(pdu: &NGAP_PDU, procedure_code: u8) -> Option<T> {

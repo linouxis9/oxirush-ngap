@@ -41,7 +41,7 @@ oxirush-ngap = "0.5"
 The minimum supported Rust version is 1.88.
 
 ```rust
-use oxirush_ngap::{build_ngap, ngap::*};
+use oxirush_ngap::{build_ngap, extract_ngap_ies, ngap::*};
 
 let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
     IGNORE, UEContextReleaseRequest,
@@ -57,7 +57,8 @@ assert_eq!(decoded.procedure_name(), "UEContextReleaseRequest");
 assert!(decoded.is_initiating());
 
 let request: UEContextReleaseRequest = decoded.decode_value().unwrap();
-assert_eq!(request.protocol_ies.0.len(), 3);
+extract_ngap_ies!(request, UEContextReleaseRequest, opt ran_id: u32 = RAN_UE_NGAP_ID(id));
+assert_eq!(ran_id, Some(7));
 ```
 
 `build_ngap!` takes a direction, procedure name, outer criticality, message
@@ -103,28 +104,63 @@ let capabilities = ue_security_capabilities(&[0xe0, 0xe0]);
 ## Inspection
 
 The `inspect` feature turns a decoded PDU into a `serde_json` tree in the
-ASN.1 JSON encoding (JER), and a tree into a PDU:
+ASN.1 JSON encoding (JER), and a tree into a PDU. Each value of the tree has
+a path, in which `/ngap` stands for the IEs of the message and an IE goes by
+its name:
 
 ```rust
 use oxirush_ngap::{inspect, ngap::NGAP_PDU};
+use serde_json::json;
 
 fn edit(pdu: &NGAP_PDU) -> Result<NGAP_PDU, String> {
     let mut tree = inspect::inspect_pdu(pdu)?;
-    tree["message"]["protocolIEs"][1]["value"] = 9.into();
+    // /ngap/AMF-UE-NGAP-ID/value = 42
+    // /ngap/RAN-UE-NGAP-ID/value = 7
+    // /ngap/Cause/value/radioNetwork = "user-inactivity"
+    for (path, value) in inspect::paths(&tree) {
+        println!("{path} = {value}");
+    }
+    let cause = inspect::select(&tree, "/ngap/Cause/value/radioNetwork")?;
+    assert_eq!(cause, [&json!("user-inactivity")]);
+
+    inspect::set(&mut tree, "/ngap/RAN-UE-NGAP-ID/value", json!(9))?;
+    inspect::remove(&mut tree, "/ngap/Cause")?;
+    let name = json!({"id": "RANNodeName", "criticality": "ignore", "value": "gnb-1"});
+    inspect::insert(&mut tree, "/ngap/-", name)?;
     inspect::encode_pdu(&tree)
 }
 ```
+
+An IE is named as ASN.1 names it after `id-`, in any case, and also selected
+by its position (`/ngap/0`), by its identifier (`/ngap/@id=85`) or with all
+the others (`/ngap/*`); `paths` gives the position of an IE that has no name
+or is there twice. Under an IE are its `criticality`, its typed `value` and
+its `octets`, what it was received as. The IEs of a message that the tree
+contains, as the `decoded` value of a transfer, go by name in its place:
+
+```text
+/ngap/PDUSessionResourceSetupListSUReq/value/0/pDUSessionResourceSetupRequestTransfer/decoded/PDUSessionType/value = "ipv4"
+```
+
+An IE that the message does not have selects nothing; a name that is no IE,
+or a member that a value cannot have, is an error.
+
+`inspect::message_name(&pdu)` is the name that ASN.1 gives the message of a
+PDU, such as `InitialContextSetupResponse`, and `inspect::message_named` finds
+the `direction` and the `procedure_code` that a tree has for a message from
+its name, whatever its case and its hyphens.
 
 What is not edited keeps the octets received, and repeated IEs keep their
 order. An IE or contained transfer that is unknown or does not decode stays as
 its octets beside a `_decode_error`; a PDU whose message does not decode is an
 error. An edit is refused when the value around it does not encode back to the
 octets received, as with an unknown extension addition, and when it has a
-member that the ASN.1 type does not have. An IE is added as an entry of
-`protocolIEs` with its `id`, its `criticality` and its `value`, which is typed
-whatever JSON it is: an `ENUMERATED` is added by its name. Given octets are
-sent as `_raw_value`, without `value`. The module documentation lists the
-members of the tree and the rules of an edit.
+member that the ASN.1 type does not have. An IE is added with `insert`, before
+the IE that the path selects or at the end for `/ngap/-`, as its `id`, by name
+or by number, its `criticality` and its `value`, which is typed whatever JSON
+it is: an `ENUMERATED` is added by its name. Given octets are sent as its
+`octets`, without `value`. The module documentation lists the members of the
+tree and the rules of an edit.
 
 The values of well-known types are shown, and taken, as they are usually
 written:
@@ -248,8 +284,9 @@ cargo run -p oxirush-ngap --example inspect --features inspect
   raw APER API.
 - `extract_ies` extracts UE release, handover, and nested PDU-session/NAS data
   from decoded NGAP messages.
-- `inspect` decodes an NG Setup Request, prints its tree, edits one IE, adds
-  one by its value and one by its octets, and encodes the PDU again.
+- `inspect` decodes an NG Setup Request, prints its values with their paths,
+  edits one IE, adds one by its value and one by its octets, and encodes the
+  PDU again.
 
 The examples intentionally mirror the corresponding `oxirush-s1ap`
 examples, substituting the standards-defined NGAP messages and IEs.

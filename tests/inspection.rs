@@ -207,6 +207,12 @@ fn a_new_ie_whose_value_is_a_string_is_typed_too() {
         inspect::encode_pdu(&tree).unwrap().encode().unwrap(),
         typed.encode().unwrap()
     );
+    // Hexadecimal in lower case is the same octets.
+    *tree.pointer_mut("/message/protocolIEs/2/value").unwrap() = serde_json::json!("7e00");
+    assert_eq!(
+        inspect::encode_pdu(&tree).unwrap().encode().unwrap(),
+        typed.encode().unwrap()
+    );
 }
 
 #[test]

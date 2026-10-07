@@ -42,7 +42,7 @@
 //!
 //! Beside a `value`, `_raw_value` is what the value is compared with, as `_raw_message` is
 //! for the message, so changing one alone sends nothing else. A member that the ASN.1 type
-//! does not have is refused, and so is hexadecimal in lower case.
+//! does not have is refused. Hexadecimal is taken in either case.
 
 use serde_json::{Value, json};
 
@@ -147,13 +147,35 @@ fn encode_typed<T: rasn::Decode + rasn::Encode + RepairOpenTypes>(
     let checked: Value =
         serde_json::from_str(&rasn::jer::encode(&typed).map_err(|e| e.to_string())?)
             .map_err(|e| e.to_string())?;
-    if checked != *value {
+    if !written_as(&checked, &value) {
         return Err("the value has a member that its ASN.1 type does not have, or is not written as JER writes it".into());
     }
     Ok(crate::ngap::encode_open_type(&typed)
         .map_err(|e| e.to_string())?
         .as_bytes()
         .to_vec())
+}
+
+/// Whether `written` is the value that JER writes as `checked`: the same, with
+/// hexadecimal in either case.
+fn written_as(checked: &Value, written: &Value) -> bool {
+    match (checked, written) {
+        (Value::String(checked), Value::String(written)) => {
+            checked == written
+                || (checked.eq_ignore_ascii_case(written)
+                    && checked.bytes().all(|digit| digit.is_ascii_hexdigit()))
+        }
+        (Value::Array(checked), Value::Array(written)) => {
+            checked.len() == written.len()
+                && checked.iter().zip(written).all(|(c, w)| written_as(c, w))
+        }
+        (Value::Object(checked), Value::Object(written)) => {
+            checked.len() == written.len()
+                && (checked.iter())
+                    .all(|(name, c)| written.get(name).is_some_and(|w| written_as(c, w)))
+        }
+        _ => checked == written,
+    }
 }
 
 /// The functions of a type of the registry.

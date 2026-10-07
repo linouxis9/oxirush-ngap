@@ -284,6 +284,70 @@ fn an_ie_that_contains_a_type_is_decoded_and_edited_like_a_transfer() {
     }
 }
 
+#[test]
+fn a_transfer_that_was_not_received_is_encoded_from_its_decoded_value() {
+    let pdu = build_ngap!(SuccessfulOutcome, PDUSessionResourceSetup,
+        REJECT, PDUSessionResourceSetupResponse,
+        IGNORE AMF_UE_NGAP_ID(1u64),
+        IGNORE RAN_UE_NGAP_ID(7u32),
+    );
+    let transfer = serde_json::json!({"dLQosFlowPerTNLInformation": {
+        "uPTransportLayerInformation": {"gTPTunnel": {
+            "transportLayerAddress": "10.0.0.1",
+            "gTP-TEID": 9,
+        }},
+        "associatedQosFlowList": [{"qosFlowIdentifier": 1}],
+    }});
+    let written = |transfer: serde_json::Value| {
+        let mut tree = inspect::inspect_pdu(&pdu).unwrap();
+        let ies = tree.pointer_mut("/message/protocolIEs").unwrap();
+        ies.as_array_mut().unwrap().push(serde_json::json!({
+            "id": 75,
+            "criticality": "ignore",
+            "value": [{"pDUSessionID": 5, "pDUSessionResourceSetupResponseTransfer": transfer}],
+        }));
+        inspect::encode_pdu(&tree).and_then(|pdu| inspect::inspect_pdu(&pdu))
+    };
+    let sent = written(serde_json::json!({"decoded": transfer})).unwrap();
+    let item = "/message/protocolIEs/2/value/0/pDUSessionResourceSetupResponseTransfer";
+    assert_eq!(sent.pointer(&format!("{item}/decoded")), Some(&transfer));
+    // A member beside the value, and a value that the transfer does not have.
+    let error = written(serde_json::json!({"decoded": transfer, "other": 1})).unwrap_err();
+    assert!(error.contains("its decoded value alone"), "{error}");
+    assert!(written(serde_json::json!({"decoded": {"no-such-member": 1}})).is_err());
+
+    // The value of an IE that contains a type is written the same way.
+    let release = build_ngap!(
+        InitiatingMessage,
+        DistributionRelease,
+        REJECT,
+        DistributionReleaseRequest,
+    );
+    let mut tree = inspect::inspect_pdu(&release).unwrap();
+    let received = NGAP_PDU::decode(&fixture("DistributionReleaseRequest")).unwrap();
+    let received = inspect::inspect_pdu(&received).unwrap();
+    let ies: Vec<_> = received["message"]["protocolIEs"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|ie| {
+            let mut ie = ie.clone();
+            let members = ie.as_object_mut().unwrap();
+            members.retain(|name, _| !name.starts_with('_'));
+            let contained = members
+                .get_mut("value")
+                .and_then(|value| value.as_object_mut());
+            if let Some(contained) = contained.filter(|value| value.contains_key("decoded")) {
+                contained.retain(|name, _| name == "decoded");
+            }
+            ie
+        })
+        .collect();
+    tree["message"]["protocolIEs"] = ies.into();
+    let sent = inspect::encode_pdu(&tree).unwrap().encode().unwrap();
+    assert_eq!(sent, fixture("DistributionReleaseRequest"));
+}
+
 /// The octets of the message `name` of the fixtures.
 fn fixture(name: &str) -> Vec<u8> {
     let mut lines = include_str!("fixtures/messages.tsv").lines();

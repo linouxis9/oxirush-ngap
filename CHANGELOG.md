@@ -32,7 +32,8 @@ is not source compatible with 0.4.2.
   ASN.1 JSON encoding, which can be edited and encoded again. What is not
   edited keeps the octets received, and an IE is added by its typed value or
   by its octets. The transfers that an `OCTET STRING` contains are decoded in
-  place, as fields and as IEs. A PLMN identity, a transport layer address
+  place, as fields and as IEs, and one that is added is written by its
+  `decoded` value alone. A PLMN identity, a transport layer address
   and the usual identifiers read and write as they are usually written, and
   an `ENUMERATED` value is named in any case.
 - `NgapPduKind` names the seven MBS procedures, whose fourteen messages were

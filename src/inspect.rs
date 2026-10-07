@@ -36,6 +36,8 @@
 //!   `_raw_value`: the value is encoded as the type of the identifier, whatever JSON it is;
 //! - to send given octets as an IE, write them in hexadecimal as `_raw_value` and leave
 //!   `value` out. For a transfer, replace the member with its octets;
+//! - to add a transfer, or the value of an IE that contains a type, write it as an object
+//!   with its `decoded` value alone, which is encoded as the type contained;
 //! - an IE with a `_decode_error` has its octets as `value`: change them there.
 //!
 //! Beside a `value`, `_raw_value` is what the value is compared with, as `_raw_message` is
@@ -499,6 +501,23 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
                         }
                     } else {
                         *child = raw;
+                    }
+                } else if let Some(written) = child.get("decoded") {
+                    // What was not received is encoded from the value written.
+                    let transfer = match key.as_str() {
+                        "value" | "extensionValue" => id.and_then(registry::ie_contents),
+                        key if registry::TRANSFER_FIELDS.contains(&key) => {
+                            Some(registry::transfer(key)?)
+                        }
+                        _ => None,
+                    };
+                    if let Some(transfer) = transfer {
+                        if child.as_object().is_some_and(|members| members.len() != 1) {
+                            return Err(format!(
+                                "{key} is written with its decoded value alone, or as its octets"
+                            ));
+                        }
+                        *child = json!(hex(&(transfer.encode)(written)?));
                     }
                 }
             }

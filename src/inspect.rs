@@ -274,40 +274,6 @@ fn written_as(checked: &Value, written: &Value) -> bool {
     }
 }
 
-/// The messages of the registry: the direction, the procedure code, the name that ASN.1
-/// gives it and the type of each.
-macro_rules! messages {
-    ($($direction:ident $code:literal $name:literal $message:path;)*) => {
-        pub(crate) const MESSAGES: &[(&str, u8, &str, fn() -> Typed)] = &[
-            $((stringify!($direction), $code, $name, Typed::of::<$message>),)*
-        ];
-    };
-}
-pub(crate) use messages;
-
-/// The IEs of the registry: the identifier, the name and the type of each, then the type
-/// that the octets of the IE contain. An identifier that has several types has its name
-/// alone.
-macro_rules! ies {
-    ($($id:literal $name:literal $($ie:path $(, $contents:path)?)?;)*) => {
-        pub(crate) const IE_NAMES: &[(u16, &str)] = &[$(($id, $name),)*];
-        pub(crate) fn ie(id: u16) -> Result<Typed, String> {
-            match id {
-                $($($id => Ok(Typed::of::<$ie>()),)?)*
-                _ => Err(format!("{PROTOCOL} IE {id} is unknown or has several types")),
-            }
-        }
-        #[allow(clippy::match_single_binding)]
-        pub(crate) fn ie_contents(id: u16) -> Option<Typed> {
-            match id {
-                $($($($id => Some(Typed::of::<$contents>()),)?)?)*
-                _ => None,
-            }
-        }
-    };
-}
-pub(crate) use ies;
-
 /// The transfers of the registry: the member that holds each, and the type that its
 /// octets contain. A member that has several types has its name alone.
 macro_rules! transfers {

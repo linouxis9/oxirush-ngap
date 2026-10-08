@@ -9,7 +9,8 @@
 //!
 //! ## `build_ngap!` — build a complete NGAP PDU
 //!
-//! IE IDs and procedure codes are generated from the ASN.1 object sets. Values
+//! IE IDs and procedure codes are those of `src/registry.rs`, the list generated
+//! from the ASN.1 object sets, which the `inspect` feature reads too. Values
 //! are converted with `.into()`, so primitive values such as `u32` can be passed
 //! directly for generated newtypes.
 //!
@@ -128,6 +129,199 @@ impl fmt::Display for MissingIeError {
 }
 
 impl std::error::Error for MissingIeError {}
+
+/// The procedures of the protocol, which `src/registry.rs` lists from the ASN.1: the
+/// code and the name of each, then for each of its messages the direction, the kind,
+/// the name that ASN.1 gives it and its type.
+///
+/// The codes that the macros take by the names of the procedures, the kinds of a PDU
+/// and, with the `inspect` feature, the messages of a tree all come from these lines.
+macro_rules! procedures {
+    ($($code:literal $procedure:ident {
+        $(InitiatingMessage $initiating:ident $initiating_name:literal $initiating_type:path;)?
+        $(SuccessfulOutcome $successful:ident $successful_name:literal $successful_type:path;)?
+        $(UnsuccessfulOutcome $unsuccessful:ident $unsuccessful_name:literal $unsuccessful_type:path;)?
+    })*) => {
+        /// The procedure codes, by the names of the procedures.
+        #[doc(hidden)]
+        #[allow(non_upper_case_globals)]
+        pub mod procedures {
+            $(pub const $procedure: u8 = $code;)*
+        }
+
+        /// The direction and the procedure of a PDU: each variant is one message.
+        #[allow(non_camel_case_types)]
+        #[derive(Clone, Debug, PartialEq, Eq)]
+        #[non_exhaustive]
+        pub enum NgapPduKind {
+            $($(#[doc = concat!("`", $initiating_name, "`.")] $initiating,)?)*
+            $($(#[doc = concat!("`", $successful_name, "`.")] $successful,)?)*
+            $($(#[doc = concat!("`", $unsuccessful_name, "`.")] $unsuccessful,)?)*
+            /// A procedure that the specification does not have in that direction.
+            Other { direction: &'static str, procedure_code: u8 },
+        }
+
+        impl NgapPduKind {
+            /// Return this kind's NGAP procedure code.
+            pub fn procedure_code(&self) -> u8 {
+                match self {
+                    $(
+                        $(Self::$initiating => $code,)?
+                        $(Self::$successful => $code,)?
+                        $(Self::$unsuccessful => $code,)?
+                    )*
+                    Self::Other { procedure_code, .. } => *procedure_code,
+                }
+            }
+        }
+
+        impl $crate::ngap::NGAPPDU {
+            /// Return the ASN.1 procedure name.
+            pub fn procedure_name(&self) -> &'static str {
+                match self.procedure_code() {
+                    $($code => stringify!($procedure),)*
+                    _ => "Unknown",
+                }
+            }
+
+            /// Return the canonical direction/procedure kind.
+            pub fn kind(&self) -> NgapPduKind {
+                let procedure_code = self.procedure_code();
+                let (direction, kind) = match self {
+                    Self::initiatingMessage(_) => ("Initiating", match procedure_code {
+                        $($($code => Some(NgapPduKind::$initiating),)?)*
+                        _ => None,
+                    }),
+                    Self::successfulOutcome(_) => ("Successful", match procedure_code {
+                        $($($code => Some(NgapPduKind::$successful),)?)*
+                        _ => None,
+                    }),
+                    Self::unsuccessfulOutcome(_) => ("Unsuccessful", match procedure_code {
+                        $($($code => Some(NgapPduKind::$unsuccessful),)?)*
+                        _ => None,
+                    }),
+                };
+                kind.unwrap_or(NgapPduKind::Other { direction, procedure_code })
+            }
+        }
+
+        /// The messages: the direction, the procedure code, the name that ASN.1 gives it
+        /// and the type of each.
+        #[cfg(feature = "inspect")]
+        pub(crate) const MESSAGES: &[(&str, u8, &str, fn() -> $crate::inspect::Typed)] = &[
+            $($(("InitiatingMessage", $code, $initiating_name,
+                $crate::inspect::Typed::of::<$initiating_type>),)?)*
+            $($(("SuccessfulOutcome", $code, $successful_name,
+                $crate::inspect::Typed::of::<$successful_type>),)?)*
+            $($(("UnsuccessfulOutcome", $code, $unsuccessful_name,
+                $crate::inspect::Typed::of::<$unsuccessful_type>),)?)*
+        ];
+    };
+}
+pub(crate) use procedures;
+
+/// The IEs of the protocol, which `src/registry.rs` lists from the ASN.1: the identifier,
+/// the name that ASN.1 gives it and the type of each, the type that its octets contain,
+/// then the names that the macros take it by. An identifier that has several types has
+/// its name alone.
+///
+/// The identifier and the type that a name stands for in the macros and, with the
+/// `inspect` feature, the names and the types of a tree all come from these lines.
+macro_rules! ies {
+    ($($id:literal $name:literal
+        $($ie:path $(, $contents:path)? $(=> $own:ident $($alias:ident)?)?)?;
+    )*) => {
+        /// The identifier and the type of each IE, by the names that the macros take.
+        #[doc(hidden)]
+        #[allow(non_camel_case_types)]
+        pub mod ies {
+            use $crate::macros::Ie;
+            $($($(
+                pub type $own = Ie<$id, $ie>;
+                $(pub type $alias = Ie<$id, $ie>;)?
+            )?)?)*
+        }
+
+        #[cfg(feature = "inspect")]
+        pub(crate) const IE_NAMES: &[(u16, &str)] = &[$(($id, $name),)*];
+
+        #[cfg(feature = "inspect")]
+        pub(crate) fn ie(id: u16) -> Result<$crate::inspect::Typed, String> {
+            match id {
+                $($($id => Ok($crate::inspect::Typed::of::<$ie>()),)?)*
+                _ => Err(format!("NGAP IE {id} is unknown or has several types")),
+            }
+        }
+
+        #[cfg(feature = "inspect")]
+        #[allow(clippy::match_single_binding)]
+        pub(crate) fn ie_contents(id: u16) -> Option<$crate::inspect::Typed> {
+            match id {
+                $($($($id => Some($crate::inspect::Typed::of::<$contents>()),)?)?)*
+                _ => None,
+            }
+        }
+    };
+}
+pub(crate) use ies;
+
+/// An IE as the macros name it: a type of the `ies` of the registry, which has the
+/// identifier of the IE and the type of its value.
+#[doc(hidden)]
+pub struct Ie<const ID: u16, T>(core::marker::PhantomData<T>);
+
+/// What a name of the macros stands for.
+#[doc(hidden)]
+pub trait Named {
+    /// The identifier of the IE.
+    const ID: u16;
+    /// The type of its value.
+    type Type;
+}
+
+impl<const ID: u16, T> Named for Ie<ID, T> {
+    const ID: u16 = ID;
+    type Type = T;
+}
+
+/// The identifier of the IE that the macros take by this name.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __ngap_ie_id {
+    ($name:ident) => {
+        <$crate::registry::ies::$name as $crate::macros::Named>::ID
+    };
+}
+
+/// The open type of a value of the IE that the macros take by this name.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __ngap_encode_ie {
+    ($name:ident, $value:expr) => {{
+        let value: <$crate::registry::ies::$name as $crate::macros::Named>::Type = ($value).into();
+        $crate::ngap::encode_open_type(&value)
+    }};
+}
+
+/// The value in an open type of the IE that the macros take by this name.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __ngap_decode_ie {
+    ($name:ident, $value:expr) => {
+        $crate::ngap::decode_open_type::<
+            <$crate::registry::ies::$name as $crate::macros::Named>::Type,
+        >($value)
+    };
+}
+
+/// The code of the procedure of this name.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __ngap_proc_code {
+    ($name:ident) => {
+        $crate::registry::procedures::$name
+    };
+}
 
 /// Extract typed NGAP protocol IEs with `req` and `opt` semantics.
 #[macro_export]

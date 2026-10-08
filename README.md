@@ -192,7 +192,8 @@ Limits:
 
 ## Code generation
 
-Cargo compiles the checked-in `src/ngap.rs` and `src/inspect_registry.rs`.
+Cargo compiles the checked-in `src/ngap.rs`, `src/registry.rs` and, with the
+`inspect` feature, `src/inspect_registry.rs`.
 Normal builds, docs.rs, and crates.io package verification do not run a
 generator. The published crate excludes the generator and the ASN.1 inputs.
 
@@ -205,14 +206,17 @@ the crate directory:
 
 ```sh
 CARGO="$(command -v cargo)" cargo run --locked --manifest-path build/Cargo.toml
-rustfmt --edition 2024 src/ngap.rs src/inspect_registry.rs
+rustfmt --edition 2024 src/ngap.rs src/registry.rs src/inspect_registry.rs
 ```
 
 `rasn-compiler` finds rustfmt through `CARGO`. To the compiler's output the
-generator adds the flat API, typed-open-type macros, procedure metadata,
-convenience methods, and `Display` implementation, and it writes the registry
-of the `inspect` feature. Commit both files after regenerating them. Do not
-edit them by hand.
+generator adds the flat API, convenience methods, and `Display`
+implementation. `src/registry.rs` is the list of the procedures and of the IEs:
+one line for each, with its code or its identifier, its names and its types.
+The names that the macros take, `NgapPduKind` and the names and the types of the
+`inspect` feature all expand from it, so each is written once.
+`src/inspect_registry.rs` has what the `inspect` feature alone needs. Commit
+the three files after regenerating them. Do not edit them by hand.
 
 ## rasn integration
 

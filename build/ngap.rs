@@ -18,7 +18,7 @@ pub fn generate_ngap() -> Result<()> {
     let config = RasnConfig {
         // rasn-compiler's typed open types are experimental and currently emit
         // invalid bindings for TS 38.413. Stable opaque open types are wrapped
-        // by the generated macros below, retaining a typed public API.
+        // by the macros over the generated registry, retaining a typed public API.
         opaque_open_types: true,
         generate_from_impls: true,
         ..RasnConfig::default()
@@ -60,35 +60,28 @@ fn post_process(path: &Path, asn_files: &[PathBuf]) -> Result<()> {
         1,
     );
 
-    let support = generate_support(&generated, asn_files)?;
-    generated.push_str(&support);
+    generated.push_str(&generate_support(&generated)?);
     let asn = asn_files
         .iter()
         .map(fs::read_to_string)
         .collect::<std::io::Result<Vec<_>>>()?
         .join("\n");
+    // The procedures and the IEs, once for the macros and for the inspection.
+    let registry = crate::registry::Registry::read("NGAP", &generated, &asn)?;
+    fs::write("src/registry.rs", registry.list()?)?;
     fs::write(
         "src/inspect_registry.rs",
-        crate::inspection::generate("NGAP", &generated, &asn)?,
+        crate::inspection::generate("NGAP", &generated, &asn, &registry)?,
     )?;
     fs::write(path, generated).context("write post-processed NGAP bindings")
 }
 
-fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
-    let mut asn = String::new();
-    for file in asn_files {
-        asn.push_str(&fs::read_to_string(file)?);
-        asn.push('\n');
-    }
-
+fn generate_support(generated: &str) -> Result<String> {
     let generated_type = Regex::new(r"(?m)^    pub (?:struct|enum|type) ([A-Za-z][A-Za-z0-9_]*)")?;
-    let mut rust_types = BTreeMap::new();
-    for captures in generated_type.captures_iter(generated) {
-        let name = captures[1].to_string();
-        if !name.starts_with("Anonymous") {
-            rust_types.entry(canonical(&name)).or_insert(name);
-        }
-    }
+    let rust_types: BTreeSet<&str> = generated_type
+        .captures_iter(generated)
+        .map(|captures| captures.get(1).expect("a name").as_str())
+        .collect();
 
     let newtype = Regex::new(r"(?m)^    pub struct ([A-Za-z][A-Za-z0-9_]*)\(pub ([^;\n]+)\);$")?;
     let mut newtypes = BTreeMap::new();
@@ -100,112 +93,10 @@ fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
         }
     }
 
-    let ie_constant =
-        Regex::new(r"(?m)^\s*(id-[A-Za-z][A-Za-z0-9-]*)\s+ProtocolIE-ID\s+::=\s+(\d+)")?;
-    let ie_constants: BTreeMap<String, u16> = ie_constant
-        .captures_iter(&asn)
-        .map(|captures| Ok((captures[1].to_string(), captures[2].parse()?)))
-        .collect::<Result<_>>()?;
-
-    let ie_object = Regex::new(
-        r"(?s)\{\s*ID\s+(id-[A-Za-z][A-Za-z0-9-]*)\s+CRITICALITY\s+[A-Za-z-]+\s+TYPE\s+(OCTET\s+STRING(?:\s*\(CONTAINING\s+[A-Za-z][A-Za-z0-9-]*\s*\))?|[A-Za-z][A-Za-z0-9-]*)\s+PRESENCE",
-    )?;
-    let mut ies: BTreeMap<String, (u16, String)> = BTreeMap::new();
-    let mut type_aliases: BTreeMap<String, BTreeSet<u16>> = BTreeMap::new();
-    for captures in ie_object.captures_iter(&asn) {
-        let id_name = &captures[1];
-        let asn_type = &captures[2];
-        let Some(id) = ie_constants.get(id_name).copied() else {
-            continue;
-        };
-        // Paths below `$crate`. An inline OCTET STRING, such as the type of
-        // id-NGAP-Message or the OCTET STRING (CONTAINING
-        // MBSSessionSetupOrModRequestTransfer) of
-        // id-MBSSessionSetupRequestTransfer, has no generated type.
-        let (rust_type, path) = if asn_type.starts_with("OCTET") {
-            (None, "__rasn::types::OctetString".to_string())
-        } else {
-            let Some(rust_type) = rust_types.get(&canonical(asn_type)).cloned() else {
-                continue;
-            };
-            let path = format!("ngap::{rust_type}");
-            (Some(rust_type), path)
-        };
-
-        // The IE-name spelling used by TS 38.413 names its own IE. The rasn
-        // type name is a concise alias, added below, unless an IE has that
-        // name: id-OldAMF is an AMFName, but `AMFName` names id-AMFName.
-        ies.entry(macro_ident(id_name.trim_start_matches("id-")))
-            .or_insert((id, path));
-        if let Some(rust_type) = rust_type {
-            type_aliases.entry(rust_type).or_default().insert(id);
-        }
-    }
-    // A type name is an alias only for the one IE of that type: the type of
-    // id-SONConfigurationTransferDL and -UL could otherwise address either.
-    // Nor is it one when an IE outside the macros' reach has that name:
-    // id-SelectedNID is the one NID, but `NID` would read as id-NID, an
-    // extension IE.
-    let ie_names: BTreeSet<String> = ie_constants
-        .keys()
-        .map(|id_name| macro_ident(id_name.trim_start_matches("id-")))
-        .collect();
-    for (rust_type, ids) in type_aliases {
-        if let [id] = ids.into_iter().collect::<Vec<_>>()[..]
-            && !ie_names.contains(&rust_type)
-        {
-            ies.entry(rust_type.clone())
-                .or_insert((id, format!("ngap::{rust_type}")));
-        }
-    }
-
-    let procedure_constant =
-        Regex::new(r"(?m)^\s*(id-[A-Za-z][A-Za-z0-9-]*)\s+ProcedureCode\s+::=\s+(\d+)")?;
-    let mut procedures = BTreeMap::new();
-    let mut procedure_ids = BTreeMap::new();
-    for captures in procedure_constant.captures_iter(&asn) {
-        let id_name = captures[1].to_string();
-        let code: u8 = captures[2].parse()?;
-        let name = macro_ident(id_name.trim_start_matches("id-"));
-        procedures.insert(name.clone(), code);
-        procedure_ids.insert(id_name, name);
-    }
-
-    let procedure_block = Regex::new(
-        r"(?ms)^[\t ]*[A-Za-z][A-Za-z0-9-]*\s+NGAP-ELEMENTARY-PROCEDURE\s+::=\s*\{(.*?)^[\t ]*\}",
-    )?;
-    let procedure_ref = Regex::new(r"PROCEDURE CODE\s+(id-[A-Za-z][A-Za-z0-9-]*)")?;
-    let mut directions: BTreeMap<&str, BTreeSet<String>> = BTreeMap::new();
-    for captures in procedure_block.captures_iter(&asn) {
-        let body = &captures[1];
-        let Some(id) = procedure_ref
-            .captures(body)
-            .map(|capture| capture[1].to_string())
-        else {
-            continue;
-        };
-        let Some(name) = procedure_ids.get(&id).cloned() else {
-            continue;
-        };
-        for (label, direction) in [
-            ("INITIATING MESSAGE", "Initiating"),
-            ("SUCCESSFUL OUTCOME", "Successful"),
-            ("UNSUCCESSFUL OUTCOME", "Unsuccessful"),
-        ] {
-            // The label of an unsuccessful outcome ends with that of a successful one.
-            if Regex::new(&format!(r"\b{label}\b"))?.is_match(body) {
-                directions
-                    .entry(direction)
-                    .or_default()
-                    .insert(name.clone());
-            }
-        }
-    }
-
     let mut out = String::new();
     writeln!(
         out,
-        "\n// Auto-generated NGAP compatibility surface and ASN.1-derived lookups."
+        "\n// Auto-generated NGAP compatibility surface."
     )?;
     writeln!(out, "pub use ngap_common_data_types::*;")?;
     writeln!(out, "pub use ngap_constants::*;")?;
@@ -215,11 +106,11 @@ fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
     writeln!(out, "pub use ngap_pdu_descriptions::*;")?;
     writeln!(out, "#[allow(non_camel_case_types)]")?;
     writeln!(out, "pub type NGAP_PDU = NGAPPDU;")?;
-    if rust_types.values().any(|name| name == "AMFUENGAPID") {
+    if rust_types.contains("AMFUENGAPID") {
         writeln!(out, "#[allow(non_camel_case_types)]")?;
         writeln!(out, "pub type AMF_UE_NGAP_ID = AMFUENGAPID;")?;
     }
-    if rust_types.values().any(|name| name == "RANUENGAPID") {
+    if rust_types.contains("RANUENGAPID") {
         writeln!(out, "#[allow(non_camel_case_types)]")?;
         writeln!(out, "pub type RAN_UE_NGAP_ID = RANUENGAPID;")?;
     }
@@ -253,60 +144,8 @@ fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
         }
     }
 
-    writeln!(out, "#[macro_export]")?;
-    writeln!(out, "#[doc(hidden)]")?;
-    writeln!(out, "macro_rules! __ngap_ie_id {{")?;
-    for (name, (id, _)) in &ies {
-        writeln!(out, "    ({name}) => {{ {id}u16 }};")?;
-    }
-    writeln!(out, "}}")?;
-
-    writeln!(out, "#[macro_export]")?;
-    writeln!(out, "#[doc(hidden)]")?;
-    writeln!(out, "macro_rules! __ngap_encode_ie {{")?;
-    for (name, (_, path)) in &ies {
-        writeln!(
-            out,
-            "    ({name}, $value:expr) => {{ {{ let value: $crate::{path} = ($value).into(); $crate::ngap::encode_open_type(&value) }} }};"
-        )?;
-    }
-    writeln!(out, "}}")?;
-
-    writeln!(out, "#[macro_export]")?;
-    writeln!(out, "#[doc(hidden)]")?;
-    writeln!(out, "macro_rules! __ngap_decode_ie {{")?;
-    for (name, (_, path)) in &ies {
-        writeln!(
-            out,
-            "    ({name}, $value:expr) => {{ $crate::ngap::decode_open_type::<$crate::{path}>($value) }};"
-        )?;
-    }
-    writeln!(out, "}}")?;
-
-    writeln!(out, "#[macro_export]")?;
-    writeln!(out, "#[doc(hidden)]")?;
-    writeln!(out, "macro_rules! __ngap_proc_code {{")?;
-    for (name, code) in &procedures {
-        writeln!(out, "    ({name}) => {{ {code}u8 }};")?;
-    }
-    writeln!(out, "}}")?;
-
-    writeln!(out, "#[allow(non_camel_case_types)]")?;
-    writeln!(out, "#[derive(Clone, Debug, PartialEq, Eq)]")?;
-    writeln!(out, "#[non_exhaustive]")?;
-    writeln!(out, "pub enum NgapPduKind {{")?;
-    for direction in ["Initiating", "Successful", "Unsuccessful"] {
-        if let Some(names) = directions.get(direction) {
-            for name in names {
-                writeln!(out, "    {direction}_{name},")?;
-            }
-        }
-    }
-    writeln!(
-        out,
-        "    Other {{ direction: &'static str, procedure_code: u8 }},"
-    )?;
-    writeln!(out, "}}")?;
+    // The kinds, the names of the procedures and their codes are those of the registry.
+    writeln!(out, "pub use crate::registry::NgapPduKind;")?;
 
     writeln!(out, "impl NGAPPDU {{")?;
     writeln!(out, "    /// Encode this PDU using Aligned PER.")?;
@@ -399,70 +238,6 @@ fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
         out,
         "    pub fn is_unsuccessful(&self) -> bool {{ matches!(self, NGAPPDU::unsuccessfulOutcome(_)) }}"
     )?;
-    writeln!(out, "    /// Return the ASN.1 procedure name.")?;
-    writeln!(out, "    pub fn procedure_name(&self) -> &'static str {{")?;
-    writeln!(out, "        match self.procedure_code() {{")?;
-    for (name, code) in &procedures {
-        writeln!(out, "            {code} => \"{name}\",")?;
-    }
-    writeln!(out, "            _ => \"Unknown\",")?;
-    writeln!(out, "        }}")?;
-    writeln!(out, "    }}")?;
-    writeln!(
-        out,
-        "    /// Return the canonical direction/procedure kind."
-    )?;
-    writeln!(out, "    pub fn kind(&self) -> NgapPduKind {{")?;
-    writeln!(out, "        let code = self.procedure_code();")?;
-    writeln!(out, "        match self {{")?;
-    for (variant, direction) in [
-        ("initiatingMessage", "Initiating"),
-        ("successfulOutcome", "Successful"),
-        ("unsuccessfulOutcome", "Unsuccessful"),
-    ] {
-        writeln!(out, "            NGAPPDU::{variant}(_) => match code {{")?;
-        if let Some(names) = directions.get(direction) {
-            for name in names {
-                if let Some(code) = procedures.get(name) {
-                    writeln!(
-                        out,
-                        "                {code} => NgapPduKind::{direction}_{name},"
-                    )?;
-                }
-            }
-        }
-        writeln!(
-            out,
-            "                _ => NgapPduKind::Other {{ direction: \"{direction}\", procedure_code: code }},"
-        )?;
-        writeln!(out, "            }},")?;
-    }
-    writeln!(out, "        }}")?;
-    writeln!(out, "    }}")?;
-    writeln!(out, "}}")?;
-
-    writeln!(out, "impl NgapPduKind {{")?;
-    writeln!(out, "    /// Return this kind's NGAP procedure code.")?;
-    writeln!(out, "    pub fn procedure_code(&self) -> u8 {{")?;
-    writeln!(out, "        match self {{")?;
-    for direction in ["Initiating", "Successful", "Unsuccessful"] {
-        if let Some(names) = directions.get(direction) {
-            for name in names {
-                if let Some(code) = procedures.get(name) {
-                    writeln!(
-                        out,
-                        "            NgapPduKind::{direction}_{name} => {code},"
-                    )?;
-                }
-            }
-        }
-    }
-    writeln!(
-        out,
-        "            NgapPduKind::Other {{ procedure_code, .. }} => *procedure_code,"
-    )?;
-    writeln!(out, "        }}")?;
-    writeln!(out, "    }}")?;
     writeln!(out, "}}")?;
 
     writeln!(out, "impl std::fmt::Display for NGAPPDU {{")?;
@@ -528,16 +303,4 @@ fn generate_support(generated: &str, asn_files: &[PathBuf]) -> Result<String> {
     writeln!(out, "}}")?;
 
     Ok(out)
-}
-
-fn canonical(value: &str) -> String {
-    value
-        .chars()
-        .filter(|character| character.is_ascii_alphanumeric())
-        .flat_map(char::to_lowercase)
-        .collect()
-}
-
-fn macro_ident(value: &str) -> String {
-    value.replace('-', "_")
 }

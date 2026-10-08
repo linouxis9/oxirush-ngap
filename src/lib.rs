@@ -47,6 +47,8 @@ mod inspect_registry;
 pub mod macros;
 pub mod ngap;
 mod per;
+#[doc(hidden)]
+pub mod registry;
 pub mod sized;
 
 #[doc(hidden)]

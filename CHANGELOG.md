@@ -63,6 +63,7 @@ is not source compatible with 0.4.2.
   the names that are close to it, where the error named the first IE of the
   specification. The variants of `NgapPduKind` are in the order of the procedure
   codes, and each says its message.
+- The crate no longer depends on `paste`: the macros paste no name.
 
 ### Fixed
 

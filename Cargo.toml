@@ -27,7 +27,6 @@ inspect = ["dep:serde_json"]
 all-features = true
 
 [dependencies]
-paste = "1"
 rasn = { version = "0.28.15", default-features = false, features = ["bytes"] }
 serde_json = { version = "1.0.106", optional = true }
 

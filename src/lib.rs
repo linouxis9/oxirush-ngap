@@ -52,8 +52,6 @@ pub mod registry;
 pub mod sized;
 
 #[doc(hidden)]
-pub use paste as __paste;
-#[doc(hidden)]
 pub use rasn as __rasn;
 
 pub use ngap::NgapPduKind;

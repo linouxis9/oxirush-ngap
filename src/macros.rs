@@ -403,7 +403,7 @@ macro_rules! build_ngap {
      $($ie_crit:ident $ie_name:ident ($($ie_value:tt)+)),*
      $(,)?
     ) => {
-        $crate::__paste::paste! {{
+        {
             let ies = vec![
                 $( $crate::ngap::ProtocolIEField {
                     id: $crate::ngap::ProtocolIEID($crate::__ngap_ie_id!($ie_name)),
@@ -418,7 +418,7 @@ macro_rules! build_ngap {
             let value = $crate::ngap::encode_open_type(&message)
                 .expect("failed to APER-encode NGAP message open type");
             $crate::build_ngap!(@pdu $direction, $proc, $outer_crit, value)
-        }}
+        }
     };
     (@criticality REJECT) => { $crate::ngap::Criticality::reject };
     (@criticality IGNORE) => { $crate::ngap::Criticality::ignore };
@@ -455,13 +455,11 @@ macro_rules! build_ngap {
 #[macro_export]
 macro_rules! build_ngap_ie {
     ($msg:ident, $criticality:ident $ie_name:ident ($($value:tt)+)) => {
-        $crate::__paste::paste! {
-            $crate::ngap::ProtocolIEField {
-                id: $crate::ngap::ProtocolIEID($crate::__ngap_ie_id!($ie_name)),
-                criticality: $crate::build_ngap!(@criticality $criticality),
-                value: $crate::__ngap_encode_ie!($ie_name, ($($value)+))
-                    .expect("failed to APER-encode NGAP IE open type"),
-            }
+        $crate::ngap::ProtocolIEField {
+            id: $crate::ngap::ProtocolIEID($crate::__ngap_ie_id!($ie_name)),
+            criticality: $crate::build_ngap!(@criticality $criticality),
+            value: $crate::__ngap_encode_ie!($ie_name, ($($value)+))
+                .expect("failed to APER-encode NGAP IE open type"),
         }
     };
 }

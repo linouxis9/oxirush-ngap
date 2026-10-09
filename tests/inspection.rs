@@ -999,6 +999,48 @@ fn a_message_has_the_ies_of_its_object_set() {
 }
 
 #[test]
+fn the_identifiers_of_the_registry_are_the_constants_of_the_bindings() {
+    use std::collections::BTreeMap;
+    let letters = |name: &str| -> String {
+        let letters = name.chars().filter(char::is_ascii_alphanumeric);
+        letters.flat_map(char::to_lowercase).collect()
+    };
+    // `pub const ID_<NAME>: <Type> = <Type>(<number>);`, as the compiler writes them.
+    let mut constants: BTreeMap<(String, String), u64> = BTreeMap::new();
+    for constant in include_str!("../src/ngap.rs")
+        .split("pub const ID_")
+        .skip(1)
+    {
+        let constant: String = constant
+            .split(';')
+            .next()
+            .unwrap()
+            .split_whitespace()
+            .collect();
+        let (name, value) = constant.split_once(':').unwrap();
+        let (kind, number) = value.split_once('=').unwrap();
+        let number = number.trim_start_matches(kind).trim_matches(['(', ')']);
+        constants.insert((kind.into(), letters(name)), number.parse().unwrap());
+    }
+    for (id, name) in inspect::ie_names() {
+        let constant = constants.get(&("ProtocolIEID".into(), letters(name)));
+        assert_eq!(constant, Some(&u64::from(*id)), "{name}");
+    }
+    // The procedures of the list: `<code> <Name> {`.
+    let mut procedures = 0;
+    for line in include_str!("../src/registry.rs").lines() {
+        let mut words = line.split_whitespace();
+        let (Some(code), Some(name), Some("{")) = (words.next(), words.next(), words.next()) else {
+            continue;
+        };
+        let constant = constants.get(&("ProcedureCode".into(), letters(name)));
+        assert_eq!(constant, Some(&code.parse().unwrap()), "{name}");
+        procedures += 1;
+    }
+    assert!(procedures > 50, "{procedures}");
+}
+
+#[test]
 fn a_kind_that_the_specification_does_not_have_says_the_direction_of_its_pdu() {
     let pdu = NGAP_PDU::unsuccessfulOutcome(UnsuccessfulOutcome::new(
         ProcedureCode(46),

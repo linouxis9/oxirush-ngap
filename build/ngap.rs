@@ -32,7 +32,7 @@ pub fn generate_ngap() -> Result<()> {
         .map_err(|error| anyhow!("compile NGAP ASN.1 definitions: {error}"))?;
 
     for warning in warnings {
-        println!("cargo:warning={warning}");
+        eprintln!("warning: {warning}");
     }
 
     post_process(output, &files)

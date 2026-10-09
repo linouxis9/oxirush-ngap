@@ -323,7 +323,7 @@ fn generate_readable(generated: &str, ies: &BTreeMap<u16, Ie>, out: &mut String)
                 list.1.clone_from(form);
             }
             _ if forms.keys().any(Option::is_some) => {
-                println!("cargo:warning=the members named {name} have several types: not readable");
+                eprintln!("warning: the members named {name} have several types: not readable");
             }
             _ => {}
         }

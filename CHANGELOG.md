@@ -64,6 +64,19 @@ is not source compatible with 0.4.2.
   specification. The variants of `NgapPduKind` are in the order of the procedure
   codes, and each says its message.
 - The crate no longer depends on `paste`: the macros paste no name.
+- An edit at a path of an inspection tree changes what is sent or is refused.
+  `set` with `null` takes an optional member out, as its documentation said,
+  where it wrote a `null` that did not encode. The value of an IE and the
+  decoded value of a transfer are not taken out, and the `octets` of a
+  transfer are selected and set as those of an IE: these edits returned
+  without an error and sent the octets received. A transfer with a member
+  that it does not have is refused. The `octets` of an IE or a transfer whose
+  value an edit changed are an error to select, and `*` leaves out the
+  members that start with `_`.
+- The name of an ENUMERATED value of the PDU itself, its `criticality`, is
+  taken whatever its case, as those of its IEs are.
+- What is nested deeper than 64 levels stays as its octets beside a
+  `_decode_error`: `inspect_pdu` refused the whole PDU.
 
 ### Fixed
 

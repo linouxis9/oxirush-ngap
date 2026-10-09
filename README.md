@@ -142,8 +142,15 @@ contains, as the `decoded` value of a transfer, go by name in its place:
 /ngap/PDUSessionResourceSetupListSUReq/value/0/pDUSessionResourceSetupRequestTransfer/decoded/PDUSessionType/value = "ipv4"
 ```
 
-An IE that the message does not have selects nothing; a name that is no IE,
-or a member that a value cannot have, is an error.
+An IE that the message does not have selects nothing. A name that is no IE is
+an error, and so is a member that a value does not have, whether its type has
+none of that name or the value has it absent: a member that is written wrong
+is not taken for one that is optional and not there. `*` is each entry of a
+list or each member of a value, without the members that start with `_`.
+
+The name of an IE is taken in any case, with `-`, `_` and space as the same;
+the members of a value are spelled as ASN.1 spells them, and the name of a
+message is taken with or without its hyphens.
 
 `inspect::message_name(&pdu)` is the name that ASN.1 gives the message of a
 PDU, such as `InitialContextSetupResponse`, and `inspect::message_named` finds
@@ -161,6 +168,15 @@ or by number, its `criticality` and its `value`, which is typed whatever JSON
 it is: an `ENUMERATED` is added by its name. Given octets are sent as its
 `octets`, without `value`. The module documentation lists the members of the
 tree and the rules of an edit.
+
+No edit at a path is taken and then left out. `null` takes an optional member
+out. The value of an IE and the decoded value of a transfer are not taken out,
+as the octets received would be sent in their place: the IE is removed, or its
+`octets` are set, and those of a transfer the same way. Once `set`, `remove`
+or `insert` changed something under a value, the `octets` beside it are no
+longer those of that value and selecting them is an error, until `encode_pdu`
+gives the PDU its octets. What is nested deeper than 64 levels stays as its
+octets beside a `_decode_error`, and the rest of the PDU is read.
 
 The values of well-known types are shown, and taken, as they are usually
 written:

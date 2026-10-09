@@ -840,3 +840,127 @@ fn a_message_goes_by_the_name_that_asn1_gives_it() {
     assert_eq!(inspect::message_name(&pdu), Some("UEContextReleaseRequest"));
     assert!(pdu.is_initiating());
 }
+
+#[test]
+fn an_edit_changes_what_is_sent_or_is_refused() {
+    use serde_json::{Value, json};
+    let mut tree = inspect::inspect_pdu(&release_request()).unwrap();
+    let before = tree.clone();
+    // The value of an IE is not taken out: its octets would go out as they came.
+    for edit in [
+        inspect::remove(&mut tree, "/ngap/Cause/value"),
+        inspect::set(&mut tree, "/ngap/Cause/value", Value::Null),
+    ] {
+        let error = edit.unwrap_err();
+        assert!(error.contains("value is not taken out"), "{error}");
+    }
+    assert_eq!(tree, before);
+    // `*` is each member of a value, without what the tree keeps of what came.
+    let members = inspect::select(&tree, "/ngap/Cause/*").unwrap();
+    assert_eq!(members.len(), 3, "{members:?}");
+    // The octets of an IE whose value was edited are no longer its octets.
+    inspect::set(&mut tree, "/ngap/RAN-UE-NGAP-ID/value", json!(9)).unwrap();
+    let error = inspect::select(&tree, "/ngap/RAN-UE-NGAP-ID/octets").unwrap_err();
+    assert!(error.contains("the value was edited"), "{error}");
+    let other = inspect::select(&tree, "/ngap/AMF-UE-NGAP-ID/octets").unwrap();
+    assert_eq!(other.len(), 1);
+    assert!(
+        inspect::paths(&tree)
+            .iter()
+            .all(|(path, _)| !path.contains("_edited"))
+    );
+    let sent = inspect::inspect_pdu(&inspect::encode_pdu(&tree).unwrap()).unwrap();
+    let octets = inspect::select(&sent, "/ngap/RAN-UE-NGAP-ID/octets").unwrap();
+    assert_eq!(octets, [&json!("0009")]);
+    // Octets that are set are those of the IE again.
+    inspect::set(&mut tree, "/ngap/RAN-UE-NGAP-ID/octets", json!("0007")).unwrap();
+    let octets = inspect::select(&tree, "/ngap/RAN-UE-NGAP-ID/octets").unwrap();
+    assert_eq!(octets, [&json!("0007")]);
+    assert_eq!(inspect::encode_pdu(&tree).unwrap(), release_request());
+    // The name of an ENUMERATED value of the PDU itself is taken as any other.
+    inspect::set(&mut tree, "/criticality", json!("Reject")).unwrap();
+    let pdu = inspect::encode_pdu(&tree).unwrap();
+    assert_eq!(inspect::inspect_pdu(&pdu).unwrap()["criticality"], "reject");
+}
+
+#[test]
+fn null_takes_an_optional_member_out_and_a_transfer_has_its_octets() {
+    use serde_json::{Value, json};
+    let pdu = NGAP_PDU::decode(&fixture("PDUSessionResourceSetupRequest")).unwrap();
+    let tree = inspect::inspect_pdu(&pdu).unwrap();
+    let item = "/ngap/PDUSessionResourceSetupListSUReq/value/0";
+    let transfer = format!("{item}/pDUSessionResourceSetupRequestTransfer");
+    let sent = |tree: &Value| inspect::inspect_pdu(&inspect::encode_pdu(tree)?);
+    // An optional member that is there is taken out, and one that is not is not
+    // selected.
+    let sd = format!("{item}/s-NSSAI/sD");
+    let mut edited = tree.clone();
+    inspect::set(&mut edited, &sd, json!("010203")).unwrap();
+    let mut edited = sent(&edited).unwrap();
+    assert_eq!(inspect::select(&edited, &sd).unwrap(), [&json!("010203")]);
+    inspect::set(&mut edited, &sd, Value::Null).unwrap();
+    let error = inspect::select(&sent(&edited).unwrap(), &sd).unwrap_err();
+    assert!(error.contains("unknown or unavailable"), "{error}");
+    let error = inspect::set(&mut edited, &sd, Value::Null).unwrap_err();
+    assert!(error.contains("selected no field"), "{error}");
+    // The octets of a transfer are selected and set as those of an IE are.
+    let octets = format!("{transfer}/octets");
+    let received = inspect::select(&tree, &octets).unwrap()[0].clone();
+    assert!(received.as_str().is_some_and(|octets| octets.len() > 8));
+    let mut edited = tree.clone();
+    inspect::set(&mut edited, &octets, json!("00")).unwrap();
+    let after = sent(&edited).unwrap();
+    assert_eq!(inspect::select(&after, &octets).unwrap(), [&json!("00")]);
+    // Its decoded value is not taken out, and what is under it is no longer its octets.
+    let mut edited = tree.clone();
+    let error = inspect::remove(&mut edited, &format!("{transfer}/decoded")).unwrap_err();
+    assert!(error.contains("decoded is not taken out"), "{error}");
+    let kind = format!("{transfer}/decoded/PDUSessionType/value");
+    inspect::set(&mut edited, &kind, json!("ipv6")).unwrap();
+    let error = inspect::select(&edited, &octets).unwrap_err();
+    assert!(error.contains("the value was edited"), "{error}");
+    let after = sent(&edited).unwrap();
+    assert_eq!(inspect::select(&after, &kind).unwrap(), [&json!("ipv6")]);
+    assert_ne!(inspect::select(&after, &octets).unwrap(), [&received]);
+    // A member that a transfer does not have is refused, not left out.
+    let mut edited = tree.clone();
+    let raw = "/message/protocolIEs/2/value/0/pDUSessionResourceSetupRequestTransfer";
+    edited.pointer_mut(raw).unwrap()["octets"] = json!("00");
+    let error = inspect::encode_pdu(&edited).unwrap_err();
+    assert!(error.contains("has no member \"octets\""), "{error}");
+}
+
+#[test]
+fn what_is_nested_deeper_than_the_inspection_goes_keeps_its_octets() {
+    // A cause in the extension of a cause, forty times.
+    let mut cause = Cause::misc(CauseMisc::unspecified);
+    for _ in 0..40 {
+        let value = encode_open_type(&cause).unwrap();
+        cause = Cause::choice_Extensions(ProtocolIEField::new(
+            ProtocolIEID(15),
+            Criticality::ignore,
+            value,
+        ));
+    }
+    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
+        IGNORE, UEContextReleaseRequest,
+        REJECT AMF_UE_NGAP_ID(1u64),
+        REJECT RAN_UE_NGAP_ID(7u32),
+        IGNORE Cause(cause),
+    );
+    let pdu = NGAP_PDU::decode(&pdu.encode().unwrap()).unwrap();
+    let tree = inspect::inspect_pdu(&pdu).unwrap();
+    let paths = inspect::paths(&tree);
+    let (deepest, why) = (paths.iter())
+        .find(|(path, _)| path.ends_with("/_decode_error"))
+        .expect("an IE that was not decoded");
+    assert!(why.as_str().unwrap().contains("nesting exceeds"), "{why}");
+    assert!(
+        deepest.matches("choice-Extensions").count() > 20,
+        "{deepest}"
+    );
+    // The other IEs are read, and the PDU is sent as it came.
+    let ran = inspect::select(&tree, "/ngap/RAN-UE-NGAP-ID/value").unwrap();
+    assert_eq!(ran, [&serde_json::json!(7)]);
+    assert_eq!(inspect::encode_pdu(&tree).unwrap(), pdu);
+}

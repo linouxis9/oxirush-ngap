@@ -22,10 +22,15 @@
 //! The members that start with `_` say what was received:
 //!
 //! - `_raw_value`, `_raw_transfer` and `_raw_message`: the octets, in hexadecimal;
-//! - `_original_id` and `_ie_name`: the IE that the octets were decoded as;
+//! - `_original_id` and `_ie_name`: the identifier that the octets were decoded as, and the
+//!   name that ASN.1 gives it. An entry whose `id` was changed is encoded as the type of
+//!   its new identifier;
 //! - `_decode_error`: why an IE's `value` is still its octets in hexadecimal, or why a
 //!   transfer has no `decoded` member. The identifier is unknown or has several types, the
-//!   octets do not decode, or JER cannot represent the value.
+//!   octets do not decode, JER cannot represent the value, or the IE is nested deeper
+//!   than 64 levels;
+//! - `_edited`: [`set`], [`remove`] or [`insert`] changed something under the value, whose
+//!   octets are no longer those beside it.
 //!
 //! [`encode_pdu`] encodes the tree. What was not edited keeps the octets received. To edit:
 //!
@@ -42,7 +47,8 @@
 //!
 //! Beside a `value`, `_raw_value` is what the value is compared with, as `_raw_message` is
 //! for the message, so changing one alone sends nothing else. A member that the ASN.1 type
-//! does not have is refused. Hexadecimal is taken in either case.
+//! does not have is refused, and so is one beside the `decoded` value of a transfer.
+//! Hexadecimal is taken in either case.
 //!
 //! # Paths
 //!
@@ -76,7 +82,17 @@
 //! ```
 //!
 //! Any other list selects by position, `*` and `@id=N`. An IE that the message does not
-//! have selects nothing, and a member that a value cannot have is an error.
+//! have selects nothing. A member that a value does not have is an error, whether its
+//! type has none of that name or the value has it absent, so a member that is written
+//! wrong is not taken for one that is not there. The name of an IE is taken in any case,
+//! with `-`, `_` and space as the same, and the members of a value as ASN.1 spells them.
+//!
+//! [`paths`] lists the values of a tree without the members that start with `_`, except
+//! `_decode_error`: the octets of an IE or of a transfer are selected as its `octets`,
+//! and set there in place of its value. Those of a value that an edit changed are an
+//! error to select: [`encode_pdu`] gives the PDU its octets. `null` takes an optional
+//! member out; the value of an IE or of a transfer is not taken out, as its octets would
+//! be sent in its place.
 //!
 //! ```
 //! use oxirush_ngap::{build_ngap, inspect, ngap::*};
@@ -102,6 +118,7 @@
 
 use serde_json::{Value, json};
 
+use crate::inspect_paths::EDITED;
 pub use crate::inspect_paths::{insert, paths, remove, select, set};
 use crate::inspect_registry as registry;
 use crate::ngap::NGAP_PDU;
@@ -115,7 +132,14 @@ pub fn ie_names() -> &'static [(u16, &'static str)] {
 /// and the name that ASN.1 gives it.
 pub fn message_names() -> impl Iterator<Item = (&'static str, u8, &'static str)> {
     let messages = registry::MESSAGES.iter();
-    messages.map(|(direction, code, name, _)| (*direction, *code, *name))
+    messages.map(|(direction, code, name, ..)| (*direction, *code, *name))
+}
+
+/// The letters and the digits of a name, in lower case: what a name is whatever its case
+/// and its hyphens, underscores and spaces.
+fn letters(name: &str) -> Vec<u8> {
+    let letters = name.bytes().filter(u8::is_ascii_alphanumeric);
+    letters.map(|letter| letter.to_ascii_lowercase()).collect()
 }
 
 /// The name that ASN.1 gives the message of a PDU, as `InitialContextSetupResponse`; `None`
@@ -130,10 +154,6 @@ pub fn message_name(pdu: &NGAP_PDU) -> Option<&'static str> {
 /// The `direction` and the `procedure_code` of the message that `name` names, whatever
 /// its case and its hyphens, underscores and spaces.
 pub fn message_named(name: &str) -> Option<(&'static str, u8)> {
-    let letters = |name: &str| -> Vec<u8> {
-        let letters = name.bytes().filter(u8::is_ascii_alphanumeric);
-        letters.map(|letter| letter.to_ascii_lowercase()).collect()
-    };
     let written = letters(name);
     message_names()
         .find(|(.., known)| letters(known) == written)
@@ -222,14 +242,14 @@ impl<T: RepairOpenTypes> RepairOpenTypes for Box<T> {
     }
 }
 
-fn encode_typed<T: rasn::Decode + rasn::Encode + RepairOpenTypes>(
-    value: &Value,
-) -> Result<Vec<u8>, String> {
+/// The value of the type `T` that JER reads `value` as, and `value` with the names of
+/// ENUMERATED values as the specification spells them.
+fn decode_jer<T: rasn::Decode>(value: &Value) -> Result<(T, std::borrow::Cow<'_, Value>), String> {
     let mut value = std::borrow::Cow::Borrowed(value);
     let mut respellings = 0;
-    let mut typed = loop {
+    loop {
         match rasn::jer::decode::<T>(&value.to_string()) {
-            Ok(typed) => break typed,
+            Ok(typed) => return Ok((typed, value)),
             Err(error) => match respelled(&value, &error).filter(|_| respellings < 64) {
                 Some(respelled) => {
                     value = std::borrow::Cow::Owned(respelled);
@@ -238,7 +258,13 @@ fn encode_typed<T: rasn::Decode + rasn::Encode + RepairOpenTypes>(
                 None => return Err(error.to_string()),
             },
         }
-    };
+    }
+}
+
+fn encode_typed<T: rasn::Decode + rasn::Encode + RepairOpenTypes>(
+    value: &Value,
+) -> Result<Vec<u8>, String> {
+    let (mut typed, value) = decode_jer::<T>(value)?;
     typed.repair_open_types()?;
     let checked: Value =
         serde_json::from_str(&rasn::jer::encode(&typed).map_err(|e| e.to_string())?)
@@ -540,10 +566,18 @@ fn contained(raw: Value, typed: Result<Typed, String>) -> Value {
     }
 }
 
-fn expand(value: &mut Value, depth: usize) -> Result<(), String> {
-    if depth > 64 {
-        return Err("inspection nesting exceeds 64".into());
-    }
+/// How deep in a tree an IE or a transfer is still decoded.
+const NESTING: usize = 64;
+
+/// Why what is deeper keeps its octets.
+fn too_deep<T>() -> Result<T, String> {
+    Err(format!("inspection nesting exceeds {NESTING}"))
+}
+
+/// Decode the IEs and the transfers of `value`, which is `depth` deep in its tree. What
+/// is deeper than [`NESTING`] keeps its octets, with why.
+fn expand(value: &mut Value, depth: usize) {
+    let deep = depth > NESTING;
     if let Some(object) = value.as_object_mut() {
         let field = if object.contains_key("value") {
             "value"
@@ -561,7 +595,11 @@ fn expand(value: &mut Value, depth: usize) -> Result<(), String> {
             if let Some((_, name)) = ie_names().iter().find(|(key, _)| *key == id) {
                 object.insert("_ie_name".into(), json!(name));
             }
-            match unhex(&raw).and_then(|bytes| (registry::ie(id)?.decode)(&bytes)) {
+            let decoded = match deep {
+                true => too_deep(),
+                false => unhex(&raw).and_then(|bytes| (registry::ie(id)?.decode)(&bytes)),
+            };
+            match decoded {
                 Ok(decoded) => {
                     // An OCTET STRING (CONTAINING ...) has the form of a transfer.
                     let mut decoded = match registry::ie_contents(id) {
@@ -581,9 +619,13 @@ fn expand(value: &mut Value, depth: usize) -> Result<(), String> {
         for (key, child) in object {
             if !key.starts_with('_') {
                 if registry::TRANSFER_FIELDS.contains(&key.as_str()) && child.is_string() {
-                    *child = contained(child.take(), registry::transfer(key));
+                    let typed = match deep {
+                        true => too_deep(),
+                        false => registry::transfer(key),
+                    };
+                    *child = contained(child.take(), typed);
                 }
-                expand(child, depth + 1)?;
+                expand(child, depth + 1);
                 if let Some(form) = registry::member_form(key) {
                     show(form, child);
                 }
@@ -591,16 +633,16 @@ fn expand(value: &mut Value, depth: usize) -> Result<(), String> {
         }
     } else if let Some(array) = value.as_array_mut() {
         for child in array {
-            expand(child, depth + 1)?;
+            expand(child, depth + 1);
         }
     }
-    Ok(())
 }
 
 /// `member` is the name of the member that holds `value`, or the list it is in.
 fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String> {
-    if depth > 64 {
-        return Err("inspection nesting exceeds 64".into());
+    // What is decoded at the limit of the inspection has values of its own under it.
+    if depth > 4 * NESTING {
+        return Err(format!("inspection nesting exceeds {}", 4 * NESTING));
     }
     if let Some(object) = value.as_object_mut() {
         let id = object
@@ -614,6 +656,17 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
                     unshow(form, child)?;
                 }
                 if let Some(raw) = child.get("_raw_transfer").cloned() {
+                    // Nothing that is written is left out: a transfer has its decoded
+                    // value beside the octets that it was received as, and no other.
+                    let known = ["_raw_transfer", "decoded", "_decode_error", EDITED];
+                    let mut members = child.as_object().into_iter().flatten();
+                    if let Some((other, _)) =
+                        members.find(|(name, _)| !known.contains(&name.as_str()))
+                    {
+                        return Err(format!(
+                            "{key} has no member {other:?}: a transfer has its decoded value"
+                        ));
+                    }
                     if let Some(edited) = child.get("decoded") {
                         let bytes = unhex(&raw)?;
                         // An IE's identifier gives the type of what it contains, and
@@ -662,6 +715,7 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
         let original_id = object.remove("_original_id");
         let undecoded = object.remove("_decode_error").is_some();
         object.remove("_ie_name");
+        object.remove(EDITED);
         if let Some(id) = id {
             // The value of an IE of an extension container has another name.
             let field = match member.starts_with("iE-Extension") {
@@ -735,7 +789,7 @@ pub fn inspect_pdu(pdu: &NGAP_PDU) -> Result<Value, String> {
     let direction = pdu.direction();
     let raw = body["value"].clone();
     let mut message = (message_type(direction, code)?.decode)(&unhex(&raw)?)?;
-    expand(&mut message, 0)?;
+    expand(&mut message, 0);
     Ok(
         json!({"procedure_code": code, "direction": direction, "criticality": body["criticality"], "message": message, "_raw_message": raw}),
     )
@@ -788,7 +842,7 @@ pub fn encode_pdu(tree: &Value) -> Result<NGAP_PDU, String> {
         (message_type(direction, code)?.encode)(&message)?
     };
     let top = json!({variant: {"procedureCode": code, "criticality": tree["criticality"], "value": hex(&raw)}});
-    let mut pdu: NGAP_PDU = rasn::jer::decode(&top.to_string()).map_err(|e| e.to_string())?;
+    let (mut pdu, _) = decode_jer::<NGAP_PDU>(&top)?;
     pdu.repair_open_types()?;
     Ok(pdu)
 }

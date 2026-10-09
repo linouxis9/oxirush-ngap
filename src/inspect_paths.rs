@@ -12,6 +12,11 @@ const MESSAGE: &str = "message";
 const IES: &str = "protocolIEs";
 /// The most occurrences that a path selects.
 const OCCURRENCES: usize = 4096;
+/// The member that marks an IE or a transfer whose value an edit changed: its octets are
+/// no longer those of its value.
+pub(crate) const EDITED: &str = "_edited";
+/// The members that hold the value of an IE or of a transfer.
+const VALUES: [&str; 3] = ["value", "extensionValue", "decoded"];
 
 /// Whether two names are the same: whatever their case, with `-`, `_` and space taken as
 /// the same.
@@ -95,7 +100,12 @@ fn resolve(path: &str) -> Result<(Vec<String>, bool), String> {
 }
 
 /// The values at `path` in `tree`, in the order of the tree. An IE that the message does
-/// not have selects nothing; a member that a value cannot have is an error.
+/// not have selects nothing; a member that a value does not have is an error, whether the
+/// type of the value has none of that name or the value has it absent. `*` is each entry
+/// of a list or each member of a value, without those that start with `_`. The `octets`
+/// of an IE or of a transfer are what it was received as: those of one whose value
+/// [`set`], [`remove`] or [`insert`] edited since are an error, as
+/// [`encode_pdu`](crate::inspect::encode_pdu) has yet to give it others.
 pub fn select<'a>(tree: &'a Value, path: &str) -> Result<Vec<&'a Value>, String> {
     let mut selected = vec![tree];
     let (parts, named) = resolve(path)?;
@@ -114,7 +124,9 @@ pub fn select<'a>(tree: &'a Value, path: &str) -> Result<Vec<&'a Value>, String>
             if part == "*" {
                 match value {
                     Value::Array(a) => next.extend(a),
-                    Value::Object(o) => next.extend(o.values()),
+                    Value::Object(o) => {
+                        next.extend(o.iter().filter(|(name, _)| shown(name)).map(|(_, v)| v))
+                    }
                     Value::Null => {}
                     _ => return Err(format!("wildcard cannot traverse a scalar at {path}")),
                 }
@@ -126,8 +138,13 @@ pub fn select<'a>(tree: &'a Value, path: &str) -> Result<Vec<&'a Value>, String>
                     return Err(format!("IE-id selection requires an array at {path}"));
                 }
             } else if let Some(object) = value.as_object() {
-                // `octets` is what an IE was received as.
-                let octets = object.get("_raw_value").filter(|_| part == "octets");
+                // `octets` is what an IE or a transfer was received as.
+                let octets = received(object).filter(|_| part == "octets");
+                if octets.is_some() && object.contains_key(EDITED) {
+                    return Err(format!(
+                        "the value was edited since these octets were received at {path}"
+                    ));
+                }
                 if let Some(value) = object.get(&part).or(octets) {
                     next.push(value);
                 } else {
@@ -159,6 +176,23 @@ pub fn select<'a>(tree: &'a Value, path: &str) -> Result<Vec<&'a Value>, String>
     Ok(selected)
 }
 
+/// Whether a member is one of a value, and not what a tree keeps of what was received.
+fn shown(name: &str) -> bool {
+    !name.starts_with('_') || name == "_decode_error"
+}
+
+/// The octets that an IE or a transfer was received as.
+fn received(entry: &serde_json::Map<String, Value>) -> Option<&Value> {
+    entry.get("_raw_value").or(entry.get("_raw_transfer"))
+}
+
+/// The member of an entry that holds the octets it was received as.
+fn received_member(entry: &serde_json::Map<String, Value>) -> Option<&'static str> {
+    ["_raw_value", "_raw_transfer"]
+        .into_iter()
+        .find(|member| entry.contains_key(*member))
+}
+
 /// Each value of `tree` with the path that selects it, in the order of the tree. A list
 /// of plain values is one value. The IEs of the message go by name under the root, and
 /// those of a message that the tree contains by name in its place; an IE goes by its
@@ -182,7 +216,7 @@ fn walk(value: &Value, path: &mut String, found: &mut Vec<(String, Value)>) {
     match value {
         Value::Object(members) if !members.is_empty() => {
             for (name, member) in members {
-                if name.starts_with('_') && name != "_decode_error" {
+                if !shown(name) {
                     continue;
                 }
                 let Some(ies) = member.as_array().filter(|_| name == IES) else {
@@ -238,9 +272,12 @@ enum Edit {
 /// Give the member or the list entry at `path` the value `value`. `null` takes an
 /// optional member out. An IE is written as `{id, criticality, value}` with its typed
 /// value, or with its `octets` in hexadecimal in place of `value`; its `id` is a number,
-/// or its name under the root. The `octets` of an IE are set in place of its value.
+/// or its name under the root. The `octets` of an IE or of a transfer are set in place of
+/// its value.
 ///
-/// A path that selects nothing is an error, and the tree is then as it was.
+/// A path that selects nothing is an error, and the tree is then as it was. So is an
+/// edit that would send nothing else: the value of an IE or the decoded value of a
+/// transfer is not taken out, as the octets received would go out in its place.
 pub fn set(tree: &mut Value, path: &str, value: Value) -> Result<(), String> {
     edit(tree, path, Edit::Set(value))
 }
@@ -281,6 +318,14 @@ fn edit(tree: &mut Value, path: &str, mut operation: Edit) -> Result<(), String>
     Ok(())
 }
 
+/// Mark `entry` when `member`, which an edit changed or changed something under, holds
+/// the value of an IE or of a transfer that was received.
+fn mark(entry: &mut serde_json::Map<String, Value>, member: &str) {
+    if VALUES.contains(&member) && received_member(entry).is_some() {
+        entry.insert(EDITED.into(), true.into());
+    }
+}
+
 /// Apply `operation` at `parts` under `tree`; the number of places that it changed.
 fn apply(
     tree: &mut Value,
@@ -302,30 +347,52 @@ fn apply(
             return Err("array selection used on an object".into());
         }
         if rest.is_empty() {
-            // The octets of an IE are sent in place of its value.
-            if part == "octets" && object.contains_key("_raw_value") {
+            // The octets of an IE or of a transfer are sent in place of its value.
+            if let Some(member) = received_member(object).filter(|_| part == "octets") {
                 let Edit::Set(octets @ Value::String(_)) = operation else {
-                    return Err("the octets of an IE are set, in hexadecimal".into());
+                    return Err("octets are set, in hexadecimal".into());
                 };
-                object.insert("_raw_value".into(), octets.clone());
-                object.remove("value");
-                object.remove("extensionValue");
+                object.insert(member.into(), octets.clone());
+                for value in VALUES.into_iter().chain(["_decode_error", EDITED]) {
+                    object.remove(value);
+                }
                 return Ok(1);
             }
+            let removes = matches!(operation, Edit::Remove | Edit::Set(Value::Null));
+            // What holds the value of an IE or of a transfer: without it the octets
+            // received would be sent, and the edit would change nothing.
+            let value = match part.as_str() {
+                "value" | "extensionValue" => object.contains_key("id"),
+                "decoded" => object.contains_key("_raw_transfer"),
+                _ => false,
+            };
+            if removes && value {
+                return Err(format!(
+                    "{part} is not taken out: remove what has it, or set its octets"
+                ));
+            }
             return match operation {
-                // Null removes a member: one that is not there is not selected.
-                Edit::Set(value) if value.is_null() && !object.contains_key(part) => Ok(0),
+                // Null takes a member out, as a removal does: one that is not there is
+                // not selected.
+                Edit::Remove | Edit::Set(Value::Null) => {
+                    Ok(usize::from(object.remove(part).is_some()))
+                }
                 Edit::Set(value) => {
                     object.insert(part.clone(), value.clone());
+                    mark(object, part);
                     Ok(1)
                 }
-                Edit::Remove => Ok(usize::from(object.remove(part).is_some())),
                 Edit::Insert(_) => Err("insert adds to a list".into()),
             };
         }
-        return object
-            .get_mut(part)
-            .map_or(Ok(0), |child| apply(child, rest, operation, named));
+        let changed = match object.get_mut(part) {
+            Some(child) => apply(child, rest, operation, named)?,
+            None => 0,
+        };
+        if changed > 0 {
+            mark(object, part);
+        }
+        return Ok(changed);
     }
     let Some(array) = tree.as_array_mut() else {
         return Ok(0);

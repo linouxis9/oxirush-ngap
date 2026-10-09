@@ -150,7 +150,9 @@ list or each member of a value, without the members that start with `_`.
 
 The name of an IE is taken in any case, with `-`, `_` and space as the same;
 the members of a value are spelled as ASN.1 spells them, and the name of a
-message is taken with or without its hyphens.
+message is taken with or without its hyphens. `inspect::message_ies` gives the
+IEs that a message can have, from its ASN.1 object set: the identifier of each
+and whether its presence is mandatory, in the order of the set.
 
 `inspect::message_name(&pdu)` is the name that ASN.1 gives the message of a
 PDU, such as `InitialContextSetupResponse`, and `inspect::message_named` finds
@@ -228,7 +230,8 @@ rustfmt --edition 2024 src/ngap.rs src/registry.rs src/inspect_registry.rs
 `rasn-compiler` finds rustfmt through `CARGO`. To the compiler's output the
 generator adds the flat API, convenience methods, and `Display`
 implementation. `src/registry.rs` is the list of the procedures and of the IEs:
-one line for each, with its code or its identifier, its names and its types.
+one line for each, with its code or its identifier, its names and its types,
+and for each message of a procedure the IEs of its object set.
 The names that the macros take, `NgapPduKind` and the names and the types of the
 `inspect` feature all expand from it, so each is written once.
 `src/inspect_registry.rs` has what the `inspect` feature alone needs. Commit

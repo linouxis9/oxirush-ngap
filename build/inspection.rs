@@ -407,7 +407,7 @@ pub(super) fn generate(
     generate_readable(generated, &registry.ies, &mut out)?;
     // The types that the registry and the transfers have the functions of.
     let messages = registry.procedures.values().flat_map(|p| p.messages.iter());
-    let roots = (messages.flatten().map(|(_, ty)| ty.clone()))
+    let roots = (messages.flatten().map(|message| message.ty.clone()))
         .chain(registry.ies.values().filter_map(|ie| alone(&ie.types)))
         .chain(registry.ies.values().filter_map(|ie| alone(&ie.contents)))
         .chain(transfers.values().filter_map(alone))

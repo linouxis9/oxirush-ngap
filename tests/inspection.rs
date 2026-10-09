@@ -964,3 +964,53 @@ fn what_is_nested_deeper_than_the_inspection_goes_keeps_its_octets() {
     assert_eq!(ran, [&serde_json::json!(7)]);
     assert_eq!(inspect::encode_pdu(&tree).unwrap(), pdu);
 }
+
+#[test]
+fn a_message_has_the_ies_of_its_object_set() {
+    let id = |name: &str| {
+        let mut names = inspect::ie_names().iter();
+        names.find(|(_, known)| *known == name).unwrap().0
+    };
+    let ies = inspect::message_ies("InitialContextSetupRequest").unwrap();
+    assert_eq!(ies[0], (id("AMF-UE-NGAP-ID"), true));
+    assert!(ies.contains(&(id("PDUSessionResourceSetupListCxtReq"), false)));
+    // The presence of an IE that is there on a condition is not mandatory.
+    assert!(ies.contains(&(id("UEAggregateMaximumBitRate"), false)));
+    let listed = |name: &str| ies.iter().any(|(ie, _)| *ie == id(name));
+    assert!(!listed("PDUSessionResourceSetupListSUReq"));
+    // A name is taken as that of a message is, and a message without IEs has none.
+    assert_eq!(
+        inspect::message_ies("initial-context-setup-request"),
+        Some(ies)
+    );
+    assert_eq!(inspect::message_ies("PrivateMessage"), Some(&[][..]));
+    assert_eq!(inspect::message_ies("NoSuchMessage"), None);
+    // Every message has its IEs in the order of its set, each of them known.
+    for (.., name) in inspect::message_names() {
+        let ies = inspect::message_ies(name).unwrap();
+        assert!(name == "PrivateMessage" || !ies.is_empty(), "{name}");
+        for (ie, _) in ies {
+            assert!(
+                inspect::ie_names().iter().any(|(known, _)| known == ie),
+                "{name} {ie}"
+            );
+        }
+    }
+}
+
+#[test]
+fn a_kind_that_the_specification_does_not_have_says_the_direction_of_its_pdu() {
+    let pdu = NGAP_PDU::unsuccessfulOutcome(UnsuccessfulOutcome::new(
+        ProcedureCode(46),
+        Criticality::ignore,
+        rasn::types::Any::new(vec![0]),
+    ));
+    let oxirush_ngap::NgapPduKind::Other {
+        direction,
+        procedure_code,
+    } = pdu.kind()
+    else {
+        panic!("{:?}", pdu.kind());
+    };
+    assert_eq!((direction, procedure_code), (pdu.direction(), 46));
+}

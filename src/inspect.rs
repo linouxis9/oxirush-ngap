@@ -160,13 +160,25 @@ pub fn message_named(name: &str) -> Option<(&'static str, u8)> {
         .map(|(direction, code, _)| (direction, code))
 }
 
+/// The IEs that the message `name` can have, as its ASN.1 object set lists them: the
+/// identifier of each and whether its presence is mandatory, in the order of the set. The
+/// name is the one that ASN.1 gives the message, taken as [`message_named`] takes it.
+/// `None` for a name that is no message; a message without an object set of IEs, as a
+/// private message, has none.
+pub fn message_ies(name: &str) -> Option<&'static [(u16, bool)]> {
+    let written = letters(name);
+    let mut messages = registry::MESSAGES.iter();
+    let message = messages.find(|(_, _, known, ..)| letters(known) == written);
+    message.map(|(.., ies)| *ies)
+}
+
 /// The functions of the type of the message of a direction and a procedure code.
 fn message_type(direction: &str, code: u8) -> Result<Typed, String> {
     let mut messages = registry::MESSAGES.iter();
     let message = messages.find(|(of, procedure, ..)| (*of, *procedure) == (direction, code));
     let protocol = registry::PROTOCOL;
     message
-        .map(|(.., typed)| typed())
+        .map(|(_, _, _, typed, _)| typed())
         .ok_or_else(|| format!("unknown {protocol} direction/procedure {direction}/{code}"))
 }
 

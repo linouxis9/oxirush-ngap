@@ -10,6 +10,9 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
+  # The tests need no debug information, and with it the compiler needs more
+  # memory for this crate than a hosted runner gives a job.
+  CARGO_PROFILE_DEV_DEBUG: 0
 
 jobs:
   test:

@@ -1001,6 +1001,76 @@ fn a_message_has_the_ies_of_its_object_set() {
 }
 
 #[test]
+fn a_message_has_the_criticality_that_asn1_assigns() {
+    let id = |name: &str| {
+        let mut names = inspect::ie_names().iter();
+        names.find(|(_, known)| *known == name).unwrap().0
+    };
+    let request = inspect::message_ie_criticalities("InitialContextSetupRequest").unwrap();
+    assert_eq!(request[0], (10, "reject"));
+    assert_eq!(request[0].0, id("AMF-UE-NGAP-ID"));
+    let assistance = id("CoreNetworkAssistanceInformationForInactive");
+    assert!(request.contains(&(assistance, "ignore")));
+    // An IE has the criticality that the set of each message gives it.
+    let response = inspect::message_ie_criticalities("InitialContextSetupResponse").unwrap();
+    assert_eq!(response[0], (id("AMF-UE-NGAP-ID"), "ignore"));
+    // A name is taken as that of a message is, and a message without IEs has none.
+    assert_eq!(
+        inspect::message_ie_criticalities("initial-context-setup-request"),
+        Some(request)
+    );
+    assert_eq!(
+        inspect::message_ie_criticalities("PrivateMessage"),
+        Some(&[][..])
+    );
+    assert_eq!(inspect::message_ie_criticalities("NoSuchMessage"), None);
+    // The procedure has its own, which is that of each of its messages.
+    let procedure = inspect::message_criticality;
+    assert_eq!(procedure("InitialContextSetupRequest"), Some("reject"));
+    assert_eq!(procedure("initial-context-setup-response"), Some("reject"));
+    assert_eq!(procedure("Paging"), Some("ignore"));
+    assert_eq!(procedure("ErrorIndication"), Some("ignore"));
+    assert_eq!(procedure("NoSuchMessage"), None);
+    // Every message has the IEs of its set in their order, each with a criticality.
+    let known = ["reject", "ignore", "notify"];
+    for (.., name) in inspect::message_names() {
+        let ies = inspect::message_ies(name).unwrap().iter().map(|(ie, _)| ie);
+        let assigned = inspect::message_ie_criticalities(name).unwrap();
+        assert!(ies.eq(assigned.iter().map(|(ie, _)| ie)), "{name}");
+        for (ie, criticality) in assigned {
+            assert!(known.contains(criticality), "{name} {ie}");
+        }
+        assert!(known.contains(&procedure(name).unwrap()), "{name}");
+    }
+}
+
+#[test]
+fn the_messages_of_the_fixtures_have_the_criticality_that_asn1_assigns() {
+    let mut ies = 0;
+    for line in include_str!("fixtures/messages.tsv")
+        .lines()
+        .filter(|line| !line.starts_with('#') && !line.is_empty())
+    {
+        let fields: Vec<_> = line.split('\t').collect();
+        let pdu = NGAP_PDU::decode(&hex::decode(fields[1]).unwrap()).unwrap();
+        let tree = inspect::inspect_pdu(&pdu).unwrap();
+        let procedure = inspect::message_criticality(fields[0]);
+        assert_eq!(tree["criticality"].as_str(), procedure, "{}", fields[0]);
+        let assigned = inspect::message_ie_criticalities(fields[0]).unwrap();
+        // A private message has no IEs of an object set.
+        let entries = tree["message"]["protocolIEs"].as_array();
+        for ie in entries.into_iter().flatten() {
+            let id = ie["id"].as_u64().unwrap();
+            let mut assigned = assigned.iter().filter(|(known, _)| u64::from(*known) == id);
+            let assigned = assigned.next().map(|(_, criticality)| *criticality);
+            assert_eq!(ie["criticality"].as_str(), assigned, "{}", fields[0]);
+            ies += 1;
+        }
+    }
+    assert!(ies > 300, "{ies}");
+}
+
+#[test]
 fn the_identifiers_of_the_registry_are_the_constants_of_the_bindings() {
     use std::collections::BTreeMap;
     let letters = |name: &str| -> String {
@@ -1028,11 +1098,11 @@ fn the_identifiers_of_the_registry_are_the_constants_of_the_bindings() {
         let constant = constants.get(&("ProtocolIEID".into(), letters(name)));
         assert_eq!(constant, Some(&u64::from(*id)), "{name}");
     }
-    // The procedures of the list: `<code> <Name> {`.
+    // The procedures of the list: `<code> <Name> <criticality> {`.
     let mut procedures = 0;
     for line in include_str!("../src/registry.rs").lines() {
-        let mut words = line.split_whitespace();
-        let (Some(code), Some(name), Some("{")) = (words.next(), words.next(), words.next()) else {
+        let words: Vec<_> = line.split_whitespace().take(4).collect();
+        let [code, name, _, "{"] = words[..] else {
             continue;
         };
         let constant = constants.get(&("ProcedureCode".into(), letters(name)));

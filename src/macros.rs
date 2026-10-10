@@ -143,22 +143,26 @@ impl fmt::Display for MissingIeError {
 impl std::error::Error for MissingIeError {}
 
 /// The procedures of the protocol, which `src/registry.rs` lists from the ASN.1: the
-/// code and the name of each, then for each of its messages the direction, the kind,
-/// the name that ASN.1 gives it, its type and the IEs of its object set, each with its
-/// identifier and its presence.
+/// code, the name and the criticality of each, then for each of its messages the
+/// direction, the kind, the name that ASN.1 gives it, its type and the IEs of its object
+/// set, each with its identifier, its criticality and its presence.
 ///
 /// The codes that the macros take by the names of the procedures, the type of the
 /// message that they build, the kinds of a PDU and, with the `inspect` feature, the
-/// messages of a tree and the IEs that each can have all come from these lines.
+/// messages of a tree, the IEs that each can have and the criticality that ASN.1 assigns
+/// all come from these lines.
 macro_rules! procedures {
-    ($($code:literal $procedure:ident {
+    ($($code:literal $procedure:ident $($criticality:ident)? {
         $(InitiatingMessage $initiating:ident $initiating_name:literal $initiating_type:path
-            [$($initiating_ie:literal $initiating_presence:ident),*];)?
+            [$($initiating_ie:literal $initiating_criticality:ident
+                $initiating_presence:ident),*];)?
         $(SuccessfulOutcome $successful:ident $successful_name:literal $successful_type:path
-            [$($successful_ie:literal $successful_presence:ident),*];)?
+            [$($successful_ie:literal $successful_criticality:ident
+                $successful_presence:ident),*];)?
         $(UnsuccessfulOutcome $unsuccessful:ident $unsuccessful_name:literal
             $unsuccessful_type:path
-            [$($unsuccessful_ie:literal $unsuccessful_presence:ident),*];)?
+            [$($unsuccessful_ie:literal $unsuccessful_criticality:ident
+                $unsuccessful_presence:ident),*];)?
     })*) => {
         /// The procedure codes, by the names of the procedures.
         #[doc(hidden)]
@@ -265,6 +269,24 @@ macro_rules! procedures {
                 $crate::inspect::Typed::of::<$unsuccessful_type>,
                 &[$(($unsuccessful_ie, $crate::macros::presence!($unsuccessful_presence))),*],
                 stringify!($unsuccessful_type)),)?)*
+        ];
+
+        /// The criticality that ASN.1 assigns to each procedure, by its code.
+        #[cfg(feature = "inspect")]
+        pub(crate) const PROCEDURE_CRITICALITIES: &[(u8, &str)] =
+            &[$($(($code, stringify!($criticality)),)?)*];
+
+        /// The criticality that ASN.1 assigns to the IEs of each message: the name that
+        /// ASN.1 gives the message, then each IE of its object set with its identifier and
+        /// its criticality.
+        #[cfg(feature = "inspect")]
+        pub(crate) const MESSAGE_IE_CRITICALITIES: &[(&str, &[(u16, &str)])] = &[
+            $($(($initiating_name,
+                &[$(($initiating_ie, stringify!($initiating_criticality))),*]),)?)*
+            $($(($successful_name,
+                &[$(($successful_ie, stringify!($successful_criticality))),*]),)?)*
+            $($(($unsuccessful_name,
+                &[$(($unsuccessful_ie, stringify!($unsuccessful_criticality))),*]),)?)*
         ];
     };
 }

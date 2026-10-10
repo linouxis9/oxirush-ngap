@@ -170,7 +170,10 @@ selected by `@id=N` whose identifier is unknown or has several types, and the
 entries of a container other than that of the message when they are selected
 by position. `inspect::message_ies` gives the IEs that a message can have,
 from its ASN.1 object set: the identifier of each and whether its presence is
-mandatory, in the order of the set.
+mandatory, in the order of the set. `inspect::message_ie_criticalities` gives
+the criticality that the set assigns to each of them, and
+`inspect::message_criticality` that of the procedure of the message: `reject`,
+`ignore` or `notify`.
 
 `inspect::message_name(&pdu)` is the name that ASN.1 gives the message of a
 PDU, such as `InitialContextSetupResponse`, and `inspect::message_named` finds

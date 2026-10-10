@@ -59,6 +59,10 @@ is not source compatible with 0.4.2.
   the object set of the message, and each segment under it a member that the
   type of the value has. `src/inspect_registry.rs` lists what each type has,
   from the bindings: one line for each SEQUENCE and each CHOICE.
+- With the `inspect` feature, `inspect::message_ie_criticalities` and
+  `inspect::message_criticality`: the criticality that ASN.1 assigns to each
+  IE of the object set of a message, and to the procedure of the message.
+  The list of `src/registry.rs` has both on the line of each procedure.
 
 ### Changed
 

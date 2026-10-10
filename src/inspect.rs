@@ -198,6 +198,28 @@ pub fn message_ies(name: &str) -> Option<&'static [(u16, bool)]> {
     message.map(|(_, _, _, _, ies, _)| *ies)
 }
 
+/// The criticality that the ASN.1 object set of the message `name` assigns to each of its
+/// IEs: the identifier of each and `"reject"`, `"ignore"` or `"notify"`, in the order of
+/// the set, which is that of [`message_ies`]. The name is the one that ASN.1 gives the
+/// message, taken as [`message_named`] takes it. `None` for a name that is no message; a
+/// message without an object set of IEs, as a private message, has none.
+pub fn message_ie_criticalities(name: &str) -> Option<&'static [(u16, &'static str)]> {
+    let mut messages = registry::MESSAGE_IE_CRITICALITIES.iter();
+    let message = messages.find(|(known, _)| same_name(known, name));
+    message.map(|(_, ies)| *ies)
+}
+
+/// The criticality that ASN.1 assigns to the procedure of the message `name`, which a PDU
+/// has beside its procedure code: `"reject"`, `"ignore"` or `"notify"`. The name is the
+/// one that ASN.1 gives the message, taken as [`message_named`] takes it. `None` for a
+/// name that is no message.
+pub fn message_criticality(name: &str) -> Option<&'static str> {
+    let (_, code) = message_named(name)?;
+    let mut procedures = registry::PROCEDURE_CRITICALITIES.iter();
+    let procedure = procedures.find(|(known, _)| *known == code);
+    procedure.map(|(_, criticality)| *criticality)
+}
+
 /// The functions of the type of the message of a direction and a procedure code.
 fn message_type(direction: &str, code: u8) -> Result<Typed, String> {
     let mut messages = registry::MESSAGES.iter();

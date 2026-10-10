@@ -2,8 +2,8 @@
 use crate::inspect::{Form, Typed, transfers};
 use crate::inspect_paths::types;
 pub(crate) use crate::registry::{
-    IE_NAMES, IE_TYPES, MESSAGE_IE_CRITICALITIES, MESSAGES, PROCEDURE_CRITICALITIES, ie,
-    ie_contents,
+    IE_NAMES, IE_TYPES, ITEM_CRITICALITIES, MESSAGE_IE_CRITICALITIES, MESSAGES,
+    PROCEDURE_CRITICALITIES, ie, ie_contents,
 };
 pub(crate) const PROTOCOL: &str = "NGAP";
 pub(crate) const ROOT: &str = "ngap";

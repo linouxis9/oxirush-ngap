@@ -311,12 +311,14 @@ pub(crate) use presence;
 /// The IEs of the protocol, which `src/registry.rs` lists from the ASN.1: the identifier,
 /// the name that ASN.1 gives it and the type of each, the type that its octets contain,
 /// then the names that the macros take it by. An identifier that has several types has
-/// its name alone.
+/// its name alone. An IE that a value holds alone, in a single container, has its
+/// criticality after its identifier when its object sets give it one.
 ///
 /// The identifier and the type that a name stands for in the macros and, with the
-/// `inspect` feature, the names and the types of a tree all come from these lines.
+/// `inspect` feature, the names and the types of a tree and the criticality of an IE in
+/// a single container all come from these lines.
 macro_rules! ies {
-    ($($id:literal $name:literal
+    ($($id:literal $($item:ident)? $name:literal
         $($ie:path $(, $contents:path)? $(=> $own:ident $($alias:ident)?)?)?;
     )*) => {
         /// The identifier and the type of each IE, by the names that the macros take.
@@ -332,6 +334,12 @@ macro_rules! ies {
 
         #[cfg(feature = "inspect")]
         pub(crate) const IE_NAMES: &[(u16, &str)] = &[$(($id, $name),)*];
+
+        /// The criticality that ASN.1 assigns to each IE that a value holds alone, in a
+        /// single container, when its object sets give it one.
+        #[cfg(feature = "inspect")]
+        pub(crate) const ITEM_CRITICALITIES: &[(u16, &str)] =
+            &[$($(($id, stringify!($item)),)?)*];
 
         /// The path of the type of each IE that has one type, and that of the type that
         /// its octets contain.

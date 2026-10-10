@@ -34,7 +34,8 @@ pub(crate) struct Message {
 }
 
 /// An IE: the name that ASN.1 gives it after `id-`, the types that its object sets give
-/// it and the types that its octets contain, and the names that the macros take it by.
+/// it and the types that its octets contain, the criticalities that the object sets of
+/// the single containers give it, and the names that the macros take it by.
 /// The macros take the IE of a message by its own name and, where one type has one IE,
 /// by the name of that type.
 #[derive(Default)]
@@ -42,6 +43,7 @@ pub(crate) struct Ie {
     pub(crate) name: String,
     pub(crate) types: BTreeSet<String>,
     pub(crate) contents: BTreeSet<String>,
+    pub(crate) items: BTreeSet<String>,
     pub(crate) macros: Vec<String>,
 }
 
@@ -87,7 +89,7 @@ impl Registry {
             ies: BTreeMap::new(),
         };
         registry.procedures = registry.read_procedures(protocol, asn)?;
-        registry.ies = registry.read_ies(asn)?;
+        registry.ies = registry.read_ies(protocol, asn)?;
         Ok(registry)
     }
 
@@ -129,12 +131,17 @@ impl Registry {
             writeln!(out, " }}")?;
         }
         writeln!(out, "}}")?;
-        // The identifier, the name and the type, the type that the octets of the IE
+        // The identifier, the criticality of the IE in a single container when its object
+        // sets give it one, the name and the type, the type that the octets of the IE
         // contain, then the names that the macros take the IE by. An identifier that has
         // several types has its name alone.
         writeln!(out, "ies! {{")?;
         for (id, ie) in &self.ies {
-            write!(out, "    {id} {:?}", ie.name)?;
+            write!(out, "    {id}")?;
+            if let Some(criticality) = alone(&ie.items) {
+                write!(out, " {criticality}")?;
+            }
+            write!(out, " {:?}", ie.name)?;
             match (alone(&ie.types), alone(&ie.contents)) {
                 (Some(ty), Some(contained)) => write!(out, " {ty}, {contained}")?,
                 (Some(ty), None) => write!(out, " {ty}")?,
@@ -212,7 +219,7 @@ impl Registry {
     }
 
     /// The IEs of the object sets, and of the extension sets, which the macros do not reach.
-    fn read_ies(&self, asn: &str) -> Result<BTreeMap<u16, Ie>> {
+    fn read_ies(&self, protocol: &str, asn: &str) -> Result<BTreeMap<u16, Ie>> {
         let ids = identifiers(asn)?;
         let object = Regex::new(
             r"(?s)\{\s*ID\s+(id-[A-Za-z][A-Za-z0-9-]*)\s+CRITICALITY\s+[A-Za-z-]+\s+(TYPE|EXTENSION)\s+(OCTET\s+STRING(?:\s*\(CONTAINING\s+[A-Za-z][A-Za-z0-9-]*\s*\))?|[A-Za-z][A-Za-z0-9-]*)\s+PRESENCE",
@@ -254,6 +261,12 @@ impl Registry {
                 }
             }
         }
+        // The criticalities of the IEs that a value holds alone, in a single container.
+        for (name, criticalities) in single_containers(protocol, asn)? {
+            let id = ids.get(&name).map(|(id, _)| id);
+            let ie = id.and_then(|id| ies.get_mut(id));
+            ie.ok_or_else(|| anyhow!("{name} names no IE"))?.items = criticalities;
+        }
         // The name of a type is an alias only for the one IE of that type: a type that two
         // IEs have could otherwise address either. Nor is it one when an IE has that name,
         // within the reach of the macros or not: the name of an IE names that IE.
@@ -294,6 +307,40 @@ fn identifiers(asn: &str) -> Result<BTreeMap<String, (u16, bool)>> {
         .captures_iter(asn)
         .map(|c| Ok((c[1].to_string(), (c[3].parse()?, &c[2] == "ProtocolIE-ID"))))
         .collect()
+}
+
+/// The criticalities that each IE has in the object sets of the single containers, by the
+/// constant of the IE. A set of IEs that no `ProtocolIE-Container` has is that of a
+/// `ProtocolIE-SingleContainer`, which a value holds alone or as each entry of a list.
+fn single_containers(protocol: &str, asn: &str) -> Result<BTreeMap<String, BTreeSet<String>>> {
+    let container =
+        Regex::new(r"ProtocolIE-Container\s*\{\s*\{\s*([A-Za-z][A-Za-z0-9-]*)\s*\}\s*\}")?;
+    let containers = container.captures_iter(asn).map(|c| c[1].to_string());
+    let containers: BTreeSet<String> = containers.collect();
+    let set = Regex::new(&format!(
+        r"(?ms)^[\t ]*([A-Za-z][A-Za-z0-9-]*)\s+{protocol}-PROTOCOL-IES\s*::=\s*\{{(.*?)^[\t ]*\}}"
+    ))?;
+    let object = Regex::new(
+        r"\{\s*ID\s+(id-[A-Za-z][A-Za-z0-9-]*)\s+CRITICALITY\s+(reject|ignore|notify)\b",
+    )?;
+    let mut items: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+    for set in set.captures_iter(asn) {
+        if containers.contains(&set[1]) {
+            continue;
+        }
+        let mut objects = 0;
+        for c in object.captures_iter(&set[2]) {
+            let criticalities = items.entry(c[1].to_string()).or_default();
+            criticalities.insert(c[2].to_string());
+            objects += 1;
+        }
+        ensure!(
+            set[2].matches("PRESENCE").count() == objects,
+            "{}: an object of the set was not read",
+            &set[1]
+        );
+    }
+    Ok(items)
 }
 
 /// The IEs of the object set that the message `name` has for its `protocolIEs`: none for

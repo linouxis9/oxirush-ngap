@@ -1071,6 +1071,23 @@ fn the_messages_of_the_fixtures_have_the_criticality_that_asn1_assigns() {
 }
 
 #[test]
+fn an_ie_that_a_value_holds_alone_has_the_criticality_of_its_object_sets() {
+    let id = |name: &str| {
+        let mut names = inspect::ie_names().iter();
+        names.find(|(_, known)| *known == name).unwrap().0
+    };
+    // The alternatives that extend the CHOICE of a node and that of a location.
+    let item = |name: &str| inspect::item_criticality(id(name));
+    assert_eq!(inspect::item_criticality(240), Some("reject"));
+    assert_eq!(item("GlobalTNGF-ID"), Some("reject"));
+    assert_eq!(item("UserLocationInformationTNGF"), Some("ignore"));
+    // The IEs of a message and those of a transfer are in no single container.
+    assert_eq!(item("AMF-UE-NGAP-ID"), None);
+    assert_eq!(item("PDUSessionType"), None);
+    assert_eq!(inspect::item_criticality(u16::MAX), None);
+}
+
+#[test]
 fn the_identifiers_of_the_registry_are_the_constants_of_the_bindings() {
     use std::collections::BTreeMap;
     let letters = |name: &str| -> String {

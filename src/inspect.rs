@@ -220,6 +220,17 @@ pub fn message_criticality(name: &str) -> Option<&'static str> {
     procedure.map(|(_, criticality)| *criticality)
 }
 
+/// The criticality that ASN.1 assigns to the IE `id` where a value holds it alone, in a
+/// `ProtocolIE-SingleContainer`, as the alternative that extends a CHOICE: `"reject"`,
+/// `"ignore"` or `"notify"`. `None` for an IE that no object set of a single container
+/// has, as the IEs of a message or of a transfer, and for one that two of these sets give
+/// two criticalities.
+pub fn item_criticality(id: u16) -> Option<&'static str> {
+    let mut items = registry::ITEM_CRITICALITIES.iter();
+    let item = items.find(|(known, _)| *known == id);
+    item.map(|(_, criticality)| *criticality)
+}
+
 /// The functions of the type of the message of a direction and a procedure code.
 fn message_type(direction: &str, code: u8) -> Result<Typed, String> {
     let mut messages = registry::MESSAGES.iter();

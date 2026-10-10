@@ -173,7 +173,8 @@ from its ASN.1 object set: the identifier of each and whether its presence is
 mandatory, in the order of the set. `inspect::message_ie_criticalities` gives
 the criticality that the set assigns to each of them, and
 `inspect::message_criticality` that of the procedure of the message: `reject`,
-`ignore` or `notify`.
+`ignore` or `notify`. `inspect::item_criticality` gives that of an IE that a
+value holds alone, in a `ProtocolIE-SingleContainer`, by its identifier.
 
 `inspect::message_name(&pdu)` is the name that ASN.1 gives the message of a
 PDU, such as `InitialContextSetupResponse`, and `inspect::message_named` finds

@@ -152,7 +152,7 @@
 use serde_json::{Value, json};
 
 use crate::inspect_paths::{EDITED, same_name, written_ie};
-pub use crate::inspect_paths::{check_path, insert, paths, remove, select, set};
+pub use crate::inspect_paths::{check_path, enumerated_at, insert, paths, remove, select, set};
 use crate::inspect_registry as registry;
 use crate::ngap::NGAP_PDU;
 

@@ -307,6 +307,8 @@ fn generate_readable(generated: &str, ies: &BTreeMap<u16, Ie>, out: &mut String)
     // some type gives a member of another kind has several, and so has no form.
     let mut members: BTreeMap<String, BTreeMap<Option<String>, String>> = BTreeMap::new();
     let mut enumerated = std::collections::BTreeSet::new();
+    // The names of the values of each ENUMERATED, in the order of its definition.
+    let mut enumerations: BTreeMap<String, Vec<String>> = BTreeMap::new();
     for (_, item) in &declarations {
         let mut member = |attributes: &[syn::Attribute], ident: &syn::Ident, ty| -> Result<()> {
             let name = rasn(attributes)?.0;
@@ -327,7 +329,9 @@ fn generate_readable(generated: &str, ies: &BTreeMap<u16, Ie>, out: &mut String)
             syn::Item::Enum(item) if rasn(&item.attrs)?.1 => {
                 for value in &item.variants {
                     let name = rasn(&value.attrs)?.0;
-                    enumerated.insert(name.unwrap_or_else(|| value.ident.unraw().to_string()));
+                    let name = name.unwrap_or_else(|| value.ident.unraw().to_string());
+                    enumerations.entry(item.ident.to_string()).or_default().push(name.clone());
+                    enumerated.insert(name);
                 }
             }
             syn::Item::Enum(item) => {
@@ -393,6 +397,16 @@ fn generate_readable(generated: &str, ies: &BTreeMap<u16, Ie>, out: &mut String)
         writeln!(out, "{name:?},")?;
     }
     writeln!(out, "];")?;
+    writeln!(
+        out,
+        "/// The names of the values of each ENUMERATED, by the name of its type in the \
+         bindings, in the order of the names of the types.\n\
+         pub(crate) const ENUMERATIONS: &[(&str, &[&str])] = &["
+    )?;
+    for (ty, names) in &enumerations {
+        writeln!(out, "({ty:?}, &{names:?}),")?;
+    }
+    writeln!(out, "];")?;
     Ok(())
 }
 
@@ -407,8 +421,8 @@ const CONTAINERS: &[(&str, &str)] = &[
 
 /// How the list of the types writes a value of type `ty`, and whether a member of that
 /// type may be absent: `_` for a value without members, `bits` for a string of bits whose
-/// size varies, the name of a SEQUENCE, of a CHOICE or of a type that is a list, a list
-/// in brackets and a container by its kind.
+/// size varies, the name of a SEQUENCE, of a CHOICE, of an ENUMERATED or of a type that
+/// is a list, a list in brackets and a container by its kind.
 fn shape(ty: &syn::Type, declared: &BTreeMap<String, &syn::Item>, depth: u8) -> (String, bool) {
     let plain = || ("_".to_string(), false);
     let Some((name, arguments)) = named(ty).filter(|_| depth < 16) else {
@@ -440,10 +454,8 @@ fn shape(ty: &syn::Type, declared: &BTreeMap<String, &syn::Item>, depth: u8) -> 
             }
             _ => plain(),
         },
-        (_, _, Some(syn::Item::Enum(item))) => match rasn(&item.attrs) {
-            Ok((_, false)) => (name.clone(), false),
-            _ => plain(),
-        },
+        // A CHOICE has its alternatives, and an ENUMERATED its names.
+        (_, _, Some(syn::Item::Enum(_))) => (name.clone(), false),
         _ => plain(),
     }
 }

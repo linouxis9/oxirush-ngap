@@ -67,6 +67,10 @@ is not source compatible with 0.4.2.
   that ASN.1 assigns to an IE that a value holds alone, in a
   `ProtocolIE-SingleContainer`, by its identifier, when its object sets give
   it one. The list of `src/registry.rs` has it on the line of the IE.
+- With the `inspect` feature, `inspect::enumerated_at` gives the names that
+  the value at a path of a message can have when its type is an `ENUMERATED`,
+  from the bindings, without a tree: a caller can refuse a name that no
+  message has before it compares one.
 
 ### Changed
 

@@ -5,7 +5,7 @@ use serde_json::{Map, Value, json};
 
 // The name of the protocol, the first segment of the paths of the IEs of the message of
 // a PDU, and what the ASN.1 says of the messages, the IEs and the types.
-use crate::inspect_registry::{IE_TYPES, MESSAGES, PROTOCOL, ROOT, TYPES};
+use crate::inspect_registry::{ENUMERATIONS, IE_TYPES, MESSAGES, PROTOCOL, ROOT, TYPES};
 /// The member of a tree that holds the message of the PDU.
 const MESSAGE: &str = "message";
 /// The member of a message that holds its IEs.
@@ -36,7 +36,7 @@ pub(crate) enum Shape {
     Bits,
     /// A SEQUENCE or a CHOICE, or a type that is a list or a string of bits, by the name
     /// that the bindings give it. A name that the list of the types does not have is
-    /// that of a value without members.
+    /// that of a value without members: an ENUMERATED, which has its names.
     Named(&'static str),
     /// A list.
     List(&'static Shape),
@@ -299,6 +299,12 @@ fn pdu(tree: &Value) -> Shape {
 fn kind_of(name: &str) -> Option<&'static Kind> {
     let at = TYPES.binary_search_by(|(known, _)| (*known).cmp(name));
     at.ok().map(|at| &TYPES[at].1)
+}
+
+/// The names of the values of the ENUMERATED that the bindings name `name`.
+fn enumeration(name: &str) -> Option<&'static [&'static str]> {
+    let at = ENUMERATIONS.binary_search_by(|(known, _)| (*known).cmp(name));
+    at.ok().map(|at| ENUMERATIONS[at].1)
 }
 
 /// `shape`, or what the type that it names is.
@@ -798,6 +804,47 @@ pub fn check_path(message: &str, path: &str) -> Result<(), String> {
     Ok(())
 }
 
+/// The names that the value at `path` can have in a message that ASN.1 names `message`,
+/// when its type is an ENUMERATED: the names of its values as the specification spells
+/// them, in the order of its definition. A name is compared as [`select`] compares one,
+/// whatever its case and whatever is between its letters.
+///
+/// `None` for a value of another type, and for one whose type is not known: what
+/// [`check_path`] does not refuse for that reason. A path that it refuses is an error
+/// here too.
+pub fn enumerated_at(message: &str, path: &str) -> Result<Option<&'static [&'static str]>, String> {
+    let known = sent(|_, _, name| same_name(name, message));
+    let message = known.ok_or_else(|| format!("{message:?} is not a message of {PROTOCOL}"))?;
+    let (parts, named) = resolve(path)?;
+    let mut places: Vec<Place> = vec![(None, Shape::Pdu(Some(message)))];
+    for part in &parts {
+        places = advance_all(places, part, named, path)?;
+    }
+    // The value is of one type, wherever the path finds it.
+    let mut names = None;
+    for (_, mut shape) in places {
+        // A type that is another one names it a few times at most.
+        for _ in 0..16 {
+            match shape {
+                Shape::Named(name) => match kind_of(name) {
+                    Some(Kind::Is(is)) => shape = *is,
+                    _ => break,
+                },
+                _ => break,
+            }
+        }
+        let Shape::Named(name) = shape else {
+            return Ok(None);
+        };
+        match (enumeration(name), names) {
+            (Some(of), None) => names = Some(of),
+            (Some(of), Some(other)) if of == other => {}
+            _ => return Ok(None),
+        }
+    }
+    Ok(names)
+}
+
 /// Whether a member is one of a value, and not what a tree keeps of what was received.
 fn shown(name: &str) -> bool {
     !name.starts_with('_') || name == "_decode_error"
@@ -1162,9 +1209,12 @@ mod tests {
         assert!(TYPES.windows(2).all(|pair| pair[0].0 < pair[1].0));
         fn check(of: &str, shape: Shape) {
             match shape {
-                // A name that the list does not have is that of a value without members,
-                // which the list writes as `_`.
-                Shape::Named(name) => assert!(kind_of(name).is_some(), "{of}: {name}"),
+                // A name that the list does not have is that of an ENUMERATED, which
+                // has no members and has its names.
+                Shape::Named(name) => assert!(
+                    kind_of(name).is_some() || enumeration(name).is_some(),
+                    "{of}: {name}"
+                ),
                 Shape::Transfer(name) if !name.is_empty() => {
                     assert!(kind_of(name).is_some(), "{of}: {name}")
                 }
@@ -1189,6 +1239,29 @@ mod tests {
                 .iter()
                 .any(|(_, ty, _)| kind_of(type_name(ty)).is_some())
         );
+    }
+
+    #[test]
+    fn an_enumerated_value_has_the_names_of_its_type_wherever_a_path_finds_it() {
+        assert!(ENUMERATIONS.windows(2).all(|pair| pair[0].0 < pair[1].0));
+        let names = |message: &str, path: &str| enumerated_at(message, &format!("/{ROOT}/{path}"));
+        let release = |path: &str| names("UEContextReleaseCommand", path).unwrap();
+        // An alternative of a CHOICE, however the path is written.
+        let nas = release("Cause/value/nas").expect("an ENUMERATED");
+        assert!(nas.contains(&"normal-release") && !nas.contains(&"unspecified-failure"));
+        assert_eq!(release("cause/VALUE/Nas"), Some(nas));
+        // A CHOICE, and the identifier of an IE.
+        assert_eq!(release("Cause/value"), None);
+        assert_eq!(release("Cause/id"), None);
+        // A member of the entries of a list, through an optional member.
+        let error = names(
+            "ErrorIndication",
+            "CriticalityDiagnostics/value/iEsCriticalityDiagnostics/0/typeOfError",
+        );
+        assert_eq!(error.unwrap(), Some(&["not-understood", "missing"][..]));
+        // What `check_path` refuses is refused.
+        assert!(names("UEContextReleaseCommand", "Cause/value/nsa").is_err());
+        assert!(names("NoSuchMessage", "Cause/value/nas").is_err());
     }
 
     #[test]

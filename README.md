@@ -175,6 +175,10 @@ the criticality that the set assigns to each of them, and
 `inspect::message_criticality` that of the procedure of the message: `reject`,
 `ignore` or `notify`. `inspect::item_criticality` gives that of an IE that a
 value holds alone, in a `ProtocolIE-SingleContainer`, by its identifier.
+`inspect::enumerated_at(message, path)` gives the names that the value at a
+path can have when its type is an `ENUMERATED`, such as those of
+`/ngap/Cause/value/nas`, as the specification spells them: a name that is not
+one of them is never the value of a message.
 
 `inspect::message_name(&pdu)` is the name that ASN.1 gives the message of a
 PDU, such as `InitialContextSetupResponse`, and `inspect::message_named` finds

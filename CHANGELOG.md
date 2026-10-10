@@ -71,6 +71,11 @@ is not source compatible with 0.4.2.
   the value at a path of a message can have when its type is an `ENUMERATED`,
   from the bindings, without a tree: a caller can refuse a name that no
   message has before it compares one.
+- With the `inspect` feature, a message as its name and its IEs by name:
+  `inspect::message_from_tree` makes a PDU from `{"message": NAME, "ies":
+  [{NAME: VALUE}, …]}`, with the procedure code, the direction and the
+  criticalities that the specification assigns, and `inspect::message_tree`
+  shows a PDU in that form.
 
 ### Changed
 

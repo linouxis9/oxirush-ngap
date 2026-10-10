@@ -354,6 +354,82 @@ fn a_transfer_that_was_not_received_is_encoded_from_its_decoded_value() {
     assert_eq!(sent, fixture("DistributionReleaseRequest"));
 }
 
+#[test]
+fn a_message_is_shown_and_written_as_its_name_and_its_ies_by_name() {
+    // Every message of the fixtures is the same octets once it was shown and written.
+    for line in include_str!("fixtures/messages.tsv")
+        .lines()
+        .filter(|line| !line.starts_with('#') && !line.is_empty())
+    {
+        let fields: Vec<_> = line.split('\t').collect();
+        let wire = hex::decode(fields[1]).unwrap();
+        let shown = match inspect::message_tree(&NGAP_PDU::decode(&wire).unwrap()) {
+            Ok(shown) => shown,
+            // A private message has no IEs of the protocol to name.
+            Err(reason) => {
+                assert!(
+                    reason.contains("PrivateMessage has no list of IEs"),
+                    "{reason}"
+                );
+                continue;
+            }
+        };
+        assert!(
+            shown["message"].is_string() && shown["ies"].is_array(),
+            "{}",
+            fields[0]
+        );
+        let written = inspect::message_from_tree(&shown);
+        assert_eq!(
+            written.unwrap().encode().unwrap(),
+            wire,
+            "{}: {shown}",
+            fields[0]
+        );
+    }
+    // The name gives the procedure and the criticalities; an IE that the message does
+    // not have says its own, and octets are sent as they are.
+    let request = serde_json::json!({
+        "message": "ue context release request",
+        "ies": [
+            {"amf-ue-ngap-id": 1},
+            {"RAN-UE-NGAP-ID": 2},
+            {"Cause": {"radioNetwork": "user-inactivity"}},
+            {"65000": {"octets": "00"}, "criticality": "reject"},
+        ],
+    });
+    let pdu = inspect::message_from_tree(&request).unwrap();
+    assert_eq!(inspect::message_name(&pdu), Some("UEContextReleaseRequest"));
+    let tree = inspect::inspect_pdu(&pdu).unwrap();
+    assert_eq!(tree["criticality"], "ignore");
+    let criticalities = tree["message"]["protocolIEs"].as_array().unwrap().iter();
+    let criticalities: Vec<_> = criticalities
+        .map(|ie| ie["criticality"].as_str().unwrap())
+        .collect();
+    assert_eq!(criticalities, ["reject", "reject", "ignore", "reject"]);
+    let shown = inspect::message_tree(&pdu).unwrap();
+    assert_eq!(shown["message"], "UEContextReleaseRequest");
+    assert_eq!(shown["ies"][0], serde_json::json!({"AMF-UE-NGAP-ID": 1}));
+    assert_eq!(
+        shown["ies"][3],
+        serde_json::json!({"65000": {"octets": "00"}, "criticality": "reject"})
+    );
+    // What is not a message, not an IE, or an IE of another message without its
+    // criticality, is refused with what is wrong.
+    let refused = |tree: serde_json::Value| inspect::message_from_tree(&tree).unwrap_err();
+    let named = |message: &str, ie: &str| serde_json::json!({"message": message, "ies": [{ie: 1}]});
+    assert!(
+        refused(named("UEContextReleaseRequst", "AMF-UE-NGAP-ID")).contains("is not a message")
+    );
+    assert!(refused(named("UEContextReleaseRequest", "AMF-UE-ID")).contains("is not an IE"));
+    assert!(
+        refused(named("UEContextReleaseRequest", "UEContextRequest"))
+            .contains("says its \"criticality\"")
+    );
+    assert!(refused(serde_json::json!({"message": "Paging", "ies": [{}]})).contains("one IE"));
+    assert!(refused(serde_json::json!({"message": "Paging", "ie": []})).contains("is no member"));
+}
+
 /// The octets of the message `name` of the fixtures.
 fn fixture(name: &str) -> Vec<u8> {
     let mut lines = include_str!("fixtures/messages.tsv").lines();

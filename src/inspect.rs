@@ -848,6 +848,125 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
     Ok(())
 }
 
+/// A PDU as the name of its message and its IEs by name, in their order:
+///
+/// ```json
+/// {"message": "UEContextReleaseRequest",
+///  "ies": [{"AMF-UE-NGAP-ID": 1}, {"RAN-UE-NGAP-ID": 2}, {"Cause": {"radioNetwork": "user-inactivity"}}]}
+/// ```
+///
+/// An IE is one member: the name that ASN.1 gives it, or its identifier in digits when
+/// it has none, with its value as [`inspect_pdu`] shows it. One that did not decode has
+/// its octets, as `{"octets": "…"}`. What the specification assigns is left out: the
+/// `criticality` of the PDU is there when it is not that of the procedure, and that of
+/// an IE, beside its name, when it is not the one that the message assigns it.
+/// [`message_from_tree`] reads this form back.
+///
+/// An error for a PDU whose message does not decode, for a procedure that the
+/// specification does not have in that direction, and for a message without a list of
+/// IEs of the protocol, as a private message.
+pub fn message_tree(pdu: &NGAP_PDU) -> Result<Value, String> {
+    let name = message_name(pdu).ok_or("the specification has no message of this procedure")?;
+    let tree = inspect_pdu(pdu)?;
+    let listed = tree["message"]["protocolIEs"].as_array();
+    let listed = listed.ok_or_else(|| format!("a message {name} has no list of IEs"))?;
+    let assigned = message_ie_criticalities(name).unwrap_or_default();
+    let mut ies = Vec::with_capacity(listed.len());
+    for ie in listed {
+        let id = ie["id"].as_u64().ok_or("an IE has its identifier")?;
+        let named = ie_names().iter().find(|(known, _)| u64::from(*known) == id);
+        let name = named.map_or_else(|| id.to_string(), |(_, name)| (*name).to_owned());
+        let value = match ie.get("_decode_error") {
+            Some(_) => json!({"octets": ie["value"]}),
+            None => ie["value"].clone(),
+        };
+        let mut entry = serde_json::Map::new();
+        entry.insert(name, value);
+        let of_the_message = assigned.iter().find(|(known, _)| u64::from(*known) == id);
+        if of_the_message.map(|(_, criticality)| *criticality) != ie["criticality"].as_str() {
+            entry.insert("criticality".into(), ie["criticality"].clone());
+        }
+        ies.push(Value::Object(entry));
+    }
+    let mut message = json!({"message": name, "ies": ies});
+    if tree["criticality"].as_str() != message_criticality(name) {
+        message["criticality"] = tree["criticality"].clone();
+    }
+    Ok(message)
+}
+
+/// The PDU of a message written as its name and its IEs by name, as [`message_tree`]
+/// shows one: the IEs are sent in the order written, one that is written twice is sent
+/// twice.
+///
+/// The name of the message gives the procedure code, the direction and the criticality
+/// of the PDU, and the message the criticality of each of its IEs; a `criticality`
+/// beside the name of the message or of an IE is sent in its place. An IE that the
+/// message does not have, by its name or by its identifier in digits, says its
+/// `criticality`. A value is written as [`inspect_pdu`] shows it and encoded as the type
+/// of the IE; `{"octets": "…"}` is the octets of the IE as they are sent, whatever they
+/// are.
+pub fn message_from_tree(tree: &Value) -> Result<NGAP_PDU, String> {
+    const FORM: &str = "a message is written as {\"message\": NAME, \"ies\": [{NAME: VALUE}, …]}";
+    let written = tree.as_object().ok_or(FORM)?;
+    if let Some(other) = written
+        .keys()
+        .find(|key| !["message", "ies", "criticality"].contains(&key.as_str()))
+    {
+        return Err(format!("{other:?} is no member of a message: {FORM}"));
+    }
+    let name = written.get("message").and_then(Value::as_str).ok_or(FORM)?;
+    let (direction, code) =
+        message_named(name).ok_or_else(|| format!("{name:?} is not a message of NGAP"))?;
+    let criticality = match written.get("criticality") {
+        Some(criticality) => criticality.clone(),
+        None => json!(message_criticality(name)),
+    };
+    let assigned = message_ie_criticalities(name).unwrap_or_default();
+    let listed = written.get("ies").and_then(Value::as_array).ok_or(FORM)?;
+    let mut ies = Vec::with_capacity(listed.len());
+    for entry in listed {
+        const IE: &str = "an entry of \"ies\" is one IE: its name with its value";
+        let entry = entry.as_object().ok_or(IE)?;
+        let mut members = entry.iter().filter(|(member, _)| *member != "criticality");
+        let (Some((ie, value)), None) = (members.next(), members.next()) else {
+            return Err(IE.into());
+        };
+        let known = || ie_names().iter().find(|(_, known)| same_name(known, ie));
+        let id = match ie.parse::<u16>() {
+            Ok(id) => id,
+            Err(_) => {
+                known()
+                    .ok_or_else(|| format!("{ie:?} is not an IE of NGAP"))?
+                    .0
+            }
+        };
+        let criticality = match entry.get("criticality") {
+            Some(criticality) => criticality.clone(),
+            None => {
+                let of_the_message = assigned.iter().find(|(known, _)| *known == id);
+                let (_, criticality) = of_the_message.ok_or_else(|| {
+                    format!(
+                        "{name} has no IE {ie}: one that is sent in it says its \"criticality\""
+                    )
+                })?;
+                json!(criticality)
+            }
+        };
+        let octets = value.as_object().filter(|value| value.len() == 1);
+        ies.push(match octets.and_then(|value| value.get("octets")) {
+            Some(octets) => json!({"id": id, "criticality": criticality, "octets": octets}),
+            None => json!({"id": id, "criticality": criticality, "value": value}),
+        });
+    }
+    encode_pdu(&json!({
+        "procedure_code": code,
+        "direction": direction,
+        "criticality": criticality,
+        "message": {"protocolIEs": ies},
+    }))
+}
+
 /// The tree of a PDU. An error when its message does not decode.
 pub fn inspect_pdu(pdu: &NGAP_PDU) -> Result<Value, String> {
     let top: Value = serde_json::from_str(&rasn::jer::encode(pdu).map_err(|e| e.to_string())?)

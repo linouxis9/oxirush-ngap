@@ -180,6 +180,22 @@ path can have when its type is an `ENUMERATED`, such as those of
 `/ngap/Cause/value/nas`, as the specification spells them: a name that is not
 one of them is never the value of a message.
 
+A message is also written, and shown, as its name and its IEs by name:
+
+```json
+{"message": "UEContextReleaseRequest",
+ "ies": [{"AMF-UE-NGAP-ID": 1}, {"RAN-UE-NGAP-ID": 2},
+         {"Cause": {"radioNetwork": "user-inactivity"}}]}
+```
+
+`inspect::message_from_tree` makes the PDU of that form: the name gives the
+procedure code, the direction and the criticality of the PDU, and the message
+the criticality of each IE. The IEs are sent in the order written; one that
+the message does not have, by its name or by its identifier in digits, says
+its `criticality`, and `{"octets": "…"}` in place of a value is the octets of
+an IE as they are sent. `inspect::message_tree` shows a PDU in that form,
+without what the specification assigns.
+
 `inspect::message_name(&pdu)` is the name that ASN.1 gives the message of a
 PDU, such as `InitialContextSetupResponse`, and `inspect::message_named` finds
 the `direction` and the `procedure_code` that a tree has for a message from

@@ -172,13 +172,41 @@ const READABLE: &[(&str, &[&str])] = &[
 /// The ASN.1 identifier that `rasn` has for a type, a field or an alternative, and
 /// whether the attributes of a type say that it is an ENUMERATED.
 fn rasn(attributes: &[syn::Attribute]) -> Result<(Option<String>, bool)> {
+    let (identifier, enumerated, _) = rasn_kind(attributes)?;
+    Ok((identifier, enumerated))
+}
+
+/// Whether the attributes of a string give it one size: JER then writes a string of bits
+/// as its octets alone, without its length.
+fn one_size(attributes: &[syn::Attribute]) -> Result<bool> {
     use syn::{Meta, Token, punctuated::Punctuated};
-    let (mut identifier, mut enumerated) = (None, false);
+    for attribute in attributes.iter().filter(|a| a.path().is_ident("rasn")) {
+        let metas = attribute.parse_args_with(Punctuated::<Meta, Token![,]>::parse_terminated)?;
+        for meta in metas {
+            if let Meta::List(list) = meta
+                && list.path.is_ident("size")
+            {
+                let size = list.tokens.to_string();
+                let size = size.split(',').next().unwrap_or_default().trim();
+                let digits = size.trim_matches('"');
+                return Ok(!digits.is_empty() && digits.bytes().all(|digit| digit.is_ascii_digit()));
+            }
+        }
+    }
+    Ok(false)
+}
+
+/// What [`rasn`] gives, and whether the attributes of a member give it a default value.
+fn rasn_kind(attributes: &[syn::Attribute]) -> Result<(Option<String>, bool, bool)> {
+    use syn::{Meta, Token, punctuated::Punctuated};
+    let (mut identifier, mut enumerated, mut default) = (None, false, false);
     for attribute in attributes.iter().filter(|a| a.path().is_ident("rasn")) {
         let metas = attribute.parse_args_with(Punctuated::<Meta, Token![,]>::parse_terminated)?;
         for meta in metas {
             match meta {
                 Meta::Path(path) if path.is_ident("enumerated") => enumerated = true,
+                Meta::Path(path) if path.is_ident("default") => default = true,
+                Meta::NameValue(pair) if pair.path.is_ident("default") => default = true,
                 Meta::NameValue(pair) if pair.path.is_ident("identifier") => {
                     let syn::Expr::Lit(literal) = pair.value else {
                         continue;
@@ -191,7 +219,7 @@ fn rasn(attributes: &[syn::Attribute]) -> Result<(Option<String>, bool)> {
             }
         }
     }
-    Ok((identifier, enumerated))
+    Ok((identifier, enumerated, default))
 }
 
 /// The last segment of a type's path: its name and its generic arguments.
@@ -368,8 +396,149 @@ fn generate_readable(generated: &str, ies: &BTreeMap<u16, Ie>, out: &mut String)
     Ok(())
 }
 
-/// The tables that only the inspection has: the transfers, the readable forms and the
-/// open types. The messages and the IEs are those of the registry.
+/// The containers of the protocol, which a tree shows as IEs, and how the list of the
+/// types writes each.
+const CONTAINERS: &[(&str, &str)] = &[
+    ("ProtocolIEContainer", "ies"),
+    ("ProtocolIEField", "ie"),
+    ("ProtocolExtensionContainer", "extensions"),
+    ("ProtocolExtensionField", "extension"),
+];
+
+/// How the list of the types writes a value of type `ty`, and whether a member of that
+/// type may be absent: `_` for a value without members, `bits` for a string of bits whose
+/// size varies, the name of a SEQUENCE, of a CHOICE or of a type that is a list, a list
+/// in brackets and a container by its kind.
+fn shape(ty: &syn::Type, declared: &BTreeMap<String, &syn::Item>, depth: u8) -> (String, bool) {
+    let plain = || ("_".to_string(), false);
+    let Some((name, arguments)) = named(ty).filter(|_| depth < 16) else {
+        return plain();
+    };
+    let inner = arguments.iter().find_map(|argument| match argument {
+        syn::GenericArgument::Type(inner) => Some(inner),
+        _ => None,
+    });
+    if let Some((_, written)) = CONTAINERS.iter().find(|(container, _)| *container == name) {
+        return (written.to_string(), false);
+    }
+    match (name.as_str(), inner, declared.get(&name)) {
+        ("Option", Some(inner), _) => (shape(inner, declared, depth + 1).0, true),
+        ("Box", Some(inner), _) => shape(inner, declared, depth + 1),
+        ("SequenceOf" | "SetOf" | "Vec", Some(inner), _) => {
+            (format!("[{}]", shape(inner, declared, depth + 1).0), false)
+        }
+        ("BitString" | "SizedBitString", ..) => ("bits".to_string(), false),
+        // A type that only wraps another is what it wraps, when that has no members.
+        (_, _, Some(syn::Item::Struct(item))) => match &item.fields {
+            syn::Fields::Named(_) => (name.clone(), false),
+            syn::Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
+                match shape(&fields.unnamed[0].ty, declared, depth + 1).0.as_str() {
+                    "_" => plain(),
+                    "bits" if one_size(&item.attrs).unwrap_or(false) => plain(),
+                    _ => (name.clone(), false),
+                }
+            }
+            _ => plain(),
+        },
+        (_, _, Some(syn::Item::Enum(item))) => match rasn(&item.attrs) {
+            Ok((_, false)) => (name.clone(), false),
+            _ => plain(),
+        },
+        _ => plain(),
+    }
+}
+
+/// The list of the types: one line for each SEQUENCE and each CHOICE, with its members
+/// or its alternatives by the names that ASN.1 gives them, and one for each type that is
+/// a list or a string of bits. A member that holds a transfer has the type that its
+/// octets contain in parentheses.
+fn generate_types(
+    generated: &str,
+    transfers: &BTreeMap<String, std::collections::BTreeSet<String>>,
+    out: &mut String,
+) -> Result<()> {
+    use syn::ext::IdentExt;
+    let syntax = syn::parse_file(generated)?;
+    let mut declarations = Vec::new();
+    items(&syntax.items, "", &mut declarations);
+    let mut declared = BTreeMap::new();
+    for (_, item) in &declarations {
+        let name = match item {
+            syn::Item::Struct(item) => &item.ident,
+            syn::Item::Enum(item) => &item.ident,
+            _ => unreachable!(),
+        };
+        ensure!(
+            declared.insert(name.to_string(), *item).is_none(),
+            "{name}: two types of the bindings have this name"
+        );
+    }
+    let member = |attributes: &[syn::Attribute], ident: &syn::Ident, ty: &syn::Type| {
+        let (name, _, default) = rasn_kind(attributes)?;
+        let name = name.unwrap_or_else(|| ident.unraw().to_string());
+        let (mut written, optional) = shape(ty, &declared, 0);
+        if written == "bits" && one_size(attributes)? {
+            written = "_".to_string();
+        }
+        // The octets of a transfer are shown as the value that they contain.
+        if let Some(contained) = transfers.get(&name) {
+            ensure!(written == "_", "{name}: a transfer is a string of octets");
+            let contained = alone(contained).unwrap_or_default();
+            written = format!("({})", contained.rsplit("::").next().unwrap_or_default());
+        }
+        let presence = match optional || default {
+            true => '?',
+            false => ':',
+        };
+        Ok(format!("{name:?}{presence} {written}"))
+    };
+    // rustfmt leaves the lines of a macro called with braces as they are.
+    writeln!(out, "types! {{")?;
+    for (name, item) in &declared {
+        if CONTAINERS.iter().any(|(container, _)| container == name) {
+            continue;
+        }
+        match item {
+            syn::Item::Struct(item) => match &item.fields {
+                syn::Fields::Named(fields) => {
+                    let members = fields.named.iter().map(|field| {
+                        member(&field.attrs, field.ident.as_ref().expect("a name"), &field.ty)
+                    });
+                    let members = members.collect::<Result<Vec<_>>>()?;
+                    writeln!(out, "    {name} sequence {{ {} }};", members.join(", "))?;
+                }
+                syn::Fields::Unnamed(fields) if fields.unnamed.len() == 1 => {
+                    let (written, _) = shape(&fields.unnamed[0].ty, &declared, 0);
+                    if written != "_" && !(written == "bits" && one_size(&item.attrs)?) {
+                        writeln!(out, "    {name} = {written};")?;
+                    }
+                }
+                _ => {}
+            },
+            syn::Item::Enum(item) if !rasn(&item.attrs)?.1 => {
+                let alternatives = item.variants.iter().map(|alternative| {
+                    match alternative.fields.iter().next() {
+                        Some(field) => member(&alternative.attrs, &alternative.ident, &field.ty),
+                        None => {
+                            let name = rasn(&alternative.attrs)?.0;
+                            let name = name.unwrap_or_else(|| alternative.ident.unraw().to_string());
+                            Ok(format!("{name:?}: _"))
+                        }
+                    }
+                });
+                let alternatives = alternatives.collect::<Result<Vec<_>>>()?;
+                writeln!(out, "    {name} choice {{ {} }};", alternatives.join(", "))?;
+            }
+            _ => {}
+        }
+    }
+    writeln!(out, "}}")?;
+    Ok(())
+}
+
+/// The tables that only the inspection has: the transfers, the readable forms, the
+/// members of the types and the open types. The messages and the IEs are those of the
+/// registry.
 pub(super) fn generate(
     protocol: &str,
     generated: &str,
@@ -389,7 +558,7 @@ pub(super) fn generate(
     // One line for each transfer: rustfmt leaves the lines of a macro called with braces
     // as they are.
     let mut out = String::from(
-        "// Auto-generated by build/inspection.rs from ASN.1; do not edit.\nuse crate::inspect::{Form, Typed, transfers};\npub(crate) use crate::registry::{IE_NAMES, MESSAGES, ie, ie_contents};\n",
+        "// Auto-generated by build/inspection.rs from ASN.1; do not edit.\nuse crate::inspect::{Form, Typed, transfers};\nuse crate::inspect_paths::types;\npub(crate) use crate::registry::{IE_NAMES, IE_TYPES, MESSAGES, ie, ie_contents};\n",
     );
     writeln!(
         out,
@@ -405,6 +574,7 @@ pub(super) fn generate(
     }
     writeln!(out, "}}")?;
     generate_readable(generated, &registry.ies, &mut out)?;
+    generate_types(generated, &transfers, &mut out)?;
     // The types that the registry and the transfers have the functions of.
     let messages = registry.procedures.values().flat_map(|p| p.messages.iter());
     let roots = (messages.flatten().map(|message| message.ty.clone()))

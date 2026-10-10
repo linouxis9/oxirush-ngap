@@ -54,6 +54,11 @@ is not source compatible with 0.4.2.
   a plain `OCTET STRING`.
 - The `sized` module: the `OCTET STRING` and `BIT STRING` types whose length
   determinant takes two octets.
+- With the `inspect` feature, `inspect::check_path`: whether a path can select
+  anything in a message of a name, without a tree. The IE has to be one of
+  the object set of the message, and each segment under it a member that the
+  type of the value has. `src/inspect_registry.rs` lists what each type has,
+  from the bindings: one line for each SEQUENCE and each CHOICE.
 
 ### Changed
 
@@ -86,6 +91,30 @@ is not source compatible with 0.4.2.
   taken whatever its case, as those of its IEs are.
 - What is nested deeper than 64 levels stays as its octets beside a
   `_decode_error`: `inspect_pdu` refused the whole PDU.
+- A path of an inspection tree selects nothing for an OPTIONAL member that
+  is absent and for another alternative of a CHOICE, and a name that the type
+  of a value cannot have is an error that lists the members of the type: both
+  were the same error. What follows an absent value in a path is checked
+  against the type, `*` on a value without members selects nothing, and after
+  `*` a segment is an error when none of the values can have it. The name of
+  an IE in a list whose entries are no IEs is an error, where it selected
+  nothing, and so is a path into a value that did not decode.
+- One rule for the names of a path: a name is its letters and its digits,
+  whatever their case and whatever is between them. The root, the members of
+  a value and the names of ENUMERATED values are taken as the names of IEs
+  and of messages were: `/ngap/cause/value/radionetwork`. A position is a
+  number as decimal writes it: `+1` and `01` are not.
+- `set` refuses a name that the type of a value does not have, where the
+  error came from `encode_pdu`, and writes a member by the name that ASN.1
+  gives it. A member that its type always has is not taken out, and an
+  alternative of a CHOICE takes the place of the one that is there.
+- An IE is written with the name of its IE as `id` and with its `octets`
+  wherever a tree has IEs: `encode_pdu` takes them in any entry, where only
+  `set` and `insert` on a path under `/ngap` did, and the `octets` of an IE
+  that was added are set at its path. An `_original_id` that is no number is
+  refused.
+- `paths` lists the `octets` of an IE or of a transfer that has no value
+  beside them.
 
 ### Fixed
 

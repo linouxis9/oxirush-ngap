@@ -16,8 +16,8 @@
 //!   parts of a GUAMI or an SST, as a number.
 //!
 //! [`encode_pdu`] takes them in this form, a number also as a `"0x…"` string, and as JER
-//! writes them. It takes the name of an ENUMERATED value whatever its case, with `-`, `_`
-//! and space taken as the same.
+//! writes them. It takes the name of an ENUMERATED value as any other name: see
+//! [Names](#names).
 //!
 //! The members that start with `_` say what was received:
 //!
@@ -38,9 +38,11 @@
 //!   This is refused when the octets received do not decode and encode back to themselves,
 //!   as with an extension addition that the typed value does not keep;
 //! - to add an IE, write an entry with its `id`, its `criticality` and its `value`, and no
-//!   `_raw_value`: the value is encoded as the type of the identifier, whatever JSON it is;
-//! - to send given octets as an IE, write them in hexadecimal as `_raw_value` and leave
-//!   `value` out. For a transfer, replace the member with its octets;
+//!   `_raw_value`: the value is encoded as the type of the identifier, whatever JSON it is.
+//!   The `id` is a number, or the name of the IE;
+//! - to send given octets as an IE, write them in hexadecimal as its `octets`, or as
+//!   `_raw_value`, and leave `value` out. For a transfer, replace the member with its
+//!   octets;
 //! - to add a transfer, or the value of an IE that contains a type, write it as an object
 //!   with its `decoded` value alone, which is encoded as the type contained;
 //! - an IE with a `_decode_error` has its octets as `value`: change them there.
@@ -65,10 +67,10 @@
 //! A path is a JSON pointer into the tree, where `/ngap` stands for the IEs of the
 //! message. The segment after it selects among them:
 //!
-//! - the name of an IE, as ASN.1 has it after `id-` and in any case:
-//!   `/ngap/RAN-UE-NGAP-ID`. An IE that is there twice is selected twice;
+//! - the name of an IE, as ASN.1 has it after `id-`: `/ngap/RAN-UE-NGAP-ID`. An IE that is
+//!   there twice is selected twice;
 //! - a position, `/ngap/0`, which is how [`paths`] names an IE that has no name or is
-//!   there twice;
+//!   there twice. A position is a number as decimal writes it: `0`, `12`;
 //! - `@id=N`, the IEs with that identifier, whether it has a name or not, and `*`, each
 //!   of them;
 //! - `-`, the end of the list, where [`insert`] adds an IE.
@@ -81,18 +83,49 @@
 //! /ngap/PDUSessionResourceSetupListSUReq/value/0/pDUSessionResourceSetupRequestTransfer/decoded/PDUSessionType/value = "ipv4"
 //! ```
 //!
-//! Any other list selects by position, `*` and `@id=N`. An IE that the message does not
-//! have selects nothing. A member that a value does not have is an error, whether its
-//! type has none of that name or the value has it absent, so a member that is written
-//! wrong is not taken for one that is not there. The name of an IE is taken in any case,
-//! with `-`, `_` and space as the same, and the members of a value as ASN.1 spells them.
+//! Any other list selects by position and `*`.
+//!
+//! ## Names
+//!
+//! A name is its letters and its digits, whatever their case and whatever is between
+//! them: `/ngap/RAN-UE-NGAP-ID`, `/NGAP/ran_ue_ngap_id` and `/ngap/ranuengapid` are one
+//! path. The root, the name of an IE, the members of a value, the name of a message
+//! ([`message_named`], [`check_path`]) and the name of an ENUMERATED value are all taken
+//! this way, and no two of them that could be taken for each other are the same. A
+//! member that starts with `_` is named as it is.
+//!
+//! ## What is not there
+//!
+//! A path selects nothing where the message could have a value and does not:
+//!
+//! - an IE that the message does not have;
+//! - an OPTIONAL member that is absent, and another alternative of a CHOICE:
+//!   `/ngap/Cause/value/nas` when the cause is one of the radio network;
+//! - what follows in the path, which is still checked against the type.
+//!
+//! A name that the type of a value cannot have is an error, which lists the members
+//! that the type has: a member that is written wrong is not taken for one that is not
+//! there. So are a member of a value that has none, a path into a value that did not
+//! decode, and the name of an IE in a list whose entries are no IEs. After `*`, a
+//! segment is an error when none of the values that it is applied to can have it.
+//!
+//! [`check_path`] says the same of a path without a tree: whether it can select
+//! anything in a message of a name, whose IEs are those of its object set
+//! ([`message_ies`]).
+//!
+//! ## Edits
 //!
 //! [`paths`] lists the values of a tree without the members that start with `_`, except
-//! `_decode_error`: the octets of an IE or of a transfer are selected as its `octets`,
-//! and set there in place of its value. Those of a value that an edit changed are an
-//! error to select: [`encode_pdu`] gives the PDU its octets. `null` takes an optional
-//! member out; the value of an IE or of a transfer is not taken out, as its octets would
-//! be sent in its place.
+//! `_decode_error`. The octets of an IE or of a transfer are selected as its `octets`,
+//! which [`paths`] lists only for one that has no value beside them, and set there in
+//! place of its value. Those of a value that an edit changed are an error to select:
+//! [`encode_pdu`] gives the PDU its octets.
+//!
+//! [`set`] writes a member by the name that ASN.1 gives it, and refuses a name that the
+//! type does not have. `null` takes an optional member out, as [`remove`] does; a member
+//! that its type always has is not taken out, and an alternative of a CHOICE takes the
+//! place of the one that is there. The value of an IE or of a transfer is not taken out
+//! either, as its octets would be sent in its place.
 //!
 //! ```
 //! use oxirush_ngap::{build_ngap, inspect, ngap::*};
@@ -118,12 +151,14 @@
 
 use serde_json::{Value, json};
 
-use crate::inspect_paths::EDITED;
-pub use crate::inspect_paths::{insert, paths, remove, select, set};
+use crate::inspect_paths::{EDITED, same_name, written_ie};
+pub use crate::inspect_paths::{check_path, insert, paths, remove, select, set};
 use crate::inspect_registry as registry;
 use crate::ngap::NGAP_PDU;
 
-/// ASN.1-derived IE identifiers and names, including extension IEs.
+/// The identifier and the name of each IE that an object set of the ASN.1 has, those of
+/// the extension containers included. An identifier that the ASN.1 defines and that no
+/// object set uses has no type, and is not among them.
 pub fn ie_names() -> &'static [(u16, &'static str)] {
     registry::IE_NAMES
 }
@@ -135,13 +170,6 @@ pub fn message_names() -> impl Iterator<Item = (&'static str, u8, &'static str)>
     messages.map(|(direction, code, name, ..)| (*direction, *code, *name))
 }
 
-/// The letters and the digits of a name, in lower case: what a name is whatever its case
-/// and its hyphens, underscores and spaces.
-fn letters(name: &str) -> Vec<u8> {
-    let letters = name.bytes().filter(u8::is_ascii_alphanumeric);
-    letters.map(|letter| letter.to_ascii_lowercase()).collect()
-}
-
 /// The name that ASN.1 gives the message of a PDU, as `InitialContextSetupResponse`; `None`
 /// for a procedure that the specification does not have in that direction.
 pub fn message_name(pdu: &NGAP_PDU) -> Option<&'static str> {
@@ -151,12 +179,11 @@ pub fn message_name(pdu: &NGAP_PDU) -> Option<&'static str> {
         .map(|(.., name)| name)
 }
 
-/// The `direction` and the `procedure_code` of the message that `name` names, whatever
-/// its case and its hyphens, underscores and spaces.
+/// The `direction` and the `procedure_code` of the message that `name` names: a name is
+/// its letters and its digits, whatever their case and whatever is between them.
 pub fn message_named(name: &str) -> Option<(&'static str, u8)> {
-    let written = letters(name);
     message_names()
-        .find(|(.., known)| letters(known) == written)
+        .find(|(.., known)| same_name(known, name))
         .map(|(direction, code, _)| (direction, code))
 }
 
@@ -166,10 +193,9 @@ pub fn message_named(name: &str) -> Option<(&'static str, u8)> {
 /// `None` for a name that is no message; a message without an object set of IEs, as a
 /// private message, has none.
 pub fn message_ies(name: &str) -> Option<&'static [(u16, bool)]> {
-    let written = letters(name);
     let mut messages = registry::MESSAGES.iter();
-    let message = messages.find(|(_, _, known, ..)| letters(known) == written);
-    message.map(|(.., ies)| *ies)
+    let message = messages.find(|(_, _, known, ..)| same_name(known, name));
+    message.map(|(_, _, _, _, ies, _)| *ies)
 }
 
 /// The functions of the type of the message of a direction and a procedure code.
@@ -178,7 +204,7 @@ fn message_type(direction: &str, code: u8) -> Result<Typed, String> {
     let message = messages.find(|(of, procedure, ..)| (*of, *procedure) == (direction, code));
     let protocol = registry::PROTOCOL;
     message
-        .map(|(_, _, _, typed, _)| typed())
+        .map(|(_, _, _, typed, ..)| typed())
         .ok_or_else(|| format!("unknown {protocol} direction/procedure {direction}/{code}"))
 }
 
@@ -531,8 +557,8 @@ fn unshow(form: Form, value: &mut Value) -> Result<(), String> {
 }
 
 /// `value` with the name that JER did not find among those of an ENUMERATED type as the
-/// specification spells it: a name is the same whatever its case, with `-`, `_` and
-/// space taken as the same.
+/// specification spells it: a name is its letters and its digits, whatever their case
+/// and whatever is between them.
 fn respelled(value: &Value, error: &rasn::error::DecodeError) -> Option<Value> {
     use rasn::error::{CodecDecodeError, DecodeErrorKind, JerDecodeErrorKind};
     // The error of a member is in the errors of the fields that lead to it.
@@ -546,12 +572,7 @@ fn respelled(value: &Value, error: &rasn::error::DecodeError) -> Option<Value> {
     else {
         return None;
     };
-    let letter = |c: u8| match c {
-        b'-' | b'_' | b' ' => b'-',
-        c => c.to_ascii_lowercase(),
-    };
-    let written = discriminant.bytes().map(letter);
-    let same = |name: &&&str| name.bytes().map(letter).eq(written.clone());
+    let same = |name: &&&str| same_name(name, discriminant);
     // Two types may spell a name differently: the next decoding tries the other.
     let mut names = registry::ENUMERATED.iter().filter(same);
     let name = names.find(|name| **name != discriminant.as_str())?;
@@ -657,6 +678,8 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
         return Err(format!("inspection nesting exceeds {}", 4 * NESTING));
     }
     if let Some(object) = value.as_object_mut() {
+        // An IE may be written with its name as `id`, and with its `octets`.
+        written_ie(object)?;
         let id = object
             .get("id")
             .and_then(Value::as_u64)
@@ -757,11 +780,14 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
                     edited.clone()
                 }
                 (Some(raw), Some(edited)) => {
-                    let original_id = original_id
-                        .as_ref()
-                        .and_then(Value::as_u64)
-                        .and_then(|v| u16::try_from(v).ok())
-                        .unwrap_or(id);
+                    // The identifier that the octets were decoded as, when a tree has
+                    // one: without it they are those of the identifier of the entry.
+                    let original_id = match &original_id {
+                        Some(original) => (original.as_u64())
+                            .and_then(|v| u16::try_from(v).ok())
+                            .ok_or("_original_id is the identifier that the octets were decoded as, a number")?,
+                        None => id,
+                    };
                     let bytes = unhex(&raw)?;
                     let received = registry::ie(original_id)?;
                     let original = (received.decode)(&bytes)?;

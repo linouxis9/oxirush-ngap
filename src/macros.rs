@@ -229,8 +229,8 @@ macro_rules! procedures {
         }
 
         /// The messages: the direction, the procedure code, the name that ASN.1 gives it
-        /// and the type of each, and the IEs of its object set, each with its identifier
-        /// and whether its presence is mandatory.
+        /// and the type of each, the IEs of its object set, each with its identifier and
+        /// whether its presence is mandatory, and the path of its type.
         #[cfg(feature = "inspect")]
         #[allow(clippy::type_complexity)]
         pub(crate) const MESSAGES: &[(
@@ -239,16 +239,20 @@ macro_rules! procedures {
             &str,
             fn() -> $crate::inspect::Typed,
             &[(u16, bool)],
+            &str,
         )] = &[
             $($(("InitiatingMessage", $code, $initiating_name,
                 $crate::inspect::Typed::of::<$initiating_type>,
-                &[$(($initiating_ie, $crate::macros::presence!($initiating_presence))),*]),)?)*
+                &[$(($initiating_ie, $crate::macros::presence!($initiating_presence))),*],
+                stringify!($initiating_type)),)?)*
             $($(("SuccessfulOutcome", $code, $successful_name,
                 $crate::inspect::Typed::of::<$successful_type>,
-                &[$(($successful_ie, $crate::macros::presence!($successful_presence))),*]),)?)*
+                &[$(($successful_ie, $crate::macros::presence!($successful_presence))),*],
+                stringify!($successful_type)),)?)*
             $($(("UnsuccessfulOutcome", $code, $unsuccessful_name,
                 $crate::inspect::Typed::of::<$unsuccessful_type>,
-                &[$(($unsuccessful_ie, $crate::macros::presence!($unsuccessful_presence))),*]),)?)*
+                &[$(($unsuccessful_ie, $crate::macros::presence!($unsuccessful_presence))),*],
+                stringify!($unsuccessful_type)),)?)*
         ];
     };
 }
@@ -294,6 +298,13 @@ macro_rules! ies {
 
         #[cfg(feature = "inspect")]
         pub(crate) const IE_NAMES: &[(u16, &str)] = &[$(($id, $name),)*];
+
+        /// The path of the type of each IE that has one type, and that of the type that
+        /// its octets contain.
+        #[cfg(feature = "inspect")]
+        pub(crate) const IE_TYPES: &[(u16, &str, &str)] = &[
+            $($(($id, stringify!($ie), concat!($(stringify!($contents))?)),)?)*
+        ];
 
         #[cfg(feature = "inspect")]
         pub(crate) fn ie(id: u16) -> Result<$crate::inspect::Typed, String> {

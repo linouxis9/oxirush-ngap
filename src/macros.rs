@@ -14,7 +14,7 @@
 //! are converted with `.into()`, so primitive values such as `u32` can be passed
 //! directly for generated newtypes.
 //!
-//! ```ignore
+//! ```
 //! use oxirush_ngap::{build_ngap, ngap::*};
 //!
 //! let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
@@ -36,7 +36,7 @@
 //!
 //! This is useful for conditionally included IEs or IEs built separately.
 //!
-//! ```ignore
+//! ```
 //! use oxirush_ngap::{build_ngap_ie, ngap::*};
 //!
 //! let ie = build_ngap_ie!(UEContextReleaseRequest,
@@ -79,8 +79,8 @@
 //! implements `From<MissingIeError>`. Without `=> expression`, extraction uses
 //! `binding.0`, which unwraps the usual single-field generated newtype.
 //!
-//! ```ignore
-//! use oxirush_ngap::{extract_ngap_ies, macros::MissingIeError, ngap::*};
+//! ```
+//! use oxirush_ngap::{build_ngap_ie, extract_ngap_ies, macros::MissingIeError, ngap::*};
 //!
 //! fn handle(msg: &UplinkNASTransport) -> Result<Vec<u8>, MissingIeError> {
 //!     extract_ngap_ies!(msg, UplinkNASTransport,
@@ -91,6 +91,12 @@
 //!     let _ = (amf_id, ran_id);
 //!     Ok(nas_pdu)
 //! }
+//!
+//! let message = UplinkNASTransport::new(ProtocolIEContainer(vec![
+//!     build_ngap_ie!(UplinkNASTransport, REJECT AMF_UE_NGAP_ID(1u64)),
+//!     build_ngap_ie!(UplinkNASTransport, REJECT NAS_PDU(vec![0x7e, 0x00])),
+//! ]));
+//! assert_eq!(handle(&message).unwrap(), [0x7e, 0x00]);
 //! ```
 //!
 //! ## `with_ngap_ie_mut!` — locate and mutate one decoded NGAP IE
@@ -100,9 +106,15 @@
 //! decoded and re-encoded successfully, and the expression returned `true`.
 //! The setter form `IeName(binding) = value` expands to `binding.0 = value`.
 //!
-//! ```ignore
-//! use oxirush_ngap::{ngap::*, with_ngap_ie_mut};
+//! Of an IE that a message has twice, both macros take the same one: the last
+//! that decodes. `extract_ngap_ies!` reads it and `with_ngap_ie_mut!` changes it.
 //!
+//! ```
+//! use oxirush_ngap::{build_ngap_ie, ngap::*, with_ngap_ie_mut};
+//!
+//! let mut message = UplinkNASTransport::new(ProtocolIEContainer(vec![
+//!     build_ngap_ie!(UplinkNASTransport, REJECT AMF_UE_NGAP_ID(1u64)),
+//! ]));
 //! let updated = with_ngap_ie_mut!(message, UplinkNASTransport,
 //!     AMF_UE_NGAP_ID(id) = 42u64
 //! );
@@ -439,7 +451,8 @@ macro_rules! with_ngap_ie_mut {
         // The name is the type of what the IE is in.
         let _: &$crate::ngap::$msg = &$msg_var;
         let mut matched = false;
-        for ie in &mut $msg_var.protocol_ies.0 {
+        // The IE that `extract_ngap_ies!` reads: the last one that decodes.
+        for ie in $msg_var.protocol_ies.0.iter_mut().rev() {
             if ie.id.0 == $crate::__ngap_ie_id!($ie_name) {
                 if let Ok(mut $bind) = $crate::__ngap_decode_ie!($ie_name, &ie.value) {
                     let result = $expr;
@@ -447,8 +460,8 @@ macro_rules! with_ngap_ie_mut {
                         ie.value = value;
                         matched = result;
                     }
+                    break;
                 }
-                break;
             }
         }
         matched
@@ -568,6 +581,43 @@ mod tests {
             .expect("AMF UE ID");
         let id: AMFUENGAPID = rasn::aper::decode(ie.value.as_bytes()).expect("decode ID");
         assert_eq!(id.0, 42);
+    }
+
+    #[test]
+    fn an_ie_that_is_there_twice_is_read_and_changed_at_the_same_place() {
+        use crate::macros::MissingIeError;
+        fn id(request: &UEContextReleaseRequest) -> Result<u64, MissingIeError> {
+            extract_ngap_ies!(request, UEContextReleaseRequest,
+                req id: u64 = AMF_UE_NGAP_ID(id),
+            );
+            Ok(id)
+        }
+        let ids = |request: &UEContextReleaseRequest| -> Vec<Vec<u8>> {
+            let ies = request.protocol_ies.0.iter();
+            ies.map(|ie| ie.value.as_bytes().to_vec()).collect()
+        };
+        let entry = |id: u64| build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(id));
+        let mut request = UEContextReleaseRequest::new(ProtocolIEContainer(vec![
+            entry(1),
+            entry(2),
+            // An identifier of this IE that does not decode as one.
+            ProtocolIEField::new(
+                10u16,
+                Criticality::reject,
+                rasn::types::Any::new(vec![0xff]),
+            ),
+        ]));
+        assert_eq!(id(&request).unwrap(), 2);
+        let before = ids(&request);
+        assert!(with_ngap_ie_mut!(
+            request,
+            UEContextReleaseRequest,
+            AMF_UE_NGAP_ID(id) = 42u64
+        ));
+        assert_eq!(id(&request).unwrap(), 42);
+        let after = ids(&request);
+        assert_eq!((&after[0], &after[2]), (&before[0], &before[2]));
+        assert_ne!(after[1], before[1]);
     }
 
     #[test]

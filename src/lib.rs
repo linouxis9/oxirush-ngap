@@ -23,7 +23,7 @@
 //! Encoding and decoding use [`rasn`](https://crates.io/crates/rasn)'s Aligned
 //! Packed Encoding Rules implementation.
 //!
-//! ```ignore
+//! ```
 //! use oxirush_ngap::{build_ngap, ngap::*};
 //!
 //! let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
@@ -55,6 +55,11 @@ pub mod sized;
 pub use rasn as __rasn;
 
 pub use ngap::NgapPduKind;
+
+/// The examples of the README, which the documentation tests compile and run.
+#[cfg(all(doctest, feature = "inspect"))]
+#[doc = include_str!("../README.md")]
+struct Readme;
 
 /// Version of oxirush-ngap.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

@@ -115,6 +115,11 @@ is not source compatible with 0.4.2.
   refused.
 - `paths` lists the `octets` of an IE or of a transfer that has no value
   beside them.
+- `with_ngap_ie_mut!` changes the IE that `extract_ngap_ies!` reads when a
+  message has it twice, the last that decodes: it changed the first, or
+  nothing when the first did not decode.
+- The examples of the documentation and of the README are compiled and run
+  by the documentation tests.
 
 ### Fixed
 

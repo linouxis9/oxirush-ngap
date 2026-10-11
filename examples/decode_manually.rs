@@ -19,6 +19,8 @@ fn main() {
     // The response identifies its served GUAMIs, capacity, PLMNs, and slices.
 
     let plmn_identity = PLMNIdentity(FixedOctetString::new([0x02, 0xF8, 0x39]));
+
+    // The GUAMI that the AMF serves.
     let guami = GUAMI::new(
         plmn_identity.clone(),
         AMFRegionID(fixed_bits::<8>(1)),
@@ -27,18 +29,16 @@ fn main() {
         None,
     );
     let served_guamis = ServedGUAMIList(vec![ServedGUAMIItem::new(guami, None, None)]);
-    let plmn_support = PLMNSupportList(vec![PLMNSupportItem::new(
-        plmn_identity,
-        SliceSupportList(vec![SliceSupportItem::new(
-            SNSSAI::new(
-                SST(FixedOctetString::new([1])),
-                Some(SD(FixedOctetString::new([0x00, 0x00, 0x01]))),
-                None,
-            ),
-            None,
-        )]),
+
+    // The PLMN that it supports, with one slice.
+    let slice = SNSSAI::new(
+        SST(FixedOctetString::new([1])),
+        Some(SD(FixedOctetString::new([0x00, 0x00, 0x01]))),
         None,
-    )]);
+    );
+    let slices = SliceSupportList(vec![SliceSupportItem::new(slice, None)]);
+    let plmn_support = PLMNSupportList(vec![PLMNSupportItem::new(plmn_identity, slices, None)]);
+
     let amf_name = AMFName(PrintableString::try_from("OxiRushAMF").expect("valid AMF name"));
 
     // In rasn's stable opaque-open-type representation, every entry holds its
@@ -79,6 +79,7 @@ fn main() {
     // `pdu.encode()` is the convenience API; this deliberately uses raw rasn.
 
     let aper_bytes = rasn::aper::encode(&pdu).expect("APER encode failed");
+
     println!("Encoded NGSetupResponse: {} bytes", aper_bytes.len());
     println!("APER hex: {}", hex::encode(&aper_bytes));
 
@@ -107,48 +108,50 @@ fn main() {
 
             let response: NGSetupResponse =
                 decode_open_type(&outcome.value).expect("decode NG Setup Response");
+
             for ie in &response.protocol_ies.0 {
                 match ie.id {
                     ID_AMFNAME => {
                         let name: AMFName = decode_open_type(&ie.value).expect("decode AMF name");
-                        println!(
-                            "AMF Name:       {}",
-                            String::from_utf8_lossy(name.0.as_bytes())
-                        );
+                        let text = String::from_utf8_lossy(name.0.as_bytes());
+
+                        println!("AMF Name:       {text}");
                     }
+
                     ID_RELATIVE_AMFCAPACITY => {
                         let capacity: RelativeAMFCapacity =
                             decode_open_type(&ie.value).expect("decode AMF capacity");
+
                         println!("AMF Capacity:   {}", capacity.0);
                     }
+
                     ID_SERVED_GUAMILIST => {
                         let list: ServedGUAMIList =
                             decode_open_type(&ie.value).expect("decode served GUAMIs");
+
                         println!("Served GUAMIs:  {} entries", list.0.len());
                         for item in &list.0 {
                             let plmn = &item.g_uami.p_lmnidentity.0;
-                            println!(
-                                "  PLMN: {}",
-                                plmn.iter().map(|b| format!("{b:02x}")).collect::<String>()
-                            );
+                            let plmn_hex: String =
+                                plmn.iter().map(|b| format!("{b:02x}")).collect();
+                            println!("  PLMN: {plmn_hex}");
                         }
                     }
+
                     ID_PLMNSUPPORT_LIST => {
                         let list: PLMNSupportList =
                             decode_open_type(&ie.value).expect("decode PLMN support");
+
                         println!("PLMN Support:   {} entries", list.0.len());
                         for item in &list.0 {
-                            println!(
-                                "  PLMN: {}, slices: {}",
-                                item.p_lmnidentity
-                                    .0
-                                    .iter()
-                                    .map(|b| format!("{b:02x}"))
-                                    .collect::<String>(),
-                                item.slice_support_list.0.len()
-                            );
+                            let plmn = &item.p_lmnidentity.0;
+                            let plmn_hex: String =
+                                plmn.iter().map(|b| format!("{b:02x}")).collect();
+                            let slices = item.slice_support_list.0.len();
+                            println!("  PLMN: {plmn_hex}, slices: {slices}");
                         }
                     }
+
                     _ => println!("  (other IE: id={})", ie.id.0),
                 }
             }
@@ -160,6 +163,7 @@ fn main() {
 
     let re_encoded = decoded.encode().expect("re-encode failed");
     assert_eq!(aper_bytes, re_encoded, "Round-trip mismatch!");
+
     println!("\nRound-trip OK ({} bytes)", re_encoded.len());
 }
 

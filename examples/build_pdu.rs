@@ -17,8 +17,11 @@ fn main() {
     let amf_ue_id: u64 = 1;
     let ran_ue_id: u32 = 0;
 
+    // The direction, the procedure, its criticality and the message, then
+    // each IE with its criticality.
     let pdu = build_ngap!(SuccessfulOutcome, InitialContextSetup,
         REJECT, InitialContextSetupResponse,
+
         IGNORE AMF_UE_NGAP_ID(amf_ue_id),
         IGNORE RAN_UE_NGAP_ID(ran_ue_id),
         IGNORE PDUSessionResourceSetupListCxtRes(session_setup_response_list()),
@@ -31,6 +34,7 @@ fn main() {
 
     let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
         IGNORE, UEContextReleaseRequest,
+
         REJECT AMF_UE_NGAP_ID(amf_ue_id),
         REJECT RAN_UE_NGAP_ID(ran_ue_id),
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
@@ -47,21 +51,27 @@ fn main() {
 
     let network = plmn("208", "93");
     let sessions = session_setup_request_list(vec![0x7e, 0x00, 0x42]);
+    let bit_rate = UEAggregateMaximumBitRate::new(
+        BitRate(1_000_000_000u64.into()),
+        BitRate(500_000_000u64.into()),
+        None,
+    );
+    let allowed_slice = AllowedNSSAIItem::new(s_nssai(1, Some([0x00, 0x00, 0x01])), None);
+
     let pdu = build_ngap!(InitiatingMessage, InitialContextSetup,
         REJECT, InitialContextSetupRequest,
+
+        // The UE, on each side of the interface
         REJECT AMF_UE_NGAP_ID(amf_ue_id),
         REJECT RAN_UE_NGAP_ID(ran_ue_id),
-        REJECT UEAggregateMaximumBitRate(UEAggregateMaximumBitRate::new(
-            BitRate(1_000_000_000u64.into()),
-            BitRate(500_000_000u64.into()),
-            None,
-        )),
+
+        // Its bit rate, its AMF, its sessions and its slices
+        REJECT UEAggregateMaximumBitRate(bit_rate),
         REJECT GUAMI(guami(network.clone(), 1, 1, 0)),
         REJECT PDUSessionResourceSetupListCxtReq(sessions),
-        REJECT AllowedNSSAI(AllowedNSSAI(vec![AllowedNSSAIItem::new(
-            s_nssai(1, Some([0x00, 0x00, 0x01])),
-            None,
-        )])),
+        REJECT AllowedNSSAI(AllowedNSSAI(vec![allowed_slice])),
+
+        // Its security capabilities and its key
         REJECT UESecurityCapabilities(ue_security_capabilities(&[0xe0, 0xe0])),
         REJECT SecurityKey(SecurityKey(FixedBitString::<256>::ZERO)),
     );
@@ -74,20 +84,23 @@ fn main() {
     // HandoverPreparation procedure → HandoverRequired message. The target gNB
     // and PDU-session resource list are mandatory NGAP IEs.
 
-    let target = TargetID::targetRANNodeID(TargetRANNodeID::new(
-        GlobalRANNodeID::globalGNB_ID(global_gnb_id(network.clone(), 0x123456)),
-        tai(network, &[0x00, 0x00, 0x01]),
-        None,
-    ));
+    let target_gnb = GlobalRANNodeID::globalGNB_ID(global_gnb_id(network.clone(), 0x123456));
+    let target_area = tai(network, &[0x00, 0x00, 0x01]);
+    let target = TargetID::targetRANNodeID(TargetRANNodeID::new(target_gnb, target_area, None));
+    let cause = Cause::radioNetwork(CauseRadioNetwork::handover_desirable_for_radio_reason);
+
     let pdu = build_ngap!(InitiatingMessage, HandoverPreparation,
         REJECT, HandoverRequired,
+
         REJECT AMF_UE_NGAP_ID(amf_ue_id),
         REJECT RAN_UE_NGAP_ID(ran_ue_id),
+
+        // The kind of handover, its cause and its target
         REJECT HandoverType(HandoverType::intra5gs),
-        IGNORE Cause(Cause::radioNetwork(
-            CauseRadioNetwork::handover_desirable_for_radio_reason,
-        )),
+        IGNORE Cause(cause),
         REJECT TargetID(target),
+
+        // The sessions and the container that go to the target
         REJECT PDUSessionResourceListHORqd(handover_required_sessions()),
         REJECT SourceToTarget_TransparentContainer(vec![0x00, 0x01, 0x02]),
     );
@@ -99,8 +112,10 @@ fn main() {
 
     let pdu = build_ngap!(SuccessfulOutcome, HandoverResourceAllocation,
         REJECT, HandoverRequestAcknowledge,
+
         IGNORE AMF_UE_NGAP_ID(amf_ue_id),
         IGNORE RAN_UE_NGAP_ID(ran_ue_id),
+
         IGNORE PDUSessionResourceAdmittedList(admitted_sessions()),
         REJECT TargetToSource_TransparentContainer(vec![0xAA, 0xBB]),
     );
@@ -110,6 +125,7 @@ fn main() {
 
     let pdu = build_ngap!(UnsuccessfulOutcome, NGSetup,
         REJECT, NGSetupFailure,
+
         IGNORE Cause(Cause::misc(CauseMisc::unknown_PLMN_or_SNPN)),
     );
 
@@ -121,6 +137,7 @@ fn main() {
     let cause_ie = build_ngap_ie!(UEContextReleaseRequest, IGNORE
         Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity))
     );
+
     println!("\n=== 6. Single IE (via build_ngap_ie!) ===");
     println!(
         "IE ID: {}, Criticality: {:?}",
@@ -199,6 +216,7 @@ fn print_and_encode(pdu: &NGAP_PDU) {
         pdu.direction(),
         pdu.procedure_code()
     );
+
     let bytes = pdu.encode().expect("APER encode failed");
     println!("  APER ({} bytes): {}", bytes.len(), hex::encode(&bytes));
 }

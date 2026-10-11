@@ -13,11 +13,14 @@ its IEs by their names.
 ```rust
 use oxirush_ngap::{build_ngap, extract_ngap_ies, ngap::*};
 
-// UE CONTEXT RELEASE REQUEST: decode it, and read its IEs
+// Decode a UE CONTEXT RELEASE REQUEST
 let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
 let pdu = NGAP_PDU::decode(&bytes).unwrap();
 assert_eq!((pdu.procedure_code(), pdu.is_initiating()), (42, true));
 println!("{}", pdu.procedure_name());
+
+// Read its IEs by name. An `opt` field is `None` when its IE is not there,
+// and what follows `=>` is what the field keeps of the decoded value
 let request: UEContextReleaseRequest = pdu.decode_value().unwrap();
 extract_ngap_ies!(request, UEContextReleaseRequest,
     opt amf_id: u64 = AMF_UE_NGAP_ID(id),
@@ -26,13 +29,17 @@ extract_ngap_ies!(request, UEContextReleaseRequest,
 );
 println!("AMF={amf_id:?} RAN={ran_id:?} cause={cause:?}");
 
-// Build it with another cause, and encode it
+// Build it with another cause: the direction, the procedure, the criticality
+// of the PDU and the message, then each IE with its criticality
 let rebuilt = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
     IGNORE, UEContextReleaseRequest,
+
     REJECT AMF_UE_NGAP_ID(42u64),
     REJECT RAN_UE_NGAP_ID(7u32),
     IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::radio_connection_with_ue_lost)),
 );
+
+// Encode it
 let encoded = hex::encode(rebuilt.encode().unwrap());
 assert_eq!(encoded, "002a4015000003000a0002002a005500020007000f40020540");
 ```
@@ -50,16 +57,21 @@ JSON, which is read, edited and written by the names of the specification:
 use oxirush_ngap::{inspect, ngap::NGAP_PDU};
 use serde_json::json;
 
+// The same message, shown as its name and its IEs by name
 let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
 let pdu = NGAP_PDU::decode(&bytes).unwrap();
 println!("{}", inspect::message_tree(&pdu).unwrap());
 
+// Its tree is edited at a path, and is a PDU again
 let mut tree = inspect::inspect_pdu(&pdu).unwrap();
 let lost = json!("radio-connection-with-ue-lost");
 inspect::set(&mut tree, "/ngap/Cause/radioNetwork", lost).unwrap();
 let edited = inspect::encode_pdu(&tree).unwrap();
 println!("{}", inspect::message_tree(&edited).unwrap());
-assert_eq!(hex::encode(edited.encode().unwrap()), "002a4015000003000a0002002a005500020007000f40020540");
+
+// Its octets are those that the typed example built
+let octets = hex::encode(edited.encode().unwrap());
+assert_eq!(octets, "002a4015000003000a0002002a005500020007000f40020540");
 ```
 
 ```json
@@ -248,9 +260,12 @@ without it, the field is the `.0` of the generated newtype.
 ```rust
 use oxirush_ngap::{build_ngap_ie, ngap::*, with_ngap_ie_mut};
 
+// A message with one IE, which is built alone
 let mut message = UplinkNASTransport::new(ProtocolIEContainer(vec![
     build_ngap_ie!(UplinkNASTransport, REJECT AMF_UE_NGAP_ID(1u64)),
 ]));
+
+// The IE is decoded, changed and encoded again in its place
 let updated = with_ngap_ie_mut!(message, UplinkNASTransport,
     AMF_UE_NGAP_ID(id) = 42u64
 );
@@ -269,11 +284,15 @@ the same one: the last that decodes.
 ```rust
 use oxirush_ngap::helpers::*;
 
+// A PLMN from its MCC and its MNC, and what is identified within it
 let network = plmn("208", "93");
-let amf = guami(network.clone(), 1, 1, 0);
-let tracking_area = tai(network.clone(), &[0x00, 0x00, 0x01]);
-let cell = nr_cgi(network.clone(), 0x123456, 1);
+let amf = guami(network.clone(), 1, 1, 0); // region, set, pointer
+let tracking_area = tai(network.clone(), &[0x00, 0x00, 0x01]); // TAC
+let cell = nr_cgi(network.clone(), 0x123456, 1); // gNB, cell
 let gnb = global_gnb_id(network, 0x123456);
+
+// A string of bits from octets, and the NR algorithms of a UE: the first
+// octet of its encryption bitmap, then of its integrity bitmap
 let algorithm_mask = bytes_to_bitvec(&[0xe0]);
 let capabilities = ue_security_capabilities(&[0xe0, 0xe0]);
 ```
@@ -315,6 +334,8 @@ use oxirush_ngap::{inspect, ngap::NGAP_PDU};
 // UE CONTEXT RELEASE REQUEST
 let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
 let pdu = NGAP_PDU::decode(&bytes).unwrap();
+
+// As a message, then its third IE as the tree has it
 println!("{}", inspect::message_tree(&pdu).unwrap());
 let tree = inspect::inspect_pdu(&pdu).unwrap();
 println!("{}", tree["message"]["protocolIEs"][2]);
@@ -335,17 +356,21 @@ use oxirush_ngap::{inspect, ngap::NGAP_PDU};
 use serde_json::json;
 
 let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-let tree = inspect::inspect_pdu(&NGAP_PDU::decode(&bytes).unwrap()).unwrap();
+let pdu = NGAP_PDU::decode(&bytes).unwrap();
+let tree = inspect::inspect_pdu(&pdu).unwrap();
 
 // `/ngap` is the IEs of the message, and an IE goes by its name
 let select = |path| inspect::select(&tree, path).unwrap();
 assert_eq!(select("/ngap/RAN-UE-NGAP-ID/value"), [&json!(7)]);
 assert_eq!(select("/ngap/Cause/radioNetwork"), [&json!("user-inactivity")]);
 assert_eq!(select("/ngap/Cause/octets"), [&json!("0500")]);
-// By its position or its identifier, in any case, and each of them
+
+// By its position, by its name whatever its case and its separators, by its
+// identifier, and each IE with `*`
 assert_eq!(select("/ngap/1/value"), select("/NGAP/ran_ue_ngap_id/value"));
 assert_eq!(select("/ngap/@id=85/value"), [&json!(7)]);
 assert_eq!(select("/ngap/*/criticality").len(), 3);
+
 // Nothing where the message could have a value and has none
 assert!(select("/ngap/Cause/nas").is_empty());
 assert!(select("/ngap/GUAMI/pLMNIdentity").is_empty());
@@ -378,7 +403,8 @@ use oxirush_ngap::{inspect, ngap::NGAP_PDU};
 use serde_json::json;
 
 let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-let mut tree = inspect::inspect_pdu(&NGAP_PDU::decode(&bytes).unwrap()).unwrap();
+let pdu = NGAP_PDU::decode(&bytes).unwrap();
+let mut tree = inspect::inspect_pdu(&pdu).unwrap();
 
 // A value, and another alternative of a CHOICE in place of the one that is there
 inspect::set(&mut tree, "/ngap/RAN-UE-NGAP-ID/value", json!(9)).unwrap();
@@ -390,6 +416,7 @@ println!("{}", inspect::message_tree(&edited).unwrap());
 let after = inspect::inspect_pdu(&edited).unwrap();
 let octets = inspect::select(&after, "/ngap/AMF-UE-NGAP-ID/octets").unwrap();
 assert_eq!(octets, [&json!("002A")]);
+
 // A name that the type does not have is refused, and the tree is as it was
 let wrong = inspect::set(&mut tree, "/ngap/Cause/radioNetwrok", json!("unspecified"));
 println!("{}", wrong.unwrap_err());
@@ -407,14 +434,18 @@ use oxirush_ngap::{inspect, ngap::NGAP_PDU};
 use serde_json::json;
 
 let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-let mut tree = inspect::inspect_pdu(&NGAP_PDU::decode(&bytes).unwrap()).unwrap();
+let pdu = NGAP_PDU::decode(&bytes).unwrap();
+let mut tree = inspect::inspect_pdu(&pdu).unwrap();
 
-// At the end, by its name and its typed value
+// An IE is added at the end, by its name and its typed value
 let name = json!({"id": "RANNodeName", "criticality": "ignore", "value": "gnb-1"});
 inspect::insert(&mut tree, "/ngap/-", name).unwrap();
+
 // Before another IE, by its number and its octets
 let unknown = json!({"id": 60000, "criticality": "ignore", "octets": "c0ffee"});
 inspect::insert(&mut tree, "/ngap/Cause", unknown).unwrap();
+
+// An IE is taken out by its name
 inspect::remove(&mut tree, "/ngap/AMF-UE-NGAP-ID").unwrap();
 
 let edited = inspect::encode_pdu(&tree).unwrap();
@@ -431,6 +462,7 @@ println!("{}", inspect::message_tree(&edited).unwrap()["ies"]);
 use oxirush_ngap::inspect;
 use serde_json::json;
 
+// The name of the message, whatever its case and its separators, then its IEs
 let request = json!({
     "message": "ue context release request",
     "ies": [
@@ -441,6 +473,7 @@ let request = json!({
         {"RANNodeName": "gnb-1", "criticality": "ignore"},
     ],
 });
+
 let pdu = inspect::message_from_tree(&request).unwrap();
 println!("{}", hex::encode(pdu.encode().unwrap()));
 
@@ -492,6 +525,7 @@ println!("{}", inspect::message_tree(&edited).unwrap());
 use oxirush_ngap::inspect;
 use serde_json::json;
 
+// A message that has one IE twice
 let twice = json!({"message": "UEContextReleaseRequest", "ies": [
     {"AMF-UE-NGAP-ID": 1},
     {"RAN-UE-NGAP-ID": 7},
@@ -503,10 +537,14 @@ let mut tree = inspect::inspect_pdu(&pdu).unwrap();
 // The name selects both, in the order of the message
 let both = inspect::select(&tree, "/ngap/AMF-UE-NGAP-ID/value").unwrap();
 assert_eq!(both, [&json!(1), &json!(2)]);
+
 // Each has its position, which is how `paths` names it, and its name may follow
 inspect::set(&mut tree, "/ngap/2/AMF-UE-NGAP-ID/value", json!(3)).unwrap();
-// The name of another IE says which IE is there
+
+// After a position, the name of another IE is an error that says which IE is there
 println!("{}", inspect::select(&tree, "/ngap/2/RAN-UE-NGAP-ID/value").unwrap_err());
+
+// The values, each with its path
 for (path, value) in inspect::paths(&tree) {
     if path.ends_with("/value") {
         println!("{path} = {value}");
@@ -527,6 +565,7 @@ this IE is AMF-UE-NGAP-ID, not RAN-UE-NGAP-ID: "RAN-UE-NGAP-ID" is not a member 
 use oxirush_ngap::inspect;
 use serde_json::{Value, json};
 
+// A message whose one IE is a list of two items
 let request = json!({"message": "InitialContextSetupRequest", "ies": [
     {"AllowedNSSAI": [{"s-NSSAI": {"sST": 1}}, {"s-NSSAI": {"sST": 2, "sD": "000001"}}]},
 ]});
@@ -540,14 +579,17 @@ let select = |tree, path| -> Vec<Value> {
 };
 assert_eq!(select(&tree, "/ngap/AllowedNSSAI/1/s-NSSAI/sD"), [json!("000001")]);
 assert_eq!(select(&tree, "/ngap/AllowedNSSAI/value/*/s-NSSAI/sST"), [json!(1), json!(2)]);
-// An optional member that an item does not have
+
+// An optional member that an item does not have selects nothing
 assert!(select(&tree, "/ngap/AllowedNSSAI/0/s-NSSAI/sD").is_empty());
 
 // An item is added at the end, and one is taken out
 inspect::insert(&mut tree, "/ngap/AllowedNSSAI/-", json!({"s-NSSAI": {"sST": 3}})).unwrap();
 inspect::remove(&mut tree, "/ngap/AllowedNSSAI/0").unwrap();
+
 // `null` takes an optional member out
 inspect::set(&mut tree, "/ngap/AllowedNSSAI/0/s-NSSAI/sD", Value::Null).unwrap();
+
 let edited = inspect::encode_pdu(&tree).unwrap();
 println!("{}", inspect::message_tree(&edited).unwrap());
 ```
@@ -565,6 +607,7 @@ value beside its octets, and a message its decoded value alone.
 use oxirush_ngap::inspect;
 use serde_json::json;
 
+// A message with a transfer, written as the message that it contains
 let request = json!({"message": "PDUSessionResourceSetupRequest", "ies": [
     {"AMF-UE-NGAP-ID": 42},
     {"RAN-UE-NGAP-ID": 7},
@@ -578,20 +621,25 @@ let request = json!({"message": "PDUSessionResourceSetupRequest", "ies": [
 ]});
 let pdu = inspect::message_from_tree(&request).unwrap();
 let mut tree = inspect::inspect_pdu(&pdu).unwrap();
+
+// In a tree, the transfer is its octets beside its decoded value
 let transfer = "/ngap/PDUSessionResourceSetupListSUReq/0/pDUSessionResourceSetupRequestTransfer";
 println!("{}", inspect::select(&tree, transfer).unwrap()[0]);
 
 // The IEs of the message that it contains go by name in its place
 let kind = format!("{transfer}/PDUSessionType/value");
 assert_eq!(inspect::select(&tree, &kind).unwrap(), [&json!("ipv4")]);
+
 // The same value by the path that says `value` and `decoded`
 let long = "/ngap/PDUSessionResourceSetupListSUReq/value/0\
     /pDUSessionResourceSetupRequestTransfer/decoded/PDUSessionType/value";
 assert_eq!(inspect::select(&tree, long), inspect::select(&tree, &kind));
+
 // And by the names that the message shows, joined: the IE by its position, then its name
 let joined = format!("{transfer}/protocolIEs/0/PDUSessionType/value");
 assert_eq!(inspect::select(&tree, &joined), inspect::select(&tree, &kind));
 
+// An edit of the message that it contains is encoded into the transfer
 inspect::set(&mut tree, &kind, json!("ipv6")).unwrap();
 let edited = inspect::encode_pdu(&tree).unwrap();
 println!("{}", inspect::message_tree(&edited).unwrap()["ies"][2]);
@@ -610,6 +658,7 @@ use oxirush_ngap::inspect;
 // The names that the value at a path can have, as the specification spells them
 let names = inspect::enumerated_at("UEContextReleaseRequest", "/ngap/Cause/nas").unwrap();
 println!("{:?}", names.unwrap());
+
 // A value of another type has none
 let choice = inspect::enumerated_at("UEContextReleaseRequest", "/ngap/Cause/value");
 assert_eq!(choice, Ok(None));
@@ -631,6 +680,8 @@ use oxirush_ngap::inspect;
 let check = |path| inspect::check_path("UEContextReleaseRequest", path);
 assert_eq!(check("/ngap/Cause/nas"), Ok(()));
 assert_eq!(check("/ngap/*/radioNetwork"), Ok(()));
+
+// A name that is written wrong, and an IE that the message does not have
 for wrong in ["/ngap/Cause/radioNetwrok", "/ngap/RAN-UE-NGAP-ID/valeu", "/ngap/GUAMI"] {
     println!("{}", check(wrong).unwrap_err());
 }
@@ -684,18 +735,25 @@ let required = json!({"message": "HandoverRequired", "ies": [
         "uEHistoryInformation": [{"lastVisitedCellInformation": {"eUTRANCell": "00"}}],
     }}},
 ]});
+
+// A message shows the octets that the container was encoded as
 let pdu = inspect::message_from_tree(&required).unwrap();
 println!("{}", inspect::message_tree(&pdu).unwrap()["ies"][2]);
 
-// Read: a path goes through the name of the type, once `open` decoded the octets
+// Read: a path goes through the name of the type
 let mut tree = inspect::inspect_pdu(&pdu).unwrap();
 let container = format!("/ngap/SourceToTarget-TransparentContainer/{name}");
 let cell = format!("{container}/targetCell-ID/nR-CGI/nRCellIdentity");
 assert_eq!(inspect::check_path("HandoverRequired", &cell), Ok(()));
+
+// It is an error until `open` decoded the octets, and selects after
 assert!(inspect::select(&tree, &cell).unwrap_err().contains("open decodes them"));
 inspect::open(&mut tree, &cell).unwrap();
 assert_eq!(inspect::select(&tree, &cell).unwrap(), [&json!(4660)]);
-println!("{}", inspect::select(&tree, &format!("{container}/decoded")).unwrap()[0]);
+
+// What the octets carry, decoded
+let decoded = format!("{container}/decoded");
+println!("{}", inspect::select(&tree, &decoded).unwrap()[0]);
 
 // An edit goes into it, and what is not edited is sent as it was received
 inspect::set(&mut tree, &cell, json!(7)).unwrap();

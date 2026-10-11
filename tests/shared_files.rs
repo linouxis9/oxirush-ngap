@@ -1,6 +1,6 @@
 //! The files that oxirush-ngap and oxirush-s1ap have in common, octet for octet: the
-//! codec helpers, the paths of the inspection, the generators that both protocols run
-//! and the test of the README. Each crate holds the digest of each file, so that an
+//! error, the codec helpers, the paths of the inspection, the generators that both
+//! protocols run and the test of the README. Each crate holds the digest of each file, so that an
 //! edit in one fails here until the file is the same in the other and both record its
 //! new digest. This file is one of them, and the two crates keep it the same too.
 
@@ -12,8 +12,10 @@ const SHARED: &[(&str, u64)] = &[
     ("build/containers.rs", 0x9d134011ce89fec9),
     ("build/inspection.rs", 0xcc54553d89f026e5),
     ("build/registry.rs", 0xcf4be166857fe031),
+    ("src/error.rs", 0x2dbe8b288b946e67),
     ("src/inspect_paths.rs", 0xbe13926097bb7c45),
-    ("src/per.rs", 0x80552549e724045f),
+    ("src/message.rs", 0x95e7ef29b6bc50cf),
+    ("src/per.rs", 0xafcc857f8263a8d2),
     ("src/sized.rs", 0xacd754552266ad78),
     ("tests/readme.rs", 0xe02499cb40541d3c),
 ];

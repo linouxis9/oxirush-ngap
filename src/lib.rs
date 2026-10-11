@@ -36,7 +36,12 @@
 //! let decoded = NGAP_PDU::decode(&bytes).unwrap();
 //! assert_eq!(decoded.procedure_name(), "UEContextReleaseRequest");
 //! ```
+//!
+//! The codec returns an [`Error`]: its [`ErrorKind`] is what a caller matches on, its
+//! `Display` says what is wrong, and its source is the error of `rasn` where the codec
+//! gave one.
 
+mod error;
 pub mod helpers;
 #[cfg(feature = "inspect")]
 pub mod inspect;
@@ -45,6 +50,7 @@ mod inspect_paths;
 #[cfg(feature = "inspect")]
 mod inspect_registry;
 pub mod macros;
+mod message;
 pub mod ngap;
 mod per;
 #[doc(hidden)]
@@ -58,6 +64,8 @@ pub mod sized;
 /// `rasn` of its own.
 pub use rasn;
 
+pub use error::{Error, ErrorKind};
+pub use message::Message;
 pub use ngap::NgapPduKind;
 
 /// The examples of the README, which the documentation tests compile and run.

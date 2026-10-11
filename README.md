@@ -109,10 +109,10 @@ oxirush-ngap = "0.5"
 
 No feature is on by default. The examples of this page also use the `hex`
 crate, and `serde_json` for JSON. The values of the bindings are those of
-`rasn`, such as `Integer`, `FixedBitString`, `OctetString` and `Any`, and so
-are the errors of the codec. The crate re-exports it as `oxirush_ngap::rasn`,
-which is where the examples take these names from: a crate that names them
-needs no dependency on `rasn` of its own.
+`rasn`, such as `Integer`, `FixedBitString`, `OctetString` and `Any`. The
+crate re-exports it as `oxirush_ngap::rasn`, which is where the examples take
+these names from: a crate that names them needs no dependency on `rasn` of
+its own. The errors of the codec are the crate's own: see [Errors](#errors).
 
 The minimum supported Rust version is 1.88. A project that is built with
 Rust 1.88 needs a resolver that looks at the Rust version, which edition
@@ -170,12 +170,12 @@ without debug information.
 
 | Of an `NGAP_PDU` | Gives |
 |------------------|-------|
-| `NGAP_PDU::decode(&bytes)` | The PDU of the octets of one message. Octets that are incomplete, and octets after the message, are an error |
+| `NGAP_PDU::decode(&bytes)` | The PDU of the octets of one message. Octets that are incomplete, and octets after the message, are an error of the kind `Decode` |
 | `encode()` | Its octets, a `Vec<u8>` |
 | `procedure_code()`, `procedure_name()` | The code and the name of its procedure: `42` and `"UEContextReleaseRequest"` |
 | `direction()` | `"InitiatingMessage"`, `"SuccessfulOutcome"` or `"UnsuccessfulOutcome"`; `is_initiating()`, `is_successful()` and `is_unsuccessful()` say which |
 | `kind()` | An `NgapPduKind`: one variant for each message, and `Other` for a procedure that the specification does not have in that direction |
-| `decode_value()` | The message, as the type that the caller names |
+| `decode_value()` | The message, as its type, which the caller names. The type of another message is an error of the kind `WrongMessage`, and a type that is no message does not compile |
 
 The kind of a PDU says which message to decode:
 
@@ -310,6 +310,49 @@ message has another order for an MNC of three digits, that of TS 24.008,
 where the same network is `13 00 14`. `plmn_from` reads the MCC and the MNC
 of a PLMN identity, and has `None` for octets that are not one, as
 `ab cd ef`.
+
+### Errors
+
+The codec returns an `oxirush_ngap::Error`: `NGAP_PDU::decode`, `encode` and
+`decode_value`, and `decode_open_type` and `encode_open_type`.
+
+| Of an `Error` | Gives |
+|---------------|-------|
+| `kind()` | An `ErrorKind`, which is what a caller matches on. More kinds may come with a later version: leave the others to `_` |
+| `Display` | What is wrong, with the names of the specification, and what to do about it where something can be done |
+| `source()` | The error of `rasn`, where the codec gave one: a `rasn::error::DecodeError` or an `EncodeError` |
+
+It is `Clone`, `Send` and `Sync`, two errors are equal when their kind and
+their message are, and `?` converts one into a `Box<dyn std::error::Error>`.
+
+| Kind | When |
+|------|------|
+| `Decode` | Octets are not the value that they are decoded as: they end before it does, go on after it, or hold a value outside its constraint |
+| `Encode` | A value does not encode, as an integer outside its constraint |
+| `WrongMessage` | `decode_value::<T>()` on a PDU that holds another message than `T` |
+
+```rust
+use oxirush_ngap::{ErrorKind, ngap::*};
+
+// A UE CONTEXT RELEASE REQUEST is not decoded as an NG SETUP REQUEST
+let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
+let pdu = NGAP_PDU::decode(&bytes).unwrap();
+let wrong = pdu.decode_value::<NGSetupRequest>().unwrap_err();
+assert_eq!(wrong.kind(), ErrorKind::WrongMessage);
+println!("{wrong}");
+
+// Octets that end early: the message, and what rasn said
+let short = NGAP_PDU::decode(&bytes[..10]).unwrap_err();
+assert_eq!(short.kind(), ErrorKind::Decode);
+println!("{short}");
+println!("{}", std::error::Error::source(&short).unwrap());
+```
+
+```text
+the message of this PDU is UEContextReleaseRequest, not NGSetupRequest: kind() says which message a PDU holds
+these octets do not decode as NGAP-PDU: they end before the value does, in its field `value`
+Error when decoding field `InitiatingMessage.value`: Need more data to continue: Size(120) (Codec: APER) (Codec: APER)
+```
 
 ### Key types
 
@@ -855,6 +898,7 @@ S1AP.
 |------|---------------|
 | `tests/aper_vectors.rs` | The 144 messages of `tests/fixtures/messages.tsv`, one for each message of each procedure, were encoded by pycrate 0.8.1. Each decodes to its type and encodes to the same octets, and each of its truncations and one more octet are refused. |
 | `tests/aper_round_trip.rs` | The macros, and the encodings where the codec departs from rasn's: constrained lists, `UTF8String`, long bit strings. |
+| `tests/errors.rs` | The errors of the typed API, each with its kind and its message: a PDU that is decoded as another message, octets that are no PDU, and a value outside its constraint. |
 | `tests/unknown_extensions.rs` | The additions of a later release to an extensible `SEQUENCE` are skipped, and what follows them is read. |
 | `tests/allocation.rs` | Decoding reserves memory for the elements that it reads, not for the count that a length determinant claims. |
 | `tests/inspection.rs` | Each of the 144 messages is the same octets through its view, and through its tree where it has IEs to name. Each path of each selects its value, with and without `value` and `decoded`, and is one that `check_path` takes. Edits, written trees, criticalities, the two IEs that have the type of what they extend, and the identifiers of the registry against the constants of the bindings. |
@@ -898,8 +942,9 @@ regenerates them, as the ASN.1 is not in the repository.
 
 oxirush-ngap and oxirush-s1ap share, octet for octet, the code that does not
 depend on the protocol: `build/aper_fix.rs`, `build/containers.rs`,
-`build/inspection.rs`, `build/registry.rs`, `src/inspect_paths.rs`,
-`src/per.rs`, `src/sized.rs` and the test `tests/readme.rs`.
+`build/inspection.rs`, `build/registry.rs`, `src/error.rs`,
+`src/inspect_paths.rs`, `src/message.rs`, `src/per.rs`, `src/sized.rs` and
+the test `tests/readme.rs`.
 `tests/shared_files.rs` holds a digest of each, so that an edit in one crate
 fails its tests until the file is the same in the other and both record the
 new digest.

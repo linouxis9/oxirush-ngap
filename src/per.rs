@@ -26,6 +26,38 @@ pub(crate) fn skip_unknown_extensions<D: Decoder>(decoder: &mut D) -> Result<(),
     Ok(())
 }
 
+/// The open type of `value`: its complete encoding in aligned PER, in which an empty
+/// encoding becomes one zero octet (X.691 (02/2021) §11.1.4, §11.2.1).
+pub(crate) fn encode_open_type<T: Encode>(value: &T) -> Result<Any, crate::Error> {
+    let mut bytes = rasn::aper::encode(value).map_err(crate::Error::encoding::<T>)?;
+    if bytes.is_empty() {
+        bytes.push(0);
+    }
+    Ok(Any::new(bytes))
+}
+
+/// The value of the type `T` that `bytes` are the complete encoding of, in aligned PER:
+/// one value, whole, and no octet after it.
+pub(crate) fn decode_complete<T: Decode>(bytes: &[u8]) -> Result<T, crate::Error> {
+    if bytes.is_empty() {
+        return Err(crate::Error::not_a::<T>("there are none"));
+    }
+    let decoded = rasn::aper::decode_with_remainder(bytes);
+    let (decoded, remainder) = decoded.map_err(crate::Error::decoding::<T>)?;
+    // A zero-bit field-list has exactly one zero octet as its complete encoding.
+    let zero_bit_encoding = bytes == [0] && remainder == bytes;
+    if !remainder.is_empty() && !zero_bit_encoding {
+        let after = match remainder.len() {
+            1 => "1 octet".to_string(),
+            length => format!("{length} octets"),
+        };
+        return Err(crate::Error::not_a::<T>(format!(
+            "the value is followed by {after}"
+        )));
+    }
+    Ok(decoded)
+}
+
 /// Keep the public SEQUENCE's AsnType and Encode implementations. In APER,
 /// read its extension bit, decode the identical nonextensible root, then
 /// consume the unknown additions. Other codecs use the original structure.

@@ -29284,16 +29284,50 @@ impl From<SequenceOf<TransportLayerAddress>> for XnTLAs {
 }
 pub use crate::registry::NgapPduKind;
 impl NGAPPDU {
-    /// Encode this PDU using Aligned PER.
-    pub fn encode(&self) -> Result<Vec<u8>, rasn::error::EncodeError> {
-        rasn::aper::encode(self)
+    /// The octets of this PDU, in aligned PER.
+    pub fn encode(&self) -> Result<Vec<u8>, crate::Error> {
+        rasn::aper::encode(self).map_err(crate::Error::encoding::<Self>)
     }
-    /// Decode an NGAP PDU from Aligned PER bytes.
-    pub fn decode(bytes: &[u8]) -> Result<Self, rasn::error::DecodeError> {
-        decode_complete(bytes)
+    /// The PDU that `bytes` are, in aligned PER: the octets of one PDU, whole, and no
+    /// octet after it.
+    pub fn decode(bytes: &[u8]) -> Result<Self, crate::Error> {
+        crate::per::decode_complete(bytes)
     }
-    /// Decode the typed message held by this PDU's open type.
-    pub fn decode_value<T: rasn::Decode>(&self) -> Result<T, rasn::error::DecodeError> {
+    /// The message that this PDU holds, as its type `T`.
+    ///
+    /// `T` is the type of the message that `kind()` says. For the type of another
+    /// message the error has the kind `WrongMessage`, as the octets of one message
+    /// may decode as another:
+    ///
+    /// ```
+    /// use oxirush_ngap::{ErrorKind, ngap::*};
+    ///
+    /// // A UE CONTEXT RELEASE REQUEST
+    /// let octets = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
+    /// let pdu = NGAP_PDU::decode(&octets)?;
+    /// let request: UEContextReleaseRequest = pdu.decode_value()?;
+    /// assert_eq!(request.protocol_ies.0.len(), 3);
+    ///
+    /// let other = pdu.decode_value::<NGSetupRequest>().unwrap_err();
+    /// assert_eq!(other.kind(), ErrorKind::WrongMessage);
+    /// # Ok::<(), oxirush_ngap::Error>(())
+    /// ```
+    ///
+    /// A type that is no message, as that of a transfer or an IE, does not compile.
+    /// `decode_open_type` decodes any type from an open type.
+    ///
+    /// ```compile_fail
+    /// use oxirush_ngap::ngap::*;
+    ///
+    /// fn held(pdu: &NGAP_PDU) {
+    ///     let _ = pdu.decode_value::<PDUSessionResourceSetupRequestTransfer>();
+    /// }
+    /// ```
+    pub fn decode_value<T: crate::Message>(&self) -> Result<T, crate::Error> {
+        let (direction, code) = (self.direction(), self.procedure_code());
+        if (direction, code) != (T::DIRECTION, T::PROCEDURE_CODE) {
+            return Err(crate::Error::wrong_message(T::NAME, direction, code));
+        }
         let value = match self {
             NGAPPDU::initiatingMessage(message) => &message.value,
             NGAPPDU::successfulOutcome(message) => &message.value,
@@ -29341,40 +29375,13 @@ impl std::fmt::Display for NGAPPDU {
         )
     }
 }
-/// Encode a typed ASN.1 value for an NGAP open type using APER.
-///
-/// An open type holds a complete encoding, in which an empty encoding
-/// becomes one zero octet (X.691 (02/2021) §11.1.4, §11.2.1).
-pub fn encode_open_type<T: rasn::Encode>(
-    value: &T,
-) -> Result<rasn::types::Any, rasn::error::EncodeError> {
-    let mut bytes = rasn::aper::encode(value)?;
-    if bytes.is_empty() {
-        bytes.push(0);
-    }
-    Ok(rasn::types::Any::new(bytes))
+/// The open type of a value: its complete encoding in aligned PER, in which an empty
+/// encoding becomes one zero octet (X.691 (02/2021) §11.1.4, §11.2.1).
+pub fn encode_open_type<T: rasn::Encode>(value: &T) -> Result<rasn::types::Any, crate::Error> {
+    crate::per::encode_open_type(value)
 }
-/// Decode a typed ASN.1 value from an NGAP open type using APER.
-pub fn decode_open_type<T: rasn::Decode>(
-    value: &rasn::types::Any,
-) -> Result<T, rasn::error::DecodeError> {
-    decode_complete(value.as_bytes())
-}
-fn decode_complete<T: rasn::Decode>(bytes: &[u8]) -> Result<T, rasn::error::DecodeError> {
-    if bytes.is_empty() {
-        return Err(<rasn::error::DecodeError as rasn::de::Error>::custom(
-            "APER value must contain a complete encoding",
-            rasn::Codec::Aper,
-        ));
-    }
-    let (decoded, remainder) = rasn::aper::decode_with_remainder(bytes)?;
-    // A zero-bit field-list has exactly one zero octet as its complete encoding.
-    let zero_bit_encoding = bytes == [0] && remainder == bytes;
-    if !remainder.is_empty() && !zero_bit_encoding {
-        return Err(<rasn::error::DecodeError as rasn::de::Error>::custom(
-            "APER complete encoding has trailing whole octets",
-            rasn::Codec::Aper,
-        ));
-    }
-    Ok(decoded)
+/// The value of the type `T` that an open type holds, in aligned PER: one value,
+/// whole, and no octet after it.
+pub fn decode_open_type<T: rasn::Decode>(value: &rasn::types::Any) -> Result<T, crate::Error> {
+    crate::per::decode_complete(value.as_bytes())
 }

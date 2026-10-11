@@ -215,6 +215,42 @@ macro_rules! procedures {
             }
         }
 
+        // The type of each message is a message, and no other type is one.
+        $($(
+            impl $crate::message::sealed::Sealed for $initiating_type {}
+            impl $crate::Message for $initiating_type {
+                const NAME: &'static str = $initiating_name;
+                const DIRECTION: &'static str = "InitiatingMessage";
+                const PROCEDURE_CODE: u8 = $code;
+            }
+        )?)*
+        $($(
+            impl $crate::message::sealed::Sealed for $successful_type {}
+            impl $crate::Message for $successful_type {
+                const NAME: &'static str = $successful_name;
+                const DIRECTION: &'static str = "SuccessfulOutcome";
+                const PROCEDURE_CODE: u8 = $code;
+            }
+        )?)*
+        $($(
+            impl $crate::message::sealed::Sealed for $unsuccessful_type {}
+            impl $crate::Message for $unsuccessful_type {
+                const NAME: &'static str = $unsuccessful_name;
+                const DIRECTION: &'static str = "UnsuccessfulOutcome";
+                const PROCEDURE_CODE: u8 = $code;
+            }
+        )?)*
+
+        /// The name that ASN.1 gives the message of a direction and a procedure code.
+        pub(crate) fn message_name(direction: &str, code: u8) -> Option<&'static str> {
+            match (direction, code) {
+                $($(("InitiatingMessage", $code) => Some($initiating_name),)?)*
+                $($(("SuccessfulOutcome", $code) => Some($successful_name),)?)*
+                $($(("UnsuccessfulOutcome", $code) => Some($unsuccessful_name),)?)*
+                _ => None,
+            }
+        }
+
         impl $crate::ngap::NGAPPDU {
             /// Return the ASN.1 procedure name.
             pub fn procedure_name(&self) -> &'static str {

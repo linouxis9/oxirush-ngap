@@ -12,7 +12,7 @@ fn value(pdu: &NGAP_PDU) -> &Any {
     }
 }
 
-fn check_typed<T: rasn::Decode + rasn::Encode>(pdu: &NGAP_PDU, name: &str) {
+fn check_typed<T: oxirush_ngap::Message>(pdu: &NGAP_PDU, name: &str) {
     let raw = value(pdu);
     let decoded: T = pdu
         .decode_value()

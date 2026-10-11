@@ -899,7 +899,8 @@ pub fn check_path(message: &str, path: &str) -> Result<(), String> {
 /// The names that the value at `path` can have in a message that ASN.1 names `message`,
 /// when its type is an ENUMERATED: the names of its values as the specification spells
 /// them, in the order of its definition. A name is compared as [`select`] compares one,
-/// whatever its case and whatever is between its letters.
+/// whatever its case and whatever is between its letters. A name that is not one of them
+/// is never the value of a message, so a caller can refuse it before it compares one.
 ///
 /// `None` for a value of another type, and for one whose type is not known: what
 /// [`check_path`] does not refuse for that reason. A path that it refuses is an error

@@ -17,7 +17,10 @@
 //!
 //! [`encode_pdu`] takes them in this form, a number also as a `"0x…"` string, and as JER
 //! writes them. It takes the name of an ENUMERATED value as any other name: see
-//! [Names](#names).
+//! [Names](#names). A value that does not fit its form, such as a transport layer address
+//! of another length, stays as JER writes it. The other strings stay in hexadecimal: an
+//! SD, keys and algorithm masks, the NAS-PDU and the other containers, and the node
+//! identifiers, whose length is part of their value.
 //!
 //! The members that start with `_` say what was received:
 //!
@@ -28,7 +31,7 @@
 //! - `_decode_error`: why an IE's `value` is still its octets in hexadecimal, or why a
 //!   transfer has no `decoded` member. The identifier is unknown or has several types, the
 //!   octets do not decode, JER cannot represent the value, or the IE is nested deeper
-//!   than 64 levels;
+//!   than 64 levels. The rest of the PDU is read all the same;
 //! - `_edited`: [`set`], [`remove`] or [`insert`] changed something under the value, whose
 //!   octets are no longer those beside it.
 //!
@@ -39,7 +42,9 @@
 //!   as with an extension addition that the typed value does not keep;
 //! - to add an IE, write an entry with its `id`, its `criticality` and its `value`, and no
 //!   `_raw_value`: the value is encoded as the type of the identifier, whatever JSON it is.
-//!   The `id` is a number, or the name of the IE;
+//!   The `id` is a number, or the name of the IE. An IE is written this way wherever a
+//!   tree has IEs: in a message that a transfer contains, in a value that is set whole,
+//!   and in a tree written by hand;
 //! - to send given octets as an IE, write them in hexadecimal as its `octets`, or as
 //!   `_raw_value`, and leave `value` out. For a transfer, replace the member with its
 //!   octets, or with an object that has them as its `octets` alone;

@@ -176,7 +176,7 @@ fn rasn(attributes: &[syn::Attribute]) -> Result<(Option<String>, bool)> {
     Ok((identifier, enumerated))
 }
 
-/// Whether the attributes of a string give it one size: JER then writes a string of bits
+/// Whether the attributes of a string give it one size: JER then writes a bit string
 /// as its octets alone, without its length.
 fn one_size(attributes: &[syn::Attribute]) -> Result<bool> {
     use syn::{Meta, Token, punctuated::Punctuated};
@@ -420,7 +420,7 @@ const CONTAINERS: &[(&str, &str)] = &[
 ];
 
 /// How the list of the types writes a value of type `ty`, and whether a member of that
-/// type may be absent: `_` for a value without members, `bits` for a string of bits whose
+/// type may be absent: `_` for a value without members, `bits` for a bit string whose
 /// size varies, the name of a SEQUENCE, of a CHOICE, of an ENUMERATED or of a type that
 /// is a list, a list in brackets and a container by its kind.
 fn shape(ty: &syn::Type, declared: &BTreeMap<String, &syn::Item>, depth: u8) -> (String, bool) {
@@ -462,7 +462,7 @@ fn shape(ty: &syn::Type, declared: &BTreeMap<String, &syn::Item>, depth: u8) -> 
 
 /// The list of the types: one line for each SEQUENCE and each CHOICE, with its members
 /// or its alternatives by the names that ASN.1 gives them, and one for each type that is
-/// a list or a string of bits. A member that holds a transfer has the type that its
+/// a list or a bit string. A member that holds a transfer has the type that its
 /// octets contain in parentheses.
 fn generate_types(
     generated: &str,

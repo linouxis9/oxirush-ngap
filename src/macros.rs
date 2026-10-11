@@ -108,7 +108,7 @@
 //! decoded and re-encoded successfully, and the expression returned `true`.
 //! The setter form `IeName(binding) = value` expands to `binding.0 = value`.
 //!
-//! Of an IE that a message has twice, both macros take the same one: the last
+//! When a message has the same IE twice, both macros use the same one: the last
 //! that decodes. `extract_ngap_ies!` reads it and `with_ngap_ie_mut!` changes it.
 //!
 //! ```

@@ -119,10 +119,11 @@
 //!
 //! What an IE or a transfer has itself comes first: `/ngap/Cause/value` is the value of
 //! the IE and `/ngap/Cause/*` each of its members, so the entries of a list that is the
-//! value of an IE are `value/*`. A member of a value that is named as one of its IE is
-//! reached after `value`: only a string of bits whose size varies has one, its `value`,
-//! as in `/ngap/TraceCollectionEntityIPAddress/value/value`. The value of an IE of an
-//! extension container is its `extensionValue`, and is left out the same way.
+//! value of an IE are `value/*`. If a value has a member with the same name as a member
+//! of its IE, write `value` before it: only a bit string whose size varies has such a
+//! member, its own `value`, as in `/ngap/TraceCollectionEntityIPAddress/value/value`.
+//! The value of an IE of an extension container is its `extensionValue`, and is left
+//! out the same way.
 //!
 //! After an entry of a list of IEs, or an IE that a value holds alone, a segment may be
 //! the name of that IE, and the path goes on from the IE:
@@ -351,7 +352,7 @@ where
         .map_err(|e| e.to_string())?;
     let shown: Value = serde_json::from_str(&rasn::jer::encode(&value).map_err(|e| e.to_string())?)
         .map_err(|e| e.to_string())?;
-    // rasn's JER writes a string of bits of one extensible size as its octets, without
+    // rasn's JER writes a bit string of one extensible size as its octets, without
     // its length: one of another size would be shown as a string that it is not.
     const LOST: &str = "JER does not represent this value";
     let (mut read, _) = decode_jer::<T>(&shown).map_err(|error| format!("{LOST}: {error}"))?;

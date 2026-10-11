@@ -36,10 +36,10 @@ pub(crate) enum Shape {
     Message(Sent),
     /// A value without members.
     Plain,
-    /// A string of bits whose size varies: its `value` and its `length`, unless the view
+    /// A bit string whose size varies: its `value` and its `length`, unless the view
     /// shows it as it is usually written.
     Bits,
-    /// A SEQUENCE or a CHOICE, or a type that is a list or a string of bits, by the name
+    /// A SEQUENCE or a CHOICE, or a type that is a list or a bit string, by the name
     /// that the bindings give it. A name that the list of the types does not have is
     /// that of a value without members: an ENUMERATED, which has its names.
     Named(&'static str),
@@ -85,7 +85,7 @@ pub(crate) enum Kind {
     Sequence(&'static [Member]),
     /// A CHOICE, with its alternatives.
     Choice(&'static [Member]),
-    /// A type that is a list, a string of bits, or another type.
+    /// A type that is a list, a bit string, or another type.
     Is(Shape),
 }
 
@@ -160,8 +160,8 @@ pub(crate) use kind;
 /// The types of the protocol, which `src/inspect_registry.rs` lists from the bindings in
 /// the order of their names: each SEQUENCE with its members and each CHOICE with its
 /// alternatives, by the names that ASN.1 gives them, and each type that is a list or a
-/// string of bits. A member is written with `?` when a value may be without it, and
-/// its value as `_` when it has no members, `bits` for a string of bits whose size
+/// bit string. A member is written with `?` when a value may be without it, and
+/// its value as `_` when it has no members, `bits` for a bit string whose size
 /// varies, the name of its type, a list in brackets, a container by its kind, or in
 /// parentheses the type that the octets of a transfer contain.
 macro_rules! types {
@@ -624,7 +624,7 @@ fn no_member(shape: Shape, members: &[Member], part: &str, path: &str) -> String
         Shape::Named(name) => name.to_string(),
         Shape::Message(message) => message.name.to_string(),
         Shape::Pdu(_) => "a view".to_string(),
-        Shape::Bits => "a string of bits".to_string(),
+        Shape::Bits => "a bit string".to_string(),
         Shape::Transfer(_) => "a transfer".to_string(),
         Shape::Ie(_) | Shape::Extension(..) => "an IE".to_string(),
         _ => "this value".to_string(),
@@ -818,7 +818,7 @@ fn advance<'a>(
             Shape::Undecoded => Err((true, format!("the IE did not decode at {path}"))),
             // A value without members has none to select.
             _ if part == "*" => Ok(()),
-            // A string of bits that the view shows as it is usually written.
+            // A bit string that the view shows as it is usually written.
             Shape::Bits if ["value", "length"].contains(&part) => Ok(()),
             // A transfer that an edit replaced by its octets.
             Shape::Transfer(_) if same_name(part, "octets") => {

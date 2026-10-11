@@ -176,7 +176,7 @@ fn block_6() {
     let cell = nr_cgi(network.clone(), 0x123456, 1); // gNB, cell
     let gnb = global_gnb_id(network, 0x123456);
 
-    // A string of bits from octets, and the NR algorithms of a UE: the first
+    // A bit string from octets, and the NR algorithms of a UE: the first
     // octet of its encryption bitmap, then of its integrity bitmap
     let algorithm_mask = bytes_to_bitvec(&[0xe0]);
     let capabilities = ue_security_capabilities(&[0xe0, 0xe0]);
@@ -489,7 +489,7 @@ fn block_18() {
     let cell = format!("{container}/targetCell-ID/nR-CGI/nRCellIdentity");
     assert_eq!(inspect::check_path("HandoverRequired", &cell), Ok(()));
 
-    // It is an error until `open` decoded the octets, and selects after
+    // The path is an error until `open` has decoded the octets, and selects the value after that
     assert!(inspect::select(&view, &cell).unwrap_err().contains("open decodes them"));
     inspect::open(&mut view, &cell).unwrap();
     assert_eq!(inspect::select(&view, &cell).unwrap(), [&json!(4660)]);

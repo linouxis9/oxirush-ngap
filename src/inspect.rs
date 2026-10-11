@@ -47,7 +47,10 @@
 //!   with its `decoded` value alone, which is encoded as the type contained, or as that
 //!   value itself: an object that has no member of a transfer, which are `decoded`,
 //!   `octets` and those that start with `_`, is its decoded value;
-//! - an IE with a `_decode_error` has its octets as `value`: change them there.
+//! - an IE with a `_decode_error` has its octets as `value`: change them there;
+//! - the octets of an IE whose content the specification gives by reference are also
+//!   written as the type that they carry, by its name: see
+//!   [Octets that carry a type](#octets-that-carry-a-type).
 //!
 //! Beside a `value`, `_raw_value` is what the value is compared with, as `_raw_message` is
 //! for the message, so changing one alone sends nothing else. A member that the ASN.1 type
@@ -171,10 +174,46 @@
 //! assert_eq!(inspect::select(&edited, "/ngap/*/id")?, [&json!(85), &json!(15), &json!(82)]);
 //! # Ok::<(), String>(())
 //! ```
+//!
+//! # Octets that carry a type
+//!
+//! TS 38.413 gives the content of three IEs by reference, where the ASN.1 has an
+//! `OCTET STRING`. Between NG-RAN nodes:
+//!
+//! | The octets of | carry a | Clause |
+//! | --- | --- | --- |
+//! | `SourceToTarget-TransparentContainer` | `SourceNGRANNode-ToTargetNGRANNode-TransparentContainer` | 9.3.1.20 |
+//! | `TargetToSource-TransparentContainer` | `TargetNGRANNode-ToSourceNGRANNode-TransparentContainer` | 9.3.1.21 |
+//! | `TargettoSource-Failure-TransparentContainer` | `TargetNGRANNode-ToSourceNGRANNode-FailureTransparentContainer` | 9.3.1.186 |
+//!
+//! For another target system they are octets of its own specification, and nothing in a
+//! message says which they are. So a tree shows such an IE by its octets, and the one
+//! that writes or reads it names the type, in any case:
+//!
+//! - written, the value of the IE is an object with one member, the name of the type
+//!   with its value, which is encoded as that type:
+//!   `{"SourceNGRANNode-ToTargetNGRANNode-TransparentContainer": {"rRCContainer": "…", …}}`.
+//!   [`message_from_tree`] takes it, and so does [`encode_pdu`] for a value that [`set`]
+//!   or [`insert`] wrote and for a tree written by hand;
+//! - read, a path goes through the name of the type, after the IE or its `value`:
+//!   `/ngap/SourceToTarget-TransparentContainer/SourceNGRANNode-ToTargetNGRANNode-TransparentContainer/targetCell-ID`.
+//!   [`check_path`] and [`enumerated_at`] read it against the types. In a tree,
+//!   [`open`] decodes the octets that a path takes so, and nothing else does:
+//!   [`select`] gives values of the tree, and an edit changes what the tree has. On
+//!   octets that were not opened, such a path is an error that says so.
+//!
+//! Once it is opened or written so, the value of the IE is the transfer of that type
+//! under its name, with what any transfer has. Its `decoded` may be left out of a
+//! path, its `octets` are those that were received, and [`paths`] lists what it has.
+//! Octets that are not of the type have a `_decode_error`, which a path into them
+//! reports, and what is not edited is sent as the octets received. The `rRCContainer`
+//! in it stays octets: it is a message of RRC.
 
 use serde_json::{Value, json};
 
-use crate::inspect_paths::{EDITED, listed_ies, named_ies, of_a_transfer, same_name, written_ie};
+use crate::inspect_paths::{
+    EDITED, listed_ies, named_ies, of_a_transfer, open_with, same_name, written_ie,
+};
 pub use crate::inspect_paths::{check_path, enumerated_at, insert, paths, remove, select, set};
 use crate::inspect_registry as registry;
 use crate::ngap::NGAP_PDU;
@@ -411,6 +450,23 @@ macro_rules! transfers {
     };
 }
 pub(crate) use transfers;
+
+/// The IEs of the registry whose octets may carry a type that the specification names
+/// and the ASN.1 does not: the identifier of each, the name that ASN.1 gives the type,
+/// and the type.
+macro_rules! carried {
+    ($($id:literal $name:literal $carried:path;)*) => {
+        pub(crate) const CARRIED: &[(u16, &str, &str)] =
+            &[$(($id, $name, stringify!($carried)),)*];
+        pub(crate) fn carried(name: &str) -> Option<Typed> {
+            $(if $crate::inspect_paths::same_name($name, name) {
+                return Some(Typed::of::<$carried>());
+            })*
+            None
+        }
+    };
+}
+pub(crate) use carried;
 
 /// The functions of a type of the registry.
 pub(crate) struct Typed {
@@ -655,6 +711,53 @@ fn contained(raw: Value, typed: Result<Typed, String>) -> Value {
     }
 }
 
+/// The octets `raw` as the transfer that they are when they carry the type that ASN.1
+/// names `name`: its decoded value beside them, or why they are not of that type.
+fn opened(raw: Value, name: &str) -> Value {
+    let typed = registry::carried(name);
+    let mut transfer = contained(raw, typed.ok_or(format!("octets carry no {name}")));
+    expand(&mut transfer, 0);
+    transfer
+}
+
+/// Decode, in `tree`, the octets that `path` takes as a type that they may carry: those
+/// of an IE whose content the specification gives by reference, as the transparent
+/// container of a handover, where the segment after the IE or its `value` is the name
+/// that ASN.1 gives one of these types. See
+/// [Octets that carry a type](self#octets-that-carry-a-type).
+///
+/// The IE then has, in place of its octets, the transfer of that type under that name,
+/// which [`select`], [`paths`] and the edits go into and [`encode_pdu`] takes back: its
+/// decoded value beside the octets, or why they are not of that type. Nothing in a
+/// message says which type octets carry, so [`inspect_pdu`] leaves them as they are, and
+/// nothing but this function decodes them: on octets that were not opened, a path
+/// through the name of a type is an error that says so.
+///
+/// A path that goes through no such name changes nothing. A name that the type of a
+/// value cannot have is an error, and the tree is then as it was.
+pub fn open(tree: &mut Value, path: &str) -> Result<(), String> {
+    open_with(tree, path, &opened)
+}
+
+/// The octets of the IE `id`, which is written as a type that they may carry: one
+/// member, the name of that type with its value, which is its octets by now.
+fn carried_octets(written: &Value, id: u16) -> Result<Value, String> {
+    let carried = registry::CARRIED
+        .iter()
+        .filter(|(carrier, ..)| *carrier == id);
+    let names: Vec<_> = carried.map(|(_, name, _)| *name).collect();
+    let mut members = written.as_object().into_iter().flatten();
+    match (members.next(), members.next()) {
+        (Some((name, octets)), None) if names.iter().any(|known| same_name(known, name)) => {
+            Ok(octets.clone())
+        }
+        _ => Err(format!(
+            "IE {id} is written as its octets, or as {{NAME: VALUE}} for a type that they carry: {}",
+            names.join(", ")
+        )),
+    }
+}
+
 /// How deep in a tree an IE or a transfer is still decoded.
 const NESTING: usize = 64;
 
@@ -766,7 +869,10 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
                             "value" | "extensionValue" => id
                                 .and_then(registry::ie_contents)
                                 .ok_or("this IE does not contain a type")?,
-                            _ => registry::transfer(key)?,
+                            key => match registry::carried(key) {
+                                Some(carried) => carried,
+                                None => registry::transfer(key)?,
+                            },
                         };
                         let original = (transfer.decode)(&bytes)?;
                         if &original == edited {
@@ -789,7 +895,8 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
                         key if registry::TRANSFER_FIELDS.contains(&key) => {
                             Some(registry::transfer(key)?)
                         }
-                        _ => None,
+                        // A type that the octets of an IE may carry, by its name.
+                        key => registry::carried(key),
                     };
                     if let Some(transfer) = transfer {
                         // The decoded value, as the object itself when it has no member
@@ -822,6 +929,12 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
                 true => "extensionValue",
                 false => "value",
             };
+            // Octets that are written as a type that they may carry.
+            if let Some(written) = object.get_mut(field).filter(|value| value.is_object())
+                && registry::CARRIED.iter().any(|(carrier, ..)| *carrier == id)
+            {
+                *written = carried_octets(written, id)?;
+            }
             let typed = |id: u16| {
                 let octets = format!("give its octets as _raw_value, without {field}");
                 registry::ie(id).map_err(|error| format!("{error}: {octets}"))

@@ -5,7 +5,7 @@ use serde_json::{Map, Value, json};
 
 // The name of the protocol, the first segment of the paths of the IEs of the message of
 // a PDU, and what the ASN.1 says of the messages, the IEs and the types.
-use crate::inspect_registry::{ENUMERATIONS, IE_TYPES, MESSAGES, PROTOCOL, ROOT, TYPES};
+use crate::inspect_registry::{CARRIED, ENUMERATIONS, IE_TYPES, MESSAGES, PROTOCOL, ROOT, TYPES};
 /// The member of a tree that holds the message of the PDU.
 const MESSAGE: &str = "message";
 /// The member of a message that holds its IEs.
@@ -54,6 +54,11 @@ pub(crate) enum Shape {
     /// Octets that contain a value of the type of this name, which the tree shows
     /// decoded beside them. No name: the octets have one of several types.
     Transfer(&'static str),
+    /// The octets of the IE of this identifier, which may carry a type that the
+    /// specification names and the ASN.1 does not. The tree shows them as they are, or
+    /// as the transfer of that type under its name, once they are written or opened
+    /// so.
+    Carrier(u16),
 }
 
 /// A message, as the paths need it: the name that ASN.1 gives it, the name of its type
@@ -330,6 +335,9 @@ fn ie_value(id: Option<u16>) -> Shape {
     let Some(id) = id else {
         return Shape::Unknown;
     };
+    if CARRIED.iter().any(|(carrier, ..)| *carrier == id) {
+        return Shape::Carrier(id);
+    }
     match IE_TYPES.iter().find(|(known, ..)| *known == id) {
         Some((_, _, contained)) if !contained.is_empty() => Shape::Transfer(type_name(contained)),
         Some((_, ty, _)) => Shape::Named(type_name(ty)),
@@ -410,6 +418,13 @@ fn members(shape: Shape, entry: Option<&Map<String, Value>>) -> Option<Vec<Membe
                 ("_decode_error", Shape::Plain, true),
                 (EDITED, Shape::Plain, true),
             ]
+        }
+        // Each type that the octets may carry, by the name that ASN.1 gives it.
+        Shape::Carrier(id) => {
+            let carried = CARRIED.iter().filter(|(carrier, ..)| *carrier == id);
+            carried
+                .map(|(_, name, ty)| (*name, Shape::Transfer(type_name(ty)), true))
+                .collect()
         }
         Shape::Plain | Shape::List(_) | Shape::Ies(_) | Shape::Extensions => Vec::new(),
     })
@@ -693,6 +708,19 @@ fn advance<'a>(
                 let taken = typed(decoded, part, named, path, &mut |shape| push(None, shape));
                 let own = members(shape, None).unwrap_or_default();
                 taken.map_err(|(unread, reason)| (unread, or_its_own(reason, shape, &own)))
+            }
+            // Octets that may carry a type are that type once they are opened.
+            Shape::Carrier(_) => {
+                let carried = members(shape, None).unwrap_or_default();
+                match member(&carried, part) {
+                    Some((name, ..)) => Err((
+                        true,
+                        format!(
+                            "the octets are not shown as a {name} at {path}: open decodes them"
+                        ),
+                    )),
+                    None => no(no_member(shape, &carried, part, path)),
+                }
             }
             Shape::Plain => no(no_member(shape, &[], part, path)),
             _ => no(format!("decoded path traverses a scalar at {path}")),
@@ -1004,10 +1032,13 @@ fn ie_segment(ies: &[Value], index: usize) -> String {
 }
 
 /// What an edit does at its path.
-enum Edit {
+enum Edit<'d> {
     Set(Value),
     Remove,
     Insert(Value),
+    /// Nothing, but for the octets that the path takes as a type that they may carry:
+    /// this function makes of them, and of the name of that type, what a tree shows.
+    Open(&'d dyn Fn(Value, &str) -> Value),
 }
 
 /// Give the member or the list entry at `path` the value `value`. `null` takes an
@@ -1035,6 +1066,22 @@ pub fn remove(tree: &mut Value, path: &str) -> Result<(), String> {
 /// for a path that ends with `-`. An IE is written as [`set`] takes it.
 pub fn insert(tree: &mut Value, path: &str, value: Value) -> Result<(), String> {
     edit(tree, path, Edit::Insert(value))
+}
+
+/// Show, in `tree`, the octets that `path` takes as a type that they may carry as what
+/// `decode` makes of them and of the name of that type: see
+/// [`open`](crate::inspect::open), which gives the function that decodes.
+pub(crate) fn open_with(
+    tree: &mut Value,
+    path: &str,
+    decode: &dyn Fn(Value, &str) -> Value,
+) -> Result<(), String> {
+    let (parts, named) = resolve(path)?;
+    let mut opened = tree.clone();
+    let shape = pdu(&opened);
+    apply(&mut opened, shape, &parts, &Edit::Open(decode), named, path)?;
+    *tree = opened;
+    Ok(())
 }
 
 /// Write the entry of an IE as a tree has it: the name of the IE that its `id` may be
@@ -1098,6 +1145,15 @@ fn apply(
 ) -> Result<usize, String> {
     let (part, rest) = parts.split_first().ok_or("empty edit path")?;
     let shape = resolved(shape);
+    // Octets that the path takes as a type that they may carry are shown as it, when
+    // that is what is asked.
+    if let (Shape::Carrier(_), Edit::Open(decode)) = (shape, operation)
+        && tree.is_string()
+        && let Some(carried) = members(shape, None)
+        && let Some((name, ..)) = member(&carried, part)
+    {
+        *tree = json!({*name: decode(tree.take(), name)});
+    }
     let members = members(shape, tree.as_object());
     // The IEs of a message that the tree contains are edited in its place.
     if named
@@ -1146,8 +1202,10 @@ fn apply(
             _ => None,
         });
         if let Some(raw) = raw.filter(|_| rest.is_empty() && same_name(part, "octets")) {
-            let Edit::Set(octets @ Value::String(_)) = operation else {
-                return Err("octets are set, in hexadecimal".into());
+            let octets = match operation {
+                Edit::Set(octets @ Value::String(_)) => octets,
+                Edit::Open(_) => return Ok(0),
+                _ => return Err("octets are set, in hexadecimal".into()),
             };
             object.insert(raw.into(), octets.clone());
             for value in VALUES.into_iter().chain(["_decode_error", EDITED]) {
@@ -1207,6 +1265,7 @@ fn apply(
                     Ok(1)
                 }
                 Edit::Insert(_) => Err("insert adds to a list".into()),
+                Edit::Open(_) => Ok(0),
             };
         }
         let changed = match object.get_mut(&name) {
@@ -1219,7 +1278,15 @@ fn apply(
         return Ok(changed);
     }
     let Some(array) = tree.as_array_mut() else {
-        return Ok(0);
+        // Octets that were not opened say so, as they do where they are selected.
+        let unopened = match shape {
+            Shape::Carrier(_) => advance((Some(tree), shape), part, named, path, &mut Vec::new()),
+            _ => Ok(()),
+        };
+        return match unopened {
+            Err((true, reason)) => Err(reason),
+            _ => Ok(0),
+        };
     };
     if let (Edit::Insert(value), "-", []) = (operation, part.as_str(), rest) {
         array.push(value.clone());
@@ -1266,6 +1333,7 @@ fn apply(
                     array.remove(index);
                 }
                 Edit::Insert(value) => array.insert(index, value.clone()),
+                Edit::Open(_) => continue,
             }
             changed += 1;
         } else {
@@ -1776,6 +1844,23 @@ mod tests {
         }
         let refused = written(&deep, Shape::Unknown, 0).unwrap_err();
         assert!(refused.contains("nests deeper"), "{refused}");
+    }
+
+    #[test]
+    fn the_octets_of_an_ie_carry_a_type_of_the_list_by_a_name_that_no_member_has() {
+        for (id, name, ty) in CARRIED {
+            // The value of the IE is octets, and what they carry a type of the list, by
+            // the name that ASN.1 gives it.
+            let (_, octets, contained) = IE_TYPES.iter().find(|(known, ..)| known == id).unwrap();
+            assert!(contained.is_empty() && kind_of(type_name(octets)).is_none());
+            assert!(kind_of(type_name(ty)).is_some() && same_name(name, type_name(ty)));
+            assert_eq!(ie_value(Some(*id)), Shape::Carrier(*id));
+            // A tree is encoded with any member of that name as that type.
+            for (of, members) in all_members() {
+                let same = members.iter().any(|(member, ..)| same_name(member, name));
+                assert!(!same, "{of}: {name}");
+            }
+        }
     }
 
     #[test]

@@ -236,6 +236,32 @@ that of a single container, and no other. `message_from_tree` also takes a
 value as `inspect_pdu` shows it, with `decoded` for a transfer and an entry of
 `id`, `criticality` and `value` for an IE, and the two forms in one message.
 
+The content of a handover's transparent container is written and selected by
+the name of its type. TS 38.413 gives it by reference where the ASN.1 has an
+`OCTET STRING`, so a tree shows the octets, and the one that writes or reads
+them says what they carry between NG-RAN nodes:
+
+```json
+{"SourceToTarget-TransparentContainer":
+  {"SourceNGRANNode-ToTargetNGRANNode-TransparentContainer":
+    {"rRCContainer": "0102",
+     "targetCell-ID": {"nR-CGI": {"pLMNIdentity": "208-93", "nRCellIdentity": 4660}},
+     "uEHistoryInformation": [{"lastVisitedCellInformation": {"eUTRANCell": "00"}}]}}}
+```
+
+`message_from_tree` encodes that value as the type, and so does `encode_pdu`
+for one that `set` or `insert` wrote. A path goes through the same name, as
+`/ngap/SourceToTarget-TransparentContainer/SourceNGRANNode-ToTargetNGRANNode-TransparentContainer/targetCell-ID`:
+`check_path` reads it against the types, and `inspect::open(&mut tree, path)`
+decodes the octets in a tree, after which `select`, `paths` and the edits go
+into them.
+`TargetToSource-TransparentContainer` carries a
+`TargetNGRANNode-ToSourceNGRANNode-TransparentContainer` the same way, and
+`TargettoSource-Failure-TransparentContainer` a
+`TargetNGRANNode-ToSourceNGRANNode-FailureTransparentContainer` (TS 38.413
+clauses 9.3.1.20, 9.3.1.21 and 9.3.1.186). The `rRCContainer` stays octets:
+it is a message of RRC.
+
 `inspect::message_name(&pdu)` is the name that ASN.1 gives the message of a
 PDU, such as `InitialContextSetupResponse`, and `inspect::message_named` finds
 the `direction` and the `procedure_code` that a tree has for a message from
@@ -332,7 +358,7 @@ it the list of the types: one line for each SEQUENCE and each CHOICE with its
 members, which the paths of the inspection are read against. Commit the
 three files after regenerating them. Do not edit them by hand.
 
-The checked-in files were last regenerated on 2026-10-10, with the generator
+The checked-in files were last regenerated on 2026-10-11, with the generator
 of that revision and the rustfmt of Rust 1.88, from the ASN.1 named above:
 the three files came out as they are committed, octet for octet. No CI job
 regenerates them, as the ASN.1 is not in the repository.

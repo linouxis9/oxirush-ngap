@@ -10,9 +10,9 @@ use std::path::Path;
 const SHARED: &[(&str, u64)] = &[
     ("build/aper_fix.rs", 0x980c6fa445805383),
     ("build/containers.rs", 0x9d134011ce89fec9),
-    ("build/inspection.rs", 0x4f321cf38a2a621e),
+    ("build/inspection.rs", 0x925d6be710aa9b66),
     ("build/registry.rs", 0x3ca3a19c00177a26),
-    ("src/inspect_paths.rs", 0x7920c7e0178a2afc),
+    ("src/inspect_paths.rs", 0x80204f7e43efbc65),
     ("src/per.rs", 0x1ce4f74a2faf32e5),
     ("src/sized.rs", 0xacd754552266ad78),
 ];

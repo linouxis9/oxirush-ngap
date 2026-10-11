@@ -8,6 +8,25 @@ use rasn_compiler::OutputMode;
 use rasn_compiler::prelude::{Compiler, RasnBackend, RasnConfig};
 use regex::Regex;
 
+/// The IEs whose octets ASN.1 leaves open, each with the type of this module that TS
+/// 38.413 gives them for a handover between NG-RAN nodes: clauses 9.3.1.20, 9.3.1.21
+/// and 9.3.1.186. For another target system the octets are those of its own
+/// specification.
+const CARRIED: &[(&str, &str)] = &[
+    (
+        "SourceToTarget-TransparentContainer",
+        "SourceNGRANNode-ToTargetNGRANNode-TransparentContainer",
+    ),
+    (
+        "TargetToSource-TransparentContainer",
+        "TargetNGRANNode-ToSourceNGRANNode-TransparentContainer",
+    ),
+    (
+        "TargettoSource-Failure-TransparentContainer",
+        "TargetNGRANNode-ToSourceNGRANNode-FailureTransparentContainer",
+    ),
+];
+
 pub fn generate_ngap() -> Result<()> {
     let mut files: Vec<PathBuf> = fs::read_dir("ngap")
         .context("read NGAP ASN.1 source directory")?
@@ -71,7 +90,7 @@ fn post_process(path: &Path, asn_files: &[PathBuf]) -> Result<()> {
     fs::write("src/registry.rs", registry.list()?)?;
     fs::write(
         "src/inspect_registry.rs",
-        crate::inspection::generate("NGAP", &generated, &asn, &registry)?,
+        crate::inspection::generate("NGAP", &generated, &asn, &registry, CARRIED)?,
     )?;
     fs::write(path, generated).context("write post-processed NGAP bindings")
 }

@@ -736,6 +736,149 @@ fn the_value_of_an_ie_and_of_a_transfer_may_be_left_out_of_a_path() {
     assert_eq!(select("value/length"), [&json!(24)]);
 }
 
+#[test]
+fn the_container_of_a_handover_is_written_and_selected_by_the_type_that_it_carries() {
+    use serde_json::{Value, json};
+    // Between NG-RAN nodes, the Source to Target Transparent Container of a HANDOVER
+    // REQUIRED carries a Source NG-RAN Node to Target NG-RAN Node Transparent Container:
+    // TS 38.413 clause 9.3.1.20 says so, and the ASN.1 has an OCTET STRING.
+    let name = "SourceNGRANNode-ToTargetNGRANNode-TransparentContainer";
+    let container = json!({
+        "rRCContainer": "0102",
+        "targetCell-ID": {"nR-CGI": {"pLMNIdentity": "208-93", "nRCellIdentity": 4660}},
+        "uEHistoryInformation": [{"lastVisitedCellInformation": {"eUTRANCell": "00"}}],
+    });
+    let required = |container: Value| {
+        json!({"message": "HandoverRequired", "ies": [
+            {"AMF-UE-NGAP-ID": 1},
+            {"RAN-UE-NGAP-ID": 2},
+            {"SourceToTarget-TransparentContainer": container},
+        ]})
+    };
+    let pdu = inspect::message_from_tree(&required(json!({name: container}))).unwrap();
+    // The octets are the APER encoding of the type, which the bindings read.
+    let message: HandoverRequired = pdu.decode_value().unwrap();
+    let octets = message.protocol_ies.0[2].value.as_bytes();
+    let octets: SourceToTargetTransparentContainer =
+        decode_open_type(&rasn::types::Any::new(octets.to_vec())).unwrap();
+    let carried: SourceNGRANNodeToTargetNGRANNodeTransparentContainer =
+        rasn::aper::decode(&octets.0).unwrap();
+    assert_eq!(carried.r_rccontainer.0.as_ref(), [1, 2]);
+    assert_eq!(rasn::aper::encode(&carried).unwrap(), octets.0.as_ref());
+    // Nothing says what the octets carry: a tree and a shown message have them as
+    // they are.
+    let mut tree = inspect::inspect_pdu(&pdu).unwrap();
+    let ie = "/ngap/SourceToTarget-TransparentContainer";
+    let hexadecimal = json!(hex::encode_upper(&octets.0));
+    let value = inspect::select(&tree, &format!("{ie}/value")).unwrap();
+    assert_eq!(value, [&hexadecimal]);
+    let shown = inspect::message_tree(&pdu).unwrap();
+    assert_eq!(shown, required(hexadecimal.clone()));
+    // A path names the type. The types say whether it can select, and the octets are
+    // opened before it does.
+    let cell = format!("{ie}/{name}/targetCell-ID/nR-CGI/nRCellIdentity");
+    assert_eq!(inspect::check_path("HandoverRequired", &cell), Ok(()));
+    let error = inspect::select(&tree, &cell).unwrap_err();
+    assert!(error.contains("open decodes them"), "{error}");
+    inspect::open(&mut tree, &cell).unwrap();
+    assert_eq!(inspect::select(&tree, &cell).unwrap(), [&json!(4660)]);
+    // What was written by the type is selected by the type, in any case of its name,
+    // and its paths are listed.
+    let decoded = inspect::select(&tree, &format!("{ie}/{name}/decoded")).unwrap();
+    assert_eq!(decoded, [&container]);
+    let loose = format!("{ie}/value/{}/rrc_container", name.to_lowercase());
+    assert_eq!(inspect::select(&tree, &loose).unwrap(), [&json!("0102")]);
+    let listed = format!("{ie}/value/{name}/decoded/rRCContainer");
+    let paths = inspect::paths(&tree);
+    assert!(paths.iter().any(|(path, _)| *path == listed), "{paths:?}");
+    for (path, value) in &paths {
+        assert_eq!(inspect::select(&tree, path).unwrap(), [value], "{path}");
+    }
+    // The octets that were received are kept, and are those of the transfer.
+    let received = inspect::select(&tree, &format!("{ie}/{name}/octets")).unwrap();
+    assert_eq!(received, [&hexadecimal]);
+    assert_eq!(inspect::encode_pdu(&tree).unwrap(), pdu);
+    // An edit changes what the tree has: octets are opened before it goes into them.
+    let mut tree = inspect::inspect_pdu(&pdu).unwrap();
+    for path in [cell.clone(), cell.replace(name, &format!("value/{name}"))] {
+        let error = inspect::set(&mut tree, &path, json!(7)).unwrap_err();
+        assert!(error.contains("open decodes them"), "{error}");
+    }
+    inspect::open(&mut tree, &cell).unwrap();
+    inspect::set(&mut tree, &cell, json!(7)).unwrap();
+    inspect::remove(&mut tree, &format!("{ie}/{name}/uEHistoryInformation/0")).unwrap();
+    let cells = json!({"lastVisitedCellInformation": {"uTRANCell": "01"}});
+    inspect::insert(
+        &mut tree,
+        &format!("{ie}/{name}/uEHistoryInformation/-"),
+        cells,
+    )
+    .unwrap();
+    let mut after = inspect::inspect_pdu(&inspect::encode_pdu(&tree).unwrap()).unwrap();
+    assert!(inspect::select(&after, &format!("{ie}/value")).unwrap()[0].is_string());
+    inspect::open(&mut after, &cell).unwrap();
+    assert_eq!(inspect::select(&after, &cell).unwrap(), [&json!(7)]);
+    let history = format!("{ie}/{name}/uEHistoryInformation/0/lastVisitedCellInformation");
+    let visited = inspect::select(&after, &history).unwrap();
+    assert_eq!(visited, [&json!({"uTRANCell": "01"})]);
+    // The value of the IE is set by the type, and an IE is added by it: the container
+    // of the other direction, and the one of a failure.
+    let back = json!({"TargetNGRANNode-ToSourceNGRANNode-TransparentContainer": {
+        "rRCContainer": "03",
+    }});
+    let failure = json!({"targetngrannode_tosourcengrannode_failuretransparentcontainer": {}});
+    inspect::set(&mut after, &format!("{ie}/value"), json!({name: container})).unwrap();
+    for (id, value) in [
+        ("TargetToSource-TransparentContainer", &back),
+        ("TargettoSource-Failure-TransparentContainer", &failure),
+    ] {
+        let entry = json!({"id": id, "criticality": "reject", "value": value});
+        inspect::insert(&mut after, "/ngap/-", entry).unwrap();
+    }
+    let sent = inspect::inspect_pdu(&inspect::encode_pdu(&after).unwrap()).unwrap();
+    let octets = |ie: &str| inspect::select(&sent, &format!("/ngap/{ie}/value")).unwrap();
+    assert_eq!(
+        octets("SourceToTarget-TransparentContainer"),
+        [&hexadecimal]
+    );
+    assert_eq!(
+        octets("TargetToSource-TransparentContainer"),
+        [&json!("000103")]
+    );
+    assert_eq!(
+        octets("TargettoSource-Failure-TransparentContainer"),
+        [&json!("00")]
+    );
+    // Octets that are not of the type say so where they are selected, and are sent
+    // as they came.
+    let other = inspect::message_from_tree(&required(json!("FF"))).unwrap();
+    let mut tree = inspect::inspect_pdu(&other).unwrap();
+    inspect::open(&mut tree, &cell).unwrap();
+    let error = inspect::select(&tree, &cell).unwrap_err();
+    assert!(error.contains("the transfer did not decode"), "{error}");
+    assert_eq!(inspect::encode_pdu(&tree).unwrap(), other);
+    // A path that goes through no such name opens nothing.
+    let before = tree.clone();
+    inspect::open(&mut tree, "/ngap/RAN-UE-NGAP-ID/value").unwrap();
+    assert_eq!(tree, before);
+    // The name is one of a type that the IE may carry.
+    let written = inspect::message_from_tree(&required(back));
+    let error = written.unwrap_err();
+    assert!(
+        error.contains(&format!("for a type that they carry: {name}")),
+        "{error}"
+    );
+    for path in [
+        format!("{ie}/NoSuchType/rRCContainer"),
+        format!("{ie}/rRCContainer"),
+    ] {
+        let error = inspect::check_path("HandoverRequired", &path).unwrap_err();
+        assert!(error.contains(&format!("which has {name}, at")), "{error}");
+        assert_eq!(inspect::select(&tree, &path), Err(error.clone()), "{path}");
+        assert_eq!(inspect::open(&mut tree, &path), Err(error), "{path}");
+    }
+}
+
 /// The octets of the message `name` of the fixtures.
 fn fixture(name: &str) -> Vec<u8> {
     let mut lines = include_str!("fixtures/messages.tsv").lines();

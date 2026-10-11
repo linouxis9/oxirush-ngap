@@ -77,6 +77,25 @@ is not source compatible with 0.4.2.
   one and `with_ngap_ie_mut!` changes the last one, and any of them that does
   not decode is an error for both. 0.4.2 read the last one that decoded,
   and changed the first one or, when that did not decode, nothing.
+- No function of `helpers` panics, and none cuts a number short. Each of
+  these returns a `Result` with an `Error` of the kind `Argument`, so a call
+  takes a `?` or an `.unwrap()`:
+  - `plmn(mcc, mnc) -> Result<PLMNIdentity, Error>`, for an MCC that is not
+    three digits or an MNC that is not two or three, where it panicked;
+  - `int_to_bitvec(value, width) -> Result<BitString, Error>`, for a width
+    over 64 bits, where it panicked, and for a value that does not fit in the
+    width, whose high bits it dropped;
+  - `guami(…) -> Result<GUAMI, Error>`, for an AMF Set ID over 10 bits or an
+    AMF Pointer over 6: `guami(plmn, 1, 2000, 70)` built the set 976 and the
+    pointer 6;
+  - `nr_cgi(…) -> Result<NRCGI, Error>` and
+    `global_gnb_id(…) -> Result<GlobalGNBID, Error>`, for a gNB ID over 24
+    bits or a cell over 12, which they masked.
+- `helpers::tai` takes the TAC as `[u8; 3]`, where it took a slice and
+  panicked unless it had three octets: `tai(plmn, [0, 0, 1])`.
+- `helpers::ue_security_capabilities(encryption, integrity)` takes the two
+  octets, where it took a slice, read its first two octets and took a
+  missing one for zero: `ue_security_capabilities(0xe0, 0xe0)`.
 
 ### Added
 

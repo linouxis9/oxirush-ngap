@@ -286,7 +286,7 @@ fn long_fixed_size_bit_strings_are_octet_aligned() -> Result<(), Error> {
 
     let bits = |length: usize| (0..length).map(|bit| bit % 3 == 0).collect::<BitString>();
     let node = GlobalRANNodeID::globalNgENB_ID(GlobalNgENBID::new(
-        oxirush_ngap::helpers::plmn("208", "93"),
+        oxirush_ngap::helpers::plmn("208", "93")?,
         NgENBID::macroNgENB_ID(bits(20)),
         None,
     ));

@@ -48,7 +48,7 @@ fn main() -> Result<(), Error> {
     // demonstrates that nested payload, fixed-size security key, GUAMI, NSSAI,
     // and UE security capabilities.
 
-    let network = plmn("208", "93");
+    let network = plmn("208", "93")?;
     let sessions = session_setup_request_list(vec![0x7e, 0x00, 0x42]);
     let bit_rate = UEAggregateMaximumBitRate::new(
         BitRate(1_000_000_000u64.into()),
@@ -66,12 +66,12 @@ fn main() -> Result<(), Error> {
 
         // Its bit rate, its AMF, its sessions and its slices
         REJECT UEAggregateMaximumBitRate(bit_rate),
-        REJECT GUAMI(guami(network.clone(), 1, 1, 0)),
+        REJECT GUAMI(guami(network.clone(), 1, 1, 0)?),
         REJECT PDUSessionResourceSetupListCxtReq(sessions),
         REJECT AllowedNSSAI(AllowedNSSAI(vec![allowed_slice])),
 
         // Its security capabilities and its key
-        REJECT UESecurityCapabilities(ue_security_capabilities(&[0xe0, 0xe0])),
+        REJECT UESecurityCapabilities(ue_security_capabilities(0xe0, 0xe0)),
         REJECT SecurityKey(SecurityKey(FixedBitString::<256>::ZERO)),
     )?;
 
@@ -83,8 +83,8 @@ fn main() -> Result<(), Error> {
     // HandoverPreparation procedure → HandoverRequired message. The target gNB
     // and PDU-session resource list are mandatory NGAP IEs.
 
-    let target_gnb = GlobalRANNodeID::globalGNB_ID(global_gnb_id(network.clone(), 0x123456));
-    let target_area = tai(network, &[0x00, 0x00, 0x01]);
+    let target_gnb = GlobalRANNodeID::globalGNB_ID(global_gnb_id(network.clone(), 0x123456)?);
+    let target_area = tai(network, [0x00, 0x00, 0x01]);
     let target = TargetID::targetRANNodeID(TargetRANNodeID::new(target_gnb, target_area, None));
     let cause = Cause::radioNetwork(CauseRadioNetwork::handover_desirable_for_radio_reason);
 

@@ -302,16 +302,25 @@ use the last one, and one of them that does not decode is an error for both.
 use oxirush_ngap::helpers::*;
 
 // A PLMN from its MCC and its MNC, and what is identified within it
-let network = plmn("208", "93");
-let amf = guami(network.clone(), 1, 1, 0); // region, set, pointer
-let tracking_area = tai(network.clone(), &[0x00, 0x00, 0x01]); // TAC
-let cell = nr_cgi(network.clone(), 0x123456, 1); // gNB, cell
-let gnb = global_gnb_id(network, 0x123456);
+let network = plmn("208", "93").unwrap();
+let amf = guami(network.clone(), 1, 1, 0).unwrap(); // region, set, pointer
+let tracking_area = tai(network.clone(), [0x00, 0x00, 0x01]); // TAC
+let cell = nr_cgi(network.clone(), 0x123456, 1).unwrap(); // gNB, cell
+let gnb = global_gnb_id(network.clone(), 0x123456).unwrap();
 
 // A bit string from octets, and the NR algorithms of a UE: the first
 // octet of its encryption bitmap, then of its integrity bitmap
 let algorithm_mask = bytes_to_bitvec(&[0xe0]);
-let capabilities = ue_security_capabilities(&[0xe0, 0xe0]);
+let capabilities = ue_security_capabilities(0xe0, 0xe0);
+
+// What is no MCC, and an AMF Set ID that does not fit in its 10 bits
+println!("{}", plmn("20", "93").unwrap_err());
+println!("{}", guami(network, 1, 1024, 0).unwrap_err());
+```
+
+```text
+"20" is not an MCC: it has three digits, 0 to 9
+the AMF Set ID 1024 does not fit in 10 bits
 ```
 
 A PLMN identity has its digits in the order of TS 38.413 clause 9.3.3.5: the
@@ -322,11 +331,17 @@ where the same network is `13 00 14`. `plmn_from` reads the MCC and the MNC
 of a PLMN identity, and has `None` for octets that are not one, as
 `ab cd ef`.
 
+No helper panics, and none cuts a number short. `plmn` gives an error of the
+kind `Argument` for what is no MCC or no MNC, and so do `guami`, `nr_cgi`,
+`global_gnb_id` and `int_to_bitvec` for a number that does not fit in the
+bits of its field. `tai` takes the three octets of a TAC as an array.
+
 ### Errors
 
-The codec and the macros return an `oxirush_ngap::Error`: `NGAP_PDU::decode`,
-`encode` and `decode_value`, `decode_open_type` and `encode_open_type`, and
-`build_ngap!`, `build_ngap_ie!`, `extract_ngap_ies!` and `with_ngap_ie_mut!`.
+The codec, the macros and the helpers return an `oxirush_ngap::Error`:
+`NGAP_PDU::decode`, `encode` and `decode_value`, `decode_open_type` and
+`encode_open_type`, `build_ngap!`, `build_ngap_ie!`, `extract_ngap_ies!` and
+`with_ngap_ie_mut!`, and the functions of `helpers` that can fail.
 
 | Of an `Error` | Gives |
 |---------------|-------|
@@ -344,6 +359,7 @@ their message are, and `?` converts one into a `Box<dyn std::error::Error>`.
 | `WrongMessage` | `decode_value::<T>()` on a PDU that holds another message than `T` |
 | `MissingIe` | A `req` field of `extract_ngap_ies!` whose IE is not in the message |
 | `UndecodableIe` | An IE that is in the message and does not decode as its type: a `req` or an `opt` field of `extract_ngap_ies!`, and the IE of `with_ngap_ie_mut!` |
+| `Argument` | An argument that a helper does not take: what is no MCC or no MNC, and a number that does not fit in the bits of its field |
 
 ```rust
 use oxirush_ngap::{ErrorKind, ngap::*};
@@ -912,7 +928,7 @@ S1AP.
 |------|---------------|
 | `tests/aper_vectors.rs` | The 144 messages of `tests/fixtures/messages.tsv`, one for each message of each procedure, were encoded by pycrate 0.8.1. Each decodes to its type and encodes to the same octets, and each of its truncations and one more octet are refused. |
 | `tests/aper_round_trip.rs` | The macros, and the encodings where the codec departs from rasn's: constrained lists, `UTF8String`, long bit strings. |
-| `tests/errors.rs` | The errors of the typed API, each with its kind and its message: a PDU that is decoded as another message, octets that are no PDU, a value outside its constraint in a function and in each macro, and an IE that is absent or does not decode, for a `req` and for an `opt` field. |
+| `tests/errors.rs` | The errors of the typed API, each with its kind and its message: a PDU that is decoded as another message, octets that are no PDU, a value outside its constraint in a function and in each macro, an IE that is absent or does not decode, for a `req` and for an `opt` field, and what each helper refuses. |
 | `tests/unknown_extensions.rs` | The additions of a later release to an extensible `SEQUENCE` are skipped, and what follows them is read. |
 | `tests/allocation.rs` | Decoding reserves memory for the elements that it reads, not for the count that a length determinant claims. |
 | `tests/inspection.rs` | Each of the 144 messages is the same octets through its view, and through its tree where it has IEs to name. Each path of each selects its value, with and without `value` and `decoded`, and is one that `check_path` takes. Edits, written trees, criticalities, the two IEs that have the type of what they extend, and the identifiers of the registry against the constants of the bindings. |

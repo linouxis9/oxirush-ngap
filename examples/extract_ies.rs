@@ -124,7 +124,7 @@ fn main() -> Result<(), Error> {
 
         REJECT HandoverType(HandoverType::intra5gs),
         IGNORE Cause(cause),
-        REJECT TargetID(target_gnb()),
+        REJECT TargetID(target_gnb()?),
 
         REJECT PDUSessionResourceListHORqd(handover_required_sessions()),
         REJECT SourceToTarget_TransparentContainer(vec![0xDE, 0xAD, 0xBE, 0xEF]),
@@ -132,7 +132,7 @@ fn main() -> Result<(), Error> {
 
     // 3. InitialContextSetupRequest. The NAS PDU is nested in a PDU-session
     // item, as specified by TS 38.413.
-    let network = plmn("208", "93");
+    let network = plmn("208", "93")?;
     let bit_rate = UEAggregateMaximumBitRate::new(
         BitRate(1_000_000_000u64.into()),
         BitRate(500_000_000u64.into()),
@@ -147,11 +147,11 @@ fn main() -> Result<(), Error> {
         REJECT RAN_UE_NGAP_ID(10u32),
 
         REJECT UEAggregateMaximumBitRate(bit_rate),
-        REJECT GUAMI(guami(network, 1, 1, 0)),
+        REJECT GUAMI(guami(network, 1, 1, 0)?),
         REJECT PDUSessionResourceSetupListCxtReq(sessions),
         REJECT AllowedNSSAI(AllowedNSSAI(vec![allowed_slice])),
 
-        REJECT UESecurityCapabilities(ue_security_capabilities(&[0xe0, 0xe0])),
+        REJECT UESecurityCapabilities(ue_security_capabilities(0xe0, 0xe0)),
         REJECT SecurityKey(SecurityKey(FixedBitString::<256>::ZERO)),
     )?;
 
@@ -192,12 +192,14 @@ fn main() -> Result<(), Error> {
     Ok(())
 }
 
-fn target_gnb() -> TargetID {
-    let network = plmn("208", "93");
-    let gnb = GlobalRANNodeID::globalGNB_ID(global_gnb_id(network.clone(), 0x123456));
-    let area = tai(network, &[0x00, 0x00, 0x01]);
+fn target_gnb() -> Result<TargetID, Error> {
+    let network = plmn("208", "93")?;
+    let gnb = GlobalRANNodeID::globalGNB_ID(global_gnb_id(network.clone(), 0x123456)?);
+    let area = tai(network, [0x00, 0x00, 0x01]);
 
-    TargetID::targetRANNodeID(TargetRANNodeID::new(gnb, area, None))
+    Ok(TargetID::targetRANNodeID(TargetRANNodeID::new(
+        gnb, area, None,
+    )))
 }
 
 fn session_setup_request_list(nas: Vec<u8>) -> PDUSessionResourceSetupListCxtReq {

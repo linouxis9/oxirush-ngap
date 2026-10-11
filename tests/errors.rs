@@ -303,3 +303,41 @@ fn changing_an_ie_says_whether_it_did_or_why_it_did_not() {
     assert_eq!(unread.unwrap_err().kind(), ErrorKind::UndecodableIe);
     assert_eq!(message, before);
 }
+
+#[test]
+fn an_argument_that_a_helper_does_not_take_is_an_error_and_no_panic() {
+    use oxirush_ngap::helpers::*;
+    let network = || plmn("208", "93").unwrap();
+
+    // What panicked: an MCC of two digits, an MNC of one, and a width over the 64 bits
+    // of a number.
+    let panicked = [
+        plmn("20", "93").unwrap_err(),
+        plmn("208", "9").unwrap_err(),
+        int_to_bitvec(1, 65).unwrap_err(),
+    ];
+    // What was cut short: an AMF Set ID over 10 bits and an AMF Pointer over 6
+    // (TS 38.413 clauses 9.3.3.12 and 9.3.3.19), a gNB ID over the 24 bits that the
+    // helpers give it, a cell over the 12 bits that follow them in an NR Cell Identity
+    // of 36 (clause 9.3.1.7), and a number over the width of its bit string.
+    let cut_short = [
+        guami(network(), 1, 2000, 0).unwrap_err(),
+        guami(network(), 1, 1, 70).unwrap_err(),
+        global_gnb_id(network(), 0x1ff_ffff).unwrap_err(),
+        nr_cgi(network(), 0x1ff_ffff, 1).unwrap_err(),
+        nr_cgi(network(), 1, 0x1000).unwrap_err(),
+        int_to_bitvec(0x100, 8).unwrap_err(),
+    ];
+    for error in panicked.iter().chain(&cut_short) {
+        assert_eq!(error.kind(), ErrorKind::Argument, "{error}");
+        assert_eq!(source(error), None);
+    }
+    assert_eq!(
+        cut_short[0].to_string(),
+        "the AMF Set ID 2000 does not fit in 10 bits"
+    );
+
+    // A TAC is three octets (clause 9.3.3.10), which the type of the argument says.
+    let area = tai(network(), [0, 0, 1]);
+    assert_eq!(area.t_ac.0[..], [0, 0, 1]);
+}

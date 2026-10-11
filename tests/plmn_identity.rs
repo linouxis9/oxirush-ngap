@@ -88,15 +88,15 @@ fn networks(printed: &str) -> Vec<(String, String)> {
 /// The tracking areas that [`PAGING`] is for, built with the helpers.
 fn tracking_areas() -> TAIListForPaging {
     let areas = [("208", "93", [0, 0, 1]), ("310", "410", [0, 0, 2])];
-    let items =
-        areas.map(|(mcc, mnc, tac)| TAIListForPagingItem::new(tai(plmn(mcc, mnc), &tac), None));
+    let items = areas
+        .map(|(mcc, mnc, tac)| TAIListForPagingItem::new(tai(plmn(mcc, mnc).unwrap(), tac), None));
     TAIListForPaging(items.to_vec())
 }
 
 #[test]
 fn the_octets_of_a_plmn_identity_are_those_of_the_clause() {
     for (mcc, mnc, octets) in IDENTITIES {
-        let identity = plmn(mcc, mnc);
+        let identity = plmn(mcc, mnc).unwrap();
         assert_eq!(&identity.0[..], octets, "{mcc}-{mnc}");
         let read = plmn_from(&PLMNIdentity::from(*octets));
         let digits = (mcc.to_string(), mnc.to_string());
@@ -144,7 +144,7 @@ fn the_order_of_a_nas_message_is_another_network() {
     );
     let identity = PLMNIdentity::from([0x13, 0x00, 0x14]);
     assert_eq!(plmn_from(&identity), Some(read[1].clone()));
-    assert_eq!(&plmn("310", "041").0[..], [0x13, 0x00, 0x14]);
+    assert_eq!(&plmn("310", "041").unwrap().0[..], [0x13, 0x00, 0x14]);
 }
 
 /// Octets that are no PLMN identity have no MCC and no MNC: a half octet that is no

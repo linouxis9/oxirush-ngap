@@ -651,14 +651,13 @@ impl Form {
         match self {
             Self::Plmn if text.contains('-') => {
                 let (mcc, mnc) = text.split_once('-').unwrap_or_default();
-                if mcc.len() != 3
-                    || !(2..=3).contains(&mnc.len())
-                    || !all_digits(&text.replacen('-', "", 1))
-                {
-                    return Err(format!("{text}: a PLMN identity is MCC-MNC, as 208-93"));
-                }
-                let (mcc, mnc) = (bcd(mcc), bcd(mnc));
-                let octets = crate::helpers::plmn_octets([mcc[0], mcc[1], mcc[2]], &mnc);
+                // The three digits of an MCC, and the two or three of an MNC.
+                let digits = |digits: &str| all_digits(digits).then(|| bcd(digits));
+                let mcc = digits(mcc).and_then(|mcc| <[u8; 3]>::try_from(mcc).ok());
+                let octets = mcc.zip(digits(mnc));
+                let octets = octets.and_then(|(mcc, mnc)| crate::helpers::plmn_octets(mcc, &mnc));
+                let octets = octets
+                    .ok_or_else(|| format!("{text}: a PLMN identity is MCC-MNC, as 208-93"))?;
                 Ok(json!(hex(&octets)))
             }
             Self::Digits if all_digits(text) => {

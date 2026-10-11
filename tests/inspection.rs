@@ -1145,8 +1145,8 @@ fn the_parts_of_a_guami_are_numbers_of_their_bits() {
     let edited = inspect::message_from_view(&view).unwrap();
     let mut shown = inspect::message_view(&edited).unwrap();
     // The same GUAMI as the crate's helper builds from these numbers.
-    let network = oxirush_ngap::helpers::plmn("310", "410");
-    let expected = oxirush_ngap::helpers::guami(network, 0xCA, 0x3FF, 1);
+    let network = oxirush_ngap::helpers::plmn("310", "410").unwrap();
+    let expected = oxirush_ngap::helpers::guami(network, 0xCA, 0x3FF, 1).unwrap();
     let expected = encode_open_type(&expected).unwrap();
     assert_eq!(
         ie(&mut shown, 28)["_raw_value"],

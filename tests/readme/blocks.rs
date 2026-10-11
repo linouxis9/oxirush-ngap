@@ -176,16 +176,20 @@ fn block_6() {
     use oxirush_ngap::helpers::*;
 
     // A PLMN from its MCC and its MNC, and what is identified within it
-    let network = plmn("208", "93");
-    let amf = guami(network.clone(), 1, 1, 0); // region, set, pointer
-    let tracking_area = tai(network.clone(), &[0x00, 0x00, 0x01]); // TAC
-    let cell = nr_cgi(network.clone(), 0x123456, 1); // gNB, cell
-    let gnb = global_gnb_id(network, 0x123456);
+    let network = plmn("208", "93").unwrap();
+    let amf = guami(network.clone(), 1, 1, 0).unwrap(); // region, set, pointer
+    let tracking_area = tai(network.clone(), [0x00, 0x00, 0x01]); // TAC
+    let cell = nr_cgi(network.clone(), 0x123456, 1).unwrap(); // gNB, cell
+    let gnb = global_gnb_id(network.clone(), 0x123456).unwrap();
 
     // A bit string from octets, and the NR algorithms of a UE: the first
     // octet of its encryption bitmap, then of its integrity bitmap
     let algorithm_mask = bytes_to_bitvec(&[0xe0]);
-    let capabilities = ue_security_capabilities(&[0xe0, 0xe0]);
+    let capabilities = ue_security_capabilities(0xe0, 0xe0);
+
+    // What is no MCC, and an AMF Set ID that does not fit in its 10 bits
+    println!("{}", plmn("20", "93").unwrap_err());
+    println!("{}", guami(network, 1, 1024, 0).unwrap_err());
 }
 
 /// The Rust block 7 of README.md.

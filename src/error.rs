@@ -135,6 +135,11 @@ impl Error {
         Self::new(ErrorKind::WrongMessage, message)
     }
 
+    /// An argument that a helper does not take, and what it takes.
+    pub(crate) fn argument(what: impl Into<String>) -> Self {
+        Self::new(ErrorKind::Argument, what)
+    }
+
     /// For the macro that extracts IEs: the IE `id`, which the field `field` requires,
     /// is not in a message of the type `message`.
     #[doc(hidden)]

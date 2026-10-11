@@ -37,7 +37,7 @@ pub(crate) struct Message {
 /// it and the types that its octets contain, the criticalities that the object sets of
 /// the single containers give it, and the names that the macros take it by.
 /// The macros take the IE of a message by its own name and, where one type has one IE,
-/// by the name of that type.
+/// by the name of that type and by the aliases that the bindings give the type.
 #[derive(Default)]
 pub(crate) struct Ie {
     pub(crate) name: String,
@@ -51,6 +51,8 @@ pub(crate) struct Registry {
     /// The module of the bindings, and their types by name without case or punctuation.
     module: String,
     types: BTreeMap<String, String>,
+    /// The aliases that the bindings give their types, each with the name of its type.
+    aliases: BTreeMap<String, String>,
     pub(crate) procedures: BTreeMap<u8, Procedure>,
     pub(crate) ies: BTreeMap<u16, Ie>,
 }
@@ -82,9 +84,14 @@ impl Registry {
                 .entry(canonical(&c[1]))
                 .or_insert_with(|| c[1].to_string());
         }
+        // The aliases follow the modules, at the root of the bindings.
+        let alias = Regex::new(r"(?m)^pub type ([A-Za-z][A-Za-z0-9_]*) = ([A-Za-z][A-Za-z0-9_]*);")?;
+        let aliases = alias.captures_iter(generated);
+        let aliases = aliases.map(|c| (c[1].to_string(), c[2].to_string())).collect();
         let mut registry = Self {
             module: protocol.to_ascii_lowercase(),
             types,
+            aliases,
             procedures: BTreeMap::new(),
             ies: BTreeMap::new(),
         };
@@ -278,6 +285,15 @@ impl Registry {
                 && !constants.contains(&name)
             {
                 names.entry(name).or_insert((id, ty));
+            }
+        }
+        // An alias of a type is a name of that type: it names the IE that the name of
+        // the type names, unless an IE has that name itself.
+        for (alias, ty) in &self.aliases {
+            if let Some(named) = names.get(ty).cloned()
+                && !constants.contains(alias)
+            {
+                names.entry(alias.clone()).or_insert(named);
             }
         }
         for (name, (id, ty)) in names {

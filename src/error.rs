@@ -18,7 +18,8 @@ pub enum ErrorKind {
     Decode,
     /// A value does not encode in aligned PER, as an integer outside its constraint.
     Encode,
-    /// `decode_value::<T>()` on a PDU that holds another message than `T`.
+    /// `decode_value::<T>()` on a PDU that holds another message than `T`, and the
+    /// protocol IEs of a PDU whose message has none, as the private message.
     WrongMessage,
     /// A required IE that the message does not have: a `req` field of the macro that
     /// extracts IEs.
@@ -134,6 +135,44 @@ impl Error {
             ),
         };
         Self::new(ErrorKind::WrongMessage, message)
+    }
+
+    /// A PDU of the message that ASN.1 names `name`, which has no container of
+    /// protocol IEs.
+    pub(crate) fn no_protocol_ies(name: &str) -> Self {
+        let what =
+            format!("the message of this PDU is {name}, which has no container of protocol IEs");
+        Self::new(ErrorKind::WrongMessage, what)
+    }
+
+    /// This error is why the message of a PDU does not decode as a container of
+    /// protocol IEs: the message that ASN.1 names `name`, when the specification has
+    /// one for the PDU.
+    pub(crate) fn of_message(self, name: Option<&str>) -> Self {
+        const UNNAMED: &str =
+            "the message of this PDU does not decode as a container of protocol IEs";
+        self.told_of(match name {
+            Some(name) => format!("the {name} of this PDU does not decode"),
+            None => UNNAMED.to_string(),
+        })
+    }
+
+    /// This error is why `count` protocol IEs do not encode as a message.
+    pub(crate) fn of_protocol_ies(self, count: usize) -> Self {
+        self.told_of(format!(
+            "these {count} protocol IEs do not encode as a message"
+        ))
+    }
+
+    /// The same error, of `what`: what it said is wrong is the reason, where it gave
+    /// none apart.
+    fn told_of(self, what: String) -> Self {
+        Self {
+            kind: self.kind,
+            what: what.into_boxed_str(),
+            why: Some(self.why.unwrap_or(self.what)),
+            source: self.source,
+        }
     }
 
     /// An argument that a helper does not take, and what it takes.

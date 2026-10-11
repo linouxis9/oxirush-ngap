@@ -228,24 +228,25 @@ pub fn __pdu<M: Message, const N: usize>(
 /// The procedures of the protocol, which `src/registry.rs` lists from the ASN.1: the
 /// code, the name and the criticality of each, then for each of its messages the
 /// direction, the kind, the name that ASN.1 gives it, its type and the IEs of its object
-/// set, each with its identifier, its criticality and its presence.
+/// set, each with its identifier, its criticality and its presence. A message that has
+/// no container of protocol IEs, as the private message, has no object set.
 ///
 /// The codes that the macros take by the names of the procedures, the type of the
-/// message that they build, the kinds of a PDU and, with the `inspect` feature, the
-/// messages of a view and of a tree, the IEs that each can have and the criticality that
-/// ASN.1 assigns all come from these lines.
+/// message that they build, the kinds of a PDU, the messages whose protocol IEs a PDU
+/// gives and, with the `inspect` feature, the messages of a view and of a tree, the IEs
+/// that each can have and the criticality that ASN.1 assigns all come from these lines.
 macro_rules! procedures {
     ($($code:literal $procedure:ident $($criticality:ident)? {
         $(InitiatingMessage $initiating:ident $initiating_name:literal $initiating_type:path
-            [$($initiating_ie:literal $initiating_criticality:ident
-                $initiating_presence:ident),*];)?
+            $([$($initiating_ie:literal $initiating_criticality:ident
+                $initiating_presence:ident),*])?;)?
         $(SuccessfulOutcome $successful:ident $successful_name:literal $successful_type:path
-            [$($successful_ie:literal $successful_criticality:ident
-                $successful_presence:ident),*];)?
+            $([$($successful_ie:literal $successful_criticality:ident
+                $successful_presence:ident),*])?;)?
         $(UnsuccessfulOutcome $unsuccessful:ident $unsuccessful_name:literal
             $unsuccessful_type:path
-            [$($unsuccessful_ie:literal $unsuccessful_criticality:ident
-                $unsuccessful_presence:ident),*];)?
+            $([$($unsuccessful_ie:literal $unsuccessful_criticality:ident
+                $unsuccessful_presence:ident),*])?;)?
     })*) => {
         /// The procedure codes, by the names of the procedures.
         #[doc(hidden)]
@@ -363,6 +364,39 @@ macro_rules! procedures {
             }
         }
 
+        /// The criticality of the bindings, for the code that the two protocols share.
+        pub(crate) use $crate::ngap::Criticality;
+
+        /// The object set of each message: the direction and the procedure code of its
+        /// PDU, the name that ASN.1 gives it, and the IEs that its container of protocol
+        /// IEs can have, in the order of the set.
+        pub(crate) const OBJECT_SETS: &[$crate::check::ObjectSet] = &[
+            $($($crate::check::ObjectSet {
+                direction: "InitiatingMessage",
+                procedure_code: $code,
+                name: $initiating_name,
+                ies: $crate::macros::object_set!($([$(
+                    $initiating_ie $initiating_criticality $initiating_presence
+                ),*])?),
+            },)?)*
+            $($($crate::check::ObjectSet {
+                direction: "SuccessfulOutcome",
+                procedure_code: $code,
+                name: $successful_name,
+                ies: $crate::macros::object_set!($([$(
+                    $successful_ie $successful_criticality $successful_presence
+                ),*])?),
+            },)?)*
+            $($($crate::check::ObjectSet {
+                direction: "UnsuccessfulOutcome",
+                procedure_code: $code,
+                name: $unsuccessful_name,
+                ies: $crate::macros::object_set!($([$(
+                    $unsuccessful_ie $unsuccessful_criticality $unsuccessful_presence
+                ),*])?),
+            },)?)*
+        ];
+
         /// The messages: the direction, the procedure code, the name that ASN.1 gives it
         /// and the type of each, the IEs of its object set, each with its identifier and
         /// whether its presence is mandatory, and the path of its type.
@@ -378,15 +412,15 @@ macro_rules! procedures {
         )] = &[
             $($(("InitiatingMessage", $code, $initiating_name,
                 $crate::inspect::Typed::of::<$initiating_type>,
-                &[$(($initiating_ie, $crate::macros::presence!($initiating_presence))),*],
+                &[$($(($initiating_ie, $crate::macros::presence!($initiating_presence))),*)?],
                 stringify!($initiating_type)),)?)*
             $($(("SuccessfulOutcome", $code, $successful_name,
                 $crate::inspect::Typed::of::<$successful_type>,
-                &[$(($successful_ie, $crate::macros::presence!($successful_presence))),*],
+                &[$($(($successful_ie, $crate::macros::presence!($successful_presence))),*)?],
                 stringify!($successful_type)),)?)*
             $($(("UnsuccessfulOutcome", $code, $unsuccessful_name,
                 $crate::inspect::Typed::of::<$unsuccessful_type>,
-                &[$(($unsuccessful_ie, $crate::macros::presence!($unsuccessful_presence))),*],
+                &[$($(($unsuccessful_ie, $crate::macros::presence!($unsuccessful_presence))),*)?],
                 stringify!($unsuccessful_type)),)?)*
         ];
 
@@ -401,18 +435,34 @@ macro_rules! procedures {
         #[cfg(feature = "inspect")]
         pub(crate) const MESSAGE_IE_CRITICALITIES: &[(&str, &[(u16, &str)])] = &[
             $($(($initiating_name,
-                &[$(($initiating_ie, stringify!($initiating_criticality))),*]),)?)*
+                &[$($(($initiating_ie, stringify!($initiating_criticality))),*)?]),)?)*
             $($(($successful_name,
-                &[$(($successful_ie, stringify!($successful_criticality))),*]),)?)*
+                &[$($(($successful_ie, stringify!($successful_criticality))),*)?]),)?)*
             $($(($unsuccessful_name,
-                &[$(($unsuccessful_ie, stringify!($unsuccessful_criticality))),*]),)?)*
+                &[$($(($unsuccessful_ie, stringify!($unsuccessful_criticality))),*)?]),)?)*
         ];
     };
 }
 pub(crate) use procedures;
 
+/// The IEs of an object set, each as its identifier, the criticality that the set
+/// assigns it and whether its presence is mandatory: none for a message that has no
+/// container of protocol IEs.
+macro_rules! object_set {
+    () => {
+        None
+    };
+    ([$($id:literal $criticality:ident $presence:ident),*]) => {
+        Some(&[$((
+            $id,
+            $crate::ngap::Criticality::$criticality,
+            $crate::macros::presence!($presence),
+        )),*])
+    };
+}
+pub(crate) use object_set;
+
 /// Whether an IE of an object set is always there: its `PRESENCE`, as ASN.1 words it.
-#[cfg(feature = "inspect")]
 macro_rules! presence {
     (mandatory) => {
         true
@@ -424,7 +474,6 @@ macro_rules! presence {
         false
     };
 }
-#[cfg(feature = "inspect")]
 pub(crate) use presence;
 
 /// The IEs of the protocol, which `src/registry.rs` lists from the ASN.1: the identifier,

@@ -179,6 +179,7 @@ without debug information.
 | `direction()` | `"InitiatingMessage"`, `"SuccessfulOutcome"` or `"UnsuccessfulOutcome"`; `is_initiating()`, `is_successful()` and `is_unsuccessful()` say which |
 | `kind()` | An `NgapPduKind`: one variant for each message, and `Other` for a procedure that the specification does not have in that direction |
 | `decode_value()` | The message, as its type, which the caller names. The type of another message is an error of the kind `WrongMessage`, and a type that is no message does not compile |
+| `protocol_ies()`, `set_protocol_ies(ies)` | The IEs of its message, whatever the message is, and the same PDU with other IEs: [below](#the-ies-of-any-message) |
 
 The kind of a PDU says which message to decode:
 
@@ -296,6 +297,52 @@ IE that does not decode or a changed value that does not encode. When a
 message has the same IE twice, `with_ngap_ie_mut!` and `extract_ngap_ies!` both
 use the last one, and one of them that does not decode is an error for both.
 
+### The IEs of any message
+
+Every message of TS 38.413 but the private one is a container of protocol
+IEs, so a PDU gives the IEs of its message, and takes them back, without the
+type of the message. `decode_value` takes the type of the message that the
+PDU holds, and refuses another one.
+
+```rust
+use oxirush_ngap::{build_ngap_ie, ngap::*};
+
+fn main() -> Result<(), oxirush_ngap::Error> {
+    // An NG SETUP FAILURE, as any PDU that was received
+    let bytes = hex::decode("40150008000001000f400188").unwrap();
+    let mut pdu = NGAP_PDU::decode(&bytes)?;
+
+    // Its IEs as they were received: identifier, criticality and octets
+    let mut ies = pdu.protocol_ies()?;
+    for ie in &ies.0 {
+        let octets = hex::encode(ie.value.as_bytes());
+        println!("{} {:?} {octets}", ie.id.0, ie.criticality);
+    }
+
+    // One more IE, and the container is the message of the same PDU again
+    let wait = build_ngap_ie!(NGSetupFailure, IGNORE TimeToWait(TimeToWait::v5s))?;
+    ies.0.push(wait);
+    pdu.set_protocol_ies(ies)?;
+    let octets = hex::encode(pdu.encode()?);
+    println!("{} {octets}", pdu.procedure_name());
+    Ok(())
+}
+```
+
+```text
+15 ignore 88
+NGSetup 4015000d000002000f400188006b400120
+```
+
+`protocol_ies()` gives a `ProtocolIEContainer`, the IEs in the order of the
+message: one that the message cannot have, one that the protocol does not
+have and one that is there twice are among them. `set_protocol_ies` checks
+nothing, and the PDU keeps its direction, its procedure code and its
+criticality. Both are an error of the kind `WrongMessage` for the private
+message, which has private IEs. The message of a procedure that the
+specification does not have in that direction is read as a container of
+protocol IEs too.
+
 ### Identities and capabilities
 
 ```rust
@@ -355,7 +402,7 @@ their message are, and `?` converts one into a `Box<dyn std::error::Error>`.
 |------|------|
 | `Decode` | Octets are not the value that they are decoded as: they end before it does, go on after it, or hold a value outside its constraint |
 | `Encode` | A value does not encode, as an integer outside its constraint |
-| `WrongMessage` | `decode_value::<T>()` on a PDU that holds another message than `T` |
+| `WrongMessage` | `decode_value::<T>()` on a PDU that holds another message than `T`, and the protocol IEs of the private message, which has none |
 | `MissingIe` | A `req` field of `extract_ngap_ies!` whose IE is not in the message |
 | `UndecodableIe` | An IE that is in the message and does not decode as its type: a `req` or an `opt` field of `extract_ngap_ies!`, and the IE of `with_ngap_ie_mut!`. With `inspect`, a path into an IE or a transfer that did not decode |
 | `Argument` | An argument that a helper does not take: what is no MCC or no MNC, and a number that does not fit in the bits of its field |
@@ -954,6 +1001,7 @@ S1AP.
 | `tests/aper_vectors.rs` | The 144 messages of `tests/fixtures/messages.tsv`, one for each message of each procedure, were encoded by pycrate 0.8.1. Each decodes to its type and encodes to the same octets, and each of its truncations and one more octet are refused. |
 | `tests/aper_round_trip.rs` | The macros, and the encodings where the codec departs from rasn's: constrained lists, `UTF8String`, long bit strings. |
 | `tests/errors.rs` | The errors of the typed API, each with its kind and its message: a PDU that is decoded as another message, octets that are no PDU, a value outside its constraint in a function and in each macro, an IE that is absent or does not decode, for a `req` and for an `opt` field, and what each helper refuses. With `inspect`, a test for each kind of error of the JSON forms. |
+| `tests/protocol_ies.rs` | The protocol IEs of each of the 144 messages but the private one are read from its PDU and put back as the same octets. An IE that the protocol does not have and one that is there twice are kept with their criticality, a message that the macros built has the IEs that it was built with, and the private message is an error. |
 | `tests/unknown_extensions.rs` | The additions of a later release to an extensible `SEQUENCE` are skipped, and what follows them is read. |
 | `tests/allocation.rs` | Decoding reserves memory for the elements that it reads, not for the count that a length determinant claims. |
 | `tests/inspection.rs` | Each of the 144 messages is the same octets through its view, and through its tree where it has IEs to name. Each path of each selects its value, with and without `value` and `decoded`, and is one that `check_path` takes. Edits, written trees, criticalities, the two IEs that have the type of what they extend, and the identifiers of the registry against the constants of the bindings. |
@@ -991,13 +1039,13 @@ rustfmt --edition 2024 src/ngap.rs src/registry.rs src/inspect_registry.rs
 
 `rasn-compiler` finds rustfmt through `CARGO`. Commit the three files after
 regenerating them, and do not edit them by hand. They were last regenerated
-on 2026-10-11, with the generator of that revision and the rustfmt of Rust
+on 2026-10-12, with the generator of that revision and the rustfmt of Rust
 1.88: they came out as they are committed, octet for octet. No CI job
 regenerates them, as the ASN.1 is not in the repository.
 
 oxirush-ngap and oxirush-s1ap share, octet for octet, the code that does not
 depend on the protocol: `build/aper_fix.rs`, `build/containers.rs`,
-`build/inspection.rs`, `build/registry.rs`, `src/error.rs`,
+`build/inspection.rs`, `build/registry.rs`, `src/check.rs`, `src/error.rs`,
 `src/inspect_paths.rs`, `src/message.rs`, `src/per.rs`, `src/sized.rs` and
 the test `tests/readme.rs`.
 `tests/shared_files.rs` holds a digest of each, so that an edit in one crate

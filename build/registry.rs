@@ -27,10 +27,12 @@ pub(crate) struct Procedure {
 
 /// A message: the name that ASN.1 gives it, its type, and the IEs of its object set in
 /// the order of the set, each as its identifier, its `CRITICALITY` and its `PRESENCE`.
+/// A message that has no container of protocol IEs, as a private message, has no
+/// object set.
 pub(crate) struct Message {
     pub(crate) name: String,
     pub(crate) ty: String,
-    pub(crate) ies: Vec<(u16, String, String)>,
+    pub(crate) ies: Option<Vec<(u16, String, String)>>,
 }
 
 /// An IE: the name that ASN.1 gives it after `id-`, the types that its object sets give
@@ -119,7 +121,7 @@ impl Registry {
         );
         // The procedure code, the name and the criticality, then for each message its
         // direction, its kind, the name that ASN.1 gives it, its type and the IEs of its
-        // object set.
+        // object set, in brackets: a message without an object set has none.
         writeln!(out, "procedures! {{")?;
         for (code, procedure) in &self.procedures {
             write!(out, "    {code} {}", procedure.name)?;
@@ -130,13 +132,13 @@ impl Registry {
             for ((_, direction, kind), message) in DIRECTIONS.iter().zip(&procedure.messages) {
                 if let Some(Message { name, ty, ies }) = message {
                     let kind = format!("{kind}_{}", procedure.name);
-                    let ies = ies.iter().map(|(id, c, p)| format!("{id} {c} {p}"));
-                    let ies: Vec<_> = ies.collect();
-                    write!(
-                        out,
-                        " {direction} {kind} {name:?} {ty} [{}];",
-                        ies.join(", ")
-                    )?;
+                    write!(out, " {direction} {kind} {name:?} {ty}")?;
+                    if let Some(ies) = ies {
+                        let ies = ies.iter().map(|(id, c, p)| format!("{id} {c} {p}"));
+                        let ies: Vec<_> = ies.collect();
+                        write!(out, " [{}]", ies.join(", "))?;
+                    }
+                    write!(out, ";")?;
                 }
             }
             writeln!(out, " }}")?;
@@ -429,15 +431,25 @@ fn single_containers(protocol: &str, asn: &str) -> Result<BTreeMap<String, BTree
     Ok(items)
 }
 
-/// The IEs of the object set that the message `name` has for its `protocolIEs`: none for
-/// a message that has no such container, as a private message.
-fn message_ies(protocol: &str, asn: &str, name: &str) -> Result<Vec<(u16, String, String)>> {
+/// The IEs of the object set that the message `name` has for its `protocolIEs`: `None`
+/// for a message that has no such container, as a private message.
+fn message_ies(
+    protocol: &str,
+    asn: &str,
+    name: &str,
+) -> Result<Option<Vec<(u16, String, String)>>> {
     let container = Regex::new(&format!(
-        r"(?m)^[\t ]*{name}\s*::=\s*SEQUENCE\s*\{{\s*protocolIEs\s+ProtocolIE-Container\s*\{{\s*\{{\s*([A-Za-z][A-Za-z0-9-]*)\s*\}}\s*\}}"
+        r"(?m)^[\t ]*{name}\s*::=\s*SEQUENCE\s*\{{\s*protocolIEs\s+ProtocolIE-Container\s*\{{\s*\{{\s*([A-Za-z][A-Za-z0-9-]*)\s*\}}\s*\}}(\s*,\s*\.\.\.\s*\}})?"
     ))?;
     let Some(set) = container.captures(asn) else {
-        return Ok(Vec::new());
+        return Ok(None);
     };
+    // The crate reads the IEs of a PDU without the type of its message: a message is
+    // this container, and what a later release adds.
+    ensure!(
+        set.get(2).is_some(),
+        "{name} has more than a container of protocol IEs"
+    );
     let block = Regex::new(&format!(
         r"(?ms)^[\t ]*{}\s+{protocol}-PROTOCOL-IES\s*::=\s*\{{(.*?)^[\t ]*\}}",
         &set[1]
@@ -460,5 +472,5 @@ fn message_ies(protocol: &str, asn: &str, name: &str) -> Result<Vec<(u16, String
         "{}: an object of the set was not read",
         &set[1]
     );
-    Ok(ies)
+    Ok(Some(ies))
 }

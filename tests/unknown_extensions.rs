@@ -33,7 +33,8 @@ struct FollowingSNSSAI {
 
 /// Hand-built X.691 fields, independent of rasn's encoder. In particular,
 /// normally small lengths <=64 encode n-1 in six unaligned bits; larger
-/// bitmaps use an unconstrained length (§11.9.3.4), including fragments.
+/// bitmaps use an unconstrained length (X.691 (02/2021) §11.9.3.4),
+/// including fragments.
 #[derive(Default)]
 struct Wire(BitString);
 

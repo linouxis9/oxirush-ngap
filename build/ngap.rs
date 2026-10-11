@@ -282,7 +282,7 @@ fn generate_support(generated: &str) -> Result<String> {
     )?;
     writeln!(
         out,
-        "/// becomes one zero octet (X.691 (07/2002) §10.1.4, §10.2.1)."
+        "/// becomes one zero octet (X.691 (02/2021) §11.1.4, §11.2.1)."
     )?;
     writeln!(
         out,

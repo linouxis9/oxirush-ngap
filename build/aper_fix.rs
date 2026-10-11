@@ -126,8 +126,8 @@ pub fn fix_extensible_sequences(generated: &str) -> Result<String> {
 /// Work around rasn 0.28 APER decoding of size-constrained `UTF8String` values.
 ///
 /// A constraint on a character string type that is not a known-multiplier
-/// type is not PER-visible (X.691 §9.3.6): the value is an unconstrained
-/// length in octets followed by its UTF-8 octets (§27.6, 07/2002 numbering).
+/// type is not PER-visible (X.691 (02/2021) §10.3.7): the value is an
+/// unconstrained length in octets followed by its UTF-8 octets (§30.6).
 /// rasn encodes it that way but applies the size constraint when decoding.
 pub fn fix_utf8_strings(generated: &str) -> Result<String> {
     let string = Regex::new(
@@ -174,7 +174,7 @@ pub fn fix_utf8_strings(generated: &str) -> Result<String> {
 /// longer than 16 bits.
 ///
 /// Such a bit string is octet-aligned in APER, with no length determinant
-/// (X.691 (07/2002) §15.10). rasn encodes it that way but decodes it from the
+/// (X.691 (02/2021) §16.10). rasn encodes it that way but decodes it from the
 /// current bit offset. The generated decoders read the first octet as an
 /// octet-aligned integer (0..255) and the remaining bits as a short bit string
 /// that is then octet-aligned; every other encoding rule keeps rasn's codec.
@@ -278,7 +278,7 @@ pub fn fix_fixed_bit_strings(generated: &str) -> Result<String> {
                 if let Some((length, extensible)) = length(attributes, variant_type) {
                     let bits = aligned_bits(length, "                ");
                     // Outside an extensible root, a semi-constrained length
-                    // precedes the bits (X.691 (07/2002) §15.6).
+                    // precedes the bits (X.691 (02/2021) §16.6).
                     let (size, extension) = if extensible {
                         (
                             format!("{length}, extensible"),

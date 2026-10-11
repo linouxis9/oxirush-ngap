@@ -29344,7 +29344,7 @@ impl std::fmt::Display for NGAPPDU {
 /// Encode a typed ASN.1 value for an NGAP open type using APER.
 ///
 /// An open type holds a complete encoding, in which an empty encoding
-/// becomes one zero octet (X.691 (07/2002) §10.1.4, §10.2.1).
+/// becomes one zero octet (X.691 (02/2021) §11.1.4, §11.2.1).
 pub fn encode_open_type<T: rasn::Encode>(
     value: &T,
 ) -> Result<rasn::types::Any, rasn::error::EncodeError> {

@@ -86,7 +86,8 @@ pub(crate) use decode_extensible_sequence;
 /// of the length and of the elements. In APER the length is encoded as a
 /// constrained whole number, through rasn's integer codec, and the elements
 /// follow it. An `unconstrained` list has an upper bound of 64K or more, so
-/// its length is an unconstrained length determinant (X.691 §11.9.3.5):
+/// its length is an unconstrained length determinant (X.691 (02/2021)
+/// §11.9.3.5):
 /// rasn's sequence codec without the size, which is checked here. The
 /// decoded list grows with the elements read, so that a count alone reserves
 /// no memory. Every other encoding rule keeps rasn's sequence codec.

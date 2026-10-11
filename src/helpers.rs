@@ -192,7 +192,7 @@ mod tests {
     fn common_identifiers_have_the_required_widths() {
         let plmn = plmn("208", "93");
         // The 24-bit gNB ID and the 12-bit cell: a 36-bit NR cell identity,
-        // octet-aligned after the PLMN (X.691 (07/2002) §15.10).
+        // octet-aligned after the PLMN (X.691 (02/2021) §16.10).
         let cgi = nr_cgi(plmn.clone(), 0xab_cdef, 0x123);
         assert_eq!(
             cgi.n_rcell_identity.0[..36],

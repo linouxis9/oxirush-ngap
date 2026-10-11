@@ -135,7 +135,8 @@ fn ie_names_address_their_own_ie_before_a_same_named_type() -> Result<(), Missin
 /// Constrained lists whose `rasn` attribute rustfmt splits over several
 /// lines use the corrected APER codec too. The expected octets are the ones
 /// Wireshark decodes: an octet-aligned length for SIZE(1..256), and an
-/// unconstrained length for SIZE(1..65536) (X.691 §11.9.3.3, §11.9.3.5).
+/// unconstrained length for SIZE(1..65536) (X.691 (02/2021) §11.9.3.3,
+/// §11.9.3.5).
 #[test]
 fn every_constrained_list_encodes_its_length_per_x691() {
     let diagnostics = CriticalityDiagnostics::new(
@@ -213,9 +214,9 @@ fn multiline_extension_list_has_an_aligned_count() {
 }
 
 /// A size constraint on a UTF8String, which is not a known-multiplier
-/// character string type, is not PER-visible (X.691 §9.3.6): the value is an
-/// unconstrained length in octets, then its UTF-8 octets (§27.6, 07/2002
-/// numbering). Wireshark decodes the expected octets.
+/// character string type, is not PER-visible (X.691 (02/2021) §10.3.7): the
+/// value is an unconstrained length in octets, then its UTF-8 octets (§30.6).
+/// Wireshark decodes the expected octets.
 #[test]
 fn utf8_string_names_have_an_unconstrained_length() -> Result<(), MissingIeError> {
     let name = ExtendedAMFName::new(None, Some(AMFNameUTF8String("amf-é".into())), None);
@@ -253,7 +254,7 @@ where
 }
 
 /// A fixed-size BIT STRING longer than 16 bits is octet-aligned in APER
-/// (X.691 (07/2002) §15.10). The expected octets are the ones Wireshark
+/// (X.691 (02/2021) §16.10). The expected octets are the ones Wireshark
 /// decodes: padding follows the 3-bit NCC before the 256-bit NH, and the
 /// 2-bit NgENB-ID choice index before the 20-bit ng-eNB ID.
 #[test]
@@ -462,7 +463,7 @@ fn a_missing_required_ie_is_a_missing_ie_error() {
 }
 
 /// An open type holds a complete encoding, in which an empty encoding is one
-/// zero octet (X.691 (07/2002) §10.1.4, §10.2.1). No NGAP IE value is
+/// zero octet (X.691 (02/2021) §11.1.4, §11.2.1). No NGAP IE value is
 /// empty, but the helper takes any type, such as NULL.
 #[test]
 fn an_empty_open_type_value_is_one_zero_octet() {

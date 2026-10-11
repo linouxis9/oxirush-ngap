@@ -1,12 +1,12 @@
-//! The values of an inspection tree by their paths, and the IEs of a message by their
-//! names: see the module documentation of [`crate::inspect`].
+//! The values of a view by their paths, and the IEs of a tree by their names: see the
+//! module documentation of [`crate::inspect`].
 
 use serde_json::{Map, Value, json};
 
 // The name of the protocol, the first segment of the paths of the IEs of the message of
 // a PDU, and what the ASN.1 says of the messages, the IEs and the types.
 use crate::inspect_registry::{CARRIED, ENUMERATIONS, IE_TYPES, MESSAGES, PROTOCOL, ROOT, TYPES};
-/// The member of a tree that holds the message of the PDU.
+/// The member of a view that holds the message of the PDU.
 const MESSAGE: &str = "message";
 /// The member of a message that holds its IEs.
 const IES: &str = "protocolIEs";
@@ -17,23 +17,23 @@ const OCCURRENCES: usize = 4096;
 pub(crate) const EDITED: &str = "_edited";
 /// The members that hold the value of an IE or of a transfer.
 const VALUES: [&str; 3] = ["value", "extensionValue", "decoded"];
-/// How deep a message that is written by the names of its IEs is read.
+/// How deep a tree that is written is read.
 const WRITTEN: usize = 256;
 
-/// What a value of a tree is, as its ASN.1 type has it: what a path can select in it.
+/// What a value of a view is, as its ASN.1 type has it: what a path can select in it.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) enum Shape {
-    /// A value that the tables do not describe: it has the members that the tree has.
+    /// A value that the tables do not describe: it has the members that the view has.
     Unknown,
     /// The octets of a value that did not decode: nothing is selected in them.
     Undecoded,
-    /// The tree of a PDU, of this message when the tables have it.
+    /// The view of a PDU, of this message when the tables have it.
     Pdu(Option<Sent>),
     /// The message of a PDU.
     Message(Sent),
     /// A value without members.
     Plain,
-    /// A string of bits whose size varies: its `value` and its `length`, unless the tree
+    /// A string of bits whose size varies: its `value` and its `length`, unless the view
     /// shows it as it is usually written.
     Bits,
     /// A SEQUENCE or a CHOICE, or a type that is a list or a string of bits, by the name
@@ -51,11 +51,11 @@ pub(crate) enum Shape {
     Ie(Option<u16>),
     /// An IE of an extension container.
     Extension(Option<u16>),
-    /// Octets that contain a value of the type of this name, which the tree shows
+    /// Octets that contain a value of the type of this name, which the view shows
     /// decoded beside them. No name: the octets have one of several types.
     Transfer(&'static str),
     /// The octets of the IE of this identifier, which may carry a type that the
-    /// specification names and the ASN.1 does not. The tree shows them as they are, or
+    /// specification names and the ASN.1 does not. The view shows them as they are, or
     /// as the transfer of that type under its name, once they are written or opened
     /// so.
     Carrier(u16),
@@ -265,7 +265,7 @@ fn segments(path: &str) -> Result<(Vec<String>, bool), String> {
     Ok((parts, rooted))
 }
 
-/// The segments of `path` in a tree, with what the root is short for, and whether the
+/// The segments of `path` in a view, with what the root is short for, and whether the
 /// IEs on the way are selected by name.
 fn resolve(path: &str) -> Result<(Vec<String>, bool), String> {
     let (mut parts, rooted) = segments(path)?;
@@ -291,11 +291,11 @@ fn sent(of: impl Fn(&'static str, u8, &'static str) -> bool) -> Option<Sent> {
     })
 }
 
-/// The shape of a tree: that of a PDU, of the message that its direction and its
+/// The shape of a view: that of a PDU, of the message that its direction and its
 /// procedure code say.
-fn pdu(tree: &Value) -> Shape {
-    let code = tree.get("procedure_code").and_then(Value::as_u64);
-    let direction = tree.get("direction").and_then(Value::as_str);
+fn pdu(view: &Value) -> Shape {
+    let code = view.get("procedure_code").and_then(Value::as_u64);
+    let direction = view.get("direction").and_then(Value::as_str);
     Shape::Pdu(sent(|of, procedure, _| {
         Some(of) == direction && Some(u64::from(procedure)) == code
     }))
@@ -346,11 +346,11 @@ fn ie_value(id: Option<u16>) -> Shape {
     }
 }
 
-/// The members that a value of `shape` can have, which is `entry` in a tree; `None` for
-/// a shape whose members are those that the tree has.
+/// The members that a value of `shape` can have, which is `entry` in a view; `None` for
+/// a shape whose members are those that the view has.
 fn members(shape: Shape, entry: Option<&Map<String, Value>>) -> Option<Vec<Member>> {
     let has = |member: &str| entry.is_some_and(|entry| entry.contains_key(member));
-    // The entry of an IE in a tree says which IE its value was decoded as.
+    // The entry of an IE in a view says which IE its value was decoded as.
     let ie = |id: Option<u16>, value: &'static str, raw: &'static str| {
         let of = |member: &str| {
             let id = entry
@@ -440,7 +440,7 @@ fn member<'m>(members: &'m [Member], part: &str) -> Option<&'m Member> {
     })
 }
 
-/// The member of the entry of a tree that a segment names, where no table says what
+/// The member of the entry of a view that a segment names, where no table says what
 /// the entry has.
 fn key<'e>(entry: &'e Map<String, Value>, part: &str) -> Option<&'e str> {
     let exact = entry.get_key_value(part).map(|(name, _)| name);
@@ -545,7 +545,7 @@ fn names_another_type(part: &str, id: u16) -> bool {
 }
 
 /// The IE that a segment stays on when it names the IE that a value of `shape` is, for
-/// a value that a tree does not have: a path may say which IE an entry is. An entry
+/// a value that a view does not have: a path may say which IE an entry is. An entry
 /// whose IE is not known is the one that the segment names, unless some value has a
 /// member of that name and of another type, which the segment may be.
 fn named_ie(shape: Shape, part: &str, named: bool) -> Option<Shape> {
@@ -592,7 +592,7 @@ fn no_member(shape: Shape, members: &[Member], part: &str, path: &str) -> String
     let of = match shape {
         Shape::Named(name) => name.to_string(),
         Shape::Message(message) => message.name.to_string(),
-        Shape::Pdu(_) => "a tree".to_string(),
+        Shape::Pdu(_) => "a view".to_string(),
         Shape::Bits => "a string of bits".to_string(),
         Shape::Transfer(_) => "a transfer".to_string(),
         Shape::Ie(_) | Shape::Extension(_) => "an IE".to_string(),
@@ -629,7 +629,7 @@ fn element_of(shape: Shape, id: u16) -> Option<Shape> {
     }
 }
 
-/// A place on the way of a path: a value of the tree, or none where the tree has no
+/// A place on the way of a path: a value of the view, or none where the view has no
 /// value and the type could have one, and the shape of a value there.
 type Place<'a> = (Option<&'a Value>, Shape);
 
@@ -658,7 +658,7 @@ fn advance<'a>(
     match value {
         Some(whole @ Value::Object(entry)) => {
             let members = members(shape, Some(entry));
-            // The IEs of a message that the tree contains are selected in its place.
+            // The IEs of a message that the view contains are selected in its place.
             if named
                 && selects_ies(part)
                 && !entry.contains_key(part)
@@ -696,7 +696,7 @@ fn advance<'a>(
                 return Ok(());
             }
             let Some(members) = members else {
-                // No table says what the value can have: it has what the tree has.
+                // No table says what the value can have: it has what the view has.
                 return match key(entry, part) {
                     Some(name) => {
                         push(entry.get(name), Shape::Unknown);
@@ -786,7 +786,7 @@ fn advance<'a>(
             Shape::Undecoded => Err((true, format!("the IE did not decode at {path}"))),
             // A value without members has none to select.
             _ if part == "*" => Ok(()),
-            // A string of bits that the tree shows as it is usually written.
+            // A string of bits that the view shows as it is usually written.
             Shape::Bits if ["value", "length"].contains(&part) => Ok(()),
             // A transfer that an edit replaced by its octets.
             Shape::Transfer(_) if same_name(part, "octets") => {
@@ -821,7 +821,7 @@ fn advance<'a>(
     }
 }
 
-/// Give `push` what `part` selects in a value of `shape` that a tree does not have: the
+/// Give `push` what `part` selects in a value of `shape` that a view does not have: the
 /// places of the values that it could have.
 fn typed(
     shape: Shape,
@@ -943,7 +943,7 @@ fn advance_all<'a>(
     }
 }
 
-/// The values at `path` in `tree`, in the order of the tree.
+/// The values at `path` in `view`, in the order of the view.
 ///
 /// An IE that the message does not have selects nothing, and so does a member that its
 /// type can have and the value does not have: an OPTIONAL member that is absent, or
@@ -963,11 +963,11 @@ fn advance_all<'a>(
 ///
 /// The `octets` of an IE or of a transfer are what it was received as: those of one whose
 /// value [`set`], [`remove`] or [`insert`] edited since are an error, as
-/// [`encode_pdu`](crate::inspect::encode_pdu) has yet to give it others. So is a path into
-/// a value that did not decode.
-pub fn select<'a>(tree: &'a Value, path: &str) -> Result<Vec<&'a Value>, String> {
+/// [`message_from_view`](crate::inspect::message_from_view) has yet to give it others. So
+/// is a path into a value that did not decode.
+pub fn select<'a>(view: &'a Value, path: &str) -> Result<Vec<&'a Value>, String> {
     let (parts, named) = resolve(path)?;
-    let mut places = vec![(Some(tree), pdu(tree))];
+    let mut places = vec![(Some(view), pdu(view))];
     for part in &parts {
         places = advance_all(places, part, named, path)?;
     }
@@ -975,7 +975,7 @@ pub fn select<'a>(tree: &'a Value, path: &str) -> Result<Vec<&'a Value>, String>
 }
 
 /// Whether `path` can select a value in a message that ASN.1 names `message`: what
-/// [`select`] says of a path without a tree to select in.
+/// [`select`] says of a path without a view to select in.
 ///
 /// The name is taken as [`message_named`](crate::inspect::message_named) takes it. Under
 /// the root, the name of an IE has to be that of an IE of the object set of the message;
@@ -1049,7 +1049,7 @@ pub fn enumerated_at(message: &str, path: &str) -> Result<Option<&'static [&'sta
     Ok(names)
 }
 
-/// Whether a member is one of a value, and not what a tree keeps of what was received.
+/// Whether a member is one of a value, and not what a view keeps of what was received.
 fn shown(name: &str) -> bool {
     !name.starts_with('_') || name == "_decode_error"
 }
@@ -1066,17 +1066,17 @@ fn received_member(entry: &Map<String, Value>) -> Option<&'static str> {
         .find(|member| entry.contains_key(*member))
 }
 
-/// Each value of `tree` with the path that selects it, in the order of the tree. A list
+/// Each value of `view` with the path that selects it, in the order of the view. A list
 /// of plain values is one value. The IEs of the message go by name under the root, and
-/// those of a message that the tree contains by name in its place; an IE goes by its
+/// those of a message that the view contains by name in its place; an IE goes by its
 /// position when it has no name or its identifier is there twice.
 ///
 /// The members that start with `_` repeat what was received and are left out, except
 /// `_decode_error`. The `octets` of an IE or of a transfer are listed when it has no
 /// value beside them: those of a value repeat it, and are selected all the same.
-pub fn paths(tree: &Value) -> Vec<(String, Value)> {
+pub fn paths(view: &Value) -> Vec<(String, Value)> {
     let mut found = Vec::new();
-    walk(tree, &mut String::new(), &mut found);
+    walk(view, &mut String::new(), &mut found);
     found
 }
 
@@ -1105,7 +1105,7 @@ fn walk(value: &Value, path: &mut String, found: &mut Vec<(String, Value)>) {
                     continue;
                 };
                 // The IEs of a message go by name: under the root for the message of the
-                // PDU, and in the place of a message that the tree contains.
+                // PDU, and in the place of a message that the view contains.
                 let mut root = format!("/{ROOT}");
                 let of_the_pdu = path.strip_prefix('/') == Some(MESSAGE);
                 let message = match of_the_pdu {
@@ -1149,7 +1149,7 @@ enum Edit<'d> {
     Remove,
     Insert(Value),
     /// Nothing, but for the octets that the path takes as a type that they may carry:
-    /// this function makes of them, and of the name of that type, what a tree shows.
+    /// this function makes of them, and of the name of that type, what a view shows.
     Open(&'d dyn Fn(Value, &str) -> Value),
 }
 
@@ -1159,44 +1159,44 @@ enum Edit<'d> {
 /// or the name of the IE. The `octets` of an IE or of a transfer are set in place of
 /// its value. An alternative of a CHOICE takes the place of the one that is there.
 ///
-/// A path that selects nothing is an error, and the tree is then as it was. So is a
+/// A path that selects nothing is an error, and the view is then as it was. So is a
 /// name that the type of a value cannot have, a member that its type always has and
 /// that would be taken out, and an edit that would send nothing else: the value of an IE
 /// or the decoded value of a transfer is not taken out, as the octets received would go
 /// out in its place.
-pub fn set(tree: &mut Value, path: &str, value: Value) -> Result<(), String> {
-    edit(tree, path, Edit::Set(value))
+pub fn set(view: &mut Value, path: &str, value: Value) -> Result<(), String> {
+    edit(view, path, Edit::Set(value))
 }
 
-/// Take the member or the list entries at `path` out of `tree`. A path that selects
+/// Take the member or the list entries at `path` out of `view`. A path that selects
 /// nothing is an error, and so is a member that its type always has.
-pub fn remove(tree: &mut Value, path: &str) -> Result<(), String> {
-    edit(tree, path, Edit::Remove)
+pub fn remove(view: &mut Value, path: &str) -> Result<(), String> {
+    edit(view, path, Edit::Remove)
 }
 
-/// Add `value` to a list of `tree`: before each entry that `path` selects, or at the end
+/// Add `value` to a list of `view`: before each entry that `path` selects, or at the end
 /// for a path that ends with `-`. An IE is written as [`set`] takes it.
-pub fn insert(tree: &mut Value, path: &str, value: Value) -> Result<(), String> {
-    edit(tree, path, Edit::Insert(value))
+pub fn insert(view: &mut Value, path: &str, value: Value) -> Result<(), String> {
+    edit(view, path, Edit::Insert(value))
 }
 
-/// Show, in `tree`, the octets that `path` takes as a type that they may carry as what
+/// Show, in `view`, the octets that `path` takes as a type that they may carry as what
 /// `decode` makes of them and of the name of that type: see
 /// [`open`](crate::inspect::open), which gives the function that decodes.
 pub(crate) fn open_with(
-    tree: &mut Value,
+    view: &mut Value,
     path: &str,
     decode: &dyn Fn(Value, &str) -> Value,
 ) -> Result<(), String> {
     let (parts, named) = resolve(path)?;
-    let mut opened = tree.clone();
+    let mut opened = view.clone();
     let shape = pdu(&opened);
     apply(&mut opened, shape, &parts, &Edit::Open(decode), named, path)?;
-    *tree = opened;
+    *view = opened;
     Ok(())
 }
 
-/// Write the entry of an IE as a tree has it: the name of the IE that its `id` may be
+/// Write the entry of an IE as a view has it: the name of the IE that its `id` may be
 /// written as becomes its number, and its `octets` what it is sent as in place of a
 /// value. An entry of a list of IEs has an `id`, which no member of an ASN.1 type is
 /// named beside a string or a number.
@@ -1221,19 +1221,19 @@ pub(crate) fn written_ie(entry: &mut Map<String, Value>) -> Result<(), String> {
     Ok(())
 }
 
-fn edit(tree: &mut Value, path: &str, mut operation: Edit) -> Result<(), String> {
+fn edit(view: &mut Value, path: &str, mut operation: Edit) -> Result<(), String> {
     let (parts, named) = resolve(path)?;
     if let Edit::Set(ie) | Edit::Insert(ie) = &mut operation
         && let Some(ie) = ie.as_object_mut()
     {
         written_ie(ie)?;
     }
-    let mut edited = tree.clone();
+    let mut edited = view.clone();
     let shape = pdu(&edited);
     if apply(&mut edited, shape, &parts, &operation, named, path)? == 0 {
         return Err(format!("IE edit selected no field: {path}"));
     }
-    *tree = edited;
+    *view = edited;
     Ok(())
 }
 
@@ -1255,10 +1255,10 @@ fn mark(entry: &mut Map<String, Value>, member: &str) {
     }
 }
 
-/// Apply `operation` at `parts` under `tree`, a value of `shape`; the number of places
+/// Apply `operation` at `parts` under `view`, a value of `shape`; the number of places
 /// that it changed.
 fn apply(
-    tree: &mut Value,
+    view: &mut Value,
     shape: Shape,
     parts: &[String],
     operation: &Edit,
@@ -1267,28 +1267,28 @@ fn apply(
 ) -> Result<usize, String> {
     let (part, rest) = parts.split_first().ok_or("empty edit path")?;
     let shape = resolved(shape);
-    let this = ie_of(tree, shape);
+    let this = ie_of(view, shape);
     // Octets that the path takes as a type that they may carry are shown as it, when
     // that is what is asked.
     if let (Shape::Carrier(_), Edit::Open(decode)) = (shape, operation)
-        && tree.is_string()
+        && view.is_string()
         && let Some(carried) = members(shape, None)
         && let Some((name, ..)) = member(&carried, part)
     {
-        *tree = json!({*name: decode(tree.take(), name)});
+        *view = json!({*name: decode(view.take(), name)});
     }
-    let members = members(shape, tree.as_object());
-    // The IEs of a message that the tree contains are edited in its place.
+    let members = members(shape, view.as_object());
+    // The IEs of a message that the view contains are edited in its place.
     if named
-        && tree.get(part).is_none()
+        && view.get(part).is_none()
         && selects_ies(part)
-        && let Some(ies @ Value::Array(_)) = tree.get_mut(IES)
+        && let Some(ies @ Value::Array(_)) = view.get_mut(IES)
     {
         let of = members.as_deref().and_then(|members| member(members, IES));
         let shape = of.map_or(Shape::Ies(None), |(_, shape, _)| *shape);
         return apply(ies, shape, parts, operation, named, path);
     }
-    if let Some(object) = tree.as_object_mut() {
+    if let Some(object) = view.as_object_mut() {
         // What names no member of an IE or of a transfer is edited in its value, as if
         // the member that holds it stood before.
         if let Some(members) = &members
@@ -1406,10 +1406,10 @@ fn apply(
         }
         return Ok(changed);
     }
-    let Some(array) = tree.as_array_mut() else {
+    let Some(array) = view.as_array_mut() else {
         // Octets that were not opened say so, as they do where they are selected.
         let unopened = match shape {
-            Shape::Carrier(_) => advance((Some(tree), shape), part, named, path, &mut Vec::new()),
+            Shape::Carrier(_) => advance((Some(view), shape), part, named, path, &mut Vec::new()),
             _ => Ok(()),
         };
         return match unopened {
@@ -1481,9 +1481,9 @@ fn apply(
     Ok(changed)
 }
 
-/// Whether a transfer has a member of this name in a tree: its `decoded` value, its
-/// `octets`, or what a tree keeps of what was received. Where a transfer is written, an
-/// object that has none of them is its decoded value.
+/// Whether a transfer has a member of this name in a view: its `decoded` value, its
+/// `octets`, or what a view keeps of what was received. Where a transfer is written, in
+/// a tree or in a view, an object that has none of them is its decoded value.
 pub(crate) fn of_a_transfer(name: &str) -> bool {
     name.starts_with('_') || ["decoded", "octets"].contains(&name)
 }
@@ -1505,8 +1505,8 @@ fn assigned(container: Shape, id: u16) -> Option<&'static str> {
     }
 }
 
-/// `value`, a value of `shape` of a tree, as a message is written: a transfer as its
-/// decoded value, or as its `octets` when it has none, and each IE of a container as
+/// `value`, a value of `shape` of a view, as a tree has it: a transfer as its decoded
+/// value, or as its `octets` when it has none, and each IE of a container as
 /// [`ie_by_name`] shows it.
 fn by_name(value: &Value, shape: Shape) -> Result<Value, String> {
     let shape = resolved(shape);
@@ -1571,13 +1571,13 @@ fn ie_by_name(entry: &Value, shape: Shape, container: Shape) -> Result<Value, St
     Ok(Value::Object(shown))
 }
 
-/// `value`, a value of `shape` as a message is written, as a tree has it: each IE of a
-/// container as the entry that [`entry_of`] gives it. A transfer keeps the form that it
-/// is written in, its decoded value alone or as its `decoded` member, which
-/// [`encode_pdu`](crate::inspect::encode_pdu) takes.
+/// `value`, a value of `shape` of a tree, as a view has it: each IE of a container as
+/// the entry that [`entry_of`] gives it. A transfer keeps the form that it is written
+/// in, its decoded value alone or as its `decoded` member, which
+/// [`message_from_view`](crate::inspect::message_from_view) takes.
 fn written(value: &Value, shape: Shape, depth: usize) -> Result<Value, String> {
     if depth > WRITTEN {
-        return Err(format!("a written message nests deeper than {WRITTEN}"));
+        return Err(format!("a written tree nests deeper than {WRITTEN}"));
     }
     let shape = resolved(shape);
     match value {
@@ -1617,11 +1617,11 @@ fn written(value: &Value, shape: Shape, depth: usize) -> Result<Value, String> {
     }
 }
 
-/// The entry that a tree has for an IE of `shape` in a container of `container`, which
-/// is written as its name with its value: the name that ASN.1 gives the IE or its
+/// The entry that a view has for an IE of `shape` in a container of `container`, which
+/// a tree writes as its name with its value: the name that ASN.1 gives the IE or its
 /// identifier in digits, and `{"octets": "…"}` for the octets that it is sent as. Its
 /// `criticality` is the one beside its name, or the one that the specification assigns
-/// it there. An entry that is written as a tree has it, with its `id`, stays as it is,
+/// it there. An entry that is written as a view has it, with its `id`, stays as it is,
 /// and the IEs that its value holds are read the same way.
 fn entry_of(ie: &Value, shape: Shape, container: Shape, depth: usize) -> Result<Value, String> {
     const IE: &str = "each entry of a container is one IE: its name with its value";
@@ -1668,16 +1668,16 @@ fn entry_of(ie: &Value, shape: Shape, container: Shape, depth: usize) -> Result<
     })
 }
 
-/// The IEs of the message that ASN.1 names `message`, which a tree has as `ies`, as a
-/// message is written: each as its name with its value, and so are the IEs that a value
+/// The IEs of the message that ASN.1 names `message`, which a view has as `ies`, as a
+/// tree has them: each as its name with its value, and so are the IEs that a value
 /// holds, to any depth.
 pub(crate) fn named_ies(message: &str, ies: &Value) -> Result<Value, String> {
     let message = sent(|_, _, name| same_name(name, message));
     by_name(ies, Shape::Ies(message))
 }
 
-/// The entries that a tree has for the IEs of the message that ASN.1 names `message`,
-/// which `ies` writes as [`named_ies`] shows them.
+/// The entries that a view has for the IEs of the message that ASN.1 names `message`,
+/// which `ies` has as a tree has them: as [`named_ies`] shows them.
 pub(crate) fn listed_ies(message: &str, ies: &Value) -> Result<Value, String> {
     let message = sent(|_, _, name| same_name(name, message));
     written(ies, Shape::Ies(message), 0)
@@ -1786,7 +1786,7 @@ mod tests {
         distinct("the IEs", &mut ies.iter().map(|(_, name)| *name));
         let mut messages = MESSAGES.iter().map(|(_, _, name, ..)| *name);
         distinct("the messages", &mut messages);
-        // The names of an IE and of a member do not meet: a message that a tree contains
+        // The names of an IE and of a member do not meet: a message that a view contains
         // has its IEs alone.
         for (name, members) in all_members() {
             if members.iter().any(|(member, ..)| *member == IES) {
@@ -1805,8 +1805,8 @@ mod tests {
         }
     }
 
-    /// The tree of a message that ASN.1 names `name` and that has `ies` for IEs.
-    fn tree_of(name: &str, ies: Value) -> Value {
+    /// The view of a message that ASN.1 names `name` and that has `ies` for IEs.
+    fn view_of(name: &str, ies: Value) -> Value {
         let mut messages = MESSAGES.iter();
         let (direction, code, ..) = messages.find(|(_, _, known, ..)| *known == name).unwrap();
         json!({
@@ -1822,20 +1822,20 @@ mod tests {
         let cause = ie_id("Cause").expect("an IE of the protocol");
         let value = json!({"radioNetwork": "unspecified"});
         let entry = json!({"id": cause, "criticality": "ignore", "value": value});
-        let mut tree = tree_of("UEContextReleaseCommand", json!([entry]));
+        let mut view = view_of("UEContextReleaseCommand", json!([entry]));
         let path = |rest: &str| format!("/{ROOT}/Cause/{rest}");
         // The path that leaves `value` out selects what the one that has it selects.
-        let short = select(&tree, &path("radioNetwork")).unwrap();
+        let short = select(&view, &path("radioNetwork")).unwrap();
         assert_eq!(short, [&json!("unspecified")]);
-        assert_eq!(short, select(&tree, &path("value/radioNetwork")).unwrap());
-        assert!(select(&tree, &path("nas")).unwrap().is_empty());
+        assert_eq!(short, select(&view, &path("value/radioNetwork")).unwrap());
+        assert!(select(&view, &path("nas")).unwrap().is_empty());
         // What the IE has itself comes first, and `*` is each of its members.
-        assert_eq!(select(&tree, &path("value")).unwrap(), [&value]);
-        assert_eq!(select(&tree, &path("id")).unwrap(), [&json!(cause)]);
-        assert_eq!(select(&tree, &path("*")).unwrap().len(), 3);
-        // A name that neither has is refused with the members of both, with a tree and
+        assert_eq!(select(&view, &path("value")).unwrap(), [&value]);
+        assert_eq!(select(&view, &path("id")).unwrap(), [&json!(cause)]);
+        assert_eq!(select(&view, &path("*")).unwrap().len(), 3);
+        // A name that neither has is refused with the members of both, with a view and
         // without one.
-        let refused = select(&tree, &path("misspelled")).unwrap_err();
+        let refused = select(&view, &path("misspelled")).unwrap_err();
         assert!(refused.contains("is not a member of Cause, which has radioNetwork"));
         assert!(refused.ends_with("; an IE itself has id, criticality, value, octets"));
         let checked = |rest: &str| check_path("UEContextReleaseCommand", &path(rest));
@@ -1844,16 +1844,16 @@ mod tests {
         let deeper = checked("radioNetwork/deeper").unwrap_err();
         assert!(deeper.contains("which has none") && !deeper.contains("itself"));
         // An edit takes the same path, and marks the value that it changed.
-        tree[MESSAGE][IES][0]["_raw_value"] = json!("0000");
-        set(&mut tree, &path("nas"), json!("normal-release")).unwrap();
-        let edited = &tree[MESSAGE][IES][0];
+        view[MESSAGE][IES][0]["_raw_value"] = json!("0000");
+        set(&mut view, &path("nas"), json!("normal-release")).unwrap();
+        let edited = &view[MESSAGE][IES][0];
         assert_eq!(edited["value"], json!({"nas": "normal-release"}));
         assert_eq!(edited[EDITED], json!(true));
-        let before = tree.clone();
-        assert_eq!(set(&mut tree, &path("misspelled"), json!(1)), Err(refused));
-        let kept = remove(&mut tree, &path("nas")).unwrap_err();
+        let before = view.clone();
+        assert_eq!(set(&mut view, &path("misspelled"), json!(1)), Err(refused));
+        let kept = remove(&mut view, &path("nas")).unwrap_err();
         assert!(kept.contains("a CHOICE has one alternative"), "{kept}");
-        assert_eq!(tree, before);
+        assert_eq!(view, before);
     }
 
     #[test]
@@ -1861,22 +1861,22 @@ mod tests {
         let cause = ie_id("Cause").expect("an IE of the protocol");
         let value = json!({"radioNetwork": "unspecified"});
         let entry = json!({"id": cause, "criticality": "ignore", "value": value});
-        let mut tree = tree_of("UEContextReleaseCommand", json!([entry]));
+        let mut view = view_of("UEContextReleaseCommand", json!([entry]));
         let path = |rest: &str| format!("/{ROOT}/{rest}");
         // After its position, and after its name, which selects it already.
         for named in ["0/Cause", "0/cause", "Cause/Cause", "*/Cause"] {
-            assert_eq!(select(&tree, &path(named)).unwrap(), [&entry], "{named}");
-            let member = select(&tree, &path(&format!("{named}/radioNetwork"))).unwrap();
+            assert_eq!(select(&view, &path(named)).unwrap(), [&entry], "{named}");
+            let member = select(&view, &path(&format!("{named}/radioNetwork"))).unwrap();
             assert_eq!(member, [&json!("unspecified")], "{named}");
-            let whole = select(&tree, &path(&format!("{named}/value"))).unwrap();
+            let whole = select(&view, &path(&format!("{named}/value"))).unwrap();
             assert_eq!(whole, [&value], "{named}");
         }
-        // The name of another IE says which IE the entry is, with a tree and without.
+        // The name of another IE says which IE the entry is, with a view and without.
         let other = crate::inspect::ie_names()
             .iter()
             .find(|(id, _)| *id != cause);
         let other = path(&format!("0/{}/value", other.unwrap().1));
-        let refused = select(&tree, &other).unwrap_err();
+        let refused = select(&view, &other).unwrap_err();
         assert!(refused.starts_with("this IE is Cause, not "), "{refused}");
         assert!(refused.contains("is not a member of Cause, which has radioNetwork"));
         let checked = |rest: &str| check_path("UEContextReleaseCommand", &path(rest));
@@ -1887,19 +1887,19 @@ mod tests {
         assert!(names("*/Cause/nas").unwrap().is_some());
         // An edit takes the same path, and the entry itself where the path ends with
         // its name.
-        assert_eq!(set(&mut tree, &other, json!(1)), Err(refused));
-        set(&mut tree, &path("0/Cause/nas"), json!("normal-release")).unwrap();
-        let edited = select(&tree, &path("Cause/value")).unwrap();
+        assert_eq!(set(&mut view, &other, json!(1)), Err(refused));
+        set(&mut view, &path("0/Cause/nas"), json!("normal-release")).unwrap();
+        let edited = select(&view, &path("Cause/value")).unwrap();
         assert_eq!(edited, [&json!({"nas": "normal-release"})]);
-        insert(&mut tree, &path("0/Cause"), entry.clone()).unwrap();
-        assert_eq!(select(&tree, &path("*/Cause")).unwrap().len(), 2);
-        remove(&mut tree, &path("1/Cause")).unwrap();
-        assert_eq!(select(&tree, &path("*/Cause")).unwrap(), [&entry]);
+        insert(&mut view, &path("0/Cause"), entry.clone()).unwrap();
+        assert_eq!(select(&view, &path("*/Cause")).unwrap().len(), 2);
+        remove(&mut view, &path("1/Cause")).unwrap();
+        assert_eq!(select(&view, &path("*/Cause")).unwrap(), [&entry]);
     }
 
     #[test]
     fn an_entry_that_is_not_known_is_the_ie_that_a_segment_names_where_no_member_is() {
-        // Where a tree is not there to say which IE an entry is, a segment that names
+        // Where a view is not there to say which IE an entry is, a segment that names
         // an IE is taken for it, and the path goes on in the type of that IE: unless a
         // value has a member of that name and of another type, which it may be.
         let cause = ie_id("Cause").expect("an IE of the protocol");
@@ -1964,7 +1964,7 @@ mod tests {
         let (unread, refused) = at(&transfer, "misspelled").unwrap_err();
         assert!(!unread && refused.contains("is not a member of Cause, which has radioNetwork"));
         assert!(refused.ends_with("; a transfer itself has decoded, octets"));
-        // The types say the same without a tree.
+        // The types say the same without a view.
         let mut shapes = Vec::new();
         let mut push = |shape| shapes.push(shape);
         let wrong = typed(shape, "misspelled", true, "/a/path", &mut push);
@@ -2012,7 +2012,7 @@ mod tests {
     fn the_ies_that_a_value_holds_are_written_by_name_and_read_back() {
         let cause = ie_id("Cause").expect("an IE of the protocol");
         let value = json!({"radioNetwork": "unspecified"});
-        // The entry of a tree, with what it keeps of what was received, and as it is
+        // The entry of a view, with what it keeps of what was received, and as it is
         // written.
         let entry = |field: &str, received: bool| {
             let mut entry = json!({"id": cause, "criticality": "ignore", field: value});
@@ -2034,7 +2034,7 @@ mod tests {
             assert_eq!(listed, json!([entry(field, false)]));
             let refused = written(&json!([{"Cause": value}]), container, 0).unwrap_err();
             assert!(refused.contains("says its \"criticality\""), "{refused}");
-            // An entry that is written as a tree has it stays as it is.
+            // An entry that is written as a view has it stays as it is.
             assert_eq!(written(&listed, container, 0), Ok(listed));
         }
         // One that did not decode has its octets, which are sent as they are.
@@ -2057,7 +2057,7 @@ mod tests {
         let octets = json!({"octets": "00"});
         assert_eq!(by_name(&undecoded, transfer), Ok(octets.clone()));
         assert_eq!(written(&octets, transfer, 0), Ok(octets));
-        // A message is not read deeper than a tree is encoded.
+        // A tree is not read deeper than a view is encoded.
         let mut deep = json!(1);
         for _ in 0..WRITTEN + 2 {
             deep = json!([deep]);
@@ -2075,7 +2075,7 @@ mod tests {
             assert!(contained.is_empty() && kind_of(type_name(octets)).is_none());
             assert!(kind_of(type_name(ty)).is_some() && same_name(name, type_name(ty)));
             assert_eq!(ie_value(Some(*id)), Shape::Carrier(*id));
-            // A tree is encoded with any member of that name as that type.
+            // A view is encoded with any member of that name as that type.
             for (of, members) in all_members() {
                 let same = members.iter().any(|(member, ..)| same_name(member, name));
                 assert!(!same, "{of}: {name}");
@@ -2087,7 +2087,7 @@ mod tests {
     fn an_entry_of_a_list_of_ies_is_known_by_its_members() {
         // An IE is written with a number or a name as its `id`: no type has a member of
         // that name with such a value, nor one named as the members of an IE or of a
-        // transfer in a tree.
+        // transfer in a view.
         for (name, members) in all_members() {
             for (member, shape, _) in members {
                 assert!(

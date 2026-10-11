@@ -1,6 +1,11 @@
-//! Decoded PDUs as JSON trees that can be edited and encoded again.
+//! Decoded PDUs as JSON, in two forms: a view, which is read and edited by paths and
+//! encoded again, and a tree, the short form in which a message is shown and written.
 //!
-//! [`inspect_pdu`] returns `procedure_code`, `direction`, `criticality` and `message`: the
+//! The tree of a PDU is the name of its message and its IEs by name. [`message_tree`]
+//! shows it, and [`message_from_tree`] gives the PDU of one that is written. The view
+//! of a PDU keeps what was received, and the rest of this page is about it.
+//!
+//! [`message_view`] returns `procedure_code`, `direction`, `criticality` and `message`: the
 //! message in the ASN.1 JSON encoding (JER). An IE whose identifier has one type has its
 //! typed `value` (`extensionValue` in an extension container) in place of its octets. A
 //! contained transfer, and the value of an IE declared `OCTET STRING (CONTAINING ...)`, is
@@ -14,8 +19,8 @@
 //! - an identifier or a counter, such as a TAC, a GTP-TEID, a TMSI, a cell identity, the
 //!   parts of a GUAMI or an SST, as a number.
 //!
-//! [`encode_pdu`] takes them in this form, a number also as a `"0x…"` string, and as JER
-//! writes them. It takes the name of an ENUMERATED value as any other name: see
+//! [`message_from_view`] takes them in this form, a number also as a `"0x…"` string, and
+//! as JER writes them. It takes the name of an ENUMERATED value as any other name: see
 //! [Names](#names). A value that does not fit its form, such as a transport layer address
 //! of another length, stays as JER writes it. The other strings stay in hexadecimal: an
 //! SD, keys and algorithm masks, the NAS-PDU and the other containers, and the node
@@ -34,7 +39,8 @@
 //! - `_edited`: [`set`], [`remove`] or [`insert`] changed something under the value, whose
 //!   octets are no longer those beside it.
 //!
-//! [`encode_pdu`] encodes the tree. What was not edited keeps the octets received. To edit:
+//! [`message_from_view`] encodes the view. What was not edited keeps the octets received.
+//! To edit:
 //!
 //! - change a typed `value` or the `decoded` member of a transfer, which is encoded again.
 //!   This is refused when the octets received do not decode and encode back to themselves,
@@ -42,8 +48,8 @@
 //! - to add an IE, write an entry with its `id`, its `criticality` and its `value`, and no
 //!   `_raw_value`: the value is encoded as the type of the identifier, whatever JSON it is.
 //!   The `id` is a number, or the name of the IE. An IE is written this way wherever a
-//!   tree has IEs: in a message that a transfer contains, in a value that is set whole,
-//!   and in a tree written by hand;
+//!   view has IEs: in a message that a transfer contains, in a value that is set whole,
+//!   and in a view written by hand;
 //! - to send given octets as an IE, write them in hexadecimal as its `octets`, or as
 //!   `_raw_value`, and leave `value` out. For a transfer, replace the member with its
 //!   octets, or with an object that has them as its `octets` alone;
@@ -63,8 +69,8 @@
 //!
 //! # Paths
 //!
-//! [`paths`] gives each value of a tree with the path that selects it, [`select`] the
-//! values at a path, and [`set`], [`remove`] and [`insert`] edit a tree at a path:
+//! [`paths`] gives each value of a view with the path that selects it, [`select`] the
+//! values at a path, and [`set`], [`remove`] and [`insert`] edit a view at a path:
 //!
 //! ```text
 //! /ngap/AMF-UE-NGAP-ID/criticality = "reject"
@@ -73,7 +79,7 @@
 //! /procedure_code = 42
 //! ```
 //!
-//! A path is a JSON pointer into the tree, where `/ngap` stands for the IEs of the
+//! A path is a JSON pointer into the view, where `/ngap` stands for the IEs of the
 //! message. The segment after it selects among them:
 //!
 //! - the name of an IE, as ASN.1 has it after `id-`: `/ngap/RAN-UE-NGAP-ID`. An IE that is
@@ -85,7 +91,7 @@
 //! - `-`, the end of the list, where [`insert`] adds an IE.
 //!
 //! Under an IE are its `criticality`, its typed `value`, and its `octets`: what it was
-//! received as, in hexadecimal. The IEs of a message that the tree contains, as the
+//! received as, in hexadecimal. The IEs of a message that the view contains, as the
 //! `decoded` value of a transfer, are selected the same way in its place:
 //!
 //! ```text
@@ -121,7 +127,7 @@
 //! ```
 //!
 //! So the names and the positions that [`message_tree`] shows, joined after the root,
-//! are the path of a value in the tree of the same PDU. A path that ends with the name
+//! are the path of a value in the view of the same PDU. A path that ends with the name
 //! of an IE selects the IE, as its name alone does in a list, and `value` after it its
 //! value.
 //!
@@ -161,17 +167,17 @@
 //! After `*`, a segment is an error when none of the values that it is applied to can
 //! have it.
 //!
-//! [`check_path`] says the same of a path without a tree: whether it can select
+//! [`check_path`] says the same of a path without a view: whether it can select
 //! anything in a message of a name, whose IEs are those of its object set
 //! ([`message_ies`]).
 //!
 //! ## Edits
 //!
-//! [`paths`] lists the values of a tree without the members that start with `_`, except
+//! [`paths`] lists the values of a view without the members that start with `_`, except
 //! `_decode_error`. The octets of an IE or of a transfer are selected as its `octets`,
 //! which [`paths`] lists only for one that has no value beside them, and set there in
 //! place of its value. Those of a value that an edit changed are an error to select:
-//! [`encode_pdu`] gives the PDU its octets.
+//! [`message_from_view`] gives the PDU its octets.
 //!
 //! [`set`] writes a member by the name that ASN.1 gives it, and refuses a name that the
 //! type does not have. `null` takes an optional member out, as [`remove`] does; a member
@@ -189,14 +195,14 @@
 //!     REJECT RAN_UE_NGAP_ID(7u32),
 //!     IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
 //! );
-//! let mut tree = inspect::inspect_pdu(&pdu)?;
-//! assert_eq!(inspect::select(&tree, "/ngap/RAN-UE-NGAP-ID/value")?, [&json!(7)]);
+//! let mut view = inspect::message_view(&pdu)?;
+//! assert_eq!(inspect::select(&view, "/ngap/RAN-UE-NGAP-ID/value")?, [&json!(7)]);
 //!
-//! inspect::set(&mut tree, "/ngap/Cause/value", json!({"nas": "normal-release"}))?;
-//! inspect::remove(&mut tree, "/ngap/AMF-UE-NGAP-ID")?;
+//! inspect::set(&mut view, "/ngap/Cause/value", json!({"nas": "normal-release"}))?;
+//! inspect::remove(&mut view, "/ngap/AMF-UE-NGAP-ID")?;
 //! let name = json!({"id": "RANNodeName", "criticality": "ignore", "value": "gnb-1"});
-//! inspect::insert(&mut tree, "/ngap/-", name)?;
-//! let edited = inspect::inspect_pdu(&inspect::encode_pdu(&tree)?)?;
+//! inspect::insert(&mut view, "/ngap/-", name)?;
+//! let edited = inspect::message_view(&inspect::message_from_view(&view)?)?;
 //! assert_eq!(inspect::select(&edited, "/ngap/*/id")?, [&json!(85), &json!(15), &json!(82)]);
 //! # Ok::<(), String>(())
 //! ```
@@ -213,19 +219,19 @@
 //! | `TargettoSource-Failure-TransparentContainer` | `TargetNGRANNode-ToSourceNGRANNode-FailureTransparentContainer` | 9.3.1.186 |
 //!
 //! For another target system they are octets of its own specification, and nothing in a
-//! message says which they are. So a tree shows such an IE by its octets, and the one
-//! that writes or reads it names the type, in any case:
+//! message says which they are. So a view and a tree show such an IE by its octets,
+//! and the one that writes or reads it names the type, in any case:
 //!
 //! - written, the value of the IE is an object with one member, the name of the type
 //!   with its value, which is encoded as that type:
 //!   `{"SourceNGRANNode-ToTargetNGRANNode-TransparentContainer": {"rRCContainer": "…", …}}`.
-//!   [`message_from_tree`] takes it, and so does [`encode_pdu`] for a value that [`set`]
-//!   or [`insert`] wrote and for a tree written by hand;
+//!   [`message_from_tree`] takes it, and so does [`message_from_view`] for a value that
+//!   [`set`] or [`insert`] wrote and for a view written by hand;
 //! - read, a path goes through the name of the type, after the IE or its `value`:
 //!   `/ngap/SourceToTarget-TransparentContainer/SourceNGRANNode-ToTargetNGRANNode-TransparentContainer/targetCell-ID`.
-//!   [`check_path`] and [`enumerated_at`] read it against the types. In a tree,
+//!   [`check_path`] and [`enumerated_at`] read it against the types. In a view,
 //!   [`open`] decodes the octets that a path takes so, and nothing else does:
-//!   [`select`] gives values of the tree, and an edit changes what the tree has. On
+//!   [`select`] gives values of the view, and an edit changes what the view has. On
 //!   octets that were not opened, such a path is an error that says so.
 //!
 //! Once it is opened or written so, the value of the IE is the transfer of that type
@@ -251,7 +257,7 @@ pub fn ie_names() -> &'static [(u16, &'static str)] {
     registry::IE_NAMES
 }
 
-/// The messages, each as the `direction` and the `procedure_code` that a tree has for it
+/// The messages, each as the `direction` and the `procedure_code` that a view has for it
 /// and the name that ASN.1 gives it.
 pub fn message_names() -> impl Iterator<Item = (&'static str, u8, &'static str)> {
     let messages = registry::MESSAGES.iter();
@@ -538,7 +544,7 @@ fn unhex(value: &Value) -> Result<Vec<u8>, String> {
         .collect()
 }
 
-/// How a tree shows the values of a well-known type, and takes them back.
+/// How a view and a tree show the values of a well-known type, and take them back.
 #[derive(Clone, Copy)]
 pub(crate) enum Form {
     /// A PLMN identity as its MCC and MNC: `"208-93"`.
@@ -746,23 +752,23 @@ fn opened(raw: Value, name: &str) -> Value {
     transfer
 }
 
-/// Decode, in `tree`, the octets that `path` takes as a type that they may carry: those
+/// Decode, in `view`, the octets that `path` takes as a type that they may carry: those
 /// of an IE whose content the specification gives by reference, as the transparent
 /// container of a handover, where the segment after the IE or its `value` is the name
 /// that ASN.1 gives one of these types. See
 /// [Octets that carry a type](self#octets-that-carry-a-type).
 ///
 /// The IE then has, in place of its octets, the transfer of that type under that name,
-/// which [`select`], [`paths`] and the edits go into and [`encode_pdu`] takes back: its
-/// decoded value beside the octets, or why they are not of that type. Nothing in a
-/// message says which type octets carry, so [`inspect_pdu`] leaves them as they are, and
-/// nothing but this function decodes them: on octets that were not opened, a path
-/// through the name of a type is an error that says so.
+/// which [`select`], [`paths`] and the edits go into and [`message_from_view`] takes
+/// back: its decoded value beside the octets, or why they are not of that type. Nothing
+/// in a message says which type octets carry, so [`message_view`] leaves them as they
+/// are, and nothing but this function decodes them: on octets that were not opened, a
+/// path through the name of a type is an error that says so.
 ///
 /// A path that goes through no such name changes nothing. A name that the type of a
-/// value cannot have is an error, and the tree is then as it was.
-pub fn open(tree: &mut Value, path: &str) -> Result<(), String> {
-    open_with(tree, path, &opened)
+/// value cannot have is an error, and the view is then as it was.
+pub fn open(view: &mut Value, path: &str) -> Result<(), String> {
+    open_with(view, path, &opened)
 }
 
 /// The octets of the IE `id`, which is written as a type that they may carry: one
@@ -784,7 +790,7 @@ fn carried_octets(written: &Value, id: u16) -> Result<Value, String> {
     }
 }
 
-/// How deep in a tree an IE or a transfer is still decoded.
+/// How deep in a view an IE or a transfer is still decoded.
 const NESTING: usize = 64;
 
 /// Why what is deeper keeps its octets.
@@ -792,7 +798,7 @@ fn too_deep<T>() -> Result<T, String> {
     Err(format!("inspection nesting exceeds {NESTING}"))
 }
 
-/// Decode the IEs and the transfers of `value`, which is `depth` deep in its tree. What
+/// Decode the IEs and the transfers of `value`, which is `depth` deep in its view. What
 /// is deeper than [`NESTING`] keeps its octets, with why.
 fn expand(value: &mut Value, depth: usize) {
     let deep = depth > NESTING;
@@ -984,7 +990,7 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
                     edited.clone()
                 }
                 (Some(raw), Some(edited)) => {
-                    // The identifier that the octets were decoded as, when a tree has
+                    // The identifier that the octets were decoded as, when a view has
                     // one: without it they are those of the identifier of the entry.
                     let original_id = match &original_id {
                         Some(original) => (original.as_u64())
@@ -1019,7 +1025,7 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
     Ok(())
 }
 
-/// A PDU as the name of its message and its IEs by name, in their order:
+/// The tree of a PDU, which is the name of its message and its IEs by name, in their order:
 ///
 /// ```json
 /// {"message": "UEContextReleaseRequest",
@@ -1033,7 +1039,7 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
 /// name, when it is not the one that the message assigns it.
 /// [`message_from_tree`] reads this form back.
 ///
-/// A value is as [`inspect_pdu`] shows it, without what a tree keeps of what was
+/// A value is as [`message_view`] shows it, without what a view keeps of what was
 /// received, to any depth. A transfer is its decoded value, or `{"octets": "…"}` when
 /// it did not decode. The IEs that a value holds, alone, as the entries of a list, in
 /// an extension container or as the message that a transfer contains, are each a name
@@ -1056,21 +1062,21 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
 /// IEs of the protocol, as a private message.
 pub fn message_tree(pdu: &NGAP_PDU) -> Result<Value, String> {
     let name = message_name(pdu).ok_or("the specification has no message of this procedure")?;
-    let tree = inspect_pdu(pdu)?;
-    let listed = &tree["message"]["protocolIEs"];
+    let view = message_view(pdu)?;
+    let listed = &view["message"]["protocolIEs"];
     if !listed.is_array() {
         return Err(format!("a message {name} has no list of IEs"));
     }
-    let mut message = json!({"message": name, "ies": named_ies(name, listed)?});
-    if tree["criticality"].as_str() != message_criticality(name) {
-        message["criticality"] = tree["criticality"].clone();
+    let mut tree = json!({"message": name, "ies": named_ies(name, listed)?});
+    if view["criticality"].as_str() != message_criticality(name) {
+        tree["criticality"] = view["criticality"].clone();
     }
-    Ok(message)
+    Ok(tree)
 }
 
-/// The PDU of a message written as its name and its IEs by name, as [`message_tree`]
-/// shows one: the IEs are sent in the order written, one that is written twice is sent
-/// twice.
+/// The PDU of a tree: a message written as its name and its IEs by name, as
+/// [`message_tree`] shows one. The IEs are sent in the order written, and one that is
+/// written twice is sent twice.
 ///
 /// The name of the message gives the procedure code, the direction and the criticality
 /// of the PDU, and the message the criticality of each of its IEs; a `criticality`
@@ -1082,18 +1088,18 @@ pub fn message_tree(pdu: &NGAP_PDU) -> Result<Value, String> {
 /// A value is written as [`message_tree`] shows it: a transfer as its decoded value, or
 /// as its `octets`, and each IE that the value holds as its name with its value. Such
 /// an IE says its `criticality` where [`message_tree`] always shows it, and where
-/// [`item_criticality`] has none for it. A value is also written as [`inspect_pdu`]
+/// [`item_criticality`] has none for it. A value is also written as [`message_view`]
 /// shows it, with `decoded` for the value of a transfer and an entry with its `id`,
 /// its `criticality` and its `value` for an IE, and the two forms are taken in one
-/// message.
+/// tree.
 pub fn message_from_tree(tree: &Value) -> Result<NGAP_PDU, String> {
-    const FORM: &str = "a message is written as {\"message\": NAME, \"ies\": [{NAME: VALUE}, …]}";
+    const FORM: &str = "a tree is {\"message\": NAME, \"ies\": [{NAME: VALUE}, …]}";
     let written = tree.as_object().ok_or(FORM)?;
     if let Some(other) = written
         .keys()
         .find(|key| !["message", "ies", "criticality"].contains(&key.as_str()))
     {
-        return Err(format!("{other:?} is no member of a message: {FORM}"));
+        return Err(format!("{other:?} is no member of a tree: {FORM}"));
     }
     let name = written.get("message").and_then(Value::as_str).ok_or(FORM)?;
     let (direction, code) =
@@ -1104,7 +1110,7 @@ pub fn message_from_tree(tree: &Value) -> Result<NGAP_PDU, String> {
     };
     let listed = written.get("ies").filter(|ies| ies.is_array());
     let ies = listed_ies(name, listed.ok_or(FORM)?)?;
-    encode_pdu(&json!({
+    message_from_view(&json!({
         "procedure_code": code,
         "direction": direction,
         "criticality": criticality,
@@ -1112,8 +1118,10 @@ pub fn message_from_tree(tree: &Value) -> Result<NGAP_PDU, String> {
     }))
 }
 
-/// The tree of a PDU. An error when its message does not decode.
-pub fn inspect_pdu(pdu: &NGAP_PDU) -> Result<Value, String> {
+/// The view of a PDU: its `procedure_code`, its `direction`, its `criticality` and its
+/// `message`, each IE of which has its typed value and what it was received as. An
+/// error when its message does not decode.
+pub fn message_view(pdu: &NGAP_PDU) -> Result<Value, String> {
     let top: Value = serde_json::from_str(&rasn::jer::encode(pdu).map_err(|e| e.to_string())?)
         .map_err(|e| e.to_string())?;
     let body = top
@@ -1130,9 +1138,10 @@ pub fn inspect_pdu(pdu: &NGAP_PDU) -> Result<Value, String> {
     )
 }
 
-/// The PDU of a tree, with the octets received for what was not edited.
-pub fn encode_pdu(tree: &Value) -> Result<NGAP_PDU, String> {
-    if tree.as_object().is_none_or(|o| {
+/// The PDU of a view, as [`message_view`] gives one and the edits leave it, with the
+/// octets received for what was not edited.
+pub fn message_from_view(view: &Value) -> Result<NGAP_PDU, String> {
+    if view.as_object().is_none_or(|o| {
         o.keys().any(|key| {
             ![
                 "procedure_code",
@@ -1146,11 +1155,11 @@ pub fn encode_pdu(tree: &Value) -> Result<NGAP_PDU, String> {
     }) {
         return Err("unknown PDU inspection root field".into());
     }
-    let code = tree["procedure_code"]
+    let code = view["procedure_code"]
         .as_u64()
         .and_then(|c| u8::try_from(c).ok())
         .ok_or("procedure_code must be u8")?;
-    let direction = tree["direction"]
+    let direction = view["direction"]
         .as_str()
         .ok_or("direction must be a string")?;
     let variant = match direction {
@@ -1159,9 +1168,9 @@ pub fn encode_pdu(tree: &Value) -> Result<NGAP_PDU, String> {
         "UnsuccessfulOutcome" => "unsuccessfulOutcome",
         _ => return Err("invalid direction".into()),
     };
-    let mut message = tree.get("message").ok_or("missing message")?.clone();
+    let mut message = view.get("message").ok_or("missing message")?.clone();
     collapse(&mut message, "", 0)?;
-    let raw = if let Some(original) = tree.get("_raw_message") {
+    let raw = if let Some(original) = view.get("_raw_message") {
         let original = unhex(original)?;
         let typed = message_type(direction, code)?;
         let decoded = (typed.decode)(&original)?;
@@ -1176,7 +1185,7 @@ pub fn encode_pdu(tree: &Value) -> Result<NGAP_PDU, String> {
     } else {
         (message_type(direction, code)?.encode)(&message)?
     };
-    let top = json!({variant: {"procedureCode": code, "criticality": tree["criticality"], "value": hex(&raw)}});
+    let top = json!({variant: {"procedureCode": code, "criticality": view["criticality"], "value": hex(&raw)}});
     let (mut pdu, _) = decode_jer::<NGAP_PDU>(&top)?;
     pdu.repair_open_types()?;
     Ok(pdu)

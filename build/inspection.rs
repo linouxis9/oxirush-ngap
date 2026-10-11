@@ -135,9 +135,9 @@ fn generate_open_type_repair(
     Ok(())
 }
 
-/// The well-known types whose values a tree shows in a readable form: the form, and the
-/// names of the types that have it. A name is matched whatever its case and its hyphens:
-/// TS 36.413 writes `PLMNidentity` and `Port-Number`.
+/// The well-known types whose values a view and a tree show in a readable form: the
+/// form, and the names of the types that have it. A name is matched whatever its case
+/// and its hyphens: TS 36.413 writes `PLMNidentity` and `Port-Number`.
 const READABLE: &[(&str, &[&str])] = &[
     ("Plmn", &["PLMNIdentity"]),
     ("Digits", &["IMSI"]),
@@ -410,7 +410,7 @@ fn generate_readable(generated: &str, ies: &BTreeMap<u16, Ie>, out: &mut String)
     Ok(())
 }
 
-/// The containers of the protocol, which a tree shows as IEs, and how the list of the
+/// The containers of the protocol, which a view shows as IEs, and how the list of the
 /// types writes each.
 const CONTAINERS: &[(&str, &str)] = &[
     ("ProtocolIEContainer", "ies"),

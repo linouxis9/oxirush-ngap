@@ -151,8 +151,8 @@ impl std::error::Error for MissingIeError {}
 ///
 /// The codes that the macros take by the names of the procedures, the type of the
 /// message that they build, the kinds of a PDU and, with the `inspect` feature, the
-/// messages of a tree, the IEs that each can have and the criticality that ASN.1 assigns
-/// all come from these lines.
+/// messages of a view and of a tree, the IEs that each can have and the criticality that
+/// ASN.1 assigns all come from these lines.
 macro_rules! procedures {
     ($($code:literal $procedure:ident $($criticality:ident)? {
         $(InitiatingMessage $initiating:ident $initiating_name:literal $initiating_type:path
@@ -318,8 +318,8 @@ pub(crate) use presence;
 /// give it one.
 ///
 /// The identifier and the type that a name stands for in the macros and, with the
-/// `inspect` feature, the names and the types of a tree and the criticality of an IE in
-/// a single container all come from these lines.
+/// `inspect` feature, the names and the types of a view and of a tree and the
+/// criticality of an IE in a single container all come from these lines.
 macro_rules! ies {
     ($($id:literal $($item:ident)? $name:literal
         $($ie:path $(, $contents:path)? $(=> $own:ident $($alias:ident)*)?)?;

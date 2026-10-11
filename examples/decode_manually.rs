@@ -44,7 +44,7 @@ fn main() {
     let slices = SliceSupportList(vec![SliceSupportItem::new(slice, None)]);
     let plmn_support = PLMNSupportList(vec![PLMNSupportItem::new(plmn_identity, slices, None)]);
 
-    let amf_name = AMFName(PrintableString::try_from("OxiRushAMF").expect("valid AMF name"));
+    let amf_name = AMFName(PrintableString::try_from("amf-1").expect("valid AMF name"));
 
     // In rasn's stable opaque-open-type representation, every entry holds its
     // numeric ID, criticality, and the APER bytes of its concrete NGAP value.

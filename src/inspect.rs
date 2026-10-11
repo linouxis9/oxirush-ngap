@@ -34,8 +34,9 @@
 //!   its new identifier;
 //! - `_decode_error`: why an IE's `value` is still its octets in hexadecimal, or why a
 //!   transfer has no `decoded` member. The identifier is unknown or has several types, the
-//!   octets do not decode, JER cannot represent the value, or the IE is nested deeper
-//!   than 64 levels. The rest of the PDU is read all the same;
+//!   octets do not decode, JER does not write the value or does not read it back as it
+//!   is, or the IE is nested deeper than 64 levels. The rest of the PDU is read all the
+//!   same;
 //! - `_edited`: [`set`], [`remove`] or [`insert`] changed something under the value, whose
 //!   octets are no longer those beside it.
 //!
@@ -335,11 +336,25 @@ fn message_type(direction: &str, code: u8) -> Result<Typed, String> {
         .ok_or_else(|| format!("unknown {protocol} direction/procedure {direction}/{code}"))
 }
 
-fn decode_typed<T: rasn::Decode + rasn::Encode>(raw: &[u8]) -> Result<Value, String> {
+/// The value of the type `T` that the octets `raw` are, as JER writes it. An error for
+/// a value that JER does not read back as it is: it is not shown as what it is not.
+fn decode_typed<T>(raw: &[u8]) -> Result<Value, String>
+where
+    T: rasn::Decode + rasn::Encode + RepairOpenTypes + PartialEq,
+{
     let value = crate::ngap::decode_open_type::<T>(&rasn::types::Any::new(raw.to_vec()))
         .map_err(|e| e.to_string())?;
-    serde_json::from_str(&rasn::jer::encode(&value).map_err(|e| e.to_string())?)
-        .map_err(|e| e.to_string())
+    let shown: Value = serde_json::from_str(&rasn::jer::encode(&value).map_err(|e| e.to_string())?)
+        .map_err(|e| e.to_string())?;
+    // rasn's JER writes a string of bits of one extensible size as its octets, without
+    // its length: one of another size would be shown as a string that it is not.
+    const LOST: &str = "JER does not represent this value";
+    let (mut read, _) = decode_jer::<T>(&shown).map_err(|error| format!("{LOST}: {error}"))?;
+    read.repair_open_types()?;
+    match read == value {
+        true => Ok(shown),
+        false => Err(LOST.into()),
+    }
 }
 
 pub(crate) trait RepairOpenTypes {
@@ -507,7 +522,7 @@ pub(crate) struct Typed {
 }
 
 impl Typed {
-    pub(crate) fn of<T: rasn::Decode + rasn::Encode + RepairOpenTypes>() -> Self {
+    pub(crate) fn of<T: rasn::Decode + rasn::Encode + RepairOpenTypes + PartialEq>() -> Self {
         Self {
             decode: decode_typed::<T>,
             encode: encode_typed::<T>,

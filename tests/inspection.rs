@@ -2252,3 +2252,176 @@ fn the_identifier_that_the_octets_were_decoded_as_is_a_number() {
     let error = inspect::message_from_view(&view).unwrap_err();
     assert!(error.contains("_original_id is the identifier"), "{error}");
 }
+
+/// A request to modify a UE context: its aggregate maximum bit rate for the downlink,
+/// and UE security capabilities whose NR encryption algorithms are this many bits.
+fn modification(rate: u64, bits: usize) -> NGAP_PDU {
+    let mask =
+        |length: usize| -> rasn::types::BitString { (0..length).map(|bit| bit < 2).collect() };
+    let rates = UEAggregateMaximumBitRate::new(BitRate(rate.into()), BitRate(1u64.into()), None);
+    let capabilities = UESecurityCapabilities::new(
+        NRencryptionAlgorithms(mask(bits)),
+        NRintegrityProtectionAlgorithms(mask(16)),
+        EUTRAencryptionAlgorithms(mask(16)),
+        EUTRAintegrityProtectionAlgorithms(mask(16)),
+        None,
+    );
+    build_ngap!(InitiatingMessage, UEContextModification,
+        REJECT, UEContextModificationRequest,
+        REJECT AMF_UE_NGAP_ID(1u64),
+        REJECT RAN_UE_NGAP_ID(1u32),
+        IGNORE UEAggregateMaximumBitRate(rates),
+        REJECT UESecurityCapabilities(capabilities),
+    )
+}
+
+/// rasn's JER writes an INTEGER as an `i64`, where ITU-T X.697 (02/2021) §21 has a number
+/// of any size. An IE with an integer of 2^63 or more has no typed value: it stays its
+/// octets, as the README says.
+#[test]
+fn an_ie_with_an_integer_of_two_to_the_63_stays_octets() {
+    use serde_json::json;
+    let rates = "/ngap/UEAggregateMaximumBitRate";
+    let downlink = format!("{rates}/uEAggregateMaximumBitRateDL");
+
+    // The largest integer that is typed is read, edited and encoded.
+    let largest = (1u64 << 63) - 1;
+    let mut view = inspect::message_view(&modification(largest, 16)).unwrap();
+    assert_eq!(
+        inspect::select(&view, &downlink).unwrap(),
+        [&json!(largest)]
+    );
+    inspect::set(&mut view, &downlink, json!(largest - 1)).unwrap();
+    let edited = inspect::message_from_view(&view).unwrap();
+    assert_eq!(edited, modification(largest - 1, 16));
+
+    // One more, and the IE is its octets beside why it has no value. The rest of the PDU
+    // is read.
+    let pdu = modification(1 << 63, 16);
+    let wire = pdu.encode().unwrap();
+    let mut view = inspect::message_view(&NGAP_PDU::decode(&wire).unwrap()).unwrap();
+    let entry = view["message"]["protocolIEs"][2].clone();
+    assert!(entry["_decode_error"].is_string(), "{entry}");
+    assert_eq!(entry["value"], entry["_raw_value"]);
+    let octets = inspect::select(&view, &format!("{rates}/octets")).unwrap()[0].clone();
+    assert_eq!(octets, entry["_raw_value"]);
+    assert!(inspect::select(&view, &downlink).is_err());
+    let other = "/ngap/RAN-UE-NGAP-ID/value";
+    assert_eq!(inspect::select(&view, other).unwrap(), [&json!(1)]);
+
+    // A tree has the octets too, and both forms send them as they were received, also
+    // beside an edit of another IE.
+    let tree = inspect::message_tree(&pdu).unwrap();
+    assert_eq!(
+        tree["ies"][2],
+        json!({"UEAggregateMaximumBitRate": {"octets": octets}})
+    );
+    assert_eq!(
+        inspect::message_from_tree(&tree).unwrap().encode().unwrap(),
+        wire
+    );
+    assert_eq!(
+        inspect::message_from_view(&view).unwrap().encode().unwrap(),
+        wire
+    );
+    inspect::set(&mut view, other, json!(2)).unwrap();
+    let edited = inspect::message_view(&inspect::message_from_view(&view).unwrap()).unwrap();
+    assert_eq!(inspect::select(&edited, other).unwrap(), [&json!(2)]);
+    assert_eq!(
+        inspect::select(&edited, &format!("{rates}/octets")).unwrap(),
+        [&octets]
+    );
+
+    // Such an integer is not written as a typed value either.
+    let written = json!({"message": "UEContextModificationRequest", "ies": [
+        {"AMF-UE-NGAP-ID": 1},
+        {"RAN-UE-NGAP-ID": 1},
+        {"UEAggregateMaximumBitRate": {
+            "uEAggregateMaximumBitRateDL": 1u64 << 63,
+            "uEAggregateMaximumBitRateUL": 1,
+        }},
+    ]});
+    assert!(inspect::message_from_tree(&written).is_err());
+}
+
+/// rasn's JER writes a BIT STRING of one extensible size as its octets alone, where
+/// ITU-T X.697 (02/2021) §7.2.1 and §24.3 give it its length. A string of another size
+/// than its type gives would be shown as a string that it is not, 20 bits as 24: its IE
+/// has no typed value and stays its octets, as the README says.
+#[test]
+fn an_ie_with_a_string_of_bits_of_another_size_stays_octets() {
+    use serde_json::json;
+    let capabilities = "/ngap/UESecurityCapabilities";
+    let member = |of: &str| format!("{capabilities}/{of}");
+    let algorithms = member("nRencryptionAlgorithms");
+    let other = "/ngap/RAN-UE-NGAP-ID/value";
+
+    // The size that the type gives is typed: hexadecimal, read and edited.
+    let mut view = inspect::message_view(&modification(1, 16)).unwrap();
+    assert_eq!(
+        inspect::select(&view, &algorithms).unwrap(),
+        [&json!("C000")]
+    );
+    inspect::set(&mut view, &algorithms, json!("8000")).unwrap();
+    let edited = inspect::message_view(&inspect::message_from_view(&view).unwrap()).unwrap();
+    assert_eq!(
+        inspect::select(&edited, &algorithms).unwrap(),
+        [&json!("8000")]
+    );
+
+    // 20 bits and 24 bits are the same three octets to JER. Each is the octets of its IE
+    // beside why it has no value, and the rest of the PDU is read.
+    let mut received = Vec::new();
+    for bits in [20, 24] {
+        let pdu = modification(1, bits);
+        let wire = pdu.encode().unwrap();
+        let view = inspect::message_view(&NGAP_PDU::decode(&wire).unwrap()).unwrap();
+        let entry = view["message"]["protocolIEs"][3].clone();
+        let error = entry["_decode_error"].as_str().unwrap_or_default();
+        assert!(
+            error.starts_with("JER does not represent this value"),
+            "{entry}"
+        );
+        assert_eq!(entry["value"], entry["_raw_value"]);
+        assert!(inspect::select(&view, &algorithms).is_err());
+        assert_eq!(inspect::select(&view, other).unwrap(), [&json!(1)]);
+
+        // A tree has the octets too, and both forms send them as they were received.
+        let octets = json!({"UESecurityCapabilities": {"octets": entry["_raw_value"]}});
+        let tree = inspect::message_tree(&pdu).unwrap();
+        assert_eq!(tree["ies"][3], octets);
+        assert_eq!(
+            inspect::message_from_tree(&tree).unwrap().encode().unwrap(),
+            wire
+        );
+        assert_eq!(
+            inspect::message_from_view(&view).unwrap().encode().unwrap(),
+            wire
+        );
+        received.push(entry["_raw_value"].clone());
+    }
+    assert_ne!(received[0], received[1]);
+
+    // The octets of the IE are set in its place.
+    let mut view = inspect::message_view(&modification(1, 24)).unwrap();
+    let usual = inspect::message_view(&modification(1, 16)).unwrap();
+    let usual = inspect::select(&usual, &member("octets")).unwrap()[0].clone();
+    inspect::set(&mut view, &member("octets"), usual).unwrap();
+    assert_eq!(
+        inspect::message_from_view(&view).unwrap(),
+        modification(1, 16)
+    );
+
+    // Such a string is not written as a typed value either.
+    let written = json!({"message": "UEContextModificationRequest", "ies": [
+        {"AMF-UE-NGAP-ID": 1},
+        {"RAN-UE-NGAP-ID": 1},
+        {"UESecurityCapabilities": {
+            "nRencryptionAlgorithms": "C00000",
+            "nRintegrityProtectionAlgorithms": "C000",
+            "eUTRAencryptionAlgorithms": "C000",
+            "eUTRAintegrityProtectionAlgorithms": "C000",
+        }},
+    ]});
+    assert!(inspect::message_from_tree(&written).is_err());
+}

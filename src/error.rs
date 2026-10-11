@@ -64,7 +64,10 @@ pub enum ErrorKind {
 #[derive(Clone)]
 pub struct Error {
     kind: ErrorKind,
-    message: Box<str>,
+    /// What is wrong, and after it the reason, where the message has one apart: what
+    /// the codec says of octets or of a value.
+    what: Box<str>,
+    why: Option<Box<str>>,
     source: Option<Arc<dyn std::error::Error + Send + Sync + 'static>>,
 }
 
@@ -74,12 +77,19 @@ impl Error {
         self.kind
     }
 
-    pub(crate) fn new(kind: ErrorKind, message: impl Into<String>) -> Self {
+    pub(crate) fn new(kind: ErrorKind, what: impl Into<String>) -> Self {
         Self {
             kind,
-            message: message.into().into_boxed_str(),
+            what: what.into().into_boxed_str(),
+            why: None,
             source: None,
         }
+    }
+
+    /// The reason of what is wrong, which the message has after it.
+    fn because(mut self, why: impl Into<String>) -> Self {
+        self.why = Some(why.into().into_boxed_str());
+        self
     }
 
     /// The error of rasn that this one tells of.
@@ -89,9 +99,9 @@ impl Error {
     }
 
     /// Octets that are not a value of the type `T`, and why.
-    pub(crate) fn not_a<T: rasn::AsnType>(why: impl fmt::Display) -> Self {
-        let message = format!("these octets do not decode as {}: {why}", name::<T>());
-        Self::new(ErrorKind::Decode, message)
+    pub(crate) fn not_a<T: rasn::AsnType>(why: impl Into<String>) -> Self {
+        let what = format!("these octets do not decode as {}", name::<T>());
+        Self::new(ErrorKind::Decode, what).because(why)
     }
 
     /// Octets that rasn does not decode as a value of the type `T`.
@@ -101,12 +111,12 @@ impl Error {
 
     /// A value of the type `T` that rasn does not encode.
     pub(crate) fn encoding<T: rasn::AsnType>(error: EncodeError) -> Self {
-        let (name, why) = (
-            T::IDENTIFIER.0.unwrap_or("this type"),
-            encode_reason(&error),
-        );
-        let message = format!("a value of {name} does not encode: {why}");
-        Self::new(ErrorKind::Encode, message).caused_by(error)
+        let name = T::IDENTIFIER.0.unwrap_or("this type");
+        let what = format!("a value of {name} does not encode");
+        let why = encode_reason(&error);
+        Self::new(ErrorKind::Encode, what)
+            .because(why)
+            .caused_by(error)
     }
 
     /// A PDU of the message of `direction` and `code`, which is decoded as the
@@ -124,11 +134,38 @@ impl Error {
         };
         Self::new(ErrorKind::WrongMessage, message)
     }
+
+    /// For the macro that extracts IEs: the IE `id`, which the field `field` requires,
+    /// is not in a message of the type `message`.
+    #[doc(hidden)]
+    pub fn __missing_ie(message: &str, id: u16, field: &str) -> Self {
+        let ie = ie(id);
+        let what = format!("this {message} has no {ie}, which the field `{field}` requires");
+        Self::new(ErrorKind::MissingIe, what)
+    }
+
+    /// For the macros that read an IE: this error is why the IE `id` of a message of
+    /// the type `message` does not decode.
+    #[doc(hidden)]
+    pub fn __undecodable_ie(self, message: &str, id: u16) -> Self {
+        let what = format!("the {} of this {message} does not decode", ie(id));
+        Self {
+            kind: ErrorKind::UndecodableIe,
+            what: what.into_boxed_str(),
+            // What the codec said of the octets, without the type that it took them for.
+            why: Some(self.why.unwrap_or(self.what)),
+            source: self.source,
+        }
+    }
 }
 
 impl fmt::Display for Error {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        formatter.write_str(&self.message)
+        formatter.write_str(&self.what)?;
+        match &self.why {
+            Some(why) => write!(formatter, ": {why}"),
+            None => Ok(()),
+        }
     }
 }
 
@@ -137,7 +174,7 @@ impl fmt::Debug for Error {
         // The source is the same error as rasn tells it, and is reached as `source()`.
         let mut error = formatter.debug_struct("Error");
         error.field("kind", &self.kind);
-        error.field("message", &self.message);
+        error.field("message", &self.to_string());
         error.finish()
     }
 }
@@ -151,7 +188,7 @@ impl std::error::Error for Error {
 
 impl PartialEq for Error {
     fn eq(&self, other: &Self) -> bool {
-        self.kind == other.kind && self.message == other.message
+        self.kind == other.kind && self.to_string() == other.to_string()
     }
 }
 
@@ -160,16 +197,30 @@ impl Eq for Error {}
 /// Octets that do not decode, where nothing says what they were decoded as.
 impl From<DecodeError> for Error {
     fn from(error: DecodeError) -> Self {
-        let message = format!("the octets do not decode: {}", in_its_field(&error));
-        Self::new(ErrorKind::Decode, message).caused_by(error)
+        let why = in_its_field(&error);
+        Self::new(ErrorKind::Decode, "the octets do not decode")
+            .because(why)
+            .caused_by(error)
     }
 }
 
 /// A value that does not encode, where nothing says what its type is.
 impl From<EncodeError> for Error {
     fn from(error: EncodeError) -> Self {
-        let message = format!("the value does not encode: {}", encode_reason(&error));
-        Self::new(ErrorKind::Encode, message).caused_by(error)
+        let why = encode_reason(&error);
+        Self::new(ErrorKind::Encode, "the value does not encode")
+            .because(why)
+            .caused_by(error)
+    }
+}
+
+/// The IE of an identifier, as a message names it: the name that ASN.1 gives it after
+/// `id-`, or its number for one that the protocol does not have.
+fn ie(id: u16) -> String {
+    let mut names = crate::registry::IE_NAMES.iter();
+    match names.find(|(known, _)| *known == id) {
+        Some((_, name)) => name.to_string(),
+        None => format!("IE {id}"),
     }
 }
 
@@ -203,9 +254,9 @@ fn decode_reason(error: &DecodeError) -> (Vec<&'static str>, String) {
     }
     let why = match &*error.kind {
         DecodeErrorKind::Incomplete { .. } | DecodeErrorKind::Eof => {
-            "they end before the value does".to_string()
+            "the octets end before the value does".to_string()
         }
-        DecodeErrorKind::UnexpectedEmptyInput => "there are none where a value is".to_string(),
+        DecodeErrorKind::UnexpectedEmptyInput => "there are no octets where a value is".to_string(),
         DecodeErrorKind::UnexpectedExtraData { length } => {
             format!("{length} octets follow the value")
         }
@@ -344,7 +395,7 @@ mod tests {
         let named = Error::decoding::<Integer>(short);
         assert_eq!(
             named.to_string(),
-            "these octets do not decode as INTEGER: they end before the value does"
+            "these octets do not decode as INTEGER: the octets end before the value does"
         );
     }
 }

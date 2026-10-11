@@ -26,7 +26,7 @@
 
 use oxirush_ngap::helpers::{plmn, plmn_from, tai};
 use oxirush_ngap::ngap::*;
-use oxirush_ngap::{build_ngap_ie, extract_ngap_ies, macros::MissingIeError};
+use oxirush_ngap::{Error, build_ngap_ie, extract_ngap_ies};
 
 /// An MCC, an MNC and the octets of their PLMN identity, digit by digit from the clause.
 const IDENTITIES: &[(&str, &str, [u8; 3])] = &[
@@ -105,7 +105,7 @@ fn the_octets_of_a_plmn_identity_are_those_of_the_clause() {
 }
 
 #[test]
-fn the_identities_of_a_paging_are_those_that_tshark_reads() -> Result<(), MissingIeError> {
+fn the_identities_of_a_paging_are_those_that_tshark_reads() -> Result<(), Error> {
     // What tshark printed names the two networks, in the order of the message.
     let read = networks(TSHARK);
     assert_eq!(
@@ -127,7 +127,7 @@ fn the_identities_of_a_paging_are_those_that_tshark_reads() -> Result<(), Missin
 
     // And write the octets of the message for them.
     assert_eq!(areas, tracking_areas());
-    let written = build_ngap_ie!(Paging, IGNORE TAIListForPaging(tracking_areas()));
+    let written = build_ngap_ie!(Paging, IGNORE TAIListForPaging(tracking_areas())).unwrap();
     assert_eq!(written, paging.protocol_ies.0[1]);
     assert_eq!(hex::encode(pdu.encode().unwrap()), PAGING);
     Ok(())

@@ -40,7 +40,7 @@ pub(crate) fn encode_open_type<T: Encode>(value: &T) -> Result<Any, crate::Error
 /// one value, whole, and no octet after it.
 pub(crate) fn decode_complete<T: Decode>(bytes: &[u8]) -> Result<T, crate::Error> {
     if bytes.is_empty() {
-        return Err(crate::Error::not_a::<T>("there are none"));
+        return Err(crate::Error::not_a::<T>("there are no octets"));
     }
     let decoded = rasn::aper::decode_with_remainder(bytes);
     let (decoded, remainder) = decoded.map_err(crate::Error::decoding::<T>)?;

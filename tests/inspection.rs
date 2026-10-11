@@ -10,7 +10,8 @@ fn inspect_repeated_ies_and_edit_one_without_reordering() {
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
         REJECT AMF_UE_NGAP_ID(2u64),
-    );
+    )
+    .unwrap();
     let mut view = inspect::message_view(&pdu).unwrap();
     assert_eq!(
         view.pointer("/message/protocolIEs/0/value"),
@@ -70,7 +71,7 @@ fn contained_transfer_edits_are_typed_and_do_not_reorder_outer_ies() {
         IGNORE AMF_UE_NGAP_ID(1u64),
         IGNORE RAN_UE_NGAP_ID(7u32),
         IGNORE PDUSessionResourceFailedToSetupListSURes(PDUSessionResourceFailedToSetupListSURes(vec![PDUSessionResourceFailedToSetupItemSURes::new(PDUSessionID(7), raw.into(), None)])),
-    );
+    ).unwrap();
     let mut view = inspect::message_view(&pdu).unwrap();
     let path = "/message/protocolIEs/2/value/0/pDUSessionResourceSetupUnsuccessfulTransfer/decoded/cause/protocol";
     assert_eq!(
@@ -134,7 +135,8 @@ fn the_octets_of_an_ie_are_replaced_or_added_as_its_raw_value_without_value() {
         IGNORE, UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(7u32),
-    );
+    )
+    .unwrap();
     let mut view = inspect::message_view(&pdu).unwrap();
     // RAN-UE-NGAP-ID 9, as its octets in place of the typed value.
     let ie = view.pointer_mut("/message/protocolIEs/1").unwrap();
@@ -162,13 +164,15 @@ fn a_new_ie_takes_a_typed_value_of_the_type_of_its_identifier() {
         IGNORE, UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(7u32),
-    );
+    )
+    .unwrap();
     let with_cause = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
         IGNORE, UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
-    );
+    )
+    .unwrap();
     let added = |id: u16, value: serde_json::Value| {
         let mut view = inspect::message_view(&pdu).unwrap();
         let ies = view.pointer_mut("/message/protocolIEs").unwrap();
@@ -192,13 +196,15 @@ fn a_new_ie_whose_value_is_a_string_is_typed_too() {
     let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
         IGNORE, UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
-    );
+    )
+    .unwrap();
     let typed = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
         IGNORE, UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         IGNORE RRCEstablishmentCause(RRCEstablishmentCause::mo_Signalling),
         REJECT NAS_PDU(vec![0x7e, 0x00]),
-    );
+    )
+    .unwrap();
     let mut view = inspect::message_view(&pdu).unwrap();
     let ies = view.pointer_mut("/message/protocolIEs").unwrap();
     let ies = ies.as_array_mut().unwrap();
@@ -255,7 +261,8 @@ fn a_changed_raw_value_alone_sends_nothing_else() {
         IGNORE, UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(7u32),
-    );
+    )
+    .unwrap();
     let mut view = inspect::message_view(&pdu).unwrap();
     *view
         .pointer_mut("/message/protocolIEs/1/_raw_value")
@@ -302,7 +309,8 @@ fn a_transfer_that_was_not_received_is_encoded_from_its_decoded_value() {
         REJECT, PDUSessionResourceSetupResponse,
         IGNORE AMF_UE_NGAP_ID(1u64),
         IGNORE RAN_UE_NGAP_ID(7u32),
-    );
+    )
+    .unwrap();
     let transfer = serde_json::json!({"dLQosFlowPerTNLInformation": {
         "uPTransportLayerInformation": {"gTPTunnel": {
             "transportLayerAddress": "10.0.0.1",
@@ -343,7 +351,8 @@ fn a_transfer_that_was_not_received_is_encoded_from_its_decoded_value() {
         DistributionRelease,
         REJECT,
         DistributionReleaseRequest,
-    );
+    )
+    .unwrap();
     let received = NGAP_PDU::decode(&fixture("DistributionReleaseRequest")).unwrap();
     let received = inspect::message_view(&received).unwrap();
     // With its `decoded` member alone, then as the decoded value itself.
@@ -1044,7 +1053,8 @@ fn sent(entries: &[serde_json::Value]) -> Result<serde_json::Value, String> {
         UEContextReleaseRequest,
         IGNORE,
         UEContextReleaseRequest,
-    );
+    )
+    .unwrap();
     let mut view = inspect::message_view(&pdu)?;
     *view["message"]["protocolIEs"].as_array_mut().unwrap() = entries.to_vec();
     inspect::message_view(&inspect::message_from_view(&view)?)
@@ -1246,6 +1256,7 @@ fn release_request() -> NGAP_PDU {
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
     )
+    .unwrap()
 }
 
 #[test]
@@ -1356,7 +1367,8 @@ fn an_ie_that_is_there_twice_goes_by_its_position() {
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         REJECT AMF_UE_NGAP_ID(2u64),
-    );
+    )
+    .unwrap();
     let mut view = inspect::message_view(&pdu).unwrap();
     let paths = inspect::paths(&view);
     let values: Vec<_> = (paths.iter())
@@ -1673,7 +1685,8 @@ fn what_is_nested_deeper_than_the_inspection_goes_keeps_its_octets() {
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE Cause(cause),
-    );
+    )
+    .unwrap();
     let pdu = NGAP_PDU::decode(&pdu.encode().unwrap()).unwrap();
     let view = inspect::message_view(&pdu).unwrap();
     let paths = inspect::paths(&view);
@@ -2273,6 +2286,7 @@ fn modification(rate: u64, bits: usize) -> NGAP_PDU {
         IGNORE UEAggregateMaximumBitRate(rates),
         REJECT UESecurityCapabilities(capabilities),
     )
+    .unwrap()
 }
 
 /// rasn's JER writes an INTEGER as an `i64`, where ITU-T X.697 (02/2021) §21 has a number

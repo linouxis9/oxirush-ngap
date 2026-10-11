@@ -32,14 +32,14 @@ is not source compatible with 0.4.2.
   a half octet being no digit where it is not the filler before an MNC of
   two digits. `ab cd ef` was the MCC `111013` and the MNC `151412`.
 - One error type, `oxirush_ngap::Error`. `NGAP_PDU::decode`, `encode` and
-  `decode_value`, and `ngap::decode_open_type` and `ngap::encode_open_type`,
-  return it where they returned a `rasn::error::DecodeError` or an
-  `EncodeError`. A function that returned one of those returns
-  `Result<_, oxirush_ngap::Error>`, or keeps a `Box<dyn std::error::Error>`.
-  `error.kind()` is an `ErrorKind` to match on, `Decode`, `Encode` or
-  `WrongMessage` here, and the message says what is wrong without the wording
-  of rasn: `these octets do not decode as NGAP-PDU: they end before the value
-  does`. The error of rasn is the `source()`, for code that read its `kind`:
+  `decode_value`, `ngap::decode_open_type` and `ngap::encode_open_type` return
+  it where they returned a `rasn::error::DecodeError` or an `EncodeError`,
+  and so do the four macros. A function that returned one of those errors
+  returns `Result<_, oxirush_ngap::Error>`, or keeps a
+  `Box<dyn std::error::Error>`. `error.kind()` is an `ErrorKind` to match on,
+  and the message says what is wrong without the wording of rasn: `these
+  octets do not decode as NGAP-PDU: the octets end before the value does`.
+  The error of rasn is the `source()`, for code that read its `kind`:
   `source.downcast_ref::<rasn::error::DecodeError>()`. `Error` has a `From`
   of both, for code that calls `rasn::aper` itself.
 - `decode_value::<T>()` takes the type of a message alone, and checks that
@@ -50,6 +50,33 @@ is not source compatible with 0.4.2.
   with `ngap::decode_open_type::<T>(&any)`. Generic code that calls
   `decode_value` asks for `T: oxirush_ngap::Message` where it asked for
   `T: rasn::Decode`.
+- `build_ngap!` gives a `Result<NGAP_PDU, Error>` and `build_ngap_ie!` a
+  `Result<ProtocolIEField, Error>`: write `?` after the call, or `.unwrap()`
+  where the values are known to encode. A value that does not encode, as an
+  integer outside its constraint, is an error of the kind `Encode`, where
+  the macros panicked with `failed to APER-encode NGAP IE open type`.
+- `extract_ngap_ies!` returns an `Error` from the enclosing function, and
+  `macros::MissingIeError` is gone. A `req` field whose IE is not in the
+  message is an error of the kind `MissingIe`, whose message names the IE and
+  the field, where `MissingIeError` had the name of the field as `ie_name`.
+  An IE that is in the message and does not decode is an error of the kind
+  `UndecodableIe`, for a `req` and for an `opt` field: 0.4.2 said that a
+  `req` field was missing, and gave `None` for an `opt` one. The macro
+  converts the error as `?` converts one, which 0.4.2 documented and did
+  not do, so the enclosing function returns a `Result` whose error is
+  `Error`, `Box<dyn std::error::Error>` or a type with a
+  `From<oxirush_ngap::Error>`, where it returned `MissingIeError` itself. A
+  call with `opt` fields alone returns the error too: it no longer compiles
+  in a function that returns nothing.
+- `with_ngap_ie_mut!` gives a `Result<bool, Error>` where it gave a `bool`:
+  what the expression says, `Ok(false)` for an IE that is not in the message,
+  and an error for an IE that does not decode (`UndecodableIe`) or a changed
+  value that does not encode (`Encode`), which were both `false`. Write
+  `with_ngap_ie_mut!(…)?` where the `bool` was read.
+- When a message has the same IE twice, `extract_ngap_ies!` reads the last
+  one and `with_ngap_ie_mut!` changes the last one, and any of them that does
+  not decode is an error for both. 0.4.2 read the last one that decoded,
+  and changed the first one or, when that did not decode, nothing.
 
 ### Added
 
@@ -164,6 +191,10 @@ is not source compatible with 0.4.2.
   specification. The variants of `NgapPduKind` are in the order of the procedure
   codes, and each says its message.
 - The crate no longer depends on `paste`: the macros paste no name.
+- A call of `build_ngap!` or `build_ngap_ie!` that leaves out a criticality is
+  a compile error that says which one: `the criticality of the IE … is
+  missing: write REJECT, IGNORE or NOTIFY before its name`, where the compiler
+  said ``no rules expected `(` ``. A word that is no criticality is named too.
 - `build_ngap!` takes the message that the procedure has in that direction, and
   the other macros a type that has IEs: another name does not compile, where
   it was not looked at. `NgapPduKind::Other` has the `direction` that
@@ -219,15 +250,6 @@ is not source compatible with 0.4.2.
   extensible size as its octets, without its length: an algorithm mask of
   20 bits and one of 24 were shown as the same value, an edit of their IE
   was refused, and the tree of their PDU was not written back.
-- `with_ngap_ie_mut!` changes the IE that `extract_ngap_ies!` reads when a
-  message has it twice, the last that decodes: it changed the first, or
-  nothing when the first did not decode.
-- `extract_ngap_ies!` converts the `MissingIeError` of a `req` field as `?`
-  converts an error, so the enclosing function returns `MissingIeError`,
-  `Box<dyn std::error::Error>` or any error type with a
-  `From<MissingIeError>`, as the documentation of 0.4.2 said and the macro did
-  not do: it returned the error as it is. A closure whose error type the
-  macro alone gave now has to say it.
 - The examples of the documentation and of the README are compiled and run
   by the documentation tests.
 

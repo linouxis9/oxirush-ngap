@@ -8,9 +8,9 @@
 use oxirush_ngap::helpers::*;
 use oxirush_ngap::ngap::*;
 use oxirush_ngap::rasn::types::FixedBitString;
-use oxirush_ngap::{build_ngap, build_ngap_ie};
+use oxirush_ngap::{Error, build_ngap, build_ngap_ie};
 
-fn main() {
+fn main() -> Result<(), Error> {
     // ── 1. Simple: InitialContextSetupResponse ─────────────────────────────
 
     let amf_ue_id: u64 = 1;
@@ -24,10 +24,10 @@ fn main() {
         IGNORE AMF_UE_NGAP_ID(amf_ue_id),
         IGNORE RAN_UE_NGAP_ID(ran_ue_id),
         IGNORE PDUSessionResourceSetupListCxtRes(session_setup_response_list()),
-    );
+    )?;
 
     println!("=== 1. InitialContextSetupResponse ===");
-    print_and_encode(&pdu);
+    print_and_encode(&pdu)?;
 
     // ── 2. UEContextReleaseRequest with Cause ──────────────────────────────
 
@@ -37,10 +37,10 @@ fn main() {
         REJECT AMF_UE_NGAP_ID(amf_ue_id),
         REJECT RAN_UE_NGAP_ID(ran_ue_id),
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
-    );
+    )?;
 
     println!("\n=== 2. UEContextReleaseRequest ===");
-    print_and_encode(&pdu);
+    print_and_encode(&pdu)?;
 
     // ── 3. Complex: InitialContextSetupRequest with PDU session + security ─
     //
@@ -73,10 +73,10 @@ fn main() {
         // Its security capabilities and its key
         REJECT UESecurityCapabilities(ue_security_capabilities(&[0xe0, 0xe0])),
         REJECT SecurityKey(SecurityKey(FixedBitString::<256>::ZERO)),
-    );
+    )?;
 
     println!("\n=== 3. InitialContextSetupRequest (complex) ===");
-    print_and_encode(&pdu);
+    print_and_encode(&pdu)?;
 
     // ── 4. Handover: procedure name differs from message name ──────────────
     //
@@ -102,10 +102,10 @@ fn main() {
         // The sessions and the container that go to the target
         REJECT PDUSessionResourceListHORqd(handover_required_sessions()),
         REJECT SourceToTarget_TransparentContainer(vec![0x00, 0x01, 0x02]),
-    );
+    )?;
 
     println!("\n=== 4. HandoverRequired (procedure=HandoverPreparation) ===");
-    print_and_encode(&pdu);
+    print_and_encode(&pdu)?;
 
     // ── 5. SuccessfulOutcome + UnsuccessfulOutcome ─────────────────────────
 
@@ -117,25 +117,25 @@ fn main() {
 
         IGNORE PDUSessionResourceAdmittedList(admitted_sessions()),
         REJECT TargetToSource_TransparentContainer(vec![0xAA, 0xBB]),
-    );
+    )?;
 
     println!("\n=== 5. HandoverRequestAcknowledge (SuccessfulOutcome) ===");
-    print_and_encode(&pdu);
+    print_and_encode(&pdu)?;
 
     let pdu = build_ngap!(UnsuccessfulOutcome, NGSetup,
         REJECT, NGSetupFailure,
 
         IGNORE Cause(Cause::misc(CauseMisc::unknown_PLMN_or_SNPN)),
-    );
+    )?;
 
     println!("\n=== 5. NGSetupFailure (UnsuccessfulOutcome) ===");
-    print_and_encode(&pdu);
+    print_and_encode(&pdu)?;
 
     // ── 6. build_ngap_ie! for conditional IE construction ──────────────────
 
     let cause_ie = build_ngap_ie!(UEContextReleaseRequest, IGNORE
         Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity))
-    );
+    )?;
 
     println!("\n=== 6. Single IE (via build_ngap_ie!) ===");
     println!(
@@ -170,6 +170,7 @@ fn main() {
     //       Criticality::reject,
     //       encode_open_type(&response)?,
     //   ));
+    Ok(())
 }
 
 fn session_setup_response_list() -> PDUSessionResourceSetupListCxtRes {
@@ -206,7 +207,7 @@ fn admitted_sessions() -> PDUSessionResourceAdmittedList {
     )])
 }
 
-fn print_and_encode(pdu: &NGAP_PDU) {
+fn print_and_encode(pdu: &NGAP_PDU) -> Result<(), Error> {
     // Display example: "InitiatingMessage NGSetup (code=21)".
     println!("{pdu}");
     println!(
@@ -216,6 +217,7 @@ fn print_and_encode(pdu: &NGAP_PDU) {
         pdu.procedure_code()
     );
 
-    let bytes = pdu.encode().expect("APER encode failed");
+    let bytes = pdu.encode()?;
     println!("  APER ({} bytes): {}", bytes.len(), hex::encode(&bytes));
+    Ok(())
 }

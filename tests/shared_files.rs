@@ -12,12 +12,12 @@ const SHARED: &[(&str, u64)] = &[
     ("build/containers.rs", 0x9d134011ce89fec9),
     ("build/inspection.rs", 0xcc54553d89f026e5),
     ("build/registry.rs", 0xcf4be166857fe031),
-    ("src/error.rs", 0x2dbe8b288b946e67),
+    ("src/error.rs", 0xcc6df5676712d3d8),
     ("src/inspect_paths.rs", 0xbe13926097bb7c45),
     ("src/message.rs", 0x95e7ef29b6bc50cf),
-    ("src/per.rs", 0xafcc857f8263a8d2),
+    ("src/per.rs", 0x0a3fd42cad850a6f),
     ("src/sized.rs", 0xacd754552266ad78),
-    ("tests/readme.rs", 0xe02499cb40541d3c),
+    ("tests/readme.rs", 0x8649417b32dae0f4),
 ];
 
 /// The 64-bit FNV-1a digest of `octets`, without the carriage returns that a checkout

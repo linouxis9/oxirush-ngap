@@ -1,14 +1,14 @@
 use oxirush_ngap::ngap::*;
-use oxirush_ngap::{build_ngap, extract_ngap_ies, macros::MissingIeError};
+use oxirush_ngap::{Error, ErrorKind, build_ngap, extract_ngap_ies};
 
 #[test]
-fn public_macros_round_trip_typed_open_message() -> Result<(), MissingIeError> {
+fn public_macros_round_trip_typed_open_message() -> Result<(), Error> {
     let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
         IGNORE, UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(42u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
-    );
+    )?;
 
     let NGAP_PDU::initiatingMessage(message) = &pdu else {
         panic!("expected initiating message");
@@ -109,21 +109,21 @@ fn plmn_support_item_round_trips() {
 /// An IE name addresses that IE even when it is also the type of another IE:
 /// id-OldAMF is an AMFName and id-RRC-Resume-Cause an RRCEstablishmentCause.
 #[test]
-fn ie_names_address_their_own_ie_before_a_same_named_type() -> Result<(), MissingIeError> {
+fn ie_names_address_their_own_ie_before_a_same_named_type() -> Result<(), Error> {
     let name = AMFName(rasn::types::PrintableString::try_from("amf").expect("printable"));
-    let ie = oxirush_ngap::build_ngap_ie!(NGSetupResponse, REJECT AMFName(name.clone()));
+    let ie = oxirush_ngap::build_ngap_ie!(NGSetupResponse, REJECT AMFName(name.clone()))?;
     assert_eq!(ie.id, ID_AMFNAME);
-    let ie = oxirush_ngap::build_ngap_ie!(DownlinkNASTransport, REJECT OldAMF(name.clone()));
+    let ie = oxirush_ngap::build_ngap_ie!(DownlinkNASTransport, REJECT OldAMF(name.clone()))?;
     assert_eq!(ie.id, ID_OLD_AMF);
     let ie = oxirush_ngap::build_ngap_ie!(InitialUEMessage,
         IGNORE RRCEstablishmentCause(RRCEstablishmentCause::mo_Signalling)
-    );
+    )?;
     assert_eq!(ie.id, ID_RRCESTABLISHMENT_CAUSE);
 
     let pdu = build_ngap!(SuccessfulOutcome, NGSetup,
         REJECT, NGSetupResponse,
         REJECT AMFName(name.clone()),
-    );
+    )?;
     let response: NGSetupResponse = pdu.decode_value().expect("decode message");
     extract_ngap_ies!(&response, NGSetupResponse,
         req amf_name: AMFName = AMFName(value) => value,
@@ -138,7 +138,7 @@ fn ie_names_address_their_own_ie_before_a_same_named_type() -> Result<(), Missin
 /// unconstrained length for SIZE(1..65536) (X.691 (02/2021) §11.9.3.3,
 /// §11.9.3.5).
 #[test]
-fn every_constrained_list_encodes_its_length_per_x691() {
+fn every_constrained_list_encodes_its_length_per_x691() -> Result<(), Error> {
     let diagnostics = CriticalityDiagnostics::new(
         Some(ProcedureCode(14)),
         Some(TriggeringMessage::initiating_message),
@@ -157,7 +157,7 @@ fn every_constrained_list_encodes_its_length_per_x691() {
         IGNORE, ErrorIndication,
         IGNORE Cause(Cause::protocol(CauseProtocol::abstract_syntax_error_reject)),
         IGNORE CriticalityDiagnostics(diagnostics),
-    );
+    )?;
     let wire = error.encode().expect("encode ErrorIndication");
     assert_eq!(
         hex::encode(&wire),
@@ -171,13 +171,14 @@ fn every_constrained_list_encodes_its_length_per_x691() {
         REJECT ResetType(ResetType::partOfNG_Interface(UEAssociatedLogicalNGConnectionList(vec![
             UEAssociatedLogicalNGConnectionItem::new(Some(AMFUENGAPID(5)), Some(RANUENGAPID(6)), None),
         ]))),
-    );
+    )?;
     let wire = reset.encode().expect("encode NGReset");
     assert_eq!(
         hex::encode(&wire),
         "00140013000002000f4002000000580006400160050006"
     );
     assert_eq!(NGAP_PDU::decode(&wire).expect("decode"), reset);
+    Ok(())
 }
 
 /// A long element name makes rustfmt split both the SEQUENCE OF attribute
@@ -218,12 +219,12 @@ fn multiline_extension_list_has_an_aligned_count() {
 /// value is an unconstrained length in octets, then its UTF-8 octets (§30.6).
 /// Wireshark decodes the expected octets.
 #[test]
-fn utf8_string_names_have_an_unconstrained_length() -> Result<(), MissingIeError> {
+fn utf8_string_names_have_an_unconstrained_length() -> Result<(), Error> {
     let name = ExtendedAMFName::new(None, Some(AMFNameUTF8String("amf-é".into())), None);
     let pdu = build_ngap!(SuccessfulOutcome, NGSetup,
         REJECT, NGSetupResponse,
         IGNORE Extended_AMFName(name.clone()),
-    );
+    )?;
     let wire = pdu.encode().expect("encode NGSetupResponse");
     assert_eq!(hex::encode(&wire), "2015000f000001011240082006616d662dc3a9");
     let response: NGSetupResponse = NGAP_PDU::decode(&wire)
@@ -258,7 +259,7 @@ where
 /// decodes: padding follows the 3-bit NCC before the 256-bit NH, and the
 /// 2-bit NgENB-ID choice index before the 20-bit ng-eNB ID.
 #[test]
-fn long_fixed_size_bit_strings_are_octet_aligned() -> Result<(), MissingIeError> {
+fn long_fixed_size_bit_strings_are_octet_aligned() -> Result<(), Error> {
     use rasn::types::{BitString, FixedBitString};
 
     let mut nh = FixedBitString::<256>::ZERO;
@@ -268,7 +269,7 @@ fn long_fixed_size_bit_strings_are_octet_aligned() -> Result<(), MissingIeError>
     let pdu = build_ngap!(SuccessfulOutcome, PathSwitchRequest,
         REJECT, PathSwitchRequestAcknowledge,
         REJECT SecurityContext(context.clone()),
-    );
+    )?;
     let wire = pdu.encode().expect("encode PathSwitchRequestAcknowledge");
     assert_eq!(
         hex::encode(&wire),
@@ -292,7 +293,7 @@ fn long_fixed_size_bit_strings_are_octet_aligned() -> Result<(), MissingIeError>
     let pdu = build_ngap!(InitiatingMessage, NGSetup,
         REJECT, NGSetupRequest,
         REJECT GlobalRANNodeID(node.clone()),
-    );
+    )?;
     let wire = pdu.encode().expect("encode NGSetupRequest");
     assert_eq!(hex::encode(&wire), "0015000f000001001b00084002f83900924920");
     let request: NGSetupRequest = NGAP_PDU::decode(&wire)
@@ -346,19 +347,19 @@ fn long_fixed_size_bit_strings_are_octet_aligned() -> Result<(), MissingIeError>
 /// id-NGAP-Message (42) carries the rerouted InitialUEMessage, which
 /// Wireshark decodes from the expected octets.
 #[test]
-fn octet_string_ies_have_ie_names() -> Result<(), MissingIeError> {
+fn octet_string_ies_have_ie_names() -> Result<(), Error> {
     let initial = build_ngap!(InitiatingMessage, InitialUEMessage,
         IGNORE, InitialUEMessage,
         REJECT RAN_UE_NGAP_ID(7u32),
         REJECT NAS_PDU(vec![0x7e, 0x00, 0x41]),
-    )
+    )?
     .encode()
     .expect("encode InitialUEMessage");
     let reroute = build_ngap!(InitiatingMessage, RerouteNASRequest,
         REJECT, RerouteNASRequest,
         REJECT RAN_UE_NGAP_ID(7u32),
         REJECT NGAP_Message(initial.clone()),
-    );
+    )?;
     let wire = reroute.encode().expect("encode RerouteNASRequest");
     assert_eq!(
         hex::encode(&wire),
@@ -378,12 +379,12 @@ fn octet_string_ies_have_ie_names() -> Result<(), MissingIeError> {
 
 /// An extracted field and its binding may share a name.
 #[test]
-fn extraction_binding_may_share_the_field_name() -> Result<(), MissingIeError> {
+fn extraction_binding_may_share_the_field_name() -> Result<(), Error> {
     let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
         IGNORE, UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(42u64),
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
-    );
+    )?;
     let request: UEContextReleaseRequest = pdu.decode_value().expect("decode message");
     extract_ngap_ies!(&request, UEContextReleaseRequest,
         req amf_ue_ngap_id: u64 = AMF_UE_NGAP_ID(amf_ue_ngap_id),
@@ -399,23 +400,24 @@ fn extraction_binding_may_share_the_field_name() -> Result<(), MissingIeError> {
 
 /// A message with the identifier that the functions below require, or without it.
 fn release_request(id: Option<u64>) -> UEContextReleaseRequest {
-    let ies = id
-        .map(|id| oxirush_ngap::build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(id)));
+    let ie =
+        |id: u64| oxirush_ngap::build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(id));
+    let ies = id.map(|id| ie(id).expect("an identifier"));
     UEContextReleaseRequest::new(ProtocolIEContainer(ies.into_iter().collect()))
 }
 
 /// A `req` field that is not there is the error of the enclosing function: the
-/// macro converts its `MissingIeError` as `?` converts one, here into an error
-/// type of the caller that has a `From<MissingIeError>`.
+/// macro converts its error as `?` converts one, here into an error type of the
+/// caller that has a `From` of the error of the crate.
 #[test]
 fn a_missing_required_ie_is_an_error_of_the_callers_own_type() {
     #[derive(Debug, PartialEq)]
     enum Refused {
-        Missing(&'static str),
+        Codec(ErrorKind),
     }
-    impl From<MissingIeError> for Refused {
-        fn from(error: MissingIeError) -> Self {
-            Self::Missing(error.ie_name)
+    impl From<Error> for Refused {
+        fn from(error: Error) -> Self {
+            Self::Codec(error.kind())
         }
     }
     fn id(request: &UEContextReleaseRequest) -> Result<u64, Refused> {
@@ -424,12 +426,13 @@ fn a_missing_required_ie_is_an_error_of_the_callers_own_type() {
         );
         Ok(amf_id)
     }
-    assert_eq!(id(&release_request(None)), Err(Refused::Missing("amf_id")));
+    let missing = Refused::Codec(ErrorKind::MissingIe);
+    assert_eq!(id(&release_request(None)), Err(missing));
     assert_eq!(id(&release_request(Some(42))), Ok(42));
 }
 
-/// The same in a function whose error is a `Box<dyn Error>`, which holds the
-/// `MissingIeError`.
+/// The same in a function whose error is a `Box<dyn Error>`, which holds the error
+/// of the crate.
 #[test]
 fn a_missing_required_ie_is_a_boxed_error() {
     fn id(request: &UEContextReleaseRequest) -> Result<u64, Box<dyn std::error::Error>> {
@@ -439,27 +442,28 @@ fn a_missing_required_ie_is_a_boxed_error() {
         Ok(amf_id)
     }
     let error = id(&release_request(None)).unwrap_err();
-    let missing = error.downcast_ref::<MissingIeError>().expect("the error");
-    assert_eq!(missing.ie_name, "amf_id");
+    let missing = error.downcast_ref::<Error>().expect("the error");
+    assert_eq!(missing.kind(), ErrorKind::MissingIe);
     assert_eq!(
         error.to_string(),
-        "missing or invalid required NGAP IE: amf_id"
+        "this UEContextReleaseRequest has no AMF-UE-NGAP-ID, which the field `amf_id` requires"
     );
     assert_eq!(id(&release_request(Some(42))).unwrap(), 42);
 }
 
-/// And in a function whose error is `MissingIeError` itself, which needs no
+/// And in a function whose error is the error of the crate itself, which needs no
 /// conversion.
 #[test]
-fn a_missing_required_ie_is_a_missing_ie_error() {
-    fn id(request: &UEContextReleaseRequest) -> Result<u64, MissingIeError> {
+fn a_missing_required_ie_is_an_error_of_the_crate() {
+    fn id(request: &UEContextReleaseRequest) -> Result<u64, Error> {
         extract_ngap_ies!(request, UEContextReleaseRequest,
             req amf_id: u64 = AMF_UE_NGAP_ID(id),
         );
         Ok(amf_id)
     }
-    assert_eq!(id(&release_request(None)).unwrap_err().ie_name, "amf_id");
-    assert_eq!(id(&release_request(Some(42))).unwrap(), 42);
+    let missing = id(&release_request(None)).unwrap_err();
+    assert_eq!(missing.kind(), ErrorKind::MissingIe);
+    assert_eq!(id(&release_request(Some(42))), Ok(42));
 }
 
 /// An open type holds a complete encoding, in which an empty encoding is one

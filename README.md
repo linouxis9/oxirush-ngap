@@ -13,35 +13,38 @@ its IEs by their names.
 ```rust
 use oxirush_ngap::{build_ngap, extract_ngap_ies, ngap::*};
 
-// Decode a UE CONTEXT RELEASE REQUEST
-let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-let pdu = NGAP_PDU::decode(&bytes).unwrap();
-assert_eq!((pdu.procedure_code(), pdu.is_initiating()), (42, true));
-println!("{}", pdu.procedure_name());
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Decode a UE CONTEXT RELEASE REQUEST
+    let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500")?;
+    let pdu = NGAP_PDU::decode(&bytes)?;
+    assert_eq!((pdu.procedure_code(), pdu.is_initiating()), (42, true));
+    println!("{}", pdu.procedure_name());
 
-// Read its IEs by name. An `opt` field is `None` when its IE is not there,
-// and what follows `=>` is what the field keeps of the decoded value
-let request: UEContextReleaseRequest = pdu.decode_value().unwrap();
-extract_ngap_ies!(request, UEContextReleaseRequest,
-    opt amf_id: u64 = AMF_UE_NGAP_ID(id),
-    opt ran_id: u32 = RAN_UE_NGAP_ID(id),
-    opt cause: Cause = Cause(cause) => cause,
-);
-println!("AMF={amf_id:?} RAN={ran_id:?} cause={cause:?}");
+    // Read its IEs by name. An `opt` field is `None` when its IE is not there,
+    // and what follows `=>` is what the field keeps of the decoded value
+    let request: UEContextReleaseRequest = pdu.decode_value()?;
+    extract_ngap_ies!(request, UEContextReleaseRequest,
+        opt amf_id: u64 = AMF_UE_NGAP_ID(id),
+        opt ran_id: u32 = RAN_UE_NGAP_ID(id),
+        opt cause: Cause = Cause(cause) => cause,
+    );
+    println!("AMF={amf_id:?} RAN={ran_id:?} cause={cause:?}");
 
-// Build it with another cause: the direction, the procedure, the criticality
-// of the PDU and the message, then each IE with its criticality
-let rebuilt = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-    IGNORE, UEContextReleaseRequest,
+    // Build it with another cause: the direction, the procedure, the criticality
+    // of the PDU and the message, then each IE with its criticality
+    let rebuilt = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
+        IGNORE, UEContextReleaseRequest,
 
-    REJECT AMF_UE_NGAP_ID(42u64),
-    REJECT RAN_UE_NGAP_ID(7u32),
-    IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::radio_connection_with_ue_lost)),
-);
+        REJECT AMF_UE_NGAP_ID(42u64),
+        REJECT RAN_UE_NGAP_ID(7u32),
+        IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::radio_connection_with_ue_lost)),
+    )?;
 
-// Encode it
-let encoded = hex::encode(rebuilt.encode().unwrap());
-assert_eq!(encoded, "002a4015000003000a0002002a005500020007000f40020540");
+    // Encode it
+    let encoded = hex::encode(rebuilt.encode()?);
+    assert_eq!(encoded, "002a4015000003000a0002002a005500020007000f40020540");
+    Ok(())
+}
 ```
 
 ```text
@@ -225,9 +228,10 @@ Unsuccessful_NGSetup is not handled here
 The name of an IE is its ASN.1 identifier without `id-` and with `_` for `-`:
 `id-AMF-UE-NGAP-ID` is `AMF_UE_NGAP_ID`. The name of a type stands for the IE
 of that type where one IE alone has it, as `RANUENGAPID` for
-`RAN_UE_NGAP_ID`. A name that the crate does not have does not compile, and a
-value that does not encode, such as an integer outside its constraint, is a
-panic.
+`RAN_UE_NGAP_ID`. A name that the crate does not have does not compile, and
+neither does a call that leaves out a criticality: the error says which one
+is missing. The macro gives a `Result`: a value that does not encode, such
+as an integer outside its constraint, is an error of the kind `Encode`.
 
 A criticality says what a receiver does with what it does not comprehend
 (TS 38.413 clause 10.3.2). The specification assigns one to each procedure
@@ -238,9 +242,9 @@ the one that they are given and check none; with the `inspect` feature,
 ### Read the IEs of a message
 
 ```rust
-use oxirush_ngap::{extract_ngap_ies, macros::MissingIeError, ngap::*};
+use oxirush_ngap::{Error, extract_ngap_ies, ngap::*};
 
-fn handle(request: &UEContextReleaseRequest) -> Result<(), MissingIeError> {
+fn handle(request: &UEContextReleaseRequest) -> Result<(), Error> {
     extract_ngap_ies!(request, UEContextReleaseRequest,
         req amf_id: u64 = AMF_UE_NGAP_ID(id),
         req ran_id: u32 = RAN_UE_NGAP_ID(id),
@@ -256,10 +260,14 @@ A field is `req` or `opt`, its name and its type, then the IE with a name for
 its decoded value. After `=>` comes what the field keeps of that value;
 without it, the field is the `.0` of the generated newtype.
 
-| Field | Is | When the IE is absent or does not decode |
-|-------|----|------------------------------------------|
-| `req` | A `T` | The enclosing function returns an `Err` that names the field: a `MissingIeError`, converted as `?` converts one, so the error type of the function is `MissingIeError`, `Box<dyn std::error::Error>` or any type with a `From<MissingIeError>` |
-| `opt` | An `Option<T>` | The field is `None` |
+| Field | Is | When the IE is not in the message | When it is there and does not decode |
+|-------|----|-----------------------------------|--------------------------------------|
+| `req` | A `T` | An error of the kind `MissingIe`, which names the IE and the field | An error of the kind `UndecodableIe` |
+| `opt` | An `Option<T>` | `None` | The same error |
+
+The error is that of the enclosing function, converted as `?` converts one:
+the function returns a `Result` whose error is `Error`,
+`Box<dyn std::error::Error>` or any type with a `From<Error>`.
 
 ### Change or build one IE
 
@@ -268,22 +276,25 @@ use oxirush_ngap::{build_ngap_ie, ngap::*, with_ngap_ie_mut};
 
 // A message with one IE, which is built alone
 let mut message = UplinkNASTransport::new(ProtocolIEContainer(vec![
-    build_ngap_ie!(UplinkNASTransport, REJECT AMF_UE_NGAP_ID(1u64)),
+    build_ngap_ie!(UplinkNASTransport, REJECT AMF_UE_NGAP_ID(1u64)).unwrap(),
 ]));
 
 // The IE is decoded, changed and encoded again in its place
 let updated = with_ngap_ie_mut!(message, UplinkNASTransport,
     AMF_UE_NGAP_ID(id) = 42u64
 );
-assert!(updated);
+assert_eq!(updated, Ok(true));
 ```
 
 `build_ngap_ie!` builds one entry of the IEs of a message, a
-`ProtocolIEField`. `with_ngap_ie_mut!` decodes one IE, changes it and encodes
-it again, and says whether it did: `= value` sets the `.0` of a newtype, and
-`=> expression` changes the decoded value and gives the `bool` that the macro
-returns. When a message has the same IE twice, `with_ngap_ie_mut!` and
-`extract_ngap_ies!` both use the last one that decodes.
+`ProtocolIEField`, and gives a `Result` as `build_ngap!` does.
+`with_ngap_ie_mut!` decodes one IE, changes it and encodes it again: `= value`
+sets the `.0` of a newtype, and `=> expression` changes the decoded value and
+says `true` or `false`. It gives a `Result<bool, Error>`: what the expression
+says, `Ok(false)` for an IE that is not in the message, and an error for an
+IE that does not decode or a changed value that does not encode. When a
+message has the same IE twice, `with_ngap_ie_mut!` and `extract_ngap_ies!` both
+use the last one, and one of them that does not decode is an error for both.
 
 ### Identities and capabilities
 
@@ -313,8 +324,9 @@ of a PLMN identity, and has `None` for octets that are not one, as
 
 ### Errors
 
-The codec returns an `oxirush_ngap::Error`: `NGAP_PDU::decode`, `encode` and
-`decode_value`, and `decode_open_type` and `encode_open_type`.
+The codec and the macros return an `oxirush_ngap::Error`: `NGAP_PDU::decode`,
+`encode` and `decode_value`, `decode_open_type` and `encode_open_type`, and
+`build_ngap!`, `build_ngap_ie!`, `extract_ngap_ies!` and `with_ngap_ie_mut!`.
 
 | Of an `Error` | Gives |
 |---------------|-------|
@@ -330,6 +342,8 @@ their message are, and `?` converts one into a `Box<dyn std::error::Error>`.
 | `Decode` | Octets are not the value that they are decoded as: they end before it does, go on after it, or hold a value outside its constraint |
 | `Encode` | A value does not encode, as an integer outside its constraint |
 | `WrongMessage` | `decode_value::<T>()` on a PDU that holds another message than `T` |
+| `MissingIe` | A `req` field of `extract_ngap_ies!` whose IE is not in the message |
+| `UndecodableIe` | An IE that is in the message and does not decode as its type: a `req` or an `opt` field of `extract_ngap_ies!`, and the IE of `with_ngap_ie_mut!` |
 
 ```rust
 use oxirush_ngap::{ErrorKind, ngap::*};
@@ -350,7 +364,7 @@ println!("{}", std::error::Error::source(&short).unwrap());
 
 ```text
 the message of this PDU is UEContextReleaseRequest, not NGSetupRequest: kind() says which message a PDU holds
-these octets do not decode as NGAP-PDU: they end before the value does, in its field `value`
+these octets do not decode as NGAP-PDU: the octets end before the value does, in its field `value`
 Error when decoding field `InitiatingMessage.value`: Need more data to continue: Size(120) (Codec: APER) (Codec: APER)
 ```
 
@@ -898,7 +912,7 @@ S1AP.
 |------|---------------|
 | `tests/aper_vectors.rs` | The 144 messages of `tests/fixtures/messages.tsv`, one for each message of each procedure, were encoded by pycrate 0.8.1. Each decodes to its type and encodes to the same octets, and each of its truncations and one more octet are refused. |
 | `tests/aper_round_trip.rs` | The macros, and the encodings where the codec departs from rasn's: constrained lists, `UTF8String`, long bit strings. |
-| `tests/errors.rs` | The errors of the typed API, each with its kind and its message: a PDU that is decoded as another message, octets that are no PDU, and a value outside its constraint. |
+| `tests/errors.rs` | The errors of the typed API, each with its kind and its message: a PDU that is decoded as another message, octets that are no PDU, a value outside its constraint in a function and in each macro, and an IE that is absent or does not decode, for a `req` and for an `opt` field. |
 | `tests/unknown_extensions.rs` | The additions of a later release to an extensible `SEQUENCE` are skipped, and what follows them is read. |
 | `tests/allocation.rs` | Decoding reserves memory for the elements that it reads, not for the count that a length determinant claims. |
 | `tests/inspection.rs` | Each of the 144 messages is the same octets through its view, and through its tree where it has IEs to name. Each path of each selects its value, with and without `value` and `decoded`, and is one that `check_path` takes. Edits, written trees, criticalities, the two IEs that have the type of what they extend, and the identifiers of the registry against the constants of the bindings. |

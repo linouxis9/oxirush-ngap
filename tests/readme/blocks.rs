@@ -54,35 +54,40 @@ pub const BLOCKS: &[fn()] = &[
 fn block_1() {
     use oxirush_ngap::{build_ngap, extract_ngap_ies, ngap::*};
 
-    // Decode a UE CONTEXT RELEASE REQUEST
-    let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-    let pdu = NGAP_PDU::decode(&bytes).unwrap();
-    assert_eq!((pdu.procedure_code(), pdu.is_initiating()), (42, true));
-    println!("{}", pdu.procedure_name());
+    fn main() -> Result<(), Box<dyn std::error::Error>> {
+        // Decode a UE CONTEXT RELEASE REQUEST
+        let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500")?;
+        let pdu = NGAP_PDU::decode(&bytes)?;
+        assert_eq!((pdu.procedure_code(), pdu.is_initiating()), (42, true));
+        println!("{}", pdu.procedure_name());
 
-    // Read its IEs by name. An `opt` field is `None` when its IE is not there,
-    // and what follows `=>` is what the field keeps of the decoded value
-    let request: UEContextReleaseRequest = pdu.decode_value().unwrap();
-    extract_ngap_ies!(request, UEContextReleaseRequest,
-        opt amf_id: u64 = AMF_UE_NGAP_ID(id),
-        opt ran_id: u32 = RAN_UE_NGAP_ID(id),
-        opt cause: Cause = Cause(cause) => cause,
-    );
-    println!("AMF={amf_id:?} RAN={ran_id:?} cause={cause:?}");
+        // Read its IEs by name. An `opt` field is `None` when its IE is not there,
+        // and what follows `=>` is what the field keeps of the decoded value
+        let request: UEContextReleaseRequest = pdu.decode_value()?;
+        extract_ngap_ies!(request, UEContextReleaseRequest,
+            opt amf_id: u64 = AMF_UE_NGAP_ID(id),
+            opt ran_id: u32 = RAN_UE_NGAP_ID(id),
+            opt cause: Cause = Cause(cause) => cause,
+        );
+        println!("AMF={amf_id:?} RAN={ran_id:?} cause={cause:?}");
 
-    // Build it with another cause: the direction, the procedure, the criticality
-    // of the PDU and the message, then each IE with its criticality
-    let rebuilt = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+        // Build it with another cause: the direction, the procedure, the criticality
+        // of the PDU and the message, then each IE with its criticality
+        let rebuilt = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
+            IGNORE, UEContextReleaseRequest,
 
-        REJECT AMF_UE_NGAP_ID(42u64),
-        REJECT RAN_UE_NGAP_ID(7u32),
-        IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::radio_connection_with_ue_lost)),
-    );
+            REJECT AMF_UE_NGAP_ID(42u64),
+            REJECT RAN_UE_NGAP_ID(7u32),
+            IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::radio_connection_with_ue_lost)),
+        )?;
 
-    // Encode it
-    let encoded = hex::encode(rebuilt.encode().unwrap());
-    assert_eq!(encoded, "002a4015000003000a0002002a005500020007000f40020540");
+        // Encode it
+        let encoded = hex::encode(rebuilt.encode()?);
+        assert_eq!(encoded, "002a4015000003000a0002002a005500020007000f40020540");
+        Ok(())
+    }
+
+    main().unwrap();
 }
 
 /// The Rust block 2 of README.md.
@@ -136,9 +141,9 @@ fn block_3() {
 
 /// The Rust block 4 of README.md.
 fn block_4() {
-    use oxirush_ngap::{extract_ngap_ies, macros::MissingIeError, ngap::*};
+    use oxirush_ngap::{Error, extract_ngap_ies, ngap::*};
 
-    fn handle(request: &UEContextReleaseRequest) -> Result<(), MissingIeError> {
+    fn handle(request: &UEContextReleaseRequest) -> Result<(), Error> {
         extract_ngap_ies!(request, UEContextReleaseRequest,
             req amf_id: u64 = AMF_UE_NGAP_ID(id),
             req ran_id: u32 = RAN_UE_NGAP_ID(id),
@@ -156,14 +161,14 @@ fn block_5() {
 
     // A message with one IE, which is built alone
     let mut message = UplinkNASTransport::new(ProtocolIEContainer(vec![
-        build_ngap_ie!(UplinkNASTransport, REJECT AMF_UE_NGAP_ID(1u64)),
+        build_ngap_ie!(UplinkNASTransport, REJECT AMF_UE_NGAP_ID(1u64)).unwrap(),
     ]));
 
     // The IE is decoded, changed and encoded again in its place
     let updated = with_ngap_ie_mut!(message, UplinkNASTransport,
         AMF_UE_NGAP_ID(id) = 42u64
     );
-    assert!(updated);
+    assert_eq!(updated, Ok(true));
 }
 
 /// The Rust block 6 of README.md.

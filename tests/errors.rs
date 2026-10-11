@@ -2,7 +2,9 @@
 //! caller matches on, and what its message says.
 
 use oxirush_ngap::ngap::*;
-use oxirush_ngap::{Error, ErrorKind, Message};
+use oxirush_ngap::{
+    Error, ErrorKind, Message, build_ngap, build_ngap_ie, extract_ngap_ies, with_ngap_ie_mut,
+};
 use rasn::types::Any;
 
 /// A UE CONTEXT RELEASE REQUEST with its three IEs, the message of the README.
@@ -100,7 +102,7 @@ fn octets_that_are_no_pdu_are_a_decode_error() {
     assert_eq!(none.kind(), ErrorKind::Decode);
     assert_eq!(
         none.to_string(),
-        "these octets do not decode as NGAP-PDU: there are none"
+        "these octets do not decode as NGAP-PDU: there are no octets"
     );
     for cut in 1..octets.len() {
         let short = NGAP_PDU::decode(&octets[..cut]).unwrap_err();
@@ -135,7 +137,7 @@ fn an_open_type_that_is_not_the_value_asked_for_is_a_decode_error() {
     assert_eq!(short.kind(), ErrorKind::Decode);
     assert_eq!(
         short.to_string(),
-        "these octets do not decode as AMF-UE-NGAP-ID: they end before the value does"
+        "these octets do not decode as AMF-UE-NGAP-ID: the octets end before the value does"
     );
     let long = decode_open_type::<AMFUENGAPID>(&Any::new(vec![0x00, 0x2a, 0x00, 0x00]));
     assert_eq!(
@@ -172,4 +174,132 @@ fn an_error_is_the_error_of_a_function_of_the_caller() {
         .downcast_ref::<Error>()
         .expect("the error of the crate");
     assert_eq!(error.kind(), ErrorKind::Decode);
+}
+
+/// What the macro reads in a request: an identifier that it requires, and one that
+/// the request may be without.
+fn ids(request: &UEContextReleaseRequest) -> Result<(u64, Option<u32>), Error> {
+    extract_ngap_ies!(request, UEContextReleaseRequest,
+        req amf_id: u64 = AMF_UE_NGAP_ID(id),
+        opt ran_id: u32 = RAN_UE_NGAP_ID(id),
+    );
+    Ok((amf_id, ran_id))
+}
+
+fn request(ies: Vec<ProtocolIEField>) -> UEContextReleaseRequest {
+    UEContextReleaseRequest::new(ProtocolIEContainer(ies))
+}
+
+/// The entry of an AMF UE NGAP ID and that of a RAN UE NGAP ID.
+fn amf_and_ran() -> (ProtocolIEField, ProtocolIEField) {
+    let amf = build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(42u64));
+    let ran = build_ngap_ie!(UEContextReleaseRequest, REJECT RAN_UE_NGAP_ID(7u32));
+    (amf.unwrap(), ran.unwrap())
+}
+
+/// An entry with the identifier of an IE, whose octets are not the value of that IE.
+fn undecodable(id: u16) -> ProtocolIEField {
+    ProtocolIEField::new(id, Criticality::reject, Any::new(vec![0xff]))
+}
+
+#[test]
+fn a_required_ie_that_is_absent_is_missing_and_an_optional_one_is_none() {
+    let (amf, ran) = amf_and_ran();
+    assert_eq!(
+        ids(&request(vec![amf.clone(), ran.clone()])),
+        Ok((42, Some(7)))
+    );
+    assert_eq!(ids(&request(vec![amf])), Ok((42, None)));
+
+    let missing = ids(&request(vec![ran])).unwrap_err();
+    assert_eq!(missing.kind(), ErrorKind::MissingIe);
+    assert_eq!(
+        missing.to_string(),
+        "this UEContextReleaseRequest has no AMF-UE-NGAP-ID, which the field `amf_id` requires"
+    );
+    assert_eq!(source(&missing), None);
+}
+
+#[test]
+fn an_ie_that_does_not_decode_is_an_error_for_a_required_and_for_an_optional_field() {
+    let (amf, ran) = amf_and_ran();
+
+    // The one that is required.
+    let required = ids(&request(vec![undecodable(10), ran])).unwrap_err();
+    assert_eq!(required.kind(), ErrorKind::UndecodableIe);
+    assert_eq!(
+        required.to_string(),
+        "the AMF-UE-NGAP-ID of this UEContextReleaseRequest does not decode: the octets end \
+         before the value does"
+    );
+    assert!(source(&required).is_some_and(|source| source.contains("Codec: APER")));
+
+    // The one that may be absent is there: it is not `None`.
+    let optional = ids(&request(vec![amf, undecodable(85)])).unwrap_err();
+    assert_eq!(optional.kind(), ErrorKind::UndecodableIe);
+    let text = optional.to_string();
+    assert!(
+        text.starts_with("the RAN-UE-NGAP-ID of this UEContextReleaseRequest does not decode: "),
+        "{text}"
+    );
+}
+
+#[test]
+fn a_value_outside_its_constraint_is_an_error_of_the_macros_that_build() {
+    // An AMF UE NGAP ID is an INTEGER (0..1099511627775), TS 38.413 clause 9.3.3.1, and
+    // the macro takes a `u64`.
+    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
+        IGNORE, UEContextReleaseRequest,
+        REJECT AMF_UE_NGAP_ID(u64::MAX),
+        REJECT RAN_UE_NGAP_ID(7u32),
+    );
+    let error = pdu.unwrap_err();
+    assert_eq!(error.kind(), ErrorKind::Encode);
+    assert_eq!(
+        error.to_string(),
+        "a value of AMF-UE-NGAP-ID does not encode: 18446744073709551615 is outside its \
+         constraint (0..1099511627775)"
+    );
+    let ie = build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(u64::MAX));
+    assert_eq!(ie.unwrap_err(), error);
+
+    // The last value of the constraint is built.
+    let last = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
+        IGNORE, UEContextReleaseRequest,
+        REJECT AMF_UE_NGAP_ID((1u64 << 40) - 1),
+    );
+    assert!(last.is_ok());
+}
+
+#[test]
+fn changing_an_ie_says_whether_it_did_or_why_it_did_not() {
+    let (amf, _) = amf_and_ran();
+    let mut message = request(vec![amf]);
+
+    // The IE is changed, another one is not there, and the expression says no.
+    let changed = with_ngap_ie_mut!(message, UEContextReleaseRequest, AMF_UE_NGAP_ID(id) = 43u64);
+    assert_eq!(changed, Ok(true));
+    let absent = with_ngap_ie_mut!(message, UEContextReleaseRequest, RAN_UE_NGAP_ID(id) = 8u32);
+    assert_eq!(absent, Ok(false));
+    let refused =
+        with_ngap_ie_mut!(message, UEContextReleaseRequest, AMF_UE_NGAP_ID(id) => id.0 == 0);
+    assert_eq!(refused, Ok(false));
+    assert_eq!(ids(&message), Ok((43, None)));
+
+    // A value that does not encode: the message is as it was.
+    let before = message.clone();
+    let outside = with_ngap_ie_mut!(
+        message,
+        UEContextReleaseRequest,
+        AMF_UE_NGAP_ID(id) = u64::MAX
+    );
+    assert_eq!(outside.unwrap_err().kind(), ErrorKind::Encode);
+    assert_eq!(message, before);
+
+    // An IE that does not decode is not changed either.
+    let mut message = request(vec![undecodable(10)]);
+    let before = message.clone();
+    let unread = with_ngap_ie_mut!(message, UEContextReleaseRequest, AMF_UE_NGAP_ID(id) = 1u64);
+    assert_eq!(unread.unwrap_err().kind(), ErrorKind::UndecodableIe);
+    assert_eq!(message, before);
 }

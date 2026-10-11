@@ -42,9 +42,11 @@
 //!   The `id` is a number, or the name of the IE;
 //! - to send given octets as an IE, write them in hexadecimal as its `octets`, or as
 //!   `_raw_value`, and leave `value` out. For a transfer, replace the member with its
-//!   octets;
+//!   octets, or with an object that has them as its `octets` alone;
 //! - to add a transfer, or the value of an IE that contains a type, write it as an object
-//!   with its `decoded` value alone, which is encoded as the type contained;
+//!   with its `decoded` value alone, which is encoded as the type contained, or as that
+//!   value itself: an object that has no member of a transfer, which are `decoded`,
+//!   `octets` and those that start with `_`, is its decoded value;
 //! - an IE with a `_decode_error` has its octets as `value`: change them there.
 //!
 //! Beside a `value`, `_raw_value` is what the value is compared with, as `_raw_message` is
@@ -85,6 +87,25 @@
 //!
 //! Any other list selects by position and `*`.
 //!
+//! `value` and `decoded` may be left out of a path. A segment that names no member of an
+//! IE, which has `id`, `criticality`, `value`, `octets` and the members that start with
+//! `_`, is taken in its value, and one that names no member of a transfer, which has
+//! `decoded`, `octets` and the members that start with `_`, in its decoded value. So
+//! `/ngap/Cause/radioNetwork` is `/ngap/Cause/value/radioNetwork`, and these two paths
+//! select the same value:
+//!
+//! ```text
+//! /ngap/PDUSessionResourceSetupListSUReq/value/0/pDUSessionResourceSetupRequestTransfer/decoded/QosFlowSetupRequestList/value/0/qosFlowIdentifier
+//! /ngap/PDUSessionResourceSetupListSUReq/0/pDUSessionResourceSetupRequestTransfer/QosFlowSetupRequestList/0/qosFlowIdentifier
+//! ```
+//!
+//! What an IE or a transfer has itself comes first: `/ngap/Cause/value` is the value of
+//! the IE and `/ngap/Cause/*` each of its members, so the entries of a list that is the
+//! value of an IE are `value/*`. A member of a value that is named as one of its IE is
+//! reached after `value`: only a string of bits whose size varies has one, its `value`,
+//! as in `/ngap/TraceCollectionEntityIPAddress/value/value`. The value of an IE of an
+//! extension container is its `extensionValue`, and is left out the same way.
+//!
 //! ## Names
 //!
 //! A name is its letters and its digits, whatever their case and whatever is between
@@ -105,9 +126,11 @@
 //!
 //! A name that the type of a value cannot have is an error, which lists the members
 //! that the type has: a member that is written wrong is not taken for one that is not
-//! there. So are a member of a value that has none, a path into a value that did not
-//! decode, and the name of an IE in a list whose entries are no IEs. After `*`, a
-//! segment is an error when none of the values that it is applied to can have it.
+//! there. Under an IE or a transfer, it lists those of its value, then those of the IE
+//! or of the transfer itself. So are a member of a value that has none, a path into a
+//! value that did not decode, and the name of an IE in a list whose entries are no IEs.
+//! After `*`, a segment is an error when none of the values that it is applied to can
+//! have it.
 //!
 //! [`check_path`] says the same of a path without a tree: whether it can select
 //! anything in a message of a name, whose IEs are those of its object set
@@ -151,7 +174,7 @@
 
 use serde_json::{Value, json};
 
-use crate::inspect_paths::{EDITED, same_name, written_ie};
+use crate::inspect_paths::{EDITED, listed_ies, named_ies, of_a_transfer, same_name, written_ie};
 pub use crate::inspect_paths::{check_path, enumerated_at, insert, paths, remove, select, set};
 use crate::inspect_registry as registry;
 use crate::ngap::NGAP_PDU;
@@ -759,7 +782,7 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
                     } else {
                         *child = raw;
                     }
-                } else if let Some(written) = child.get("decoded") {
+                } else if let Some(members) = child.as_object() {
                     // What was not received is encoded from the value written.
                     let transfer = match key.as_str() {
                         "value" | "extensionValue" => id.and_then(registry::ie_contents),
@@ -769,12 +792,21 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
                         _ => None,
                     };
                     if let Some(transfer) = transfer {
-                        if child.as_object().is_some_and(|members| members.len() != 1) {
+                        // The decoded value, as the object itself when it has no member
+                        // of a transfer or as its `decoded` member, or the `octets`.
+                        let alone = |member| members.get(member).filter(|_| members.len() == 1);
+                        let wire = if !members.keys().any(|name| of_a_transfer(name)) {
+                            json!(hex(&(transfer.encode)(child)?))
+                        } else if let Some(written) = alone("decoded") {
+                            json!(hex(&(transfer.encode)(written)?))
+                        } else if let Some(octets) = alone("octets") {
+                            octets.clone()
+                        } else {
                             return Err(format!(
                                 "{key} is written with its decoded value alone, or as its octets"
                             ));
-                        }
-                        *child = json!(hex(&(transfer.encode)(written)?));
+                        };
+                        *child = wire;
                     }
                 }
             }
@@ -856,11 +888,29 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
 /// ```
 ///
 /// An IE is one member: the name that ASN.1 gives it, or its identifier in digits when
-/// it has none, with its value as [`inspect_pdu`] shows it. One that did not decode has
-/// its octets, as `{"octets": "…"}`. What the specification assigns is left out: the
-/// `criticality` of the PDU is there when it is not that of the procedure, and that of
-/// an IE, beside its name, when it is not the one that the message assigns it.
+/// it has none, with its value. One that did not decode has its octets, as
+/// `{"octets": "…"}`. What the specification assigns is left out: the `criticality` of
+/// the PDU is there when it is not that of the procedure, and that of an IE, beside its
+/// name, when it is not the one that the message assigns it.
 /// [`message_from_tree`] reads this form back.
+///
+/// A value is as [`inspect_pdu`] shows it, without what a tree keeps of what was
+/// received, to any depth. A transfer is its decoded value, or `{"octets": "…"}` when
+/// it did not decode. The IEs that a value holds, alone, as the entries of a list, in
+/// an extension container or as the message that a transfer contains, are each a name
+/// with a value too:
+///
+/// ```json
+/// {"PDUSessionResourceSetupListSUReq": [{"pDUSessionID": 5, "s-NSSAI": {"sST": 1},
+///   "pDUSessionResourceSetupRequestTransfer": {"protocolIEs": [
+///     {"PDUSessionType": "ipv4", "criticality": "reject"}]}}]}
+/// ```
+///
+/// The `criticality` of an IE that a value holds alone or as an entry of a list is
+/// left out when it is the one that [`item_criticality`] gives. That of an IE of a
+/// message that a transfer contains, and that of an IE of an extension container, is
+/// always there: the tables have the criticality that an object set assigns for the
+/// messages of the procedures and for the single containers only.
 ///
 /// An error for a PDU whose message does not decode, for a procedure that the
 /// specification does not have in that direction, and for a message without a list of
@@ -868,27 +918,11 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
 pub fn message_tree(pdu: &NGAP_PDU) -> Result<Value, String> {
     let name = message_name(pdu).ok_or("the specification has no message of this procedure")?;
     let tree = inspect_pdu(pdu)?;
-    let listed = tree["message"]["protocolIEs"].as_array();
-    let listed = listed.ok_or_else(|| format!("a message {name} has no list of IEs"))?;
-    let assigned = message_ie_criticalities(name).unwrap_or_default();
-    let mut ies = Vec::with_capacity(listed.len());
-    for ie in listed {
-        let id = ie["id"].as_u64().ok_or("an IE has its identifier")?;
-        let named = ie_names().iter().find(|(known, _)| u64::from(*known) == id);
-        let name = named.map_or_else(|| id.to_string(), |(_, name)| (*name).to_owned());
-        let value = match ie.get("_decode_error") {
-            Some(_) => json!({"octets": ie["value"]}),
-            None => ie["value"].clone(),
-        };
-        let mut entry = serde_json::Map::new();
-        entry.insert(name, value);
-        let of_the_message = assigned.iter().find(|(known, _)| u64::from(*known) == id);
-        if of_the_message.map(|(_, criticality)| *criticality) != ie["criticality"].as_str() {
-            entry.insert("criticality".into(), ie["criticality"].clone());
-        }
-        ies.push(Value::Object(entry));
+    let listed = &tree["message"]["protocolIEs"];
+    if !listed.is_array() {
+        return Err(format!("a message {name} has no list of IEs"));
     }
-    let mut message = json!({"message": name, "ies": ies});
+    let mut message = json!({"message": name, "ies": named_ies(name, listed)?});
     if tree["criticality"].as_str() != message_criticality(name) {
         message["criticality"] = tree["criticality"].clone();
     }
@@ -903,9 +937,16 @@ pub fn message_tree(pdu: &NGAP_PDU) -> Result<Value, String> {
 /// of the PDU, and the message the criticality of each of its IEs; a `criticality`
 /// beside the name of the message or of an IE is sent in its place. An IE that the
 /// message does not have, by its name or by its identifier in digits, says its
-/// `criticality`. A value is written as [`inspect_pdu`] shows it and encoded as the type
-/// of the IE; `{"octets": "…"}` is the octets of the IE as they are sent, whatever they
-/// are.
+/// `criticality`. A value is encoded as the type of the IE; `{"octets": "…"}` is the
+/// octets of the IE as they are sent, whatever they are.
+///
+/// A value is written as [`message_tree`] shows it: a transfer as its decoded value, or
+/// as its `octets`, and each IE that the value holds as its name with its value. Such
+/// an IE says its `criticality` where [`message_tree`] always shows it, and where
+/// [`item_criticality`] has none for it. A value is also written as [`inspect_pdu`]
+/// shows it, with `decoded` for the value of a transfer and an entry with its `id`,
+/// its `criticality` and its `value` for an IE, and the two forms are taken in one
+/// message.
 pub fn message_from_tree(tree: &Value) -> Result<NGAP_PDU, String> {
     const FORM: &str = "a message is written as {\"message\": NAME, \"ies\": [{NAME: VALUE}, …]}";
     let written = tree.as_object().ok_or(FORM)?;
@@ -922,43 +963,8 @@ pub fn message_from_tree(tree: &Value) -> Result<NGAP_PDU, String> {
         Some(criticality) => criticality.clone(),
         None => json!(message_criticality(name)),
     };
-    let assigned = message_ie_criticalities(name).unwrap_or_default();
-    let listed = written.get("ies").and_then(Value::as_array).ok_or(FORM)?;
-    let mut ies = Vec::with_capacity(listed.len());
-    for entry in listed {
-        const IE: &str = "an entry of \"ies\" is one IE: its name with its value";
-        let entry = entry.as_object().ok_or(IE)?;
-        let mut members = entry.iter().filter(|(member, _)| *member != "criticality");
-        let (Some((ie, value)), None) = (members.next(), members.next()) else {
-            return Err(IE.into());
-        };
-        let known = || ie_names().iter().find(|(_, known)| same_name(known, ie));
-        let id = match ie.parse::<u16>() {
-            Ok(id) => id,
-            Err(_) => {
-                known()
-                    .ok_or_else(|| format!("{ie:?} is not an IE of NGAP"))?
-                    .0
-            }
-        };
-        let criticality = match entry.get("criticality") {
-            Some(criticality) => criticality.clone(),
-            None => {
-                let of_the_message = assigned.iter().find(|(known, _)| *known == id);
-                let (_, criticality) = of_the_message.ok_or_else(|| {
-                    format!(
-                        "{name} has no IE {ie}: one that is sent in it says its \"criticality\""
-                    )
-                })?;
-                json!(criticality)
-            }
-        };
-        let octets = value.as_object().filter(|value| value.len() == 1);
-        ies.push(match octets.and_then(|value| value.get("octets")) {
-            Some(octets) => json!({"id": id, "criticality": criticality, "octets": octets}),
-            None => json!({"id": id, "criticality": criticality, "value": value}),
-        });
-    }
+    let listed = written.get("ies").filter(|ies| ies.is_array());
+    let ies = listed_ies(name, listed.ok_or(FORM)?)?;
     encode_pdu(&json!({
         "procedure_code": code,
         "direction": direction,

@@ -1,5 +1,5 @@
-//! The values of an inspection tree by their paths: see the module documentation of
-//! [`crate::inspect`].
+//! The values of an inspection tree by their paths, and the IEs of a message by their
+//! names: see the module documentation of [`crate::inspect`].
 
 use serde_json::{Map, Value, json};
 
@@ -17,6 +17,8 @@ const OCCURRENCES: usize = 4096;
 pub(crate) const EDITED: &str = "_edited";
 /// The members that hold the value of an IE or of a transfer.
 const VALUES: [&str; 3] = ["value", "extensionValue", "decoded"];
+/// How deep a message that is written by the names of its IEs is read.
+const WRITTEN: usize = 256;
 
 /// What a value of a tree is, as its ASN.1 type has it: what a path can select in it.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -442,6 +444,42 @@ fn has_octets(shape: Shape) -> bool {
     )
 }
 
+/// The member that holds the value of an IE or of a transfer of `shape`, which a path may
+/// leave out: a segment that names no member of the IE or of the transfer is taken in
+/// that value.
+fn value_member(shape: Shape) -> Option<&'static str> {
+    match shape {
+        Shape::Ie(_) => Some("value"),
+        Shape::Extension(_) => Some("extensionValue"),
+        Shape::Transfer(_) => Some("decoded"),
+        _ => None,
+    }
+}
+
+/// The members of a value of `shape` that a path names: those that its type has, and the
+/// `octets` of an IE or of a transfer.
+fn names(shape: Shape, members: &[Member]) -> Vec<&'static str> {
+    let mut names: Vec<_> = (members.iter().map(|(name, ..)| *name))
+        .filter(|name| shown(name) && *name != "_decode_error")
+        .collect();
+    if has_octets(shape) {
+        names.push("octets");
+    }
+    names
+}
+
+/// `reason`, why a segment selects nothing in the value of an IE or of a transfer of
+/// `shape`, with the members that the IE or the transfer has itself: the segment may be
+/// one of them, written wrong.
+fn or_its_own(reason: String, shape: Shape, members: &[Member]) -> String {
+    let of = match shape {
+        Shape::Transfer(_) => "a transfer",
+        _ => "an IE",
+    };
+    let own = names(shape, members).join(", ");
+    format!("{reason}; {of} itself has {own}")
+}
+
 /// Why a segment selects nothing in a value of `shape`: the type has no such member.
 fn no_member(shape: Shape, members: &[Member], part: &str, path: &str) -> String {
     // The root stands for the IEs of a message, which a private message has none of.
@@ -462,12 +500,7 @@ fn no_member(shape: Shape, members: &[Member], part: &str, path: &str) -> String
         Shape::Ie(_) | Shape::Extension(_) => "an IE".to_string(),
         _ => "this value".to_string(),
     };
-    let mut names: Vec<_> = (members.iter().map(|(name, ..)| *name))
-        .filter(|name| shown(name) && *name != "_decode_error")
-        .collect();
-    if has_octets(shape) {
-        names.push("octets");
-    }
+    let names = names(shape, members);
     match names.is_empty() {
         true => format!("{part:?} is not a member of {of}, which has none, at {path}"),
         false => format!(
@@ -547,7 +580,10 @@ fn advance<'a>(
                 }
                 return Ok(());
             }
-            if part.starts_with("@id=") {
+            // The value of an IE or of a transfer, in which a segment that names none of
+            // its members is taken, as if the member that holds it stood before.
+            let held = value_member(shape);
+            if part.starts_with("@id=") && held.is_none() {
                 return no(format!("IE-id selection requires an array at {path}"));
             }
             // `octets` is what an IE or a transfer was received as.
@@ -573,22 +609,30 @@ fn advance<'a>(
                     )),
                 };
             };
-            match member(&members, part) {
-                Some((name, of, _)) => match entry.get(*name) {
-                    None if *name == "decoded" && entry.contains_key("_decode_error") => {
-                        let error = entry["_decode_error"].as_str().unwrap_or_default();
-                        Err((
-                            true,
-                            format!("the transfer did not decode at {path}: {error}"),
-                        ))
-                    }
-                    value => {
-                        push(value, *of);
-                        Ok(())
-                    }
-                },
-                None => no(no_member(shape, &members, part, path)),
+            let own = member(&members, part);
+            let held = held.and_then(|held| member(&members, held));
+            let Some((name, of, _)) = own.or(held) else {
+                return no(no_member(shape, &members, part, path));
+            };
+            let value = match entry.get(*name) {
+                None if *name == "decoded" && entry.contains_key("_decode_error") => {
+                    let error = entry["_decode_error"].as_str().unwrap_or_default();
+                    return Err((
+                        true,
+                        format!("the transfer did not decode at {path}: {error}"),
+                    ));
+                }
+                value => value,
+            };
+            if own.is_some() {
+                push(value, *of);
+                return Ok(());
             }
+            let taken = advance((value, *of), part, named, path, next);
+            taken.map_err(|(unread, reason)| match unread {
+                true => (unread, reason),
+                false => (unread, or_its_own(reason, shape, &members)),
+            })
         }
         Some(Value::Array(entries)) => {
             let id = match part.strip_prefix("@id=") {
@@ -642,6 +686,14 @@ fn advance<'a>(
                 Ok(())
             }
             Shape::Transfer(_) if same_name(part, "decoded") => Ok(()),
+            // What is no member of a transfer is one of the decoded value, which a
+            // transfer that is its octets has not.
+            Shape::Transfer(contained) if !contained.is_empty() => {
+                let decoded = Shape::Named(contained);
+                let taken = typed(decoded, part, named, path, &mut |shape| push(None, shape));
+                let own = members(shape, None).unwrap_or_default();
+                taken.map_err(|(unread, reason)| (unread, or_its_own(reason, shape, &own)))
+            }
             Shape::Plain => no(no_member(shape, &[], part, path)),
             _ => no(format!("decoded path traverses a scalar at {path}")),
         },
@@ -718,6 +770,13 @@ fn typed(
                 push(Shape::Plain);
             } else if let Some((_, of, _)) = member(&members, part) {
                 push(*of);
+            } else if let Some((_, of, _)) =
+                value_member(shape).and_then(|held| member(&members, held))
+            {
+                // What names no member of an IE or of a transfer is one of its value.
+                let taken = typed(resolved(*of), part, named, path, push);
+                return taken
+                    .map_err(|(unread, reason)| (unread, or_its_own(reason, shape, &members)));
             } else {
                 return no(no_member(shape, &members, part, path));
             }
@@ -761,6 +820,10 @@ fn advance_all<'a>(
 /// of a value, without those that start with `_`; after it, a segment is an error when
 /// none of the values can have it.
 ///
+/// A segment that names no member of an IE is taken in its value, and one that names no
+/// member of a transfer in its decoded value, as if `value` or `decoded` stood before
+/// it. A name that neither has is an error, which says the members of both.
+///
 /// The `octets` of an IE or of a transfer are what it was received as: those of one whose
 /// value [`set`], [`remove`] or [`insert`] edited since are an error, as
 /// [`encode_pdu`](crate::inspect::encode_pdu) has yet to give it others. So is a path into
@@ -785,8 +848,9 @@ pub fn select<'a>(tree: &'a Value, path: &str) -> Result<Vec<&'a Value>, String>
 ///
 /// What is not known is not refused: the value of an IE selected by `@id=N` when the
 /// identifier is unknown or has several types, the entries of a container that is not
-/// that of the message when they are selected by position, and whether a position is
-/// within the bounds of its list.
+/// that of the message when they are selected by position, a segment under such an IE,
+/// which may name a member of its value, and whether a position is within the bounds of
+/// its list.
 pub fn check_path(message: &str, path: &str) -> Result<(), String> {
     let known = sent(|_, _, name| same_name(name, message));
     let message = known.ok_or_else(|| format!("{message:?} is not a message of {PROTOCOL}"))?;
@@ -1046,6 +1110,32 @@ fn apply(
         return apply(ies, shape, parts, operation, named, path);
     }
     if let Some(object) = tree.as_object_mut() {
+        // What names no member of an IE or of a transfer is edited in its value, as if
+        // the member that holds it stood before.
+        if let Some(members) = &members
+            && part != "*"
+            && !same_name(part, "octets")
+            && member(members, part).is_none()
+            && let Some((name, of, _)) = value_member(shape).and_then(|held| member(members, held))
+        {
+            let changed = match object.get_mut(*name) {
+                Some(value) => apply(value, *of, parts, operation, named, path),
+                None => Ok(0),
+            };
+            if matches!(changed, Ok(1..)) {
+                mark(object, name);
+                return changed;
+            }
+            // An edit that changes nothing says what the value cannot have, as a
+            // selection does: the segment may be a member of the IE or of the transfer,
+            // written wrong.
+            let place = (object.get(*name), *of);
+            return match advance(place, part, named, path, &mut Vec::new()) {
+                Err((false, reason)) => Err(or_its_own(reason, shape, members)),
+                Err((true, reason)) => Err(reason),
+                Ok(()) => changed,
+            };
+        }
         if part == "*" || part.starts_with("@id=") {
             return Err("array selection used on an object".into());
         }
@@ -1192,6 +1282,208 @@ fn apply(
     Ok(changed)
 }
 
+/// Whether a transfer has a member of this name in a tree: its `decoded` value, its
+/// `octets`, or what a tree keeps of what was received. Where a transfer is written, an
+/// object that has none of them is its decoded value.
+pub(crate) fn of_a_transfer(name: &str) -> bool {
+    name.starts_with('_') || ["decoded", "octets"].contains(&name)
+}
+
+/// The criticality that ASN.1 assigns to the IE `id` in a container of `shape`, where the
+/// tables have it: that of the object set of a message for its IEs, and that of the
+/// single containers for an IE that a value holds alone or as an entry of a list. They
+/// have none for the IEs of a message that a transfer contains, nor for those of an
+/// extension container.
+fn assigned(container: Shape, id: u16) -> Option<&'static str> {
+    match container {
+        Shape::Ies(Some(message)) => {
+            let ies = crate::inspect::message_ie_criticalities(message.name)?;
+            let ie = ies.iter().find(|(known, _)| *known == id);
+            ie.map(|(_, criticality)| *criticality)
+        }
+        Shape::Ie(_) | Shape::List(Shape::Ie(_)) => crate::inspect::item_criticality(id),
+        _ => None,
+    }
+}
+
+/// `value`, a value of `shape` of a tree, as a message is written: a transfer as its
+/// decoded value, or as its `octets` when it has none, and each IE of a container as
+/// [`ie_by_name`] shows it.
+fn by_name(value: &Value, shape: Shape) -> Result<Value, String> {
+    let shape = resolved(shape);
+    match value {
+        Value::Object(entry) => match shape {
+            Shape::Transfer(_) => {
+                let members = members(shape, Some(entry)).unwrap_or_default();
+                match (entry.get("decoded"), member(&members, "decoded")) {
+                    (Some(decoded), Some((_, of, _))) => by_name(decoded, *of),
+                    _ => Ok(json!({"octets": received(entry)})),
+                }
+            }
+            // An IE that a value holds alone.
+            Shape::Ie(_) | Shape::Extension(_) => ie_by_name(value, shape, shape),
+            _ => {
+                let members = members(shape, Some(entry)).unwrap_or_default();
+                let shown = entry.iter().map(|(name, value)| {
+                    let of = member(&members, name).map_or(Shape::Unknown, |(_, of, _)| *of);
+                    Ok((name.clone(), by_name(value, of)?))
+                });
+                Ok(Value::Object(shown.collect::<Result<_, String>>()?))
+            }
+        },
+        Value::Array(entries) => {
+            let shown = entries.iter().map(|entry| match element(shape) {
+                of @ (Shape::Ie(_) | Shape::Extension(_)) => ie_by_name(entry, of, shape),
+                of => by_name(entry, of),
+            });
+            Ok(Value::Array(shown.collect::<Result<_, String>>()?))
+        }
+        plain => Ok(plain.clone()),
+    }
+}
+
+/// The entry of an IE of `shape` in a container of `container`, as its name with its
+/// value: the name that ASN.1 gives the IE, or its identifier in digits when it has
+/// none. One that did not decode, or that contains a type and octets that are not of
+/// that type, has the octets that it was received as, as `{"octets": "…"}`. Its
+/// `criticality` is beside its name when it is not the one that the specification
+/// assigns it there, and where the tables do not have that one.
+fn ie_by_name(entry: &Value, shape: Shape, container: Shape) -> Result<Value, String> {
+    let id = entry_id(entry).and_then(|id| u16::try_from(id).ok());
+    let id = id.ok_or("an IE has its identifier")?;
+    let mut names = crate::inspect::ie_names().iter();
+    let name = match names.find(|(known, _)| *known == id) {
+        Some((_, name)) => name.to_string(),
+        None => id.to_string(),
+    };
+    let field = value_member(shape).unwrap_or("value");
+    let undecoded = [entry, &entry[field]]
+        .iter()
+        .any(|of| of.get("_decode_error").is_some());
+    let value = match undecoded {
+        true => json!({"octets": entry["_raw_value"]}),
+        false => by_name(&entry[field], ie_value(Some(id)))?,
+    };
+    let mut shown = Map::new();
+    shown.insert(name, value);
+    if entry["criticality"].as_str() != assigned(container, id) {
+        shown.insert("criticality".into(), entry["criticality"].clone());
+    }
+    Ok(Value::Object(shown))
+}
+
+/// `value`, a value of `shape` as a message is written, as a tree has it: each IE of a
+/// container as the entry that [`entry_of`] gives it. A transfer keeps the form that it
+/// is written in, its decoded value alone or as its `decoded` member, which
+/// [`encode_pdu`](crate::inspect::encode_pdu) takes.
+fn written(value: &Value, shape: Shape, depth: usize) -> Result<Value, String> {
+    if depth > WRITTEN {
+        return Err(format!("a written message nests deeper than {WRITTEN}"));
+    }
+    let shape = resolved(shape);
+    match value {
+        Value::Object(entry) => match shape {
+            Shape::Transfer(_) => {
+                let members = members(shape, None).unwrap_or_default();
+                let decoded = member(&members, "decoded");
+                let decoded = decoded.map_or(Shape::Unknown, |(_, of, _)| *of);
+                if !entry.keys().any(|name| of_a_transfer(name)) {
+                    return written(value, decoded, depth + 1);
+                }
+                let mut entry = entry.clone();
+                if let Some(value) = entry.get_mut("decoded") {
+                    *value = written(value, decoded, depth + 1)?;
+                }
+                Ok(Value::Object(entry))
+            }
+            // An IE that a value holds alone.
+            Shape::Ie(_) | Shape::Extension(_) => entry_of(value, shape, shape, depth),
+            _ => {
+                let members = members(shape, Some(entry)).unwrap_or_default();
+                let listed = entry.iter().map(|(name, value)| {
+                    let of = member(&members, name).map_or(Shape::Unknown, |(_, of, _)| *of);
+                    Ok((name.clone(), written(value, of, depth + 1)?))
+                });
+                Ok(Value::Object(listed.collect::<Result<_, String>>()?))
+            }
+        },
+        Value::Array(entries) => {
+            let listed = entries.iter().map(|entry| match element(shape) {
+                of @ (Shape::Ie(_) | Shape::Extension(_)) => entry_of(entry, of, shape, depth),
+                of => written(entry, of, depth + 1),
+            });
+            Ok(Value::Array(listed.collect::<Result<_, String>>()?))
+        }
+        plain => Ok(plain.clone()),
+    }
+}
+
+/// The entry that a tree has for an IE of `shape` in a container of `container`, which
+/// is written as its name with its value: the name that ASN.1 gives the IE or its
+/// identifier in digits, and `{"octets": "…"}` for the octets that it is sent as. Its
+/// `criticality` is the one beside its name, or the one that the specification assigns
+/// it there. An entry that is written as a tree has it, with its `id`, stays as it is,
+/// and the IEs that its value holds are read the same way.
+fn entry_of(ie: &Value, shape: Shape, container: Shape, depth: usize) -> Result<Value, String> {
+    const IE: &str = "each entry of a container is one IE: its name with its value";
+    let field = value_member(shape).unwrap_or("value");
+    let entry = ie.as_object().ok_or(IE)?;
+    if entry.contains_key("id") {
+        let id = entry_id(ie).and_then(|id| u16::try_from(id).ok());
+        let mut entry = entry.clone();
+        if let Some(value) = entry.get_mut(field) {
+            *value = written(value, ie_value(id), depth + 1)?;
+        }
+        return Ok(Value::Object(entry));
+    }
+    let mut members = entry.iter().filter(|(member, _)| *member != "criticality");
+    let (Some((name, value)), None) = (members.next(), members.next()) else {
+        return Err(IE.into());
+    };
+    let id = match name.parse::<u16>() {
+        Ok(id) => id,
+        Err(_) => ie_id(name).ok_or_else(|| format!("{name:?} is not an IE of {PROTOCOL}"))?,
+    };
+    let criticality = match (entry.get("criticality"), assigned(container, id), container) {
+        (Some(criticality), ..) => criticality.clone(),
+        (None, Some(criticality), _) => json!(criticality),
+        (None, None, Shape::Ies(Some(message))) => {
+            return Err(format!(
+                "{} has no IE {name}: one that is sent in it says its \"criticality\"",
+                message.name
+            ));
+        }
+        (None, None, _) => {
+            return Err(format!(
+                "{name} says its \"criticality\" here: the tables have none for it"
+            ));
+        }
+    };
+    let octets = value.as_object().filter(|value| value.len() == 1);
+    Ok(match octets.and_then(|value| value.get("octets")) {
+        Some(octets) => json!({"id": id, "criticality": criticality, "octets": octets}),
+        None => {
+            let value = written(value, ie_value(Some(id)), depth + 1)?;
+            json!({"id": id, "criticality": criticality, field: value})
+        }
+    })
+}
+
+/// The IEs of the message that ASN.1 names `message`, which a tree has as `ies`, as a
+/// message is written: each as its name with its value, and so are the IEs that a value
+/// holds, to any depth.
+pub(crate) fn named_ies(message: &str, ies: &Value) -> Result<Value, String> {
+    let message = sent(|_, _, name| same_name(name, message));
+    by_name(ies, Shape::Ies(message))
+}
+
+/// The entries that a tree has for the IEs of the message that ASN.1 names `message`,
+/// which `ies` writes as [`named_ies`] shows them.
+pub(crate) fn listed_ies(message: &str, ies: &Value) -> Result<Value, String> {
+    let message = sent(|_, _, name| same_name(name, message));
+    written(ies, Shape::Ies(message), 0)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1250,6 +1542,8 @@ mod tests {
         let nas = release("Cause/value/nas").expect("an ENUMERATED");
         assert!(nas.contains(&"normal-release") && !nas.contains(&"unspecified-failure"));
         assert_eq!(release("cause/VALUE/Nas"), Some(nas));
+        // The value of the IE may be left out of the path.
+        assert_eq!(release("Cause/nas"), Some(nas));
         // A CHOICE, and the identifier of an IE.
         assert_eq!(release("Cause/value"), None);
         assert_eq!(release("Cause/id"), None);
@@ -1310,6 +1604,178 @@ mod tests {
             let same = names.iter().filter(|other| same_name(other, name));
             assert!(same.count() <= 2, "{name}");
         }
+    }
+
+    /// The tree of a message that ASN.1 names `name` and that has `ies` for IEs.
+    fn tree_of(name: &str, ies: Value) -> Value {
+        let mut messages = MESSAGES.iter();
+        let (direction, code, ..) = messages.find(|(_, _, known, ..)| *known == name).unwrap();
+        json!({
+            "direction": direction,
+            "procedure_code": code,
+            "criticality": "reject",
+            "message": {IES: ies},
+        })
+    }
+
+    #[test]
+    fn a_segment_that_names_no_member_of_an_ie_is_taken_in_its_value() {
+        let cause = ie_id("Cause").expect("an IE of the protocol");
+        let value = json!({"radioNetwork": "unspecified"});
+        let entry = json!({"id": cause, "criticality": "ignore", "value": value});
+        let mut tree = tree_of("UEContextReleaseCommand", json!([entry]));
+        let path = |rest: &str| format!("/{ROOT}/Cause/{rest}");
+        // The path that leaves `value` out selects what the one that has it selects.
+        let short = select(&tree, &path("radioNetwork")).unwrap();
+        assert_eq!(short, [&json!("unspecified")]);
+        assert_eq!(short, select(&tree, &path("value/radioNetwork")).unwrap());
+        assert!(select(&tree, &path("nas")).unwrap().is_empty());
+        // What the IE has itself comes first, and `*` is each of its members.
+        assert_eq!(select(&tree, &path("value")).unwrap(), [&value]);
+        assert_eq!(select(&tree, &path("id")).unwrap(), [&json!(cause)]);
+        assert_eq!(select(&tree, &path("*")).unwrap().len(), 3);
+        // A name that neither has is refused with the members of both, with a tree and
+        // without one.
+        let refused = select(&tree, &path("misspelled")).unwrap_err();
+        assert!(refused.contains("is not a member of Cause, which has radioNetwork"));
+        assert!(refused.ends_with("; an IE itself has id, criticality, value, octets"));
+        let checked = |rest: &str| check_path("UEContextReleaseCommand", &path(rest));
+        assert_eq!(checked("misspelled"), Err(refused.clone()));
+        assert_eq!(checked("nas"), Ok(()));
+        let deeper = checked("radioNetwork/deeper").unwrap_err();
+        assert!(deeper.contains("which has none") && !deeper.contains("itself"));
+        // An edit takes the same path, and marks the value that it changed.
+        tree[MESSAGE][IES][0]["_raw_value"] = json!("0000");
+        set(&mut tree, &path("nas"), json!("normal-release")).unwrap();
+        let edited = &tree[MESSAGE][IES][0];
+        assert_eq!(edited["value"], json!({"nas": "normal-release"}));
+        assert_eq!(edited[EDITED], json!(true));
+        let before = tree.clone();
+        assert_eq!(set(&mut tree, &path("misspelled"), json!(1)), Err(refused));
+        let kept = remove(&mut tree, &path("nas")).unwrap_err();
+        assert!(kept.contains("a CHOICE has one alternative"), "{kept}");
+        assert_eq!(tree, before);
+    }
+
+    #[test]
+    fn a_segment_that_names_no_member_of_a_transfer_is_taken_in_its_decoded_value() {
+        // A transfer that contains a cause, which is a type of the protocol.
+        let shape = Shape::Transfer("Cause");
+        let at = |transfer: &Value, part: &str| {
+            let mut next = Vec::new();
+            advance((Some(transfer), shape), part, true, "/a/path", &mut next)?;
+            Ok::<_, Refusal>(next.into_iter().map(|(value, _)| value.cloned()).collect())
+        };
+        let some = |value: Value| Ok::<Vec<_>, Refusal>(vec![Some(value)]);
+        let transfer = json!({"_raw_transfer": "00", "decoded": {"radioNetwork": "unspecified"}});
+        assert_eq!(at(&transfer, "radioNetwork"), some(json!("unspecified")));
+        assert_eq!(at(&transfer, "nas"), Ok(vec![None]));
+        // What the transfer has itself comes first.
+        assert_eq!(at(&transfer, "decoded"), some(transfer["decoded"].clone()));
+        assert_eq!(at(&transfer, "octets"), some(json!("00")));
+        let (unread, refused) = at(&transfer, "misspelled").unwrap_err();
+        assert!(!unread && refused.contains("is not a member of Cause, which has radioNetwork"));
+        assert!(refused.ends_with("; a transfer itself has decoded, octets"));
+        // The types say the same without a tree.
+        let mut shapes = Vec::new();
+        let mut push = |shape| shapes.push(shape);
+        let wrong = typed(shape, "misspelled", true, "/a/path", &mut push);
+        assert_eq!(wrong, Err((false, refused)));
+        assert_eq!(typed(shape, "nas", true, "/a/path", &mut push), Ok(()));
+        assert!(matches!(shapes[..], [Shape::Named(nas)] if enumeration(nas).is_some()));
+        // One that did not decode cannot be read, and one that is its octets has no
+        // decoded value: the name is still one that the type has.
+        let undecoded = json!({"_raw_transfer": "00", "_decode_error": "why"});
+        assert!(matches!(at(&undecoded, "radioNetwork"), Err((true, _))));
+        assert_eq!(at(&json!("00"), "radioNetwork"), Ok(vec![None]));
+        assert!(matches!(at(&json!("00"), "misspelled"), Err((false, _))));
+        // An edit is made in the decoded value, whose octets are then others.
+        let mut edited = transfer.clone();
+        let set = Edit::Set(json!("normal-release"));
+        let changed = apply(&mut edited, shape, &["nas".into()], &set, true, "/a/path");
+        assert_eq!(changed, Ok(1));
+        assert_eq!(edited["decoded"], json!({"nas": "normal-release"}));
+        assert_eq!(edited[EDITED], json!(true));
+    }
+
+    #[test]
+    fn only_a_string_of_bits_names_a_member_as_the_ie_that_holds_it_does() {
+        // A segment under an IE that names a member of the IE is that member, and under
+        // a transfer one of the transfer: of the values that they hold, a string of
+        // bits whose size varies alone has a member of such a name, its `value`, which
+        // a path reaches after the `value` of the IE.
+        let mut bits = 0;
+        for (id, ..) in IE_TYPES {
+            let mut shape = resolved(ie_value(Some(*id)));
+            if let Shape::Transfer(contained) = shape {
+                shape = resolved(Shape::Named(contained));
+            }
+            let members = members(shape, None).unwrap_or_default();
+            for own in VALUES.into_iter().chain(["id", "criticality", "octets"]) {
+                let same = members.iter().any(|(name, ..)| same_name(name, own));
+                assert_eq!(same, shape == Shape::Bits && own == "value", "{id}: {own}");
+            }
+            bits += usize::from(shape == Shape::Bits);
+        }
+        assert!(bits > 0);
+    }
+
+    #[test]
+    fn the_ies_that_a_value_holds_are_written_by_name_and_read_back() {
+        let cause = ie_id("Cause").expect("an IE of the protocol");
+        let value = json!({"radioNetwork": "unspecified"});
+        // The entry of a tree, with what it keeps of what was received, and as it is
+        // written.
+        let entry = |field: &str, received: bool| {
+            let mut entry = json!({"id": cause, "criticality": "ignore", field: value});
+            if received {
+                entry["_raw_value"] = json!("0000");
+                entry["_original_id"] = json!(cause);
+            }
+            entry
+        };
+        // No table has the criticality of the IEs of a message that a transfer contains,
+        // nor of those of an extension container: it is written, and asked for.
+        for (container, field) in [
+            (Shape::Ies(None), "value"),
+            (Shape::Extensions, "extensionValue"),
+        ] {
+            let shown = by_name(&json!([entry(field, true)]), container).unwrap();
+            assert_eq!(shown, json!([{"Cause": value, "criticality": "ignore"}]));
+            let listed = written(&shown, container, 0).unwrap();
+            assert_eq!(listed, json!([entry(field, false)]));
+            let refused = written(&json!([{"Cause": value}]), container, 0).unwrap_err();
+            assert!(refused.contains("says its \"criticality\""), "{refused}");
+            // An entry that is written as a tree has it stays as it is.
+            assert_eq!(written(&listed, container, 0), Ok(listed));
+        }
+        // One that did not decode has its octets, which are sent as they are.
+        let mut undecoded = entry("value", true);
+        undecoded["value"] = json!("0000");
+        undecoded["_decode_error"] = json!("why");
+        let shown = by_name(&json!([undecoded]), Shape::Ies(None)).unwrap();
+        let octets = json!({"Cause": {"octets": "0000"}, "criticality": "ignore"});
+        assert_eq!(shown, json!([octets]));
+        let listed = written(&shown, Shape::Ies(None), 0).unwrap();
+        let octets = json!({"id": cause, "criticality": "ignore", "octets": "0000"});
+        assert_eq!(listed, json!([octets]));
+        // A transfer is its decoded value, or its octets when it has none, and is read
+        // in the form that it is written in.
+        let transfer = Shape::Transfer("Cause");
+        let decoded = json!({"_raw_transfer": "00", "decoded": value});
+        assert_eq!(by_name(&decoded, transfer), Ok(value.clone()));
+        assert_eq!(written(&value, transfer, 0), Ok(value.clone()));
+        let undecoded = json!({"_raw_transfer": "00", "_decode_error": "why"});
+        let octets = json!({"octets": "00"});
+        assert_eq!(by_name(&undecoded, transfer), Ok(octets.clone()));
+        assert_eq!(written(&octets, transfer, 0), Ok(octets));
+        // A message is not read deeper than a tree is encoded.
+        let mut deep = json!(1);
+        for _ in 0..WRITTEN + 2 {
+            deep = json!([deep]);
+        }
+        let refused = written(&deep, Shape::Unknown, 0).unwrap_err();
+        assert!(refused.contains("nests deeper"), "{refused}");
     }
 
     #[test]

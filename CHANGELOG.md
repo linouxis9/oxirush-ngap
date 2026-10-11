@@ -76,6 +76,17 @@ is not source compatible with 0.4.2.
   [{NAME: VALUE}, …]}`, with the procedure code, the direction and the
   criticalities that the specification assigns, and `inspect::message_tree`
   shows a PDU in that form.
+- With the `inspect` feature, `value` and `decoded` may be left out. In a
+  path, a segment that names no member of an IE is taken in its value, and
+  one that names no member of a transfer in its decoded value:
+  `/ngap/Cause/radioNetwork` is `/ngap/Cause/value/radioNetwork`. A transfer
+  is written as its decoded value itself, as well as with `decoded`.
+  `inspect::message_tree` shows a transfer as its decoded value and each IE
+  that a value holds as its name with its value, to any depth, as in
+  `{"pDUSessionResourceSetupRequestTransfer": {"protocolIEs":
+  [{"PDUSessionType": "ipv4", "criticality": "reject"}]}}`, and
+  `inspect::message_from_tree` reads that form. What is written with the two
+  words is taken as it was.
 
 ### Changed
 

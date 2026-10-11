@@ -317,10 +317,19 @@ fn a_transfer_that_was_not_received_is_encoded_from_its_decoded_value() {
     let sent = written(serde_json::json!({"decoded": transfer})).unwrap();
     let item = "/message/protocolIEs/2/value/0/pDUSessionResourceSetupResponseTransfer";
     assert_eq!(sent.pointer(&format!("{item}/decoded")), Some(&transfer));
+    // The decoded value itself is the same transfer, and so are its octets.
+    assert_eq!(written(transfer.clone()).unwrap(), sent);
+    let octets = sent.pointer(&format!("{item}/_raw_transfer")).unwrap();
+    let as_octets = serde_json::json!({"octets": octets});
+    assert_eq!(written(as_octets).unwrap(), sent);
+    assert_eq!(written(octets.clone()).unwrap(), sent);
     // A member beside the value, and a value that the transfer does not have.
     let error = written(serde_json::json!({"decoded": transfer, "other": 1})).unwrap_err();
     assert!(error.contains("its decoded value alone"), "{error}");
+    let error = written(serde_json::json!({"octets": octets, "other": 1})).unwrap_err();
+    assert!(error.contains("its decoded value alone"), "{error}");
     assert!(written(serde_json::json!({"decoded": {"no-such-member": 1}})).is_err());
+    assert!(written(serde_json::json!({"no-such-member": 1})).is_err());
 
     // The value of an IE that contains a type is written the same way.
     let release = build_ngap!(
@@ -329,29 +338,33 @@ fn a_transfer_that_was_not_received_is_encoded_from_its_decoded_value() {
         REJECT,
         DistributionReleaseRequest,
     );
-    let mut tree = inspect::inspect_pdu(&release).unwrap();
     let received = NGAP_PDU::decode(&fixture("DistributionReleaseRequest")).unwrap();
     let received = inspect::inspect_pdu(&received).unwrap();
-    let ies: Vec<_> = received["message"]["protocolIEs"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|ie| {
-            let mut ie = ie.clone();
-            let members = ie.as_object_mut().unwrap();
-            members.retain(|name, _| !name.starts_with('_'));
-            let contained = members
-                .get_mut("value")
-                .and_then(|value| value.as_object_mut());
-            if let Some(contained) = contained.filter(|value| value.contains_key("decoded")) {
-                contained.retain(|name, _| name == "decoded");
-            }
-            ie
-        })
-        .collect();
-    tree["message"]["protocolIEs"] = ies.into();
-    let sent = inspect::encode_pdu(&tree).unwrap().encode().unwrap();
-    assert_eq!(sent, fixture("DistributionReleaseRequest"));
+    // With its `decoded` member alone, then as the decoded value itself.
+    for alone in [false, true] {
+        let ies: Vec<_> = received["message"]["protocolIEs"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|ie| {
+                let mut ie = ie.clone();
+                let members = ie.as_object_mut().unwrap();
+                members.retain(|name, _| !name.starts_with('_'));
+                let value = members.get_mut("value").unwrap();
+                if let Some(decoded) = value.get("decoded").cloned() {
+                    *value = match alone {
+                        true => decoded,
+                        false => serde_json::json!({"decoded": decoded}),
+                    };
+                }
+                ie
+            })
+            .collect();
+        let mut tree = inspect::inspect_pdu(&release).unwrap();
+        tree["message"]["protocolIEs"] = ies.into();
+        let sent = inspect::encode_pdu(&tree).unwrap().encode().unwrap();
+        assert_eq!(sent, fixture("DistributionReleaseRequest"));
+    }
 }
 
 #[test]
@@ -428,6 +441,299 @@ fn a_message_is_shown_and_written_as_its_name_and_its_ies_by_name() {
     );
     assert!(refused(serde_json::json!({"message": "Paging", "ies": [{}]})).contains("one IE"));
     assert!(refused(serde_json::json!({"message": "Paging", "ie": []})).contains("is no member"));
+}
+
+/// The members of the shown message `value` that only repeat what its form says: those of
+/// an IE or of a transfer in a tree, and a `criticality` that the tables could give.
+/// `holder` is the name of the member that has `value`, or the list it is in.
+fn redundant(value: &serde_json::Value, holder: &str, found: &mut Vec<String>) {
+    use serde_json::Value;
+    match value {
+        Value::Object(members) => {
+            for (name, member) in members {
+                let wraps = match name.as_str() {
+                    "decoded" | "id" | "extensionValue" => true,
+                    // A string of bits whose size varies has a `value` and a `length`.
+                    "value" => !members.contains_key("length"),
+                    // No table has the criticality of the IEs of a contained message.
+                    "criticality" => holder != "protocolIEs",
+                    name => name.starts_with('_'),
+                };
+                if wraps {
+                    found.push(format!("{name} in {holder}"));
+                }
+                redundant(member, name, found);
+            }
+        }
+        Value::Array(entries) => (entries.iter()).for_each(|entry| redundant(entry, holder, found)),
+        _ => {}
+    }
+}
+
+#[test]
+fn a_message_is_shown_and_written_by_name_to_any_depth() {
+    use serde_json::json;
+    let shown = |wire: &[u8]| inspect::message_tree(&NGAP_PDU::decode(wire).unwrap());
+    let written = |tree: &serde_json::Value| {
+        inspect::message_from_tree(tree).map(|pdu| pdu.encode().unwrap())
+    };
+    // A transfer is its decoded value, and the IEs of the message that it contains go
+    // by name. Their criticality is written: the tables have that of the IEs of the
+    // messages of the procedures.
+    let wire = fixture("PDUSessionResourceSetupRequest");
+    let tunnel = json!({"gTPTunnel": {
+        "transportLayerAddress": {"value": "00", "length": 1},
+        "gTP-TEID": 577899919,
+    }});
+    let flow = json!({"qosFlowIdentifier": 0, "qosFlowLevelQosParameters": {
+        "qosCharacteristics": {"nonDynamic5QI": {"fiveQI": 0}},
+        "allocationAndRetentionPriority": {
+            "priorityLevelARP": 1,
+            "pre-emptionCapability": "shall-not-trigger-pre-emption",
+            "pre-emptionVulnerability": "not-pre-emptable",
+        },
+    }});
+    let request = json!({
+        "message": "PDUSessionResourceSetupRequest",
+        "ies": [
+            {"AMF-UE-NGAP-ID": 0},
+            {"RAN-UE-NGAP-ID": 0},
+            {"PDUSessionResourceSetupListSUReq": [{
+                "pDUSessionID": 0,
+                "s-NSSAI": {"sST": 85},
+                "pDUSessionResourceSetupRequestTransfer": {"protocolIEs": [
+                    {"UL-NGU-UP-TNLInformation": tunnel, "criticality": "reject"},
+                    {"PDUSessionType": "ipv4", "criticality": "reject"},
+                    {"QosFlowSetupRequestList": [flow], "criticality": "reject"},
+                ]},
+            }]},
+        ],
+    });
+    assert_eq!(shown(&wire).unwrap(), request);
+    assert_eq!(written(&request).unwrap(), wire);
+    // No message of the fixtures is shown with a member that only wraps a value, nor
+    // with a criticality that the tables have.
+    let mut found = Vec::new();
+    for line in include_str!("fixtures/messages.tsv")
+        .lines()
+        .filter(|line| !line.starts_with('#') && !line.is_empty())
+    {
+        let fields: Vec<_> = line.split('\t').collect();
+        if let Ok(shown) = shown(&hex::decode(fields[1]).unwrap()) {
+            redundant(&shown["ies"], fields[0], &mut found);
+        }
+    }
+    assert_eq!(found, Vec::<String>::new());
+    // The same message as a tree has it, with `decoded` and an entry for each IE, and
+    // with the two forms together.
+    let transfer = "/ies/2/PDUSessionResourceSetupListSUReq/0\
+        /pDUSessionResourceSetupRequestTransfer";
+    let mut explicit = request.clone();
+    *explicit.pointer_mut(transfer).unwrap() = json!({"decoded": {"protocolIEs": [
+        {"id": 139, "criticality": "reject", "value": tunnel},
+        {"id": "PDUSessionType", "criticality": "reject", "value": "ipv4"},
+        {"QosFlowSetupRequestList": [flow], "criticality": "reject"},
+    ]}});
+    assert_eq!(written(&explicit).unwrap(), wire);
+    // An IE of a contained message says its criticality, and one of an extension
+    // container too: `message_tree` shows both.
+    let mut unassigned = request.clone();
+    let kind = unassigned.pointer_mut(&format!("{transfer}/protocolIEs/1"));
+    kind.unwrap().as_object_mut().unwrap().remove("criticality");
+    let error = written(&unassigned).unwrap_err();
+    assert!(error.contains("Type says its \"criticality\""), "{error}");
+    let mut extended = request.clone();
+    let item = format!("{transfer}/protocolIEs/2/QosFlowSetupRequestList/0");
+    let indicator = json!({"RedundantQosFlowIndicator": "true", "criticality": "ignore"});
+    extended.pointer_mut(&item).unwrap()["iE-Extensions"] = json!([indicator]);
+    let pdu = inspect::message_from_tree(&extended).unwrap();
+    let tree = inspect::inspect_pdu(&pdu).unwrap();
+    let extension = "/ngap/PDUSessionResourceSetupListSUReq/0\
+        /pDUSessionResourceSetupRequestTransfer/QosFlowSetupRequestList/0/iE-Extensions/0";
+    let value = inspect::select(&tree, &format!("{extension}/extensionValue")).unwrap();
+    assert_eq!(value, [&json!("true")]);
+    assert_eq!(inspect::message_tree(&pdu).unwrap(), extended);
+    let indicator = json!({"RedundantQosFlowIndicator": "true"});
+    extended.pointer_mut(&item).unwrap()["iE-Extensions"] = json!([indicator]);
+    let error = written(&extended).unwrap_err();
+    assert!(
+        error.contains("Indicator says its \"criticality\""),
+        "{error}"
+    );
+    // An IE that a value holds alone has the criticality of its object set.
+    let identity = json!({"pLMNIdentity": "208-93", "tNGF-ID": {"tNGF-ID": "00000001"}});
+    let setup = |node: serde_json::Value| {
+        let node = json!({"GlobalRANNodeID": node});
+        json!({"message": "NGSetupRequest", "ies": [node]})
+    };
+    let node = setup(json!({"choice-Extensions": {"GlobalTNGF-ID": identity}}));
+    let pdu = inspect::message_from_tree(&node).unwrap();
+    let tree = inspect::inspect_pdu(&pdu).unwrap();
+    let held = "/ngap/GlobalRANNodeID/choice-Extensions";
+    let criticality = inspect::select(&tree, &format!("{held}/criticality")).unwrap();
+    assert_eq!(criticality, [&json!("reject")]);
+    let network = inspect::select(&tree, &format!("{held}/pLMNIdentity")).unwrap();
+    assert_eq!(network, [&json!("208-93")]);
+    assert_eq!(inspect::message_tree(&pdu).unwrap(), node);
+    // One that its set does not have says its own, which is shown.
+    let cause = json!({"Cause": {"misc": "unspecified"}});
+    let error = written(&setup(json!({"choice-Extensions": cause}))).unwrap_err();
+    assert!(error.contains("Cause says its \"criticality\""), "{error}");
+    let cause = json!({"Cause": {"misc": "unspecified"}, "criticality": "ignore"});
+    let node = setup(json!({"choice-Extensions": cause}));
+    let pdu = inspect::message_from_tree(&node).unwrap();
+    assert_eq!(inspect::message_tree(&pdu).unwrap(), node);
+    // A transfer that does not decode has its octets, and so has an IE that contains a
+    // type when its octets are not of that type.
+    let mut undecoded = request.clone();
+    *undecoded.pointer_mut(transfer).unwrap() = json!({"octets": "FF"});
+    let pdu = inspect::message_from_tree(&undecoded).unwrap();
+    assert_eq!(inspect::message_tree(&pdu).unwrap(), undecoded);
+    let release = json!({
+        "message": "DistributionReleaseRequest",
+        "ies": [{"MBS-DistributionReleaseRequestTransfer": "FF"}],
+    });
+    let pdu = inspect::message_from_tree(&release).unwrap();
+    let shown = inspect::message_tree(&pdu).unwrap();
+    let octets = json!({"MBS-DistributionReleaseRequestTransfer": {"octets": "01FF"}});
+    assert_eq!(shown["ies"][0], octets);
+    assert_eq!(written(&shown).unwrap(), pdu.encode().unwrap());
+    // What is in the place of an IE and is none is refused.
+    let error = written(&setup(json!({"choice-Extensions": {"a": 1, "b": 2}}))).unwrap_err();
+    assert!(error.contains("one IE"), "{error}");
+}
+
+#[test]
+fn the_value_of_an_ie_and_of_a_transfer_may_be_left_out_of_a_path() {
+    use serde_json::{Value, json};
+    let name = "PDUSessionResourceSetupRequest";
+    let tree = inspect::inspect_pdu(&NGAP_PDU::decode(&fixture(name)).unwrap()).unwrap();
+    let long = "/ngap/PDUSessionResourceSetupListSUReq/value/0\
+        /pDUSessionResourceSetupRequestTransfer/decoded/QosFlowSetupRequestList/value/0";
+    let transfer = "/ngap/PDUSessionResourceSetupListSUReq/0\
+        /pDUSessionResourceSetupRequestTransfer";
+    let list = format!("{transfer}/QosFlowSetupRequestList");
+    let short = format!("{list}/0");
+    // Each of the three is left out alone, and all of them together.
+    let flow = inspect::select(&tree, &format!("{long}/qosFlowIdentifier")).unwrap();
+    assert_eq!(flow, [&json!(0)]);
+    for path in [
+        long.replacen("/value", "", 1),
+        long.replace("/decoded", ""),
+        long.replace("/QosFlowSetupRequestList/value", "/QosFlowSetupRequestList"),
+        short.clone(),
+        short.to_lowercase(),
+    ] {
+        let selected = inspect::select(&tree, &format!("{path}/qosFlowIdentifier"));
+        assert_eq!(selected.as_ref(), Ok(&flow), "{path}");
+        let checked = inspect::check_path(name, &format!("{path}/qosFlowIdentifier"));
+        assert_eq!(checked, Ok(()), "{path}");
+    }
+    // An IE of the contained message goes by its name, its position or its identifier.
+    for ie in ["PDUSessionType", "1", "@id=134"] {
+        let kind = inspect::select(&tree, &format!("{transfer}/{ie}/value")).unwrap();
+        assert_eq!(kind, [&json!("ipv4")], "{ie}");
+    }
+    // What an IE and a transfer have themselves comes first: `*` is each of their
+    // members, and the entries of a value are after `value`.
+    let select = |path: &str| inspect::select(&tree, path).unwrap();
+    let ie = "/ngap/PDUSessionResourceSetupListSUReq";
+    assert_eq!(select(&format!("{ie}/criticality")), [&json!("reject")]);
+    assert_eq!(select(&format!("{ie}/*")).len(), 3);
+    assert_eq!(select(&format!("{ie}/value/*/pDUSessionID")), [&json!(0)]);
+    assert!(select(&format!("{transfer}/octets"))[0].is_string());
+    assert!(select(&format!("{transfer}/decoded"))[0].is_object());
+    // The names of an ENUMERATED are found on the same path.
+    let capability = "qosFlowLevelQosParameters/allocationAndRetentionPriority\
+        /pre-emptionCapability";
+    let names = inspect::enumerated_at(name, &format!("{short}/{capability}")).unwrap();
+    assert!(names.is_some_and(|names| names.contains(&"may-trigger-pre-emption")));
+    assert_eq!(
+        inspect::enumerated_at(name, &format!("{long}/{capability}")),
+        Ok(names)
+    );
+    // Edits take the same paths: a member is set, an entry is added and one taken out,
+    // and the octets of the transfer are no longer those of its value.
+    let mut edited = tree.clone();
+    let second = inspect::select(&tree, &short).unwrap()[0].clone();
+    inspect::set(&mut edited, &format!("{short}/qosFlowIdentifier"), json!(5)).unwrap();
+    let error = inspect::select(&edited, &format!("{transfer}/octets")).unwrap_err();
+    assert!(error.contains("the value was edited"), "{error}");
+    inspect::insert(&mut edited, &format!("{list}/-"), second.clone()).unwrap();
+    inspect::insert(&mut edited, &format!("{list}/0"), second).unwrap();
+    inspect::set(&mut edited, &format!("{list}/0/e-RAB-ID"), json!(7)).unwrap();
+    inspect::remove(&mut edited, &format!("{list}/2")).unwrap();
+    inspect::set(
+        &mut edited,
+        &format!("{transfer}/PDUSessionType/value"),
+        json!("ipv6"),
+    )
+    .unwrap();
+    let after = inspect::inspect_pdu(&inspect::encode_pdu(&edited).unwrap()).unwrap();
+    let flows = inspect::select(&after, &format!("{list}/value/*/qosFlowIdentifier")).unwrap();
+    assert_eq!(flows, [&json!(0), &json!(5)]);
+    let bearers = inspect::select(&after, &format!("{list}/value/*/e-RAB-ID")).unwrap();
+    assert_eq!(bearers, [&json!(7)]);
+    let kind = inspect::select(&after, &format!("{transfer}/PDUSessionType/value")).unwrap();
+    assert_eq!(kind, [&json!("ipv6")]);
+    inspect::set(&mut edited, &format!("{list}/0/e-RAB-ID"), Value::Null).unwrap();
+    let none = Vec::<&Value>::new();
+    assert_eq!(
+        inspect::select(&edited, &format!("{list}/0/e-RAB-ID")),
+        Ok(none)
+    );
+    // A name that neither has is refused with the members of both, and the tree is as
+    // it was.
+    let before = edited.clone();
+    for (path, value, own) in [
+        (
+            format!("{list}/0/misspelled"),
+            "is not a member of QosFlowSetupRequestItem, which has qosFlowIdentifier",
+            None,
+        ),
+        (
+            format!("{transfer}/misspelled"),
+            "is not a member of PDUSessionResourceSetupRequestTransfer, which has protocolIEs",
+            Some("; a transfer itself has decoded, octets"),
+        ),
+        (
+            format!("{list}/misspelled"),
+            "array index must be numeric",
+            Some("; an IE itself has id, criticality, value, octets"),
+        ),
+        (
+            "/ngap/RAN-UE-NGAP-ID/valeu".to_string(),
+            "\"valeu\" is not a member of this value, which has none",
+            Some("; an IE itself has id, criticality, value, octets"),
+        ),
+    ] {
+        for error in [
+            inspect::select(&edited, &path).map(|_| ()).unwrap_err(),
+            inspect::set(&mut edited, &path, json!(1)).unwrap_err(),
+            inspect::check_path(name, &path).unwrap_err(),
+        ] {
+            assert!(error.contains(value), "{path}: {error}");
+            assert_eq!(
+                own.is_some_and(|own| error.ends_with(own)),
+                own.is_some(),
+                "{error}"
+            );
+            assert_eq!(error.contains("itself"), own.is_some(), "{path}: {error}");
+        }
+    }
+    assert_eq!(edited, before);
+    // A member of a value that is named as one of its IE is that of the IE: the `value`
+    // of a string of bits whose size varies is reached after `value`.
+    let address = json!({"value": "0A0000", "length": 24});
+    let entry =
+        json!({"id": "TraceCollectionEntityIPAddress", "criticality": "ignore", "value": address});
+    let tree = sent(&[entry]).unwrap();
+    let ie = "/ngap/TraceCollectionEntityIPAddress";
+    let select = |path: &str| inspect::select(&tree, &format!("{ie}/{path}")).unwrap();
+    assert_eq!(select("value"), [&address]);
+    assert_eq!(select("value/value"), [&json!("0A0000")]);
+    assert_eq!(select("length"), [&json!(24)]);
+    assert_eq!(select("value/length"), [&json!(24)]);
 }
 
 /// The octets of the message `name` of the fixtures.
@@ -690,6 +996,7 @@ fn the_ies_of_a_message_have_paths_by_their_names() {
 
 #[test]
 fn every_path_of_every_canonical_procedure_selects_its_value() {
+    let mut shorter = 0;
     for line in include_str!("fixtures/messages.tsv")
         .lines()
         .filter(|line| !line.starts_with('#') && !line.is_empty())
@@ -702,8 +1009,49 @@ fn every_path_of_every_canonical_procedure_selects_its_value() {
             assert!(!path.contains("protocolIEs"), "{} {path}", fields[0]);
             let selected = inspect::select(&tree, &path);
             assert_eq!(selected, Ok(vec![&value]), "{} {path}", fields[0]);
+            // The path that leaves out what it may selects the same value.
+            let short = short(&tree, &path);
+            let selected = inspect::select(&tree, &short);
+            assert_eq!(selected, Ok(vec![&value]), "{} {short}", fields[0]);
+            shorter += usize::from(short != path);
         }
     }
+    assert!(shorter > 300, "{shorter}");
+}
+
+/// `path` of `tree` without the `value` of each IE and the `decoded` of each transfer on
+/// its way, which a path may leave out. One that the path ends with stays, and so does
+/// one before a member of the value that is named as a member of the IE or of the
+/// transfer.
+fn short(tree: &serde_json::Value, path: &str) -> String {
+    let segments: Vec<&str> = path.split('/').skip(1).collect();
+    let mut short = String::new();
+    for (at, segment) in segments.iter().enumerate() {
+        // What has the segment, by the path so far.
+        let holder = match at {
+            0 => None,
+            at => inspect::select(tree, &format!("/{}", segments[..at].join("/")))
+                .unwrap()
+                .pop(),
+        };
+        let has = |member: &str| holder.is_some_and(|holder| holder.get(member).is_some());
+        let own: &[&str] = match *segment {
+            "value" if has("_raw_value") => &["id", "criticality", "value", "octets"],
+            "extensionValue" if has("_raw_value") => {
+                &["id", "criticality", "extensionValue", "octets"]
+            }
+            "decoded" if has("_raw_transfer") => &["decoded", "octets"],
+            _ => &[],
+        };
+        let left_out = !own.is_empty()
+            && (segments.get(at + 1))
+                .is_some_and(|next| !own.contains(next) && !next.starts_with('_'));
+        if !left_out {
+            short.push('/');
+            short.push_str(segment);
+        }
+    }
+    short
 }
 
 #[test]
@@ -1347,9 +1695,15 @@ fn a_path_is_checked_against_a_message_without_a_tree() {
         for (path, _) in inspect::paths(&tree) {
             let checked = inspect::check_path(name, &path);
             assert!(checked.is_ok(), "{name} {path}: {checked:?}");
+            // And so is the path that leaves out what it may.
+            let short = short(&tree, &path);
+            let checked = inspect::check_path(name, &short);
+            assert!(checked.is_ok(), "{name} {short}: {checked:?}");
         }
     }
     let transfer = "/ngap/PDUSessionResourceSetupListSUReq/value/0\
+        /pDUSessionResourceSetupRequestTransfer";
+    let short_transfer = "/ngap/PDUSessionResourceSetupListSUReq/0\
         /pDUSessionResourceSetupRequestTransfer";
     for (message, path) in [
         ("UEContextReleaseRequest", "/ngap/Cause/value/nas"),
@@ -1386,6 +1740,23 @@ fn a_path_is_checked_against_a_message_without_a_tree() {
             "PDUSessionResourceSetupRequest",
             &format!("{transfer}/octets"),
         ),
+        // The value of an IE and the decoded value of a transfer may be left out.
+        ("UEContextReleaseRequest", "/ngap/Cause/nas"),
+        ("UEContextReleaseRequest", "/ngap/*/radioNetwork"),
+        (
+            "InitialContextSetupRequest",
+            "/ngap/AllowedNSSAI/0/s-NSSAI/sD",
+        ),
+        (
+            "PDUSessionResourceSetupRequest",
+            &format!("{short_transfer}/QosFlowSetupRequestList/0/qosFlowIdentifier"),
+        ),
+        (
+            "PDUSessionResourceSetupRequest",
+            &format!("{short_transfer}/@id=136/-"),
+        ),
+        // A segment under an IE whose type is not known may be a member of its value.
+        ("UEContextReleaseRequest", "/ngap/@id=60000/anything"),
     ] {
         let checked = inspect::check_path(message, path);
         assert!(checked.is_ok(), "{message} {path}: {checked:?}");
@@ -1417,10 +1788,24 @@ fn a_path_is_checked_against_a_message_without_a_tree() {
             "/ngap/RAN-UE-NGAP-ID/value/*/deeper",
             "selects nothing in a message UEContextReleaseRequest",
         ),
+        // A name that neither an IE nor its value has: the members of both.
         (
             "UEContextReleaseRequest",
             "/ngap/Cause/misspelled",
-            "is not a member of an IE, which has id, criticality, value, octets",
+            "is not a member of Cause, which has radioNetwork, transport, nas, protocol, misc, \
+             choice-Extensions, at /ngap/Cause/misspelled; an IE itself has id, criticality, \
+             value, octets",
+        ),
+        (
+            "UEContextReleaseRequest",
+            "/ngap/RAN-UE-NGAP-ID/valeu",
+            "is not a member of this value, which has none, at /ngap/RAN-UE-NGAP-ID/valeu; an \
+             IE itself has id, criticality, value, octets",
+        ),
+        (
+            "UEContextReleaseRequest",
+            "/ngap/Cause/radioNetwork/deeper",
+            "which has none",
         ),
         (
             "UEContextReleaseRequest",
@@ -1435,7 +1820,22 @@ fn a_path_is_checked_against_a_message_without_a_tree() {
         (
             "PDUSessionResourceSetupRequest",
             &format!("{transfer}/misspelled"),
-            "is not a member of a transfer, which has decoded, octets",
+            "is not a member of PDUSessionResourceSetupRequestTransfer, which has protocolIEs",
+        ),
+        (
+            "PDUSessionResourceSetupRequest",
+            &format!("{transfer}/misspelled"),
+            "; a transfer itself has decoded, octets",
+        ),
+        (
+            "PDUSessionResourceSetupRequest",
+            &format!("{short_transfer}/QosFlowSetupRequestList/0/misspelled"),
+            "is not a member of QosFlowSetupRequestItem",
+        ),
+        (
+            "PDUSessionResourceSetupRequest",
+            "/ngap/PDUSessionResourceSetupListSUReq/Cause",
+            "go by position",
         ),
         (
             "PDUSessionResourceSetupRequest",

@@ -145,14 +145,34 @@ contains, as the `decoded` value of a transfer, go by name in its place:
 /ngap/PDUSessionResourceSetupListSUReq/value/0/pDUSessionResourceSetupRequestTransfer/decoded/PDUSessionType/value = "ipv4"
 ```
 
+`value` and `decoded` may be left out of a path. A segment that names no
+member of an IE, which has `id`, `criticality`, `value` and `octets`, is taken
+in its value, and one that names no member of a transfer, which has `decoded`
+and `octets`, in its decoded value. These two paths select the same value:
+
+```text
+/ngap/PDUSessionResourceSetupListSUReq/value/0/pDUSessionResourceSetupRequestTransfer/decoded/QosFlowSetupRequestList/value/0/qosFlowIdentifier
+/ngap/PDUSessionResourceSetupListSUReq/0/pDUSessionResourceSetupRequestTransfer/QosFlowSetupRequestList/0/qosFlowIdentifier
+```
+
+What an IE or a transfer has itself comes first: `/ngap/Cause/value` is the
+value of the IE and `/ngap/Cause/*` each of its members, so the entries of a
+list that is the value of an IE are `value/*`. A member of a value that is
+named as one of its IE is reached after `value`: only a string of bits whose
+size varies has one, its `value`, as in
+`/ngap/TraceCollectionEntityIPAddress/value/value`. The members that start
+with `_` are those of the IE or of the transfer too.
+
 A path selects nothing where the message could have a value and does not: an
 IE that the message does not have, an `OPTIONAL` member that is absent, and
 another alternative of a `CHOICE`. A name that the type of a value cannot
 have is an error, which lists the members that the type has, so a member that
 is written wrong is not taken for one that is not there; what follows an
-absent value in a path is checked the same way. `*` is each entry of a list
-or each member of a value, without the members that start with `_`, and a
-segment after it is an error when none of the values can have it.
+absent value in a path is checked the same way. Under an IE or a transfer, the
+error lists the members of its value, then those of the IE or of the transfer
+itself. `*` is each entry of a list or each member of a value, without the
+members that start with `_`, and a segment after it is an error when none of
+the values can have it.
 
 A name is its letters and its digits, whatever their case and whatever is
 between them: `/ngap/RAN-UE-NGAP-ID`, `/NGAP/ran_ue_ngap_id` and
@@ -166,7 +186,8 @@ in a message of a name, without a tree: under `/ngap` the IE has to be one of
 the object set of the message, and each segment under it a member that the
 type has, through the lists, the alternatives of a `CHOICE` and the decoded
 value of a transfer. What is not known is not refused: the value of an IE
-selected by `@id=N` whose identifier is unknown or has several types, and the
+selected by `@id=N` whose identifier is unknown or has several types, a
+segment under such an IE, which may name a member of its value, and the
 entries of a container other than that of the message when they are selected
 by position. `inspect::message_ies` gives the IEs that a message can have,
 from its ASN.1 object set: the identifier of each and whether its presence is
@@ -196,6 +217,25 @@ its `criticality`, and `{"octets": "…"}` in place of a value is the octets of
 an IE as they are sent. `inspect::message_tree` shows a PDU in that form,
 without what the specification assigns.
 
+The form goes to any depth. A transfer is its decoded value, or
+`{"octets": "…"}` when it did not decode, and the IEs that a value holds are
+each a name with a value, as those of the message are:
+
+```json
+{"PDUSessionResourceSetupListSUReq": [{"pDUSessionID": 5, "s-NSSAI": {"sST": 1},
+  "pDUSessionResourceSetupRequestTransfer": {"protocolIEs": [
+    {"PDUSessionType": "ipv4", "criticality": "reject"}]}}]}
+```
+
+An IE that a value holds alone, as the alternative that extends a `CHOICE`,
+has the criticality that `inspect::item_criticality` gives, unless it says
+another. An IE of a message that a transfer contains and an IE of an extension
+container always say their `criticality`, and `message_tree` always shows it:
+the tables have what the object set of a message of a procedure assigns, and
+that of a single container, and no other. `message_from_tree` also takes a
+value as `inspect_pdu` shows it, with `decoded` for a transfer and an entry of
+`id`, `criticality` and `value` for an IE, and the two forms in one message.
+
 `inspect::message_name(&pdu)` is the name that ASN.1 gives the message of a
 PDU, such as `InitialContextSetupResponse`, and `inspect::message_named` finds
 the `direction` and the `procedure_code` that a tree has for a message from
@@ -212,8 +252,13 @@ or by number, its `criticality` and its `value`, which is typed whatever JSON
 it is: an `ENUMERATED` is added by its name. Given octets are sent as its
 `octets`, without `value`. An IE is written this way wherever a tree has IEs:
 in a message that a transfer contains, in a value that is set whole, and in a
-tree written by hand. The module documentation lists the members of the tree
-and the rules of an edit.
+tree written by hand. A transfer is added as an object with its `decoded`
+value alone, or as that value itself: an object that has no `decoded`, no
+`octets` and no member that starts with `_` is the decoded value, as in
+`{"pDUSessionResourceSetupUnsuccessfulTransfer": {"cause": {"misc": "unspecified"}}}`.
+Given octets are sent as a transfer in its place, or as its `octets` alone.
+The module documentation lists the members of the tree and the rules of an
+edit.
 
 No edit at a path is taken and then left out. `set` writes a member by the
 name that ASN.1 gives it and refuses a name that the type does not have.

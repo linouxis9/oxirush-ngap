@@ -107,13 +107,19 @@ oxirush-ngap = "0.5"
 |---------|------|---------|
 | `inspect` | A PDU as a `serde_json::Value`: its tree, in which a message is shown and written as its name and its IEs, its view and the paths of its values | `serde_json` |
 
-No feature is on by default. The minimum supported Rust version is 1.88. The
-examples of this page also use the `hex` crate, and `serde_json` for JSON.
-The values of the bindings are those of `rasn`, such as `Integer`,
-`FixedBitString`, `OctetString` and `Any`, and so are the errors of the
-codec. The crate re-exports it as `oxirush_ngap::rasn`, which is where the
-examples take these names from: a crate that names them needs no dependency
-on `rasn` of its own.
+No feature is on by default. The examples of this page also use the `hex`
+crate, and `serde_json` for JSON. The values of the bindings are those of
+`rasn`, such as `Integer`, `FixedBitString`, `OctetString` and `Any`, and so
+are the errors of the codec. The crate re-exports it as `oxirush_ngap::rasn`,
+which is where the examples take these names from: a crate that names them
+needs no dependency on `rasn` of its own.
+
+The minimum supported Rust version is 1.88. A project that is built with
+Rust 1.88 needs a resolver that looks at the Rust version, which edition
+2024 has and `resolver = "3"` in its `Cargo.toml` gives an older edition:
+the default resolver of edition 2021 takes a `uuid` that needs Rust 1.89,
+through the macros of `rasn`, and the build stops with
+`uuid@1.28.0 requires rustc 1.89.0`.
 
 The bindings are checked in and large, and with `inspect` the compiler also
 builds JER and APER code for every type of the protocol. A clean

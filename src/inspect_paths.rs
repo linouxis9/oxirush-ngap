@@ -1150,21 +1150,26 @@ fn received_member(entry: &Map<String, Value>) -> Option<&'static str> {
 /// The members that start with `_` repeat what was received and are left out, except
 /// `_decode_error`. The `octets` of an IE or of a transfer are listed when it has no
 /// value beside them: those of a value repeat it, and are selected all the same.
+///
+/// What is nested deeper than 256 levels is one value, whatever it holds: no view of a
+/// PDU is that deep, and JSON that is deeper is not walked further.
 pub fn paths(view: &Value) -> Vec<(String, Value)> {
     let mut found = Vec::new();
-    walk(view, &mut String::new(), &mut found);
+    walk(view, &mut String::new(), 0, &mut found);
     found
 }
 
-fn walk(value: &Value, path: &mut String, found: &mut Vec<(String, Value)>) {
+fn walk(value: &Value, path: &mut String, depth: usize, found: &mut Vec<(String, Value)>) {
     let step = |segment: &str, child: &Value, path: &mut String, found: &mut _| {
         let length = path.len();
         path.push('/');
         path.push_str(&segment.replace('~', "~0").replace('/', "~1"));
-        walk(child, path, found);
+        walk(child, path, depth + 1, found);
         path.truncate(length);
     };
     match value {
+        // A view is read no deeper than a tree is.
+        _ if depth > WRITTEN => found.push((path.clone(), value.clone())),
         Value::Object(members) if !members.is_empty() => {
             // An IE or a transfer that has its octets alone.
             if let Some(octets) = received(members)
@@ -2206,6 +2211,34 @@ mod tests {
                 assert!(!same, "{of}: {name}");
             }
         }
+    }
+
+    #[test]
+    fn what_is_nested_deeper_than_a_view_is_one_value() {
+        // Lists in lists, ten levels deeper than a view is read: the path of the one
+        // value has a segment for each level that is walked, and the value is what is
+        // under them, whole.
+        let mut deep = json!([{"a": 1}]);
+        for _ in 0..WRITTEN + 10 {
+            deep = json!([deep]);
+        }
+        let found = paths(&deep);
+        assert_eq!(found.len(), 1);
+        let (path, value) = &found[0];
+        assert_eq!(path.matches('/').count(), WRITTEN + 1);
+        let mut rest = json!([{"a": 1}]);
+        for _ in 0..9 {
+            rest = json!([rest]);
+        }
+        assert_eq!(*value, rest);
+        // What is not that deep is listed value by value.
+        let mut shallow = json!([{"a": 1}]);
+        for _ in 0..WRITTEN - 10 {
+            shallow = json!([shallow]);
+        }
+        let found = paths(&shallow);
+        assert_eq!(found.len(), 1);
+        assert!(found[0].0.ends_with("/0/a") && found[0].1 == json!(1));
     }
 
     #[test]

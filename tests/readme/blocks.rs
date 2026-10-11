@@ -98,14 +98,14 @@ fn block_2() {
     // The same message as a tree: its name and its IEs by name
     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
     let pdu = NGAP_PDU::decode(&bytes).unwrap();
-    println!("{}", inspect::message_tree(&pdu).unwrap());
+    println!("{}", pdu.to_tree().unwrap());
 
     // Its view is edited at a path, and is a PDU again
-    let mut view = inspect::message_view(&pdu).unwrap();
+    let mut view = pdu.to_view().unwrap();
     let lost = json!("radio-connection-with-ue-lost");
     inspect::set(&mut view, "/ngap/Cause/radioNetwork", lost).unwrap();
-    let edited = inspect::message_from_view(&view).unwrap();
-    println!("{}", inspect::message_tree(&edited).unwrap());
+    let edited = pdu.with_view(&view).unwrap();
+    println!("{}", edited.to_tree().unwrap());
 
     // Its octets are those that the typed example built
     let octets = hex::encode(edited.encode().unwrap());
@@ -212,15 +212,15 @@ fn block_7() {
 
 /// The Rust block 8 of README.md.
 fn block_8() {
-    use oxirush_ngap::{inspect, ngap::NGAP_PDU};
+    use oxirush_ngap::ngap::NGAP_PDU;
 
     // UE CONTEXT RELEASE REQUEST
     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
     let pdu = NGAP_PDU::decode(&bytes).unwrap();
 
     // Its tree, then its third IE as the view has it
-    println!("{}", inspect::message_tree(&pdu).unwrap());
-    let view = inspect::message_view(&pdu).unwrap();
+    println!("{}", pdu.to_tree().unwrap());
+    let view = pdu.to_view().unwrap();
     println!("{}", view["message"]["protocolIEs"][2]);
 }
 
@@ -231,7 +231,7 @@ fn block_9() {
 
     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
     let pdu = NGAP_PDU::decode(&bytes).unwrap();
-    let view = inspect::message_view(&pdu).unwrap();
+    let view = pdu.to_view().unwrap();
 
     // `/ngap` is the IEs of the message, and an IE goes by its name
     let select = |path| inspect::select(&view, path).unwrap();
@@ -262,16 +262,16 @@ fn block_10() {
 
     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
     let pdu = NGAP_PDU::decode(&bytes).unwrap();
-    let mut view = inspect::message_view(&pdu).unwrap();
+    let mut view = pdu.to_view().unwrap();
 
     // A value, and another alternative of a CHOICE in place of the one that is there
     inspect::set(&mut view, "/ngap/RAN-UE-NGAP-ID/value", json!(9)).unwrap();
     inspect::set(&mut view, "/ngap/Cause/nas", json!("Normal Release")).unwrap();
-    let edited = inspect::message_from_view(&view).unwrap();
-    println!("{}", inspect::message_tree(&edited).unwrap());
+    let edited = pdu.with_view(&view).unwrap();
+    println!("{}", edited.to_tree().unwrap());
 
     // What was not edited is the octets that were received
-    let after = inspect::message_view(&edited).unwrap();
+    let after = edited.to_view().unwrap();
     let octets = inspect::select(&after, "/ngap/AMF-UE-NGAP-ID/octets").unwrap();
     assert_eq!(octets, [&json!("002A")]);
 
@@ -287,7 +287,7 @@ fn block_11() {
 
     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
     let pdu = NGAP_PDU::decode(&bytes).unwrap();
-    let mut view = inspect::message_view(&pdu).unwrap();
+    let mut view = pdu.to_view().unwrap();
 
     // An IE is added at the end, by its name and its typed value
     let name = json!({"id": "RANNodeName", "criticality": "ignore", "value": "gnb-1"});
@@ -300,13 +300,13 @@ fn block_11() {
     // An IE is taken out by its name
     inspect::remove(&mut view, "/ngap/AMF-UE-NGAP-ID").unwrap();
 
-    let edited = inspect::message_from_view(&view).unwrap();
-    println!("{}", inspect::message_tree(&edited).unwrap()["ies"]);
+    let edited = pdu.with_view(&view).unwrap();
+    println!("{}", edited.to_tree().unwrap()["ies"]);
 }
 
 /// The Rust block 12 of README.md.
 fn block_12() {
-    use oxirush_ngap::inspect;
+    use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::json;
 
     // A tree: the name of the message, whatever its case and its separators, then its IEs
@@ -321,18 +321,18 @@ fn block_12() {
         ],
     });
 
-    let pdu = inspect::message_from_tree(&request).unwrap();
+    let pdu = NGAP_PDU::from_tree(&request).unwrap();
     println!("{}", hex::encode(pdu.encode().unwrap()));
 
     // The name gave the direction, the procedure code and the criticalities
-    let view = inspect::message_view(&pdu).unwrap();
+    let view = pdu.to_view().unwrap();
     println!("{} {} {}", view["direction"], view["procedure_code"], view["criticality"]);
     println!("{}", json!(inspect::select(&view, "/ngap/*/criticality").unwrap()));
 }
 
 /// The Rust block 13 of README.md.
 fn block_13() {
-    use oxirush_ngap::inspect;
+    use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::json;
 
     // `{"octets": "…"}` in place of a value is the octets of the IE, whatever they are
@@ -340,22 +340,22 @@ fn block_13() {
         {"AMF-UE-NGAP-ID": 42},
         {"65000": {"octets": "c0ffee"}, "criticality": "reject"},
     ]});
-    let pdu = inspect::message_from_tree(&request).unwrap();
+    let pdu = NGAP_PDU::from_tree(&request).unwrap();
     println!("{}", hex::encode(pdu.encode().unwrap()));
 
     // A view shows an IE that does not decode by its octets, and says why
-    let mut view = inspect::message_view(&pdu).unwrap();
+    let mut view = pdu.to_view().unwrap();
     println!("{}", view["message"]["protocolIEs"][1]);
 
     // In a view, the `octets` of an IE are set in place of its value
     inspect::set(&mut view, "/ngap/AMF-UE-NGAP-ID/octets", json!("00ff")).unwrap();
-    let edited = inspect::message_from_view(&view).unwrap();
-    println!("{}", inspect::message_tree(&edited).unwrap());
+    let edited = pdu.with_view(&view).unwrap();
+    println!("{}", edited.to_tree().unwrap());
 }
 
 /// The Rust block 14 of README.md.
 fn block_14() {
-    use oxirush_ngap::inspect;
+    use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::json;
 
     // A message that has one IE twice
@@ -364,8 +364,8 @@ fn block_14() {
         {"RAN-UE-NGAP-ID": 7},
         {"AMF-UE-NGAP-ID": 2},
     ]});
-    let pdu = inspect::message_from_tree(&twice).unwrap();
-    let mut view = inspect::message_view(&pdu).unwrap();
+    let pdu = NGAP_PDU::from_tree(&twice).unwrap();
+    let mut view = pdu.to_view().unwrap();
 
     // The name selects both, in the order of the message
     let both = inspect::select(&view, "/ngap/AMF-UE-NGAP-ID/value").unwrap();
@@ -387,15 +387,15 @@ fn block_14() {
 
 /// The Rust block 15 of README.md.
 fn block_15() {
-    use oxirush_ngap::inspect;
+    use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::{Value, json};
 
     // A message whose one IE is a list of two items
     let request = json!({"message": "InitialContextSetupRequest", "ies": [
         {"AllowedNSSAI": [{"s-NSSAI": {"sST": 1}}, {"s-NSSAI": {"sST": 2, "sD": "000001"}}]},
     ]});
-    let pdu = inspect::message_from_tree(&request).unwrap();
-    let mut view = inspect::message_view(&pdu).unwrap();
+    let pdu = NGAP_PDU::from_tree(&request).unwrap();
+    let mut view = pdu.to_view().unwrap();
 
     // An item by its position, and each of them after `value`
     let select = |view, path| -> Vec<Value> {
@@ -415,13 +415,13 @@ fn block_15() {
     // `null` takes an optional member out
     inspect::set(&mut view, "/ngap/AllowedNSSAI/0/s-NSSAI/sD", Value::Null).unwrap();
 
-    let edited = inspect::message_from_view(&view).unwrap();
-    println!("{}", inspect::message_tree(&edited).unwrap());
+    let edited = pdu.with_view(&view).unwrap();
+    println!("{}", edited.to_tree().unwrap());
 }
 
 /// The Rust block 16 of README.md.
 fn block_16() {
-    use oxirush_ngap::inspect;
+    use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::json;
 
     // A message with a transfer, written as the message that it contains
@@ -436,8 +436,8 @@ fn block_16() {
             ]},
         }]},
     ]});
-    let pdu = inspect::message_from_tree(&request).unwrap();
-    let mut view = inspect::message_view(&pdu).unwrap();
+    let pdu = NGAP_PDU::from_tree(&request).unwrap();
+    let mut view = pdu.to_view().unwrap();
 
     // In a view, the transfer is its octets beside its decoded value
     let transfer = "/ngap/PDUSessionResourceSetupListSUReq/0/pDUSessionResourceSetupRequestTransfer";
@@ -458,8 +458,8 @@ fn block_16() {
 
     // An edit of the message that it contains is encoded into the transfer
     inspect::set(&mut view, &kind, json!("ipv6")).unwrap();
-    let edited = inspect::message_from_view(&view).unwrap();
-    println!("{}", inspect::message_tree(&edited).unwrap()["ies"][2]);
+    let edited = pdu.with_view(&view).unwrap();
+    println!("{}", edited.to_tree().unwrap()["ies"][2]);
 }
 
 /// The Rust block 17 of README.md.
@@ -492,7 +492,7 @@ fn block_18() {
 
 /// The Rust block 19 of README.md.
 fn block_19() {
-    use oxirush_ngap::{ErrorKind, inspect};
+    use oxirush_ngap::{ErrorKind, inspect, ngap::NGAP_PDU};
     use serde_json::json;
 
     // Written: the name of the type with its value, in place of the octets
@@ -508,11 +508,11 @@ fn block_19() {
     ]});
 
     // A tree shows the octets that the container was encoded as
-    let pdu = inspect::message_from_tree(&required).unwrap();
-    println!("{}", inspect::message_tree(&pdu).unwrap()["ies"][2]);
+    let pdu = NGAP_PDU::from_tree(&required).unwrap();
+    println!("{}", pdu.to_tree().unwrap()["ies"][2]);
 
     // Read: a path goes through the name of the type
-    let mut view = inspect::message_view(&pdu).unwrap();
+    let mut view = pdu.to_view().unwrap();
     let container = format!("/ngap/SourceToTarget-TransparentContainer/{name}");
     let cell = format!("{container}/targetCell-ID/nR-CGI/nRCellIdentity");
     assert_eq!(inspect::check_path("HandoverRequired", &cell), Ok(()));
@@ -528,6 +528,6 @@ fn block_19() {
 
     // An edit goes into it, and what is not edited is sent as it was received
     inspect::set(&mut view, &cell, json!(7)).unwrap();
-    let edited = inspect::message_from_view(&view).unwrap();
-    println!("{}", inspect::message_tree(&edited).unwrap()["ies"][2]);
+    let edited = pdu.with_view(&view).unwrap();
+    println!("{}", edited.to_tree().unwrap()["ies"][2]);
 }

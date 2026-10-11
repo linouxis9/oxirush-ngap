@@ -1085,9 +1085,8 @@ fn advance_all<'a>(
 /// says which IE the entry is.
 ///
 /// The `octets` of an IE or of a transfer are what it was received as: those of one whose
-/// value [`set`], [`remove`] or [`insert`] edited since are an error, as
-/// [`message_from_view`](crate::inspect::message_from_view) has yet to give it others. So
-/// is a path into a value that did not decode.
+/// value [`set`], [`remove`] or [`insert`] edited since are an error, as `from_view` of
+/// the PDU has yet to give it others. So is a path into a value that did not decode.
 pub fn select<'a>(view: &'a Value, path: &str) -> Result<Vec<&'a Value>, Error> {
     let (parts, named) = resolve(path)?;
     let mut places = vec![(Some(view), pdu(view))];
@@ -1720,8 +1719,8 @@ fn ie_by_name(entry: &Value, shape: Shape, container: Shape) -> Result<Value, Er
 
 /// `value`, a value of `shape` of a tree, as a view has it: each IE of a container as
 /// the entry that [`entry_of`] gives it. A transfer keeps the form that it is written
-/// in, its decoded value alone or as its `decoded` member, which
-/// [`message_from_view`](crate::inspect::message_from_view) takes.
+/// in, its decoded value alone or as its `decoded` member, which `from_view` of the PDU
+/// takes.
 fn written(value: &Value, shape: Shape, depth: usize) -> Result<Value, Error> {
     if depth > WRITTEN {
         return Err(Error::limit(format!(

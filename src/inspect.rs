@@ -1,11 +1,18 @@
 //! Decoded PDUs as JSON, in two forms: a view, which is read and edited by paths and
 //! encoded again, and a tree, the short form in which a message is shown and written.
 //!
-//! The tree of a PDU is the name of its message and its IEs by name. [`message_tree`]
-//! shows it, and [`message_from_tree`] gives the PDU of one that is written. The view
-//! of a PDU keeps what was received, and the rest of this page is about it.
+//! The two forms are methods of the PDU, [`NGAP_PDU`], and the functions of this module
+//! read and edit a view by its paths, and say what the messages of the protocol have.
 //!
-//! [`message_view`] returns `procedure_code`, `direction`, `criticality` and `message`: the
+//! | | Tree | View |
+//! | --- | --- | --- |
+//! | From a PDU | [`to_tree`] | [`to_view`] |
+//! | Back to a PDU | [`from_tree`]: a message written from the tree alone | [`with_view`]: this PDU, edited; [`from_view`]: the PDU of any view |
+//!
+//! The tree of a PDU is the name of its message and its IEs by name. The view of a PDU
+//! keeps what was received, and the rest of this page is about it.
+//!
+//! [`to_view`] returns `procedure_code`, `direction`, `criticality` and `message`: the
 //! message in the ASN.1 JSON encoding (JER). An IE whose identifier is known has its typed
 //! `value` (`extensionValue` in an extension container) in place of its octets. Its type
 //! is that of its identifier, and for an IE of an extension container the one that the
@@ -23,7 +30,7 @@
 //! - an identifier or a counter, such as a TAC, a GTP-TEID, a TMSI, a cell identity, the
 //!   parts of a GUAMI or an SST, as a number.
 //!
-//! [`message_from_view`] takes them in this form, a number also as a `"0x…"` string, and
+//! [`from_view`] takes them in this form, a number also as a `"0x…"` string, and
 //! as JER writes them. It takes the name of an ENUMERATED value as any other name: see
 //! [Names](#names). A value that does not fit its form, such as a transport layer address
 //! of another length, stays as JER writes it. The other strings stay in hexadecimal: an
@@ -44,8 +51,8 @@
 //! - `_edited`: [`set`], [`remove`] or [`insert`] changed something under the value, whose
 //!   octets are no longer those beside it.
 //!
-//! [`message_from_view`] encodes the view. What was not edited keeps the octets received.
-//! To edit:
+//! [`from_view`] encodes the view, and [`with_view`] the view of a PDU that is at hand.
+//! What was not edited keeps the octets received. To edit:
 //!
 //! - change a typed `value` or the `decoded` member of a transfer, which is encoded again.
 //!   This is refused when the octets received do not decode and encode back to themselves,
@@ -132,7 +139,7 @@
 //! /ngap/PDUSessionResourceSetupListSUReq/0/pDUSessionResourceSetupRequestTransfer/protocolIEs/0/UL-NGU-UP-TNLInformation/gTPTunnel/gTP-TEID
 //! ```
 //!
-//! So the names and the positions that [`message_tree`] shows, joined after the root,
+//! So the names and the positions that [`to_tree`] shows, joined after the root,
 //! are the path of a value in the view of the same PDU. A path that ends with the name
 //! of an IE selects the IE, as its name alone does in a list, and `value` after it its
 //! value.
@@ -183,7 +190,7 @@
 //! `_decode_error`. The octets of an IE or of a transfer are selected as its `octets`,
 //! which [`paths`] lists only for one that has no value beside them, and set there in
 //! place of its value. Those of a value that an edit changed are an error to select:
-//! [`message_from_view`] gives the PDU its octets.
+//! [`from_view`] gives the PDU its octets.
 //!
 //! [`set`] writes a member by the name that ASN.1 gives it, and refuses a name that the
 //! type does not have. `null` takes an optional member out, as [`remove`] does; a member
@@ -201,14 +208,14 @@
 //!     REJECT RAN_UE_NGAP_ID(7u32),
 //!     IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
 //! )?;
-//! let mut view = inspect::message_view(&pdu)?;
+//! let mut view = pdu.to_view()?;
 //! assert_eq!(inspect::select(&view, "/ngap/RAN-UE-NGAP-ID/value")?, [&json!(7)]);
 //!
 //! inspect::set(&mut view, "/ngap/Cause/value", json!({"nas": "normal-release"}))?;
 //! inspect::remove(&mut view, "/ngap/AMF-UE-NGAP-ID")?;
 //! let name = json!({"id": "RANNodeName", "criticality": "ignore", "value": "gnb-1"});
 //! inspect::insert(&mut view, "/ngap/-", name)?;
-//! let edited = inspect::message_view(&inspect::message_from_view(&view)?)?;
+//! let edited = pdu.with_view(&view)?.to_view()?;
 //! assert_eq!(inspect::select(&edited, "/ngap/*/id")?, [&json!(85), &json!(15), &json!(82)]);
 //! # Ok::<(), oxirush_ngap::Error>(())
 //! ```
@@ -253,8 +260,8 @@
 //! - written, the value of the IE is an object with one member, the name of the type
 //!   with its value, which is encoded as that type:
 //!   `{"SourceNGRANNode-ToTargetNGRANNode-TransparentContainer": {"rRCContainer": "…", …}}`.
-//!   [`message_from_tree`] takes it, and so does [`message_from_view`] for a value that
-//!   [`set`] or [`insert`] wrote and for a view written by hand;
+//!   [`from_tree`] takes it, and so does [`from_view`] for a value that [`set`] or
+//!   [`insert`] wrote and for a view written by hand;
 //! - read, a path goes through the name of the type, after the IE or its `value`:
 //!   `/ngap/SourceToTarget-TransparentContainer/SourceNGRANNode-ToTargetNGRANNode-TransparentContainer/targetCell-ID`.
 //!   [`check_path`] and [`enumerated_at`] read it against the types. In a view,
@@ -268,6 +275,12 @@
 //! Octets that are not of the type have a `_decode_error`, which a path into them
 //! reports, and what is not edited is sent as the octets received. The `rRCContainer`
 //! in it stays octets: it is a message of RRC.
+//!
+//! [`to_tree`]: NGAP_PDU::to_tree
+//! [`from_tree`]: NGAP_PDU::from_tree
+//! [`to_view`]: NGAP_PDU::to_view
+//! [`from_view`]: NGAP_PDU::from_view
+//! [`with_view`]: NGAP_PDU::with_view
 
 use serde_json::{Value, json};
 
@@ -948,11 +961,12 @@ fn opened(raw: Value, name: &str) -> Value {
 /// [Octets that carry a type](self#octets-that-carry-a-type).
 ///
 /// The IE then has, in place of its octets, the transfer of that type under that name,
-/// which [`select`], [`paths`] and the edits go into and [`message_from_view`] takes
-/// back: its decoded value beside the octets, or why they are not of that type. Nothing
-/// in a message says which type octets carry, so [`message_view`] leaves them as they
-/// are, and nothing but this function decodes them: on octets that were not opened, a
-/// path through the name of a type is an error that says so.
+/// which [`select`], [`paths`] and the edits go into and
+/// [`from_view`](NGAP_PDU::from_view) takes back: its decoded value beside the octets, or
+/// why they are not of that type. Nothing in a message says which type octets carry, so
+/// [`to_view`](NGAP_PDU::to_view) leaves them as they are, and nothing but this function
+/// decodes them: on octets that were not opened, a path through the name of a type is an
+/// error that says so.
 ///
 /// A path that goes through no such name changes nothing. A name that the type of a
 /// value cannot have is an error, and the view is then as it was.
@@ -1247,183 +1261,287 @@ fn collapse(value: &mut Value, member: &str, depth: usize, shape: Shape) -> Resu
     Ok(())
 }
 
-/// The tree of a PDU, which is the name of its message and its IEs by name, in their order:
-///
-/// ```json
-/// {"message": "UEContextReleaseRequest",
-///  "ies": [{"AMF-UE-NGAP-ID": 1}, {"RAN-UE-NGAP-ID": 2}, {"Cause": {"radioNetwork": "user-inactivity"}}]}
-/// ```
-///
-/// An IE is one member: the name that ASN.1 gives it, or its identifier in digits when
-/// it has none, with its value. One that did not decode has its octets, as
-/// `{"octets": "…"}`. What the specification assigns is left out: the `criticality` of
-/// the PDU is there when it is not that of the procedure, and that of an IE, beside its
-/// name, when it is not the one that the message assigns it.
-/// [`message_from_tree`] reads this form back.
-///
-/// A value is as [`message_view`] shows it, without what a view keeps of what was
-/// received, to any depth. A transfer is its decoded value, or `{"octets": "…"}` when
-/// it did not decode. The IEs that a value holds, alone, as the entries of a list, in
-/// an extension container or as the message that a transfer contains, are each a name
-/// with a value too:
-///
-/// ```json
-/// {"PDUSessionResourceSetupListSUReq": [{"pDUSessionID": 5, "s-NSSAI": {"sST": 1},
-///   "pDUSessionResourceSetupRequestTransfer": {"protocolIEs": [
-///     {"PDUSessionType": "ipv4", "criticality": "reject"}]}}]}
-/// ```
-///
-/// The `criticality` of an IE that a value holds alone or as an entry of a list is
-/// left out when it is the one that [`item_criticality`] gives. That of an IE of a
-/// message that a transfer contains, and that of an IE of an extension container, is
-/// always there: the tables have the criticality that an object set assigns for the
-/// messages of the procedures and for the single containers only.
-///
-/// An error for a PDU whose message does not decode, for a procedure that the
-/// specification does not have in that direction, and for a message without a list of
-/// IEs of the protocol, as a private message.
-pub fn message_tree(pdu: &NGAP_PDU) -> Result<Value, Error> {
-    let (direction, code) = (pdu.direction(), pdu.procedure_code());
-    let name = message_name(pdu).ok_or_else(|| {
-        let protocol = registry::PROTOCOL;
-        Error::unknown_message(format!("{protocol} has no {direction} of procedure {code}"))
-    })?;
-    let view = message_view(pdu)?;
-    let listed = &view["message"]["protocolIEs"];
-    if !listed.is_array() {
-        return Err(Error::limit(format!("a message {name} has no list of IEs")));
-    }
-    let mut tree = json!({"message": name, "ies": named_ies(name, listed)?});
-    if view["criticality"].as_str() != message_criticality(name) {
-        tree["criticality"] = view["criticality"].clone();
-    }
-    Ok(tree)
-}
-
-/// The PDU of a tree: a message written as its name and its IEs by name, as
-/// [`message_tree`] shows one. The IEs are sent in the order written, and one that is
-/// written twice is sent twice.
-///
-/// The name of the message gives the procedure code, the direction and the criticality
-/// of the PDU, and the message the criticality of each of its IEs; a `criticality`
-/// beside the name of the message or of an IE is sent in its place. An IE that the
-/// message does not have, by its name or by its identifier in digits, says its
-/// `criticality`. A value is encoded as the type of the IE; `{"octets": "…"}` is the
-/// octets of the IE as they are sent, whatever they are.
-///
-/// A value is written as [`message_tree`] shows it: a transfer as its decoded value, or
-/// as its `octets`, and each IE that the value holds as its name with its value. Such
-/// an IE says its `criticality` where [`message_tree`] always shows it, and where
-/// [`item_criticality`] has none for it. A value is also written as [`message_view`]
-/// shows it, with `decoded` for the value of a transfer and an entry with its `id`,
-/// its `criticality` and its `value` for an IE, and the two forms are taken in one
-/// tree.
-pub fn message_from_tree(tree: &Value) -> Result<NGAP_PDU, Error> {
-    const FORM: &str = "a tree is {\"message\": NAME, \"ies\": [{NAME: VALUE}, …]}";
-    let form = || Error::form(FORM);
-    let written = tree.as_object().ok_or_else(form)?;
-    if let Some(other) = written
-        .keys()
-        .find(|key| !["message", "ies", "criticality"].contains(&key.as_str()))
-    {
-        return Err(Error::form(format!(
-            "{other:?} is no member of a tree: {FORM}"
-        )));
-    }
-    let name = written.get("message").and_then(Value::as_str);
-    let name = name.ok_or_else(form)?;
-    let (direction, code) = message_named(name)
-        .ok_or_else(|| Error::unknown_message(format!("{name:?} is not a message of NGAP")))?;
-    let criticality = match written.get("criticality") {
-        Some(criticality) => criticality.clone(),
-        None => json!(message_criticality(name)),
-    };
-    let listed = written.get("ies").filter(|ies| ies.is_array());
-    let ies = listed_ies(name, listed.ok_or_else(form)?)?;
-    message_from_view(&json!({
-        "procedure_code": code,
-        "direction": direction,
-        "criticality": criticality,
-        "message": {"protocolIEs": ies},
-    }))
-}
-
-/// The view of a PDU: its `procedure_code`, its `direction`, its `criticality` and its
-/// `message`, each IE of which has its typed value and what it was received as. An
-/// error when its message does not decode.
-pub fn message_view(pdu: &NGAP_PDU) -> Result<Value, Error> {
-    let top = jer(pdu)?;
-    let body = top
-        .as_object()
-        .and_then(|o| o.values().next())
-        .ok_or_else(|| Error::unrepresented("a PDU is one of three alternatives"))?;
-    let code = pdu.procedure_code();
-    let direction = pdu.direction();
-    let raw = body["value"].clone();
-    let mut message = (message_type(direction, code)?.decode)(&unhex(&raw)?)?;
-    expand(&mut message, 0, message_shape(direction, code));
-    Ok(
-        json!({"procedure_code": code, "direction": direction, "criticality": body["criticality"], "message": message, "_raw_message": raw}),
-    )
-}
-
-/// The PDU of a view, as [`message_view`] gives one and the edits leave it, with the
-/// octets received for what was not edited.
-pub fn message_from_view(view: &Value) -> Result<NGAP_PDU, Error> {
-    const MEMBERS: [&str; 5] = [
-        "procedure_code",
-        "direction",
-        "criticality",
-        "message",
-        "_raw_message",
-    ];
-    const FORM: &str =
-        "a view has its procedure_code, its direction, its criticality and its message";
-    let members = view.as_object().ok_or_else(|| Error::form(FORM))?;
-    if let Some(other) = members.keys().find(|key| !MEMBERS.contains(&key.as_str())) {
-        return Err(Error::form(format!(
-            "{other:?} is no member of a view: {FORM}"
-        )));
-    }
-    let code = view["procedure_code"]
-        .as_u64()
-        .and_then(|c| u8::try_from(c).ok())
-        .ok_or_else(|| Error::form("the procedure_code of a view is a number from 0 to 255"))?;
-    let directions = || {
-        Error::form(
-            "the direction of a view is InitiatingMessage, SuccessfulOutcome or \
-             UnsuccessfulOutcome",
-        )
-    };
-    let direction = view["direction"].as_str().ok_or_else(directions)?;
-    let variant = match direction {
-        "InitiatingMessage" => "initiatingMessage",
-        "SuccessfulOutcome" => "successfulOutcome",
-        "UnsuccessfulOutcome" => "unsuccessfulOutcome",
-        _ => return Err(directions()),
-    };
-    let message = view.get("message").ok_or_else(|| Error::form(FORM))?;
-    let mut message = message.clone();
-    collapse(&mut message, "", 0, message_shape(direction, code))?;
-    let raw = if let Some(original) = view.get("_raw_message") {
-        let original = unhex(original)?;
-        let typed = message_type(direction, code)?;
-        let decoded = (typed.decode)(&original)?;
-        if decoded == message {
-            original
-        } else {
-            if (typed.encode)(&decoded)? != original {
-                return Err(Error::edit(
-                    "the message does not encode back to the octets received",
-                ));
-            }
-            (typed.encode)(&message)?
+/// The two JSON forms of a PDU, with the `inspect` feature: its tree, the short form in
+/// which a message is shown and written, and its view, which keeps what was received and
+/// is read and edited by the paths of [`inspect`](crate::inspect).
+impl NGAP_PDU {
+    /// The tree of this PDU, which is the name of its message and its IEs by name, in
+    /// their order:
+    ///
+    /// ```json
+    /// {"message": "UEContextReleaseRequest",
+    ///  "ies": [{"AMF-UE-NGAP-ID": 42}, {"RAN-UE-NGAP-ID": 7}, {"Cause": {"radioNetwork": "user-inactivity"}}]}
+    /// ```
+    ///
+    /// ```
+    /// use oxirush_ngap::ngap::NGAP_PDU;
+    ///
+    /// // A UE CONTEXT RELEASE REQUEST
+    /// let octets = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
+    /// let pdu = NGAP_PDU::decode(&octets)?;
+    /// let tree = pdu.to_tree()?;
+    /// assert_eq!(tree["message"], "UEContextReleaseRequest");
+    /// assert_eq!(tree["ies"][2]["Cause"]["radioNetwork"], "user-inactivity");
+    ///
+    /// // The tree is a PDU again, of the same octets
+    /// assert_eq!(NGAP_PDU::from_tree(&tree)?.encode()?, octets);
+    /// # Ok::<(), oxirush_ngap::Error>(())
+    /// ```
+    ///
+    /// An IE is one member: the name that ASN.1 gives it, or its identifier in digits when
+    /// it has none, with its value. One that did not decode has its octets, as
+    /// `{"octets": "…"}`. What the specification assigns is left out: the `criticality` of
+    /// the PDU is there when it is not that of the procedure, and that of an IE, beside its
+    /// name, when it is not the one that the message assigns it.
+    /// [`from_tree`](Self::from_tree) reads this form back.
+    ///
+    /// A value is as [`to_view`](Self::to_view) shows it, without what a view keeps of
+    /// what was received, to any depth. A transfer is its decoded value, or
+    /// `{"octets": "…"}` when it did not decode. The IEs that a value holds, alone, as the
+    /// entries of a list, in an extension container or as the message that a transfer
+    /// contains, are each a name with a value too:
+    ///
+    /// ```json
+    /// {"PDUSessionResourceSetupListSUReq": [{"pDUSessionID": 5, "s-NSSAI": {"sST": 1},
+    ///   "pDUSessionResourceSetupRequestTransfer": {"protocolIEs": [
+    ///     {"PDUSessionType": "ipv4", "criticality": "reject"}]}}]}
+    /// ```
+    ///
+    /// The `criticality` of an IE that a value holds alone or as an entry of a list is
+    /// left out when it is the one that [`item_criticality`] gives. That of an IE of a
+    /// message that a transfer contains, and that of an IE of an extension container, is
+    /// always there: the tables have the criticality that an object set assigns for the
+    /// messages of the procedures and for the single containers only.
+    ///
+    /// An error for a PDU whose message does not decode, for a procedure that the
+    /// specification does not have in that direction, and for a message without a list of
+    /// IEs of the protocol, as a private message.
+    pub fn to_tree(&self) -> Result<Value, Error> {
+        let (direction, code) = (self.direction(), self.procedure_code());
+        let name = message_name(self).ok_or_else(|| {
+            let protocol = registry::PROTOCOL;
+            Error::unknown_message(format!("{protocol} has no {direction} of procedure {code}"))
+        })?;
+        let view = self.to_view()?;
+        let listed = &view["message"]["protocolIEs"];
+        if !listed.is_array() {
+            return Err(Error::limit(format!("a message {name} has no list of IEs")));
         }
-    } else {
-        (message_type(direction, code)?.encode)(&message)?
-    };
-    let top = json!({variant: {"procedureCode": code, "criticality": view["criticality"], "value": hex(&raw)}});
-    let (mut pdu, _) = decode_jer::<NGAP_PDU>(&top)?;
-    pdu.repair_open_types()?;
-    Ok(pdu)
+        let mut tree = json!({"message": name, "ies": named_ies(name, listed)?});
+        if view["criticality"].as_str() != message_criticality(name) {
+            tree["criticality"] = view["criticality"].clone();
+        }
+        Ok(tree)
+    }
+
+    /// The PDU of a tree: a message written as its name and its IEs by name, as
+    /// [`to_tree`](Self::to_tree) shows one. The IEs are sent in the order written, and
+    /// one that is written twice is sent twice.
+    ///
+    /// The name of the message gives the procedure code, the direction and the criticality
+    /// of the PDU, and the message the criticality of each of its IEs; a `criticality`
+    /// beside the name of the message or of an IE is sent in its place. An IE that the
+    /// message does not have, by its name or by its identifier in digits, says its
+    /// `criticality`. A value is encoded as the type of the IE; `{"octets": "…"}` is the
+    /// octets of the IE as they are sent, whatever they are.
+    ///
+    /// A value is written as [`to_tree`](Self::to_tree) shows it: a transfer as its
+    /// decoded value, or as its `octets`, and each IE that the value holds as its name
+    /// with its value. Such an IE says its `criticality` where
+    /// [`to_tree`](Self::to_tree) always shows it, and where [`item_criticality`] has
+    /// none for it. A value is also written as [`to_view`](Self::to_view) shows it, with
+    /// `decoded` for the value of a transfer and an entry with its `id`, its
+    /// `criticality` and its `value` for an IE, and the two forms are taken in one tree.
+    ///
+    /// ```
+    /// use oxirush_ngap::ngap::NGAP_PDU;
+    /// use serde_json::json;
+    ///
+    /// let request = json!({"message": "UEContextReleaseRequest", "ies": [
+    ///     {"AMF-UE-NGAP-ID": 42},
+    ///     {"RAN-UE-NGAP-ID": 7},
+    ///     {"Cause": {"radioNetwork": "user-inactivity"}},
+    /// ]});
+    /// let octets = NGAP_PDU::from_tree(&request)?.encode()?;
+    /// assert_eq!(hex::encode(octets), "002a4015000003000a0002002a005500020007000f40020500");
+    /// # Ok::<(), oxirush_ngap::Error>(())
+    /// ```
+    pub fn from_tree(tree: &Value) -> Result<Self, Error> {
+        const FORM: &str = "a tree is {\"message\": NAME, \"ies\": [{NAME: VALUE}, …]}";
+        let form = || Error::form(FORM);
+        let written = tree.as_object().ok_or_else(form)?;
+        if let Some(other) = written
+            .keys()
+            .find(|key| !["message", "ies", "criticality"].contains(&key.as_str()))
+        {
+            return Err(Error::form(format!(
+                "{other:?} is no member of a tree: {FORM}"
+            )));
+        }
+        let name = written.get("message").and_then(Value::as_str);
+        let name = name.ok_or_else(form)?;
+        let (direction, code) = message_named(name)
+            .ok_or_else(|| Error::unknown_message(format!("{name:?} is not a message of NGAP")))?;
+        let criticality = match written.get("criticality") {
+            Some(criticality) => criticality.clone(),
+            None => json!(message_criticality(name)),
+        };
+        let listed = written.get("ies").filter(|ies| ies.is_array());
+        let ies = listed_ies(name, listed.ok_or_else(form)?)?;
+        Self::from_view(&json!({
+            "procedure_code": code,
+            "direction": direction,
+            "criticality": criticality,
+            "message": {"protocolIEs": ies},
+        }))
+    }
+
+    /// The view of this PDU: its `procedure_code`, its `direction`, its `criticality` and
+    /// its `message`, each IE of which has its typed value and what it was received as.
+    /// The functions of [`inspect`](crate::inspect) read and edit it by paths, and its
+    /// documentation says what a view has.
+    ///
+    /// An error when the message does not decode, and for a procedure that the
+    /// specification does not have in that direction.
+    ///
+    /// ```
+    /// use oxirush_ngap::{inspect, ngap::NGAP_PDU};
+    /// use serde_json::json;
+    ///
+    /// // A UE CONTEXT RELEASE REQUEST
+    /// let octets = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
+    /// let view = NGAP_PDU::decode(&octets)?.to_view()?;
+    /// assert_eq!(view["procedure_code"], 42);
+    /// assert_eq!(inspect::select(&view, "/ngap/RAN-UE-NGAP-ID/value")?, [&json!(7)]);
+    /// # Ok::<(), oxirush_ngap::Error>(())
+    /// ```
+    pub fn to_view(&self) -> Result<Value, Error> {
+        let top = jer(self)?;
+        let body = top
+            .as_object()
+            .and_then(|o| o.values().next())
+            .ok_or_else(|| Error::unrepresented("a PDU is one of three alternatives"))?;
+        let code = self.procedure_code();
+        let direction = self.direction();
+        let raw = body["value"].clone();
+        let mut message = (message_type(direction, code)?.decode)(&unhex(&raw)?)?;
+        expand(&mut message, 0, message_shape(direction, code));
+        Ok(
+            json!({"procedure_code": code, "direction": direction, "criticality": body["criticality"], "message": message, "_raw_message": raw}),
+        )
+    }
+
+    /// The PDU of a view, as [`to_view`](Self::to_view) gives one and the edits leave
+    /// it, with the octets received for what was not edited. A view that is written by
+    /// hand, without what a view keeps of what was received, is encoded from its values.
+    ///
+    /// [`with_view`](Self::with_view) is this for the view of a PDU that is at hand, and
+    /// refuses the view of another message.
+    pub fn from_view(view: &Value) -> Result<Self, Error> {
+        const MEMBERS: [&str; 5] = [
+            "procedure_code",
+            "direction",
+            "criticality",
+            "message",
+            "_raw_message",
+        ];
+        const FORM: &str =
+            "a view has its procedure_code, its direction, its criticality and its message";
+        let members = view.as_object().ok_or_else(|| Error::form(FORM))?;
+        if let Some(other) = members.keys().find(|key| !MEMBERS.contains(&key.as_str())) {
+            return Err(Error::form(format!(
+                "{other:?} is no member of a view: {FORM}"
+            )));
+        }
+        let code = view["procedure_code"]
+            .as_u64()
+            .and_then(|c| u8::try_from(c).ok())
+            .ok_or_else(|| Error::form("the procedure_code of a view is a number from 0 to 255"))?;
+        let directions = || {
+            Error::form(
+                "the direction of a view is InitiatingMessage, SuccessfulOutcome or \
+                 UnsuccessfulOutcome",
+            )
+        };
+        let direction = view["direction"].as_str().ok_or_else(directions)?;
+        let variant = match direction {
+            "InitiatingMessage" => "initiatingMessage",
+            "SuccessfulOutcome" => "successfulOutcome",
+            "UnsuccessfulOutcome" => "unsuccessfulOutcome",
+            _ => return Err(directions()),
+        };
+        let message = view.get("message").ok_or_else(|| Error::form(FORM))?;
+        let mut message = message.clone();
+        collapse(&mut message, "", 0, message_shape(direction, code))?;
+        let raw = if let Some(original) = view.get("_raw_message") {
+            let original = unhex(original)?;
+            let typed = message_type(direction, code)?;
+            let decoded = (typed.decode)(&original)?;
+            if decoded == message {
+                original
+            } else {
+                if (typed.encode)(&decoded)? != original {
+                    return Err(Error::edit(
+                        "the message does not encode back to the octets received",
+                    ));
+                }
+                (typed.encode)(&message)?
+            }
+        } else {
+            (message_type(direction, code)?.encode)(&message)?
+        };
+        let top = json!({variant: {"procedureCode": code, "criticality": view["criticality"], "value": hex(&raw)}});
+        let (mut pdu, _) = decode_jer::<Self>(&top)?;
+        pdu.repair_open_types()?;
+        Ok(pdu)
+    }
+
+    /// The PDU of a view of this PDU, as [`to_view`](Self::to_view) gives it and the
+    /// edits leave it: this message, edited. What was not edited keeps the octets
+    /// received.
+    ///
+    /// An error of the kind `Form` when the view is of another message, which has
+    /// another direction or another procedure code than this PDU:
+    /// [`from_view`](Self::from_view) gives the PDU of any view.
+    ///
+    /// ```
+    /// use oxirush_ngap::{ErrorKind, inspect, ngap::NGAP_PDU};
+    /// use serde_json::json;
+    ///
+    /// // A UE CONTEXT RELEASE REQUEST, and its view with another cause
+    /// let octets = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
+    /// let pdu = NGAP_PDU::decode(&octets)?;
+    /// let mut view = pdu.to_view()?;
+    /// inspect::set(&mut view, "/ngap/Cause/nas", json!("normal-release"))?;
+    /// let edited = pdu.with_view(&view)?;
+    /// assert_eq!(edited.to_tree()?["ies"][2], json!({"Cause": {"nas": "normal-release"}}));
+    ///
+    /// // A view that says another procedure is not a view of this PDU
+    /// view["procedure_code"] = json!(21);
+    /// assert_eq!(pdu.with_view(&view).unwrap_err().kind(), ErrorKind::Form);
+    /// # Ok::<(), oxirush_ngap::Error>(())
+    /// ```
+    pub fn with_view(&self, view: &Value) -> Result<Self, Error> {
+        let (direction, code) = (self.direction(), self.procedure_code());
+        let of = (view["direction"].as_str(), view["procedure_code"].as_u64());
+        // A view that does not say which message it is of is refused as any view is.
+        if let (Some(of), Some(procedure)) = of
+            && (of, procedure) != (direction, u64::from(code))
+        {
+            let message = |direction: &str, code: u64| {
+                let known = u8::try_from(code).ok();
+                match known.and_then(|code| crate::registry::message_name(direction, code)) {
+                    Some(name) => name.to_string(),
+                    None => format!("the {direction} of procedure {code}"),
+                }
+            };
+            return Err(Error::form(format!(
+                "this view is of {}, and the PDU is {}: with_view takes a view of the PDU \
+                 itself, and from_view any view",
+                message(of, procedure),
+                message(direction, code.into()),
+            )));
+        }
+        Self::from_view(view)
+    }
 }

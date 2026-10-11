@@ -14,7 +14,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "00150025000003001b00080002f839000000000066000d000060b72f0002f839000002c80015400100",
     )?;
     let pdu = NGAP_PDU::decode(&wire)?;
-    let mut view = inspect::message_view(&pdu)?;
+    let mut view = pdu.to_view()?;
 
     // The message by the name that ASN.1 gives it, then each value with the path that
     // selects it: `/ngap` stands for the IEs of the message, and an IE goes by its name.
@@ -45,11 +45,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     inspect::insert(&mut view, "/ngap/DefaultPagingDRX", unknown)?;
 
     // Encode the view again.
-    let edited = inspect::message_from_view(&view)?;
+    let edited = pdu.with_view(&view)?;
     println!("{}", hex::encode_upper(edited.encode()?));
 
     // The IE that was not edited is the octets that were received.
-    let view = inspect::message_view(&edited)?;
+    let view = edited.to_view()?;
     let node = inspect::select(&view, "/ngap/GlobalRANNodeID/octets")?;
     assert_eq!(node, [&json!("0002F83900000000")]);
 

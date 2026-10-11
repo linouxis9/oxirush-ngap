@@ -353,7 +353,7 @@ mod inspect_errors {
 
     /// The view of the UE CONTEXT RELEASE REQUEST.
     fn view() -> Value {
-        inspect::message_view(&release_request()).unwrap()
+        release_request().to_view().unwrap()
     }
 
     /// The kind of the error that a call returned.
@@ -363,7 +363,7 @@ mod inspect_errors {
 
     /// The PDU of a tree: a release request with these IEs.
     fn written(ies: Value) -> Result<NGAP_PDU, Error> {
-        inspect::message_from_tree(&json!({"message": "UEContextReleaseRequest", "ies": ies}))
+        NGAP_PDU::from_tree(&json!({"message": "UEContextReleaseRequest", "ies": ies}))
     }
 
     /// A release request whose procedure code is one that the specification does not have.
@@ -383,7 +383,7 @@ mod inspect_errors {
         let names = inspect::enumerated_at("NoSuchMessage", "/ngap/Cause");
         assert_eq!(kind(names), ErrorKind::UnknownMessage);
         let tree = json!({"message": "NoSuchMessage", "ies": []});
-        let error = inspect::message_from_tree(&tree).unwrap_err();
+        let error = NGAP_PDU::from_tree(&tree).unwrap_err();
         assert_eq!(error.kind(), ErrorKind::UnknownMessage);
         assert_eq!(
             error.to_string(),
@@ -391,22 +391,16 @@ mod inspect_errors {
         );
 
         // A procedure that the specification does not have, in a PDU and in a view.
-        let error = inspect::message_view(&of_no_procedure()).unwrap_err();
+        let error = of_no_procedure().to_view().unwrap_err();
         assert_eq!(error.kind(), ErrorKind::UnknownMessage);
         assert_eq!(
             error.to_string(),
             "NGAP has no InitiatingMessage of procedure 200"
         );
-        assert_eq!(
-            kind(inspect::message_tree(&of_no_procedure())),
-            ErrorKind::UnknownMessage
-        );
+        assert_eq!(kind(of_no_procedure().to_tree()), ErrorKind::UnknownMessage);
         let mut view = view();
         view["procedure_code"] = json!(200);
-        assert_eq!(
-            kind(inspect::message_from_view(&view)),
-            ErrorKind::UnknownMessage
-        );
+        assert_eq!(kind(NGAP_PDU::from_view(&view)), ErrorKind::UnknownMessage);
     }
 
     #[test]
@@ -502,11 +496,10 @@ mod inspect_errors {
         let checked = inspect::check_path("UEContextReleaseRequest", "/ngap/GUAMI");
         assert_eq!(kind(checked), ErrorKind::NoSuchMember);
         // A member that the type of a written value does not have.
-        let error =
-            inspect::message_from_tree(&json!({"message": "InitialContextSetupRequest", "ies": [
-                {"AllowedNSSAI": [{"s-NSSAI": {"sST": 1, "other": 2}}]},
-            ]}))
-            .unwrap_err();
+        let error = NGAP_PDU::from_tree(&json!({"message": "InitialContextSetupRequest", "ies": [
+            {"AllowedNSSAI": [{"s-NSSAI": {"sST": 1, "other": 2}}]},
+        ]}))
+        .unwrap_err();
         assert_eq!(error.kind(), ErrorKind::NoSuchMember);
         assert_eq!(
             error.to_string(),
@@ -540,8 +533,8 @@ mod inspect_errors {
                 "uEHistoryInformation": [{"lastVisitedCellInformation": {"eUTRANCell": "00"}}],
             }}},
         ]});
-        let pdu = inspect::message_from_tree(&required).unwrap();
-        let mut view = inspect::message_view(&pdu).unwrap();
+        let pdu = NGAP_PDU::from_tree(&required).unwrap();
+        let mut view = pdu.to_view().unwrap();
         let cell = format!(
             "/ngap/SourceToTarget-TransparentContainer/{name}/targetCell-ID/nR-CGI/nRCellIdentity"
         );
@@ -560,7 +553,7 @@ mod inspect_errors {
     fn a_path_into_what_did_not_decode_says_so() {
         // An IE whose identifier has no type keeps its octets in a view.
         let unknown = json!([{"65000": {"octets": "c0ffee"}, "criticality": "ignore"}]);
-        let view = inspect::message_view(&written(unknown).unwrap()).unwrap();
+        let view = written(unknown).unwrap().to_view().unwrap();
         assert_eq!(
             inspect::select(&view, "/ngap/@id=65000/octets"),
             Ok(vec![&json!("C0FFEE")])
@@ -608,7 +601,7 @@ mod inspect_errors {
         // A value of a member, by the names that ASN.1 gives the members on the way:
         // a PLMN identity that is none, and a number where the type has a CHOICE.
         let setup = |plmn: Value, gnb: Value| {
-            inspect::message_from_tree(
+            NGAP_PDU::from_tree(
                 &json!({"message": "NGSetupRequest", "ies": [{"GlobalRANNodeID": {"globalGNB-ID": {
                     "pLMNIdentity": plmn,
                     "gNB-ID": gnb,
@@ -655,7 +648,7 @@ mod inspect_errors {
             json!({"message": message, "ies": [{"a": 1, "b": 2}]}),
             json!({"message": message, "ies": [{"RANNodeName": "gnb-1"}]}),
         ] {
-            let error = inspect::message_from_tree(&tree).unwrap_err();
+            let error = NGAP_PDU::from_tree(&tree).unwrap_err();
             assert_eq!(error.kind(), ErrorKind::Form, "{tree}: {error}");
         }
 
@@ -681,8 +674,38 @@ mod inspect_errors {
             with("procedure_code", json!(256)),
             with("other", json!(1)),
         ] {
-            let error = inspect::message_from_view(&view).unwrap_err();
+            let error = NGAP_PDU::from_view(&view).unwrap_err();
             assert_eq!(error.kind(), ErrorKind::Form, "{error}");
+            // The PDU that the view is of refuses it as any PDU does.
+            let error = release_request().with_view(&view).unwrap_err();
+            assert_eq!(error.kind(), ErrorKind::Form, "{error}");
+        }
+
+        // The view of another message is not one of this PDU: another procedure code,
+        // another direction, and a procedure that the specification does not have.
+        let pdu = release_request();
+        for (member, value, other) in [
+            ("procedure_code", json!(21), "NGSetupRequest"),
+            (
+                "direction",
+                json!("SuccessfulOutcome"),
+                "the SuccessfulOutcome of procedure 42",
+            ),
+            (
+                "procedure_code",
+                json!(200),
+                "the InitiatingMessage of procedure 200",
+            ),
+        ] {
+            let error = pdu.with_view(&with(member, value)).unwrap_err();
+            assert_eq!(error.kind(), ErrorKind::Form, "{error}");
+            assert_eq!(
+                error.to_string(),
+                format!(
+                    "this view is of {other}, and the PDU is UEContextReleaseRequest: with_view \
+                     takes a view of the PDU itself, and from_view any view"
+                )
+            );
         }
 
         // An IE is written with its value or with its octets.
@@ -735,9 +758,9 @@ mod inspect_errors {
         // A private message has no list of IEs to show as a tree: its view has it.
         let private =
             NGAP_PDU::decode(&hex::decode("001f400a000000000000000211e8").unwrap()).unwrap();
-        let error = inspect::message_tree(&private).unwrap_err();
+        let error = private.to_tree().unwrap_err();
         assert_eq!(error.kind(), ErrorKind::Limit);
-        assert!(inspect::message_view(&private).is_ok());
+        assert!(private.to_view().is_ok());
     }
 
     #[test]
@@ -748,14 +771,14 @@ mod inspect_errors {
         };
         held.value = Any::new(vec![0xff]);
         let pdu = NGAP_PDU::initiatingMessage(held);
-        let error = inspect::message_view(&pdu).unwrap_err();
+        let error = pdu.to_view().unwrap_err();
         assert_eq!(error.kind(), ErrorKind::Decode);
-        assert_eq!(kind(inspect::message_tree(&pdu)), ErrorKind::Decode);
+        assert_eq!(kind(pdu.to_tree()), ErrorKind::Decode);
 
         // The octets that a view was received as, replaced by others, and edited.
         let mut view = view();
         view["_raw_message"] = json!("ff");
         inspect::set(&mut view, "/ngap/Cause/nas", json!("normal-release")).unwrap();
-        assert_eq!(kind(inspect::message_from_view(&view)), ErrorKind::Decode);
+        assert_eq!(kind(NGAP_PDU::from_view(&view)), ErrorKind::Decode);
     }
 }

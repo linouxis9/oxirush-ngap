@@ -99,12 +99,17 @@ is not source compatible with 0.4.2.
 
 ### Added
 
-- The optional `inspect` feature: `inspect::message_view` gives a decoded PDU
-  as its view, a `serde_json` value in the ASN.1 JSON encoding, which is
-  edited and which `inspect::message_from_view` encodes again. What is not
-  edited keeps the octets received, and an IE is added by its typed value or
-  by its octets. Before the release, the revisions of this version named the
-  two functions `inspect_pdu` and `encode_pdu`, and called the view a tree.
+- The optional `inspect` feature: `pdu.to_view()` gives a decoded PDU as its
+  view, a `serde_json` value in the ASN.1 JSON encoding, which is edited and
+  which `pdu.with_view(&view)` encodes again; `NGAP_PDU::from_view(&view)`
+  gives the PDU of any view, and `with_view` refuses the view of another
+  message than the PDU, with an error of the kind `Form`. What is not edited
+  keeps the octets received, and an IE is added by its typed value or by its
+  octets. The two JSON forms are methods of the PDU, by the names that
+  oxirush-nas has for them. Before the release, the revisions of this version
+  had them as functions of `inspect`: `message_view`, `message_from_view`,
+  `message_tree` and `message_from_tree`, and before that `inspect_pdu` and
+  `encode_pdu`, which called the view a tree.
   The transfers that an `OCTET STRING` contains are decoded in place, as
   fields and as IEs, and one that is added is written by its `decoded` value
   alone. A PLMN identity, a transport layer address and the usual identifiers
@@ -167,21 +172,20 @@ is not source compatible with 0.4.2.
   message has before it compares one.
 - With the `inspect` feature, the tree of a PDU: the short form, in which a
   message is shown and written as its name and its IEs by name.
-  `inspect::message_from_tree` makes a PDU from `{"message": NAME, "ies":
+  `NGAP_PDU::from_tree(&tree)` makes a PDU from `{"message": NAME, "ies":
   [{NAME: VALUE}, …]}`, with the procedure code, the direction and the
-  criticalities that the specification assigns, and `inspect::message_tree`
-  shows a PDU in that form.
+  criticalities that the specification assigns, and `pdu.to_tree()` shows a
+  PDU in that form.
 - With the `inspect` feature, `value` and `decoded` may be left out. In a
   path, a segment that names no member of an IE is taken in its value, and
   one that names no member of a transfer in its decoded value:
   `/ngap/Cause/radioNetwork` is `/ngap/Cause/value/radioNetwork`. A transfer
   is written as its decoded value itself, as well as with `decoded`.
-  `inspect::message_tree` shows a transfer as its decoded value and each IE
-  that a value holds as its name with its value, to any depth, as in
+  `to_tree` shows a transfer as its decoded value and each IE that a value
+  holds as its name with its value, to any depth, as in
   `{"pDUSessionResourceSetupRequestTransfer": {"protocolIEs":
-  [{"PDUSessionType": "ipv4", "criticality": "reject"}]}}`, and
-  `inspect::message_from_tree` reads that form. What is written with the two
-  words is taken as it was.
+  [{"PDUSessionType": "ipv4", "criticality": "reject"}]}}`, and `from_tree`
+  reads that form. What is written with the two words is taken as it was.
 - With the `inspect` feature, the content of a handover's transparent
   container, which TS 38.413 gives by reference where the ASN.1 has an
   `OCTET STRING`. The octets of `SourceToTarget-TransparentContainer`,
@@ -195,8 +199,8 @@ is not source compatible with 0.4.2.
   until then, as nothing in a message says what they carry.
 - With the `inspect` feature, a path may say which IE an entry is. After an
   entry of a list of IEs, or an IE that a value holds alone, the name of that
-  IE stays on it, so the names and the positions that `inspect::message_tree`
-  shows, joined, are the path of a value, as in
+  IE stays on it, so the names and the positions that `to_tree` shows,
+  joined, are the path of a value, as in
   `/ngap/PDUSessionResourceSetupListSUReq/0/pDUSessionResourceSetupRequestTransfer/protocolIEs/0/UL-NGU-UP-TNLInformation/gTPTunnel/gTP-TEID`.
   The name of another IE there is an error that says which IE the entry is,
   and `inspect::check_path` reads what follows a position and a name against
@@ -252,7 +256,7 @@ is not source compatible with 0.4.2.
 - The name of an ENUMERATED value of the PDU itself, its `criticality`, is
   taken whatever its case, as those of its IEs are.
 - What is nested deeper than 64 levels stays as its octets beside a
-  `_decode_error`: `message_view` refused the whole PDU.
+  `_decode_error`: `to_view` refused the whole PDU.
 - A path of an inspection view selects nothing for an OPTIONAL member that
   is absent and for another alternative of a CHOICE, and a name that the type
   of a value cannot have is an error that lists the members of the type: both
@@ -267,11 +271,11 @@ is not source compatible with 0.4.2.
   and of messages were: `/ngap/cause/value/radionetwork`. A position is a
   number as decimal writes it: `+1` and `01` are not.
 - `set` refuses a name that the type of a value does not have, where the
-  error came from `message_from_view`, and writes a member by the name that
+  error came from `from_view`, and writes a member by the name that
   ASN.1 gives it. A member that its type always has is not taken out, and an
   alternative of a CHOICE takes the place of the one that is there.
 - An IE is written with the name of its IE as `id` and with its `octets`
-  wherever a view has IEs: `message_from_view` takes them in any entry, where
+  wherever a view has IEs: `from_view` takes them in any entry, where
   only `set` and `insert` on a path under `/ngap` did, and the `octets` of an
   IE that was added are set at its path. An `_original_id` that is no number
   is refused.

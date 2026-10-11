@@ -63,14 +63,14 @@ use serde_json::json;
 // The same message as a tree: its name and its IEs by name
 let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
 let pdu = NGAP_PDU::decode(&bytes).unwrap();
-println!("{}", inspect::message_tree(&pdu).unwrap());
+println!("{}", pdu.to_tree().unwrap());
 
 // Its view is edited at a path, and is a PDU again
-let mut view = inspect::message_view(&pdu).unwrap();
+let mut view = pdu.to_view().unwrap();
 let lost = json!("radio-connection-with-ue-lost");
 inspect::set(&mut view, "/ngap/Cause/radioNetwork", lost).unwrap();
-let edited = inspect::message_from_view(&view).unwrap();
-println!("{}", inspect::message_tree(&edited).unwrap());
+let edited = pdu.with_view(&view).unwrap();
+println!("{}", edited.to_tree().unwrap());
 
 // Its octets are those that the typed example built
 let octets = hex::encode(edited.encode().unwrap());
@@ -237,7 +237,7 @@ A criticality says what a receiver does with what it does not comprehend
 (TS 38.413 clause 10.3.2). The specification assigns one to each procedure
 and to each IE of a message, in the tables of clause 9.2. The macros write
 the one that they are given and check none; with the `inspect` feature,
-[`message_from_tree`] writes a message with those that are assigned.
+[`from_tree()`] writes a message with those that are assigned.
 
 ### Read the IEs of a message
 
@@ -340,7 +340,7 @@ bits of its field. `tai` takes the three octets of a TAC as an array.
 
 Every function and macro that can fail returns an `oxirush_ngap::Error`: the
 codec, the four macros, the helpers and, with the `inspect` feature, the
-functions of the JSON forms.
+methods and the functions of the JSON forms.
 
 | Of an `Error` | Gives |
 |---------------|-------|
@@ -401,30 +401,32 @@ Error when decoding field `InitiatingMessage.value`: Need more data to continue:
 
 ## JSON: trees, views and paths
 
-With the `inspect` feature a PDU is a `serde_json::Value` in two forms. A
-tree is the short form, in which a message is shown and written: its name
-and its IEs by name. A view keeps what was received, and is read and edited
-by paths. Each function that can fail returns an `Error`, whose kind says
-what went wrong: see [Errors of the JSON forms](#errors-of-the-json-forms).
+With the `inspect` feature a PDU is a `serde_json::Value` in two forms,
+which are methods of `NGAP_PDU`. A tree is the short form, in which a
+message is shown and written: its name and its IEs by name. A view keeps
+what was received, and is read and edited by paths, with the functions of
+the [`inspect`] module. Each of them that can fail returns an `Error`, whose
+kind says what went wrong: see
+[Errors of the JSON forms](#errors-of-the-json-forms).
 
 | | Tree | View |
 |---|------|------|
-| From a PDU | [`message_tree`] | [`message_view`] |
+| From a PDU | [`to_tree()`] | [`to_view()`] |
 | An IE is | its name with its value | an entry: its `id`, its `criticality`, its typed `value`, and what was received |
 | It has | the name of the message and its IEs, without what the specification assigns | the procedure code, the direction, the criticality and the message, in the ASN.1 JSON encoding |
 | Read and edited | as JSON | by paths: [`select`], [`paths`], [`set`], [`insert`], [`remove`], [`open`] |
-| Back to a PDU | [`message_from_tree`]: a message written from the tree alone | [`message_from_view`]: what was not edited keeps the octets received |
+| Back to a PDU | [`from_tree()`]: a message written from the tree alone | [`with_view()`]: this PDU, edited; [`from_view()`]: the PDU of any view. What was not edited keeps the octets received |
 
 ```rust
-use oxirush_ngap::{inspect, ngap::NGAP_PDU};
+use oxirush_ngap::ngap::NGAP_PDU;
 
 // UE CONTEXT RELEASE REQUEST
 let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
 let pdu = NGAP_PDU::decode(&bytes).unwrap();
 
 // Its tree, then its third IE as the view has it
-println!("{}", inspect::message_tree(&pdu).unwrap());
-let view = inspect::message_view(&pdu).unwrap();
+println!("{}", pdu.to_tree().unwrap());
+let view = pdu.to_view().unwrap();
 println!("{}", view["message"]["protocolIEs"][2]);
 ```
 
@@ -444,7 +446,7 @@ use serde_json::json;
 
 let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
 let pdu = NGAP_PDU::decode(&bytes).unwrap();
-let view = inspect::message_view(&pdu).unwrap();
+let view = pdu.to_view().unwrap();
 
 // `/ngap` is the IEs of the message, and an IE goes by its name
 let select = |path| inspect::select(&view, path).unwrap();
@@ -491,16 +493,16 @@ use serde_json::json;
 
 let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
 let pdu = NGAP_PDU::decode(&bytes).unwrap();
-let mut view = inspect::message_view(&pdu).unwrap();
+let mut view = pdu.to_view().unwrap();
 
 // A value, and another alternative of a CHOICE in place of the one that is there
 inspect::set(&mut view, "/ngap/RAN-UE-NGAP-ID/value", json!(9)).unwrap();
 inspect::set(&mut view, "/ngap/Cause/nas", json!("Normal Release")).unwrap();
-let edited = inspect::message_from_view(&view).unwrap();
-println!("{}", inspect::message_tree(&edited).unwrap());
+let edited = pdu.with_view(&view).unwrap();
+println!("{}", edited.to_tree().unwrap());
 
 // What was not edited is the octets that were received
-let after = inspect::message_view(&edited).unwrap();
+let after = edited.to_view().unwrap();
 let octets = inspect::select(&after, "/ngap/AMF-UE-NGAP-ID/octets").unwrap();
 assert_eq!(octets, [&json!("002A")]);
 
@@ -522,7 +524,7 @@ use serde_json::json;
 
 let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
 let pdu = NGAP_PDU::decode(&bytes).unwrap();
-let mut view = inspect::message_view(&pdu).unwrap();
+let mut view = pdu.to_view().unwrap();
 
 // An IE is added at the end, by its name and its typed value
 let name = json!({"id": "RANNodeName", "criticality": "ignore", "value": "gnb-1"});
@@ -535,8 +537,8 @@ inspect::insert(&mut view, "/ngap/Cause", unknown).unwrap();
 // An IE is taken out by its name
 inspect::remove(&mut view, "/ngap/AMF-UE-NGAP-ID").unwrap();
 
-let edited = inspect::message_from_view(&view).unwrap();
-println!("{}", inspect::message_tree(&edited).unwrap()["ies"]);
+let edited = pdu.with_view(&view).unwrap();
+println!("{}", edited.to_tree().unwrap()["ies"]);
 ```
 
 ```json
@@ -546,7 +548,7 @@ println!("{}", inspect::message_tree(&edited).unwrap()["ies"]);
 ### Write a message from its name and its IEs
 
 ```rust
-use oxirush_ngap::inspect;
+use oxirush_ngap::{inspect, ngap::NGAP_PDU};
 use serde_json::json;
 
 // A tree: the name of the message, whatever its case and its separators, then its IEs
@@ -561,11 +563,11 @@ let request = json!({
     ],
 });
 
-let pdu = inspect::message_from_tree(&request).unwrap();
+let pdu = NGAP_PDU::from_tree(&request).unwrap();
 println!("{}", hex::encode(pdu.encode().unwrap()));
 
 // The name gave the direction, the procedure code and the criticalities
-let view = inspect::message_view(&pdu).unwrap();
+let view = pdu.to_view().unwrap();
 println!("{} {} {}", view["direction"], view["procedure_code"], view["criticality"]);
 println!("{}", json!(inspect::select(&view, "/ngap/*/criticality").unwrap()));
 ```
@@ -579,7 +581,7 @@ println!("{}", json!(inspect::select(&view, "/ngap/*/criticality").unwrap()));
 ### Send octets as they are
 
 ```rust
-use oxirush_ngap::inspect;
+use oxirush_ngap::{inspect, ngap::NGAP_PDU};
 use serde_json::json;
 
 // `{"octets": "…"}` in place of a value is the octets of the IE, whatever they are
@@ -587,17 +589,17 @@ let request = json!({"message": "UEContextReleaseRequest", "ies": [
     {"AMF-UE-NGAP-ID": 42},
     {"65000": {"octets": "c0ffee"}, "criticality": "reject"},
 ]});
-let pdu = inspect::message_from_tree(&request).unwrap();
+let pdu = NGAP_PDU::from_tree(&request).unwrap();
 println!("{}", hex::encode(pdu.encode().unwrap()));
 
 // A view shows an IE that does not decode by its octets, and says why
-let mut view = inspect::message_view(&pdu).unwrap();
+let mut view = pdu.to_view().unwrap();
 println!("{}", view["message"]["protocolIEs"][1]);
 
 // In a view, the `octets` of an IE are set in place of its value
 inspect::set(&mut view, "/ngap/AMF-UE-NGAP-ID/octets", json!("00ff")).unwrap();
-let edited = inspect::message_from_view(&view).unwrap();
-println!("{}", inspect::message_tree(&edited).unwrap());
+let edited = pdu.with_view(&view).unwrap();
+println!("{}", edited.to_tree().unwrap());
 ```
 
 ```text
@@ -609,7 +611,7 @@ println!("{}", inspect::message_tree(&edited).unwrap());
 ### A repeated IE
 
 ```rust
-use oxirush_ngap::inspect;
+use oxirush_ngap::{inspect, ngap::NGAP_PDU};
 use serde_json::json;
 
 // A message that has one IE twice
@@ -618,8 +620,8 @@ let twice = json!({"message": "UEContextReleaseRequest", "ies": [
     {"RAN-UE-NGAP-ID": 7},
     {"AMF-UE-NGAP-ID": 2},
 ]});
-let pdu = inspect::message_from_tree(&twice).unwrap();
-let mut view = inspect::message_view(&pdu).unwrap();
+let pdu = NGAP_PDU::from_tree(&twice).unwrap();
+let mut view = pdu.to_view().unwrap();
 
 // The name selects both, in the order of the message
 let both = inspect::select(&view, "/ngap/AMF-UE-NGAP-ID/value").unwrap();
@@ -649,15 +651,15 @@ this IE is AMF-UE-NGAP-ID, not RAN-UE-NGAP-ID: "RAN-UE-NGAP-ID" is not a member 
 ### An item of a list
 
 ```rust
-use oxirush_ngap::inspect;
+use oxirush_ngap::{inspect, ngap::NGAP_PDU};
 use serde_json::{Value, json};
 
 // A message whose one IE is a list of two items
 let request = json!({"message": "InitialContextSetupRequest", "ies": [
     {"AllowedNSSAI": [{"s-NSSAI": {"sST": 1}}, {"s-NSSAI": {"sST": 2, "sD": "000001"}}]},
 ]});
-let pdu = inspect::message_from_tree(&request).unwrap();
-let mut view = inspect::message_view(&pdu).unwrap();
+let pdu = NGAP_PDU::from_tree(&request).unwrap();
+let mut view = pdu.to_view().unwrap();
 
 // An item by its position, and each of them after `value`
 let select = |view, path| -> Vec<Value> {
@@ -677,8 +679,8 @@ inspect::remove(&mut view, "/ngap/AllowedNSSAI/0").unwrap();
 // `null` takes an optional member out
 inspect::set(&mut view, "/ngap/AllowedNSSAI/0/s-NSSAI/sD", Value::Null).unwrap();
 
-let edited = inspect::message_from_view(&view).unwrap();
-println!("{}", inspect::message_tree(&edited).unwrap());
+let edited = pdu.with_view(&view).unwrap();
+println!("{}", edited.to_tree().unwrap());
 ```
 
 ```json
@@ -691,7 +693,7 @@ A transfer is an `OCTET STRING` that contains a type. A view shows its decoded
 value beside its octets, and a tree its decoded value alone.
 
 ```rust
-use oxirush_ngap::inspect;
+use oxirush_ngap::{inspect, ngap::NGAP_PDU};
 use serde_json::json;
 
 // A message with a transfer, written as the message that it contains
@@ -706,8 +708,8 @@ let request = json!({"message": "PDUSessionResourceSetupRequest", "ies": [
         ]},
     }]},
 ]});
-let pdu = inspect::message_from_tree(&request).unwrap();
-let mut view = inspect::message_view(&pdu).unwrap();
+let pdu = NGAP_PDU::from_tree(&request).unwrap();
+let mut view = pdu.to_view().unwrap();
 
 // In a view, the transfer is its octets beside its decoded value
 let transfer = "/ngap/PDUSessionResourceSetupListSUReq/0/pDUSessionResourceSetupRequestTransfer";
@@ -728,8 +730,8 @@ assert_eq!(inspect::select(&view, &joined), inspect::select(&view, &kind));
 
 // An edit of the message that it contains is encoded into the transfer
 inspect::set(&mut view, &kind, json!("ipv6")).unwrap();
-let edited = inspect::message_from_view(&view).unwrap();
-println!("{}", inspect::message_tree(&edited).unwrap()["ies"][2]);
+let edited = pdu.with_view(&view).unwrap();
+println!("{}", edited.to_tree().unwrap()["ies"][2]);
 ```
 
 ```json
@@ -808,7 +810,7 @@ them names the type.
 | `TargettoSource-Failure-TransparentContainer` | `TargetNGRANNode-ToSourceNGRANNode-FailureTransparentContainer` | 9.3.1.186 |
 
 ```rust
-use oxirush_ngap::{ErrorKind, inspect};
+use oxirush_ngap::{ErrorKind, inspect, ngap::NGAP_PDU};
 use serde_json::json;
 
 // Written: the name of the type with its value, in place of the octets
@@ -824,11 +826,11 @@ let required = json!({"message": "HandoverRequired", "ies": [
 ]});
 
 // A tree shows the octets that the container was encoded as
-let pdu = inspect::message_from_tree(&required).unwrap();
-println!("{}", inspect::message_tree(&pdu).unwrap()["ies"][2]);
+let pdu = NGAP_PDU::from_tree(&required).unwrap();
+println!("{}", pdu.to_tree().unwrap()["ies"][2]);
 
 // Read: a path goes through the name of the type
-let mut view = inspect::message_view(&pdu).unwrap();
+let mut view = pdu.to_view().unwrap();
 let container = format!("/ngap/SourceToTarget-TransparentContainer/{name}");
 let cell = format!("{container}/targetCell-ID/nR-CGI/nRCellIdentity");
 assert_eq!(inspect::check_path("HandoverRequired", &cell), Ok(()));
@@ -844,8 +846,8 @@ println!("{}", inspect::select(&view, &decoded).unwrap()[0]);
 
 // An edit goes into it, and what is not edited is sent as it was received
 inspect::set(&mut view, &cell, json!(7)).unwrap();
-let edited = inspect::message_from_view(&view).unwrap();
-println!("{}", inspect::message_tree(&edited).unwrap()["ies"][2]);
+let edited = pdu.with_view(&view).unwrap();
+println!("{}", edited.to_tree().unwrap()["ies"][2]);
 ```
 
 ```text
@@ -900,7 +902,7 @@ is the first two bits of sixteen, and `"000004"` the number 1 in 22 bits.
 
 ### Errors of the JSON forms
 
-The functions of the JSON forms have these kinds, and two of the
+The methods and the functions of the JSON forms have these kinds, and two of the
 [typed API](#errors): `Decode` for a PDU whose message does not decode, and
 `UndecodableIe` for a path into an IE or a transfer that did not decode.
 
@@ -1056,10 +1058,11 @@ Licensed under the Apache License, Version 2.0. See [LICENSE](https://github.com
 [What is not there]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/inspect/index.html#what-is-not-there
 [Edits]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/inspect/index.html#edits
 [Octets that carry a type]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/inspect/index.html#octets-that-carry-a-type
-[`message_view`]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/inspect/fn.message_view.html
-[`message_from_view`]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/inspect/fn.message_from_view.html
-[`message_tree`]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/inspect/fn.message_tree.html
-[`message_from_tree`]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/inspect/fn.message_from_tree.html
+[`to_tree()`]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/ngap/ngap_pdu_descriptions/enum.NGAPPDU.html#method.to_tree
+[`from_tree()`]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/ngap/ngap_pdu_descriptions/enum.NGAPPDU.html#method.from_tree
+[`to_view()`]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/ngap/ngap_pdu_descriptions/enum.NGAPPDU.html#method.to_view
+[`from_view()`]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/ngap/ngap_pdu_descriptions/enum.NGAPPDU.html#method.from_view
+[`with_view()`]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/ngap/ngap_pdu_descriptions/enum.NGAPPDU.html#method.with_view
 [`select`]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/inspect/fn.select.html
 [`paths`]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/inspect/fn.paths.html
 [`set`]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/inspect/fn.set.html

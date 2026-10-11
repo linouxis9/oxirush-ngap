@@ -98,6 +98,14 @@ is not source compatible with 0.4.2.
   path goes through that name. `inspect::open` decodes, in a tree, the octets
   that a path takes so, and nothing else does: a tree shows them as octets
   until then, as nothing in a message says what they carry.
+- With the `inspect` feature, a path may say which IE an entry is. After an
+  entry of a list of IEs, or an IE that a value holds alone, the name of that
+  IE stays on it, so the names and the positions that `inspect::message_tree`
+  shows, joined, are the path of a value, as in
+  `/ngap/PDUSessionResourceSetupListSUReq/0/pDUSessionResourceSetupRequestTransfer/protocolIEs/0/UL-NGU-UP-TNLInformation/gTPTunnel/gTP-TEID`.
+  The name of another IE there is an error that says which IE the entry is,
+  and `inspect::check_path` reads what follows a position and a name against
+  the type of that IE.
 
 ### Changed
 

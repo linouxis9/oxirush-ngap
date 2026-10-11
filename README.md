@@ -376,8 +376,10 @@ let mut tree = inspect::inspect_pdu(&pdu).unwrap();
 // The name selects both, in the order of the message
 let both = inspect::select(&tree, "/ngap/AMF-UE-NGAP-ID/value").unwrap();
 assert_eq!(both, [&json!(1), &json!(2)]);
-// Each has its position, which is how `paths` names it
-inspect::set(&mut tree, "/ngap/2/value", json!(3)).unwrap();
+// Each has its position, which is how `paths` names it, and its name may follow
+inspect::set(&mut tree, "/ngap/2/AMF-UE-NGAP-ID/value", json!(3)).unwrap();
+// The name of another IE says which IE is there
+println!("{}", inspect::select(&tree, "/ngap/2/RAN-UE-NGAP-ID/value").unwrap_err());
 for (path, value) in inspect::paths(&tree) {
     if path.ends_with("/value") {
         println!("{path} = {value}");
@@ -386,6 +388,7 @@ for (path, value) in inspect::paths(&tree) {
 ```
 
 ```text
+this IE is AMF-UE-NGAP-ID, not RAN-UE-NGAP-ID: "RAN-UE-NGAP-ID" is not a member of this value, which has none, at /ngap/2/RAN-UE-NGAP-ID/value
 /ngap/0/value = 1
 /ngap/RAN-UE-NGAP-ID/value = 7
 /ngap/2/value = 3
@@ -458,6 +461,9 @@ assert_eq!(inspect::select(&tree, &kind).unwrap(), [&json!("ipv4")]);
 let long = "/ngap/PDUSessionResourceSetupListSUReq/value/0\
     /pDUSessionResourceSetupRequestTransfer/decoded/PDUSessionType/value";
 assert_eq!(inspect::select(&tree, long), inspect::select(&tree, &kind));
+// And by the names that the message shows, joined: the IE by its position, then its name
+let joined = format!("{transfer}/protocolIEs/0/PDUSessionType/value");
+assert_eq!(inspect::select(&tree, &joined), inspect::select(&tree, &kind));
 
 inspect::set(&mut tree, &kind, json!("ipv6")).unwrap();
 let edited = inspect::encode_pdu(&tree).unwrap();
@@ -644,7 +650,7 @@ headings that the rows link to.
 | Subject | Rule |
 |---------|------|
 | [Paths] | A JSON pointer into the tree, where `/ngap` stands for the IEs of the message and `*` for each entry of a list or each member of a value. |
-| An IE | The name that ASN.1 gives it after `id-`, its position (`/ngap/0`) or its identifier (`/ngap/@id=85`); `-` is the end of the list. A name selects each IE of that name. |
+| An IE | The name that ASN.1 gives it after `id-`, its position (`/ngap/0`) or its identifier (`/ngap/@id=85`); `-` is the end of the list. A name selects each IE of that name. After the position of an IE, its name may follow, so the names and the positions that a message shows, joined, are a path; that of another IE is an error that says which IE is there. |
 | Under an IE | `id`, `criticality`, the typed `value`, and `octets`: what it was received as, in hexadecimal. The members that start with `_` keep what was received. |
 | `value`, `decoded` | May be left out of a path. What the IE or the transfer has itself comes first: `/ngap/Cause/*` is the members of the IE, and `value/value` the one member of a value that is named as one of its IE, in a string of bits whose size varies. |
 | [Names] | Letters and digits, whatever their case and whatever is between them, for the root, the IEs, the members of a value, the messages and the values of an `ENUMERATED`: `/NGAP/ran_ue_ngap_id` is `/ngap/RAN-UE-NGAP-ID`. |

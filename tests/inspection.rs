@@ -879,6 +879,146 @@ fn the_container_of_a_handover_is_written_and_selected_by_the_type_that_it_carri
     }
 }
 
+/// Each value of `shown`, a message as `message_tree` shows it or a part of one, with the
+/// path that joins the names and the positions on the way to it. A list of plain values
+/// is one value.
+fn joined(shown: &serde_json::Value, path: &str, found: &mut Vec<(String, serde_json::Value)>) {
+    use serde_json::Value;
+    match shown {
+        Value::Object(members) if !members.is_empty() => {
+            for (name, member) in members {
+                joined(member, &format!("{path}/{name}"), found);
+            }
+        }
+        Value::Array(entries) if entries.iter().any(|e| e.is_object() || e.is_array()) => {
+            for (index, entry) in entries.iter().enumerate() {
+                joined(entry, &format!("{path}/{index}"), found);
+            }
+        }
+        value => found.push((path.to_string(), value.clone())),
+    }
+}
+
+#[test]
+fn the_names_that_a_message_shows_join_into_the_path_of_each_value() {
+    use serde_json::json;
+    let (mut values, mut whole, mut bits, mut empty) = (0, 0, 0, 0);
+    for line in include_str!("fixtures/messages.tsv")
+        .lines()
+        .filter(|line| !line.starts_with('#') && !line.is_empty())
+    {
+        let fields: Vec<_> = line.split('\t').collect();
+        let pdu = NGAP_PDU::decode(&hex::decode(fields[1]).unwrap()).unwrap();
+        // A private message has no IEs of the protocol to name.
+        let Ok(shown) = inspect::message_tree(&pdu) else {
+            continue;
+        };
+        let tree = inspect::inspect_pdu(&pdu).unwrap();
+        let ies = shown["ies"].as_array().unwrap();
+        for (index, ie) in ies.iter().enumerate() {
+            // An IE of the message by its position, then by its name, and by its name
+            // alone, which selects it when the message has it once.
+            let mut found = Vec::new();
+            joined(ie, &format!("/ngap/{index}"), &mut found);
+            for (path, value) in found {
+                let at = format!("{} {path}", fields[0]);
+                let selected = inspect::select(&tree, &path).expect(&at);
+                assert_eq!(inspect::check_path(fields[0], &path), Ok(()), "{at}");
+                let named = path.replacen(&format!("/{index}/"), "/", 1);
+                if !named.ends_with("/criticality") || named.matches('/').count() > 3 {
+                    assert_eq!(inspect::select(&tree, &named), Ok(selected.clone()), "{at}");
+                }
+                values += 1;
+                // A path that ends with the name of an IE selects the IE, as the name
+                // alone does in a list: a value that is the whole value of its IE is
+                // after `value`.
+                if selected[0].get("_raw_value").is_some() {
+                    let of_the_ie = inspect::select(&tree, &format!("{path}/value")).expect(&at);
+                    assert_eq!(of_the_ie, [&value], "{at}");
+                    whole += 1;
+                    continue;
+                }
+                // A string of bits whose size varies that is the value of an IE has a
+                // member that is named as one of the IE: its `value` is after `value`.
+                if path.ends_with("/value") && selected[0].get("length").is_some() {
+                    let after = inspect::select(&tree, &format!("{path}/value")).expect(&at);
+                    assert_eq!(after, [&value], "{at}");
+                    bits += 1;
+                    continue;
+                }
+                // A transfer whose decoded value has no member is selected whole.
+                if value == json!({}) && selected[0].get("_raw_transfer").is_some() {
+                    assert_eq!(selected[0]["decoded"], value, "{at}");
+                    empty += 1;
+                    continue;
+                }
+                assert_eq!(selected, [&value], "{at}");
+            }
+        }
+    }
+    assert!(values > 500 && whole > 100, "{values} {whole}");
+    assert!(bits > 0 && empty > 0, "{bits} {empty}");
+
+    // An entry of the message that a transfer contains, by its position then its name.
+    let name = "PDUSessionResourceSetupRequest";
+    let mut tree = inspect::inspect_pdu(&NGAP_PDU::decode(&fixture(name)).unwrap()).unwrap();
+    let ies = "/ngap/PDUSessionResourceSetupListSUReq/0\
+        /pDUSessionResourceSetupRequestTransfer/protocolIEs";
+    let tunnel = format!("{ies}/0/UL-NGU-UP-TNLInformation/gTPTunnel/gTP-TEID");
+    assert_eq!(
+        inspect::select(&tree, &tunnel).unwrap(),
+        [&json!(577899919)]
+    );
+    // The name of another IE says which IE the entry is, where a tree says it.
+    let other = format!("{ies}/0/PDUSessionType/value");
+    let error = inspect::select(&tree, &other).unwrap_err();
+    let which = "this IE is UL-NGU-UP-TNLInformation, not PDUSessionType: ";
+    assert!(error.starts_with(which), "{error}");
+    assert!(
+        error.contains("is not a member of UPTransportLayerInformation"),
+        "{error}"
+    );
+    assert_eq!(inspect::set(&mut tree, &other, json!("ipv6")), Err(error));
+    // Without a tree, the entry at a position is the IE that the segment names, and
+    // the path is read against its type.
+    assert_eq!(inspect::check_path(name, &tunnel), Ok(()));
+    assert_eq!(inspect::check_path(name, &other), Ok(()));
+    let wrong = format!("{ies}/0/UL-NGU-UP-TNLInformation/gTPTunel");
+    let error = inspect::check_path(name, &wrong).unwrap_err();
+    assert!(
+        error.contains("is not a member of UPTransportLayerInformation"),
+        "{error}"
+    );
+    let kinds = inspect::enumerated_at(name, &other).unwrap();
+    assert!(kinds.is_some_and(|kinds| kinds.contains(&"ipv4v6")));
+    // An edit takes the same path, and the entry itself where the path ends with its
+    // name.
+    inspect::set(&mut tree, &tunnel, json!(7)).unwrap();
+    inspect::remove(&mut tree, &format!("{ies}/1/PDUSessionType")).unwrap();
+    let sent = inspect::inspect_pdu(&inspect::encode_pdu(&tree).unwrap()).unwrap();
+    assert_eq!(inspect::select(&sent, &tunnel).unwrap(), [&json!(7)]);
+    let names = inspect::select(&sent, &format!("{ies}/*/_ie_name")).unwrap();
+    assert_eq!(
+        names,
+        [
+            &json!("UL-NGU-UP-TNLInformation"),
+            &json!("QosFlowSetupRequestList")
+        ]
+    );
+    // A member of a value that is named as another IE is that member: the target of a
+    // handover has a `targetRANNodeID`, and `Target-RAN-Node-ID` is an IE.
+    let required = NGAP_PDU::decode(&fixture("HandoverRequired")).unwrap();
+    let required = inspect::inspect_pdu(&required).unwrap();
+    assert!(
+        inspect::ie_names()
+            .iter()
+            .any(|(_, name)| *name == "Target-RAN-Node-ID")
+    );
+    let area = "/ngap/TargetID/targetRANNodeID/selectedTAI/tAC";
+    assert_eq!(inspect::select(&required, area).unwrap(), [&json!(1779096)]);
+    assert_eq!(inspect::check_path("HandoverRequired", area), Ok(()));
+}
+
 /// The octets of the message `name` of the fixtures.
 fn fixture(name: &str) -> Vec<u8> {
     let mut lines = include_str!("fixtures/messages.tsv").lines();

@@ -495,6 +495,89 @@ fn or_its_own(reason: String, shape: Shape, members: &[Member]) -> String {
     format!("{reason}; {of} itself has {own}")
 }
 
+/// The identifier of the IE that `entry` is, when a value of `shape` is an IE: an entry
+/// of a list of IEs, or an IE that a value holds alone.
+fn ie_of(entry: &Value, shape: Shape) -> Option<u16> {
+    match shape {
+        Shape::Ie(_) | Shape::Extension(_) => entry_id(entry).and_then(|id| id.try_into().ok()),
+        _ => None,
+    }
+}
+
+/// Whether `part`, a segment under the IE `id`, names that IE, and so stays on it: a path
+/// may say which IE an entry is. A member of its value that is named as the IE is that
+/// member, as a path had it before an IE could be named so, unless the segment spells
+/// the name as ASN.1 spells that of the IE.
+fn stays_on(id: u16, part: &str) -> bool {
+    if ie_id(part) != Some(id) {
+        return false;
+    }
+    let value = match resolved(ie_value(Some(id))) {
+        Shape::Transfer(contained) if !contained.is_empty() => Shape::Named(contained),
+        value => value,
+    };
+    let of_the_value = members(value, None).unwrap_or_default();
+    member(&of_the_value, part).is_none() || ie_name(id) == part
+}
+
+/// Whether a member of some value has the name `part` and another type than the value
+/// of the IE `id`: where an IE is not known, such a segment is not taken for its name.
+fn names_another_type(part: &str, id: u16) -> bool {
+    // A type that is another one names it a few times at most.
+    let settled = |mut shape: Shape| {
+        for _ in 0..16 {
+            match shape {
+                Shape::Named(name) => match kind_of(name) {
+                    Some(Kind::Is(is)) => shape = *is,
+                    _ => break,
+                },
+                _ => break,
+            }
+        }
+        shape
+    };
+    let of_the_ie = settled(ie_value(Some(id)));
+    TYPES.iter().any(|(_, kind)| match kind {
+        Kind::Sequence(members) | Kind::Choice(members) => (members.iter())
+            .any(|(name, shape, _)| same_name(name, part) && settled(*shape) != of_the_ie),
+        Kind::Is(_) => false,
+    })
+}
+
+/// The IE that a segment stays on when it names the IE that a value of `shape` is, for
+/// a value that a tree does not have: a path may say which IE an entry is. An entry
+/// whose IE is not known is the one that the segment names, unless some value has a
+/// member of that name and of another type, which the segment may be.
+fn named_ie(shape: Shape, part: &str, named: bool) -> Option<Shape> {
+    let id = ie_id(part).filter(|_| named)?;
+    let (known, extension) = match shape {
+        Shape::Ie(known) => (known, false),
+        Shape::Extension(known) => (known, true),
+        _ => return None,
+    };
+    let stays = match known {
+        Some(known) => known == id && stays_on(id, part),
+        None => !names_another_type(part, id),
+    };
+    stays.then_some(match extension {
+        true => Shape::Extension(Some(id)),
+        false => Shape::Ie(Some(id)),
+    })
+}
+
+/// Why a segment that names an IE selects nothing under another IE, `this`: which IE
+/// that one is, then `reason`, why its value has no such member either. `None` for a
+/// segment that names no IE, or the IE itself.
+fn another_ie(this: Option<u16>, part: &str, named: bool, reason: &str) -> Option<String> {
+    let other = ie_id(part).filter(|_| named)?;
+    let this = this.filter(|this| *this != other)?;
+    Some(format!(
+        "this IE is {}, not {}: {reason}",
+        ie_name(this),
+        ie_name(other)
+    ))
+}
+
 /// Why a segment selects nothing in a value of `shape`: the type has no such member.
 fn no_member(shape: Shape, members: &[Member], part: &str, path: &str) -> String {
     // The root stands for the IEs of a message, which a private message has none of.
@@ -573,7 +656,7 @@ fn advance<'a>(
     };
     let no = |reason: String| Err((false, reason));
     match value {
-        Some(Value::Object(entry)) => {
+        Some(whole @ Value::Object(entry)) => {
             let members = members(shape, Some(entry));
             // The IEs of a message that the tree contains are selected in its place.
             if named
@@ -625,6 +708,13 @@ fn advance<'a>(
                 };
             };
             let own = member(&members, part);
+            // The name of the IE that the entry is stays on the entry: a path may say
+            // which IE an entry is, before it goes into it.
+            let this = ie_of(whole, shape).filter(|_| named && own.is_none());
+            if this.is_some_and(|this| stays_on(this, part)) {
+                push(Some(whole), shape);
+                return Ok(());
+            }
             let held = held.and_then(|held| member(&members, held));
             let Some((name, of, _)) = own.or(held) else {
                 return no(no_member(shape, &members, part, path));
@@ -646,7 +736,10 @@ fn advance<'a>(
             let taken = advance((value, *of), part, named, path, next);
             taken.map_err(|(unread, reason)| match unread {
                 true => (unread, reason),
-                false => (unread, or_its_own(reason, shape, &members)),
+                false => match another_ie(this, part, named, &reason) {
+                    Some(another) => (unread, another),
+                    None => (unread, or_its_own(reason, shape, &members)),
+                },
             })
         }
         Some(Value::Array(entries)) => {
@@ -798,13 +891,24 @@ fn typed(
                 push(Shape::Plain);
             } else if let Some((_, of, _)) = member(&members, part) {
                 push(*of);
+            } else if let Some(ie) = named_ie(shape, part, named) {
+                // The name of the IE that the entry is stays on the entry.
+                push(ie);
             } else if let Some((_, of, _)) =
                 value_member(shape).and_then(|held| member(&members, held))
             {
                 // What names no member of an IE or of a transfer is one of its value.
+                let this = match shape {
+                    Shape::Ie(known) | Shape::Extension(known) => known,
+                    _ => None,
+                };
                 let taken = typed(resolved(*of), part, named, path, push);
-                return taken
-                    .map_err(|(unread, reason)| (unread, or_its_own(reason, shape, &members)));
+                return taken.map_err(|(unread, reason)| {
+                    match another_ie(this, part, named, &reason) {
+                        Some(another) => (unread, another),
+                        None => (unread, or_its_own(reason, shape, &members)),
+                    }
+                });
             } else {
                 return no(no_member(shape, &members, part, path));
             }
@@ -852,6 +956,11 @@ fn advance_all<'a>(
 /// member of a transfer in its decoded value, as if `value` or `decoded` stood before
 /// it. A name that neither has is an error, which says the members of both.
 ///
+/// After an IE, a segment that is the name of that IE stays on it: a path may say which
+/// IE an entry is, as `0/Cause` for the first IE of a list, and one that ends so selects
+/// the IE. The name of another IE, where the value has no such member, is an error that
+/// says which IE the entry is.
+///
 /// The `octets` of an IE or of a transfer are what it was received as: those of one whose
 /// value [`set`], [`remove`] or [`insert`] edited since are an error, as
 /// [`encode_pdu`](crate::inspect::encode_pdu) has yet to give it others. So is a path into
@@ -878,7 +987,9 @@ pub fn select<'a>(tree: &'a Value, path: &str) -> Result<Vec<&'a Value>, String>
 /// identifier is unknown or has several types, the entries of a container that is not
 /// that of the message when they are selected by position, a segment under such an IE,
 /// which may name a member of its value, and whether a position is within the bounds of
-/// its list.
+/// its list. Such an entry is the IE that the next segment names, and the path is then
+/// read against the type of that IE: unless some value has a member of that name and of
+/// another type, which the segment may be.
 pub fn check_path(message: &str, path: &str) -> Result<(), String> {
     let known = sent(|_, _, name| same_name(name, message));
     let message = known.ok_or_else(|| format!("{message:?} is not a message of {PROTOCOL}"))?;
@@ -1126,6 +1237,16 @@ fn edit(tree: &mut Value, path: &str, mut operation: Edit) -> Result<(), String>
     Ok(())
 }
 
+/// `rest` without the segment that it starts with, when that names the IE that `entry`, a
+/// value of `shape`, is: a path may say which IE an entry is, before it goes into it.
+fn past_its_name<'p>(entry: &Value, shape: Shape, rest: &'p [String], named: bool) -> &'p [String] {
+    let this = ie_of(entry, resolved(shape)).filter(|_| named);
+    match rest.split_first() {
+        Some((part, after)) if this.is_some_and(|this| stays_on(this, part)) => after,
+        _ => rest,
+    }
+}
+
 /// Mark `entry` when `member`, which an edit changed or changed something under, holds
 /// the value of an IE or of a transfer that was received.
 fn mark(entry: &mut Map<String, Value>, member: &str) {
@@ -1146,6 +1267,7 @@ fn apply(
 ) -> Result<usize, String> {
     let (part, rest) = parts.split_first().ok_or("empty edit path")?;
     let shape = resolved(shape);
+    let this = ie_of(tree, shape);
     // Octets that the path takes as a type that they may carry are shown as it, when
     // that is what is asked.
     if let (Shape::Carrier(_), Edit::Open(decode)) = (shape, operation)
@@ -1188,7 +1310,8 @@ fn apply(
             // written wrong.
             let place = (object.get(*name), *of);
             return match advance(place, part, named, path, &mut Vec::new()) {
-                Err((false, reason)) => Err(or_its_own(reason, shape, members)),
+                Err((false, reason)) => Err(another_ie(this, part, named, &reason)
+                    .unwrap_or_else(|| or_its_own(reason, shape, members))),
                 Err((true, reason)) => Err(reason),
                 Ok(()) => changed,
             };
@@ -1228,6 +1351,11 @@ fn apply(
         };
         let choice =
             matches!(shape, Shape::Named(name) if matches!(kind_of(name), Some(Kind::Choice(_))));
+        // The name of the IE that the member holds alone may follow it.
+        let rest = match object.get(&name) {
+            Some(child) => past_its_name(child, of, rest, named),
+            None => rest,
+        };
         if rest.is_empty() {
             let removes = matches!(operation, Edit::Remove | Edit::Set(Value::Null));
             // What holds the value of an IE or of a transfer: without it the octets
@@ -1327,6 +1455,8 @@ fn apply(
         if index >= array.len() {
             continue;
         }
+        // The name of the IE that the entry is may follow its position.
+        let rest = past_its_name(&array[index], element(shape), rest, named);
         if rest.is_empty() {
             match operation {
                 Edit::Set(value) => array[index] = value.clone(),
@@ -1724,6 +1854,95 @@ mod tests {
         let kept = remove(&mut tree, &path("nas")).unwrap_err();
         assert!(kept.contains("a CHOICE has one alternative"), "{kept}");
         assert_eq!(tree, before);
+    }
+
+    #[test]
+    fn the_name_of_the_ie_that_an_entry_is_stays_on_the_entry() {
+        let cause = ie_id("Cause").expect("an IE of the protocol");
+        let value = json!({"radioNetwork": "unspecified"});
+        let entry = json!({"id": cause, "criticality": "ignore", "value": value});
+        let mut tree = tree_of("UEContextReleaseCommand", json!([entry]));
+        let path = |rest: &str| format!("/{ROOT}/{rest}");
+        // After its position, and after its name, which selects it already.
+        for named in ["0/Cause", "0/cause", "Cause/Cause", "*/Cause"] {
+            assert_eq!(select(&tree, &path(named)).unwrap(), [&entry], "{named}");
+            let member = select(&tree, &path(&format!("{named}/radioNetwork"))).unwrap();
+            assert_eq!(member, [&json!("unspecified")], "{named}");
+            let whole = select(&tree, &path(&format!("{named}/value"))).unwrap();
+            assert_eq!(whole, [&value], "{named}");
+        }
+        // The name of another IE says which IE the entry is, with a tree and without.
+        let other = crate::inspect::ie_names()
+            .iter()
+            .find(|(id, _)| *id != cause);
+        let other = path(&format!("0/{}/value", other.unwrap().1));
+        let refused = select(&tree, &other).unwrap_err();
+        assert!(refused.starts_with("this IE is Cause, not "), "{refused}");
+        assert!(refused.contains("is not a member of Cause, which has radioNetwork"));
+        let checked = |rest: &str| check_path("UEContextReleaseCommand", &path(rest));
+        assert_eq!(checked("Cause/Cause/nas"), Ok(()));
+        assert!(checked("Cause/Cause/misspelled").is_err());
+        let names = |rest: &str| enumerated_at("UEContextReleaseCommand", &path(rest));
+        assert_eq!(names("*/Cause/nas"), names("Cause/value/nas"));
+        assert!(names("*/Cause/nas").unwrap().is_some());
+        // An edit takes the same path, and the entry itself where the path ends with
+        // its name.
+        assert_eq!(set(&mut tree, &other, json!(1)), Err(refused));
+        set(&mut tree, &path("0/Cause/nas"), json!("normal-release")).unwrap();
+        let edited = select(&tree, &path("Cause/value")).unwrap();
+        assert_eq!(edited, [&json!({"nas": "normal-release"})]);
+        insert(&mut tree, &path("0/Cause"), entry.clone()).unwrap();
+        assert_eq!(select(&tree, &path("*/Cause")).unwrap().len(), 2);
+        remove(&mut tree, &path("1/Cause")).unwrap();
+        assert_eq!(select(&tree, &path("*/Cause")).unwrap(), [&entry]);
+    }
+
+    #[test]
+    fn an_entry_that_is_not_known_is_the_ie_that_a_segment_names_where_no_member_is() {
+        // Where a tree is not there to say which IE an entry is, a segment that names
+        // an IE is taken for it, and the path goes on in the type of that IE: unless a
+        // value has a member of that name and of another type, which it may be.
+        let cause = ie_id("Cause").expect("an IE of the protocol");
+        for (shape, stays) in [
+            (Shape::Ie(None), Shape::Ie(Some(cause))),
+            (Shape::Extension(None), Shape::Extension(Some(cause))),
+        ] {
+            assert_eq!(named_ie(shape, "cause", true), Some(stays));
+            assert_eq!(named_ie(shape, "cause", false), None);
+        }
+        assert_eq!(named_ie(Shape::Ie(Some(cause + 1)), "Cause", true), None);
+        assert_eq!(named_ie(Shape::Plain, "Cause", true), None);
+        let (mut taken, mut left, mut spelled) = (0, 0, 0);
+        for (of, members) in all_members() {
+            for (member, shape, _) in members {
+                let Some(id) = ie_id(member) else {
+                    continue;
+                };
+                // A member of the value of an IE that is named as the IE itself is
+                // spelled otherwise, which is how a path tells the two.
+                let own = match resolved(ie_value(Some(id))) {
+                    Shape::Transfer(contained) => Shape::Named(contained),
+                    own => own,
+                };
+                if own == Shape::Named(of) {
+                    assert_ne!(*member, ie_name(id), "{of}.{member}");
+                    assert!(!stays_on(id, member) && stays_on(id, &ie_name(id)));
+                    spelled += 1;
+                }
+                let own = resolved(ie_value(Some(id)));
+                match named_ie(Shape::Ie(None), member, true) {
+                    Some(_) => {
+                        let same = resolved(*shape) == own;
+                        assert!(same, "{of}.{member}");
+                        taken += 1;
+                    }
+                    None => left += 1,
+                }
+            }
+        }
+        assert!(taken > 0 && left > 0, "{taken} {left}");
+        // TS 36.413 has one such member, and TS 38.413 none.
+        assert!(spelled <= 1, "{spelled}");
     }
 
     #[test]

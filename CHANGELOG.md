@@ -25,6 +25,8 @@ is not source compatible with 0.4.2.
   message. A type name shared by several IEs is no longer an IE name.
 - The minimum supported Rust version is 1.88, which rasn 0.28.15 needs:
   0.4.2 declared 1.85 and did not build with it.
+- `helpers::plmn` writes other octets for an MNC of three digits, and
+  `helpers::plmn_from` reads them: see the first entry of Fixed.
 
 ### Added
 
@@ -205,6 +207,15 @@ is not source compatible with 0.4.2.
 
 ### Fixed
 
+- The octets of a PLMN identity with an MNC of three digits, which is a fix
+  of the wire format of 0.4.2. TS 38.413 clause 9.3.3.5 has the three digits
+  of the MCC, then those of the MNC, two in each octet, the second over the
+  first: 310-410 is `13 40 01`. `helpers::plmn` wrote `13 00 14`, the order
+  that TS 24.008 gives a NAS message, which a decoder of NGAP reads as
+  310-041, and `helpers::plmn_from` read 310-410 in those octets. Both have
+  the order of the clause now, and so has the `"310-410"` that the `inspect`
+  feature writes and shows. An MNC of two digits has the same octets in both
+  orders: 208-93 is `02 f8 39` as before.
 - APER encoding and decoding of constrained `SEQUENCE OF` lists,
   size-constrained `UTF8String` values, fixed-size `BIT STRING` values
   longer than 16 bits, strings with a two-octet length, and empty open type

@@ -297,6 +297,12 @@ let algorithm_mask = bytes_to_bitvec(&[0xe0]);
 let capabilities = ue_security_capabilities(&[0xe0, 0xe0]);
 ```
 
+A PLMN identity has its digits in the order of TS 38.413 clause 9.3.3.5: the
+three of the MCC, then the two or three of the MNC, two in each octet, the
+second over the first. `plmn("310", "410")` is the octets `13 40 01`. A NAS
+message has another order for an MNC of three digits, that of TS 24.008,
+where the same network is `13 00 14`.
+
 ### Key types
 
 | Type | Description |
@@ -307,7 +313,7 @@ let capabilities = ue_security_capabilities(&[0xe0, 0xe0]);
 | `AMFUENGAPID` | 40-bit AMF UE NGAP identifier, a `u64` |
 | `RANUENGAPID` | RAN UE NGAP identifier |
 | `Cause` | Radio network, transport, NAS, protocol or miscellaneous cause |
-| `PLMNIdentity` | Three octets of TBCD |
+| `PLMNIdentity` | Three octets: the digits of the MCC, then those of the MNC, two in each octet |
 | `TAI` | PLMN and a TAC of three octets |
 | `NRCGI` | PLMN and a 36-bit NR cell identity |
 | `SNSSAI` | Slice/service type and optional slice differentiator |

@@ -36,7 +36,45 @@ fn fixed_bit_string<const N: usize>(value: u64) -> FixedBitString<N> {
     bits
 }
 
-/// Encode MCC/MNC as a 3-octet TBCD `PLMNIdentity`.
+/// The octets of the PLMN identity of an MCC and an MNC: the three digits of `mcc`, and
+/// the two or three of `mnc`, each a number from 0 to 9.
+///
+/// TS 38.413 clause 9.3.3.5 has two digits in each octet, "bits 4 to 1 of octet n encoding
+/// digit 2n-1" and "bits 8 to 5 of octet n encoding digit 2n", of "3 digits from MCC
+/// followed by either a filler digit plus 2 digits from MNC" or "3 digits from MNC",
+/// where the filler is 1111. So octet 2 has the first digit of a three-digit MNC, and
+/// octet 3 its second and its third: 310-410 is `13 40 01`. This is not the order of
+/// TS 24.008, which a NAS message has, where octet 2 has the third digit of the MNC.
+///
+/// # Panics
+///
+/// Panics if `mnc` is not two or three digits.
+pub(crate) fn plmn_octets(mcc: [u8; 3], mnc: &[u8]) -> [u8; 3] {
+    // The six digits of the clause: a filler stands before an MNC of two digits.
+    let [d1, d2, d3] = mcc;
+    let [d4, d5, d6] = match *mnc {
+        [first, second] => [0x0F, first, second],
+        [first, second, third] => [first, second, third],
+        _ => panic!("an MNC has two or three digits"),
+    };
+    // Digit 2n-1 in bits 4 to 1 of octet n, and digit 2n in its bits 8 to 5.
+    [d2 << 4 | d1, d4 << 4 | d3, d6 << 4 | d5]
+}
+
+/// The half octets of the MCC and those of the MNC in the octets of a PLMN identity, in
+/// the order of [`plmn_octets`]: the MNC has two after a filler, and three otherwise.
+pub(crate) fn plmn_digits(octets: [u8; 3]) -> ([u8; 3], Vec<u8>) {
+    let [first, second, third] = octets;
+    let mnc = match second >> 4 {
+        0x0F => vec![third & 0x0F, third >> 4],
+        digit => vec![digit, third & 0x0F, third >> 4],
+    };
+    ([first & 0x0F, first >> 4, second & 0x0F], mnc)
+}
+
+/// Encode MCC/MNC as the three octets of a `PLMNIdentity`, in the order of
+/// TS 38.413 clause 9.3.3.5: `plmn("310", "410")` is `13 40 01`, and `plmn("208", "93")`
+/// is `02 f8 39`.
 ///
 /// MCC must contain three decimal digits; MNC must contain two or three.
 ///
@@ -55,35 +93,18 @@ pub fn plmn(mcc: &str, mnc: &str) -> PLMNIdentity {
 
     let mcc_digits: Vec<u8> = mcc.bytes().map(|byte| byte - b'0').collect();
     let mnc_digits: Vec<u8> = mnc.bytes().map(|byte| byte - b'0').collect();
-    let mut bytes = [0u8; 3];
-    bytes[0] = (mcc_digits[1] << 4) | mcc_digits[0];
-    if mnc_digits.len() == 2 {
-        bytes[1] = 0xF0 | mcc_digits[2];
-        bytes[2] = (mnc_digits[1] << 4) | mnc_digits[0];
-    } else {
-        bytes[1] = (mnc_digits[2] << 4) | mcc_digits[2];
-        bytes[2] = (mnc_digits[1] << 4) | mnc_digits[0];
-    }
-    PLMNIdentity(FixedOctetString::new(bytes))
+    let mcc_digits = [mcc_digits[0], mcc_digits[1], mcc_digits[2]];
+    let octets = plmn_octets(mcc_digits, &mnc_digits);
+    PLMNIdentity(FixedOctetString::new(octets))
 }
 
-/// Decode a `PLMNIdentity` into MCC and MNC strings.
+/// Decode a `PLMNIdentity` into MCC and MNC strings, in the order of
+/// TS 38.413 clause 9.3.3.5.
 pub fn plmn_from(identity: &PLMNIdentity) -> (String, String) {
-    let bytes = &identity.0;
-    let mcc0 = bytes[0] & 0x0F;
-    let mcc1 = (bytes[0] >> 4) & 0x0F;
-    let mcc2 = bytes[1] & 0x0F;
-    let mnc_hi = (bytes[1] >> 4) & 0x0F;
-    let mnc0 = bytes[2] & 0x0F;
-    let mnc1 = (bytes[2] >> 4) & 0x0F;
-
-    let mcc = format!("{mcc0}{mcc1}{mcc2}");
-    let mnc = if mnc_hi == 0xF {
-        format!("{mnc0}{mnc1}")
-    } else {
-        format!("{mnc0}{mnc1}{mnc_hi}")
-    };
-    (mcc, mnc)
+    let octets = &identity.0;
+    let (mcc, mnc) = plmn_digits([octets[0], octets[1], octets[2]]);
+    let digits = |digits: &[u8]| digits.iter().map(u8::to_string).collect();
+    (digits(&mcc), digits(&mnc))
 }
 
 /// AMF Region ID field width.
@@ -184,7 +205,9 @@ mod tests {
 
     #[test]
     fn plmn_round_trips_for_three_digit_mnc() {
+        // The digits 9 9 9 0 7 0, two in each octet, the second over the first.
         let identity = plmn("999", "070");
+        assert_eq!(&identity.0[..], &[0x99, 0x09, 0x07]);
         assert_eq!(plmn_from(&identity), ("999".into(), "070".into()));
     }
 

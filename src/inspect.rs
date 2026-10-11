@@ -582,9 +582,8 @@ pub(crate) enum Form {
 impl Form {
     /// The readable form of a value as JER has it; `None` when it has none.
     fn read(self, jer: &Value) -> Option<Value> {
+        // The decimal digits that these half octets are; none when one of them is no digit.
         let digits = |digits: &[u8]| {
-            // A filler takes the place of a last digit that is not there.
-            let digits = digits.strip_suffix(&[15]).unwrap_or(digits);
             let text = digits
                 .iter()
                 .map(|digit| char::from_digit((*digit).into(), 10));
@@ -592,14 +591,17 @@ impl Form {
         };
         match self {
             Self::Plmn => {
-                let [a, b, c] = <[u8; 3]>::try_from(unhex(jer).ok()?).ok()?;
-                let text = digits(&[a & 15, a >> 4, b & 15, c & 15, c >> 4, b >> 4])?;
-                (text.len() >= 5).then(|| json!(format!("{}-{}", &text[..3], &text[3..])))
+                // The order of the digits is that of the helpers.
+                let octets = <[u8; 3]>::try_from(unhex(jer).ok()?).ok()?;
+                let (mcc, mnc) = crate::helpers::plmn_digits(octets);
+                Some(json!(format!("{}-{}", digits(&mcc)?, digits(&mnc)?)))
             }
             Self::Digits => {
                 let octets = unhex(jer).ok()?;
                 let nibbles: Vec<u8> = octets.iter().flat_map(|o| [o & 15, o >> 4]).collect();
-                digits(&nibbles).map(Value::from)
+                // A filler takes the place of a last digit that is not there.
+                let nibbles = nibbles.strip_suffix(&[15]).unwrap_or(&nibbles);
+                digits(nibbles).map(Value::from)
             }
             Self::Number(bits) => {
                 let (text, octets) = (jer.as_str()?, bits.div_ceil(8));
@@ -653,12 +655,7 @@ impl Form {
                     return Err(format!("{text}: a PLMN identity is MCC-MNC, as 208-93"));
                 }
                 let (mcc, mnc) = (bcd(mcc), bcd(mnc));
-                let filler = mnc.get(2).copied().unwrap_or(15);
-                let octets = [
-                    mcc[1] << 4 | mcc[0],
-                    filler << 4 | mcc[2],
-                    mnc[1] << 4 | mnc[0],
-                ];
+                let octets = crate::helpers::plmn_octets([mcc[0], mcc[1], mcc[2]], &mnc);
                 Ok(json!(hex(&octets)))
             }
             Self::Digits if all_digits(text) => {

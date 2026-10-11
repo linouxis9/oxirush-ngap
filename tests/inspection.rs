@@ -188,7 +188,12 @@ fn a_new_ie_takes_a_typed_value_of_the_type_of_its_identifier() {
     );
     // A value that the type does not have, and an identifier without a type.
     assert!(added(15, serde_json::json!({"radioNetwork": "no-such-cause"})).is_err());
-    assert!(added(60000, cause).unwrap_err().contains("_raw_value"));
+    assert!(
+        added(60000, cause)
+            .unwrap_err()
+            .to_string()
+            .contains("_raw_value")
+    );
 }
 
 #[test]
@@ -338,9 +343,13 @@ fn a_transfer_that_was_not_received_is_encoded_from_its_decoded_value() {
     assert_eq!(written(as_octets).unwrap(), sent);
     assert_eq!(written(octets.clone()).unwrap(), sent);
     // A member beside the value, and a value that the transfer does not have.
-    let error = written(serde_json::json!({"decoded": transfer, "other": 1})).unwrap_err();
+    let error = written(serde_json::json!({"decoded": transfer, "other": 1}))
+        .unwrap_err()
+        .to_string();
     assert!(error.contains("its decoded value alone"), "{error}");
-    let error = written(serde_json::json!({"octets": octets, "other": 1})).unwrap_err();
+    let error = written(serde_json::json!({"octets": octets, "other": 1}))
+        .unwrap_err()
+        .to_string();
     assert!(error.contains("its decoded value alone"), "{error}");
     assert!(written(serde_json::json!({"decoded": {"no-such-member": 1}})).is_err());
     assert!(written(serde_json::json!({"no-such-member": 1})).is_err());
@@ -395,8 +404,11 @@ fn a_message_is_shown_and_written_as_its_name_and_its_ies_by_name() {
             Ok(shown) => shown,
             // A private message has no IEs of the protocol to name.
             Err(reason) => {
+                assert_eq!(reason.kind(), oxirush_ngap::ErrorKind::Limit);
                 assert!(
-                    reason.contains("PrivateMessage has no list of IEs"),
+                    reason
+                        .to_string()
+                        .contains("PrivateMessage has no list of IEs"),
                     "{reason}"
                 );
                 continue;
@@ -444,7 +456,8 @@ fn a_message_is_shown_and_written_as_its_name_and_its_ies_by_name() {
     );
     // What is not a message, not an IE, or an IE of another message without its
     // criticality, is refused with what is wrong.
-    let refused = |tree: serde_json::Value| inspect::message_from_tree(&tree).unwrap_err();
+    let refused =
+        |tree: serde_json::Value| inspect::message_from_tree(&tree).unwrap_err().to_string();
     let named = |message: &str, ie: &str| serde_json::json!({"message": message, "ies": [{ie: 1}]});
     assert!(
         refused(named("UEContextReleaseRequst", "AMF-UE-NGAP-ID")).contains("is not a message")
@@ -556,7 +569,7 @@ fn a_message_is_shown_and_written_by_name_to_any_depth() {
     let mut unassigned = request.clone();
     let kind = unassigned.pointer_mut(&format!("{transfer}/protocolIEs/1"));
     kind.unwrap().as_object_mut().unwrap().remove("criticality");
-    let error = written(&unassigned).unwrap_err();
+    let error = written(&unassigned).unwrap_err().to_string();
     assert!(error.contains("Type says its \"criticality\""), "{error}");
     let mut extended = request.clone();
     let item = format!("{transfer}/protocolIEs/2/QosFlowSetupRequestList/0");
@@ -571,7 +584,7 @@ fn a_message_is_shown_and_written_by_name_to_any_depth() {
     assert_eq!(inspect::message_tree(&pdu).unwrap(), extended);
     let indicator = json!({"RedundantQosFlowIndicator": "true"});
     extended.pointer_mut(&item).unwrap()["iE-Extensions"] = json!([indicator]);
-    let error = written(&extended).unwrap_err();
+    let error = written(&extended).unwrap_err().to_string();
     assert!(
         error.contains("Indicator says its \"criticality\""),
         "{error}"
@@ -593,7 +606,9 @@ fn a_message_is_shown_and_written_by_name_to_any_depth() {
     assert_eq!(inspect::message_tree(&pdu).unwrap(), node);
     // One that its set does not have says its own, which is shown.
     let cause = json!({"Cause": {"misc": "unspecified"}});
-    let error = written(&setup(json!({"choice-Extensions": cause}))).unwrap_err();
+    let error = written(&setup(json!({"choice-Extensions": cause})))
+        .unwrap_err()
+        .to_string();
     assert!(error.contains("Cause says its \"criticality\""), "{error}");
     let cause = json!({"Cause": {"misc": "unspecified"}, "criticality": "ignore"});
     let node = setup(json!({"choice-Extensions": cause}));
@@ -615,7 +630,9 @@ fn a_message_is_shown_and_written_by_name_to_any_depth() {
     assert_eq!(shown["ies"][0], octets);
     assert_eq!(written(&shown).unwrap(), pdu.encode().unwrap());
     // What is in the place of an IE and is none is refused.
-    let error = written(&setup(json!({"choice-Extensions": {"a": 1, "b": 2}}))).unwrap_err();
+    let error = written(&setup(json!({"choice-Extensions": {"a": 1, "b": 2}})))
+        .unwrap_err()
+        .to_string();
     assert!(error.contains("one IE"), "{error}");
 }
 
@@ -673,7 +690,9 @@ fn the_value_of_an_ie_and_of_a_transfer_may_be_left_out_of_a_path() {
     let mut edited = view.clone();
     let second = inspect::select(&view, &short).unwrap()[0].clone();
     inspect::set(&mut edited, &format!("{short}/qosFlowIdentifier"), json!(5)).unwrap();
-    let error = inspect::select(&edited, &format!("{transfer}/octets")).unwrap_err();
+    let error = inspect::select(&edited, &format!("{transfer}/octets"))
+        .unwrap_err()
+        .to_string();
     assert!(error.contains("the value was edited"), "{error}");
     inspect::insert(&mut edited, &format!("{list}/-"), second.clone()).unwrap();
     inspect::insert(&mut edited, &format!("{list}/0"), second).unwrap();
@@ -714,7 +733,7 @@ fn the_value_of_an_ie_and_of_a_transfer_may_be_left_out_of_a_path() {
         ),
         (
             format!("{list}/misspelled"),
-            "array index must be numeric",
+            "\"misspelled\" is not a position in a list",
             Some("; an IE itself has id, criticality, value, octets"),
         ),
         (
@@ -724,9 +743,14 @@ fn the_value_of_an_ie_and_of_a_transfer_may_be_left_out_of_a_path() {
         ),
     ] {
         for error in [
-            inspect::select(&edited, &path).map(|_| ()).unwrap_err(),
-            inspect::set(&mut edited, &path, json!(1)).unwrap_err(),
-            inspect::check_path(name, &path).unwrap_err(),
+            inspect::select(&edited, &path)
+                .map(|_| ())
+                .unwrap_err()
+                .to_string(),
+            inspect::set(&mut edited, &path, json!(1))
+                .unwrap_err()
+                .to_string(),
+            inspect::check_path(name, &path).unwrap_err().to_string(),
         ] {
             assert!(error.contains(value), "{path}: {error}");
             assert_eq!(
@@ -793,7 +817,7 @@ fn the_container_of_a_handover_is_written_and_selected_by_the_type_that_it_carri
     // opened before it does.
     let cell = format!("{ie}/{name}/targetCell-ID/nR-CGI/nRCellIdentity");
     assert_eq!(inspect::check_path("HandoverRequired", &cell), Ok(()));
-    let error = inspect::select(&view, &cell).unwrap_err();
+    let error = inspect::select(&view, &cell).unwrap_err().to_string();
     assert!(error.contains("open decodes them"), "{error}");
     inspect::open(&mut view, &cell).unwrap();
     assert_eq!(inspect::select(&view, &cell).unwrap(), [&json!(4660)]);
@@ -816,7 +840,9 @@ fn the_container_of_a_handover_is_written_and_selected_by_the_type_that_it_carri
     // An edit changes what the view has: octets are opened before it goes into them.
     let mut view = inspect::message_view(&pdu).unwrap();
     for path in [cell.clone(), cell.replace(name, &format!("value/{name}"))] {
-        let error = inspect::set(&mut view, &path, json!(7)).unwrap_err();
+        let error = inspect::set(&mut view, &path, json!(7))
+            .unwrap_err()
+            .to_string();
         assert!(error.contains("open decodes them"), "{error}");
     }
     inspect::open(&mut view, &cell).unwrap();
@@ -869,7 +895,7 @@ fn the_container_of_a_handover_is_written_and_selected_by_the_type_that_it_carri
     let other = inspect::message_from_tree(&required(json!("FF"))).unwrap();
     let mut view = inspect::message_view(&other).unwrap();
     inspect::open(&mut view, &cell).unwrap();
-    let error = inspect::select(&view, &cell).unwrap_err();
+    let error = inspect::select(&view, &cell).unwrap_err().to_string();
     assert!(error.contains("the transfer did not decode"), "{error}");
     assert_eq!(inspect::message_from_view(&view).unwrap(), other);
     // A path that goes through no such name opens nothing.
@@ -878,7 +904,7 @@ fn the_container_of_a_handover_is_written_and_selected_by_the_type_that_it_carri
     assert_eq!(view, before);
     // The name is one of a type that the IE may carry.
     let written = inspect::message_from_tree(&required(back));
-    let error = written.unwrap_err();
+    let error = written.unwrap_err().to_string();
     assert!(
         error.contains(&format!("for a type that they carry: {name}")),
         "{error}"
@@ -888,7 +914,8 @@ fn the_container_of_a_handover_is_written_and_selected_by_the_type_that_it_carri
         format!("{ie}/rRCContainer"),
     ] {
         let error = inspect::check_path("HandoverRequired", &path).unwrap_err();
-        assert!(error.contains(&format!("which has {name}, at")), "{error}");
+        let text = error.to_string();
+        assert!(text.contains(&format!("which has {name}, at")), "{error}");
         assert_eq!(inspect::select(&view, &path), Err(error.clone()), "{path}");
         assert_eq!(inspect::open(&mut view, &path), Err(error), "{path}");
     }
@@ -987,9 +1014,10 @@ fn the_names_that_a_message_shows_join_into_the_path_of_each_value() {
     let other = format!("{ies}/0/PDUSessionType/value");
     let error = inspect::select(&view, &other).unwrap_err();
     let which = "this IE is UL-NGU-UP-TNLInformation, not PDUSessionType: ";
-    assert!(error.starts_with(which), "{error}");
+    let text = error.to_string();
+    assert!(text.starts_with(which), "{error}");
     assert!(
-        error.contains("is not a member of UPTransportLayerInformation"),
+        text.contains("is not a member of UPTransportLayerInformation"),
         "{error}"
     );
     assert_eq!(inspect::set(&mut view, &other, json!("ipv6")), Err(error));
@@ -998,7 +1026,7 @@ fn the_names_that_a_message_shows_join_into_the_path_of_each_value() {
     assert_eq!(inspect::check_path(name, &tunnel), Ok(()));
     assert_eq!(inspect::check_path(name, &other), Ok(()));
     let wrong = format!("{ies}/0/UL-NGU-UP-TNLInformation/gTPTunel");
-    let error = inspect::check_path(name, &wrong).unwrap_err();
+    let error = inspect::check_path(name, &wrong).unwrap_err().to_string();
     assert!(
         error.contains("is not a member of UPTransportLayerInformation"),
         "{error}"
@@ -1047,7 +1075,7 @@ fn ie(view: &mut serde_json::Value, id: u16) -> &mut serde_json::Value {
 }
 
 /// The view of a message that has `entries` for IEs, encoded and decoded again.
-fn sent(entries: &[serde_json::Value]) -> Result<serde_json::Value, String> {
+fn sent(entries: &[serde_json::Value]) -> Result<serde_json::Value, oxirush_ngap::Error> {
     let pdu = build_ngap!(
         InitiatingMessage,
         UEContextReleaseRequest,
@@ -1485,7 +1513,9 @@ fn the_ies_of_a_contained_message_go_by_name_in_its_place() {
     let unknown = json!({"id": 60000, "criticality": "ignore", "octets": "00"});
     inspect::insert(&mut view, &format!("{transfer}/-"), unknown).unwrap();
     assert_eq!(ids(&view, "/*/id").last(), Some(&json!(60000)));
-    let error = inspect::select(&view, &format!("{transfer}/misspelled")).unwrap_err();
+    let error = inspect::select(&view, &format!("{transfer}/misspelled"))
+        .unwrap_err()
+        .to_string();
     let reason = "is not a member of PDUSessionResourceSetupRequestTransfer";
     assert!(error.contains(reason), "{error}");
 }
@@ -1513,10 +1543,10 @@ fn a_path_that_names_nothing_is_refused_and_changes_nothing() {
         ),
         ("/ngap/+0/id", "\"+0\" is not an IE of NGAP"),
         ("/ngap/00/id", "\"00\" is not an IE of NGAP"),
-        ("ngap/Cause", "must start with /"),
-        ("/ngap/@id=70000", "IE id must be u16"),
+        ("ngap/Cause", "a path starts with \"/\""),
+        ("/ngap/@id=70000", "is not the identifier of an IE"),
     ] {
-        let error = inspect::select(&view, path).unwrap_err();
+        let error = inspect::select(&view, path).unwrap_err().to_string();
         assert!(error.contains(reason), "{path}: {error}");
     }
     for (path, reason) in [
@@ -1524,7 +1554,9 @@ fn a_path_that_names_nothing_is_refused_and_changes_nothing() {
         ("/ngap/GUAMI/value", "selected no field"),
         ("/ngap/7/value", "selected no field"),
     ] {
-        let error = inspect::set(&mut view, path, json!(1)).unwrap_err();
+        let error = inspect::set(&mut view, path, json!(1))
+            .unwrap_err()
+            .to_string();
         assert!(error.contains(reason), "{path}: {error}");
     }
     assert!(inspect::remove(&mut view, "/ngap/GUAMI").is_err());
@@ -1583,7 +1615,7 @@ fn an_edit_changes_what_is_sent_or_is_refused() {
         inspect::remove(&mut view, "/ngap/Cause/value"),
         inspect::set(&mut view, "/ngap/Cause/value", Value::Null),
     ] {
-        let error = edit.unwrap_err();
+        let error = edit.unwrap_err().to_string();
         assert!(error.contains("value is not taken out"), "{error}");
     }
     assert_eq!(view, before);
@@ -1592,7 +1624,9 @@ fn an_edit_changes_what_is_sent_or_is_refused() {
     assert_eq!(members.len(), 3, "{members:?}");
     // The octets of an IE whose value was edited are no longer its octets.
     inspect::set(&mut view, "/ngap/RAN-UE-NGAP-ID/value", json!(9)).unwrap();
-    let error = inspect::select(&view, "/ngap/RAN-UE-NGAP-ID/octets").unwrap_err();
+    let error = inspect::select(&view, "/ngap/RAN-UE-NGAP-ID/octets")
+        .unwrap_err()
+        .to_string();
     assert!(error.contains("the value was edited"), "{error}");
     let other = inspect::select(&view, "/ngap/AMF-UE-NGAP-ID/octets").unwrap();
     assert_eq!(other.len(), 1);
@@ -1639,7 +1673,9 @@ fn null_takes_an_optional_member_out_and_a_transfer_has_its_octets() {
     inspect::set(&mut edited, &sd, Value::Null).unwrap();
     let none = Vec::<&Value>::new();
     assert_eq!(inspect::select(&sent(&edited).unwrap(), &sd).unwrap(), none);
-    let error = inspect::set(&mut edited, &sd, Value::Null).unwrap_err();
+    let error = inspect::set(&mut edited, &sd, Value::Null)
+        .unwrap_err()
+        .to_string();
     assert!(error.contains("selected no field"), "{error}");
     // The octets of a transfer are selected and set as those of an IE are.
     let octets = format!("{transfer}/octets");
@@ -1651,11 +1687,13 @@ fn null_takes_an_optional_member_out_and_a_transfer_has_its_octets() {
     assert_eq!(inspect::select(&after, &octets).unwrap(), [&json!("00")]);
     // Its decoded value is not taken out, and what is under it is no longer its octets.
     let mut edited = view.clone();
-    let error = inspect::remove(&mut edited, &format!("{transfer}/decoded")).unwrap_err();
+    let error = inspect::remove(&mut edited, &format!("{transfer}/decoded"))
+        .unwrap_err()
+        .to_string();
     assert!(error.contains("decoded is not taken out"), "{error}");
     let kind = format!("{transfer}/decoded/PDUSessionType/value");
     inspect::set(&mut edited, &kind, json!("ipv6")).unwrap();
-    let error = inspect::select(&edited, &octets).unwrap_err();
+    let error = inspect::select(&edited, &octets).unwrap_err().to_string();
     assert!(error.contains("the value was edited"), "{error}");
     let after = sent(&edited).unwrap();
     assert_eq!(inspect::select(&after, &kind).unwrap(), [&json!("ipv6")]);
@@ -1664,7 +1702,7 @@ fn null_takes_an_optional_member_out_and_a_transfer_has_its_octets() {
     let mut edited = view.clone();
     let raw = "/message/protocolIEs/2/value/0/pDUSessionResourceSetupRequestTransfer";
     edited.pointer_mut(raw).unwrap()["octets"] = json!("00");
-    let error = inspect::message_from_view(&edited).unwrap_err();
+    let error = inspect::message_from_view(&edited).unwrap_err().to_string();
     assert!(error.contains("has no member \"octets\""), "{error}");
 }
 
@@ -1895,16 +1933,20 @@ fn a_member_that_is_absent_selects_nothing_and_one_that_its_type_has_not_is_an_e
     assert_eq!(select("/ngap/Cause/value/nas").unwrap(), none);
     // What follows an IE or a member that is not there is still a path of its type.
     assert_eq!(select("/ngap/GUAMI/value/aMFRegionID").unwrap(), none);
-    let error = select("/ngap/GUAMI/value/misspelled").unwrap_err();
+    let error = select("/ngap/GUAMI/value/misspelled")
+        .unwrap_err()
+        .to_string();
     let members = "is not a member of GUAMI, which has pLMNIdentity, aMFRegionID, aMFSetID, \
                    aMFPointer, iE-Extensions";
     assert!(error.contains(members), "{error}");
-    let error = select("/ngap/Cause/value/nas/deeper").unwrap_err();
+    let error = select("/ngap/Cause/value/nas/deeper")
+        .unwrap_err()
+        .to_string();
     assert!(error.contains("which has none"), "{error}");
     // After `*`, a member is an error when no value can have it.
     assert_eq!(select("/ngap/*/value/radioNetwork").unwrap(), [&cause]);
     assert_eq!(select("/ngap/*/value/*").unwrap(), [&cause]);
-    let error = select("/ngap/*/value/misspelled").unwrap_err();
+    let error = select("/ngap/*/value/misspelled").unwrap_err().to_string();
     assert!(error.contains("is not a member of"), "{error}");
     // A list of values has no IEs to name.
     let pdu = NGAP_PDU::decode(&fixture("PDUSessionResourceSetupRequest")).unwrap();
@@ -1914,9 +1956,13 @@ fn a_member_that_is_absent_selects_nothing_and_one_that_its_type_has_not_is_an_e
         inspect::select(&setup, &format!("{item}/0/s-NSSAI/sD")).unwrap(),
         none
     );
-    let error = inspect::select(&setup, &format!("{item}/Cause/value")).unwrap_err();
+    let error = inspect::select(&setup, &format!("{item}/Cause/value"))
+        .unwrap_err()
+        .to_string();
     assert!(error.contains("go by position"), "{error}");
-    let error = inspect::select(&setup, &format!("{item}/0/s-NSSAI/sd-typo")).unwrap_err();
+    let error = inspect::select(&setup, &format!("{item}/0/s-NSSAI/sd-typo"))
+        .unwrap_err()
+        .to_string();
     assert!(
         error.contains("is not a member of SNSSAI, which has sST, sD, iE-Extensions"),
         "{error}"
@@ -1928,11 +1974,17 @@ fn an_edit_names_a_member_that_the_type_has_and_keeps_what_it_always_has() {
     use serde_json::{Value, json};
     let mut view = inspect::message_view(&release_request()).unwrap();
     let before = view.clone();
-    let error = inspect::set(&mut view, "/ngap/Cause/value/misspelled", json!(1)).unwrap_err();
+    let error = inspect::set(&mut view, "/ngap/Cause/value/misspelled", json!(1))
+        .unwrap_err()
+        .to_string();
     assert!(error.contains("is not a member of Cause"), "{error}");
-    let error = inspect::remove(&mut view, "/ngap/Cause/value/radioNetwork").unwrap_err();
+    let error = inspect::remove(&mut view, "/ngap/Cause/value/radioNetwork")
+        .unwrap_err()
+        .to_string();
     assert!(error.contains("a CHOICE has one alternative"), "{error}");
-    let error = inspect::remove(&mut view, "/ngap/Cause/criticality").unwrap_err();
+    let error = inspect::remove(&mut view, "/ngap/Cause/criticality")
+        .unwrap_err()
+        .to_string();
     assert!(error.contains("its type always has it"), "{error}");
     assert_eq!(view, before);
     // An alternative takes the place of the one that is there.
@@ -1944,9 +1996,13 @@ fn an_edit_names_a_member_that_the_type_has_and_keeps_what_it_always_has() {
     let pdu = NGAP_PDU::decode(&fixture("PDUSessionResourceSetupRequest")).unwrap();
     let mut setup = inspect::message_view(&pdu).unwrap();
     let slice = "/ngap/PDUSessionResourceSetupListSUReq/value/0/s-NSSAI";
-    let error = inspect::remove(&mut setup, &format!("{slice}/sST")).unwrap_err();
+    let error = inspect::remove(&mut setup, &format!("{slice}/sST"))
+        .unwrap_err()
+        .to_string();
     assert!(error.contains("its type always has it"), "{error}");
-    let error = inspect::set(&mut setup, &format!("{slice}/sST"), Value::Null).unwrap_err();
+    let error = inspect::set(&mut setup, &format!("{slice}/sST"), Value::Null)
+        .unwrap_err()
+        .to_string();
     assert!(error.contains("its type always has it"), "{error}");
     inspect::set(&mut setup, &format!("{slice}/sd"), json!("010203")).unwrap();
     let sent = inspect::message_view(&inspect::message_from_view(&setup).unwrap()).unwrap();
@@ -2156,7 +2212,7 @@ fn a_path_is_checked_against_a_message_without_a_view() {
             "go by position",
         ),
     ] {
-        let error = inspect::check_path(message, path).unwrap_err();
+        let error = inspect::check_path(message, path).unwrap_err().to_string();
         assert!(error.contains(reason), "{message} {path}: {error}");
     }
 }
@@ -2213,11 +2269,11 @@ fn an_ie_is_written_by_its_name_and_its_octets_wherever_a_view_has_ies() {
     // A name that no IE has is refused, and so are a value and octets together.
     let mut edited = view.clone();
     edited["message"]["protocolIEs"][0]["id"] = json!("NoSuchIE");
-    let error = inspect::message_from_view(&edited).unwrap_err();
+    let error = inspect::message_from_view(&edited).unwrap_err().to_string();
     assert!(error.contains("is not an IE of NGAP"), "{error}");
     let mut edited = view.clone();
     edited["message"]["protocolIEs"][0]["octets"] = json!("00");
-    let error = inspect::message_from_view(&edited).unwrap_err();
+    let error = inspect::message_from_view(&edited).unwrap_err().to_string();
     assert!(
         error.contains("its value or its octets, not both"),
         "{error}"
@@ -2246,11 +2302,15 @@ fn the_octets_of_an_ie_without_a_value_have_a_path() {
 fn a_private_message_has_no_ies_under_the_root() {
     let pdu = NGAP_PDU::decode(&fixture("PrivateMessage")).unwrap();
     let view = inspect::message_view(&pdu).unwrap();
-    let error = inspect::select(&view, "/ngap/Cause").unwrap_err();
+    let error = inspect::select(&view, "/ngap/Cause")
+        .unwrap_err()
+        .to_string();
     let reason = "a message PrivateMessage has no IEs under /ngap: it has privateIEs";
     assert!(error.contains(reason), "{error}");
     assert!(!error.contains("protocolIEs"), "{error}");
-    let error = inspect::check_path("PrivateMessage", "/ngap/Cause").unwrap_err();
+    let error = inspect::check_path("PrivateMessage", "/ngap/Cause")
+        .unwrap_err()
+        .to_string();
     assert!(error.contains(reason), "{error}");
     assert!(inspect::select(&view, "/message/privateIEs/0/id/local").is_ok());
     assert!(inspect::check_path("PrivateMessage", "/message/privateIEs/0/id/global").is_ok());
@@ -2262,7 +2322,7 @@ fn the_identifier_that_the_octets_were_decoded_as_is_a_number() {
     let mut view = inspect::message_view(&release_request()).unwrap();
     inspect::set(&mut view, "/ngap/Cause/value/nas", json!("normal-release")).unwrap();
     ie(&mut view, 15)["_original_id"] = json!("fifteen");
-    let error = inspect::message_from_view(&view).unwrap_err();
+    let error = inspect::message_from_view(&view).unwrap_err().to_string();
     assert!(error.contains("_original_id is the identifier"), "{error}");
 }
 
@@ -2583,7 +2643,9 @@ fn the_qos_parameter_set_index_has_the_type_of_what_it_extends() {
             assert_eq!(inspect::check_path(message, &value), Ok(()), "{value}");
             assert_eq!(inspect::enumerated_at(message, &value), Ok(None), "{value}");
             let member = format!("{value}/member");
-            let refused = inspect::check_path(message, &member).unwrap_err();
+            let refused = inspect::check_path(message, &member)
+                .unwrap_err()
+                .to_string();
             assert!(refused.contains("which has none"), "{refused}");
         }
     }
@@ -2594,7 +2656,9 @@ fn the_qos_parameter_set_index_has_the_type_of_what_it_extends() {
             {"CurrentQoSParaSetIndex": value, "criticality": "ignore"},
         ]})
     };
-    let refused = inspect::message_from_tree(&alone(json!(3))).unwrap_err();
+    let refused = inspect::message_from_tree(&alone(json!(3)))
+        .unwrap_err()
+        .to_string();
     assert!(
         refused.contains("NGAP IE 221 has a type where it extends"),
         "{refused}"
@@ -2689,9 +2753,9 @@ fn the_additional_information_of_qos_flows_has_the_type_of_what_it_extends() {
         released("uplinkTLContainer"),
         responded("downlinkTLContainer"),
     ] {
-        let refused = inspect::message_from_tree(&wrong).unwrap_err();
+        let refused = inspect::message_from_tree(&wrong).unwrap_err().to_string();
         assert!(
-            refused.contains("a member that its ASN.1 type does not have"),
+            refused.contains("is not a member that its type has"),
             "{refused}"
         );
     }
@@ -2720,7 +2784,9 @@ fn the_additional_information_of_qos_flows_has_the_type_of_what_it_extends() {
                 Ok(()),
                 "{item}"
             );
-            let refused = inspect::check_path(message, &format!("{item}/{has_not}")).unwrap_err();
+            let refused = inspect::check_path(message, &format!("{item}/{has_not}"))
+                .unwrap_err()
+                .to_string();
             assert!(
                 refused.contains("is not a member of QosFlowAdditionalInfoItemRel"),
                 "{refused}"

@@ -493,7 +493,7 @@ macro_rules! ies {
         }
 
         #[cfg(feature = "inspect")]
-        pub(crate) fn ie(id: u16) -> Result<$crate::inspect::Typed, String> {
+        pub(crate) fn ie(id: u16) -> Result<$crate::inspect::Typed, $crate::Error> {
             match id {
                 $($($id => Ok($crate::inspect::Typed::of::<$ie>()),)?)*
                 _ => {
@@ -501,13 +501,13 @@ macro_rules! ies {
                     // elsewhere.
                     let extensions = EXTENSION_TYPES.iter().filter(|(known, ..)| *known == id);
                     let extended: Vec<_> = extensions.map(|(_, extended, _)| *extended).collect();
-                    Err(match extended.is_empty() {
+                    Err($crate::Error::unknown_ie(match extended.is_empty() {
                         true => format!("NGAP IE {id} is unknown"),
                         false => format!(
                             "NGAP IE {id} has a type where it extends {}, and none here",
                             extended.join(", ")
                         ),
-                    })
+                    }))
                 }
             }
         }

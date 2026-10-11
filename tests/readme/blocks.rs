@@ -492,7 +492,7 @@ fn block_18() {
 
 /// The Rust block 19 of README.md.
 fn block_19() {
-    use oxirush_ngap::inspect;
+    use oxirush_ngap::{ErrorKind, inspect};
     use serde_json::json;
 
     // Written: the name of the type with its value, in place of the octets
@@ -518,7 +518,7 @@ fn block_19() {
     assert_eq!(inspect::check_path("HandoverRequired", &cell), Ok(()));
 
     // The path is an error until `open` has decoded the octets, and selects the value after that
-    assert!(inspect::select(&view, &cell).unwrap_err().contains("open decodes them"));
+    assert_eq!(inspect::select(&view, &cell).unwrap_err().kind(), ErrorKind::NotOpened);
     inspect::open(&mut view, &cell).unwrap();
     assert_eq!(inspect::select(&view, &cell).unwrap(), [&json!(4660)]);
 

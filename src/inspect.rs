@@ -200,8 +200,7 @@
 //!     REJECT AMF_UE_NGAP_ID(1u64),
 //!     REJECT RAN_UE_NGAP_ID(7u32),
 //!     IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
-//! )
-//! .unwrap();
+//! )?;
 //! let mut view = inspect::message_view(&pdu)?;
 //! assert_eq!(inspect::select(&view, "/ngap/RAN-UE-NGAP-ID/value")?, [&json!(7)]);
 //!
@@ -211,8 +210,30 @@
 //! inspect::insert(&mut view, "/ngap/-", name)?;
 //! let edited = inspect::message_view(&inspect::message_from_view(&view)?)?;
 //! assert_eq!(inspect::select(&edited, "/ngap/*/id")?, [&json!(85), &json!(15), &json!(82)]);
-//! # Ok::<(), String>(())
+//! # Ok::<(), oxirush_ngap::Error>(())
 //! ```
+//!
+//! # Errors
+//!
+//! Each function that can fail returns the [`Error`] of the crate, and the kind of
+//! the error says what went wrong:
+//!
+//! | Kind | When |
+//! | --- | --- |
+//! | `UnknownMessage` | A name of a message, or a direction and a procedure code, that the protocol does not have |
+//! | `UnknownIe` | A name or an identifier of an IE that the protocol does not have, or has no type for where it is: its octets are written in its place |
+//! | `Path` | A path that is not well formed: no `/` before its first segment, `~` before what is no `0` and no `1`, `@id=` before what is no identifier |
+//! | `NoSuchMember` | A name that the type at that place cannot have: in a path, a member of a value, an IE of the object set of a message, a name where a list goes by position; in a value that is written, a member that its type does not have |
+//! | `NothingSelected` | An edit whose path selects nothing: an IE that the message does not have, or a position after the end of a list |
+//! | `NotOpened` | A path through the type that octets carry, before [`open`] decoded them: open, then select again |
+//! | `Value` | A JSON value that is not a value of its ASN.1 type: of another form, a name that an `ENUMERATED` does not have, a number outside its constraint, octets that are no hexadecimal. The message says at which member, by the names of the value |
+//! | `Form` | JSON that is not written as a tree or as a view: no name of a message, a member that neither has, an IE with its value and its octets, an IE that says no criticality where no table has one |
+//! | `Edit` | An edit that is refused: a member that its type always has, the value of an IE or the alternative of a `CHOICE` taken out, an insertion where there is no list, and the octets of a value that was edited since |
+//! | `Limit` | A path of more than 64 segments or 4096 octets, a selection of more than 4096 values, a tree nested deeper than 256 levels, a value that JER does not represent, and the tree of a message without a list of IEs |
+//! | `UndecodableIe` | A path into an IE or a transfer that did not decode |
+//! | `Decode` | A PDU whose message does not decode, and octets of a view that are not what they were decoded as |
+//!
+//! The view is as it was after an edit that returns an error.
 //!
 //! # Octets that carry a type
 //!
@@ -252,11 +273,12 @@ use serde_json::{Value, json};
 
 use crate::inspect_paths::{
     EDITED, Shape, carried_shape, entry_shape, extended, listed_ies, member_shape, member_shapes,
-    message_shape, named_ies, of_a_transfer, open_with, same_name, written_ie,
+    member_spelling, message_shape, named_ies, of_a_transfer, open_with, same_name, written_ie,
 };
 pub use crate::inspect_paths::{check_path, enumerated_at, insert, paths, remove, select, set};
 use crate::inspect_registry as registry;
 use crate::ngap::NGAP_PDU;
+use crate::{Error, ErrorKind};
 
 /// The identifier and the name of each IE that an object set of the ASN.1 has, those of
 /// the extension containers included. An identifier that the ASN.1 defines and that no
@@ -334,38 +356,45 @@ pub fn item_criticality(id: u16) -> Option<&'static str> {
 }
 
 /// The functions of the type of the message of a direction and a procedure code.
-fn message_type(direction: &str, code: u8) -> Result<Typed, String> {
+fn message_type(direction: &str, code: u8) -> Result<Typed, Error> {
     let mut messages = registry::MESSAGES.iter();
     let message = messages.find(|(of, procedure, ..)| (*of, *procedure) == (direction, code));
     let protocol = registry::PROTOCOL;
-    message
-        .map(|(_, _, _, typed, ..)| typed())
-        .ok_or_else(|| format!("unknown {protocol} direction/procedure {direction}/{code}"))
+    message.map(|(_, _, _, typed, ..)| typed()).ok_or_else(|| {
+        Error::unknown_message(format!("{protocol} has no {direction} of procedure {code}"))
+    })
+}
+
+/// A value as JER writes it. JER does not write every value: an integer of 2^63 or
+/// more is one that it refuses.
+fn jer<T: rasn::Encode>(value: &T) -> Result<Value, Error> {
+    let text = rasn::jer::encode(value).map_err(Error::unwritten)?;
+    serde_json::from_str(&text).map_err(|error| Error::unrepresented(error.to_string()))
 }
 
 /// The value of the type `T` that the octets `raw` are, as JER writes it. An error for
 /// a value that JER does not read back as it is: it is not shown as what it is not.
-fn decode_typed<T>(raw: &[u8]) -> Result<Value, String>
+fn decode_typed<T>(raw: &[u8]) -> Result<Value, Error>
 where
     T: rasn::Decode + rasn::Encode + RepairOpenTypes + PartialEq,
 {
-    let value = crate::ngap::decode_open_type::<T>(&rasn::types::Any::new(raw.to_vec()))
-        .map_err(|e| e.to_string())?;
-    let shown: Value = serde_json::from_str(&rasn::jer::encode(&value).map_err(|e| e.to_string())?)
-        .map_err(|e| e.to_string())?;
+    let value = crate::ngap::decode_open_type::<T>(&rasn::types::Any::new(raw.to_vec()))?;
+    let shown = jer(&value)?;
     // rasn's JER writes a bit string of one extensible size as its octets, without
     // its length: one of another size would be shown as a string that it is not.
-    const LOST: &str = "JER does not represent this value";
-    let (mut read, _) = decode_jer::<T>(&shown).map_err(|error| format!("{LOST}: {error}"))?;
-    read.repair_open_types()?;
+    let unread = |error: Error| Error::unrepresented(error.to_string());
+    let (mut read, _) = decode_jer::<T>(&shown).map_err(unread)?;
+    read.repair_open_types().map_err(unread)?;
     match read == value {
         true => Ok(shown),
-        false => Err(LOST.into()),
+        false => Err(Error::unrepresented(
+            "it is not read back as the value that it is",
+        )),
     }
 }
 
 pub(crate) trait RepairOpenTypes {
-    fn repair_open_types(&mut self) -> Result<(), String>;
+    fn repair_open_types(&mut self) -> Result<(), Error>;
 }
 
 /// Implements [`RepairOpenTypes`] for a generated type, from the fields, or the CHOICE
@@ -373,7 +402,7 @@ pub(crate) trait RepairOpenTypes {
 macro_rules! open_types {
     ($type:path { $($open:ident),* } else { $($closed:ident),* }) => {
         impl $crate::inspect::RepairOpenTypes for $type {
-            fn repair_open_types(&mut self) -> Result<(), String> {
+            fn repair_open_types(&mut self) -> Result<(), $crate::Error> {
                 match self {
                     $(Self::$open(value) => {
                         $crate::inspect::RepairOpenTypes::repair_open_types(value)
@@ -385,7 +414,7 @@ macro_rules! open_types {
     };
     ($type:path { $($field:tt),* }) => {
         impl $crate::inspect::RepairOpenTypes for $type {
-            fn repair_open_types(&mut self) -> Result<(), String> {
+            fn repair_open_types(&mut self) -> Result<(), $crate::Error> {
                 $($crate::inspect::RepairOpenTypes::repair_open_types(&mut self.$field)?;)*
                 Ok(())
             }
@@ -395,20 +424,21 @@ macro_rules! open_types {
 pub(crate) use open_types;
 
 impl RepairOpenTypes for rasn::types::Any {
-    fn repair_open_types(&mut self) -> Result<(), String> {
+    fn repair_open_types(&mut self) -> Result<(), Error> {
         // JER Any retains JSON text. APER Any needs decoded open-type bytes.
-        let json: Value = serde_json::from_slice(self.as_bytes()).map_err(|e| e.to_string())?;
+        let json: Value = serde_json::from_slice(self.as_bytes())
+            .map_err(|error| Error::value(format!("an open type is its octets: {error}")))?;
         *self = Self::new(unhex(&json)?);
         Ok(())
     }
 }
 impl RepairOpenTypes for rasn::types::OctetString {
-    fn repair_open_types(&mut self) -> Result<(), String> {
+    fn repair_open_types(&mut self) -> Result<(), Error> {
         Ok(())
     }
 }
 impl<T: RepairOpenTypes> RepairOpenTypes for Option<T> {
-    fn repair_open_types(&mut self) -> Result<(), String> {
+    fn repair_open_types(&mut self) -> Result<(), Error> {
         if let Some(value) = self {
             value.repair_open_types()?;
         }
@@ -416,7 +446,7 @@ impl<T: RepairOpenTypes> RepairOpenTypes for Option<T> {
     }
 }
 impl<T: RepairOpenTypes> RepairOpenTypes for Vec<T> {
-    fn repair_open_types(&mut self) -> Result<(), String> {
+    fn repair_open_types(&mut self) -> Result<(), Error> {
         for value in self {
             value.repair_open_types()?;
         }
@@ -424,14 +454,14 @@ impl<T: RepairOpenTypes> RepairOpenTypes for Vec<T> {
     }
 }
 impl<T: RepairOpenTypes> RepairOpenTypes for Box<T> {
-    fn repair_open_types(&mut self) -> Result<(), String> {
+    fn repair_open_types(&mut self) -> Result<(), Error> {
         self.as_mut().repair_open_types()
     }
 }
 
 /// The value of the type `T` that JER reads `value` as, and `value` with the names of
 /// ENUMERATED values as the specification spells them.
-fn decode_jer<T: rasn::Decode>(value: &Value) -> Result<(T, std::borrow::Cow<'_, Value>), String> {
+fn decode_jer<T: rasn::Decode>(value: &Value) -> Result<(T, std::borrow::Cow<'_, Value>), Error> {
     let mut value = std::borrow::Cow::Borrowed(value);
     let mut respellings = 0;
     loop {
@@ -442,48 +472,185 @@ fn decode_jer<T: rasn::Decode>(value: &Value) -> Result<(T, std::borrow::Cow<'_,
                     value = std::borrow::Cow::Owned(respelled);
                     respellings += 1;
                 }
-                None => return Err(error.to_string()),
+                None => return Err(refused::<T>(error, &value)),
             },
         }
     }
 }
 
-fn encode_typed<T: rasn::Decode + rasn::Encode + RepairOpenTypes>(
-    value: &Value,
-) -> Result<Vec<u8>, String> {
-    let (mut typed, value) = decode_jer::<T>(value)?;
-    typed.repair_open_types()?;
-    let checked: Value =
-        serde_json::from_str(&rasn::jer::encode(&typed).map_err(|e| e.to_string())?)
-            .map_err(|e| e.to_string())?;
-    if !written_as(&checked, &value) {
-        return Err("the value has a member that its ASN.1 type does not have, or is not written as JER writes it".into());
+/// Why JER does not read `value` as a `T`: where it stopped, by the names that the
+/// value has for the members on the way, and what is wrong there.
+fn refused<T: rasn::AsnType>(error: rasn::error::DecodeError, value: &Value) -> Error {
+    let (fields, why) = crate::error::decode_reason(&error);
+    // rasn names a member as the bindings do, as `g_nb_id`: the value has the name
+    // that ASN.1 gives it, and the list of the types has it for a member that the
+    // value is without.
+    let mut within = Some(value);
+    let mut at = Vec::new();
+    for field in fields {
+        match within.and_then(|within| member_named(within, field, 0)) {
+            Some((trail, member)) => {
+                at.extend(trail);
+                within = Some(member);
+            }
+            None => {
+                at.push(member_spelling(field).unwrap_or(field).to_string());
+                within = None;
+            }
+        }
     }
-    Ok(crate::ngap::encode_open_type(&typed)
-        .map_err(|e| e.to_string())?
-        .as_bytes()
-        .to_vec())
+    // A name that an ENUMERATED does not have is where the value has it.
+    let name = no_such_name(&error).zip(within);
+    if let Some(trail) = name.and_then(|(name, within)| written_at(within, name, 0)) {
+        at.extend(trail);
+    }
+    Error::not_a_value::<T>(&at, why, error)
 }
 
-/// Whether `written` is the value that JER writes as `checked`: the same, with
-/// hexadecimal in either case.
-fn written_as(checked: &Value, written: &Value) -> bool {
+/// The member of `value`, or of what it holds, that the bindings name `field`, after
+/// the names on the way to it: a CHOICE has it in its alternative, and a list in one
+/// of its entries, which `*` stands for as rasn does not say which.
+fn member_named<'v>(
+    value: &'v Value,
+    field: &str,
+    depth: usize,
+) -> Option<(Vec<String>, &'v Value)> {
+    if depth > 4 {
+        return None;
+    }
+    let under = |name: &str, held: &'v Value| {
+        let (mut trail, member) = member_named(held, field, depth + 1)?;
+        trail.insert(0, name.to_string());
+        Some((trail, member))
+    };
+    match value {
+        Value::Object(members) => {
+            let mut own = members.iter();
+            match own.find(|(name, _)| same_name(name, field)) {
+                Some((name, member)) => Some((vec![name.clone()], member)),
+                None => members.iter().find_map(|(name, held)| under(name, held)),
+            }
+        }
+        Value::Array(entries) => entries.iter().find_map(|entry| under("*", entry)),
+        _ => None,
+    }
+}
+
+/// The names on the way to where `value` has the string `text`.
+fn written_at(value: &Value, text: &str, depth: usize) -> Option<Vec<String>> {
+    if depth > 8 {
+        return None;
+    }
+    let under = |name: &str, held: &Value| {
+        let mut trail = written_at(held, text, depth + 1)?;
+        trail.insert(0, name.to_string());
+        Some(trail)
+    };
+    match value {
+        Value::String(written) => (written == text).then(Vec::new),
+        Value::Object(members) => members.iter().find_map(|(name, held)| under(name, held)),
+        Value::Array(entries) => entries.iter().find_map(|entry| under("*", entry)),
+        _ => None,
+    }
+}
+
+/// The name that JER did not find among those of an ENUMERATED type, when that is
+/// why it refuses a value.
+fn no_such_name(error: &rasn::error::DecodeError) -> Option<&str> {
+    use rasn::error::{CodecDecodeError, DecodeErrorKind, JerDecodeErrorKind};
+    // The error of a member is in the errors of the fields that lead to it.
+    let mut error = error;
+    while let DecodeErrorKind::FieldError { nested, .. } = &*error.kind {
+        error = nested;
+    }
+    match &*error.kind {
+        DecodeErrorKind::CodecSpecific {
+            inner:
+                CodecDecodeError::Jer(JerDecodeErrorKind::InvalidEnumDiscriminant { discriminant }),
+        } => Some(discriminant),
+        _ => None,
+    }
+}
+
+fn encode_typed<T: rasn::Decode + rasn::Encode + RepairOpenTypes>(
+    value: &Value,
+) -> Result<Vec<u8>, Error> {
+    let (mut typed, value) = decode_jer::<T>(value)?;
+    typed.repair_open_types()?;
+    let checked = jer(&typed)?;
+    let mut at = Vec::new();
+    if let Some((kind, why)) = difference(&checked, &value, &mut at) {
+        return Err(Error::not_written_as::<T>(kind, &at, why));
+    }
+    // A value that is read and does not encode is outside a constraint of its type.
+    let octets = crate::ngap::encode_open_type(&typed).map_err(Error::outside_its_type::<T>)?;
+    Ok(octets.as_bytes().to_vec())
+}
+
+/// Where `written` is not the value that JER writes as `checked`, which is the same
+/// with hexadecimal in either case: the kind of the error and what is wrong, with the
+/// members on the way in `at`. A member that the value of its type does not have is one
+/// that the type does not have, or one that is written and is not read.
+fn difference(
+    checked: &Value,
+    written: &Value,
+    at: &mut Vec<String>,
+) -> Option<(ErrorKind, String)> {
+    let differs = |checked: &Value, written: &Value| {
+        let why = format!("{written} is written, and its type has {checked}");
+        Some((ErrorKind::Value, why))
+    };
     match (checked, written) {
-        (Value::String(checked), Value::String(written)) => {
-            checked == written
-                || (checked.eq_ignore_ascii_case(written)
-                    && checked.bytes().all(|digit| digit.is_ascii_hexdigit()))
+        (Value::String(read), Value::String(text)) => {
+            let same = read == text
+                || (read.eq_ignore_ascii_case(text)
+                    && read.bytes().all(|digit| digit.is_ascii_hexdigit()));
+            (!same).then(|| differs(checked, written)).flatten()
         }
-        (Value::Array(checked), Value::Array(written)) => {
-            checked.len() == written.len()
-                && checked.iter().zip(written).all(|(c, w)| written_as(c, w))
+        (Value::Array(read), Value::Array(entries)) => {
+            if read.len() != entries.len() {
+                let why = format!(
+                    "{} entries are written, and its type has {}",
+                    entries.len(),
+                    read.len()
+                );
+                return Some((ErrorKind::Value, why));
+            }
+            read.iter()
+                .zip(entries)
+                .enumerate()
+                .find_map(|(index, (read, entry))| {
+                    at.push(index.to_string());
+                    let found = difference(read, entry, at);
+                    if found.is_none() {
+                        at.pop();
+                    }
+                    found
+                })
         }
-        (Value::Object(checked), Value::Object(written)) => {
-            checked.len() == written.len()
-                && (checked.iter())
-                    .all(|(name, c)| written.get(name).is_some_and(|w| written_as(c, w)))
+        (Value::Object(read), Value::Object(members)) => {
+            if let Some(other) = members.keys().find(|name| !read.contains_key(*name)) {
+                let why = format!("{other:?} is not a member that its type has");
+                return Some((ErrorKind::NoSuchMember, why));
+            }
+            read.iter().find_map(|(name, read)| {
+                at.push(name.clone());
+                let found = match members.get(name) {
+                    Some(member) => difference(read, member, at),
+                    None => Some((
+                        ErrorKind::Value,
+                        format!("it is not written, and its type has {read}"),
+                    )),
+                };
+                if found.is_none() {
+                    at.pop();
+                }
+                found
+            })
         }
-        _ => checked == written,
+        _ => (checked != written)
+            .then(|| differs(checked, written))
+            .flatten(),
     }
 }
 
@@ -493,12 +660,13 @@ macro_rules! transfers {
     ($($field:literal $($transfer:path)?;)*) => {
         pub(crate) const TRANSFER_FIELDS: &[&str] = &[$($field,)*];
         #[allow(clippy::match_single_binding)]
-        pub(crate) fn transfer(field: &str) -> Result<Typed, String> {
+        pub(crate) fn transfer(field: &str) -> Result<Typed, $crate::Error> {
             match field {
                 $($($field => Ok(Typed::of::<$transfer>()),)?)*
-                _ => Err(format!(
-                    "{PROTOCOL} contained transfer {field} is unknown or has several types"
-                )),
+                _ => Err($crate::Error::form(format!(
+                    "{PROTOCOL} has several types for {field}, or none: it is read and \
+                     written as its octets"
+                ))),
             }
         }
     };
@@ -524,8 +692,8 @@ pub(crate) use carried;
 
 /// The functions of a type of the registry.
 pub(crate) struct Typed {
-    pub(crate) decode: fn(&[u8]) -> Result<Value, String>,
-    pub(crate) encode: fn(&Value) -> Result<Vec<u8>, String>,
+    pub(crate) decode: fn(&[u8]) -> Result<Value, Error>,
+    pub(crate) encode: fn(&Value) -> Result<Vec<u8>, Error>,
 }
 
 impl Typed {
@@ -549,18 +717,25 @@ fn hex(raw: &[u8]) -> String {
         .collect()
 }
 
-fn unhex(value: &Value) -> Result<Vec<u8>, String> {
-    let s = value.as_str().ok_or("open type must be a hex string")?;
+fn unhex(value: &Value) -> Result<Vec<u8>, Error> {
+    let refused = || {
+        // The start of what is written says which value it is.
+        let written: String = value.to_string().chars().take(40).collect();
+        Error::value(format!(
+            "{written} is not octets: octets are written in hexadecimal, two digits for each"
+        ))
+    };
+    let s = value.as_str().ok_or_else(refused)?;
     if !s.len().is_multiple_of(2) {
-        return Err("odd hex length".into());
+        return Err(refused());
     }
     s.as_bytes()
         .as_chunks::<2>()
         .0
         .iter()
         .map(|pair| {
-            let a = (pair[0] as char).to_digit(16).ok_or("invalid hex")?;
-            let b = (pair[1] as char).to_digit(16).ok_or("invalid hex")?;
+            let a = (pair[0] as char).to_digit(16).ok_or_else(refused)?;
+            let b = (pair[1] as char).to_digit(16).ok_or_else(refused)?;
             Ok(((a << 4) | b) as u8)
         })
         .collect()
@@ -631,10 +806,12 @@ impl Form {
 
     /// The value as JER has it, from its readable form. A value in another form is kept
     /// as it is: the JER form is still taken, and the codec refuses what is neither.
-    fn write(self, shown: &Value) -> Result<Value, String> {
+    fn write(self, shown: &Value) -> Result<Value, Error> {
         let number = |bits: u32, number: u64| {
             if bits < 64 && number >> bits != 0 {
-                return Err(format!("{number} does not fit in {bits} bits"));
+                return Err(Error::value(format!(
+                    "{number} does not fit in {bits} bits"
+                )));
             }
             let octets = bits.div_ceil(8);
             let width = octets as usize * 2;
@@ -656,8 +833,9 @@ impl Form {
                 let mcc = digits(mcc).and_then(|mcc| <[u8; 3]>::try_from(mcc).ok());
                 let octets = mcc.zip(digits(mnc));
                 let octets = octets.and_then(|(mcc, mnc)| crate::helpers::plmn_octets(mcc, &mnc));
-                let octets = octets
-                    .ok_or_else(|| format!("{text}: a PLMN identity is MCC-MNC, as 208-93"))?;
+                let octets = octets.ok_or_else(|| {
+                    Error::value(format!("{text}: a PLMN identity is MCC-MNC, as 208-93"))
+                })?;
                 Ok(json!(hex(&octets)))
             }
             Self::Digits if all_digits(text) => {
@@ -667,8 +845,10 @@ impl Form {
                 Ok(json!(hex(&octets.collect::<Vec<_>>())))
             }
             Self::Number(bits) if text.starts_with("0x") => {
-                let value = u64::from_str_radix(&text[2..], 16);
-                number(bits, value.map_err(|error| format!("{text}: {error}"))?)
+                let value = u64::from_str_radix(&text[2..], 16).map_err(|error| {
+                    Error::value(format!("{text} is not a number in hexadecimal: {error}"))
+                })?;
+                number(bits, value)
             }
             Self::Address if text.contains(['.', ':']) => {
                 let mut octets = Vec::new();
@@ -679,9 +859,9 @@ impl Form {
                             octets.extend(address.octets())
                         }
                         _ => {
-                            return Err(format!(
+                            return Err(Error::value(format!(
                                 "{text}: a transport layer address is an IPv4 address, an IPv6 address, or the two with a comma"
-                            ));
+                            )));
                         }
                     }
                 }
@@ -709,7 +889,7 @@ fn show(form: Form, value: &mut Value) {
 }
 
 /// `value`, or each value of a list, as JER has it again.
-fn unshow(form: Form, value: &mut Value) -> Result<(), String> {
+fn unshow(form: Form, value: &mut Value) -> Result<(), Error> {
     match value {
         Value::Array(values) => values.iter_mut().try_for_each(|value| unshow(form, value)),
         value => {
@@ -723,22 +903,11 @@ fn unshow(form: Form, value: &mut Value) -> Result<(), String> {
 /// specification spells it: a name is its letters and its digits, whatever their case
 /// and whatever is between them.
 fn respelled(value: &Value, error: &rasn::error::DecodeError) -> Option<Value> {
-    use rasn::error::{CodecDecodeError, DecodeErrorKind, JerDecodeErrorKind};
-    // The error of a member is in the errors of the fields that lead to it.
-    let mut error = error;
-    while let DecodeErrorKind::FieldError { nested, .. } = &*error.kind {
-        error = nested;
-    }
-    let DecodeErrorKind::CodecSpecific {
-        inner: CodecDecodeError::Jer(JerDecodeErrorKind::InvalidEnumDiscriminant { discriminant }),
-    } = &*error.kind
-    else {
-        return None;
-    };
+    let discriminant = no_such_name(error)?;
     let same = |name: &&&str| same_name(name, discriminant);
     // Two types may spell a name differently: the next decoding tries the other.
     let mut names = registry::ENUMERATED.iter().filter(same);
-    let name = names.find(|name| **name != discriminant.as_str())?;
+    let name = names.find(|name| **name != discriminant)?;
     fn rename(value: &mut Value, from: &str, to: &str) {
         match value {
             Value::String(text) if text == from => *text = to.into(),
@@ -755,10 +924,10 @@ fn respelled(value: &Value, error: &rasn::error::DecodeError) -> Option<Value> {
 }
 
 /// The value that the octets `raw` contain, beside them, or why they did not decode.
-fn contained(raw: Value, typed: Result<Typed, String>) -> Value {
+fn contained(raw: Value, typed: Result<Typed, Error>) -> Value {
     match typed.and_then(|typed| (typed.decode)(&unhex(&raw)?)) {
         Ok(decoded) => json!({"_raw_transfer": raw, "decoded": decoded}),
-        Err(error) => json!({"_raw_transfer": raw, "_decode_error": error}),
+        Err(error) => json!({"_raw_transfer": raw, "_decode_error": error.to_string()}),
     }
 }
 
@@ -766,7 +935,8 @@ fn contained(raw: Value, typed: Result<Typed, String>) -> Value {
 /// names `name`: its decoded value beside them, or why they are not of that type.
 fn opened(raw: Value, name: &str) -> Value {
     let typed = registry::carried(name);
-    let mut transfer = contained(raw, typed.ok_or(format!("octets carry no {name}")));
+    let carries_none = || Error::no_such_member(format!("octets carry no {name}"));
+    let mut transfer = contained(raw, typed.ok_or_else(carries_none));
     expand(&mut transfer, 0, carried_shape(name));
     transfer
 }
@@ -786,13 +956,13 @@ fn opened(raw: Value, name: &str) -> Value {
 ///
 /// A path that goes through no such name changes nothing. A name that the type of a
 /// value cannot have is an error, and the view is then as it was.
-pub fn open(view: &mut Value, path: &str) -> Result<(), String> {
+pub fn open(view: &mut Value, path: &str) -> Result<(), Error> {
     open_with(view, path, &opened)
 }
 
 /// The octets of the IE `id`, which is written as a type that they may carry: one
 /// member, the name of that type with its value, which is its octets by now.
-fn carried_octets(written: &Value, id: u16) -> Result<Value, String> {
+fn carried_octets(written: &Value, id: u16) -> Result<Value, Error> {
     let carried = registry::CARRIED
         .iter()
         .filter(|(carrier, ..)| *carrier == id);
@@ -802,10 +972,10 @@ fn carried_octets(written: &Value, id: u16) -> Result<Value, String> {
         (Some((name, octets)), None) if names.iter().any(|known| same_name(known, name)) => {
             Ok(octets.clone())
         }
-        _ => Err(format!(
+        _ => Err(Error::value(format!(
             "IE {id} is written as its octets, or as {{NAME: VALUE}} for a type that they carry: {}",
             names.join(", ")
-        )),
+        ))),
     }
 }
 
@@ -813,13 +983,15 @@ fn carried_octets(written: &Value, id: u16) -> Result<Value, String> {
 const NESTING: usize = 64;
 
 /// Why what is deeper keeps its octets.
-fn too_deep<T>() -> Result<T, String> {
-    Err(format!("inspection nesting exceeds {NESTING}"))
+fn too_deep<T>() -> Result<T, Error> {
+    Err(Error::limit(format!(
+        "inspection nesting exceeds {NESTING}"
+    )))
 }
 
 /// The functions of the type of the IE `id` in a container of `shape`: the type of its
 /// identifier, or the one that the type which an extension container extends gives it.
-fn ie_type(id: u16, shape: Shape) -> Result<Typed, String> {
+fn ie_type(id: u16, shape: Shape) -> Result<Typed, Error> {
     match crate::registry::extension(id, extended(shape)) {
         Some(typed) => Ok(typed),
         None => registry::ie(id),
@@ -864,7 +1036,7 @@ fn expand(value: &mut Value, depth: usize, shape: Shape) {
                     object.insert(field.into(), decoded);
                 }
                 Err(error) => {
-                    object.insert("_decode_error".into(), json!(error));
+                    object.insert("_decode_error".into(), json!(error.to_string()));
                 }
             }
         }
@@ -894,10 +1066,13 @@ fn expand(value: &mut Value, depth: usize, shape: Shape) {
 
 /// `member` is the name of the member that holds `value`, a value of `shape`, or the
 /// list it is in.
-fn collapse(value: &mut Value, member: &str, depth: usize, shape: Shape) -> Result<(), String> {
+fn collapse(value: &mut Value, member: &str, depth: usize, shape: Shape) -> Result<(), Error> {
     // What is decoded at the limit of the inspection has values of its own under it.
     if depth > 4 * NESTING {
-        return Err(format!("inspection nesting exceeds {}", 4 * NESTING));
+        return Err(Error::limit(format!(
+            "inspection nesting exceeds {}",
+            4 * NESTING
+        )));
     }
     if let Some(object) = value.as_object_mut() {
         // An IE may be written with its name as `id`, and with its `octets`.
@@ -921,18 +1096,23 @@ fn collapse(value: &mut Value, member: &str, depth: usize, shape: Shape) -> Resu
                     if let Some((other, _)) =
                         members.find(|(name, _)| !known.contains(&name.as_str()))
                     {
-                        return Err(format!(
+                        return Err(Error::no_such_member(format!(
                             "{key} has no member {other:?}: a transfer has its decoded value"
-                        ));
+                        )));
                     }
                     if let Some(edited) = child.get("decoded") {
                         let bytes = unhex(&raw)?;
                         // An IE's identifier gives the type of what it contains, and
                         // the name of a transfer field the type of the transfer.
                         let transfer = match key.as_str() {
-                            "value" | "extensionValue" => id
-                                .and_then(registry::ie_contents)
-                                .ok_or("this IE does not contain a type")?,
+                            "value" | "extensionValue" => {
+                                id.and_then(registry::ie_contents).ok_or_else(|| {
+                                    Error::form(
+                                        "an IE that contains no type has no decoded value \
+                                         beside its octets",
+                                    )
+                                })?
+                            }
                             key => match registry::carried(key) {
                                 Some(carried) => carried,
                                 None => registry::transfer(key)?,
@@ -943,9 +1123,9 @@ fn collapse(value: &mut Value, member: &str, depth: usize, shape: Shape) -> Resu
                             *child = raw;
                         } else {
                             if (transfer.encode)(&original)? != bytes {
-                                return Err(format!(
+                                return Err(Error::edit(format!(
                                     "{key} does not encode back to the octets received"
-                                ));
+                                )));
                             }
                             *child = json!(hex(&(transfer.encode)(edited)?));
                         }
@@ -973,9 +1153,9 @@ fn collapse(value: &mut Value, member: &str, depth: usize, shape: Shape) -> Resu
                         } else if let Some(octets) = alone("octets") {
                             octets.clone()
                         } else {
-                            return Err(format!(
+                            return Err(Error::form(format!(
                                 "{key} is written with its decoded value alone, or as its octets"
-                            ));
+                            )));
                         };
                         *child = wire;
                     }
@@ -1001,7 +1181,8 @@ fn collapse(value: &mut Value, member: &str, depth: usize, shape: Shape) -> Resu
             }
             let typed = |id: u16| {
                 let octets = format!("give its octets as _raw_value, without {field}");
-                ie_type(id, shape).map_err(|error| format!("{error}: {octets}"))
+                ie_type(id, shape)
+                    .map_err(|error| error.reworded(|what| format!("{what}: {octets}")))
             };
             if !undecoded
                 && let Some(form) = registry::ie_form(id)
@@ -1015,9 +1196,9 @@ fn collapse(value: &mut Value, member: &str, depth: usize, shape: Shape) -> Resu
                 // The IE was shown as its octets.
                 (_, Some(edited)) if undecoded => {
                     if !edited.is_string() {
-                        return Err(format!(
+                        return Err(Error::edit(format!(
                             "IE {id} did not decode: its value is its octets in hexadecimal"
-                        ));
+                        )));
                     }
                     edited.clone()
                 }
@@ -1027,7 +1208,12 @@ fn collapse(value: &mut Value, member: &str, depth: usize, shape: Shape) -> Resu
                     let original_id = match &original_id {
                         Some(original) => (original.as_u64())
                             .and_then(|v| u16::try_from(v).ok())
-                            .ok_or("_original_id is the identifier that the octets were decoded as, a number")?,
+                            .ok_or_else(|| {
+                            Error::form(
+                                "_original_id is the identifier that the octets were \
+                                     decoded as, a number",
+                            )
+                        })?,
                         None => id,
                     };
                     let bytes = unhex(&raw)?;
@@ -1036,16 +1222,20 @@ fn collapse(value: &mut Value, member: &str, depth: usize, shape: Shape) -> Resu
                     if &original == edited && id == original_id {
                         raw
                     } else if (received.encode)(&original)? != bytes {
-                        return Err(format!(
+                        return Err(Error::edit(format!(
                             "IE {original_id} does not encode back to the octets received; replace its octets instead"
-                        ));
+                        )));
                     } else {
                         json!(hex(&(typed(id)?.encode)(edited)?))
                     }
                 }
                 // An IE that was not received.
                 (None, Some(new)) => json!(hex(&(typed(id)?.encode)(new)?)),
-                (None, None) => return Err(format!("IE {id} has no {field} and no _raw_value")),
+                (None, None) => {
+                    return Err(Error::form(format!(
+                        "IE {id} has no {field} and no _raw_value"
+                    )));
+                }
             };
             object.insert(field.into(), wire);
         }
@@ -1092,12 +1282,16 @@ fn collapse(value: &mut Value, member: &str, depth: usize, shape: Shape) -> Resu
 /// An error for a PDU whose message does not decode, for a procedure that the
 /// specification does not have in that direction, and for a message without a list of
 /// IEs of the protocol, as a private message.
-pub fn message_tree(pdu: &NGAP_PDU) -> Result<Value, String> {
-    let name = message_name(pdu).ok_or("the specification has no message of this procedure")?;
+pub fn message_tree(pdu: &NGAP_PDU) -> Result<Value, Error> {
+    let (direction, code) = (pdu.direction(), pdu.procedure_code());
+    let name = message_name(pdu).ok_or_else(|| {
+        let protocol = registry::PROTOCOL;
+        Error::unknown_message(format!("{protocol} has no {direction} of procedure {code}"))
+    })?;
     let view = message_view(pdu)?;
     let listed = &view["message"]["protocolIEs"];
     if !listed.is_array() {
-        return Err(format!("a message {name} has no list of IEs"));
+        return Err(Error::limit(format!("a message {name} has no list of IEs")));
     }
     let mut tree = json!({"message": name, "ies": named_ies(name, listed)?});
     if view["criticality"].as_str() != message_criticality(name) {
@@ -1124,24 +1318,28 @@ pub fn message_tree(pdu: &NGAP_PDU) -> Result<Value, String> {
 /// shows it, with `decoded` for the value of a transfer and an entry with its `id`,
 /// its `criticality` and its `value` for an IE, and the two forms are taken in one
 /// tree.
-pub fn message_from_tree(tree: &Value) -> Result<NGAP_PDU, String> {
+pub fn message_from_tree(tree: &Value) -> Result<NGAP_PDU, Error> {
     const FORM: &str = "a tree is {\"message\": NAME, \"ies\": [{NAME: VALUE}, …]}";
-    let written = tree.as_object().ok_or(FORM)?;
+    let form = || Error::form(FORM);
+    let written = tree.as_object().ok_or_else(form)?;
     if let Some(other) = written
         .keys()
         .find(|key| !["message", "ies", "criticality"].contains(&key.as_str()))
     {
-        return Err(format!("{other:?} is no member of a tree: {FORM}"));
+        return Err(Error::form(format!(
+            "{other:?} is no member of a tree: {FORM}"
+        )));
     }
-    let name = written.get("message").and_then(Value::as_str).ok_or(FORM)?;
-    let (direction, code) =
-        message_named(name).ok_or_else(|| format!("{name:?} is not a message of NGAP"))?;
+    let name = written.get("message").and_then(Value::as_str);
+    let name = name.ok_or_else(form)?;
+    let (direction, code) = message_named(name)
+        .ok_or_else(|| Error::unknown_message(format!("{name:?} is not a message of NGAP")))?;
     let criticality = match written.get("criticality") {
         Some(criticality) => criticality.clone(),
         None => json!(message_criticality(name)),
     };
     let listed = written.get("ies").filter(|ies| ies.is_array());
-    let ies = listed_ies(name, listed.ok_or(FORM)?)?;
+    let ies = listed_ies(name, listed.ok_or_else(form)?)?;
     message_from_view(&json!({
         "procedure_code": code,
         "direction": direction,
@@ -1153,13 +1351,12 @@ pub fn message_from_tree(tree: &Value) -> Result<NGAP_PDU, String> {
 /// The view of a PDU: its `procedure_code`, its `direction`, its `criticality` and its
 /// `message`, each IE of which has its typed value and what it was received as. An
 /// error when its message does not decode.
-pub fn message_view(pdu: &NGAP_PDU) -> Result<Value, String> {
-    let top: Value = serde_json::from_str(&rasn::jer::encode(pdu).map_err(|e| e.to_string())?)
-        .map_err(|e| e.to_string())?;
+pub fn message_view(pdu: &NGAP_PDU) -> Result<Value, Error> {
+    let top = jer(pdu)?;
     let body = top
         .as_object()
         .and_then(|o| o.values().next())
-        .ok_or("invalid PDU choice")?;
+        .ok_or_else(|| Error::unrepresented("a PDU is one of three alternatives"))?;
     let code = pdu.procedure_code();
     let direction = pdu.direction();
     let raw = body["value"].clone();
@@ -1172,35 +1369,41 @@ pub fn message_view(pdu: &NGAP_PDU) -> Result<Value, String> {
 
 /// The PDU of a view, as [`message_view`] gives one and the edits leave it, with the
 /// octets received for what was not edited.
-pub fn message_from_view(view: &Value) -> Result<NGAP_PDU, String> {
-    if view.as_object().is_none_or(|o| {
-        o.keys().any(|key| {
-            ![
-                "procedure_code",
-                "direction",
-                "criticality",
-                "message",
-                "_raw_message",
-            ]
-            .contains(&key.as_str())
-        })
-    }) {
-        return Err("unknown PDU inspection root field".into());
+pub fn message_from_view(view: &Value) -> Result<NGAP_PDU, Error> {
+    const MEMBERS: [&str; 5] = [
+        "procedure_code",
+        "direction",
+        "criticality",
+        "message",
+        "_raw_message",
+    ];
+    const FORM: &str =
+        "a view has its procedure_code, its direction, its criticality and its message";
+    let members = view.as_object().ok_or_else(|| Error::form(FORM))?;
+    if let Some(other) = members.keys().find(|key| !MEMBERS.contains(&key.as_str())) {
+        return Err(Error::form(format!(
+            "{other:?} is no member of a view: {FORM}"
+        )));
     }
     let code = view["procedure_code"]
         .as_u64()
         .and_then(|c| u8::try_from(c).ok())
-        .ok_or("procedure_code must be u8")?;
-    let direction = view["direction"]
-        .as_str()
-        .ok_or("direction must be a string")?;
+        .ok_or_else(|| Error::form("the procedure_code of a view is a number from 0 to 255"))?;
+    let directions = || {
+        Error::form(
+            "the direction of a view is InitiatingMessage, SuccessfulOutcome or \
+             UnsuccessfulOutcome",
+        )
+    };
+    let direction = view["direction"].as_str().ok_or_else(directions)?;
     let variant = match direction {
         "InitiatingMessage" => "initiatingMessage",
         "SuccessfulOutcome" => "successfulOutcome",
         "UnsuccessfulOutcome" => "unsuccessfulOutcome",
-        _ => return Err("invalid direction".into()),
+        _ => return Err(directions()),
     };
-    let mut message = view.get("message").ok_or("missing message")?.clone();
+    let message = view.get("message").ok_or_else(|| Error::form(FORM))?;
+    let mut message = message.clone();
     collapse(&mut message, "", 0, message_shape(direction, code))?;
     let raw = if let Some(original) = view.get("_raw_message") {
         let original = unhex(original)?;
@@ -1210,7 +1413,9 @@ pub fn message_from_view(view: &Value) -> Result<NGAP_PDU, String> {
             original
         } else {
             if (typed.encode)(&decoded)? != original {
-                return Err("the message does not encode back to the octets received".into());
+                return Err(Error::edit(
+                    "the message does not encode back to the octets received",
+                ));
             }
             (typed.encode)(&message)?
         }

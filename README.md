@@ -338,10 +338,9 @@ bits of its field. `tai` takes the three octets of a TAC as an array.
 
 ### Errors
 
-The codec, the macros and the helpers return an `oxirush_ngap::Error`:
-`NGAP_PDU::decode`, `encode` and `decode_value`, `decode_open_type` and
-`encode_open_type`, `build_ngap!`, `build_ngap_ie!`, `extract_ngap_ies!` and
-`with_ngap_ie_mut!`, and the functions of `helpers` that can fail.
+Every function and macro that can fail returns an `oxirush_ngap::Error`: the
+codec, the four macros, the helpers and, with the `inspect` feature, the
+functions of the JSON forms.
 
 | Of an `Error` | Gives |
 |---------------|-------|
@@ -358,7 +357,7 @@ their message are, and `?` converts one into a `Box<dyn std::error::Error>`.
 | `Encode` | A value does not encode, as an integer outside its constraint |
 | `WrongMessage` | `decode_value::<T>()` on a PDU that holds another message than `T` |
 | `MissingIe` | A `req` field of `extract_ngap_ies!` whose IE is not in the message |
-| `UndecodableIe` | An IE that is in the message and does not decode as its type: a `req` or an `opt` field of `extract_ngap_ies!`, and the IE of `with_ngap_ie_mut!` |
+| `UndecodableIe` | An IE that is in the message and does not decode as its type: a `req` or an `opt` field of `extract_ngap_ies!`, and the IE of `with_ngap_ie_mut!`. With `inspect`, a path into an IE or a transfer that did not decode |
 | `Argument` | An argument that a helper does not take: what is no MCC or no MNC, and a number that does not fit in the bits of its field |
 
 ```rust
@@ -405,7 +404,8 @@ Error when decoding field `InitiatingMessage.value`: Need more data to continue:
 With the `inspect` feature a PDU is a `serde_json::Value` in two forms. A
 tree is the short form, in which a message is shown and written: its name
 and its IEs by name. A view keeps what was received, and is read and edited
-by paths. The errors of these functions are `String`s.
+by paths. Each function that can fail returns an `Error`, whose kind says
+what went wrong: see [Errors of the JSON forms](#errors-of-the-json-forms).
 
 | | Tree | View |
 |---|------|------|
@@ -808,7 +808,7 @@ them names the type.
 | `TargettoSource-Failure-TransparentContainer` | `TargetNGRANNode-ToSourceNGRANNode-FailureTransparentContainer` | 9.3.1.186 |
 
 ```rust
-use oxirush_ngap::inspect;
+use oxirush_ngap::{ErrorKind, inspect};
 use serde_json::json;
 
 // Written: the name of the type with its value, in place of the octets
@@ -834,7 +834,7 @@ let cell = format!("{container}/targetCell-ID/nR-CGI/nRCellIdentity");
 assert_eq!(inspect::check_path("HandoverRequired", &cell), Ok(()));
 
 // The path is an error until `open` has decoded the octets, and selects the value after that
-assert!(inspect::select(&view, &cell).unwrap_err().contains("open decodes them"));
+assert_eq!(inspect::select(&view, &cell).unwrap_err().kind(), ErrorKind::NotOpened);
 inspect::open(&mut view, &cell).unwrap();
 assert_eq!(inspect::select(&view, &cell).unwrap(), [&json!(4660)]);
 
@@ -898,6 +898,29 @@ notation, such as a transport layer address of another length, stays as JER
 writes it. The octets of a bit string start with its first bit: `"C000"`
 is the first two bits of sixteen, and `"000004"` the number 1 in 22 bits.
 
+### Errors of the JSON forms
+
+The functions of the JSON forms have these kinds, and two of the
+[typed API](#errors): `Decode` for a PDU whose message does not decode, and
+`UndecodableIe` for a path into an IE or a transfer that did not decode.
+
+| Kind | When |
+|------|------|
+| `UnknownMessage` | A name of a message, or a direction and a procedure code, that the protocol does not have |
+| `UnknownIe` | A name or an identifier of an IE that the protocol does not have, or has no type for where it is: its octets are written in its place |
+| `Path` | A path that is not well formed: no `/` before its first segment, `~` before what is no `0` and no `1`, `@id=` before what is no identifier |
+| `NoSuchMember` | A name that the type at that place cannot have: in a path, a member of a value, an IE of the object set of a message, a name where a list goes by position; in a value that is written, a member that its type does not have |
+| `NothingSelected` | An edit whose path selects nothing: an IE that the message does not have, or a position after the end of a list |
+| `NotOpened` | A path through the type that octets carry, before [`open`] decoded them: open, then select again |
+| `Value` | A JSON value that is not a value of its ASN.1 type: of another form, a name that an `ENUMERATED` does not have, a number outside its constraint, octets that are no hexadecimal. The message says at which member, by the names of the value |
+| `Form` | JSON that is not written as a tree or as a view: no name of a message, a member that neither has, an IE with its value and its octets, an IE that says no criticality where no table has one |
+| `Edit` | An edit that is refused: a member that its type always has, the value of an IE or the alternative of a `CHOICE` taken out, an insertion where there is no list, and the octets of a value that was edited since |
+| `Limit` | A path of more than 64 segments or 4096 octets, a selection of more than 4096 values, a tree nested deeper than 256 levels, a value that JER does not represent, and the tree of a message without a list of IEs |
+
+A kind says what a caller can do: write octets for an `UnknownIe`, call
+[`open`] for a `NotOpened`, show the octets of a PDU for a `Limit`. The view
+is as it was after an edit that returns an error.
+
 ## Examples
 
 | Example | Shows | Feature |
@@ -928,7 +951,7 @@ S1AP.
 |------|---------------|
 | `tests/aper_vectors.rs` | The 144 messages of `tests/fixtures/messages.tsv`, one for each message of each procedure, were encoded by pycrate 0.8.1. Each decodes to its type and encodes to the same octets, and each of its truncations and one more octet are refused. |
 | `tests/aper_round_trip.rs` | The macros, and the encodings where the codec departs from rasn's: constrained lists, `UTF8String`, long bit strings. |
-| `tests/errors.rs` | The errors of the typed API, each with its kind and its message: a PDU that is decoded as another message, octets that are no PDU, a value outside its constraint in a function and in each macro, an IE that is absent or does not decode, for a `req` and for an `opt` field, and what each helper refuses. |
+| `tests/errors.rs` | The errors of the typed API, each with its kind and its message: a PDU that is decoded as another message, octets that are no PDU, a value outside its constraint in a function and in each macro, an IE that is absent or does not decode, for a `req` and for an `opt` field, and what each helper refuses. With `inspect`, a test for each kind of error of the JSON forms. |
 | `tests/unknown_extensions.rs` | The additions of a later release to an extensible `SEQUENCE` are skipped, and what follows them is read. |
 | `tests/allocation.rs` | Decoding reserves memory for the elements that it reads, not for the count that a length determinant claims. |
 | `tests/inspection.rs` | Each of the 144 messages is the same octets through its view, and through its tree where it has IEs to name. Each path of each selects its value, with and without `value` and `decoded`, and is one that `check_path` takes. Edits, written trees, criticalities, the two IEs that have the type of what they extend, and the identifiers of the registry against the constants of the bindings. |

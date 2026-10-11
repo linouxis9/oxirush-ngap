@@ -42,7 +42,8 @@ pub enum ErrorKind {
     NothingSelected,
     /// A path through the type that octets carry, before `open` decoded them.
     NotOpened,
-    /// A JSON value that is not a value of its ASN.1 type.
+    /// A JSON value that is not a value of its ASN.1 type: of another form, with a
+    /// name that an ENUMERATED does not have, or outside a constraint.
     Value,
     /// JSON that is not written as a tree or as a view.
     Form,
@@ -140,6 +141,84 @@ impl Error {
         Self::new(ErrorKind::Argument, what)
     }
 
+    /// The same error, with the message that `reword` makes of the one that it has.
+    #[cfg(feature = "inspect")]
+    pub(crate) fn reworded(self, reword: impl FnOnce(&str) -> String) -> Self {
+        Self {
+            kind: self.kind,
+            what: reword(&self.to_string()).into_boxed_str(),
+            why: None,
+            source: self.source,
+        }
+    }
+
+    /// A value that the JSON encoding rules of rasn do not write.
+    #[cfg(feature = "inspect")]
+    pub(crate) fn unwritten(error: EncodeError) -> Self {
+        let why = encode_reason(&error);
+        Self::unrepresented(why).caused_by(error)
+    }
+
+    /// A value that the JSON encoding rules of rasn do not write, or do not read back
+    /// as it is: a limit of the inspection, and no fault of the value.
+    #[cfg(feature = "inspect")]
+    pub(crate) fn unrepresented(why: impl Into<String>) -> Self {
+        Self::new(ErrorKind::Limit, "JER does not represent this value").because(why)
+    }
+
+    /// JSON that rasn does not read as a value of the type `T`: the members on the way
+    /// to where it stopped, by the names that ASN.1 gives them, and what is wrong there.
+    #[cfg(feature = "inspect")]
+    pub(crate) fn not_a_value<T: rasn::AsnType>(
+        at: &[String],
+        why: String,
+        source: DecodeError,
+    ) -> Self {
+        let what = match at.is_empty() {
+            true => format!("this is not a value of {}", name::<T>()),
+            false => format!(
+                "this is not a value of {}, at {}",
+                name::<T>(),
+                at.join("/")
+            ),
+        };
+        Self::new(ErrorKind::Value, what)
+            .because(why)
+            .caused_by(source)
+    }
+
+    /// JSON that is read as a value of the type `T` and is not what that value is
+    /// written as: the kind of the error, the members on the way and what is wrong.
+    #[cfg(feature = "inspect")]
+    pub(crate) fn not_written_as<T: rasn::AsnType>(
+        kind: ErrorKind,
+        at: &[String],
+        why: String,
+    ) -> Self {
+        let what = match at.is_empty() {
+            true => format!("this is not a value of {}", name::<T>()),
+            false => format!(
+                "this is not a value of {}, at {}",
+                name::<T>(),
+                at.join("/")
+            ),
+        };
+        Self::new(kind, what).because(why)
+    }
+
+    /// A value of the type `T` that is written in JSON and does not encode: it is
+    /// outside a constraint of its type, and so no value of that type. This error is
+    /// what the codec said of it.
+    #[cfg(feature = "inspect")]
+    pub(crate) fn outside_its_type<T: rasn::AsnType>(self) -> Self {
+        Self {
+            kind: ErrorKind::Value,
+            what: format!("this is not a value of {}", name::<T>()).into_boxed_str(),
+            why: Some(self.why.unwrap_or(self.what)),
+            source: self.source,
+        }
+    }
+
     /// For the macro that extracts IEs: the IE `id`, which the field `field` requires,
     /// is not in a message of the type `message`.
     #[doc(hidden)]
@@ -162,6 +241,48 @@ impl Error {
             source: self.source,
         }
     }
+}
+
+/// The errors of the `inspect` feature, each by its kind and with what is wrong.
+macro_rules! kinds {
+    ($($(#[$doc:meta])* $name:ident $kind:ident;)*) => {
+        #[cfg(feature = "inspect")]
+        impl Error {
+            $(
+                $(#[$doc])*
+                pub(crate) fn $name(what: impl Into<String>) -> Self {
+                    Self::new(ErrorKind::$kind, what)
+                }
+            )*
+        }
+    };
+}
+
+kinds! {
+    /// A name of a message, or a direction and a procedure code, that the protocol
+    /// does not have.
+    unknown_message UnknownMessage;
+    /// A name or an identifier of an IE that the protocol does not have, or has no
+    /// type for where it is.
+    unknown_ie UnknownIe;
+    /// A path that is not well formed.
+    path Path;
+    /// A name that the type at that place cannot have.
+    no_such_member NoSuchMember;
+    /// An edit whose path selects nothing.
+    nothing_selected NothingSelected;
+    /// A path through the type that octets carry, before they are opened.
+    not_opened NotOpened;
+    /// A path into an IE or a transfer that is there and did not decode.
+    undecodable UndecodableIe;
+    /// A JSON value that is not a value of its ASN.1 type.
+    value Value;
+    /// JSON that is not written as a tree or as a view.
+    form Form;
+    /// An edit that is refused.
+    edit Edit;
+    /// Nesting or a number of occurrences over the limits of the inspection.
+    limit Limit;
 }
 
 impl fmt::Display for Error {
@@ -248,7 +369,7 @@ fn in_its_field(error: &DecodeError) -> String {
 /// Why rasn does not decode a value, without the name of its codec: the members on the
 /// way to where the decoding stopped, each as the bindings name the field, as
 /// `g_nb_id`, then what is wrong there.
-fn decode_reason(error: &DecodeError) -> (Vec<&'static str>, String) {
+pub(crate) fn decode_reason(error: &DecodeError) -> (Vec<&'static str>, String) {
     // rasn names a field after the type that has it: `GlobalGNBID.g_nb_id`.
     let field = |name: &'static str| name.rsplit('.').next().unwrap_or(name);
     let mut members = Vec::new();
@@ -272,6 +393,9 @@ fn decode_reason(error: &DecodeError) -> (Vec<&'static str>, String) {
             Some(size) => format!("a size of {size} is outside its constraint ({expected})"),
             None => format!("the size is outside its constraint ({expected})"),
         },
+        DecodeErrorKind::IntegerOverflow { max_width } => {
+            format!("the number does not fit in {max_width} bits")
+        }
         DecodeErrorKind::EnumerationIndexNotFound { index, .. } => {
             format!("{index} is no value of the ENUMERATED")
         }

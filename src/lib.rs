@@ -38,9 +38,9 @@
 //! # Ok::<(), oxirush_ngap::Error>(())
 //! ```
 //!
-//! The codec and the macros return an [`Error`]: its [`ErrorKind`] is what a caller
-//! matches on, its `Display` says what is wrong, and its source is the error of `rasn`
-//! where the codec gave one.
+//! Every function and macro that can fail returns an [`Error`]: its [`ErrorKind`] is
+//! what a caller matches on, its `Display` says what is wrong, and its source is the
+//! error of `rasn` where the codec gave one.
 
 mod error;
 pub mod helpers;

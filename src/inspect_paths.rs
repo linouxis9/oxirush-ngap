@@ -3,6 +3,7 @@
 
 use serde_json::{Map, Value, json};
 
+use crate::Error;
 // The name of the protocol, the first segment of the paths of the IEs of the message of
 // a PDU, and what the ASN.1 says of the messages, the IEs and the types.
 use crate::inspect_registry::{CARRIED, ENUMERATIONS, IE_TYPES, MESSAGES, PROTOCOL, ROOT, TYPES};
@@ -231,9 +232,14 @@ fn selects_ies(part: &str) -> bool {
 
 /// The segments of a path: those of a JSON pointer, and whether the path starts with the
 /// root. The segment after the root selects among the IEs of the message.
-fn segments(path: &str) -> Result<(Vec<String>, bool), String> {
-    if path.len() > 4096 || !path.starts_with('/') {
-        return Err("IE path must start with / and be at most 4096 bytes".into());
+fn segments(path: &str) -> Result<(Vec<String>, bool), Error> {
+    if path.len() > 4096 {
+        return Err(Error::limit("a path has 4096 octets at most"));
+    }
+    if !path.starts_with('/') {
+        return Err(Error::path(format!(
+            "{path:?} is no path: a path starts with \"/\", as /{ROOT}/0"
+        )));
     }
     let parts = path[1..]
         .split('/')
@@ -245,34 +251,48 @@ fn segments(path: &str) -> Result<(Vec<String>, bool), String> {
                     match chars.next() {
                         Some('0') => '~',
                         Some('1') => '/',
-                        _ => return Err("invalid JSON-pointer escape".into()),
+                        _ => {
+                            return Err(Error::path(format!(
+                                "in a path, \"~\" is followed by 0 or 1, which stand for \"~\" \
+                                 and \"/\": {path}"
+                            )));
+                        }
                     }
                 } else {
                     c
                 });
             }
             if let Some(id) = decoded.strip_prefix("@id=") {
-                id.parse::<u16>().map_err(|_| "IE id must be u16")?;
+                id.parse::<u16>().map_err(|_| not_an_id(&decoded))?;
             }
             Ok(decoded)
         })
-        .collect::<Result<Vec<_>, String>>()?;
+        .collect::<Result<Vec<_>, Error>>()?;
     if parts.len() > 64 {
-        return Err("IE path nesting exceeds 64".into());
+        return Err(Error::limit("a path has 64 segments at most"));
     }
     let rooted = same_name(&parts[0], ROOT);
     if rooted
         && let Some(ie) = parts.get(1)
         && !selects_ies(ie)
     {
-        return Err(format!("{ie:?} is not an IE of {PROTOCOL} at {path}"));
+        return Err(Error::unknown_ie(format!(
+            "{ie:?} is not an IE of {PROTOCOL} at {path}"
+        )));
     }
     Ok((parts, rooted))
 }
 
+/// Why a segment that starts with `@id=` selects no IE.
+fn not_an_id(part: &str) -> Error {
+    Error::path(format!(
+        "{part:?} is not the identifier of an IE: \"@id=\" is followed by a number up to 65535"
+    ))
+}
+
 /// The segments of `path` in a view, with what the root is short for, and whether the
 /// IEs on the way are selected by name.
-fn resolve(path: &str) -> Result<(Vec<String>, bool), String> {
+fn resolve(path: &str) -> Result<(Vec<String>, bool), Error> {
     let (mut parts, rooted) = segments(path)?;
     if rooted {
         parts.splice(..1, [MESSAGE.to_string(), IES.to_string()]);
@@ -311,6 +331,17 @@ fn pdu(view: &Value) -> Shape {
 fn kind_of(name: &str) -> Option<&'static Kind> {
     let at = TYPES.binary_search_by(|(known, _)| (*known).cmp(name));
     at.ok().map(|at| &TYPES[at].1)
+}
+
+/// The name that ASN.1 gives a member which the bindings name `field`, as `gNB-ID` for
+/// `g_nb_id`, where a type of the list has such a member.
+pub(crate) fn member_spelling(field: &str) -> Option<&'static str> {
+    let members = TYPES.iter().flat_map(|(_, kind)| match kind {
+        Kind::Sequence(members) | Kind::Choice(members) => *members,
+        Kind::Is(_) => &[],
+    });
+    let mut names = members.map(|(name, ..)| *name);
+    names.find(|name| same_name(name, field))
 }
 
 /// The names of the values of the ENUMERATED that the bindings name `name`.
@@ -514,13 +545,13 @@ fn names(shape: Shape, members: &[Member]) -> Vec<&'static str> {
 /// `reason`, why a segment selects nothing in the value of an IE or of a transfer of
 /// `shape`, with the members that the IE or the transfer has itself: the segment may be
 /// one of them, written wrong.
-fn or_its_own(reason: String, shape: Shape, members: &[Member]) -> String {
+fn or_its_own(reason: Error, shape: Shape, members: &[Member]) -> Error {
     let of = match shape {
         Shape::Transfer(_) => "a transfer",
         _ => "an IE",
     };
     let own = names(shape, members).join(", ");
-    format!("{reason}; {of} itself has {own}")
+    reason.reworded(|reason| format!("{reason}; {of} itself has {own}"))
 }
 
 /// The identifier of the IE that `entry` is, when a value of `shape` is an IE: an entry
@@ -599,26 +630,27 @@ fn named_ie(shape: Shape, part: &str, named: bool) -> Option<Shape> {
 /// Why a segment that names an IE selects nothing under another IE, `this`: which IE
 /// that one is, then `reason`, why its value has no such member either. `None` for a
 /// segment that names no IE, or the IE itself.
-fn another_ie(this: Option<u16>, part: &str, named: bool, reason: &str) -> Option<String> {
+fn another_ie(this: Option<u16>, part: &str, named: bool, reason: &Error) -> Option<Error> {
     let other = ie_id(part).filter(|_| named)?;
     let this = this.filter(|this| *this != other)?;
-    Some(format!(
-        "this IE is {}, not {}: {reason}",
-        ie_name(this),
-        ie_name(other)
-    ))
+    let (this, other) = (ie_name(this), ie_name(other));
+    Some(
+        reason
+            .clone()
+            .reworded(|reason| format!("this IE is {this}, not {other}: {reason}")),
+    )
 }
 
 /// Why a segment selects nothing in a value of `shape`: the type has no such member.
-fn no_member(shape: Shape, members: &[Member], part: &str, path: &str) -> String {
+fn no_member(shape: Shape, members: &[Member], part: &str, path: &str) -> Error {
     // The root stands for the IEs of a message, which a private message has none of.
     if let (Shape::Message(message), IES) = (shape, part) {
         let has: Vec<_> = members.iter().map(|(name, ..)| *name).collect();
-        return format!(
+        return Error::no_such_member(format!(
             "a message {} has no IEs under /{ROOT}: it has {} at {path}",
             message.name,
             has.join(", ")
-        );
+        ));
     }
     let of = match shape {
         Shape::Named(name) => name.to_string(),
@@ -630,13 +662,28 @@ fn no_member(shape: Shape, members: &[Member], part: &str, path: &str) -> String
         _ => "this value".to_string(),
     };
     let names = names(shape, members);
-    match names.is_empty() {
+    Error::no_such_member(match names.is_empty() {
         true => format!("{part:?} is not a member of {of}, which has none, at {path}"),
         false => format!(
             "{part:?} is not a member of {of}, which has {}, at {path}",
             names.join(", ")
         ),
-    }
+    })
+}
+
+/// Why a segment that is no position selects no entry of a list.
+fn no_position(part: &str, path: &str) -> Error {
+    Error::no_such_member(format!(
+        "{part:?} is not a position in a list at {path}: an entry goes by its number, and \
+         \"*\" is each of them"
+    ))
+}
+
+/// Why a segment that names an IE selects no entry of a list whose entries are no IEs.
+fn no_ie_there(part: &str, path: &str) -> Error {
+    Error::no_such_member(format!(
+        "{part:?} selects an IE, and the entries of this list go by position at {path}"
+    ))
 }
 
 /// The shape of an entry of a list of `shape`.
@@ -667,7 +714,7 @@ type Place<'a> = (Option<&'a Value>, Shape);
 
 /// Why a segment selects nothing at a place: `true` when the value there cannot be read,
 /// which no other place makes up for.
-type Refusal = (bool, String);
+type Refusal = (bool, Error);
 
 /// Add to `next` what `part` selects at `place`. A member that the type can have and the
 /// value does not have is a place without a value.
@@ -686,7 +733,7 @@ fn advance<'a>(
             next.push((value, shape));
         }
     };
-    let no = |reason: String| Err((false, reason));
+    let no = |reason: Error| Err((false, reason));
     match value {
         Some(whole @ Value::Object(entry)) => {
             let members = members(shape, Some(entry));
@@ -714,14 +761,18 @@ fn advance<'a>(
             // its members is taken, as if the member that holds it stood before.
             let held = value_member(shape);
             if part.starts_with("@id=") && held.is_none() {
-                return no(format!("IE-id selection requires an array at {path}"));
+                return no(Error::no_such_member(format!(
+                    "{part:?} selects among the IEs of a list, and this is no list, at {path}"
+                )));
             }
             // `octets` is what an IE or a transfer was received as.
             if same_name(part, "octets") && (has_octets(shape) || received(entry).is_some()) {
                 if entry.contains_key(EDITED) {
                     return Err((
                         true,
-                        format!("the value was edited since these octets were received at {path}"),
+                        Error::edit(format!(
+                            "the value was edited since these octets were received at {path}"
+                        )),
                     ));
                 }
                 push(received(entry), Shape::Plain);
@@ -734,9 +785,9 @@ fn advance<'a>(
                         push(entry.get(name), Shape::Unknown);
                         Ok(())
                     }
-                    None => no(format!(
-                        "unknown or unavailable decoded field {part:?} at {path}"
-                    )),
+                    None => no(Error::no_such_member(format!(
+                        "{part:?} is not a member of this value at {path}"
+                    ))),
                 };
             };
             let own = member(&members, part);
@@ -756,7 +807,9 @@ fn advance<'a>(
                     let error = entry["_decode_error"].as_str().unwrap_or_default();
                     return Err((
                         true,
-                        format!("the transfer did not decode at {path}: {error}"),
+                        Error::undecodable(format!(
+                            "the transfer did not decode at {path}: {error}"
+                        )),
                     ));
                 }
                 value => value,
@@ -776,10 +829,7 @@ fn advance<'a>(
         }
         Some(Value::Array(entries)) => {
             let id = match part.strip_prefix("@id=") {
-                Some(id) => Some(
-                    id.parse::<u16>()
-                        .map_err(|_| (false, "invalid IE id".into()))?,
-                ),
+                Some(id) => Some(id.parse::<u16>().map_err(|_| (false, not_an_id(part)))?),
                 None => ie_id(part).filter(|_| named),
             };
             if part == "*" {
@@ -788,9 +838,7 @@ fn advance<'a>(
                 }
             } else if let Some(id) = id {
                 let Some(absent) = element_of(shape, id) else {
-                    return no(format!(
-                        "{part:?} selects an IE, and the entries of this list go by position at {path}"
-                    ));
+                    return no(no_ie_there(part, path));
                 };
                 let mut found = false;
                 for entry in entries {
@@ -808,14 +856,17 @@ fn advance<'a>(
                     push(Some(entry), element(shape));
                 }
             } else {
-                return no(format!("array index must be numeric at {path}"));
+                return no(no_position(part, path));
             }
             Ok(())
         }
         // A value that is not there, by what its type says.
         Some(Value::Null) | None => typed(shape, part, named, path, &mut |shape| push(None, shape)),
         Some(value) => match shape {
-            Shape::Undecoded => Err((true, format!("the IE did not decode at {path}"))),
+            Shape::Undecoded => Err((
+                true,
+                Error::undecodable(format!("the IE did not decode at {path}")),
+            )),
             // A value without members has none to select.
             _ if part == "*" => Ok(()),
             // A bit string that the view shows as it is usually written.
@@ -840,15 +891,17 @@ fn advance<'a>(
                 match member(&carried, part) {
                     Some((name, ..)) => Err((
                         true,
-                        format!(
+                        Error::not_opened(format!(
                             "the octets are not shown as a {name} at {path}: open decodes them"
-                        ),
+                        )),
                     )),
                     None => no(no_member(shape, &carried, part, path)),
                 }
             }
             Shape::Plain => no(no_member(shape, &[], part, path)),
-            _ => no(format!("decoded path traverses a scalar at {path}")),
+            _ => no(Error::no_such_member(format!(
+                "{part:?} is not a member of this value, which has none, at {path}"
+            ))),
         },
     }
 }
@@ -862,22 +915,17 @@ fn typed(
     path: &str,
     push: &mut dyn FnMut(Shape),
 ) -> Result<(), Refusal> {
-    let no = |reason: String| Err((false, reason));
+    let no = |reason: Error| Err((false, reason));
     match shape {
         Shape::Unknown | Shape::Undecoded => push(Shape::Unknown),
         Shape::List(_) | Shape::Ies(_) | Shape::Extensions(_) => {
             let id = match part.strip_prefix("@id=") {
-                Some(id) => Some(
-                    id.parse::<u16>()
-                        .map_err(|_| (false, "invalid IE id".into()))?,
-                ),
+                Some(id) => Some(id.parse::<u16>().map_err(|_| (false, not_an_id(part)))?),
                 None => ie_id(part).filter(|_| named),
             };
             if let Some(id) = id {
                 let Some(of) = element_of(shape, id) else {
-                    return no(format!(
-                        "{part:?} selects an IE, and the entries of this list go by position at {path}"
-                    ));
+                    return no(no_ie_there(part, path));
                 };
                 // A name is that of an IE of the object set, where the tables have it.
                 if let Shape::Ies(Some(message)) = shape
@@ -885,11 +933,11 @@ fn typed(
                     && !message.ies.iter().any(|(known, _)| *known == id)
                 {
                     let ies: Vec<_> = message.ies.iter().map(|(id, _)| ie_name(*id)).collect();
-                    return no(format!(
+                    return no(Error::no_such_member(format!(
                         "{part:?} is not an IE of {}, which has {}, at {path}",
                         message.name,
                         ies.join(", ")
-                    ));
+                    )));
                 }
                 push(of);
             } else if matches!(part, "*" | "-") || position(part).is_some() {
@@ -902,7 +950,7 @@ fn typed(
                     shape => push(element(shape)),
                 }
             } else {
-                return no(format!("array index must be numeric at {path}"));
+                return no(no_position(part, path));
             }
         }
         shape => {
@@ -997,7 +1045,7 @@ fn advance_all<'a>(
     part: &str,
     named: bool,
     path: &str,
-) -> Result<Vec<Place<'a>>, String> {
+) -> Result<Vec<Place<'a>>, Error> {
     let mut next = Vec::new();
     let mut refusal = None;
     for place in places {
@@ -1007,7 +1055,9 @@ fn advance_all<'a>(
             Err((false, reason)) => refusal = refusal.or(Some(reason)),
         }
         if next.len() > OCCURRENCES {
-            return Err(format!("IE selection exceeds {OCCURRENCES} occurrences"));
+            return Err(Error::limit(format!(
+                "IE selection exceeds {OCCURRENCES} occurrences"
+            )));
         }
     }
     match refusal {
@@ -1038,13 +1088,19 @@ fn advance_all<'a>(
 /// value [`set`], [`remove`] or [`insert`] edited since are an error, as
 /// [`message_from_view`](crate::inspect::message_from_view) has yet to give it others. So
 /// is a path into a value that did not decode.
-pub fn select<'a>(view: &'a Value, path: &str) -> Result<Vec<&'a Value>, String> {
+pub fn select<'a>(view: &'a Value, path: &str) -> Result<Vec<&'a Value>, Error> {
     let (parts, named) = resolve(path)?;
     let mut places = vec![(Some(view), pdu(view))];
     for part in &parts {
         places = advance_all(places, part, named, path)?;
     }
     Ok(places.into_iter().filter_map(|(value, _)| value).collect())
+}
+
+/// The message that ASN.1 names `name`, taken as a path takes a name.
+fn message_of(name: &str) -> Result<Sent, Error> {
+    let known = sent(|_, _, known| same_name(known, name));
+    known.ok_or_else(|| Error::unknown_message(format!("{name:?} is not a message of {PROTOCOL}")))
 }
 
 /// Whether `path` can select a value in a message that ASN.1 names `message`: what
@@ -1066,18 +1122,17 @@ pub fn select<'a>(view: &'a Value, path: &str) -> Result<Vec<&'a Value>, String>
 /// of its list. Such an entry is the IE that the next segment names, and the path is
 /// then read against the type of that IE: unless some value has a member of that name
 /// and of another type, which the segment may be.
-pub fn check_path(message: &str, path: &str) -> Result<(), String> {
-    let known = sent(|_, _, name| same_name(name, message));
-    let message = known.ok_or_else(|| format!("{message:?} is not a message of {PROTOCOL}"))?;
+pub fn check_path(message: &str, path: &str) -> Result<(), Error> {
+    let message = message_of(message)?;
     let (parts, named) = resolve(path)?;
     let mut places: Vec<Place> = vec![(None, Shape::Pdu(Some(message)))];
     for part in &parts {
         places = advance_all(places, part, named, path)?;
         if places.is_empty() {
-            return Err(format!(
+            return Err(Error::no_such_member(format!(
                 "{path} selects nothing in a message {}: a value before {part:?} has no members",
                 message.name
-            ));
+            )));
         }
     }
     Ok(())
@@ -1092,9 +1147,8 @@ pub fn check_path(message: &str, path: &str) -> Result<(), String> {
 /// `None` for a value of another type, and for one whose type is not known: what
 /// [`check_path`] does not refuse for that reason. A path that it refuses is an error
 /// here too.
-pub fn enumerated_at(message: &str, path: &str) -> Result<Option<&'static [&'static str]>, String> {
-    let known = sent(|_, _, name| same_name(name, message));
-    let message = known.ok_or_else(|| format!("{message:?} is not a message of {PROTOCOL}"))?;
+pub fn enumerated_at(message: &str, path: &str) -> Result<Option<&'static [&'static str]>, Error> {
+    let message = message_of(message)?;
     let (parts, named) = resolve(path)?;
     let mut places: Vec<Place> = vec![(None, Shape::Pdu(Some(message)))];
     for part in &parts {
@@ -1245,19 +1299,19 @@ enum Edit<'d> {
 /// that would be taken out, and an edit that would send nothing else: the value of an IE
 /// or the decoded value of a transfer is not taken out, as the octets received would go
 /// out in its place.
-pub fn set(view: &mut Value, path: &str, value: Value) -> Result<(), String> {
+pub fn set(view: &mut Value, path: &str, value: Value) -> Result<(), Error> {
     edit(view, path, Edit::Set(value))
 }
 
 /// Take the member or the list entries at `path` out of `view`. A path that selects
 /// nothing is an error, and so is a member that its type always has.
-pub fn remove(view: &mut Value, path: &str) -> Result<(), String> {
+pub fn remove(view: &mut Value, path: &str) -> Result<(), Error> {
     edit(view, path, Edit::Remove)
 }
 
 /// Add `value` to a list of `view`: before each entry that `path` selects, or at the end
 /// for a path that ends with `-`. An IE is written as [`set`] takes it.
-pub fn insert(view: &mut Value, path: &str, value: Value) -> Result<(), String> {
+pub fn insert(view: &mut Value, path: &str, value: Value) -> Result<(), Error> {
     edit(view, path, Edit::Insert(value))
 }
 
@@ -1268,7 +1322,7 @@ pub(crate) fn open_with(
     view: &mut Value,
     path: &str,
     decode: &dyn Fn(Value, &str) -> Value,
-) -> Result<(), String> {
+) -> Result<(), Error> {
     let (parts, named) = resolve(path)?;
     let mut opened = view.clone();
     let shape = pdu(&opened);
@@ -1277,16 +1331,18 @@ pub(crate) fn open_with(
     Ok(())
 }
 
+/// The identifier of the IE that `name` names, as ASN.1 names it after `id-`.
+fn ie_named(name: &str) -> Result<u16, Error> {
+    ie_id(name).ok_or_else(|| Error::unknown_ie(format!("{name:?} is not an IE of {PROTOCOL}")))
+}
+
 /// Write the entry of an IE as a view has it: the name of the IE that its `id` may be
 /// written as becomes its number, and its `octets` what it is sent as in place of a
 /// value. An entry of a list of IEs has an `id`, which no member of an ASN.1 type is
 /// named beside a string or a number.
-pub(crate) fn written_ie(entry: &mut Map<String, Value>) -> Result<(), String> {
+pub(crate) fn written_ie(entry: &mut Map<String, Value>) -> Result<(), Error> {
     let id = match entry.get("id") {
-        Some(Value::String(name)) => {
-            let unknown = || format!("{name:?} is not an IE of {PROTOCOL}");
-            Some(json!(ie_id(name).ok_or_else(unknown)?))
-        }
+        Some(Value::String(name)) => Some(json!(ie_named(name)?)),
         Some(Value::Number(_)) => None,
         _ => return Ok(()),
     };
@@ -1295,14 +1351,16 @@ pub(crate) fn written_ie(entry: &mut Map<String, Value>) -> Result<(), String> {
     }
     if let Some(octets) = entry.remove("octets") {
         if VALUES.iter().any(|value| entry.contains_key(*value)) {
-            return Err("an IE is written with its value or its octets, not both".into());
+            return Err(Error::form(
+                "an IE is written with its value or its octets, not both",
+            ));
         }
         entry.insert("_raw_value".into(), octets);
     }
     Ok(())
 }
 
-fn edit(view: &mut Value, path: &str, mut operation: Edit) -> Result<(), String> {
+fn edit(view: &mut Value, path: &str, mut operation: Edit) -> Result<(), Error> {
     let (parts, named) = resolve(path)?;
     if let Edit::Set(ie) | Edit::Insert(ie) = &mut operation
         && let Some(ie) = ie.as_object_mut()
@@ -1312,7 +1370,9 @@ fn edit(view: &mut Value, path: &str, mut operation: Edit) -> Result<(), String>
     let mut edited = view.clone();
     let shape = pdu(&edited);
     if apply(&mut edited, shape, &parts, &operation, named, path)? == 0 {
-        return Err(format!("IE edit selected no field: {path}"));
+        return Err(Error::nothing_selected(format!(
+            "IE edit selected no field: {path}"
+        )));
     }
     *view = edited;
     Ok(())
@@ -1347,8 +1407,10 @@ fn apply(
     operation: &Edit,
     named: bool,
     path: &str,
-) -> Result<usize, String> {
-    let (part, rest) = parts.split_first().ok_or("empty edit path")?;
+) -> Result<usize, Error> {
+    let (part, rest) = parts
+        .split_first()
+        .ok_or_else(|| Error::path("an edit takes the path of a member or of an entry"))?;
     let shape = resolved(shape);
     let this = ie_of(view, shape);
     // Octets that the path takes as a type that they may carry are shown as it, when
@@ -1400,7 +1462,9 @@ fn apply(
             };
         }
         if part == "*" || part.starts_with("@id=") {
-            return Err("array selection used on an object".into());
+            return Err(Error::no_such_member(format!(
+                "{part:?} selects among the entries of a list, and this is no list, at {path}"
+            )));
         }
         // The octets of an IE or of a transfer are sent in place of its value.
         let raw = received_member(object).or(match shape {
@@ -1412,7 +1476,7 @@ fn apply(
             let octets = match operation {
                 Edit::Set(octets @ Value::String(_)) => octets,
                 Edit::Open(_) => return Ok(0),
-                _ => return Err("octets are set, in hexadecimal".into()),
+                _ => return Err(Error::edit("octets are set, in hexadecimal")),
             };
             object.insert(raw.into(), octets.clone());
             for value in VALUES.into_iter().chain(["_decode_error", EDITED]) {
@@ -1449,17 +1513,19 @@ fn apply(
                 _ => false,
             };
             if removes && value {
-                return Err(format!(
+                return Err(Error::edit(format!(
                     "{name} is not taken out: remove what has it, or set its octets"
-                ));
+                )));
             }
             if removes && choice {
-                return Err(format!(
+                return Err(Error::edit(format!(
                     "{name} is not taken out: a CHOICE has one alternative, set another in its place"
-                ));
+                )));
             }
             if removes && !optional {
-                return Err(format!("{name} is not taken out: its type always has it"));
+                return Err(Error::edit(format!(
+                    "{name} is not taken out: its type always has it"
+                )));
             }
             return match operation {
                 // Null takes a member out, as a removal does: one that is not there is
@@ -1476,7 +1542,7 @@ fn apply(
                     mark(object, &name);
                     Ok(1)
                 }
-                Edit::Insert(_) => Err("insert adds to a list".into()),
+                Edit::Insert(_) => Err(Error::edit("insert adds to a list")),
                 Edit::Open(_) => Ok(0),
             };
         }
@@ -1508,15 +1574,13 @@ fn apply(
         Some(id) => Some(id),
         None => part
             .strip_prefix("@id=")
-            .map(|id| id.parse().map_err(|_| "invalid IE id"))
+            .map(|id| id.parse().map_err(|_| not_an_id(part)))
             .transpose()?,
     };
     if let Some(id) = id
         && element_of(shape, id).is_none()
     {
-        return Err(format!(
-            "{part:?} selects an IE, and the entries of this list go by position at {path}"
-        ));
+        return Err(no_ie_there(part, path));
     }
     let indexes: Vec<_> = if part == "*" {
         (0..array.len()).collect()
@@ -1526,12 +1590,12 @@ fn apply(
             .filter_map(|(index, value)| (entry_id(value) == Some(u64::from(id))).then_some(index))
             .collect()
     } else {
-        vec![position(part).ok_or("array index must be numeric")?]
+        vec![position(part).ok_or_else(|| no_position(part, path))?]
     };
     if indexes.len() > OCCURRENCES {
-        return Err(format!(
+        return Err(Error::limit(format!(
             "IE edit selects more than {OCCURRENCES} occurrences"
-        ));
+        )));
     }
     let mut changed = 0;
     for index in indexes.into_iter().rev() {
@@ -1591,7 +1655,7 @@ fn assigned(container: Shape, id: u16) -> Option<&'static str> {
 /// `value`, a value of `shape` of a view, as a tree has it: a transfer as its decoded
 /// value, or as its `octets` when it has none, and each IE of a container as
 /// [`ie_by_name`] shows it.
-fn by_name(value: &Value, shape: Shape) -> Result<Value, String> {
+fn by_name(value: &Value, shape: Shape) -> Result<Value, Error> {
     let shape = resolved(shape);
     match value {
         Value::Object(entry) => match shape {
@@ -1610,7 +1674,7 @@ fn by_name(value: &Value, shape: Shape) -> Result<Value, String> {
                     let of = member(&members, name).map_or(Shape::Unknown, |(_, of, _)| *of);
                     Ok((name.clone(), by_name(value, of)?))
                 });
-                Ok(Value::Object(shown.collect::<Result<_, String>>()?))
+                Ok(Value::Object(shown.collect::<Result<_, Error>>()?))
             }
         },
         Value::Array(entries) => {
@@ -1618,7 +1682,7 @@ fn by_name(value: &Value, shape: Shape) -> Result<Value, String> {
                 of @ (Shape::Ie(_) | Shape::Extension(..)) => ie_by_name(entry, of, shape),
                 of => by_name(entry, of),
             });
-            Ok(Value::Array(shown.collect::<Result<_, String>>()?))
+            Ok(Value::Array(shown.collect::<Result<_, Error>>()?))
         }
         plain => Ok(plain.clone()),
     }
@@ -1630,9 +1694,9 @@ fn by_name(value: &Value, shape: Shape) -> Result<Value, String> {
 /// that type, has the octets that it was received as, as `{"octets": "…"}`. Its
 /// `criticality` is beside its name when it is not the one that the specification
 /// assigns it there, and where the tables do not have that one.
-fn ie_by_name(entry: &Value, shape: Shape, container: Shape) -> Result<Value, String> {
+fn ie_by_name(entry: &Value, shape: Shape, container: Shape) -> Result<Value, Error> {
     let id = entry_id(entry).and_then(|id| u16::try_from(id).ok());
-    let id = id.ok_or("an IE has its identifier")?;
+    let id = id.ok_or_else(|| Error::form("an IE has its identifier"))?;
     let mut names = crate::inspect::ie_names().iter();
     let name = match names.find(|(known, _)| *known == id) {
         Some((_, name)) => name.to_string(),
@@ -1658,9 +1722,11 @@ fn ie_by_name(entry: &Value, shape: Shape, container: Shape) -> Result<Value, St
 /// the entry that [`entry_of`] gives it. A transfer keeps the form that it is written
 /// in, its decoded value alone or as its `decoded` member, which
 /// [`message_from_view`](crate::inspect::message_from_view) takes.
-fn written(value: &Value, shape: Shape, depth: usize) -> Result<Value, String> {
+fn written(value: &Value, shape: Shape, depth: usize) -> Result<Value, Error> {
     if depth > WRITTEN {
-        return Err(format!("a written tree nests deeper than {WRITTEN}"));
+        return Err(Error::limit(format!(
+            "a written tree nests deeper than {WRITTEN}"
+        )));
     }
     let shape = resolved(shape);
     match value {
@@ -1686,7 +1752,7 @@ fn written(value: &Value, shape: Shape, depth: usize) -> Result<Value, String> {
                     let of = member(&members, name).map_or(Shape::Unknown, |(_, of, _)| *of);
                     Ok((name.clone(), written(value, of, depth + 1)?))
                 });
-                Ok(Value::Object(listed.collect::<Result<_, String>>()?))
+                Ok(Value::Object(listed.collect::<Result<_, Error>>()?))
             }
         },
         Value::Array(entries) => {
@@ -1694,7 +1760,7 @@ fn written(value: &Value, shape: Shape, depth: usize) -> Result<Value, String> {
                 of @ (Shape::Ie(_) | Shape::Extension(..)) => entry_of(entry, of, shape, depth),
                 of => written(entry, of, depth + 1),
             });
-            Ok(Value::Array(listed.collect::<Result<_, String>>()?))
+            Ok(Value::Array(listed.collect::<Result<_, Error>>()?))
         }
         plain => Ok(plain.clone()),
     }
@@ -1706,10 +1772,10 @@ fn written(value: &Value, shape: Shape, depth: usize) -> Result<Value, String> {
 /// `criticality` is the one beside its name, or the one that the specification assigns
 /// it there. An entry that is written as a view has it, with its `id`, stays as it is,
 /// and the IEs that its value holds are read the same way.
-fn entry_of(ie: &Value, shape: Shape, container: Shape, depth: usize) -> Result<Value, String> {
+fn entry_of(ie: &Value, shape: Shape, container: Shape, depth: usize) -> Result<Value, Error> {
     const IE: &str = "each entry of a container is one IE: its name with its value";
     let field = value_member(shape).unwrap_or("value");
-    let entry = ie.as_object().ok_or(IE)?;
+    let entry = ie.as_object().ok_or_else(|| Error::form(IE))?;
     if entry.contains_key("id") {
         let id = entry_id(ie).and_then(|id| u16::try_from(id).ok());
         let mut entry = entry.clone();
@@ -1720,25 +1786,25 @@ fn entry_of(ie: &Value, shape: Shape, container: Shape, depth: usize) -> Result<
     }
     let mut members = entry.iter().filter(|(member, _)| *member != "criticality");
     let (Some((name, value)), None) = (members.next(), members.next()) else {
-        return Err(IE.into());
+        return Err(Error::form(IE));
     };
     let id = match name.parse::<u16>() {
         Ok(id) => id,
-        Err(_) => ie_id(name).ok_or_else(|| format!("{name:?} is not an IE of {PROTOCOL}"))?,
+        Err(_) => ie_named(name)?,
     };
     let criticality = match (entry.get("criticality"), assigned(container, id), container) {
         (Some(criticality), ..) => criticality.clone(),
         (None, Some(criticality), _) => json!(criticality),
         (None, None, Shape::Ies(Some(message))) => {
-            return Err(format!(
+            return Err(Error::form(format!(
                 "{} has no IE {name}: one that is sent in it says its \"criticality\"",
                 message.name
-            ));
+            )));
         }
         (None, None, _) => {
-            return Err(format!(
+            return Err(Error::form(format!(
                 "{name} says its \"criticality\" here: the tables have none for it"
-            ));
+            )));
         }
     };
     let octets = value.as_object().filter(|value| value.len() == 1);
@@ -1754,14 +1820,14 @@ fn entry_of(ie: &Value, shape: Shape, container: Shape, depth: usize) -> Result<
 /// The IEs of the message that ASN.1 names `message`, which a view has as `ies`, as a
 /// tree has them: each as its name with its value, and so are the IEs that a value
 /// holds, to any depth.
-pub(crate) fn named_ies(message: &str, ies: &Value) -> Result<Value, String> {
+pub(crate) fn named_ies(message: &str, ies: &Value) -> Result<Value, Error> {
     let message = sent(|_, _, name| same_name(name, message));
     by_name(ies, Shape::Ies(message))
 }
 
 /// The entries that a view has for the IEs of the message that ASN.1 names `message`,
 /// which `ies` has as a tree has them: as [`named_ies`] shows them.
-pub(crate) fn listed_ies(message: &str, ies: &Value) -> Result<Value, String> {
+pub(crate) fn listed_ies(message: &str, ies: &Value) -> Result<Value, Error> {
     let message = sent(|_, _, name| same_name(name, message));
     written(ies, Shape::Ies(message), 0)
 }
@@ -1919,12 +1985,14 @@ mod tests {
         // A name that neither has is refused with the members of both, with a view and
         // without one.
         let refused = select(&view, &path("misspelled")).unwrap_err();
-        assert!(refused.contains("is not a member of Cause, which has radioNetwork"));
-        assert!(refused.ends_with("; an IE itself has id, criticality, value, octets"));
+        assert_eq!(refused.kind(), crate::ErrorKind::NoSuchMember);
+        let text = refused.to_string();
+        assert!(text.contains("is not a member of Cause, which has radioNetwork"));
+        assert!(text.ends_with("; an IE itself has id, criticality, value, octets"));
         let checked = |rest: &str| check_path("UEContextReleaseCommand", &path(rest));
         assert_eq!(checked("misspelled"), Err(refused.clone()));
         assert_eq!(checked("nas"), Ok(()));
-        let deeper = checked("radioNetwork/deeper").unwrap_err();
+        let deeper = checked("radioNetwork/deeper").unwrap_err().to_string();
         assert!(deeper.contains("which has none") && !deeper.contains("itself"));
         // An edit takes the same path, and marks the value that it changed.
         view[MESSAGE][IES][0]["_raw_value"] = json!("0000");
@@ -1935,7 +2003,11 @@ mod tests {
         let before = view.clone();
         assert_eq!(set(&mut view, &path("misspelled"), json!(1)), Err(refused));
         let kept = remove(&mut view, &path("nas")).unwrap_err();
-        assert!(kept.contains("a CHOICE has one alternative"), "{kept}");
+        assert_eq!(kept.kind(), crate::ErrorKind::Edit);
+        assert!(
+            kept.to_string().contains("a CHOICE has one alternative"),
+            "{kept}"
+        );
         assert_eq!(view, before);
     }
 
@@ -1960,8 +2032,9 @@ mod tests {
             .find(|(id, _)| *id != cause);
         let other = path(&format!("0/{}/value", other.unwrap().1));
         let refused = select(&view, &other).unwrap_err();
-        assert!(refused.starts_with("this IE is Cause, not "), "{refused}");
-        assert!(refused.contains("is not a member of Cause, which has radioNetwork"));
+        let text = refused.to_string();
+        assert!(text.starts_with("this IE is Cause, not "), "{refused}");
+        assert!(text.contains("is not a member of Cause, which has radioNetwork"));
         let checked = |rest: &str| check_path("UEContextReleaseCommand", &path(rest));
         assert_eq!(checked("Cause/Cause/nas"), Ok(()));
         assert!(checked("Cause/Cause/misspelled").is_err());
@@ -2048,8 +2121,9 @@ mod tests {
         assert_eq!(at(&transfer, "decoded"), some(transfer["decoded"].clone()));
         assert_eq!(at(&transfer, "octets"), some(json!("00")));
         let (unread, refused) = at(&transfer, "misspelled").unwrap_err();
-        assert!(!unread && refused.contains("is not a member of Cause, which has radioNetwork"));
-        assert!(refused.ends_with("; a transfer itself has decoded, octets"));
+        let text = refused.to_string();
+        assert!(!unread && text.contains("is not a member of Cause, which has radioNetwork"));
+        assert!(text.ends_with("; a transfer itself has decoded, octets"));
         // The types say the same without a view.
         let mut shapes = Vec::new();
         let mut push = |shape| shapes.push(shape);
@@ -2163,7 +2237,9 @@ mod tests {
             let listed = written(&shown, container, 0).unwrap();
             assert_eq!(listed, json!([entry(field, false)]));
             let refused = written(&json!([{"Cause": value}]), container, 0).unwrap_err();
-            assert!(refused.contains("says its \"criticality\""), "{refused}");
+            assert_eq!(refused.kind(), crate::ErrorKind::Form);
+            let text = refused.to_string();
+            assert!(text.contains("says its \"criticality\""), "{refused}");
             // An entry that is written as a view has it stays as it is.
             assert_eq!(written(&listed, container, 0), Ok(listed));
         }
@@ -2193,7 +2269,8 @@ mod tests {
             deep = json!([deep]);
         }
         let refused = written(&deep, Shape::Unknown, 0).unwrap_err();
-        assert!(refused.contains("nests deeper"), "{refused}");
+        assert_eq!(refused.kind(), crate::ErrorKind::Limit);
+        assert!(refused.to_string().contains("nests deeper"), "{refused}");
     }
 
     #[test]

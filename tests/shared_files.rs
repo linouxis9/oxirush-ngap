@@ -1,8 +1,8 @@
 //! The files that oxirush-ngap and oxirush-s1ap have in common, octet for octet: the
-//! codec helpers, the paths of the inspection and the generators that both protocols
-//! run. Each crate holds the digest of each file, so that an edit in one fails here
-//! until the file is the same in the other and both record its new digest. This file is
-//! one of them, and the two crates keep it the same too.
+//! codec helpers, the paths of the inspection, the generators that both protocols run
+//! and the test of the README. Each crate holds the digest of each file, so that an
+//! edit in one fails here until the file is the same in the other and both record its
+//! new digest. This file is one of them, and the two crates keep it the same too.
 
 use std::path::Path;
 
@@ -15,6 +15,7 @@ const SHARED: &[(&str, u64)] = &[
     ("src/inspect_paths.rs", 0x815f2980e815b73e),
     ("src/per.rs", 0x80552549e724045f),
     ("src/sized.rs", 0xacd754552266ad78),
+    ("tests/readme.rs", 0xe02499cb40541d3c),
 ];
 
 /// The 64-bit FNV-1a digest of `octets`, without the carriage returns that a checkout

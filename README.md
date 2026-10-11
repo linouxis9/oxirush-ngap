@@ -885,9 +885,10 @@ regenerates them, as the ASN.1 is not in the repository.
 oxirush-ngap and oxirush-s1ap share, octet for octet, the code that does not
 depend on the protocol: `build/aper_fix.rs`, `build/containers.rs`,
 `build/inspection.rs`, `build/registry.rs`, `src/inspect_paths.rs`,
-`src/per.rs` and `src/sized.rs`. `tests/shared_files.rs` holds a digest of
-each, so that an edit in one crate fails its tests until the file is the same
-in the other and both record the new digest.
+`src/per.rs`, `src/sized.rs` and the test `tests/readme.rs`.
+`tests/shared_files.rs` holds a digest of each, so that an edit in one crate
+fails its tests until the file is the same in the other and both record the
+new digest.
 
 ### rasn integration
 

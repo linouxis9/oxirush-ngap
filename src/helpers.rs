@@ -61,15 +61,21 @@ pub(crate) fn plmn_octets(mcc: [u8; 3], mnc: &[u8]) -> [u8; 3] {
     [d2 << 4 | d1, d4 << 4 | d3, d6 << 4 | d5]
 }
 
-/// The half octets of the MCC and those of the MNC in the octets of a PLMN identity, in
-/// the order of [`plmn_octets`]: the MNC has two after a filler, and three otherwise.
-pub(crate) fn plmn_digits(octets: [u8; 3]) -> ([u8; 3], Vec<u8>) {
+/// The digits of the MCC and those of the MNC in the octets of a PLMN identity, in the
+/// order of [`plmn_octets`]: the MNC has two after a filler, and three otherwise. `None`
+/// for octets that are not a PLMN identity: a half octet is no digit, where it is not
+/// the filler before an MNC of two digits.
+pub(crate) fn plmn_digits(octets: [u8; 3]) -> Option<(String, String)> {
     let [first, second, third] = octets;
-    let mnc = match second >> 4 {
-        0x0F => vec![third & 0x0F, third >> 4],
-        digit => vec![digit, third & 0x0F, third >> 4],
+    let mcc = [first & 0x0F, first >> 4, second & 0x0F];
+    let mnc = [second >> 4, third & 0x0F, third >> 4];
+    let mnc = mnc.strip_prefix(&[0x0F]).unwrap_or(&mnc);
+    let digits = |digits: &[u8]| {
+        let digits = digits.iter();
+        let digits = digits.map(|digit| char::from_digit((*digit).into(), 10));
+        digits.collect::<Option<String>>()
     };
-    ([first & 0x0F, first >> 4, second & 0x0F], mnc)
+    Some((digits(&mcc)?, digits(mnc)?))
 }
 
 /// Encode MCC/MNC as the three octets of a `PLMNIdentity`, in the order of
@@ -100,11 +106,13 @@ pub fn plmn(mcc: &str, mnc: &str) -> PLMNIdentity {
 
 /// Decode a `PLMNIdentity` into MCC and MNC strings, in the order of
 /// TS 38.413 clause 9.3.3.5.
-pub fn plmn_from(identity: &PLMNIdentity) -> (String, String) {
+///
+/// `None` for octets that are not a PLMN identity: a half octet is no digit, where it
+/// is not the filler before an MNC of two digits. `ab cd ef` is none, and so is
+/// `02 f8 f9`.
+pub fn plmn_from(identity: &PLMNIdentity) -> Option<(String, String)> {
     let octets = &identity.0;
-    let (mcc, mnc) = plmn_digits([octets[0], octets[1], octets[2]]);
-    let digits = |digits: &[u8]| digits.iter().map(u8::to_string).collect();
-    (digits(&mcc), digits(&mnc))
+    plmn_digits([octets[0], octets[1], octets[2]])
 }
 
 /// AMF Region ID field width.
@@ -200,7 +208,7 @@ mod tests {
     fn plmn_round_trips_for_two_digit_mnc() {
         let identity = plmn("208", "93");
         assert_eq!(&identity.0[..], &[0x02, 0xF8, 0x39]);
-        assert_eq!(plmn_from(&identity), ("208".into(), "93".into()));
+        assert_eq!(plmn_from(&identity), Some(("208".into(), "93".into())));
     }
 
     #[test]
@@ -208,7 +216,23 @@ mod tests {
         // The digits 9 9 9 0 7 0, two in each octet, the second over the first.
         let identity = plmn("999", "070");
         assert_eq!(&identity.0[..], &[0x99, 0x09, 0x07]);
-        assert_eq!(plmn_from(&identity), ("999".into(), "070".into()));
+        assert_eq!(plmn_from(&identity), Some(("999".into(), "070".into())));
+    }
+
+    #[test]
+    fn octets_that_are_no_plmn_identity_have_no_mcc_and_no_mnc() {
+        // No digit at all, a filler in the MNC, a filler in the MCC, a filler before
+        // an MNC that has another one, and a digit over 9.
+        for octets in [
+            [0xab, 0xcd, 0xef],
+            [0x02, 0xf8, 0xf9],
+            [0x0f, 0xf8, 0x39],
+            [0x02, 0xf8, 0x3f],
+            [0x02, 0xa8, 0x39],
+        ] {
+            let identity = PLMNIdentity::from(octets);
+            assert_eq!(plmn_from(&identity), None, "{octets:02x?}");
+        }
     }
 
     #[test]

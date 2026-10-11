@@ -591,10 +591,11 @@ impl Form {
         };
         match self {
             Self::Plmn => {
-                // The order of the digits is that of the helpers.
+                // The order of the digits is that of the helpers, which have none for
+                // octets that are no PLMN identity: those stay octets.
                 let octets = <[u8; 3]>::try_from(unhex(jer).ok()?).ok()?;
-                let (mcc, mnc) = crate::helpers::plmn_digits(octets);
-                Some(json!(format!("{}-{}", digits(&mcc)?, digits(&mnc)?)))
+                let (mcc, mnc) = crate::helpers::plmn_digits(octets)?;
+                Some(json!(format!("{mcc}-{mnc}")))
             }
             Self::Digits => {
                 let octets = unhex(jer).ok()?;

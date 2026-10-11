@@ -27,6 +27,10 @@ is not source compatible with 0.4.2.
   0.4.2 declared 1.85 and did not build with it.
 - `helpers::plmn` writes other octets for an MNC of three digits, and
   `helpers::plmn_from` reads them: see the first entry of Fixed.
+- `helpers::plmn_from` returns an `Option<(String, String)>`, where it
+  returned the two strings: `None` for octets that are not a PLMN identity,
+  a half octet being no digit where it is not the filler before an MNC of
+  two digits. `ab cd ef` was the MCC `111013` and the MNC `151412`.
 
 ### Added
 

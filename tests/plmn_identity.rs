@@ -99,7 +99,8 @@ fn the_octets_of_a_plmn_identity_are_those_of_the_clause() {
         let identity = plmn(mcc, mnc);
         assert_eq!(&identity.0[..], octets, "{mcc}-{mnc}");
         let read = plmn_from(&PLMNIdentity::from(*octets));
-        assert_eq!(read, (mcc.to_string(), mnc.to_string()), "{octets:02x?}");
+        let digits = (mcc.to_string(), mnc.to_string());
+        assert_eq!(read, Some(digits), "{octets:02x?}");
     }
 }
 
@@ -122,7 +123,7 @@ fn the_identities_of_a_paging_are_those_that_tshark_reads() -> Result<(), Missin
         .0
         .iter()
         .map(|area| plmn_from(&area.t_ai.p_lmnidentity));
-    assert_eq!(identities.collect::<Vec<_>>(), read);
+    assert_eq!(identities.collect::<Option<Vec<_>>>(), Some(read));
 
     // And write the octets of the message for them.
     assert_eq!(areas, tracking_areas());
@@ -142,8 +143,57 @@ fn the_order_of_a_nas_message_is_another_network() {
         [("208".into(), "93".into()), ("310".into(), "041".into())]
     );
     let identity = PLMNIdentity::from([0x13, 0x00, 0x14]);
-    assert_eq!(plmn_from(&identity), read[1]);
+    assert_eq!(plmn_from(&identity), Some(read[1].clone()));
     assert_eq!(&plmn("310", "041").0[..], [0x13, 0x00, 0x14]);
+}
+
+/// Octets that are no PLMN identity have no MCC and no MNC: a half octet that is no
+/// digit, where it is not the filler before an MNC of two digits.
+#[test]
+fn octets_that_are_no_plmn_identity_are_refused() {
+    for octets in [
+        // No digit at all.
+        [0xab, 0xcd, 0xef],
+        // A filler in the MNC, in the MCC, and before an MNC that has another one.
+        [0x02, 0xf8, 0xf9],
+        [0x0f, 0xf8, 0x39],
+        [0x02, 0xf8, 0x3f],
+        // A half octet over 9.
+        [0x02, 0xa8, 0x39],
+    ] {
+        let identity = PLMNIdentity::from(octets);
+        assert_eq!(plmn_from(&identity), None, "{octets:02x?}");
+    }
+}
+
+/// With the `inspect` feature such octets are shown as they are, in hexadecimal, and
+/// are the same octets again: they are not shown as an MCC and an MNC that they are not.
+#[cfg(feature = "inspect")]
+#[test]
+fn octets_that_are_no_plmn_identity_are_shown_as_octets() {
+    use oxirush_ngap::inspect;
+    use serde_json::json;
+
+    for octets in ["abcdef", "02f8f9", "0ff839", "02f83f", "02a839"] {
+        let wire = hex::decode(PAGING.replacen("134001", octets, 1)).unwrap();
+        let pdu = NGAP_PDU::decode(&wire).unwrap();
+        let view = inspect::message_view(&pdu).unwrap();
+        let shown = inspect::select(&view, "/ngap/TAIListForPaging/1/tAI/pLMNIdentity").unwrap();
+        assert_eq!(shown, [&json!(octets.to_uppercase())]);
+        let tree = inspect::message_tree(&pdu).unwrap();
+        assert_eq!(
+            tree["ies"][1]["TAIListForPaging"][1]["tAI"]["pLMNIdentity"],
+            octets.to_uppercase()
+        );
+        assert_eq!(
+            inspect::message_from_view(&view).unwrap().encode().unwrap(),
+            wire
+        );
+        assert_eq!(
+            inspect::message_from_tree(&tree).unwrap().encode().unwrap(),
+            wire
+        );
+    }
 }
 
 /// With the `inspect` feature a PLMN identity is written and shown as its MCC and its

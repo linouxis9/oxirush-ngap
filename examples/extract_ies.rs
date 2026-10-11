@@ -57,10 +57,10 @@ fn handle_handover_required(pdu: &NGAP_PDU) -> Result<Vec<String>, MissingIeErro
 
         opt target: String = TargetID(target_value) => match target_value {
             TargetID::targetRANNodeID(value) => match value.global_rannode_id {
-                GlobalRANNodeID::globalGNB_ID(gnb) => {
-                    let (mcc, mnc) = plmn_from(&gnb.p_lmnidentity);
-                    format!("target gNB in PLMN {mcc}-{mnc}")
-                }
+                GlobalRANNodeID::globalGNB_ID(gnb) => match plmn_from(&gnb.p_lmnidentity) {
+                    Some((mcc, mnc)) => format!("target gNB in PLMN {mcc}-{mnc}"),
+                    None => "target gNB without a PLMN identity".to_string(),
+                },
                 _ => "non-gNB target".to_string(),
             },
             _ => "non-NG-RAN target".to_string(),

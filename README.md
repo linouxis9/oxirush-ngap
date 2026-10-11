@@ -301,7 +301,9 @@ A PLMN identity has its digits in the order of TS 38.413 clause 9.3.3.5: the
 three of the MCC, then the two or three of the MNC, two in each octet, the
 second over the first. `plmn("310", "410")` is the octets `13 40 01`. A NAS
 message has another order for an MNC of three digits, that of TS 24.008,
-where the same network is `13 00 14`.
+where the same network is `13 00 14`. `plmn_from` reads the MCC and the MNC
+of a PLMN identity, and has `None` for octets that are not one, as
+`ab cd ef`.
 
 ### Key types
 

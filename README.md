@@ -252,7 +252,7 @@ without it, the field is the `.0` of the generated newtype.
 
 | Field | Is | When the IE is absent or does not decode |
 |-------|----|------------------------------------------|
-| `req` | A `T` | The enclosing function, whose error type is `MissingIeError` itself, returns an `Err` that names the field |
+| `req` | A `T` | The enclosing function returns an `Err` that names the field: a `MissingIeError`, converted as `?` converts one, so the error type of the function is `MissingIeError`, `Box<dyn std::error::Error>` or any type with a `From<MissingIeError>` |
 | `opt` | An `Option<T>` | The field is `None` |
 
 ### Change or build one IE

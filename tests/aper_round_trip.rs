@@ -396,6 +396,71 @@ fn extraction_binding_may_share_the_field_name() -> Result<(), MissingIeError> {
     Ok(())
 }
 
+/// A message with the identifier that the functions below require, or without it.
+fn release_request(id: Option<u64>) -> UEContextReleaseRequest {
+    let ies = id
+        .map(|id| oxirush_ngap::build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(id)));
+    UEContextReleaseRequest::new(ProtocolIEContainer(ies.into_iter().collect()))
+}
+
+/// A `req` field that is not there is the error of the enclosing function: the
+/// macro converts its `MissingIeError` as `?` converts one, here into an error
+/// type of the caller that has a `From<MissingIeError>`.
+#[test]
+fn a_missing_required_ie_is_an_error_of_the_callers_own_type() {
+    #[derive(Debug, PartialEq)]
+    enum Refused {
+        Missing(&'static str),
+    }
+    impl From<MissingIeError> for Refused {
+        fn from(error: MissingIeError) -> Self {
+            Self::Missing(error.ie_name)
+        }
+    }
+    fn id(request: &UEContextReleaseRequest) -> Result<u64, Refused> {
+        extract_ngap_ies!(request, UEContextReleaseRequest,
+            req amf_id: u64 = AMF_UE_NGAP_ID(id),
+        );
+        Ok(amf_id)
+    }
+    assert_eq!(id(&release_request(None)), Err(Refused::Missing("amf_id")));
+    assert_eq!(id(&release_request(Some(42))), Ok(42));
+}
+
+/// The same in a function whose error is a `Box<dyn Error>`, which holds the
+/// `MissingIeError`.
+#[test]
+fn a_missing_required_ie_is_a_boxed_error() {
+    fn id(request: &UEContextReleaseRequest) -> Result<u64, Box<dyn std::error::Error>> {
+        extract_ngap_ies!(request, UEContextReleaseRequest,
+            req amf_id: u64 = AMF_UE_NGAP_ID(id),
+        );
+        Ok(amf_id)
+    }
+    let error = id(&release_request(None)).unwrap_err();
+    let missing = error.downcast_ref::<MissingIeError>().expect("the error");
+    assert_eq!(missing.ie_name, "amf_id");
+    assert_eq!(
+        error.to_string(),
+        "missing or invalid required NGAP IE: amf_id"
+    );
+    assert_eq!(id(&release_request(Some(42))).unwrap(), 42);
+}
+
+/// And in a function whose error is `MissingIeError` itself, which needs no
+/// conversion.
+#[test]
+fn a_missing_required_ie_is_a_missing_ie_error() {
+    fn id(request: &UEContextReleaseRequest) -> Result<u64, MissingIeError> {
+        extract_ngap_ies!(request, UEContextReleaseRequest,
+            req amf_id: u64 = AMF_UE_NGAP_ID(id),
+        );
+        Ok(amf_id)
+    }
+    assert_eq!(id(&release_request(None)).unwrap_err().ie_name, "amf_id");
+    assert_eq!(id(&release_request(Some(42))).unwrap(), 42);
+}
+
 /// An open type holds a complete encoding, in which an empty encoding is one
 /// zero octet (X.691 (07/2002) §10.1.4, §10.2.1). No NGAP IE value is
 /// empty, but the helper takes any type, such as NULL.

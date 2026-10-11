@@ -75,10 +75,11 @@
 //! [`MissingIeError`] from the enclosing function. Optional fields remain
 //! `Option<T>`.
 //!
-//! The enclosing function must return `Result<_, MissingIeError>`: the macro
-//! returns the error as it is, without a conversion. Without `=> expression`,
-//! extraction uses `binding.0`, which unwraps the usual single-field generated
-//! newtype.
+//! The enclosing function must return `Result<_, MissingIeError>` or a `Result`
+//! whose error type implements `From<MissingIeError>`, as
+//! `Box<dyn std::error::Error>` does: the macro converts the error as `?`
+//! converts one. Without `=> expression`, extraction uses `binding.0`, which
+//! unwraps the usual single-field generated newtype.
 //!
 //! ```
 //! use oxirush_ngap::{build_ngap_ie, extract_ngap_ies, macros::MissingIeError, ngap::*};
@@ -460,9 +461,12 @@ macro_rules! extract_ngap_ies {
         let $name = match $name {
             Some(value) => value,
             None => {
-                return Err($crate::macros::MissingIeError {
-                    ie_name: stringify!($name),
-                });
+                // The error of the enclosing function, converted as `?` converts one.
+                return Err(::core::convert::From::from(
+                    $crate::macros::MissingIeError {
+                        ie_name: stringify!($name),
+                    },
+                ));
             }
         };
     };

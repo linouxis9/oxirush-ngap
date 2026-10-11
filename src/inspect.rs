@@ -11,7 +11,6 @@
 //! - a PLMN identity as its MCC and MNC, `"208-93"`;
 //! - a transport layer address as an IP address, `"10.0.0.1"` or `"2001:db8::1"`, or as
 //!   the two with a comma when it holds both;
-//! - an IMSI as its digits;
 //! - an identifier or a counter, such as a TAC, a GTP-TEID, a TMSI, a cell identity, the
 //!   parts of a GUAMI or an SST, as a number.
 //!

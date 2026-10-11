@@ -6,10 +6,14 @@
 //! of a PDU keeps what was received, and the rest of this page is about it.
 //!
 //! [`message_view`] returns `procedure_code`, `direction`, `criticality` and `message`: the
-//! message in the ASN.1 JSON encoding (JER). An IE whose identifier has one type has its
-//! typed `value` (`extensionValue` in an extension container) in place of its octets. A
-//! contained transfer, and the value of an IE declared `OCTET STRING (CONTAINING ...)`, is
-//! its `decoded` value beside its `_raw_transfer`. Repeated IEs stay ordered array entries.
+//! message in the ASN.1 JSON encoding (JER). An IE whose identifier is known has its typed
+//! `value` (`extensionValue` in an extension container) in place of its octets. Its type
+//! is that of its identifier, and for an IE of an extension container the one that the
+//! type which the container extends gives it: id-CurrentQoSParaSetIndex is an
+//! `AlternativeQoSParaSetIndex` in a QoS flow that is associated with a tunnel, and an
+//! `AlternativeQoSParaSetNotifyIndex` in one that a notification is about. A contained
+//! transfer, and the value of an IE declared `OCTET STRING (CONTAINING ...)`, is its
+//! `decoded` value beside its `_raw_transfer`. Repeated IEs stay ordered array entries.
 //!
 //! The values of some well-known types are shown as they are usually written:
 //!
@@ -33,10 +37,10 @@
 //!   name that ASN.1 gives it. An entry whose `id` was changed is encoded as the type of
 //!   its new identifier;
 //! - `_decode_error`: why an IE's `value` is still its octets in hexadecimal, or why a
-//!   transfer has no `decoded` member. The identifier is unknown or has several types, the
-//!   octets do not decode, JER does not write the value or does not read it back as it
-//!   is, or the IE is nested deeper than 64 levels. The rest of the PDU is read all the
-//!   same;
+//!   transfer has no `decoded` member. The identifier is unknown, or is one of an
+//!   extension where it extends no type that gives it one, the octets do not decode, JER
+//!   does not write the value or does not read it back as it is, or the IE is nested
+//!   deeper than 64 levels. The rest of the PDU is read all the same;
 //! - `_edited`: [`set`], [`remove`] or [`insert`] changed something under the value, whose
 //!   octets are no longer those beside it.
 //!
@@ -47,7 +51,7 @@
 //!   This is refused when the octets received do not decode and encode back to themselves,
 //!   as with an extension addition that the typed value does not keep;
 //! - to add an IE, write an entry with its `id`, its `criticality` and its `value`, and no
-//!   `_raw_value`: the value is encoded as the type of the identifier, whatever JSON it is.
+//!   `_raw_value`: the value is encoded as the type of the IE, whatever JSON it is.
 //!   The `id` is a number, or the name of the IE. An IE is written this way wherever a
 //!   view has IEs: in a message that a transfer contains, in a value that is set whole,
 //!   and in a view written by hand;
@@ -245,7 +249,8 @@
 use serde_json::{Value, json};
 
 use crate::inspect_paths::{
-    EDITED, listed_ies, named_ies, of_a_transfer, open_with, same_name, written_ie,
+    EDITED, Shape, carried_shape, entry_shape, extended, listed_ies, member_shape, member_shapes,
+    message_shape, named_ies, of_a_transfer, open_with, same_name, written_ie,
 };
 pub use crate::inspect_paths::{check_path, enumerated_at, insert, paths, remove, select, set};
 use crate::inspect_registry as registry;
@@ -763,7 +768,7 @@ fn contained(raw: Value, typed: Result<Typed, String>) -> Value {
 fn opened(raw: Value, name: &str) -> Value {
     let typed = registry::carried(name);
     let mut transfer = contained(raw, typed.ok_or(format!("octets carry no {name}")));
-    expand(&mut transfer, 0);
+    expand(&mut transfer, 0, carried_shape(name));
     transfer
 }
 
@@ -813,9 +818,18 @@ fn too_deep<T>() -> Result<T, String> {
     Err(format!("inspection nesting exceeds {NESTING}"))
 }
 
-/// Decode the IEs and the transfers of `value`, which is `depth` deep in its view. What
-/// is deeper than [`NESTING`] keeps its octets, with why.
-fn expand(value: &mut Value, depth: usize) {
+/// The functions of the type of the IE `id` in a container of `shape`: the type of its
+/// identifier, or the one that the type which an extension container extends gives it.
+fn ie_type(id: u16, shape: Shape) -> Result<Typed, String> {
+    match crate::registry::extension(id, extended(shape)) {
+        Some(typed) => Ok(typed),
+        None => registry::ie(id),
+    }
+}
+
+/// Decode the IEs and the transfers of `value`, a value of `shape` which is `depth` deep
+/// in its view. What is deeper than [`NESTING`] keeps its octets, with why.
+fn expand(value: &mut Value, depth: usize, shape: Shape) {
     let deep = depth > NESTING;
     if let Some(object) = value.as_object_mut() {
         let field = if object.contains_key("value") {
@@ -836,7 +850,7 @@ fn expand(value: &mut Value, depth: usize) {
             }
             let decoded = match deep {
                 true => too_deep(),
-                false => unhex(&raw).and_then(|bytes| (registry::ie(id)?.decode)(&bytes)),
+                false => unhex(&raw).and_then(|bytes| (ie_type(id, shape)?.decode)(&bytes)),
             };
             match decoded {
                 Ok(decoded) => {
@@ -855,6 +869,8 @@ fn expand(value: &mut Value, depth: usize) {
                 }
             }
         }
+        // What each member is, once the entry of an IE says what it was decoded as.
+        let members = member_shapes(shape, object);
         for (key, child) in object {
             if !key.starts_with('_') {
                 if registry::TRANSFER_FIELDS.contains(&key.as_str()) && child.is_string() {
@@ -864,7 +880,7 @@ fn expand(value: &mut Value, depth: usize) {
                     };
                     *child = contained(child.take(), typed);
                 }
-                expand(child, depth + 1);
+                expand(child, depth + 1, member_shape(&members, key));
                 if let Some(form) = registry::member_form(key) {
                     show(form, child);
                 }
@@ -872,13 +888,14 @@ fn expand(value: &mut Value, depth: usize) {
         }
     } else if let Some(array) = value.as_array_mut() {
         for child in array {
-            expand(child, depth + 1);
+            expand(child, depth + 1, entry_shape(shape));
         }
     }
 }
 
-/// `member` is the name of the member that holds `value`, or the list it is in.
-fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String> {
+/// `member` is the name of the member that holds `value`, a value of `shape`, or the
+/// list it is in.
+fn collapse(value: &mut Value, member: &str, depth: usize, shape: Shape) -> Result<(), String> {
     // What is decoded at the limit of the inspection has values of its own under it.
     if depth > 4 * NESTING {
         return Err(format!("inspection nesting exceeds {}", 4 * NESTING));
@@ -890,9 +907,10 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
             .get("id")
             .and_then(Value::as_u64)
             .and_then(|v| u16::try_from(v).ok());
+        let members = member_shapes(shape, object);
         for (key, child) in object.iter_mut() {
             if !key.starts_with('_') {
-                collapse(child, key, depth + 1)?;
+                collapse(child, key, depth + 1, member_shape(&members, key))?;
                 if let Some(form) = registry::member_form(key) {
                     unshow(form, child)?;
                 }
@@ -984,7 +1002,7 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
             }
             let typed = |id: u16| {
                 let octets = format!("give its octets as _raw_value, without {field}");
-                registry::ie(id).map_err(|error| format!("{error}: {octets}"))
+                ie_type(id, shape).map_err(|error| format!("{error}: {octets}"))
             };
             if !undecoded
                 && let Some(form) = registry::ie_form(id)
@@ -1014,7 +1032,7 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
                         None => id,
                     };
                     let bytes = unhex(&raw)?;
-                    let received = registry::ie(original_id)?;
+                    let received = ie_type(original_id, shape)?;
                     let original = (received.decode)(&bytes)?;
                     if &original == edited && id == original_id {
                         raw
@@ -1034,7 +1052,7 @@ fn collapse(value: &mut Value, member: &str, depth: usize) -> Result<(), String>
         }
     } else if let Some(array) = value.as_array_mut() {
         for child in array {
-            collapse(child, member, depth + 1)?;
+            collapse(child, member, depth + 1, entry_shape(shape))?;
         }
     }
     Ok(())
@@ -1147,7 +1165,7 @@ pub fn message_view(pdu: &NGAP_PDU) -> Result<Value, String> {
     let direction = pdu.direction();
     let raw = body["value"].clone();
     let mut message = (message_type(direction, code)?.decode)(&unhex(&raw)?)?;
-    expand(&mut message, 0);
+    expand(&mut message, 0, message_shape(direction, code));
     Ok(
         json!({"procedure_code": code, "direction": direction, "criticality": body["criticality"], "message": message, "_raw_message": raw}),
     )
@@ -1184,7 +1202,7 @@ pub fn message_from_view(view: &Value) -> Result<NGAP_PDU, String> {
         _ => return Err("invalid direction".into()),
     };
     let mut message = view.get("message").ok_or("missing message")?.clone();
-    collapse(&mut message, "", 0)?;
+    collapse(&mut message, "", 0, message_shape(direction, code))?;
     let raw = if let Some(original) = view.get("_raw_message") {
         let original = unhex(original)?;
         let typed = message_type(direction, code)?;

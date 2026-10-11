@@ -309,7 +309,7 @@ ies! {
     218 "NRUESidelinkAggregateMaximumBitrate" crate::ngap::NRUESidelinkAggregateMaximumBitrate => NRUESidelinkAggregateMaximumBitrate;
     219 "PC5QoSParameters" crate::ngap::PC5QoSParameters => PC5QoSParameters;
     220 "AlternativeQoSParaSetList" crate::ngap::AlternativeQoSParaSetList;
-    221 "CurrentQoSParaSetIndex";
+    221 "CurrentQoSParaSetIndex" [crate::ngap::AlternativeQoSParaSetIndex: AssociatedQosFlowItem QosFlowAcceptedItem QosFlowAddOrModifyResponseItem QosFlowItemWithDataForwarding, crate::ngap::AlternativeQoSParaSetNotifyIndex: QosFlowNotifyItem];
     222 "CEmodeBrestricted" crate::ngap::CEmodeBrestricted => CEmodeBrestricted;
     223 "EUTRA-PagingeDRXInformation" crate::ngap::EUTRAPagingeDRXInformation => EUTRA_PagingeDRXInformation EUTRAPagingeDRXInformation;
     224 "CEmodeBSupport-Indicator" crate::ngap::CEmodeBSupportIndicator => CEmodeBSupport_Indicator CEmodeBSupportIndicator;
@@ -479,7 +479,7 @@ ies! {
     394 "DownlinkTLContainer" crate::ngap::TLContainer => DownlinkTLContainer TLContainer;
     395 "UplinkTLContainer" crate::ngap::TLContainer;
     396 "ANPacketDelayBudgetUL" crate::ngap::ExtendedPacketDelayBudget;
-    397 "QosFlowAdditionalInfoList";
+    397 "QosFlowAdditionalInfoList" [crate::ngap::QosFlowAdditionalInfoListRelCom: PDUSessionResourceReleaseCommandTransfer, crate::ngap::QosFlowAdditionalInfoListRelRes: PDUSessionResourceReleaseResponseTransfer];
     398 "AssistanceInformationQoE-Meas" crate::ngap::AssistanceInformationQoEMeas;
     399 "CommServiceType" crate::ngap::CommServiceType;
     400 "MobileIAB-Authorized" crate::ngap::MobileIABAuthorized => MobileIAB_Authorized MobileIABAuthorized;

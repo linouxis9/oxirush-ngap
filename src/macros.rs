@@ -312,17 +312,19 @@ pub(crate) use presence;
 
 /// The IEs of the protocol, which `src/registry.rs` lists from the ASN.1: the identifier,
 /// the name that ASN.1 gives it and the type of each, the type that its octets contain,
-/// then the names that the macros take it by: its own, then those of its type. An
-/// identifier that has several types has its name alone. An IE that a value holds alone,
-/// in a single container, has its criticality after its identifier when its object sets
-/// give it one.
+/// then the names that the macros take it by: its own, then those of its type. An IE
+/// that a value holds alone, in a single container, has its criticality after its
+/// identifier when its object sets give it one. An IE of an extension container that
+/// has the type which the type that it extends gives it has its types in brackets, each
+/// with the types that it extends so.
 ///
 /// The identifier and the type that a name stands for in the macros and, with the
 /// `inspect` feature, the names and the types of a view and of a tree and the
 /// criticality of an IE in a single container all come from these lines.
 macro_rules! ies {
     ($($id:literal $($item:ident)? $name:literal
-        $($ie:path $(, $contents:path)? $(=> $own:ident $($alias:ident)*)?)?;
+        $($ie:path $(, $contents:path)? $(=> $own:ident $($alias:ident)*)?)?
+        $([$($extending:path: $($extended:ident)+),+])?;
     )*) => {
         /// The identifier and the type of each IE, by the names that the macros take.
         #[doc(hidden)]
@@ -351,11 +353,45 @@ macro_rules! ies {
             $($(($id, stringify!($ie), concat!($(stringify!($contents))?)),)?)*
         ];
 
+        /// The IEs of an extension container that have the type which the type that
+        /// they extend gives them: the identifier, the name of a type that is extended
+        /// and the path of the type that the IE has there.
+        #[cfg(feature = "inspect")]
+        pub(crate) const EXTENSION_TYPES: &[(u16, &str, &str)] = &[
+            $($($($(($id, stringify!($extended), stringify!($extending)),)+)+)?)*
+        ];
+
+        /// The functions of the type of the IE `id` where it extends the type that the
+        /// bindings name `extended`; `None` for an IE that has its type whatever it
+        /// extends.
+        #[cfg(feature = "inspect")]
+        #[allow(clippy::match_single_binding)]
+        pub(crate) fn extension(id: u16, extended: &str) -> Option<$crate::inspect::Typed> {
+            match (id, extended) {
+                $($($($(($id, stringify!($extended)) => {
+                    Some($crate::inspect::Typed::of::<$extending>())
+                })+)+)?)*
+                _ => None,
+            }
+        }
+
         #[cfg(feature = "inspect")]
         pub(crate) fn ie(id: u16) -> Result<$crate::inspect::Typed, String> {
             match id {
                 $($($id => Ok($crate::inspect::Typed::of::<$ie>()),)?)*
-                _ => Err(format!("NGAP IE {id} is unknown or has several types")),
+                _ => {
+                    // An IE that has a type for each type that it extends has none
+                    // elsewhere.
+                    let extensions = EXTENSION_TYPES.iter().filter(|(known, ..)| *known == id);
+                    let extended: Vec<_> = extensions.map(|(_, extended, _)| *extended).collect();
+                    Err(match extended.is_empty() {
+                        true => format!("NGAP IE {id} is unknown"),
+                        false => format!(
+                            "NGAP IE {id} has a type where it extends {}, and none here",
+                            extended.join(", ")
+                        ),
+                    })
+                }
             }
         }
 

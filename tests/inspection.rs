@@ -2425,3 +2425,293 @@ fn an_ie_with_a_string_of_bits_of_another_size_stays_octets() {
     ]});
     assert!(inspect::message_from_tree(&written).is_err());
 }
+
+/// What a PDU that is written from `tree` has for the IE of the extension container at
+/// `extension`, a path, whose type is the one that the type which the container extends
+/// gives it. In a view the value at `at` under the IE is `value`, and the octets of the
+/// IE are `octets`, which the bindings give a value of its type. The PDU is the same
+/// octets through its view and through its tree. Set to `other` through the view, the IE
+/// has `other_octets`, and the edited PDU is its tree again.
+fn an_extension_has_its_type(
+    tree: serde_json::Value,
+    extension: &str,
+    at: &str,
+    (value, octets): (serde_json::Value, rasn::types::Any),
+    (other, other_octets): (serde_json::Value, rasn::types::Any),
+) {
+    let at = format!("{extension}/{at}");
+    let received = |view: &serde_json::Value| -> String {
+        let octets = inspect::select(view, &format!("{extension}/octets")).unwrap();
+        octets[0].as_str().unwrap().to_lowercase()
+    };
+
+    // Written from its tree, and typed in the view of what was received.
+    let pdu = inspect::message_from_tree(&tree).unwrap();
+    let wire = pdu.encode().unwrap();
+    let mut view = inspect::message_view(&NGAP_PDU::decode(&wire).unwrap()).unwrap();
+    assert_eq!(inspect::select(&view, &at).unwrap(), [&value], "{at}");
+    assert_eq!(received(&view), hex::encode(octets.as_bytes()), "{at}");
+    let entries = inspect::select(&view, extension).unwrap();
+    assert!(entries[0]["_decode_error"].is_null(), "{}", entries[0]);
+
+    // The same octets back, through the view and through the tree.
+    assert_eq!(
+        inspect::message_from_view(&view).unwrap().encode().unwrap(),
+        wire
+    );
+    let shown = inspect::message_tree(&pdu).unwrap();
+    assert_eq!(shown, tree);
+    assert_eq!(
+        inspect::message_from_tree(&shown)
+            .unwrap()
+            .encode()
+            .unwrap(),
+        wire
+    );
+
+    // Edited through the view, and the edited PDU through its tree.
+    inspect::set(&mut view, &at, other.clone()).unwrap();
+    let edited = inspect::message_from_view(&view).unwrap();
+    let after = inspect::message_view(&edited).unwrap();
+    assert_eq!(inspect::select(&after, &at).unwrap(), [&other], "{at}");
+    assert_eq!(
+        received(&after),
+        hex::encode(other_octets.as_bytes()),
+        "{at}"
+    );
+    let shown = inspect::message_tree(&edited).unwrap();
+    let written = inspect::message_from_tree(&shown).unwrap();
+    assert_eq!(written.encode().unwrap(), edited.encode().unwrap());
+}
+
+/// id-CurrentQoSParaSetIndex is an AlternativeQoSParaSetIndex where it extends an
+/// associated QoS flow and an AlternativeQoSParaSetNotifyIndex where it extends a notified
+/// one: an IE of an extension container has the type that the type which the container
+/// extends gives it, and the two types give the same number other octets.
+#[test]
+fn the_qos_parameter_set_index_has_the_type_of_what_it_extends() {
+    use serde_json::json;
+    let index = |index: u8| encode_open_type(&AlternativeQoSParaSetIndex(index.into())).unwrap();
+    let notified =
+        |index: u8| encode_open_type(&AlternativeQoSParaSetNotifyIndex(index.into())).unwrap();
+    assert_eq!(
+        (index(3).as_bytes(), notified(3).as_bytes()),
+        (&[0x20][..], &[0x18][..])
+    );
+
+    // Of a QoS flow that a notification is about.
+    let notify = json!({"message": "PDUSessionResourceNotify", "ies": [
+        {"AMF-UE-NGAP-ID": 1},
+        {"RAN-UE-NGAP-ID": 2},
+        {"PDUSessionResourceNotifyList": [{
+            "pDUSessionID": 5,
+            "pDUSessionResourceNotifyTransfer": {"qosFlowNotifyList": [{
+                "qosFlowIdentifier": 1,
+                "notificationCause": "fulfilled",
+                "iE-Extensions": [{"CurrentQoSParaSetIndex": 3, "criticality": "ignore"}],
+            }]},
+        }]},
+    ]});
+    let notify_transfer = "/ngap/PDUSessionResourceNotifyList/0/pDUSessionResourceNotifyTransfer";
+    let notified_flow = format!("{notify_transfer}/qosFlowNotifyList/0/iE-Extensions");
+    an_extension_has_its_type(
+        notify,
+        &format!("{notified_flow}/0"),
+        "extensionValue",
+        (json!(3), notified(3)),
+        (json!(0), notified(0)),
+    );
+
+    // Of a QoS flow that is associated with a tunnel.
+    let setup = json!({"message": "PDUSessionResourceSetupResponse", "ies": [
+        {"AMF-UE-NGAP-ID": 1},
+        {"RAN-UE-NGAP-ID": 2},
+        {"PDUSessionResourceSetupListSURes": [{
+            "pDUSessionID": 5,
+            "pDUSessionResourceSetupResponseTransfer": {"dLQosFlowPerTNLInformation": {
+                "uPTransportLayerInformation": {"gTPTunnel": {
+                    "transportLayerAddress": "10.0.0.1",
+                    "gTP-TEID": 1,
+                }},
+                "associatedQosFlowList": [{
+                    "qosFlowIdentifier": 1,
+                    "iE-Extensions": [{"CurrentQoSParaSetIndex": 3, "criticality": "ignore"}],
+                }],
+            }},
+        }]},
+    ]});
+    let setup_transfer =
+        "/ngap/PDUSessionResourceSetupListSURes/0/pDUSessionResourceSetupResponseTransfer";
+    let associated_flow = format!(
+        "{setup_transfer}/dLQosFlowPerTNLInformation/associatedQosFlowList/0/iE-Extensions"
+    );
+    an_extension_has_its_type(
+        setup,
+        &format!("{associated_flow}/CurrentQoSParaSetIndex"),
+        "extensionValue",
+        (json!(3), index(3)),
+        (json!(8), index(8)),
+    );
+
+    // A path is read against the type without a view, by the name of the IE, by its
+    // identifier and after its position, and a value that the type does not have is
+    // refused.
+    for (message, extensions) in [
+        ("PDUSessionResourceNotify", &notified_flow),
+        ("PDUSessionResourceSetupResponse", &associated_flow),
+    ] {
+        for ie in [
+            "CurrentQoSParaSetIndex",
+            "@id=221",
+            "0/CurrentQoSParaSetIndex",
+        ] {
+            let value = format!("{extensions}/{ie}/extensionValue");
+            assert_eq!(inspect::check_path(message, &value), Ok(()), "{value}");
+            assert_eq!(inspect::enumerated_at(message, &value), Ok(None), "{value}");
+            let member = format!("{value}/member");
+            let refused = inspect::check_path(message, &member).unwrap_err();
+            assert!(refused.contains("which has none"), "{refused}");
+        }
+    }
+
+    // Where it extends nothing that gives it a type, it has none: it is sent as octets.
+    let alone = |value: serde_json::Value| {
+        json!({"message": "PDUSessionResourceNotify", "ies": [
+            {"CurrentQoSParaSetIndex": value, "criticality": "ignore"},
+        ]})
+    };
+    let refused = inspect::message_from_tree(&alone(json!(3))).unwrap_err();
+    assert!(
+        refused.contains("NGAP IE 221 has a type where it extends"),
+        "{refused}"
+    );
+    assert!(
+        refused.contains("QosFlowNotifyItem") && refused.contains("none here"),
+        "{refused}"
+    );
+    let pdu = inspect::message_from_tree(&alone(json!({"octets": "18"}))).unwrap();
+    let view = inspect::message_view(&pdu).unwrap();
+    let error = view["message"]["protocolIEs"][0]["_decode_error"].as_str();
+    assert!(
+        error.is_some_and(|error| error.contains("none here")),
+        "{view}"
+    );
+    assert_eq!(
+        inspect::message_tree(&pdu).unwrap(),
+        alone(json!({"octets": "18"}))
+    );
+}
+
+/// id-QosFlowAdditionalInfoList is a QosFlowAdditionalInfoListRelCom where it extends the
+/// transfer of a release command and a QosFlowAdditionalInfoListRelRes where it extends
+/// that of a release response: the items of the first have a downlink container, and
+/// those of the second an uplink one.
+#[test]
+fn the_additional_information_of_qos_flows_has_the_type_of_what_it_extends() {
+    use serde_json::json;
+    let flow = || QosFlowIdentifier(1.into());
+    let container = |octets: &[u8]| Some(TLContainer(octets.to_vec().into()));
+    let command = |octets: &[u8]| {
+        let item = QosFlowAdditionalInfoItemRelCom::new(flow(), container(octets), None);
+        encode_open_type(&QosFlowAdditionalInfoListRelCom(vec![item])).unwrap()
+    };
+    let response = |octets: &[u8]| {
+        let item = QosFlowAdditionalInfoItemRelRes::new(flow(), container(octets), None);
+        encode_open_type(&QosFlowAdditionalInfoListRelRes(vec![item])).unwrap()
+    };
+
+    // Of the transfer of a release command.
+    let flows = |container: &str| json!([{"qosFlowIdentifier": 1, container: "0102"}]);
+    let released = |container: &str| {
+        json!({"message": "PDUSessionResourceReleaseCommand", "ies": [
+            {"AMF-UE-NGAP-ID": 1},
+            {"RAN-UE-NGAP-ID": 2},
+            {"PDUSessionResourceToReleaseListRelCmd": [{
+                "pDUSessionID": 5,
+                "pDUSessionResourceReleaseCommandTransfer": {
+                    "cause": {"nas": "normal-release"},
+                    "iE-Extensions": [
+                        {"QosFlowAdditionalInfoList": flows(container), "criticality": "ignore"},
+                    ],
+                },
+            }]},
+        ]})
+    };
+    let command_transfer = "/ngap/PDUSessionResourceToReleaseListRelCmd/0\
+        /pDUSessionResourceReleaseCommandTransfer/iE-Extensions";
+    an_extension_has_its_type(
+        released("downlinkTLContainer"),
+        &format!("{command_transfer}/QosFlowAdditionalInfoList"),
+        "0/downlinkTLContainer",
+        (json!("0102"), command(&[1, 2])),
+        (json!("0A0B0C"), command(&[10, 11, 12])),
+    );
+
+    // Of the transfer of a release response.
+    let responded = |container: &str| {
+        json!({"message": "PDUSessionResourceReleaseResponse", "ies": [
+            {"AMF-UE-NGAP-ID": 1},
+            {"RAN-UE-NGAP-ID": 2},
+            {"PDUSessionResourceReleasedListRelRes": [{
+                "pDUSessionID": 5,
+                "pDUSessionResourceReleaseResponseTransfer": {"iE-Extensions": [
+                    {"QosFlowAdditionalInfoList": flows(container), "criticality": "ignore"},
+                ]},
+            }]},
+        ]})
+    };
+    let response_transfer = "/ngap/PDUSessionResourceReleasedListRelRes/0\
+        /pDUSessionResourceReleaseResponseTransfer/iE-Extensions";
+    an_extension_has_its_type(
+        responded("uplinkTLContainer"),
+        &format!("{response_transfer}/0"),
+        "0/uplinkTLContainer",
+        (json!("0102"), response(&[1, 2])),
+        (json!("0A0B0C"), response(&[10, 11, 12])),
+    );
+
+    // Each has the members of its type, written and at a path, and not those of the other.
+    for wrong in [
+        released("uplinkTLContainer"),
+        responded("downlinkTLContainer"),
+    ] {
+        let refused = inspect::message_from_tree(&wrong).unwrap_err();
+        assert!(
+            refused.contains("a member that its ASN.1 type does not have"),
+            "{refused}"
+        );
+    }
+    for (message, extensions, has, has_not) in [
+        (
+            "PDUSessionResourceReleaseCommand",
+            command_transfer,
+            "downlinkTLContainer",
+            "uplinkTLContainer",
+        ),
+        (
+            "PDUSessionResourceReleaseResponse",
+            response_transfer,
+            "uplinkTLContainer",
+            "downlinkTLContainer",
+        ),
+    ] {
+        for ie in [
+            "QosFlowAdditionalInfoList",
+            "@id=397",
+            "0/QosFlowAdditionalInfoList",
+        ] {
+            let item = format!("{extensions}/{ie}/0");
+            assert_eq!(
+                inspect::check_path(message, &format!("{item}/{has}")),
+                Ok(()),
+                "{item}"
+            );
+            let refused = inspect::check_path(message, &format!("{item}/{has_not}")).unwrap_err();
+            assert!(
+                refused.contains("is not a member of QosFlowAdditionalInfoItemRel"),
+                "{refused}"
+            );
+            assert!(refused.contains(has), "{refused}");
+        }
+    }
+}

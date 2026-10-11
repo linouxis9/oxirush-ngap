@@ -612,6 +612,7 @@ pub(super) fn generate(
     let messages = registry.procedures.values().flat_map(|p| p.messages.iter());
     let roots = (messages.flatten().map(|message| message.ty.clone()))
         .chain(registry.ies.values().filter_map(|ie| alone(&ie.types)))
+        .chain(registry.ies.values().flat_map(|ie| ie.extends.keys().cloned()))
         .chain(registry.ies.values().filter_map(|ie| alone(&ie.contents)))
         .chain(transfers.values().filter_map(alone))
         .chain(carriers)

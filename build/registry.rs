@@ -38,10 +38,14 @@ pub(crate) struct Message {
 /// the single containers give it, and the names that the macros take it by.
 /// The macros take the IE of a message by its own name and, where one type has one IE,
 /// by the name of that type and by the aliases that the bindings give the type.
+/// An IE of an extension container has the type that the type which it extends gives
+/// it: `extends` has each of these types with the types of the bindings that it
+/// extends so.
 #[derive(Default)]
 pub(crate) struct Ie {
     pub(crate) name: String,
     pub(crate) types: BTreeSet<String>,
+    pub(crate) extends: BTreeMap<String, BTreeSet<String>>,
     pub(crate) contents: BTreeSet<String>,
     pub(crate) items: BTreeSet<String>,
     pub(crate) macros: Vec<String>,
@@ -140,8 +144,9 @@ impl Registry {
         writeln!(out, "}}")?;
         // The identifier, the criticality of the IE in a single container when its object
         // sets give it one, the name and the type, the type that the octets of the IE
-        // contain, then the names that the macros take the IE by. An identifier that has
-        // several types has its name alone.
+        // contain, then the names that the macros take the IE by. An IE of an extension
+        // container that has several types has them in brackets, each with the types
+        // that it extends so.
         writeln!(out, "ies! {{")?;
         for (id, ie) in &self.ies {
             write!(out, "    {id}")?;
@@ -152,11 +157,28 @@ impl Registry {
             match (alone(&ie.types), alone(&ie.contents)) {
                 (Some(ty), Some(contained)) => write!(out, " {ty}, {contained}")?,
                 (Some(ty), None) => write!(out, " {ty}")?,
-                (None, None) => ensure!(
-                    ie.macros.is_empty(),
-                    "{}: the macros take an IE that has several types",
-                    ie.name
-                ),
+                (None, None) => {
+                    ensure!(
+                        ie.macros.is_empty(),
+                        "{}: the macros take an IE that has several types",
+                        ie.name
+                    );
+                    // Each type has the types that the IE extends with it, and no type
+                    // is extended with two.
+                    let extended = ie.extends.values().flatten();
+                    let extended: Vec<_> = extended.collect();
+                    let distinct: BTreeSet<_> = extended.iter().collect();
+                    ensure!(
+                        ie.extends.keys().eq(ie.types.iter()) && distinct.len() == extended.len(),
+                        "{}: an IE has several types, and not one for each type that it extends",
+                        ie.name
+                    );
+                    let types = ie.extends.iter().map(|(ty, extended)| {
+                        let extended: Vec<_> = extended.iter().map(String::as_str).collect();
+                        format!("{ty}: {}", extended.join(" "))
+                    });
+                    write!(out, " [{}]", types.collect::<Vec<_>>().join(", "))?;
+                }
                 (None, Some(_)) => bail!("{} contains a type and has several", ie.name),
             }
             if !ie.macros.is_empty() {
@@ -268,6 +290,17 @@ impl Registry {
                 }
             }
         }
+        // The type that an IE has where it extends each type.
+        for (constant, extended, ty) in extensions(protocol, asn)? {
+            let id = ids.get(&constant).map(|(id, _)| id);
+            let ie = id.and_then(|id| ies.get_mut(id));
+            if let (Some(ie), Some(extended), Some(ty)) =
+                (ie, self.resolve(&extended), self.resolve(&ty))
+            {
+                let extended = extended.rsplit("::").next().expect("a path").to_string();
+                ie.extends.entry(ty).or_default().insert(extended);
+            }
+        }
         // The criticalities of the IEs that a value holds alone, in a single container.
         for (name, criticalities) in single_containers(protocol, asn)? {
             let id = ids.get(&name).map(|(id, _)| id);
@@ -323,6 +356,43 @@ fn identifiers(asn: &str) -> Result<BTreeMap<String, (u16, bool)>> {
         .captures_iter(asn)
         .map(|c| Ok((c[1].to_string(), (c[3].parse()?, &c[2] == "ProtocolIE-ID"))))
         .collect()
+}
+
+/// The objects of the extension sets: the constant of the IE, the type that the set
+/// extends and the type that the object gives the IE there, each as ASN.1 names it. A
+/// set extends the type whose definition has it in its extension container.
+fn extensions(protocol: &str, asn: &str) -> Result<Vec<(String, String, String)>> {
+    let set = Regex::new(&format!(
+        r"(?ms)^[\t ]*([A-Za-z][A-Za-z0-9-]*)\s+{protocol}-PROTOCOL-EXTENSION\s*::=\s*\{{(.*?)^[\t ]*\}}"
+    ))?;
+    let object = Regex::new(
+        r"\{\s*ID\s+(id-[A-Za-z][A-Za-z0-9-]*)\s+CRITICALITY\s+[A-Za-z-]+\s+EXTENSION\s+([A-Za-z][A-Za-z0-9-]*)\s+PRESENCE",
+    )?;
+    // Each use of a set as an extension container, and each definition of a type: a
+    // container is in the definition that starts last before it.
+    let container = Regex::new(
+        r"ProtocolExtensionContainer\s*\{\s*\{\s*([A-Za-z][A-Za-z0-9-]*)\s*\}\s*\}",
+    )?;
+    let definition = Regex::new(r"(?m)^([A-Za-z][A-Za-z0-9-]*)\s*::=")?;
+    let definitions: Vec<_> = definition.captures_iter(asn).collect();
+    let mut extended: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
+    for used in container.captures_iter(asn) {
+        let at = used.get(0).expect("a match").start();
+        let before = definitions.partition_point(|c| c.get(0).expect("a match").start() < at);
+        if let Some(definition) = before.checked_sub(1).map(|last| &definitions[last]) {
+            let name = definition.get(1).expect("a name").as_str();
+            extended.entry(used.get(1).expect("a set").as_str()).or_default().push(name);
+        }
+    }
+    let mut found = Vec::new();
+    for set in set.captures_iter(asn) {
+        for extended in extended.get(&set[1]).into_iter().flatten() {
+            for object in object.captures_iter(&set[2]) {
+                found.push((object[1].to_string(), extended.to_string(), object[2].to_string()));
+            }
+        }
+    }
+    Ok(found)
 }
 
 /// The criticalities that each IE has in the object sets of the single containers, by the

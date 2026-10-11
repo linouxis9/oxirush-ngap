@@ -114,6 +114,18 @@ is not source compatible with 0.4.2.
   The name of another IE there is an error that says which IE the entry is,
   and `inspect::check_path` reads what follows a position and a name against
   the type of that IE.
+- With the `inspect` feature, an IE of an extension container has the type
+  that the type which the container extends gives it, where its identifier
+  alone does not say its type. `id-CurrentQoSParaSetIndex` is an
+  `AlternativeQoSParaSetIndex` in a QoS flow that is associated, accepted,
+  modified or forwarded and an `AlternativeQoSParaSetNotifyIndex` in one that
+  a notification is about, and `id-QosFlowAdditionalInfoList` a
+  `QosFlowAdditionalInfoListRelCom` in the transfer of a release command and
+  a `QosFlowAdditionalInfoListRelRes` in that of a release response. The two
+  are read, edited and written in a view and in a tree, and
+  `inspect::check_path` and `inspect::enumerated_at` read a path into them
+  against their type. The list of `src/registry.rs` has each of their types
+  with the types that it extends.
 
 ### Changed
 
@@ -142,6 +154,10 @@ is not source compatible with 0.4.2.
   that it does not have is refused. The `octets` of an IE or a transfer whose
   value an edit changed are an error to select, and `*` leaves out the
   members that start with `_`.
+- The error of an identifier that no object set has is `NGAP IE N is unknown`,
+  where it said `is unknown or has several types`. An IE that has a type for
+  each type that it extends has none where it extends none of them, and its
+  error names those types.
 - The name of an ENUMERATED value of the PDU itself, its `criticality`, is
   taken whatever its case, as those of its IEs are.
 - What is nested deeper than 64 levels stays as its octets beside a

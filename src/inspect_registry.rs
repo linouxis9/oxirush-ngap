@@ -2424,8 +2424,10 @@ open_types! { crate::ngap::ngap_ies::AllowedPNINPNItem { i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AllowedPNINPNList { 0 } }
 open_types! { crate::ngap::ngap_ies::AllowedNSSAI { 0 } }
 open_types! { crate::ngap::ngap_ies::AllowedNSSAIItem { s_nssai, i_e_extensions } }
+open_types! { crate::ngap::ngap_ies::AlternativeQoSParaSetIndex {} }
 open_types! { crate::ngap::ngap_ies::AlternativeQoSParaSetItem { packet_error_rate, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AlternativeQoSParaSetList { 0 } }
+open_types! { crate::ngap::ngap_ies::AlternativeQoSParaSetNotifyIndex {} }
 open_types! { crate::ngap::ngap_ies::AreaID { tAI, globalRANNodeID, nR_CGI, choice_Extensions } else {} }
 open_types! { crate::ngap::ngap_ies::AreaOfInterest { area_of_interest_tailist, area_of_interest_cell_list, area_of_interest_rannode_list, i_e_extensions } }
 open_types! { crate::ngap::ngap_ies::AreaOfInterestCellItem { n_gran_cgi, i_e_extensions } }

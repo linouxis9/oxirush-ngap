@@ -6,6 +6,9 @@ use serde_json::{Map, Value, json};
 // The name of the protocol, the first segment of the paths of the IEs of the message of
 // a PDU, and what the ASN.1 says of the messages, the IEs and the types.
 use crate::inspect_registry::{CARRIED, ENUMERATIONS, IE_TYPES, MESSAGES, PROTOCOL, ROOT, TYPES};
+// The type that an IE of an extension container has where its identifier alone does not
+// say it: the one that the type which the container extends gives it.
+use crate::registry::EXTENSION_TYPES;
 /// The member of a view that holds the message of the PDU.
 const MESSAGE: &str = "message";
 /// The member of a message that holds its IEs.
@@ -45,12 +48,14 @@ pub(crate) enum Shape {
     /// The IEs of a container: those of the object set of this message, or of a set
     /// that the tables do not have.
     Ies(Option<Sent>),
-    /// The IEs of an extension container.
-    Extensions,
+    /// The IEs of an extension container, which extends the type that the bindings give
+    /// this name. No name: the tables do not say what the container extends.
+    Extensions(&'static str),
     /// An IE of a container, of this identifier when the path says it.
     Ie(Option<u16>),
-    /// An IE of an extension container.
-    Extension(Option<u16>),
+    /// An IE of an extension container, of this identifier when the path says it, where
+    /// the container extends the type of this name.
+    Extension(Option<u16>, &'static str),
     /// Octets that contain a value of the type of this name, which the view shows
     /// decoded beside them. No name: the octets have one of several types.
     Transfer(&'static str),
@@ -99,10 +104,10 @@ macro_rules! shape {
         $crate::inspect_paths::Shape::Ie(None)
     };
     (extensions) => {
-        $crate::inspect_paths::Shape::Extensions
+        $crate::inspect_paths::Shape::Extensions("")
     };
     (extension) => {
-        $crate::inspect_paths::Shape::Extension(None)
+        $crate::inspect_paths::Shape::Extension(None, "")
     };
     ([$of:tt]) => {
         $crate::inspect_paths::Shape::List(&$crate::inspect_paths::shape!($of))
@@ -330,18 +335,34 @@ fn resolved(mut shape: Shape) -> Shape {
     Shape::Unknown
 }
 
-/// The shape of the value of the IE of an identifier.
-fn ie_value(id: Option<u16>) -> Shape {
+/// The name of the type that the extension container of `shape`, or of an IE of `shape`,
+/// extends; no name for another shape, and where the tables do not say.
+pub(crate) fn extended(shape: Shape) -> &'static str {
+    match shape {
+        Shape::Extensions(extended) | Shape::Extension(_, extended) => extended,
+        _ => "",
+    }
+}
+
+/// The shape of the value of the IE of an identifier, in the extension container of the
+/// type that the bindings name `extended` when it is in one.
+fn ie_value(id: Option<u16>, extended: &str) -> Shape {
     let Some(id) = id else {
         return Shape::Unknown;
     };
     if CARRIED.iter().any(|(carrier, ..)| *carrier == id) {
         return Shape::Carrier(id);
     }
+    // An IE that has the type which the type that it extends gives it.
+    let mut extensions = EXTENSION_TYPES.iter();
+    if let Some((.., ty)) = extensions.find(|(known, of, _)| *known == id && *of == extended) {
+        return Shape::Named(type_name(ty));
+    }
     match IE_TYPES.iter().find(|(known, ..)| *known == id) {
         Some((_, _, contained)) if !contained.is_empty() => Shape::Transfer(type_name(contained)),
         Some((_, ty, _)) => Shape::Named(type_name(ty)),
-        // An identifier that is unknown, or that has several types.
+        // An identifier that is unknown, or one of an extension where it extends no type
+        // that gives it one.
         None => Shape::Unknown,
     }
 }
@@ -351,7 +372,7 @@ fn ie_value(id: Option<u16>) -> Shape {
 fn members(shape: Shape, entry: Option<&Map<String, Value>>) -> Option<Vec<Member>> {
     let has = |member: &str| entry.is_some_and(|entry| entry.contains_key(member));
     // The entry of an IE in a view says which IE its value was decoded as.
-    let ie = |id: Option<u16>, value: &'static str, raw: &'static str| {
+    let ie = |id: Option<u16>, extended: &str, value: &'static str, raw: &'static str| {
         let of = |member: &str| {
             let id = entry
                 .and_then(|entry| entry.get(member))
@@ -360,7 +381,7 @@ fn members(shape: Shape, entry: Option<&Map<String, Value>>) -> Option<Vec<Membe
         };
         let decoded = match has("_decode_error") {
             true => Shape::Undecoded,
-            false => ie_value(of("_original_id").or(of("id")).or(id)),
+            false => ie_value(of("_original_id").or(of("id")).or(id), extended),
         };
         vec![
             ("id", Shape::Plain, false),
@@ -397,7 +418,14 @@ fn members(shape: Shape, entry: Option<&Map<String, Value>>) -> Option<Vec<Membe
             members
         }
         Shape::Named(name) => match kind_of(name) {
-            Some(Kind::Sequence(members) | Kind::Choice(members)) => members.to_vec(),
+            Some(Kind::Sequence(members) | Kind::Choice(members)) => {
+                // An extension container extends the type that has it.
+                let held = |(member, shape, optional): &Member| match shape {
+                    Shape::Extensions(_) => (*member, Shape::Extensions(name), *optional),
+                    shape => (*member, *shape, *optional),
+                };
+                members.iter().map(held).collect()
+            }
             Some(Kind::Is(is)) => return self::members(resolved(*is), entry),
             None => Vec::new(),
         },
@@ -405,8 +433,8 @@ fn members(shape: Shape, entry: Option<&Map<String, Value>>) -> Option<Vec<Membe
             ("value", Shape::Plain, false),
             ("length", Shape::Plain, false),
         ],
-        Shape::Ie(id) => ie(id, "value", "_raw_value"),
-        Shape::Extension(id) => ie(id, "extensionValue", "_raw_value"),
+        Shape::Ie(id) => ie(id, "", "value", "_raw_value"),
+        Shape::Extension(id, extended) => ie(id, extended, "extensionValue", "_raw_value"),
         Shape::Transfer(contained) => {
             let decoded = match contained.is_empty() {
                 true => Shape::Unknown,
@@ -426,7 +454,7 @@ fn members(shape: Shape, entry: Option<&Map<String, Value>>) -> Option<Vec<Membe
                 .map(|(_, name, ty)| (*name, Shape::Transfer(type_name(ty)), true))
                 .collect()
         }
-        Shape::Plain | Shape::List(_) | Shape::Ies(_) | Shape::Extensions => Vec::new(),
+        Shape::Plain | Shape::List(_) | Shape::Ies(_) | Shape::Extensions(_) => Vec::new(),
     })
 }
 
@@ -455,7 +483,7 @@ fn key<'e>(entry: &'e Map<String, Value>, part: &str) -> Option<&'e str> {
 fn has_octets(shape: Shape) -> bool {
     matches!(
         shape,
-        Shape::Ie(_) | Shape::Extension(_) | Shape::Transfer(_)
+        Shape::Ie(_) | Shape::Extension(..) | Shape::Transfer(_)
     )
 }
 
@@ -465,7 +493,7 @@ fn has_octets(shape: Shape) -> bool {
 fn value_member(shape: Shape) -> Option<&'static str> {
     match shape {
         Shape::Ie(_) => Some("value"),
-        Shape::Extension(_) => Some("extensionValue"),
+        Shape::Extension(..) => Some("extensionValue"),
         Shape::Transfer(_) => Some("decoded"),
         _ => None,
     }
@@ -499,7 +527,7 @@ fn or_its_own(reason: String, shape: Shape, members: &[Member]) -> String {
 /// of a list of IEs, or an IE that a value holds alone.
 fn ie_of(entry: &Value, shape: Shape) -> Option<u16> {
     match shape {
-        Shape::Ie(_) | Shape::Extension(_) => entry_id(entry).and_then(|id| id.try_into().ok()),
+        Shape::Ie(_) | Shape::Extension(..) => entry_id(entry).and_then(|id| id.try_into().ok()),
         _ => None,
     }
 }
@@ -507,12 +535,13 @@ fn ie_of(entry: &Value, shape: Shape) -> Option<u16> {
 /// Whether `part`, a segment under the IE `id`, names that IE, and so stays on it: a path
 /// may say which IE an entry is. A member of its value that is named as the IE is that
 /// member, as a path had it before an IE could be named so, unless the segment spells
-/// the name as ASN.1 spells that of the IE.
-fn stays_on(id: u16, part: &str) -> bool {
+/// the name as ASN.1 spells that of the IE. `extended` is the name of the type that the
+/// container of the IE extends, when it is an extension.
+fn stays_on(id: u16, extended: &str, part: &str) -> bool {
     if ie_id(part) != Some(id) {
         return false;
     }
-    let value = match resolved(ie_value(Some(id))) {
+    let value = match resolved(ie_value(Some(id), extended)) {
         Shape::Transfer(contained) if !contained.is_empty() => Shape::Named(contained),
         value => value,
     };
@@ -521,8 +550,9 @@ fn stays_on(id: u16, part: &str) -> bool {
 }
 
 /// Whether a member of some value has the name `part` and another type than the value
-/// of the IE `id`: where an IE is not known, such a segment is not taken for its name.
-fn names_another_type(part: &str, id: u16) -> bool {
+/// of the IE `id`, which extends the type that the bindings name `extended` when it is
+/// an extension: where an IE is not known, such a segment is not taken for its name.
+fn names_another_type(part: &str, id: u16, extended: &str) -> bool {
     // A type that is another one names it a few times at most.
     let settled = |mut shape: Shape| {
         for _ in 0..16 {
@@ -536,7 +566,7 @@ fn names_another_type(part: &str, id: u16) -> bool {
         }
         shape
     };
-    let of_the_ie = settled(ie_value(Some(id)));
+    let of_the_ie = settled(ie_value(Some(id), extended));
     TYPES.iter().any(|(_, kind)| match kind {
         Kind::Sequence(members) | Kind::Choice(members) => (members.iter())
             .any(|(name, shape, _)| same_name(name, part) && settled(*shape) != of_the_ie),
@@ -551,17 +581,18 @@ fn names_another_type(part: &str, id: u16) -> bool {
 fn named_ie(shape: Shape, part: &str, named: bool) -> Option<Shape> {
     let id = ie_id(part).filter(|_| named)?;
     let (known, extension) = match shape {
-        Shape::Ie(known) => (known, false),
-        Shape::Extension(known) => (known, true),
+        Shape::Ie(known) => (known, None),
+        Shape::Extension(known, extended) => (known, Some(extended)),
         _ => return None,
     };
+    let extended = extended(shape);
     let stays = match known {
-        Some(known) => known == id && stays_on(id, part),
-        None => !names_another_type(part, id),
+        Some(known) => known == id && stays_on(id, extended, part),
+        None => !names_another_type(part, id, extended),
     };
     stays.then_some(match extension {
-        true => Shape::Extension(Some(id)),
-        false => Shape::Ie(Some(id)),
+        Some(extended) => Shape::Extension(Some(id), extended),
+        None => Shape::Ie(Some(id)),
     })
 }
 
@@ -595,7 +626,7 @@ fn no_member(shape: Shape, members: &[Member], part: &str, path: &str) -> String
         Shape::Pdu(_) => "a view".to_string(),
         Shape::Bits => "a string of bits".to_string(),
         Shape::Transfer(_) => "a transfer".to_string(),
-        Shape::Ie(_) | Shape::Extension(_) => "an IE".to_string(),
+        Shape::Ie(_) | Shape::Extension(..) => "an IE".to_string(),
         _ => "this value".to_string(),
     };
     let names = names(shape, members);
@@ -612,7 +643,8 @@ fn no_member(shape: Shape, members: &[Member], part: &str, path: &str) -> String
 fn element(shape: Shape) -> Shape {
     match shape {
         Shape::Ies(_) | Shape::List(Shape::Ie(_)) => Shape::Ie(None),
-        Shape::Extensions | Shape::List(Shape::Extension(_)) => Shape::Extension(None),
+        Shape::Extensions(extended) => Shape::Extension(None, extended),
+        Shape::List(Shape::Extension(_, extended)) => Shape::Extension(None, extended),
         Shape::List(of) => *of,
         _ => Shape::Unknown,
     }
@@ -623,7 +655,7 @@ fn element(shape: Shape) -> Shape {
 fn element_of(shape: Shape, id: u16) -> Option<Shape> {
     match element(shape) {
         Shape::Ie(_) => Some(Shape::Ie(Some(id))),
-        Shape::Extension(_) => Some(Shape::Extension(Some(id))),
+        Shape::Extension(_, extended) => Some(Shape::Extension(Some(id), extended)),
         Shape::Unknown => Some(Shape::Unknown),
         _ => None,
     }
@@ -711,7 +743,7 @@ fn advance<'a>(
             // The name of the IE that the entry is stays on the entry: a path may say
             // which IE an entry is, before it goes into it.
             let this = ie_of(whole, shape).filter(|_| named && own.is_none());
-            if this.is_some_and(|this| stays_on(this, part)) {
+            if this.is_some_and(|this| stays_on(this, extended(shape), part)) {
                 push(Some(whole), shape);
                 return Ok(());
             }
@@ -833,7 +865,7 @@ fn typed(
     let no = |reason: String| Err((false, reason));
     match shape {
         Shape::Unknown | Shape::Undecoded => push(Shape::Unknown),
-        Shape::List(_) | Shape::Ies(_) | Shape::Extensions => {
+        Shape::List(_) | Shape::Ies(_) | Shape::Extensions(_) => {
             let id = match part.strip_prefix("@id=") {
                 Some(id) => Some(
                     id.parse::<u16>()
@@ -899,7 +931,7 @@ fn typed(
             {
                 // What names no member of an IE or of a transfer is one of its value.
                 let this = match shape {
-                    Shape::Ie(known) | Shape::Extension(known) => known,
+                    Shape::Ie(known) | Shape::Extension(known, _) => known,
                     _ => None,
                 };
                 let taken = typed(resolved(*of), part, named, path, push);
@@ -915,6 +947,47 @@ fn typed(
         }
     }
     Ok(())
+}
+
+/// The shape of the message of a direction and a procedure code in a view, where the
+/// tables have it.
+pub(crate) fn message_shape(direction: &str, code: u8) -> Shape {
+    let message = sent(|of, procedure, _| of == direction && procedure == code);
+    message.map_or(Shape::Unknown, Shape::Message)
+}
+
+/// The shape of octets that carry the type which ASN.1 names `name`, once a view shows
+/// them so: the transfer of that type.
+pub(crate) fn carried_shape(name: &str) -> Shape {
+    let mut carried = CARRIED.iter();
+    let carried = carried.find(|(_, known, _)| same_name(known, name));
+    carried.map_or(Shape::Unknown, |(.., ty)| Shape::Transfer(type_name(ty)))
+}
+
+/// The members that `entry`, a value of `shape` in a view, can have, each with its
+/// shape; none for a shape that the tables do not describe.
+pub(crate) fn member_shapes(shape: Shape, entry: &Map<String, Value>) -> Vec<Member> {
+    let shape = match resolved(shape) {
+        // A transfer that is written as its decoded value itself.
+        Shape::Transfer(contained)
+            if !contained.is_empty() && !entry.keys().any(|name| of_a_transfer(name)) =>
+        {
+            Shape::Named(contained)
+        }
+        shape => shape,
+    };
+    members(shape, Some(entry)).unwrap_or_default()
+}
+
+/// The shape of the member that `name` names among `members`, which [`member_shapes`]
+/// gave.
+pub(crate) fn member_shape(members: &[Member], name: &str) -> Shape {
+    member(members, name).map_or(Shape::Unknown, |(_, shape, _)| *shape)
+}
+
+/// The shape of each entry of a list of `shape`.
+pub(crate) fn entry_shape(shape: Shape) -> Shape {
+    element(resolved(shape))
 }
 
 /// What `part` selects at each of `places`. A segment that selects nothing because a
@@ -983,13 +1056,16 @@ pub fn select<'a>(view: &'a Value, path: &str) -> Result<Vec<&'a Value>, String>
 /// the lists, the alternatives of a CHOICE and the decoded value of a transfer. A position
 /// or `*` stands for each entry that a list could have, and `-` for the end of a list.
 ///
+/// An IE of an extension container is read against the type that the type which the
+/// container extends gives it, where its identifier alone does not say its type.
+///
 /// What is not known is not refused: the value of an IE selected by `@id=N` when the
-/// identifier is unknown or has several types, the entries of a container that is not
-/// that of the message when they are selected by position, a segment under such an IE,
-/// which may name a member of its value, and whether a position is within the bounds of
-/// its list. Such an entry is the IE that the next segment names, and the path is then
-/// read against the type of that IE: unless some value has a member of that name and of
-/// another type, which the segment may be.
+/// identifier is unknown or has no type where it is, the entries of a container that is
+/// not that of the message when they are selected by position, a segment under such an
+/// IE, which may name a member of its value, and whether a position is within the bounds
+/// of its list. Such an entry is the IE that the next segment names, and the path is
+/// then read against the type of that IE: unless some value has a member of that name
+/// and of another type, which the segment may be.
 pub fn check_path(message: &str, path: &str) -> Result<(), String> {
     let known = sent(|_, _, name| same_name(name, message));
     let message = known.ok_or_else(|| format!("{message:?} is not a message of {PROTOCOL}"))?;
@@ -1240,9 +1316,11 @@ fn edit(view: &mut Value, path: &str, mut operation: Edit) -> Result<(), String>
 /// `rest` without the segment that it starts with, when that names the IE that `entry`, a
 /// value of `shape`, is: a path may say which IE an entry is, before it goes into it.
 fn past_its_name<'p>(entry: &Value, shape: Shape, rest: &'p [String], named: bool) -> &'p [String] {
-    let this = ie_of(entry, resolved(shape)).filter(|_| named);
+    let shape = resolved(shape);
+    let this = ie_of(entry, shape).filter(|_| named);
+    let stays = |part: &str| this.is_some_and(|this| stays_on(this, extended(shape), part));
     match rest.split_first() {
-        Some((part, after)) if this.is_some_and(|this| stays_on(this, part)) => after,
+        Some((part, after)) if stays(part) => after,
         _ => rest,
     }
 }
@@ -1321,7 +1399,7 @@ fn apply(
         }
         // The octets of an IE or of a transfer are sent in place of its value.
         let raw = received_member(object).or(match shape {
-            Shape::Ie(_) | Shape::Extension(_) => Some("_raw_value"),
+            Shape::Ie(_) | Shape::Extension(..) => Some("_raw_value"),
             Shape::Transfer(_) => Some("_raw_transfer"),
             _ => None,
         });
@@ -1520,7 +1598,7 @@ fn by_name(value: &Value, shape: Shape) -> Result<Value, String> {
                 }
             }
             // An IE that a value holds alone.
-            Shape::Ie(_) | Shape::Extension(_) => ie_by_name(value, shape, shape),
+            Shape::Ie(_) | Shape::Extension(..) => ie_by_name(value, shape, shape),
             _ => {
                 let members = members(shape, Some(entry)).unwrap_or_default();
                 let shown = entry.iter().map(|(name, value)| {
@@ -1532,7 +1610,7 @@ fn by_name(value: &Value, shape: Shape) -> Result<Value, String> {
         },
         Value::Array(entries) => {
             let shown = entries.iter().map(|entry| match element(shape) {
-                of @ (Shape::Ie(_) | Shape::Extension(_)) => ie_by_name(entry, of, shape),
+                of @ (Shape::Ie(_) | Shape::Extension(..)) => ie_by_name(entry, of, shape),
                 of => by_name(entry, of),
             });
             Ok(Value::Array(shown.collect::<Result<_, String>>()?))
@@ -1561,7 +1639,7 @@ fn ie_by_name(entry: &Value, shape: Shape, container: Shape) -> Result<Value, St
         .any(|of| of.get("_decode_error").is_some());
     let value = match undecoded {
         true => json!({"octets": entry["_raw_value"]}),
-        false => by_name(&entry[field], ie_value(Some(id)))?,
+        false => by_name(&entry[field], ie_value(Some(id), extended(shape)))?,
     };
     let mut shown = Map::new();
     shown.insert(name, value);
@@ -1596,7 +1674,7 @@ fn written(value: &Value, shape: Shape, depth: usize) -> Result<Value, String> {
                 Ok(Value::Object(entry))
             }
             // An IE that a value holds alone.
-            Shape::Ie(_) | Shape::Extension(_) => entry_of(value, shape, shape, depth),
+            Shape::Ie(_) | Shape::Extension(..) => entry_of(value, shape, shape, depth),
             _ => {
                 let members = members(shape, Some(entry)).unwrap_or_default();
                 let listed = entry.iter().map(|(name, value)| {
@@ -1608,7 +1686,7 @@ fn written(value: &Value, shape: Shape, depth: usize) -> Result<Value, String> {
         },
         Value::Array(entries) => {
             let listed = entries.iter().map(|entry| match element(shape) {
-                of @ (Shape::Ie(_) | Shape::Extension(_)) => entry_of(entry, of, shape, depth),
+                of @ (Shape::Ie(_) | Shape::Extension(..)) => entry_of(entry, of, shape, depth),
                 of => written(entry, of, depth + 1),
             });
             Ok(Value::Array(listed.collect::<Result<_, String>>()?))
@@ -1631,7 +1709,7 @@ fn entry_of(ie: &Value, shape: Shape, container: Shape, depth: usize) -> Result<
         let id = entry_id(ie).and_then(|id| u16::try_from(id).ok());
         let mut entry = entry.clone();
         if let Some(value) = entry.get_mut(field) {
-            *value = written(value, ie_value(id), depth + 1)?;
+            *value = written(value, ie_value(id, extended(shape)), depth + 1)?;
         }
         return Ok(Value::Object(entry));
     }
@@ -1662,7 +1740,7 @@ fn entry_of(ie: &Value, shape: Shape, container: Shape, depth: usize) -> Result<
     Ok(match octets.and_then(|value| value.get("octets")) {
         Some(octets) => json!({"id": id, "criticality": criticality, "octets": octets}),
         None => {
-            let value = written(value, ie_value(Some(id)), depth + 1)?;
+            let value = written(value, ie_value(Some(id), extended(shape)), depth + 1)?;
             json!({"id": id, "criticality": criticality, field: value})
         }
     })
@@ -1905,7 +1983,10 @@ mod tests {
         let cause = ie_id("Cause").expect("an IE of the protocol");
         for (shape, stays) in [
             (Shape::Ie(None), Shape::Ie(Some(cause))),
-            (Shape::Extension(None), Shape::Extension(Some(cause))),
+            (
+                Shape::Extension(None, ""),
+                Shape::Extension(Some(cause), ""),
+            ),
         ] {
             assert_eq!(named_ie(shape, "cause", true), Some(stays));
             assert_eq!(named_ie(shape, "cause", false), None);
@@ -1920,16 +2001,16 @@ mod tests {
                 };
                 // A member of the value of an IE that is named as the IE itself is
                 // spelled otherwise, which is how a path tells the two.
-                let own = match resolved(ie_value(Some(id))) {
+                let own = match resolved(ie_value(Some(id), "")) {
                     Shape::Transfer(contained) => Shape::Named(contained),
                     own => own,
                 };
                 if own == Shape::Named(of) {
                     assert_ne!(*member, ie_name(id), "{of}.{member}");
-                    assert!(!stays_on(id, member) && stays_on(id, &ie_name(id)));
+                    assert!(!stays_on(id, "", member) && stays_on(id, "", &ie_name(id)));
                     spelled += 1;
                 }
-                let own = resolved(ie_value(Some(id)));
+                let own = resolved(ie_value(Some(id), ""));
                 match named_ie(Shape::Ie(None), member, true) {
                     Some(_) => {
                         let same = resolved(*shape) == own;
@@ -1993,8 +2074,14 @@ mod tests {
         // bits whose size varies alone has a member of such a name, its `value`, which
         // a path reaches after the `value` of the IE.
         let mut bits = 0;
-        for (id, ..) in IE_TYPES {
-            let mut shape = resolved(ie_value(Some(*id)));
+        // Each IE with the type of its identifier, and with the one that each type which
+        // it extends gives it.
+        let of_their_own = IE_TYPES.iter().map(|(id, ..)| (id, ""));
+        let extensions = EXTENSION_TYPES
+            .iter()
+            .map(|(id, extended, _)| (id, *extended));
+        for (id, extended) in of_their_own.chain(extensions) {
+            let mut shape = resolved(ie_value(Some(*id), extended));
             if let Shape::Transfer(contained) = shape {
                 shape = resolved(Shape::Named(contained));
             }
@@ -2006,6 +2093,44 @@ mod tests {
             bits += usize::from(shape == Shape::Bits);
         }
         assert!(bits > 0);
+    }
+
+    #[test]
+    fn an_extension_has_the_type_that_the_type_it_extends_gives_it() {
+        // An extension container extends the type that has it, whatever type that is.
+        let mut containers = 0;
+        for (name, _) in all_members() {
+            let members = members(Shape::Named(name), None).unwrap_or_default();
+            for (_, shape, _) in members {
+                if let Shape::Extensions(extended) = shape {
+                    assert_eq!(extended, name);
+                    assert_eq!(element(shape), Shape::Extension(None, name));
+                    let entry = element_of(shape, 1);
+                    assert_eq!(entry, Some(Shape::Extension(Some(1), name)));
+                    containers += 1;
+                }
+            }
+        }
+        assert!(containers > 0);
+        // An IE whose identifier has a type for each type that it extends is of that type
+        // there, and of none elsewhere: its identifier alone does not say its type.
+        for (id, extended, ty) in EXTENSION_TYPES {
+            assert!(kind_of(extended).is_some(), "{extended}");
+            assert!(IE_TYPES.iter().all(|(known, ..)| known != id), "{id}");
+            assert_eq!(ie_value(Some(*id), extended), Shape::Named(type_name(ty)));
+            assert_eq!(ie_value(Some(*id), ""), Shape::Unknown);
+            let container = members(Shape::Named(extended), None).unwrap_or_default();
+            let extensions = container
+                .iter()
+                .find(|(_, shape, _)| extended == &self::extended(*shape));
+            let (_, extensions, _) = extensions.expect("an extension container");
+            let value = members(element_of(*extensions, *id).unwrap(), None).unwrap();
+            let (_, value, _) = member(&value, "extensionValue").unwrap();
+            assert_eq!(*value, Shape::Named(type_name(ty)), "{id} in {extended}");
+            // Its name stays on it, as that of any IE does.
+            let named = named_ie(element(*extensions), &ie_name(*id), true);
+            assert_eq!(named, Some(Shape::Extension(Some(*id), extended)));
+        }
     }
 
     #[test]
@@ -2026,7 +2151,7 @@ mod tests {
         // nor of those of an extension container: it is written, and asked for.
         for (container, field) in [
             (Shape::Ies(None), "value"),
-            (Shape::Extensions, "extensionValue"),
+            (Shape::Extensions(""), "extensionValue"),
         ] {
             let shown = by_name(&json!([entry(field, true)]), container).unwrap();
             assert_eq!(shown, json!([{"Cause": value, "criticality": "ignore"}]));
@@ -2074,7 +2199,7 @@ mod tests {
             let (_, octets, contained) = IE_TYPES.iter().find(|(known, ..)| known == id).unwrap();
             assert!(contained.is_empty() && kind_of(type_name(octets)).is_none());
             assert!(kind_of(type_name(ty)).is_some() && same_name(name, type_name(ty)));
-            assert_eq!(ie_value(Some(*id)), Shape::Carrier(*id));
+            assert_eq!(ie_value(Some(*id), ""), Shape::Carrier(*id));
             // A view is encoded with any member of that name as that type.
             for (of, members) in all_members() {
                 let same = members.iter().any(|(member, ..)| same_name(member, name));

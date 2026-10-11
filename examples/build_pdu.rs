@@ -5,10 +5,9 @@
 //! invocations hide numeric IDs and rasn open-type encoding; the commented
 //! construction at the end shows the equivalent generated types.
 
-use rasn::types::FixedBitString;
-
 use oxirush_ngap::helpers::*;
 use oxirush_ngap::ngap::*;
+use oxirush_ngap::rasn::types::FixedBitString;
 use oxirush_ngap::{build_ngap, build_ngap_ie};
 
 fn main() {

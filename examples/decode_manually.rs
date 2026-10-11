@@ -6,12 +6,17 @@
 //! - Decoding and pattern-matching open protocol IE values
 //! - Verifying encode → decode round-trip fidelity
 //!
+//! `rasn` is the one that the crate re-exports, so the example needs no
+//! dependency on it.
+//!
 //! For the ergonomic `build_ngap!` / `extract_ngap_ies!` versions, see
 //! `build_pdu.rs` and `extract_ies.rs`.
 
-use rasn::types::{FixedBitString, FixedOctetString, PrintableString};
-
 use oxirush_ngap::ngap::*;
+use oxirush_ngap::rasn::{
+    self,
+    types::{FixedBitString, FixedOctetString, PrintableString},
+};
 
 fn main() {
     // ── 1. Build an NGSetupResponse by hand ─────────────────────────────────

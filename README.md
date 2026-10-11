@@ -111,8 +111,9 @@ No feature is on by default. The minimum supported Rust version is 1.88. The
 examples of this page also use the `hex` crate, and `serde_json` for JSON.
 The values of the bindings are those of `rasn`, such as `Integer`,
 `FixedBitString`, `OctetString` and `Any`, and so are the errors of the
-codec: a crate that names them depends on `rasn` 0.28 too, as the examples
-of the typed API do.
+codec. The crate re-exports it as `oxirush_ngap::rasn`, which is where the
+examples take these names from: a crate that names them needs no dependency
+on `rasn` of its own.
 
 The bindings are checked in and large, and with `inspect` the compiler also
 builds JER and APER code for every type of the protocol. A clean

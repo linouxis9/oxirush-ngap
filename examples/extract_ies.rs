@@ -4,11 +4,10 @@
 //! IEs, custom expressions, nested handover choices, and a 5GS NAS PDU carried
 //! inside the Initial Context Setup PDU-session list.
 
-use rasn::types::FixedBitString;
-
 use oxirush_ngap::helpers::*;
 use oxirush_ngap::macros::MissingIeError;
 use oxirush_ngap::ngap::*;
+use oxirush_ngap::rasn::{self, types::FixedBitString};
 use oxirush_ngap::{build_ngap, extract_ngap_ies};
 
 // ── 1. Simple extraction: required IDs + optional cause ────────────────────

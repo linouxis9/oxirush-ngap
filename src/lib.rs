@@ -51,8 +51,12 @@ mod per;
 pub mod registry;
 pub mod sized;
 
-#[doc(hidden)]
-pub use rasn as __rasn;
+/// The ASN.1 library that the bindings are made of, at the version that this crate is
+/// built with. The values of the bindings are its types, such as `Integer`,
+/// `FixedBitString`, `OctetString` and `Any`, and the errors of the codec are its
+/// errors: a crate that names them takes them from here, and needs no dependency on
+/// `rasn` of its own.
+pub use rasn;
 
 pub use ngap::NgapPduKind;
 

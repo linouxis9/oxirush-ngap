@@ -103,6 +103,20 @@ is not source compatible with 0.4.2.
 
 ### Added
 
+- `pdu.check()`, and `oxirush_ngap::Deviation`: how a PDU deviates from what
+  the ASN.1 assigns its message, without any feature. It reports a
+  criticality of the PDU that is not that of its procedure
+  (`PduCriticality`) and, against the object set of the message, an IE that
+  the set does not have (`UnexpectedIe`), one that is there twice
+  (`RepeatedIe`), one that comes after an IE that the set has after it
+  (`OutOfOrder`), a criticality that is not the assigned one
+  (`IeCriticality`) and a mandatory IE that is missing (`MissingIe`), each
+  with the identifier, the name and the position of the IE, and with a
+  sentence as its `Display`. It refuses nothing: a message that deviates is
+  built, written from a tree, encoded and decoded as before, for the tests
+  that send one. A conditional IE is not reported, as its condition is in
+  the prose of TS 38.413, and the IEs that a value holds are not looked at.
+  0.4.2 left all of it to the caller.
 - `pdu.protocol_ies()` and `pdu.set_protocol_ies(ies)`: the protocol IEs of
   the message of a PDU, whatever the message is, and the same PDU with other
   IEs. The first gives the `ProtocolIEContainer` of the bindings, with each

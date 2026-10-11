@@ -1,11 +1,13 @@
-//! The protocol IEs of the message of a PDU, whatever the message: read, and put back.
+//! The protocol IEs of the message of a PDU, whatever the message: read, put back, and
+//! compared with the object set that the ASN.1 gives the message.
 
 use rasn::types::Any;
 use rasn::{AsnType, Decoder, Encode};
 
 use crate::Error;
-use crate::check::object_set;
-use crate::ngap::{NGAP_PDU, ProtocolIEContainer};
+use crate::check::{Deviation, deviations, object_set};
+use crate::ngap::{Criticality, NGAP_PDU, ProtocolIEContainer};
+use crate::registry::procedure_criticality;
 
 /// A message as the ASN.1 has every message but the private one: a SEQUENCE of one
 /// container of protocol IEs, which a later release may add to.
@@ -128,5 +130,100 @@ impl NGAP_PDU {
             Self::unsuccessfulOutcome(message) => message.value = value,
         }
         Ok(())
+    }
+
+    /// The criticality of this PDU.
+    fn criticality(&self) -> Criticality {
+        match self {
+            Self::initiatingMessage(message) => message.criticality,
+            Self::successfulOutcome(message) => message.criticality,
+            Self::unsuccessfulOutcome(message) => message.criticality,
+        }
+    }
+
+    /// How this PDU deviates from what the ASN.1 assigns its message: the criticality of
+    /// its procedure, and the object set of its IEs. The list is empty for a PDU that is
+    /// constructed as TS 38.413 clause 9.4.1 has a sender construct it.
+    ///
+    /// | [`Deviation`] | Is |
+    /// | --- | --- |
+    /// | `PduCriticality` | A criticality of the PDU that is not that of its procedure |
+    /// | `UnexpectedIe` | An IE that the object set of the message does not have |
+    /// | `RepeatedIe` | An IE that the message has already |
+    /// | `OutOfOrder` | An IE that comes after one that the object set has after it |
+    /// | `IeCriticality` | A criticality of an IE that is not the one that the object set assigns it |
+    /// | `MissingIe` | An IE whose presence is mandatory, and that the message does not have |
+    ///
+    /// The criticality of the PDU comes first, then what each IE deviates in, in the
+    /// order of the message, then the IEs that are missing, in the order of the object
+    /// set.
+    ///
+    /// ```
+    /// use oxirush_ngap::{Deviation, build_ngap, ngap::*};
+    ///
+    /// // A UE CONTEXT RELEASE REQUEST without its Cause, and with its two identifiers
+    /// // in the other order
+    /// let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
+    ///     IGNORE, UEContextReleaseRequest,
+    ///     REJECT RAN_UE_NGAP_ID(7u32),
+    ///     REJECT AMF_UE_NGAP_ID(42u64),
+    /// )?;
+    ///
+    /// // It is built and encoded as any other, and `check` says what it deviates in
+    /// let received = NGAP_PDU::decode(&pdu.encode()?)?;
+    /// let deviations = received.check()?;
+    /// assert_eq!(deviations.len(), 2);
+    /// assert!(matches!(deviations[0], Deviation::OutOfOrder { id: 10, after: 85, .. }));
+    /// assert_eq!(deviations[1], Deviation::MissingIe { id: 15, name: "Cause" });
+    /// assert_eq!(
+    ///     deviations[1].to_string(),
+    ///     "Cause (IE 15) is mandatory, and the message does not have it"
+    /// );
+    /// # Ok::<(), oxirush_ngap::Error>(())
+    /// ```
+    ///
+    /// It reports, and refuses nothing. The macros build a message whatever its IEs
+    /// are, a tree writes one, and the codec encodes and decodes it: a test of what a
+    /// peer does with such a message needs to send it. Clause 10.3 of TS 38.413 has what
+    /// a receiver does: with an IE that it does not comprehend, by the criticality that
+    /// the IE has (10.3.4), with one that is missing, by the criticality that the
+    /// specification assigns it (10.3.5), and with IEs in a wrong order or with too many
+    /// occurrences, which reject the procedure (10.3.6).
+    ///
+    /// What it does not look at:
+    ///
+    /// - a conditional IE, which is reported neither when it is missing nor when it is
+    ///   there: its condition is in the prose of the specification;
+    /// - the values of the IEs, and the IEs that a value holds, in a list, in a transfer
+    ///   or in an extension container;
+    /// - the IEs of the private message, which has no object set: the criticality of its
+    ///   PDU alone is compared.
+    ///
+    /// # Errors
+    ///
+    /// An error of the kind `UnknownMessage` for a procedure that the specification does
+    /// not have in that direction, which has no object set, and one of the kind `Decode`
+    /// when the octets of the message are not a container of protocol IEs.
+    pub fn check(&self) -> Result<Vec<Deviation>, Error> {
+        let (direction, code) = (self.direction(), self.procedure_code());
+        let Some(message) = object_set(direction, code) else {
+            return Err(Error::no_message_of(direction, code));
+        };
+        let mut found = Vec::new();
+        let criticality = self.criticality();
+        if let Some(assigned) = procedure_criticality(code)
+            && criticality != assigned
+        {
+            found.push(Deviation::PduCriticality {
+                criticality,
+                assigned,
+            });
+        }
+        if let Some(set) = message.ies {
+            let ies = self.protocol_ies()?;
+            let ies: Vec<_> = ies.0.iter().map(|ie| (ie.id.0, ie.criticality)).collect();
+            deviations(set, &ies, &mut found);
+        }
+        Ok(found)
     }
 }

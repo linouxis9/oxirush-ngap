@@ -367,6 +367,14 @@ macro_rules! procedures {
         /// The criticality of the bindings, for the code that the two protocols share.
         pub(crate) use $crate::ngap::Criticality;
 
+        /// The criticality that ASN.1 assigns to the procedure of a code.
+        pub(crate) fn procedure_criticality(code: u8) -> Option<Criticality> {
+            match code {
+                $($($code => Some(Criticality::$criticality),)?)*
+                _ => None,
+            }
+        }
+
         /// The object set of each message: the direction and the procedure code of its
         /// PDU, the name that ASN.1 gives it, and the IEs that its container of protocol
         /// IEs can have, in the order of the set.

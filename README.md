@@ -153,6 +153,7 @@ without debug information.
 | Codec | Aligned PER encoding and decoding through `rasn`, with the corrections of [rasn integration](#rasn-integration) |
 | Names | Flat re-exports of the generated types, and the aliases `NGAP_PDU`, `AMF_UE_NGAP_ID` and `RAN_UE_NGAP_ID`. IE identifiers, procedure codes, procedure names, directions and the kinds of a PDU (`NgapPduKind`) come from the ASN.1 |
 | Macros | `build_ngap!`, `build_ngap_ie!`, `extract_ngap_ies!` and `with_ngap_ie_mut!`: typed values in and out of the open types |
+| Any message | `protocol_ies()` and `set_protocol_ies()` read and replace the IEs of a PDU whatever its message is, and `check()` reports how a message deviates from its object set: a mandatory IE that is missing, an IE that it cannot have or has twice, the order of its IEs and the criticalities |
 | Helpers | PLMN, core network, tracking area, cell, radio node and slice identities, bit strings and UE security capabilities |
 | `inspect` | A decoded PDU as a JSON tree, in which a message is shown and written as its name and its IEs, and as a view that is read and edited by paths and encoded again |
 
@@ -160,7 +161,7 @@ without debug information.
 
 | Subject | Limit |
 |---------|-------|
-| Procedures | It is a codec: no procedure, no state and no transport. It does not check that the mandatory and conditional IEs of a message are there, nor that a criticality is the one that the specification assigns: the caller does. |
+| Procedures | It is a codec: no procedure, no state and no transport. `check()` reports a mandatory IE that a message lacks, an IE that it cannot have or has twice, the order of its IEs and a criticality that is not the assigned one ([below](#check-a-message-against-its-object-set)), and nothing is refused for them. It does not know when a conditional IE is due, and it does not look into the values of the IEs. |
 | Unknown additions | A PDU keeps the octets of its open types. A typed value that is decoded and encoded again loses the additions of a later release. |
 | RRC, other systems | An RRC container stays octets. The container of a handover is read as the NG-RAN type of TS 38.413 alone ([below](#the-container-of-a-handover)). |
 | `inspect`: two values | An IE with an integer of 2^63 or more stays octets beside a `_decode_error`, and so does one with a `BIT STRING` of another size than the one that its extensible type gives, as an algorithm mask of 24 bits: rasn's JER does not represent them. |
@@ -180,6 +181,7 @@ without debug information.
 | `kind()` | An `NgapPduKind`: one variant for each message, and `Other` for a procedure that the specification does not have in that direction |
 | `decode_value()` | The message, as its type, which the caller names. The type of another message is an error of the kind `WrongMessage`, and a type that is no message does not compile |
 | `protocol_ies()`, `set_protocol_ies(ies)` | The IEs of its message, whatever the message is, and the same PDU with other IEs: [below](#the-ies-of-any-message) |
+| `check()` | How it deviates from the object set of its message, a `Vec<Deviation>`: [below](#check-a-message-against-its-object-set) |
 
 The kind of a PDU says which message to decode:
 
@@ -237,8 +239,9 @@ as an integer outside its constraint, is an error of the kind `Encode`.
 A criticality says what a receiver does with what it does not comprehend
 (TS 38.413 clause 10.3.2). The specification assigns one to each procedure
 and to each IE of a message, in the tables of clause 9.2. The macros write
-the one that they are given and check none; with the `inspect` feature,
-[`from_tree()`] writes a message with those that are assigned.
+the one that they are given and check none: `check()` reports one that is
+not the assigned one. With the `inspect` feature, [`from_tree()`] writes a
+message with those that are assigned.
 
 ### Read the IEs of a message
 
@@ -343,6 +346,77 @@ message, which has private IEs. The message of a procedure that the
 specification does not have in that direction is read as a container of
 protocol IEs too.
 
+### Check a message against its object set
+
+The ASN.1 gives each message an object set: the IEs that it can have, in
+their order, each with a criticality and a presence. A sender constructs a
+message so (TS 38.413 clause 9.4.1), and `check()` of a PDU reports what is
+not so. It refuses nothing. The macros still build such a message, a tree
+writes it and the codec encodes and decodes it, because a test of how a peer
+handles it must be able to send it.
+
+```rust
+use oxirush_ngap::{build_ngap, ngap::*};
+
+fn main() -> Result<(), oxirush_ngap::Error> {
+    // A UE CONTEXT RELEASE REQUEST that deviates in each way, built all the same
+    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
+        REJECT, UEContextReleaseRequest,
+        REJECT RAN_UE_NGAP_ID(7u32),
+        IGNORE AMF_UE_NGAP_ID(42u64),
+        IGNORE TimeToWait(TimeToWait::v5s),
+        REJECT RAN_UE_NGAP_ID(8u32),
+    )?;
+
+    // It is encoded and decoded as any other, and `check()` reports
+    let received = NGAP_PDU::decode(&pdu.encode()?)?;
+    for deviation in received.check()? {
+        println!("{deviation}");
+    }
+
+    // The message of the first example deviates in nothing
+    let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
+    assert!(NGAP_PDU::decode(&bytes)?.check()?.is_empty());
+    Ok(())
+}
+```
+
+```text
+the criticality of the PDU is reject, and that of its procedure is ignore
+AMF-UE-NGAP-ID (IE 10), at position 1, comes after RAN-UE-NGAP-ID (IE 85), which the object set of the message has after it
+the criticality of AMF-UE-NGAP-ID (IE 10), at position 1, is ignore, and the message assigns it reject
+TimeToWait (IE 107), at position 2, is not an IE of the message
+RAN-UE-NGAP-ID (IE 85), at position 3, is in the message already, at position 0
+Cause (IE 15) is mandatory, and the message does not have it
+```
+
+`check()` gives a `Vec<Deviation>`, empty for a message that is as its object
+set has it. A `Deviation` has the identifier of its IE, the name that ASN.1
+gives it and its position in the message, from 0, and `Display` says it in a
+sentence.
+
+| `Deviation` | Is |
+|-------------|----|
+| `PduCriticality` | A criticality of the PDU that is not that of its procedure |
+| `UnexpectedIe` | An IE that the object set of the message does not have: one of another message, or one that the protocol does not have |
+| `RepeatedIe` | An IE that the message has already |
+| `OutOfOrder` | An IE that comes after one that the object set has after it. The IEs that the set does not have are left out of the order |
+| `IeCriticality` | A criticality of an IE that is not the one that the object set assigns it |
+| `MissingIe` | An IE whose presence is mandatory, and that the message does not have |
+
+Clause 10.3 of TS 38.413 says what a receiver does. An IE that it does not
+comprehend is handled by the criticality that the IE carries (10.3.4), a
+missing IE by the criticality that the specification assigns it (10.3.5),
+and IEs in a wrong order or with too many occurrences reject the procedure
+(10.3.6).
+
+`check()` does not report a conditional IE, missing or present: its
+condition is prose. It looks at the IEs of the message itself, not at their
+values or at the IEs inside a value. The private message has no object set,
+so only the criticality of its PDU is compared, and a procedure that the
+specification does not have in that direction is an error of the kind
+`UnknownMessage`.
+
 ### Identities and capabilities
 
 ```rust
@@ -406,6 +480,7 @@ their message are, and `?` converts one into a `Box<dyn std::error::Error>`.
 | `MissingIe` | A `req` field of `extract_ngap_ies!` whose IE is not in the message |
 | `UndecodableIe` | An IE that is in the message and does not decode as its type: a `req` or an `opt` field of `extract_ngap_ies!`, and the IE of `with_ngap_ie_mut!`. With `inspect`, a path into an IE or a transfer that did not decode |
 | `Argument` | An argument that a helper does not take: what is no MCC or no MNC, and a number that does not fit in the bits of its field |
+| `UnknownMessage` | `check()` on a PDU whose procedure the specification does not have in that direction: it has no object set. With `inspect`, also a name that is no message |
 
 ```rust
 use oxirush_ngap::{ErrorKind, ngap::*};
@@ -1002,6 +1077,7 @@ S1AP.
 | `tests/aper_round_trip.rs` | The macros, and the encodings where the codec departs from rasn's: constrained lists, `UTF8String`, long bit strings. |
 | `tests/errors.rs` | The errors of the typed API, each with its kind and its message: a PDU that is decoded as another message, octets that are no PDU, a value outside its constraint in a function and in each macro, an IE that is absent or does not decode, for a `req` and for an `opt` field, and what each helper refuses. With `inspect`, a test for each kind of error of the JSON forms. |
 | `tests/protocol_ies.rs` | The protocol IEs of each of the 144 messages but the private one are read from its PDU and put back as the same octets. An IE that the protocol does not have and one that is there twice are kept with their criticality, a message that the macros built has the IEs that it was built with, and the private message is an error. |
+| `tests/check.rs` | What `check()` reports: a message without a mandatory IE, with an IE twice, with an IE of another message, with its IEs out of order and with another criticality is each built by the macros, written from a tree, encoded and decoded, and reported as exactly that. Each of the 144 messages of the fixtures against its object set. |
 | `tests/unknown_extensions.rs` | The additions of a later release to an extensible `SEQUENCE` are skipped, and what follows them is read. |
 | `tests/allocation.rs` | Decoding reserves memory for the elements that it reads, not for the count that a length determinant claims. |
 | `tests/inspection.rs` | Each of the 144 messages is the same octets through its view, and through its tree where it has IEs to name. Each path of each selects its value, with and without `value` and `decoded`, and is one that `check_path` takes. Edits, written trees, criticalities, the two IEs that have the type of what they extend, and the identifiers of the registry against the constants of the bindings. |

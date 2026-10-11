@@ -41,6 +41,12 @@
 //! Every function and macro that can fail returns an [`Error`]: its [`ErrorKind`] is
 //! what a caller matches on, its `Display` says what is wrong, and its source is the
 //! error of `rasn` where the codec gave one.
+//!
+//! The codec builds, encodes and decodes a message whatever its IEs are. `check()` of
+//! a PDU reports how they deviate from the object set that the ASN.1 gives the
+//! message, each as a [`Deviation`]: a mandatory IE that is missing, an IE that the
+//! message cannot have or has twice, IEs out of order, and a criticality that is not
+//! the assigned one.
 
 mod check;
 mod error;
@@ -67,6 +73,7 @@ pub mod sized;
 /// `rasn` of its own.
 pub use rasn;
 
+pub use check::Deviation;
 pub use error::{Error, ErrorKind};
 pub use message::Message;
 pub use ngap::NgapPduKind;

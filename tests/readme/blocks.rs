@@ -49,6 +49,7 @@ pub const BLOCKS: &[fn()] = &[
     block_18,
     block_19,
     block_20,
+    block_21,
 ];
 
 /// The Rust block 1 of README.md.
@@ -202,6 +203,35 @@ fn block_6() {
 
 /// The Rust block 7 of README.md.
 fn block_7() {
+    use oxirush_ngap::{build_ngap, ngap::*};
+
+    fn main() -> Result<(), oxirush_ngap::Error> {
+        // A UE CONTEXT RELEASE REQUEST that deviates in each way, built all the same
+        let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
+            REJECT, UEContextReleaseRequest,
+            REJECT RAN_UE_NGAP_ID(7u32),
+            IGNORE AMF_UE_NGAP_ID(42u64),
+            IGNORE TimeToWait(TimeToWait::v5s),
+            REJECT RAN_UE_NGAP_ID(8u32),
+        )?;
+
+        // It is encoded and decoded as any other, and `check()` reports
+        let received = NGAP_PDU::decode(&pdu.encode()?)?;
+        for deviation in received.check()? {
+            println!("{deviation}");
+        }
+
+        // The message of the first example deviates in nothing
+        let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
+        assert!(NGAP_PDU::decode(&bytes)?.check()?.is_empty());
+        Ok(())
+    }
+
+    main().unwrap();
+}
+
+/// The Rust block 8 of README.md.
+fn block_8() {
     use oxirush_ngap::helpers::*;
 
     // A PLMN from its MCC and its MNC, and what is identified within it
@@ -221,8 +251,8 @@ fn block_7() {
     println!("{}", guami(network, 1, 1024, 0).unwrap_err());
 }
 
-/// The Rust block 8 of README.md.
-fn block_8() {
+/// The Rust block 9 of README.md.
+fn block_9() {
     use oxirush_ngap::{ErrorKind, ngap::*};
 
     // A UE CONTEXT RELEASE REQUEST is not decoded as an NG SETUP REQUEST
@@ -239,8 +269,8 @@ fn block_8() {
     println!("{}", std::error::Error::source(&short).unwrap());
 }
 
-/// The Rust block 9 of README.md.
-fn block_9() {
+/// The Rust block 10 of README.md.
+fn block_10() {
     use oxirush_ngap::ngap::NGAP_PDU;
 
     // UE CONTEXT RELEASE REQUEST
@@ -253,8 +283,8 @@ fn block_9() {
     println!("{}", view["message"]["protocolIEs"][2]);
 }
 
-/// The Rust block 10 of README.md.
-fn block_10() {
+/// The Rust block 11 of README.md.
+fn block_11() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::json;
 
@@ -284,8 +314,8 @@ fn block_10() {
     }
 }
 
-/// The Rust block 11 of README.md.
-fn block_11() {
+/// The Rust block 12 of README.md.
+fn block_12() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::json;
 
@@ -309,8 +339,8 @@ fn block_11() {
     println!("{}", wrong.unwrap_err());
 }
 
-/// The Rust block 12 of README.md.
-fn block_12() {
+/// The Rust block 13 of README.md.
+fn block_13() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::json;
 
@@ -333,8 +363,8 @@ fn block_12() {
     println!("{}", edited.to_tree().unwrap()["ies"]);
 }
 
-/// The Rust block 13 of README.md.
-fn block_13() {
+/// The Rust block 14 of README.md.
+fn block_14() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::json;
 
@@ -359,8 +389,8 @@ fn block_13() {
     println!("{}", json!(inspect::select(&view, "/ngap/*/criticality").unwrap()));
 }
 
-/// The Rust block 14 of README.md.
-fn block_14() {
+/// The Rust block 15 of README.md.
+fn block_15() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::json;
 
@@ -382,8 +412,8 @@ fn block_14() {
     println!("{}", edited.to_tree().unwrap());
 }
 
-/// The Rust block 15 of README.md.
-fn block_15() {
+/// The Rust block 16 of README.md.
+fn block_16() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::json;
 
@@ -414,8 +444,8 @@ fn block_15() {
     }
 }
 
-/// The Rust block 16 of README.md.
-fn block_16() {
+/// The Rust block 17 of README.md.
+fn block_17() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::{Value, json};
 
@@ -448,8 +478,8 @@ fn block_16() {
     println!("{}", edited.to_tree().unwrap());
 }
 
-/// The Rust block 17 of README.md.
-fn block_17() {
+/// The Rust block 18 of README.md.
+fn block_18() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::json;
 
@@ -491,8 +521,8 @@ fn block_17() {
     println!("{}", edited.to_tree().unwrap()["ies"][2]);
 }
 
-/// The Rust block 18 of README.md.
-fn block_18() {
+/// The Rust block 19 of README.md.
+fn block_19() {
     use oxirush_ngap::inspect;
 
     // The names that the value at a path can have, as the specification spells them
@@ -504,8 +534,8 @@ fn block_18() {
     assert_eq!(choice, Ok(None));
 }
 
-/// The Rust block 19 of README.md.
-fn block_19() {
+/// The Rust block 20 of README.md.
+fn block_20() {
     use oxirush_ngap::inspect;
 
     // Whether a path can select anything in a message of a name, without a view
@@ -519,8 +549,8 @@ fn block_19() {
     }
 }
 
-/// The Rust block 20 of README.md.
-fn block_20() {
+/// The Rust block 21 of README.md.
+fn block_21() {
     use oxirush_ngap::{ErrorKind, inspect, ngap::NGAP_PDU};
     use serde_json::json;
 

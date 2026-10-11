@@ -145,6 +145,16 @@ impl Error {
         Self::new(ErrorKind::WrongMessage, what)
     }
 
+    /// A PDU whose direction and procedure code the specification has no message for,
+    /// and so no object set.
+    pub(crate) fn no_message_of(direction: &str, code: u8) -> Self {
+        let what = format!(
+            "the specification has no {direction} of procedure {code}, and so no object set \
+             for its IEs"
+        );
+        Self::new(ErrorKind::UnknownMessage, what)
+    }
+
     /// This error is why the message of a PDU does not decode as a container of
     /// protocol IEs: the message that ASN.1 names `name`, when the specification has
     /// one for the PDU.

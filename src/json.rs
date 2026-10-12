@@ -46,11 +46,14 @@ use crate::{Error, ErrorKind};
 
 /// Octets in hexadecimal, in upper case.
 pub(crate) fn hex(octets: &[u8]) -> String {
-    const DIGITS: &[u8; 16] = b"0123456789ABCDEF";
-    let mut text = Vec::with_capacity(octets.len() * 2);
-    for octet in octets {
-        text.push(DIGITS[usize::from(octet >> 4)]);
-        text.push(DIGITS[usize::from(octet & 15)]);
+    // A digit is its half octet after `0`, and seven further for one after `9`, which
+    // are the characters between `9` and `A`. The loop has no table and no branch, so
+    // the compiler writes it for several octets at once.
+    let digit = |half: u8| half + b'0' + u8::from(half > 9) * (b'A' - b'9' - 1);
+    let mut text = vec![0; octets.len() * 2];
+    let (pairs, _) = text.as_chunks_mut::<2>();
+    for (pair, octet) in pairs.iter_mut().zip(octets) {
+        *pair = [digit(octet >> 4), digit(octet & 15)];
     }
     // The digits are ASCII.
     String::from_utf8(text).unwrap_or_default()
@@ -58,21 +61,31 @@ pub(crate) fn hex(octets: &[u8]) -> String {
 
 /// The octets that `text` writes in hexadecimal, two digits for each, in either case.
 pub(crate) fn unhex(text: &str) -> Option<Vec<u8>> {
-    let digit = |digit: u8| match digit {
-        b'0'..=b'9' => Some(digit - b'0'),
-        b'a'..=b'f' => Some(digit - b'a' + 10),
-        b'A'..=b'F' => Some(digit - b'A' + 10),
-        _ => None,
+    /// What is no digit: a value that no half octet has.
+    const NONE: u8 = 0x80;
+    // The value of a digit, without a branch that leaves the loop: what is no digit
+    // is told after it, so that the compiler writes the loop for several octets at
+    // once. A letter is taken in lower case, which differs from upper case by one bit.
+    let digit = |digit: u8| {
+        let (number, letter) = (digit.wrapping_sub(b'0'), (digit | 0x20).wrapping_sub(b'a'));
+        match (number < 10, letter < 6) {
+            (true, _) => number,
+            (false, true) => letter + 10,
+            (false, false) => NONE,
+        }
     };
     let (pairs, rest) = text.as_bytes().as_chunks::<2>();
     if !rest.is_empty() {
         return None;
     }
-    let mut octets = Vec::with_capacity(pairs.len());
-    for [high, low] in pairs {
-        octets.push(digit(*high)? << 4 | digit(*low)?);
+    let mut octets = vec![0; pairs.len()];
+    let mut other = 0;
+    for (octet, [high, low]) in octets.iter_mut().zip(pairs) {
+        let (high, low) = (digit(*high), digit(*low));
+        other |= high | low;
+        *octet = high << 4 | low & 15;
     }
-    Some(octets)
+    (other & NONE == 0).then_some(octets)
 }
 
 /// The start of what is written, which says which value it is.
@@ -1541,6 +1554,27 @@ mod tests {
         assert_eq!(hex(&[0x00, 0x9a, 0xff]), "009AFF");
         assert_eq!(unhex("009aFF"), Some(vec![0x00, 0x9a, 0xff]));
         assert_eq!(unhex(""), Some(vec![]));
+        // Each octet, alone and among others, and each character that is no digit.
+        let every: Vec<u8> = (0..=255).collect();
+        let written: String = every.iter().map(|octet| format!("{octet:02X}")).collect();
+        assert_eq!(hex(&every), written);
+        assert_eq!(unhex(&written), Some(every.clone()));
+        assert_eq!(unhex(&written.to_lowercase()), Some(every.clone()));
+        for length in 0..=every.len() {
+            assert_eq!(
+                unhex(&hex(&every[..length])).as_deref(),
+                Some(&every[..length])
+            );
+        }
+        for other in (0..=255u8).filter(|other| !other.is_ascii_hexdigit()) {
+            for at in [0, 1, 62, 63] {
+                let mut text = written.clone().into_bytes();
+                text[at] = other;
+                if let Ok(text) = String::from_utf8(text) {
+                    assert_eq!(unhex(&text), None, "{other:#04x} at {at}");
+                }
+            }
+        }
         for text in ["0", "0g", "000", " 00", "é0"] {
             assert_eq!(unhex(text), None, "{text}");
         }

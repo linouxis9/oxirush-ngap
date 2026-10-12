@@ -372,6 +372,8 @@ is not source compatible with 0.4.2.
   into the object that holds it by a move, `from_tree` makes the PDU of its
   message without writing a view of it first, and the members of a value
   are read where the list of the types has them.
+- Hexadecimal is written and read without a table and without a branch for
+  each digit, in loops that the compiler writes for several octets at once.
 
 ### Fixed
 

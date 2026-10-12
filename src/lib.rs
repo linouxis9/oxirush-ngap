@@ -59,7 +59,7 @@
 //! | Read a message where it was received | `let pdu = NGAP_PDU::decode(&octets)?;` then `pdu.decode_value()?`: the message borrows from `pdu`, which is a variable of its own |
 //! | Keep a value after the PDU is gone | `value.into_owned()`, which gives the same type with the lifetime `'static`, as `NASPDU<'static>`: this is the type to write in a struct |
 //! | Build a value | From data that it owns: `NASPDU::from(vec)` is a `NASPDU<'static>` |
-//! | Read a PDU in the buffer that it was received in | [`NGAPPDU::decode_borrowed`](ngap::NGAPPDU::decode_borrowed), which copies nothing: the PDU borrows from the buffer |
+//! | Read a PDU in the buffer that it was received in | [`NGAP_PDU::decode_borrowed`](ngap::NGAPPDU::decode_borrowed), which copies nothing: the PDU borrows from the buffer |
 //!
 //! [`NGAP_PDU`](ngap::NGAP_PDU) is the PDU that owns its octets, `NGAPPDU<'static>`,
 //! and has no lifetime to write.
@@ -107,7 +107,7 @@
 //! }
 //!
 //! async fn handle(received: Vec<u8>) -> Result<(), Error> {
-//!     let pdu = NGAPPDU::decode_borrowed(&received)?;
+//!     let pdu = NGAP_PDU::decode_borrowed(&received)?;
 //!     let message: UplinkNASTransport = pdu.decode_value()?;
 //!     extract_ngap_ies!(message, UplinkNASTransport,
 //!         req nas: NASPDU = NAS_PDU(nas) => nas,

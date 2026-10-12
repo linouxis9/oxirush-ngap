@@ -104463,6 +104463,35 @@ impl NGAPPDU<'static> {
             None => oxirush_aper::decode(bytes).map(NGAPPDU::into_owned),
         }
     }
+    /// The PDU that `bytes` are, as `decode` reads it, with the octets of its message
+    /// borrowed from `bytes`: nothing is copied, and the PDU, a `NGAPPDU<'_>`, lives as
+    /// long as they do. `into_owned()` gives the PDU that `decode` gives.
+    ///
+    /// ```
+    /// use oxirush_ngap::ngap::*;
+    ///
+    /// // A UE CONTEXT RELEASE REQUEST, read where it was received
+    /// let received = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
+    /// let pdu = NGAP_PDU::decode_borrowed(&received)?;
+    /// let request: UEContextReleaseRequest = pdu.decode_value()?;
+    /// assert_eq!(request.protocol_ies.0.len(), 3);
+    ///
+    /// // Kept after `received` is gone
+    /// let kept: NGAP_PDU = pdu.into_owned();
+    /// # let _ = kept;
+    /// # Ok::<(), oxirush_ngap::Error>(())
+    /// ```
+    pub fn decode_borrowed<'b>(bytes: &'b [u8]) -> Result<NGAPPDU<'b>, crate::Error> {
+        match NGAPPDU::usual(bytes) {
+            Some((alternative, code, criticality, message)) => Ok(NGAPPDU::of_alternative(
+                alternative,
+                code,
+                criticality,
+                Octets::borrowed(message),
+            )),
+            None => oxirush_aper::decode(bytes),
+        }
+    }
 }
 impl<'a> NGAPPDU<'a> {
     /// A PDU of the usual layout, read octet by octet: its alternative, its procedure
@@ -104520,34 +104549,6 @@ impl<'a> NGAPPDU<'a> {
                 criticality,
                 value,
             }),
-        }
-    }
-    /// The PDU that `bytes` are, as `decode` reads it, with the octets of its message
-    /// borrowed from `bytes`: nothing is copied, and the PDU lives as long as they do.
-    ///
-    /// ```
-    /// use oxirush_ngap::ngap::*;
-    ///
-    /// // A UE CONTEXT RELEASE REQUEST, read where it was received
-    /// let received = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-    /// let pdu = NGAPPDU::decode_borrowed(&received)?;
-    /// let request: UEContextReleaseRequest = pdu.decode_value()?;
-    /// assert_eq!(request.protocol_ies.0.len(), 3);
-    ///
-    /// // Kept after `received` is gone
-    /// let kept: NGAP_PDU = pdu.into_owned();
-    /// # let _ = kept;
-    /// # Ok::<(), oxirush_ngap::Error>(())
-    /// ```
-    pub fn decode_borrowed(bytes: &'a [u8]) -> Result<Self, crate::Error> {
-        match Self::usual(bytes) {
-            Some((alternative, code, criticality, message)) => Ok(Self::of_alternative(
-                alternative,
-                code,
-                criticality,
-                Octets::borrowed(message),
-            )),
-            None => oxirush_aper::decode(bytes),
         }
     }
     /// The octets of this PDU, in aligned PER.

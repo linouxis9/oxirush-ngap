@@ -230,7 +230,7 @@ what each type became.
 - Identifiers, builders and extractors for the IEs whose type is an
   `OCTET STRING (CONTAINING ...)`, and names for the four IEs whose type is
   a plain `OCTET STRING`.
-- `NGAPPDU::decode_borrowed(&octets)`: the PDU that borrows its message from
+- `NGAP_PDU::decode_borrowed(&octets)`: the PDU that borrows its message from
   the octets, for a caller that reads a PDU where it was received. It copies
   nothing, where `NGAP_PDU::decode` copies the message once to own it, and
   `into_owned()` gives the PDU that `decode` gives. `pdu.encode_into(&mut

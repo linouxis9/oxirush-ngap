@@ -178,7 +178,7 @@ without debug information.
 | Of an `NGAP_PDU` | Gives |
 |------------------|-------|
 | `NGAP_PDU::decode(&bytes)` | The PDU of the octets of one message, which owns its octets. Octets that are incomplete, and octets after the message, are an error of the kind `Decode` |
-| `NGAPPDU::decode_borrowed(&bytes)` | The same PDU, which borrows its message from `bytes` and copies nothing; `into_owned()` gives the one that owns |
+| `NGAP_PDU::decode_borrowed(&bytes)` | The same PDU as a `NGAPPDU<'_>`, which borrows its message from `bytes` and copies nothing; `into_owned()` gives the one that owns |
 | `encode()`, `encode_into(&mut octets)` | Its octets, a `Vec<u8>`, or appended to a buffer that is kept |
 | `procedure_code()`, `procedure_name()` | The code and the name of its procedure: `42` and `"UEContextReleaseRequest"` |
 | `direction()` | `"InitiatingMessage"`, `"SuccessfulOutcome"` or `"UnsuccessfulOutcome"`; `is_initiating()`, `is_successful()` and `is_unsuccessful()` say which |
@@ -277,7 +277,7 @@ async fn deliver(nas: &[u8]) {
 
 async fn handle(received: Vec<u8>) -> Result<(), Error> {
     // Nothing of `received` is copied
-    let pdu = NGAPPDU::decode_borrowed(&received)?;
+    let pdu = NGAP_PDU::decode_borrowed(&received)?;
     let message: UplinkNASTransport = pdu.decode_value()?;
     extract_ngap_ies!(message, UplinkNASTransport,
         req nas: NASPDU = NAS_PDU(nas) => nas,

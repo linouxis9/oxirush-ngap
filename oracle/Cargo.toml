@@ -21,7 +21,8 @@ doc = false
 [features]
 # The types and their codec, which the tests of the crate and its fuzz targets ask
 # for. Without it the package is empty: a workspace that has the crate as a member
-# builds nothing of rasn until it builds the tests of the crate.
+# builds nothing of rasn until it builds the tests of the crate, as the feature
+# resolver 2 or 3 gives a package no feature that only the tests of another ask for.
 rasn = ["dep:rasn", "dep:serde_json"]
 
 [dependencies]

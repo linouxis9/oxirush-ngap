@@ -344,8 +344,8 @@ what each type became.
   The crate depends on the oracle by path, so a workspace that has the crate
   as a member has the oracle as a member too: the oracle has no workspace of
   its own, and is empty without its feature `rasn`, which the tests and the
-  fuzz targets ask for, so that such a workspace builds nothing of rasn until
-  it builds the tests of the crate. `tests/workspace_member.sh` makes such a
+  fuzz targets ask for, so that such a workspace, with the feature resolver
+  2 or 3, builds nothing of rasn until it builds the tests of the crate. `tests/workspace_member.sh` makes such a
   workspace, and CI has cargo load it and clippy and rustdoc accept it.
 
 ### Changed

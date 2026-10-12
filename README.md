@@ -1245,7 +1245,9 @@ a member has the oracle as a member too. The oracle has no workspace of its
 own, and is empty without its feature `rasn`, which the tests and the fuzz
 targets ask for: `cargo build --workspace` builds nothing of rasn in such a
 workspace, and `cargo test --workspace` builds the oracle for the tests of
-the crate. `tests/workspace_member.sh DIRECTORY [CRATE...]` makes a
+the crate. This is so with the feature resolver 2 or 3. A workspace of
+resolver 1 gives a package the features that the tests of another ask of
+it, and builds the oracle whole in every build. `tests/workspace_member.sh DIRECTORY [CRATE...]` makes a
 workspace of this crate and of the others that it is given, as
 `oxirush-s1ap` and `oxirush-aper`: cargo loads it, clippy accepts every
 target of every member, and rustdoc documents them. CI runs it with the crate

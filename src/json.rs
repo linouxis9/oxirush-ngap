@@ -571,14 +571,16 @@ impl rasn::Encoder<'_> for Encoder {
         value.encode(self)
     }
 
+    // A member that may be absent has the constraints of its member, as one that is
+    // always there: a bit string of one size is its octets alone (X.697 (02/2021) 24.1).
     fn encode_some_with_tag_and_constraints<E: Encode>(
         &mut self,
         _: Tag,
-        _: &Constraints,
+        constraints: &Constraints,
         value: &E,
         _: Identifier,
     ) -> Result<(), EncodeError> {
-        value.encode(self)
+        value.encode_with_constraints(self, constraints)
     }
 
     fn encode_none<E: Encode>(&mut self, _: Identifier) -> Result<(), EncodeError> {
@@ -1324,19 +1326,24 @@ impl rasn::Decoder for Decoder<'_> {
         self.decode_optional()
     }
 
+    // A member that may be absent has the constraints of its member, as one that is
+    // always there.
     fn decode_optional_with_constraints<D: Decode>(
         &mut self,
-        _: &Constraints,
+        constraints: &Constraints,
     ) -> Result<Option<D>, DecodeError> {
-        self.decode_optional()
+        match self.present() {
+            true => D::decode_with_constraints(self, constraints).map(Some),
+            false => Ok(None),
+        }
     }
 
     fn decode_optional_with_tag_and_constraints<D: Decode>(
         &mut self,
         _: Tag,
-        _: &Constraints,
+        constraints: &Constraints,
     ) -> Result<Option<D>, DecodeError> {
-        self.decode_optional()
+        self.decode_optional_with_constraints(constraints)
     }
 
     fn decode_extension_addition_with_explicit_tag_and_constraints<D: Decode>(
@@ -1376,19 +1383,70 @@ thread_local! {
         const { std::cell::Cell::new(None) };
 }
 
-/// In a test that asks for it: `value` has the JSON form that the codec of the JSON
-/// Encoding Rules of rasn gives it, and is read back from it as it is.
+/// In a test that asks for it: `value` is read back from its JSON form as it is, and
+/// that form is the one that the codec of the JSON Encoding Rules of rasn gives it,
+/// where that codec writes the value.
 #[cfg(test)]
 pub(crate) fn as_rasn_writes_it<T: Encode + Decode + PartialEq + core::fmt::Debug>(value: &T) {
     let Some(compared) = COMPARED.get() else {
         return;
     };
     let ours = to_value(value).unwrap();
-    let text = rasn::jer::encode(value).unwrap();
-    let theirs: Value = serde_json::from_str(&text).unwrap();
-    assert_eq!(ours, theirs, "{value:?}");
     assert_eq!(from_value::<T>(&ours).as_ref(), Ok(value));
-    COMPARED.set(Some(compared + 1));
+    match rasn::jer::encode(value) {
+        Ok(text) => {
+            let theirs: Value = serde_json::from_str(&text).unwrap();
+            assert!(
+                same_but_for_a_length(&ours, &theirs),
+                "{value:?}: {ours} is not {theirs}"
+            );
+            COMPARED.set(Some(compared + 1));
+        }
+        // The codec of rasn writes no integer of 2^63 or more: there is nothing to
+        // compare a value that holds one with.
+        Err(error) => {
+            let error = format!("{error:?}");
+            assert!(error.contains("ExceedsSupportedIntSize"), "{error}");
+        }
+    }
+}
+
+/// Whether `ours` is what rasn writes, `theirs`, but for the two bit strings whose
+/// length the codec of rasn has otherwise (X.697 (02/2021) clause 24). A string whose
+/// type has one size is a JSON string: in a member that may be absent, rasn does not
+/// look at the size that the member gives it, and writes its length. A string of
+/// another size than the one that its type has beside an extension marker is written
+/// with its length: rasn writes its octets alone, and reads another string back.
+#[cfg(test)]
+pub(crate) fn same_but_for_a_length(ours: &Value, theirs: &Value) -> bool {
+    // The octets and the length of a bit string that is written with its length.
+    let with_length = |members: &Map<String, Value>| {
+        let length = members.get("length").and_then(Value::as_u64)?;
+        let octets = members.get("value").and_then(Value::as_str)?;
+        let whole = length.div_ceil(8) == octets.len() as u64 / 2;
+        (members.len() == 2 && whole).then(|| octets.to_string())
+    };
+    match (ours, theirs) {
+        (Value::String(octets), Value::Object(members)) => {
+            with_length(members).as_ref() == Some(octets)
+        }
+        (Value::Object(members), Value::String(octets)) => {
+            with_length(members).as_ref() == Some(octets)
+        }
+        (Value::Object(ours), Value::Object(theirs)) => {
+            let same = |(name, value)| {
+                let other = theirs.get::<String>(name);
+                other.is_some_and(|other| same_but_for_a_length(value, other))
+            };
+            ours.len() == theirs.len() && ours.iter().all(same)
+        }
+        (Value::Array(ours), Value::Array(theirs)) => {
+            let mut pairs = ours.iter().zip(theirs);
+            ours.len() == theirs.len()
+                && pairs.all(|(ours, theirs)| same_but_for_a_length(ours, theirs))
+        }
+        _ => ours == theirs,
+    }
 }
 
 #[cfg(test)]
@@ -1462,6 +1520,8 @@ mod tests {
         open: Any,
         list: SequenceOf<Either>,
         absent: Option<u8>,
+        #[rasn(value("0..=4095"))]
+        limited: Option<u16>,
         #[rasn(extension_addition)]
         later: Option<Kind>,
     }
@@ -1498,6 +1558,7 @@ mod tests {
                 Either::nothing(()),
             ],
             absent: None,
+            limited: None,
             later: Some(Kind::not_in_the_root),
         }
     }
@@ -1514,7 +1575,7 @@ mod tests {
             "fixed-bits": "ABC0",
             "mask": "C000",
             "address": {"value": "0A000001", "length": 32},
-            "day-of-week": {"value": "FE", "length": 7},
+            "day-of-week": "FE",
             "name": "gnb-1",
             "printable": "AMF 1",
             "visible": "visible",
@@ -1544,9 +1605,35 @@ mod tests {
         assert_eq!(to_value(&sample).unwrap(), written());
         assert_eq!(from_value::<Sample>(&written()), Ok(sample.clone()));
 
-        // It is the form that rasn gives the value.
-        let theirs: Value = serde_json::from_str(&rasn::jer::encode(&sample).unwrap()).unwrap();
+        // It is the form that rasn gives the value, but for the bit string of one size
+        // in a member that may be absent, which rasn writes with its length.
+        let mut theirs: Value = serde_json::from_str(&rasn::jer::encode(&sample).unwrap()).unwrap();
+        assert_eq!(theirs["day-of-week"], json!({"value": "FE", "length": 7}));
+        assert!(same_but_for_a_length(&written(), &theirs));
+        theirs["day-of-week"] = json!("FE");
         assert_eq!(theirs, written());
+    }
+
+    #[test]
+    fn a_bit_string_of_one_size_is_its_octets_in_a_member_that_may_be_absent() {
+        // X.697 (02/2021) 24.1: a bit string whose type has one size is a JSON string,
+        // wherever a value of the type is.
+        let sample = sample();
+        assert_eq!(to_value(&sample).unwrap()["day-of-week"], json!("FE"));
+        let read = from_value::<Sample>(&with("day-of-week", json!("fe"))).unwrap();
+        assert_eq!(read.day_of_week, sample.day_of_week);
+        let (kind, why) = refused(&with("day-of-week", json!({"value": "FE", "length": 7})));
+        assert_eq!(kind, ErrorKind::Value);
+        assert!(
+            why.contains("at day-of-week: a bit string of 7 bits is expected, in hexadecimal"),
+            "{why}"
+        );
+        // A number that may be absent has the constraint of its member too.
+        let (_, why) = refused(&with("limited", json!(4096)));
+        assert!(
+            why.ends_with("at limited: 4096 is outside its constraint (0..4095)"),
+            "{why}"
+        );
     }
 
     #[test]

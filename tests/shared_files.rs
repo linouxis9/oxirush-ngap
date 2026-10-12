@@ -23,7 +23,7 @@ const SHARED: &[(&str, u64)] = &[
     ("src/check.rs", 0x6a14609dae13ca66),
     ("src/error.rs", 0x5b938dac1af61881),
     ("src/inspect_paths.rs", 0xf3dc92ad52e906b2),
-    ("src/json.rs", 0x944ffbecb43a768e),
+    ("src/json.rs", 0x437608d6c30ecd75),
     ("src/message.rs", 0x80820382c540a0cc),
     ("src/per.rs", 0x8c08042e9798a7f9),
     ("src/sized.rs", 0x05d05e62217fc26a),

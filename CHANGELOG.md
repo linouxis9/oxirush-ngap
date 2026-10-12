@@ -364,6 +364,10 @@ is not source compatible with 0.4.2.
   encoding rules, and for the JSON forms, a `SEQUENCE` is written and read
   as the derived codec did it, and the additions of a later release are
   skipped in the unaligned variant too.
+- A message is found by the code of its procedure before its direction,
+  the name of an IE by a binary search of its identifier, and its
+  identifier by a hash of its name. `check` names an IE where it reports a
+  deviation, and no longer each IE of the message.
 
 ### Fixed
 

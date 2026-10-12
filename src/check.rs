@@ -19,14 +19,16 @@ pub(crate) struct ObjectSet {
 
 /// What the registry has of the message of a direction and a procedure code.
 pub(crate) fn object_set(direction: &str, code: u8) -> Option<&'static ObjectSet> {
+    // The code first: a number is compared sooner than the name of a direction.
     let mut sets = OBJECT_SETS.iter();
-    sets.find(|set| (set.direction, set.procedure_code) == (direction, code))
+    sets.find(|set| set.procedure_code == code && set.direction == direction)
 }
 
-/// The name that ASN.1 gives the IE of an identifier, after `id-`.
-fn name(id: u16) -> Option<&'static str> {
-    let mut names = IE_NAMES.iter();
-    names.find(|(known, _)| *known == id).map(|(_, name)| *name)
+/// The name that ASN.1 gives the IE of an identifier, after `id-`. The registry lists
+/// the IEs in the order of their identifiers.
+pub(crate) fn name(id: u16) -> Option<&'static str> {
+    let at = IE_NAMES.binary_search_by_key(&id, |(known, _)| *known);
+    at.ok().map(|at| IE_NAMES[at].1)
 }
 
 /// One way in which a PDU is not as the specification has a sender construct it: what
@@ -191,11 +193,11 @@ pub(crate) fn deviations(
             found.push(Deviation::UnexpectedIe { id, name, position });
             continue;
         };
-        let name = name(id).unwrap_or_default();
+        let name = || name(id).unwrap_or_default();
         match (first[index], last) {
             (Some(first), _) => found.push(Deviation::RepeatedIe {
                 id,
-                name,
+                name: name(),
                 position,
                 first,
             }),
@@ -204,7 +206,7 @@ pub(crate) fn deviations(
                 let (after, ..) = set[last];
                 found.push(Deviation::OutOfOrder {
                     id,
-                    name,
+                    name: name(),
                     position,
                     after,
                     after_name: self::name(after).unwrap_or_default(),
@@ -219,7 +221,7 @@ pub(crate) fn deviations(
         if criticality != assigned {
             found.push(Deviation::IeCriticality {
                 id,
-                name,
+                name: name(),
                 position,
                 criticality,
                 assigned,
@@ -237,6 +239,16 @@ pub(crate) fn deviations(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_ies_are_listed_in_the_order_of_their_identifiers() {
+        // The name of an IE is found by a binary search of its identifier.
+        assert!(IE_NAMES.windows(2).all(|pair| pair[0].0 < pair[1].0));
+        for (id, known) in IE_NAMES {
+            assert_eq!(name(*id), Some(*known));
+        }
+        assert_eq!(name(u16::MAX), None);
+    }
 
     #[test]
     fn each_message_but_the_private_one_has_an_object_set() {

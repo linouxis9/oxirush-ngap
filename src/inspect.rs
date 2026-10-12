@@ -343,7 +343,7 @@ pub fn message_names() -> impl Iterator<Item = (&'static str, u8, &'static str)>
 pub fn message_name(pdu: &NGAP_PDU) -> Option<&'static str> {
     let (direction, code) = (pdu.direction(), pdu.procedure_code());
     message_names()
-        .find(|(of, procedure, _)| (*of, *procedure) == (direction, code))
+        .find(|(of, procedure, _)| *procedure == code && *of == direction)
         .map(|(.., name)| name)
 }
 
@@ -402,7 +402,7 @@ pub fn item_criticality(id: u16) -> Option<&'static str> {
 /// The functions of the type of the message of a direction and a procedure code.
 fn message_type(direction: &str, code: u8) -> Result<Typed, Error> {
     let mut messages = registry::MESSAGES.iter();
-    let message = messages.find(|(of, procedure, ..)| (*of, *procedure) == (direction, code));
+    let message = messages.find(|(of, procedure, ..)| *procedure == code && *of == direction);
     let protocol = registry::PROTOCOL;
     message.map(|(_, _, _, typed, ..)| typed()).ok_or_else(|| {
         Error::unknown_message(format!("{protocol} has no {direction} of procedure {code}"))

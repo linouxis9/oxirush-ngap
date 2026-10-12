@@ -1,6 +1,9 @@
 //! The values of a view by their paths, and the IEs of a tree by their names: see the
 //! module documentation of [`crate::inspect`].
 
+use std::collections::HashMap;
+use std::sync::LazyLock;
+
 use serde_json::{Map, Value, json};
 
 use crate::Error;
@@ -197,10 +200,18 @@ fn position(part: &str) -> Option<usize> {
 
 /// The number of the IE that ASN.1 names `id-<name>`.
 pub(crate) fn ie_id(name: &str) -> Option<u16> {
-    let mut names = crate::inspect::ie_names().iter();
-    names
-        .find(|(_, known)| same_name(known, name))
-        .map(|(id, _)| *id)
+    /// The identifier of each IE by the letters and the digits of its name, in lower
+    /// case, which is how two names are the same: the first IE of a name, as a search
+    /// of the names in their order finds it.
+    static IDS: LazyLock<HashMap<Vec<u8>, u16>> = LazyLock::new(|| {
+        let mut ids = HashMap::new();
+        for (id, name) in crate::inspect::ie_names() {
+            ids.entry(letters(name).collect()).or_insert(*id);
+        }
+        ids
+    });
+    let name: Vec<u8> = letters(name).collect();
+    IDS.get(&name).copied()
 }
 
 /// The identifier of an entry of a list of IEs: its number, or the name of its IE as an
@@ -214,9 +225,8 @@ fn entry_id(entry: &Value) -> Option<u64> {
 
 /// The name that ASN.1 gives the IE of an identifier, or its number.
 fn ie_name(id: u16) -> String {
-    let mut names = crate::inspect::ie_names().iter();
-    match names.find(|(known, _)| *known == id) {
-        Some((_, name)) => name.to_string(),
+    match crate::check::name(id) {
+        Some(name) => name.to_string(),
         None => format!("@id={id}"),
     }
 }
@@ -1000,7 +1010,7 @@ fn typed(
 /// The shape of the message of a direction and a procedure code in a view, where the
 /// tables have it.
 pub(crate) fn message_shape(direction: &str, code: u8) -> Shape {
-    let message = sent(|of, procedure, _| of == direction && procedure == code);
+    let message = sent(|of, procedure, _| procedure == code && of == direction);
     message.map_or(Shape::Unknown, Shape::Message)
 }
 
@@ -1696,11 +1706,7 @@ fn by_name(value: &Value, shape: Shape) -> Result<Value, Error> {
 fn ie_by_name(entry: &Value, shape: Shape, container: Shape) -> Result<Value, Error> {
     let id = entry_id(entry).and_then(|id| u16::try_from(id).ok());
     let id = id.ok_or_else(|| Error::form("an IE has its identifier"))?;
-    let mut names = crate::inspect::ie_names().iter();
-    let name = match names.find(|(known, _)| *known == id) {
-        Some((_, name)) => name.to_string(),
-        None => id.to_string(),
-    };
+    let name = crate::check::name(id).map_or_else(|| id.to_string(), str::to_string);
     let field = value_member(shape).unwrap_or("value");
     let undecoded = [entry, &entry[field]]
         .iter()

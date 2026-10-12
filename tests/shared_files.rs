@@ -20,7 +20,7 @@ const SHARED: &[(&str, u64)] = &[
     ("build/registry.rs", 0xd1c828575adadf7c),
     ("src/check.rs", 0x6a14609dae13ca66),
     ("src/error.rs", 0x5b938dac1af61881),
-    ("src/inspect_paths.rs", 0x3a7af26d27ca147f),
+    ("src/inspect_paths.rs", 0x7e8563ca61dc25f0),
     ("src/json.rs", 0x94b43ab85ed2ca05),
     ("src/message.rs", 0x80820382c540a0cc),
     ("src/per.rs", 0x8c08042e9798a7f9),

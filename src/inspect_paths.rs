@@ -339,8 +339,9 @@ fn pdu(view: &Value) -> Shape {
 /// What a type of the list of the types is; `None` for a name that the list does not
 /// have, which is that of a value without members.
 fn kind_of(name: &str) -> Option<&'static Kind> {
-    let at = TYPES.binary_search_by(|(known, _)| (*known).cmp(name));
-    at.ok().map(|at| &TYPES[at].1)
+    static KINDS: LazyLock<HashMap<&'static str, &'static Kind>> =
+        LazyLock::new(|| TYPES.iter().map(|(name, kind)| (*name, kind)).collect());
+    KINDS.get(name).copied()
 }
 
 /// The name that ASN.1 gives a member which the bindings name `field`, as `gNB-ID` for
@@ -1022,25 +1023,48 @@ pub(crate) fn carried_shape(name: &str) -> Shape {
     carried.map_or(Shape::Unknown, |(.., ty)| Shape::Transfer(type_name(ty)))
 }
 
+/// The members that a value of a view can have, each with its shape.
+pub(crate) enum Members {
+    /// Those of a SEQUENCE or of a CHOICE, as the list of the types has them, and the
+    /// name of that type: an extension container among them extends it.
+    Listed(&'static [Member], &'static str),
+    /// Those of another value, as an IE or a transfer.
+    Made(Vec<Member>),
+}
+
 /// The members that `entry`, a value of `shape` in a view, can have, each with its
 /// shape; none for a shape that the tables do not describe.
-pub(crate) fn member_shapes(shape: Shape, entry: &Map<String, Value>) -> Vec<Member> {
+pub(crate) fn member_shapes(shape: Shape, entry: &Map<String, Value>) -> Members {
     let shape = match resolved(shape) {
         // A transfer that is written as its decoded value itself.
         Shape::Transfer(contained)
             if !contained.is_empty() && !entry.keys().any(|name| of_a_transfer(name)) =>
         {
-            Shape::Named(contained)
+            resolved(Shape::Named(contained))
         }
         shape => shape,
     };
-    members(shape, Some(entry)).unwrap_or_default()
+    if let Shape::Named(name) = shape
+        && let Some(Kind::Sequence(members) | Kind::Choice(members)) = kind_of(name)
+    {
+        return Members::Listed(members, name);
+    }
+    Members::Made(members(shape, Some(entry)).unwrap_or_default())
 }
 
 /// The shape of the member that `name` names among `members`, which [`member_shapes`]
 /// gave.
-pub(crate) fn member_shape(members: &[Member], name: &str) -> Shape {
-    member(members, name).map_or(Shape::Unknown, |(_, shape, _)| *shape)
+pub(crate) fn member_shape(members: &Members, name: &str) -> Shape {
+    let (members, of) = match members {
+        Members::Listed(members, of) => (*members, Some(*of)),
+        Members::Made(members) => (&members[..], None),
+    };
+    match (member(members, name), of) {
+        // An extension container extends the type that has it.
+        (Some((_, Shape::Extensions(_), _)), Some(of)) => Shape::Extensions(of),
+        (Some((_, shape, _)), _) => *shape,
+        (None, _) => Shape::Unknown,
+    }
 }
 
 /// The shape of each entry of a list of `shape`.
@@ -1663,38 +1687,60 @@ fn assigned(container: Shape, id: u16) -> Option<&'static str> {
 
 /// `value`, a value of `shape` of a view, as a tree has it: a transfer as its decoded
 /// value, or as its `octets` when it has none, and each IE of a container as
-/// [`ie_by_name`] shows it.
-fn by_name(value: &Value, shape: Shape) -> Result<Value, Error> {
+/// [`ie_by_name`] shows it. The view is taken: what the tree keeps of it is moved.
+fn by_name(value: Value, shape: Shape) -> Result<Value, Error> {
     let shape = resolved(shape);
     match value {
-        Value::Object(entry) => match shape {
+        Value::Object(mut entry) => match shape {
             Shape::Transfer(_) => {
-                let members = members(shape, Some(entry)).unwrap_or_default();
-                match (entry.get("decoded"), member(&members, "decoded")) {
-                    (Some(decoded), Some((_, of, _))) => by_name(decoded, *of),
-                    _ => Ok(json!({"octets": received(entry)})),
+                let members = members(shape, Some(&entry)).unwrap_or_default();
+                let of = member(&members, "decoded").map(|(_, of, _)| *of);
+                match (entry.remove("decoded"), of) {
+                    (Some(decoded), Some(of)) => by_name(decoded, of),
+                    _ => {
+                        let octets = received_member(&entry).and_then(|raw| entry.remove(raw));
+                        Ok(octets_alone(octets.unwrap_or_default()))
+                    }
                 }
             }
             // An IE that a value holds alone.
-            Shape::Ie(_) | Shape::Extension(..) => ie_by_name(value, shape, shape),
+            Shape::Ie(_) | Shape::Extension(..) => ie_by_name(entry, shape, shape),
             _ => {
-                let members = members(shape, Some(entry)).unwrap_or_default();
-                let shown = entry.iter().map(|(name, value)| {
-                    let of = member(&members, name).map_or(Shape::Unknown, |(_, of, _)| *of);
-                    Ok((name.clone(), by_name(value, of)?))
-                });
-                Ok(Value::Object(shown.collect::<Result<_, Error>>()?))
+                let members = member_shapes(shape, &entry);
+                for (name, value) in entry.iter_mut() {
+                    *value = by_name(value.take(), member_shape(&members, name))?;
+                }
+                Ok(Value::Object(entry))
             }
         },
-        Value::Array(entries) => {
-            let shown = entries.iter().map(|entry| match element(shape) {
-                of @ (Shape::Ie(_) | Shape::Extension(..)) => ie_by_name(entry, of, shape),
-                of => by_name(entry, of),
-            });
-            Ok(Value::Array(shown.collect::<Result<_, Error>>()?))
+        Value::Array(mut entries) => {
+            let of = element(shape);
+            for entry in &mut entries {
+                *entry = match (of, entry.take()) {
+                    (Shape::Ie(_) | Shape::Extension(..), Value::Object(entry)) => {
+                        ie_by_name(entry, of, shape)?
+                    }
+                    (Shape::Ie(_) | Shape::Extension(..), _) => return Err(no_identifier()),
+                    (of, entry) => by_name(entry, of)?,
+                };
+            }
+            Ok(Value::Array(entries))
         }
-        plain => Ok(plain.clone()),
+        plain => Ok(plain),
     }
+}
+
+/// What a tree has for an IE or a transfer that has no value: the octets that it was
+/// received as.
+fn octets_alone(octets: Value) -> Value {
+    let mut alone = Map::new();
+    alone.insert("octets".into(), octets);
+    Value::Object(alone)
+}
+
+/// An entry of a container that has no identifier.
+fn no_identifier() -> Error {
+    Error::form("an IE has its identifier")
 }
 
 /// The entry of an IE of `shape` in a container of `container`, as its name with its
@@ -1703,22 +1749,30 @@ fn by_name(value: &Value, shape: Shape) -> Result<Value, Error> {
 /// that type, has the octets that it was received as, as `{"octets": "…"}`. Its
 /// `criticality` is beside its name when it is not the one that the specification
 /// assigns it there, and where the tables do not have that one.
-fn ie_by_name(entry: &Value, shape: Shape, container: Shape) -> Result<Value, Error> {
-    let id = entry_id(entry).and_then(|id| u16::try_from(id).ok());
-    let id = id.ok_or_else(|| Error::form("an IE has its identifier"))?;
+fn ie_by_name(
+    mut entry: Map<String, Value>,
+    shape: Shape,
+    container: Shape,
+) -> Result<Value, Error> {
+    let id = match entry.get("id") {
+        Some(Value::String(name)) => ie_id(name),
+        Some(id) => id.as_u64().and_then(|id| u16::try_from(id).ok()),
+        None => None,
+    };
+    let id = id.ok_or_else(no_identifier)?;
     let name = crate::check::name(id).map_or_else(|| id.to_string(), str::to_string);
     let field = value_member(shape).unwrap_or("value");
-    let undecoded = [entry, &entry[field]]
-        .iter()
-        .any(|of| of.get("_decode_error").is_some());
+    let value = entry.remove(field).unwrap_or_default();
+    let undecoded = entry.contains_key("_decode_error") || value.get("_decode_error").is_some();
     let value = match undecoded {
-        true => json!({"octets": entry["_raw_value"]}),
-        false => by_name(&entry[field], ie_value(Some(id), extended(shape)))?,
+        true => octets_alone(entry.remove("_raw_value").unwrap_or_default()),
+        false => by_name(value, ie_value(Some(id), extended(shape)))?,
     };
+    let criticality = entry.remove("criticality").unwrap_or_default();
     let mut shown = Map::new();
     shown.insert(name, value);
-    if entry["criticality"].as_str() != assigned(container, id) {
-        shown.insert("criticality".into(), entry["criticality"].clone());
+    if criticality.as_str() != assigned(container, id) {
+        shown.insert("criticality".into(), criticality);
     }
     Ok(Value::Object(shown))
 }
@@ -1752,9 +1806,9 @@ fn written(value: &Value, shape: Shape, depth: usize) -> Result<Value, Error> {
             // An IE that a value holds alone.
             Shape::Ie(_) | Shape::Extension(..) => entry_of(value, shape, shape, depth),
             _ => {
-                let members = members(shape, Some(entry)).unwrap_or_default();
+                let members = member_shapes(shape, entry);
                 let listed = entry.iter().map(|(name, value)| {
-                    let of = member(&members, name).map_or(Shape::Unknown, |(_, of, _)| *of);
+                    let of = member_shape(&members, name);
                     Ok((name.clone(), written(value, of, depth + 1)?))
                 });
                 Ok(Value::Object(listed.collect::<Result<_, Error>>()?))
@@ -1812,20 +1866,24 @@ fn entry_of(ie: &Value, shape: Shape, container: Shape, depth: usize) -> Result<
             )));
         }
     };
+    let mut listed = Map::new();
+    listed.insert("id".into(), id.into());
+    listed.insert("criticality".into(), criticality);
     let octets = value.as_object().filter(|value| value.len() == 1);
-    Ok(match octets.and_then(|value| value.get("octets")) {
-        Some(octets) => json!({"id": id, "criticality": criticality, "octets": octets}),
+    match octets.and_then(|value| value.get("octets")) {
+        Some(octets) => listed.insert("octets".into(), octets.clone()),
         None => {
             let value = written(value, ie_value(Some(id), extended(shape)), depth + 1)?;
-            json!({"id": id, "criticality": criticality, field: value})
+            listed.insert(field.into(), value)
         }
-    })
+    };
+    Ok(Value::Object(listed))
 }
 
 /// The IEs of the message that ASN.1 names `message`, which a view has as `ies`, as a
 /// tree has them: each as its name with its value, and so are the IEs that a value
 /// holds, to any depth.
-pub(crate) fn named_ies(message: &str, ies: &Value) -> Result<Value, Error> {
+pub(crate) fn named_ies(message: &str, ies: Value) -> Result<Value, Error> {
     let message = sent(|_, _, name| same_name(name, message));
     by_name(ies, Shape::Ies(message))
 }
@@ -2239,7 +2297,7 @@ mod tests {
             (Shape::Ies(None), "value"),
             (Shape::Extensions(""), "extensionValue"),
         ] {
-            let shown = by_name(&json!([entry(field, true)]), container).unwrap();
+            let shown = by_name(json!([entry(field, true)]), container).unwrap();
             assert_eq!(shown, json!([{"Cause": value, "criticality": "ignore"}]));
             let listed = written(&shown, container, 0).unwrap();
             assert_eq!(listed, json!([entry(field, false)]));
@@ -2254,7 +2312,7 @@ mod tests {
         let mut undecoded = entry("value", true);
         undecoded["value"] = json!("0000");
         undecoded["_decode_error"] = json!("why");
-        let shown = by_name(&json!([undecoded]), Shape::Ies(None)).unwrap();
+        let shown = by_name(json!([undecoded]), Shape::Ies(None)).unwrap();
         let octets = json!({"Cause": {"octets": "0000"}, "criticality": "ignore"});
         assert_eq!(shown, json!([octets]));
         let listed = written(&shown, Shape::Ies(None), 0).unwrap();
@@ -2264,11 +2322,11 @@ mod tests {
         // in the form that it is written in.
         let transfer = Shape::Transfer("Cause");
         let decoded = json!({"_raw_transfer": "00", "decoded": value});
-        assert_eq!(by_name(&decoded, transfer), Ok(value.clone()));
+        assert_eq!(by_name(decoded, transfer), Ok(value.clone()));
         assert_eq!(written(&value, transfer, 0), Ok(value.clone()));
         let undecoded = json!({"_raw_transfer": "00", "_decode_error": "why"});
         let octets = json!({"octets": "00"});
-        assert_eq!(by_name(&undecoded, transfer), Ok(octets.clone()));
+        assert_eq!(by_name(undecoded, transfer), Ok(octets.clone()));
         assert_eq!(written(&octets, transfer, 0), Ok(octets));
         // A tree is not read deeper than a view is encoded.
         let mut deep = json!(1);

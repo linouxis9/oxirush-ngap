@@ -368,6 +368,10 @@ is not source compatible with 0.4.2.
   the name of an IE by a binary search of its identifier, and its
   identifier by a hash of its name. `check` names an IE where it reports a
   deviation, and no longer each IE of the message.
+- A view and a tree are built without copying what they hold: a value goes
+  into the object that holds it by a move, `from_tree` makes the PDU of its
+  message without writing a view of it first, and the members of a value
+  are read where the list of the types has them.
 
 ### Fixed
 

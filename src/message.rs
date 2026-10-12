@@ -15,6 +15,9 @@ pub trait Message: rasn::Decode + rasn::Encode + sealed::Sealed {
     const DIRECTION: &'static str;
     /// The code of its procedure.
     const PROCEDURE_CODE: u8;
+    /// The message of these protocol IEs, for one that is a container of them.
+    #[doc(hidden)]
+    const __OF_PROTOCOL_IES: Option<fn(crate::registry::ProtocolIEContainer) -> Self>;
 }
 
 pub(crate) mod sealed {

@@ -14,14 +14,22 @@ use crate::registry::procedure_criticality;
 #[derive(AsnType, Encode)]
 #[rasn(automatic_tags)]
 #[non_exhaustive]
-struct AnyMessage {
+pub(crate) struct AnyMessage {
     #[rasn(identifier = "protocolIEs")]
-    protocol_ies: ProtocolIEContainer,
+    pub(crate) protocol_ies: ProtocolIEContainer,
 }
 crate::per::decode_extensible_sequence! { AnyMessage {
     #[rasn(identifier = "protocolIEs")]
     protocol_ies: [ProtocolIEContainer],
 } }
+
+#[cfg(test)]
+impl AnyMessage {
+    /// The message of these protocol IEs.
+    pub(crate) fn of(protocol_ies: ProtocolIEContainer) -> Self {
+        Self { protocol_ies }
+    }
+}
 
 impl NGAP_PDU {
     /// The open type that holds the message of this PDU.
@@ -83,8 +91,13 @@ impl NGAP_PDU {
     /// octets of the message are not a container of protocol IEs.
     pub fn protocol_ies(&self) -> Result<ProtocolIEContainer, Error> {
         let name = self.message_of_protocol_ies()?;
-        let message: AnyMessage = crate::per::decode_complete(self.value().as_bytes())
-            .map_err(|error| error.of_message(name))?;
+        let octets = self.value().as_bytes();
+        // Octet by octet, and by the codec of rasn for what that leaves.
+        if let Some(protocol_ies) = crate::wire::protocol_ies(octets) {
+            return Ok(protocol_ies);
+        }
+        let message: AnyMessage =
+            crate::per::decode_complete(octets).map_err(|error| error.of_message(name))?;
         Ok(message.protocol_ies)
     }
 
@@ -122,8 +135,11 @@ impl NGAP_PDU {
     pub fn set_protocol_ies(&mut self, protocol_ies: ProtocolIEContainer) -> Result<(), Error> {
         self.message_of_protocol_ies()?;
         let count = protocol_ies.0.len();
-        let value = crate::per::encode_open_type(&AnyMessage { protocol_ies })
-            .map_err(|error| error.of_protocol_ies(count))?;
+        let value = match crate::wire::message_octets(&protocol_ies) {
+            Some(octets) => Any::new(octets),
+            None => crate::per::encode_open_type(&AnyMessage { protocol_ies })
+                .map_err(|error| error.of_protocol_ies(count))?,
+        };
         match self {
             Self::initiatingMessage(message) => message.value = value,
             Self::successfulOutcome(message) => message.value = value,
@@ -132,10 +148,40 @@ impl NGAP_PDU {
         Ok(())
     }
 
+    /// Which alternative this PDU is, as its position among the three.
+    pub(crate) fn alternative(&self) -> u8 {
+        match self {
+            Self::initiatingMessage(_) => 0,
+            Self::successfulOutcome(_) => 1,
+            Self::unsuccessfulOutcome(_) => 2,
+        }
+    }
+
+    /// The PDU of an alternative, by its position among the three, with the code of its
+    /// procedure, its criticality and the open type that holds its message; `None` for
+    /// what is no alternative.
+    pub(crate) fn of_alternative(
+        alternative: u8,
+        procedure_code: u8,
+        criticality: Criticality,
+        value: Any,
+    ) -> Option<Self> {
+        let direction = [
+            "InitiatingMessage",
+            "SuccessfulOutcome",
+            "UnsuccessfulOutcome",
+        ];
+        Self::of(
+            direction.get(usize::from(alternative))?,
+            procedure_code,
+            criticality,
+            value,
+        )
+    }
+
     /// The PDU of a direction, as `direction()` says it, with the code of its procedure,
     /// its criticality and the open type that holds its message; `None` for what is no
     /// direction.
-    #[cfg(feature = "inspect")]
     pub(crate) fn of(
         direction: &str,
         procedure_code: u8,

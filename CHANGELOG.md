@@ -339,8 +339,18 @@ is not source compatible with 0.4.2.
   fault is by the names of the value: a member that its type does not have,
   a second alternative of a `CHOICE`, an integer outside its constraint or
   written as its digits where JSON has a number for it, a bit string with
-  other octets than its length has and padding bits that are not zero. The name of an `ENUMERATED` value is taken whatever its case and
-  its separators where it is read.
+  other octets than its length has and padding bits that are not zero. The
+  name of an `ENUMERATED` value is taken whatever its case and its
+  separators where it is read.
+- A PDU and a message of protocol IEs are read and written octet by octet,
+  where the codec of rasn read and wrote each: `NGAP_PDU::decode` and
+  `encode`, `decode_value`, `protocol_ies`, `set_protocol_ies`, `check` and
+  the messages that `build_ngap!` builds. In aligned PER each component
+  of both starts an octet. What is not of that layout is left to the codec
+  of rasn, so a value and an error are what they were: a PDU of an
+  alternative that a later release adds, a message with an extension
+  addition, a length of 16384 octets or more, and octets that end early or
+  go on after the value.
 - The examples of the documentation and of the README are compiled and run
   by the documentation tests.
 

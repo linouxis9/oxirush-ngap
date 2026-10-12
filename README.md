@@ -1125,6 +1125,7 @@ S1AP.
 | `tests/inspection.rs` | Each of the 144 messages is the same octets through its view, and through its tree where it has IEs to name. Each path of each selects its value, with and without `value` and `decoded`, and is one that `check_path` takes. Edits, written trees, criticalities, the two IEs that have the type of what they extend, and the identifiers of the registry against the constants of the bindings. |
 | `tests/shared_files.rs` | The files that this crate shares with `oxirush-s1ap` are as they were last mirrored. |
 | The unit tests of the JSON codec | Each ASN.1 construct of the protocol has its JSON form and is read back from it, with what is refused and where. Each value of each message of the fixtures has the form that the JSON Encoding Rules codec of rasn gives it. |
+| The unit tests of `src/wire.rs` | A PDU and the protocol IEs of a message are read and written octet by octet as the codec of rasn reads and writes them: each message of the fixtures, each of its truncations, and each with one bit that is another. |
 | The unit tests of the paths | No two names that a path takes can be mistaken for each other. No value has a member with the same name as a member of its IE, except the `value` of a bit string. |
 | The Rust blocks of this page | They compile and run as documentation tests, with the `inspect` feature, and `tests/readme.rs` compares what each prints with the output shown under it. |
 
@@ -1188,8 +1189,8 @@ oxirush-ngap and oxirush-s1ap share, octet for octet, the code that does not
 depend on the protocol: `build/aper_fix.rs`, `build/containers.rs`,
 `build/inspection.rs`, `build/registry.rs`, `src/check.rs`, `src/error.rs`,
 `src/inspect_paths.rs`, `src/json.rs`, `src/message.rs`, `src/per.rs`,
-`src/sized.rs`, the test `tests/readme.rs`, and the benchmarks but for their
-`protocol.rs`.
+`src/sized.rs`, `src/wire.rs`, the test `tests/readme.rs`, and the
+benchmarks but for their `protocol.rs`.
 `tests/shared_files.rs` holds a digest of each, so that an edit in one crate
 fails its tests until the file is the same in the other and both record the
 new digest.

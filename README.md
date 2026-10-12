@@ -1170,12 +1170,16 @@ generator nor the ASN.1.
 | `src/inspect_registry.rs` | What `inspect` alone needs, with the `inspect` feature: among it the list of the types, one line for each `SEQUENCE` and each `CHOICE` with its members, which the paths are read against, and the types that a handover's containers carry, which the generator has from the prose of the specification |
 
 For maintainers, `build/` holds the generator, a package of its own whose
-lockfile pins `rasn-compiler`. It reads the six `.asn` modules in `ngap/`,
-which Git ignores: the ASN.1 of clause 9.4 of TS 38.413 V19.4.0, one file per
-module, taken out of the document of the `38413-j40.zip` archive. The
-repository has no step that extracts them. From the crate directory:
+lockfile pins `rasn-compiler`. It reads the six `.asn` modules in `ngap/`:
+the ASN.1 of clause 9.4 of TS 38.413 V19.4.0, one file per module. Their
+text is 3GPP's, and the repository does not have it. `build/asn1.sha256`
+records the SHA-256 of each module, `build/extract_asn1.py` takes them out
+of the archive that 3GPP publishes and compares them with it, and the
+generator reads no module that has another digest. From the crate directory:
 
 ```sh
+curl -A "Mozilla/5.0" -O https://www.3gpp.org/ftp/Specs/archive/38_series/38.413/38413-j40.zip
+python3 build/extract_asn1.py 38413-j40.zip
 CARGO="$(command -v cargo)" cargo run --locked --manifest-path build/Cargo.toml
 rustfmt --edition 2024 src/ngap.rs src/registry.rs src/inspect_registry.rs
 ```
@@ -1187,8 +1191,9 @@ on 2026-10-12, with the generator of that revision and the rustfmt of Rust
 regenerates them, as the ASN.1 is not in the repository.
 
 oxirush-ngap and oxirush-s1ap share, octet for octet, the code that does not
-depend on the protocol: `build/aper_fix.rs`, `build/containers.rs`,
-`build/inspection.rs`, `build/registry.rs`, `src/check.rs`, `src/error.rs`,
+depend on the protocol: `build/aper_fix.rs`, `build/asn1.rs`,
+`build/containers.rs`, `build/extract_asn1.py`, `build/inspection.rs`,
+`build/registry.rs`, `src/check.rs`, `src/error.rs`,
 `src/inspect_paths.rs`, `src/json.rs`, `src/message.rs`, `src/per.rs`,
 `src/sized.rs`, `src/wire.rs`, the test `tests/readme.rs`, and the
 benchmarks but for their `protocol.rs`.

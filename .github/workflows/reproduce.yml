@@ -1,6 +1,7 @@
 name: Reproduce
 
-# The bindings from the ASN.1 of the specification, and the vectors from pycrate:
+# The bindings and the oracle of the tests from the ASN.1 of the specification, and
+# the vectors from pycrate:
 # what the README says anyone can check. It fetches the archive of the
 # specification from 3GPP and pycrate from PyPI, so it runs when what it checks
 # changes, and on demand.
@@ -13,6 +14,7 @@ on:
       - src/ngap.rs
       - src/registry.rs
       - src/inspect_registry.rs
+      - oracle/**
       - tests/fixtures/**
       - tests/vectors.rs
       - .github/workflows/reproduce.yml
@@ -22,6 +24,7 @@ on:
       - src/ngap.rs
       - src/registry.rs
       - src/inspect_registry.rs
+      - oracle/**
       - tests/fixtures/**
       - tests/vectors.rs
       - .github/workflows/reproduce.yml
@@ -33,6 +36,8 @@ env:
   CARGO_TERM_COLOR: always
   # As in the CI workflow: the tests need no debug information.
   CARGO_PROFILE_DEV_DEBUG: 0
+  # oxirush-aper 0.1.0 is not on crates.io yet: take it from its repository.
+  APER: --config patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"
 
 jobs:
   reproduce:
@@ -49,6 +54,10 @@ jobs:
           workspaces: |
             .
             build
+      # What the generators of the two protocols share is in the repository of
+      # oxirush-aper, which `build/` takes from a checkout beside this one.
+      - name: The generator of oxirush-aper, beside this repository
+        run: git clone --depth 1 https://github.com/linouxis9/oxirush-aper ../oxirush-aper
       - name: The ASN.1 modules, out of the archive of 3GPP
         run: |
           curl -sS --fail -A "Mozilla/5.0" -o "$RUNNER_TEMP/38413-j40.zip" \
@@ -57,8 +66,9 @@ jobs:
       - name: The bindings, which the generator writes as they are committed
         run: |
           CARGO="$(command -v cargo)" cargo run --locked --manifest-path build/Cargo.toml
-          rustfmt --edition 2024 src/ngap.rs src/registry.rs src/inspect_registry.rs
-          git diff --exit-code -- src
+          rustfmt --edition 2024 src/ngap.rs src/registry.rs src/inspect_registry.rs \
+            oracle/src/bindings.rs oracle/src/types.rs
+          git diff --exit-code -- src oracle
       - name: The vectors, which pycrate writes as they are committed
         run: |
           python3 -m venv "$RUNNER_TEMP/venv"
@@ -67,6 +77,6 @@ jobs:
           "$RUNNER_TEMP/venv/bin/python" tests/fixtures/generate.py --values "$RUNNER_TEMP/values.jsonl"
           git diff --exit-code -- tests/fixtures
       - name: The values of pycrate, which the crate writes to the octets of pycrate
-        run: cargo test --features inspect --test vectors -- --ignored
+        run: cargo test $APER --features inspect --test vectors -- --ignored
         env:
           REFERENCE_VALUES: ${{ runner.temp }}/values.jsonl

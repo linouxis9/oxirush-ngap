@@ -105,19 +105,36 @@
 //!
 //! The macro iterates through `protocol_ies`, matches generated ASN.1 IE IDs,
 //! and APER-decodes each matching open type into its concrete generated type.
-//! A `req` field is the value, and an `opt` field an `Option` of it:
+//! A `req` field is the value, and an `opt` or a `lax` field an `Option` of it:
 //!
-//! | The IE | A `req` field | An `opt` field |
-//! |--------|---------------|----------------|
-//! | is in the message | the value | `Some` of the value |
-//! | is not in the message | an error of the kind `MissingIe` | `None` |
-//! | is there and does not decode | an error of the kind `UndecodableIe` | the same error |
+//! | The IE | A `req` field | An `opt` field | A `lax` field |
+//! |--------|---------------|----------------|---------------|
+//! | is in the message | the value | `Some` of the value | `Some` of the value |
+//! | is not in the message | an error of the kind `MissingIe` | `None` | `None` |
+//! | is there and does not decode | an error of the kind `UndecodableIe` | the same error | `None` |
+//!
+//! Which kind a field is says what the receiver does without the IE:
+//!
+//! - `req`: it cannot go on. The IE is one that the message always has, or one that
+//!   the handling needs.
+//! - `opt`: it goes on without an IE that was not sent, and not with one that it
+//!   could not read.
+//! - `lax`: it goes on as if the IE had not been received, whether it was not sent
+//!   or was not read: the field takes the IE if it decodes.
+//!
+//! A `lax` field is for an IE that the receiver may ignore. TS 38.413 clause 10.3.4.2
+//! has a receiver ignore the content of an IE that it does not comprehend and that
+//! was received with the criticality `ignore`, and go on as if the IE had not been
+//! received. With `notify` it does the same and reports the IE, and with `reject`
+//! it rejects the procedure. The macro does not look at the criticality of an IE:
+//! the caller reads it in `protocol_ies`, and takes with `lax` what it may ignore.
 //!
 //! The error is that of the enclosing function, which returns a `Result` whose
 //! error is [`Error`] or has a `From` of it, as
 //! `Box<dyn std::error::Error>` does: the macro converts the error as `?`
-//! converts one. Without `=> expression`, extraction uses `binding.0`, which
-//! unwraps the usual single-field generated newtype.
+//! converts one. A call with `lax` fields alone has no error, and its function
+//! returns what it likes. Without `=> expression`, extraction uses `binding.0`,
+//! which unwraps the usual single-field generated newtype.
 //!
 //! ```
 //! use oxirush_ngap::{Error, ErrorKind, build_ngap_ie, extract_ngap_ies, ngap::*};
@@ -155,7 +172,8 @@
 //!
 //! When a message has the same IE twice, both macros use the same one, the last:
 //! `extract_ngap_ies!` reads it and `with_ngap_ie_mut!` changes it. One of them that
-//! does not decode is an error for both.
+//! does not decode is an error for both, but for a `lax` field, which is `None` when
+//! the last one does not decode.
 //!
 //! ```
 //! use oxirush_ngap::{build_ngap_ie, ngap::*, with_ngap_ie_mut};
@@ -663,15 +681,26 @@ macro_rules! __ngap_ie_syntax {
     };
 }
 
-/// Extract typed NGAP protocol IEs with `req` and `opt` semantics.
+/// Extract typed NGAP protocol IEs into `req`, `opt` and `lax` fields.
 ///
-/// A `req` field whose IE is not in the message is an error of the kind `MissingIe`,
-/// and an IE that is there and does not decode one of the kind `UndecodableIe`, for a
-/// `req` and for an `opt` field: the enclosing function returns it, converted as `?`
-/// converts an error. An `opt` field is `None` only when its IE is not in the message.
+/// | The IE | A `req` field | An `opt` field | A `lax` field |
+/// |--------|---------------|----------------|---------------|
+/// | is in the message | the value | `Some` of the value | `Some` of the value |
+/// | is not in the message | an error of the kind `MissingIe` | `None` | `None` |
+/// | is there and does not decode | an error of the kind `UndecodableIe` | the same error | `None` |
+///
+/// The enclosing function returns the error, converted as `?` converts one. An `opt`
+/// field is `None` only when its IE is not in the message. A `lax` field takes the IE
+/// if it decodes, and is `None` otherwise: it is for an IE that the receiver may
+/// ignore, as TS 38.413 clause 10.3.4.2 has it ignore one that it does not comprehend
+/// and that was received with the criticality `ignore`. The macro does not look at
+/// the criticality, which the caller reads in `protocol_ies`. A call with `lax`
+/// fields alone has no error, and its function need not return a `Result`.
 ///
 /// When the message has the IE twice, the field is the last one, which is the one
-/// that `with_ngap_ie_mut!` changes, and any of them that does not decode is the error.
+/// that `with_ngap_ie_mut!` changes. Any of them that does not decode is the error of a `req`
+/// and of an `opt` field, and a `lax` field is `None` when the last one does not
+/// decode.
 #[macro_export]
 macro_rules! extract_ngap_ies {
     ($msg_var:expr, $msg:ident,
@@ -698,13 +727,7 @@ macro_rules! extract_ngap_ies {
                                 _error.__undecodable_ie(stringify!($msg), _ie.id.0),
                             ),
                         };
-                    // The last one is read, and one that does not decode is an error.
-                    $name = match $name {
-                        ::core::option::Option::Some(::core::result::Result::Err(_error)) => {
-                            ::core::option::Option::Some(::core::result::Result::Err(_error))
-                        }
-                        _ => ::core::option::Option::Some(_value),
-                    };
+                    $name = $crate::extract_ngap_ies!(@last $kind $name, _value);
                 }
             )+
         }
@@ -712,6 +735,19 @@ macro_rules! extract_ngap_ies {
     };
     (@val $bind:ident) => { $bind.0 };
     (@val $_bind:ident, $expr:expr) => { $expr };
+    // The last one decides a `lax` field.
+    (@last lax $name:ident, $value:ident) => {
+        ::core::option::Option::Some($value)
+    };
+    // The last one is read, and one that does not decode is an error.
+    (@last $kind:ident $name:ident, $value:ident) => {
+        match $name {
+            ::core::option::Option::Some(::core::result::Result::Err(_error)) => {
+                ::core::option::Option::Some(::core::result::Result::Err(_error))
+            }
+            _ => ::core::option::Option::Some($value),
+        }
+    };
     (@check req $name:ident, $msg:ident, $ie_name:ident) => {
         let $name = match $name {
             ::core::option::Option::Some(::core::result::Result::Ok(_value)) => _value,
@@ -740,6 +776,23 @@ macro_rules! extract_ngap_ies {
             }
             ::core::option::Option::None => ::core::option::Option::None,
         };
+    };
+    // The IE if it decodes: nothing is returned.
+    (@check lax $name:ident, $msg:ident, $ie_name:ident) => {
+        let $name = match $name {
+            ::core::option::Option::Some(::core::result::Result::Ok(_value)) => {
+                ::core::option::Option::Some(_value)
+            }
+            _ => ::core::option::Option::None,
+        };
+    };
+    (@check $kind:ident $name:ident, $msg:ident, $ie_name:ident) => {
+        compile_error!(concat!(
+            "`",
+            stringify!($kind),
+            "` is no kind of field: write req, opt or lax before the name of the field ",
+            stringify!($name),
+        ));
     };
 }
 

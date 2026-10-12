@@ -244,6 +244,107 @@ fn an_ie_that_does_not_decode_is_an_error_for_a_required_and_for_an_optional_fie
     );
 }
 
+/// The UE CONTEXT RELEASE REQUEST of the README with one octet of its Cause spoiled:
+/// `e5` for `05`, which is the alternative 7 of a CHOICE of six. The IE has the
+/// criticality "ignore", so a receiver that does not comprehend it goes on as if it had
+/// not been received (TS 38.413 clause 10.3.4.2).
+const SPOILED_CAUSE: &str = "002a4015000003000a0002002a005500020007000f4002e500";
+
+fn spoiled_request() -> UEContextReleaseRequest {
+    let pdu = NGAP_PDU::decode(&hex::decode(SPOILED_CAUSE).unwrap()).unwrap();
+    pdu.decode_value().unwrap()
+}
+
+/// What a receiver reads in a request when it takes the cause if it can.
+fn id_and_cause(request: &UEContextReleaseRequest) -> Result<(u64, Option<Cause>), Error> {
+    extract_ngap_ies!(request, UEContextReleaseRequest,
+        req id: u64 = AMF_UE_NGAP_ID(id),
+        lax cause: Cause = Cause(cause) => cause,
+    );
+    Ok((id, cause))
+}
+
+/// A call with `lax` fields alone has no error: its function returns no `Result`.
+fn cause_if_read(request: &UEContextReleaseRequest) -> Option<Cause> {
+    extract_ngap_ies!(request, UEContextReleaseRequest,
+        lax cause: Cause = Cause(cause) => cause,
+    );
+    cause
+}
+
+fn optional_cause(request: &UEContextReleaseRequest) -> Result<Option<Cause>, Error> {
+    extract_ngap_ies!(request, UEContextReleaseRequest,
+        opt cause: Cause = Cause(cause) => cause,
+    );
+    Ok(cause)
+}
+
+fn required_cause(request: &UEContextReleaseRequest) -> Result<Cause, Error> {
+    extract_ngap_ies!(request, UEContextReleaseRequest,
+        req cause: Cause = Cause(cause) => cause,
+    );
+    Ok(cause)
+}
+
+#[test]
+fn a_lax_field_is_the_ie_if_it_decodes_and_none_otherwise() {
+    let inactivity = Cause::radioNetwork(CauseRadioNetwork::user_inactivity);
+
+    // The IE is there and decodes.
+    let received: UEContextReleaseRequest = release_request().decode_value().unwrap();
+    assert_eq!(id_and_cause(&received), Ok((42, Some(inactivity.clone()))));
+    assert_eq!(cause_if_read(&received), Some(inactivity));
+
+    // It is absent.
+    let (amf, _) = amf_and_ran();
+    let without = request(vec![amf]);
+    assert_eq!(id_and_cause(&without), Ok((42, None)));
+    assert_eq!(cause_if_read(&without), None);
+
+    // It is there and does not decode: the message that was received, with one octet
+    // of the value of the IE spoiled.
+    let spoiled = spoiled_request();
+    assert_eq!(spoiled.protocol_ies.0[2].criticality, Criticality::ignore);
+    assert_eq!(id_and_cause(&spoiled), Ok((42, None)));
+    assert_eq!(cause_if_read(&spoiled), None);
+
+    // The same octets are an error for an `opt` and for a `req` field.
+    let optional = optional_cause(&spoiled).unwrap_err();
+    let required = required_cause(&spoiled).unwrap_err();
+    assert_eq!(optional, required);
+    assert_eq!(optional.kind(), ErrorKind::UndecodableIe);
+    assert_eq!(
+        optional.to_string(),
+        "the Cause of this UEContextReleaseRequest does not decode: 7 is no alternative of \
+         the CHOICE"
+    );
+}
+
+#[test]
+fn the_last_of_an_ie_that_is_there_twice_decides_a_lax_field() {
+    let inactivity = Cause::radioNetwork(CauseRadioNetwork::user_inactivity);
+    let received: UEContextReleaseRequest = release_request().decode_value().unwrap();
+    let read = received.protocol_ies.0[2].clone();
+    let unread = spoiled_request().protocol_ies.0[2].clone();
+
+    // The last one does not decode: the field is `None`, though the first one decodes.
+    let last_unread = request(vec![read.clone(), unread.clone()]);
+    assert_eq!(cause_if_read(&last_unread), None);
+
+    // The last one decodes: the field has it, whatever came before it.
+    let last_read = request(vec![unread, read]);
+    assert_eq!(cause_if_read(&last_read), Some(inactivity));
+
+    // One that does not decode is an error for an `opt` and for a `req` field,
+    // wherever it is.
+    for request in [&last_unread, &last_read] {
+        let optional = optional_cause(request).unwrap_err();
+        assert_eq!(optional.kind(), ErrorKind::UndecodableIe);
+        let required = required_cause(request).unwrap_err();
+        assert_eq!(required.kind(), ErrorKind::UndecodableIe);
+    }
+}
+
 #[test]
 fn a_value_outside_its_constraint_is_an_error_of_the_macros_that_build() {
     // An AMF UE NGAP ID is an INTEGER (0..1099511627775), TS 38.413 clause 9.3.3.1, and

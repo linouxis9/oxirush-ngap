@@ -261,18 +261,56 @@ fn handle(request: &UEContextReleaseRequest) -> Result<(), Error> {
 }
 ```
 
-A field is `req` or `opt`, its name and its type, then the IE with a name for
-its decoded value. After `=>` comes what the field keeps of that value;
-without it, the field is the `.0` of the generated newtype.
+A field is `req`, `opt` or `lax`, its name and its type, then the IE with a
+name for its decoded value. After `=>` comes what the field keeps of that
+value; without it, the field is the `.0` of the generated newtype.
 
 | Field | Is | When the IE is not in the message | When it is there and does not decode |
 |-------|----|-----------------------------------|--------------------------------------|
 | `req` | A `T` | An error of the kind `MissingIe`, which names the IE and the field | An error of the kind `UndecodableIe` |
 | `opt` | An `Option<T>` | `None` | The same error |
+| `lax` | An `Option<T>` | `None` | `None` |
 
 The error is that of the enclosing function, converted as `?` converts one:
 the function returns a `Result` whose error is `Error`,
-`Box<dyn std::error::Error>` or any type with a `From<Error>`.
+`Box<dyn std::error::Error>` or any type with a `From<Error>`. A call with
+`lax` fields alone has no error, and its function returns what it likes.
+
+A field is `req` when the receiver cannot go on without the IE, and `opt`
+when it goes on without an IE that was not sent, and not with one that it
+could not read. A `lax` field takes the IE if it decodes: the receiver goes on
+as if the IE had not been received. TS 38.413 clause 10.3.4.2 has a receiver
+ignore the content of an IE that it does not comprehend and that was received
+with the criticality `ignore`, and go on so; with `notify` it also reports the
+IE, and with `reject` it rejects the procedure. The macro does not look at the
+criticality of an IE: the caller reads it in `protocol_ies`, and takes with
+`lax` what it may ignore.
+
+```rust
+use oxirush_ngap::{extract_ngap_ies, ngap::*};
+
+// The cause of a request, when it has one that is read
+fn cause(request: &UEContextReleaseRequest) -> Option<Cause> {
+    extract_ngap_ies!(request, UEContextReleaseRequest,
+        lax cause: Cause = Cause(value) => value,
+    );
+    cause
+}
+
+// A UE CONTEXT RELEASE REQUEST, then the same with an octet of its Cause spoiled
+for octets in [
+    "002a4015000003000a0002002a005500020007000f40020500",
+    "002a4015000003000a0002002a005500020007000f4002e500",
+] {
+    let pdu = NGAP_PDU::decode(&hex::decode(octets).unwrap()).unwrap();
+    println!("{:?}", cause(&pdu.decode_value().unwrap()));
+}
+```
+
+```text
+Some(radioNetwork(user_inactivity))
+None
+```
 
 ### Change or build one IE
 
@@ -479,7 +517,7 @@ their message are, and `?` converts one into a `Box<dyn std::error::Error>`.
 | `Encode` | A value does not encode, as an integer outside its constraint |
 | `WrongMessage` | `decode_value::<T>()` on a PDU that holds another message than `T`, and the protocol IEs of the private message, which has none |
 | `MissingIe` | A `req` field of `extract_ngap_ies!` whose IE is not in the message |
-| `UndecodableIe` | An IE that is in the message and does not decode as its type: a `req` or an `opt` field of `extract_ngap_ies!`, and the IE of `with_ngap_ie_mut!`. With `inspect`, a path into an IE or a transfer that did not decode |
+| `UndecodableIe` | An IE that is in the message and does not decode as its type: a `req` or an `opt` field of `extract_ngap_ies!`, where a `lax` field is `None`, and the IE of `with_ngap_ie_mut!`. With `inspect`, a path into an IE or a transfer that did not decode |
 | `Argument` | An argument that a helper does not take: what is no MCC or no MNC, and a number that does not fit in the bits of its field |
 | `UnknownMessage` | `check()` on a PDU whose procedure the specification does not have in that direction: it has no object set. With `inspect`, also a name that is no message |
 

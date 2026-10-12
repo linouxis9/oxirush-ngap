@@ -78,6 +78,11 @@ is not source compatible with 0.4.2.
   `From<oxirush_ngap::Error>`, where it returned `MissingIeError` itself. A
   call with `opt` fields alone returns the error too: it no longer compiles
   in a function that returns nothing.
+  A field that took an IE when it decoded, and went on without it otherwise,
+  is a `lax` field now: `lax name: Type = IE(value)` is `None` for an IE that
+  is not in the message and for one that does not decode, which is what a
+  receiver does with an IE that it may ignore (TS 38.413 clause 10.3.4.2). A
+  call with `lax` fields alone returns no error.
 - `with_ngap_ie_mut!` gives a `Result<bool, Error>` where it gave a `bool`:
   what the expression says, `Ok(false)` for an IE that is not in the message,
   and an error for an IE that does not decode (`UndecodableIe`) or a changed
@@ -85,7 +90,8 @@ is not source compatible with 0.4.2.
   `with_ngap_ie_mut!(…)?` where the `bool` was read.
 - When a message has the same IE twice, `extract_ngap_ies!` reads the last
   one and `with_ngap_ie_mut!` changes the last one, and any of them that does
-  not decode is an error for both. 0.4.2 read the last one that decoded,
+  not decode is an error for both, but for a `lax` field, which the last one
+  decides. 0.4.2 read the last one that decoded,
   and changed the first one or, when that did not decode, nothing.
 - No function of `helpers` panics, and none cuts a number short. Each of
   these returns a `Result` with an `Error` of the kind `Argument`, so a call

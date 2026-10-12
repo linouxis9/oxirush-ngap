@@ -1,9 +1,9 @@
 //! The files that oxirush-ngap and oxirush-s1ap have in common, octet for octet: the
-//! error, the codec helpers, the paths of the inspection, the generators that both
-//! protocols run, the test of the README and the benchmarks. Each crate holds the digest
-//! of each file, so that an edit in one fails here until the file is the same in the
-//! other and both record its new digest. This file is one of them, and the two crates
-//! keep it the same too.
+//! error, the codec helpers, the JSON codec and the paths of the inspection, the
+//! generators that both protocols run, the test of the README and the benchmarks. Each
+//! crate holds the digest of each file, so that an edit in one fails here until the
+//! file is the same in the other and both record its new digest. This file is one of
+//! them, and the two crates keep it the same too.
 
 use std::path::Path;
 
@@ -19,8 +19,9 @@ const SHARED: &[(&str, u64)] = &[
     ("build/inspection.rs", 0xcc54553d89f026e5),
     ("build/registry.rs", 0xd1c828575adadf7c),
     ("src/check.rs", 0xa22672c09f0b0090),
-    ("src/error.rs", 0xe3604d5e30f8758a),
+    ("src/error.rs", 0x8bba696ff035b37a),
     ("src/inspect_paths.rs", 0x92f5cef9146d9104),
+    ("src/json.rs", 0x686d78a197ce231b),
     ("src/message.rs", 0x95e7ef29b6bc50cf),
     ("src/per.rs", 0x3ccde6c46ad3f8b6),
     ("src/sized.rs", 0x05d05e62217fc26a),

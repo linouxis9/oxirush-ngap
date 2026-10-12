@@ -89,7 +89,7 @@ impl Error {
     }
 
     /// The reason of what is wrong, which the message has after it.
-    fn because(mut self, why: impl Into<String>) -> Self {
+    pub(crate) fn because(mut self, why: impl Into<String>) -> Self {
         self.why = Some(why.into().into_boxed_str());
         self
     }
@@ -509,7 +509,7 @@ fn codec_reason(error: &rasn::error::CodecDecodeError) -> String {
 }
 
 /// Why rasn does not encode a value, without the name of its codec.
-fn encode_reason(error: &EncodeError) -> String {
+pub(crate) fn encode_reason(error: &EncodeError) -> String {
     match &*error.kind {
         EncodeErrorKind::ValueConstraintNotSatisfied { value, expected } => {
             format!("{value} is outside its constraint ({expected})")

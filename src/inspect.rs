@@ -389,9 +389,11 @@ fn jer<T: rasn::Encode>(value: &T) -> Result<Value, Error> {
 /// a value that JER does not read back as it is: it is not shown as what it is not.
 fn decode_typed<T>(raw: &[u8]) -> Result<Value, Error>
 where
-    T: rasn::Decode + rasn::Encode + RepairOpenTypes + PartialEq,
+    T: rasn::Decode + rasn::Encode + RepairOpenTypes + PartialEq + core::fmt::Debug,
 {
     let value = crate::ngap::decode_open_type::<T>(&rasn::types::Any::new(raw.to_vec()))?;
+    #[cfg(test)]
+    crate::json::as_rasn_writes_it(&value);
     let shown = jer(&value)?;
     // rasn's JER writes a bit string of one extensible size as its octets, without
     // its length: one of another size would be shown as a string that it is not.
@@ -710,7 +712,10 @@ pub(crate) struct Typed {
 }
 
 impl Typed {
-    pub(crate) fn of<T: rasn::Decode + rasn::Encode + RepairOpenTypes + PartialEq>() -> Self {
+    pub(crate) fn of<T>() -> Self
+    where
+        T: rasn::Decode + rasn::Encode + RepairOpenTypes + PartialEq + core::fmt::Debug,
+    {
         Self {
             decode: decode_typed::<T>,
             encode: encode_typed::<T>,
@@ -1543,5 +1548,30 @@ impl NGAP_PDU {
             )));
         }
         Self::from_view(view)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The values of the messages of the fixtures have the JSON form that the codec of
+    /// the JSON Encoding Rules of rasn gives them, and are read back from it as they are:
+    /// each message, each of its IEs, and each IE and each transfer that a value holds.
+    #[test]
+    fn the_values_of_the_fixtures_are_written_as_rasn_writes_them() {
+        crate::json::COMPARED.set(Some(0));
+        let fixtures = include_str!("../tests/fixtures/messages.tsv");
+        let mut messages = 0;
+        for line in fixtures.lines().filter(|line| !line.starts_with('#')) {
+            let octets = crate::json::unhex(line.split('\t').nth(1).unwrap()).unwrap();
+            NGAP_PDU::decode(&octets).unwrap().to_view().unwrap();
+            messages += 1;
+        }
+        let compared = crate::json::COMPARED.get().unwrap_or_default();
+        assert!(
+            messages >= 100 && compared > 3 * messages,
+            "{compared} values of {messages} messages"
+        );
     }
 }

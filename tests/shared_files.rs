@@ -29,8 +29,8 @@ const SHARED: &[(&str, u64)] = &[
     ("src/per.rs", 0x2b1e451772f0ff2e),
     ("src/sized.rs", 0x05d05e62217fc26a),
     ("src/wire.rs", 0x358dcf6e51fd8ab1),
-    ("tests/fixtures/dissect.py", 0xb306e19dae11f351),
-    ("tests/fixtures/generate.py", 0x560531d5a4e0e5a3),
+    ("tests/fixtures/dissect.py", 0xe83af66722907219),
+    ("tests/fixtures/generate.py", 0x313265374d7367d9),
     ("tests/readme.rs", 0x8649417b32dae0f4),
 ];
 

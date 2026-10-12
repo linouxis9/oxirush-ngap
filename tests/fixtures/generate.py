@@ -35,6 +35,18 @@ the members that are mandatory and nothing else.
   same forms.
 - `largest-TYPE`: a list or a string of the largest size that its type has.
 
+`later.tsv` has messages of a later release: a few SEQUENCE types of the modules are
+given additions after their extension marker, as a later version of the specification
+may give them, and pycrate encodes messages with these modules. Each line has the
+octets of the same message without the additions too, as pycrate encodes it with the
+modules as they are: a receiver of this release skips the additions, and reads that
+message. The types are chosen for what pycrate 0.8.1 writes as ITU-T X.691 (02/2021)
+has it. A type has 64 additions at most: pycrate writes the count of more as a normally
+small number, with the octets of its length, where clause 11.9.3.4 has a length
+determinant. And the members before the additions end an octet: pycrate pads before
+the first addition from the place before the count and the bitmap of the additions, and
+writes an octet too many where they do not.
+
 With `--values FILE` the script also writes each vector of `vectors.tsv` as the JSON
 view of its PDU, a line for each with its name: the values in the JSON encoding of
 ASN.1, as pycrate has them. A test of `tests/vectors.rs` writes a PDU from each view
@@ -80,7 +92,9 @@ FRAGMENTS = (127, 128, 16383, 16384, 16385, 32768, 49153, 65536, 65537, 81920, 1
 # The rest says where the vectors of a length and of a size are. `length` is a message
 # that has a NAS-PDU. `count` and `bits` are a message, a type, its sizes, the
 # alternatives that lead to the type and the members and the IEs that do, each with the
-# name of its SEQUENCE. Each `largest` is the same with one size.
+# name of its SEQUENCE. Each `largest` is the same with one size. `later` is the types
+# that a later release adds to, each with the number of its additions, and the messages
+# that have them.
 PROTOCOLS = {
     "ngap": {
         "specification": "3GPP TS 38.413 v19.4.0",
@@ -141,6 +155,10 @@ PROTOCOLS = {
                 [("WriteReplaceWarningRequest", "WarningMessageContents")],
             ),
         ],
+        "later": (
+            {"TAI": 1, "UserLocationInformationEUTRA": 2, "GUAMI": 64},
+            ("NGSetupResponse", "InitialUEMessage", "HandoverNotify"),
+        ),
     },
     "s1ap": {
         "specification": "3GPP TS 36.413 v19.2.0",
@@ -198,8 +216,21 @@ PROTOCOLS = {
                 [("WriteReplaceWarningRequest", "WarningMessageContents")],
             ),
         ],
+        "later": (
+            {"TAI": 2, "GUMMEI": 1, "ServedGUMMEIsItem": 64},
+            ("S1SetupResponse", "InitialUEMessage", "HandoverNotify"),
+        ),
     },
 }
+
+# The types of the additions of a later release, one after the other.
+ADDITIONS = (
+    "INTEGER (0..255)",
+    "OCTET STRING",
+    "BOOLEAN",
+    "INTEGER (0..65535, ...)",
+    "BIT STRING (SIZE(1..24))",
+)
 
 # Whether the last value under an alternative, a value of an ENUMERATED or an IE held
 # something that no vector had: a pass goes back to it until it holds nothing new.
@@ -631,9 +662,22 @@ class Values:
         return pdu.to_aper()
 
 
-def compile_modules(protocol, directory):
-    """The modules of `build/asn1.sha256`, compiled by pycrate into a module of Python."""
+def module_texts():
+    """The text of each module of `build/asn1.sha256`."""
+    texts = []
+    for entry in pathlib.Path("build/asn1.sha256").read_text().splitlines():
+        digest, path = entry.split()
+        octets = pathlib.Path(path).read_bytes()
+        if hashlib.sha256(octets).hexdigest() != digest:
+            sys.exit(f"{path} is not the module that build/asn1.sha256 records")
+        texts.append(octets.decode())
+    return texts
+
+
+def compile_modules(texts, directory, name):
+    """Modules of ASN.1, compiled by pycrate into a module of Python of this name."""
     from pycrate_asn1c.asnproc import PycrateGenerator, compile_text, generate_modules
+    from pycrate_asn1c.glob import GLOBAL
     from pycrate_asn1rt import codecs
     from pycrate_asn1rt.codecs import ASN1CodecPER
 
@@ -644,21 +688,16 @@ def compile_modules(protocol, directory):
     # first up to `off+fs>>3`, which is `(off+fs)>>3`, where it means `off+(fs>>3)`.
     if not hasattr(ASN1CodecPER, "encode_pas"):
         ASN1CodecPER.encode_pas = ASN1CodecPER.encode_pad
-    source = textwrap.dedent(inspect.getsource(ASN1CodecPER.encode_fragbytes))
-    repaired = {}
-    exec(source.replace("off+fs>>3", "off+(fs>>3)"), vars(codecs), repaired)
-    ASN1CodecPER.encode_fragbytes = repaired["encode_fragbytes"]
-    texts = []
-    for entry in pathlib.Path("build/asn1.sha256").read_text().splitlines():
-        digest, path = entry.split()
-        octets = pathlib.Path(path).read_bytes()
-        if hashlib.sha256(octets).hexdigest() != digest:
-            sys.exit(f"{path} is not the module that build/asn1.sha256 records")
-        texts.append(octets.decode())
+        source = textwrap.dedent(inspect.getsource(ASN1CodecPER.encode_fragbytes))
+        repaired = {}
+        exec(source.replace("off+fs>>3", "off+(fs>>3)"), vars(codecs), repaired)
+        ASN1CodecPER.encode_fragbytes = repaired["encode_fragbytes"]
+    GLOBAL.clear()
     compile_text(texts)
-    generate_modules(PycrateGenerator, str(directory / f"{protocol}_py.py"))
-    sys.path.insert(0, str(directory))
-    return importlib.import_module(f"{protocol}_py")
+    generate_modules(PycrateGenerator, str(directory / f"{name}.py"))
+    if str(directory) not in sys.path:
+        sys.path.insert(0, str(directory))
+    return importlib.import_module(name)
 
 
 def pdu_type(protocol, module):
@@ -778,6 +817,60 @@ def sized(protocol, module):
         yield vector(message, f"largest-{sized_type}", {sized_type: size}, alternatives, members)
 
 
+class Small(frozenset):
+    """What a pass has when it takes no size and no number for the sake of one."""
+
+    def __contains__(self, key):
+        return key[0] in "LMXZ"
+
+
+def later_release(protocol, module, texts, directory):
+    """`later.tsv`: each message of a later release as its name, its octets, the code
+    of its procedure, the alternative of its PDU and its octets without the additions."""
+    types, names = PROTOCOLS[protocol]["later"]
+    for name, count in types.items():
+        # After the extension marker of the type, its additions.
+        pattern = re.compile(r"(?ms)^(" + re.escape(name) + r"\s*::=\s*SEQUENCE\s*\{.*?\.\.\.)\s*\n\}")
+        additions = [
+            f"\tlater-{number}\t\t{ADDITIONS[number % len(ADDITIONS)]}\tOPTIONAL"
+            for number in range(1, count + 1)
+        ]
+        added = ",\n".join(additions)
+        texts = [pattern.sub(lambda found: f"{found.group(1)},\n{added}\n}}", text) for text in texts]
+        assert any(f"later-{count}\t" in text for text in texts), name
+    later = compile_modules(texts, directory, f"{protocol}_later")
+
+    def without(value):
+        """A value without the additions."""
+        if isinstance(value, dict):
+            members = value.items()
+            return {name: without(member) for name, member in members if not name.startswith("later-")}
+        if isinstance(value, (list, tuple)):
+            return type(value)(without(entry) for entry in value)
+        return value
+
+    known = {message[0]: message for message in messages(protocol, later)}
+    lines = [
+        f"# {PROTOCOLS[protocol]['specification']}, with additions of a later release that",
+        "# tests/fixtures/generate.py gives a few types; pycrate 0.8.1 vectors.",
+        "# Message/variant\twire bytes\tprocedure code\tPDU alternative\twire bytes without the additions",
+    ]
+    # Every member is there in the first pass, and the two others leave some out.
+    for name in names:
+        for turn in (0, 3, 7):
+            _, procedure, alternative, obj = known[name]
+            values = Values(protocol, later, "cover", name, f"later-{turn}", Small(), turn)
+            value = pdu_value(procedure, alternative, name, values.gen(obj))
+            wires = []
+            for modules, written in ((later, value), (module, without(value))):
+                pdu = pdu_type(protocol, modules)
+                pdu.set_val(written)
+                wires.append(pdu.to_aper().hex())
+            code = procedure["procedureCode"]
+            lines.append(f"{name}/later-{turn}\t{wires[0]}\t{code}\t{alternative}\t{wires[1]}")
+    return "\n".join(lines) + "\n"
+
+
 def to_json(obj, value):
     """A value in the JSON encoding of ASN.1 (ITU-T X.697), as a view takes it."""
     kind = obj.TYPE
@@ -862,7 +955,8 @@ def main():
     arguments = parser.parse_args()
     protocol = next(name for name in PROTOCOLS if pathlib.Path(name).is_dir())
     with tempfile.TemporaryDirectory() as directory:
-        module = compile_modules(protocol, pathlib.Path(directory))
+        directory, texts = pathlib.Path(directory), module_texts()
+        module = compile_modules(texts, directory, protocol)
         pdu = pdu_type(protocol, module)
         files = {"messages.tsv": minimal(protocol, module)}
         keys, lines, views = set(), [], []
@@ -880,6 +974,7 @@ def main():
             "# Message/variant\twire bytes\tprocedure code\tPDU alternative",
         ]
         files["vectors.tsv"] = "\n".join(header + lines) + "\n"
+        files["later.tsv"] = later_release(protocol, module, texts, directory)
     failed = False
     for name, text in files.items():
         path = pathlib.Path("tests/fixtures") / name

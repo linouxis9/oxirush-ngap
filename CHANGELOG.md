@@ -265,7 +265,9 @@ is not source compatible with 0.4.2.
   the type of handover, and strings and lists around each form of the length
   determinant, in fragments too. The tests read each with its types and
   write it back to the same octets, from its values alone too.
-  `tests/fixtures/generate.py` writes both files, and
+  `tests/fixtures/later.tsv` has messages of a later release, with additions
+  that the bindings do not have: they are read as the messages without them.
+  `tests/fixtures/generate.py` writes the three files, and
   `tests/fixtures/dissect.py` gives them to tshark.
 - For maintainers: `build/asn1.sha256` records the SHA-256 of the six ASN.1
   modules that the bindings are generated from, `build/extract_asn1.py`

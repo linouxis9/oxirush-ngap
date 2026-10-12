@@ -1116,7 +1116,7 @@ S1AP.
 | Test | What it holds |
 |------|---------------|
 | `tests/aper_vectors.rs` | [The vectors](#the-vectors) of `tests/fixtures`, which pycrate 0.8.1 encoded from the ASN.1 of the specification: the 144 messages of `messages.tsv`, one for each message of each procedure with what is mandatory and nothing else, and the 479 vectors of `vectors.tsv`, which have content. Each decodes to its type and encodes to the same octets, and its truncations and one more octet are refused. |
-| `tests/vectors.rs` | With `inspect`, each vector of `vectors.tsv` is read with the type of each IE, each transfer and each container of a handover, and is the same octets when it is written from its view, from its values alone and from its tree. The vectors hold each of the 144 messages and each of the 489 IEs that the registry names, those of the extension containers among them: the messages of `messages.tsv` hold 111 of the IEs. |
+| `tests/vectors.rs` | With `inspect`, each vector of `vectors.tsv` is read with the type of each IE, each transfer and each container of a handover, and is the same octets when it is written from its view, from its values alone and from its tree. A message of a later release, in `later.tsv`, is read as the same message without the additions that pycrate gave it. The vectors hold each of the 144 messages and each of the 489 IEs that the registry names, those of the extension containers among them: the messages of `messages.tsv` hold 111 of the IEs. |
 | `tests/aper_round_trip.rs` | The macros, and the encodings where the codec departs from rasn's: constrained lists, `UTF8String`, long bit strings, and each string with a length of two octets, as pycrate writes it. A number between the ranges of the root of an extensible constraint. |
 | `tests/errors.rs` | The errors of the typed API, each with its kind and its message: a PDU that is decoded as another message, octets that are no PDU, a value outside its constraint in a function and in each macro, an IE that is absent or does not decode, for a `req` and for an `opt` field, and what each helper refuses. With `inspect`, a test for each kind of error of the JSON forms. |
 | `tests/protocol_ies.rs` | The protocol IEs of each of the 144 messages but the private one, and of each vector, are read from its PDU and put back as the same octets. An IE that the protocol does not have and one that is there twice are kept with their criticality, a message that the macros built has the IEs that it was built with, and the private message is an error. |
@@ -1138,7 +1138,7 @@ cargo test
 
 ### The vectors
 
-`tests/fixtures/generate.py` writes the two files of vectors, and with
+`tests/fixtures/generate.py` writes the three files of vectors, and with
 `--check` it compares them with what is committed. It needs pycrate 0.8.1 and
 the ASN.1 modules of [Generated code](#generated-code), and nothing of this
 crate: pycrate compiles the modules with its own compiler and encodes, with
@@ -1150,10 +1150,12 @@ its own codec, values that the script makes from the compiled types.
 | `vectors.tsv`, 447 `cover` | Each message with every IE of its object set and every member, in passes that take each alternative of each `CHOICE`, each value of each `ENUMERATED` but those of the type of handover, the bounds of each number and each size, the value after them where a constraint is extensible, and that leave members out: 1142 IEs of object sets, 181 alternatives and 839 values |
 | 12 `length`, 6 `count`, 11 `bits` | A NAS-PDU, a list and a bit string around each form of the length determinant: 127 and 128, 16383 and 16384, and fragments, up to 65537 octets, 65536 entries and 131072 bits. The lengths are those of the string, of the open type of its IE and of the open type of the message |
 | 3 `largest` | A list of 65535 entries in an extension container, a list of 4096, and a string of 9600 octets |
+| `later.tsv`, 9 | Messages of a later release: `TAI`, `UserLocationInformationEUTRA` and `GUAMI` have additions after their extension marker, up to 64 of them, and each message is there without them too, as pycrate encodes it with the modules as they are |
 
 Three readings of the vectors do not depend on each other:
 
 - The crate reads each vector and writes the same octets, in the tests above.
+  It reads a message of `later.tsv` as the message without the additions.
 - pycrate has the value of each vector, and `generate.py --values FILE` writes
   them in the JSON encoding of ASN.1. An ignored test of `tests/vectors.rs`
   writes a PDU from each, and its octets are those of the vector, for each of
@@ -1165,7 +1167,9 @@ Three readings of the vectors do not depend on each other:
   have them, and 418 of the 479 vectors without a remark. In the others it
   stops in octets that hold a value of another specification, which are
   random in the vectors, or at one of the three lists in fragments, which it
-  does not read: the IEs after that place are not compared.
+  does not read: the IEs after that place are not compared. Of a message of
+  `later.tsv` it says that it does not know the additions, and it stops at a
+  type that has 64 of them, which are more than it takes.
 
 ```bash
 python3 -m venv venv && venv/bin/pip install pycrate==0.8.1
@@ -1178,9 +1182,17 @@ python3 tests/fixtures/dissect.py
 `generate.py` repairs two defects of pycrate 0.8.1, which does not write two
 values in fragments: for a list of 16384 entries or more it calls a function
 that it does not have, and for a bit string it takes the octets of each
-fragment after the first from the wrong place. Wireshark reads the bit strings
-in fragments as the repaired pycrate writes them, and pycrate itself reads back
-the lists, which Wireshark does not read.
+fragment after the first from the wrong place. Wireshark reads the bit
+strings in fragments as the repaired pycrate writes them, and pycrate itself
+reads back the lists, which Wireshark does not read. Two more are left alone,
+and the types of `later.tsv` are chosen for what pycrate writes as X.691
+(02/2021) has it. pycrate writes the count of more than 64 additions as a
+normally small number, with the octets of its length, where 11.9.3.4 has a
+length determinant: a type has 64 at most, and `tests/unknown_extensions.rs`
+has more, written by hand. And pycrate pads before the first addition from
+the place before the count and the bitmap of the additions, which gives an
+octet too many where the members before them do not end an octet: Wireshark
+does not read that octet either, and the types that have additions end one.
 
 The crate and pycrate write one kind of value differently. A number that is
 in the range of the root of an extensible constraint and is none of its

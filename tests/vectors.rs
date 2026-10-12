@@ -12,6 +12,7 @@ use serde_json::Value;
 
 const MESSAGES: &str = include_str!("fixtures/messages.tsv");
 const VECTORS: &str = include_str!("fixtures/vectors.tsv");
+const LATER: &str = include_str!("fixtures/later.tsv");
 
 /// The IEs whose octets carry a type of TS 38.413 between two NG-RAN nodes, each with
 /// the name of that type: the vectors have a value of it there.
@@ -166,6 +167,38 @@ fn the_vectors_hold_each_message_and_each_ie_of_the_registry() {
     assert_eq!(messages.len(), 144);
     assert_eq!(of(MESSAGES), messages);
     assert_eq!(of(VECTORS), messages);
+}
+
+/// `later.tsv` has messages of a later release: pycrate encoded them with modules in
+/// which a few types have additions after their extension marker, 64 of them for one
+/// type, and encoded the same messages without the additions with the modules as they
+/// are. The additions are skipped where they are, in a list and in a container too, and
+/// what is read is the message without them (X.691 (02/2021) 19.7-19.9).
+#[test]
+fn the_additions_of_a_later_release_are_skipped_as_pycrate_writes_them() {
+    let mut count = 0;
+    for line in LATER.lines().filter(|line| !line.starts_with('#')) {
+        let fields: Vec<_> = line.split('\t').collect();
+        let (name, later, known) = (fields[0], fields[1], fields[4]);
+        assert!(later.len() > known.len(), "{name}");
+        count += 1;
+
+        // The PDU keeps the octets of its IEs, the additions among them.
+        let pdu = NGAP_PDU::decode(&hex::decode(later).unwrap()).unwrap();
+        assert_eq!(hex::encode(pdu.encode().unwrap()), later, "{name}");
+
+        // Each IE is read with its type, as the same value as without the additions.
+        let view = opened(&pdu);
+        let (mut found, mut unread) = (BTreeSet::new(), Vec::new());
+        identifiers(&view, &mut found, &mut unread);
+        assert_eq!(unread, Vec::<String>::new(), "{name}");
+        let without = opened(&NGAP_PDU::decode(&hex::decode(known).unwrap()).unwrap());
+        assert_eq!(written(&view), written(&without), "{name}");
+
+        // And its values are written as the message without them.
+        assert_eq!(octets(&written(&view)), Ok(known.to_string()), "{name}");
+    }
+    assert_eq!(count, 9);
 }
 
 /// The values of the vectors as the reference has them: `tests/fixtures/generate.py

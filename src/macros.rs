@@ -1,7 +1,7 @@
 //! Ergonomic macros for building, extracting, and mutating NGAP protocol IEs.
 //!
-//! `rasn-compiler` represents NGAP information-object open types as
-//! [`rasn::types::Any`]. The macros keep that representation internal: callers
+//! The bindings have the value of an IE as the octets of an open type: the object
+//! set of a message does not show in its type. The macros keep that inside: callers
 //! construct and receive concrete NGAP types, while values are APER-encoded into
 //! and decoded from the open type at the protocol boundary.
 //!
@@ -136,6 +136,10 @@
 //! returns what it likes. Without `=> expression`, extraction uses `binding.0`,
 //! which unwraps the usual single-field generated newtype.
 //!
+//! What a field holds of octets is borrowed from the message: a NAS-PDU is a slice of
+//! the PDU, and is not copied. A value that outlives the message is made with
+//! `into_owned()`, or copied as the example below copies its NAS-PDU.
+//!
 //! ```
 //! use oxirush_ngap::{Error, ErrorKind, build_ngap_ie, extract_ngap_ies, ngap::*};
 //!
@@ -188,66 +192,116 @@
 //! # Ok::<(), oxirush_ngap::Error>(())
 //! ```
 
-use rasn::types::Any;
+use oxirush_aper::{Encode, Octets, Writer};
 
-use crate::ngap::{
-    Criticality, InitiatingMessage, NGAP_PDU, ProcedureCode, ProtocolIEContainer, ProtocolIEField,
-    ProtocolIEID, SuccessfulOutcome, UnsuccessfulOutcome,
-};
+use crate::ngap::{Criticality, NGAP_PDU, ProtocolIEContainer, ProtocolIEField, ProtocolIEID};
 use crate::{Error, Message};
 
-/// For the macros that build: one entry of the IEs of a message, which is the
+/// For the macro that builds an IE: one entry of the IEs of a message, which is the
 /// identifier of an IE, its criticality and its value in an open type, or why the
 /// value does not encode.
 #[doc(hidden)]
-pub fn __ie(
+pub fn __ie<T: Encode>(
     id: u16,
     criticality: Criticality,
-    value: Result<Any, Error>,
-) -> Result<ProtocolIEField, Error> {
+    value: &T,
+) -> Result<ProtocolIEField<'static>, Error> {
     Ok(ProtocolIEField {
         id: ProtocolIEID(id),
         criticality,
-        value: value?,
+        value: crate::ngap::encode_open_type(value)?,
     })
 }
 
-/// For the macro that builds a PDU: the PDU of the message `M` that `new` makes of
-/// these IEs, with the direction and the procedure code of that message, or the
-/// first error of an IE that was not built.
+/// For the macro that builds a PDU: the message that is being written, a container of
+/// protocol IEs. Each IE is written into the octets of the message, with its value in
+/// its open type, so that a PDU is built without octets for each IE.
 #[doc(hidden)]
-pub fn __pdu<M: Message, const N: usize>(
-    criticality: Criticality,
-    ies: [Result<ProtocolIEField, Error>; N],
-    new: fn(ProtocolIEContainer) -> M,
-) -> Result<NGAP_PDU, Error> {
-    let ies = ProtocolIEContainer(ies.into_iter().collect::<Result<Vec<_>, Error>>()?);
-    // A message of protocol IEs is written octet by octet, and what that leaves by the
-    // codec of rasn: a value of 16384 octets or more, and the error of what does not
-    // encode.
-    let value = match crate::wire::message_octets(&ies) {
-        Some(octets) => Any::new(octets),
-        None => crate::per::encode_open_type(&new(ies))?,
-    };
-    let procedure_code = ProcedureCode(M::PROCEDURE_CODE);
-    Ok(match M::DIRECTION {
-        "InitiatingMessage" => NGAP_PDU::initiatingMessage(InitiatingMessage {
-            procedure_code,
-            criticality,
-            value,
-        }),
-        "SuccessfulOutcome" => NGAP_PDU::successfulOutcome(SuccessfulOutcome {
-            procedure_code,
-            criticality,
-            value,
-        }),
-        _ => NGAP_PDU::unsuccessfulOutcome(UnsuccessfulOutcome {
-            procedure_code,
-            criticality,
-            value,
-        }),
-    })
+pub struct __Message {
+    octets: Vec<u8>,
+    count: usize,
+    /// Why the first IE that did not encode did not.
+    error: Option<Error>,
 }
+
+impl __Message {
+    /// A message without an IE yet: its extension bit, and the place of the count of
+    /// its IEs, which is two octets (X.691 (02/2021) §19.1, §20.6, §11.5.7.3).
+    #[doc(hidden)]
+    #[allow(clippy::new_without_default)]
+    pub fn new() -> Self {
+        Self {
+            octets: vec![0, 0, 0],
+            count: 0,
+            error: None,
+        }
+    }
+
+    /// One more IE: its identifier, its criticality, and its value in an open type.
+    #[doc(hidden)]
+    pub fn ie<T: Encode>(&mut self, id: u16, criticality: Criticality, value: &T) {
+        if self.error.is_some() {
+            return;
+        }
+        let start = self.octets.len();
+        let mut writer = Writer::new(&mut self.octets);
+        writer.octets(&id.to_be_bytes());
+        writer.index(criticality as u64, 3, false);
+        let value_start = writer.begin_open_type();
+        match value.encode(&mut writer) {
+            Ok(()) => {
+                writer.end_open_type(value_start);
+                self.count += 1;
+            }
+            Err(error) => {
+                self.octets.truncate(start);
+                self.error = Some(error.encoding(T::NAME));
+            }
+        }
+    }
+
+    /// The PDU of the message `M` of these IEs, with the direction and the procedure
+    /// code of that message, or the first error of an IE that did not encode.
+    #[doc(hidden)]
+    pub fn pdu<'a, M: Message<'a>>(mut self, criticality: Criticality) -> Result<NGAP_PDU, Error> {
+        if let Some(error) = self.error {
+            return Err(error);
+        }
+        // A container has 65535 IEs at most.
+        let Ok(count) = u16::try_from(self.count) else {
+            let size =
+                Error::new(crate::ErrorKind::Encode, "the value does not encode").because(format!(
+                    "a size of {} is outside its constraint (0..65535)",
+                    self.count
+                ));
+            return Err(size.__of_protocol_ies(self.count));
+        };
+        self.octets[1..3].copy_from_slice(&count.to_be_bytes());
+        let value = Octets::owned(self.octets);
+        // The direction of a message is one of the three.
+        NGAP_PDU::of(M::DIRECTION, M::PROCEDURE_CODE, criticality, value)
+            .ok_or_else(|| Error::new(crate::ErrorKind::Encode, "a message has no direction"))
+    }
+}
+
+/// For the macro that extracts IEs: the IE `id`, which the field `field` requires, is
+/// not in a message of the type `message`.
+#[doc(hidden)]
+pub fn __missing_ie(message: &str, id: u16, field: &str) -> Error {
+    Error::__missing_ie(message, &crate::error::ie(id), field)
+}
+
+/// For the macros that read an IE: `error` is why the IE `id` of a message of the type
+/// `message` does not decode.
+#[doc(hidden)]
+pub fn __undecodable_ie(error: Error, message: &str, id: u16) -> Error {
+    error.__undecodable_ie(message, &crate::error::ie(id))
+}
+
+/// For the macro that builds a PDU: `M` is the message that the procedure of `P` has
+/// in its direction, and a container of protocol IEs.
+#[doc(hidden)]
+pub fn __message_of<M, P>(_: fn(M) -> P, _: fn(ProtocolIEContainer<'static>) -> M) {}
 
 /// The procedures of the protocol, which `src/registry.rs` lists from the ASN.1: the
 /// code, the name and the criticality of each, then for each of its messages the
@@ -259,16 +313,18 @@ pub fn __pdu<M: Message, const N: usize>(
 /// message that they build, the kinds of a PDU, the messages whose protocol IEs a PDU
 /// gives and, with the `inspect` feature, the messages of a view and of a tree, the IEs
 /// that each can have and the criticality that ASN.1 assigns all come from these lines.
+/// The type of a message is written with the lifetime `'a`, which the macro declares
+/// where it names the type.
 macro_rules! procedures {
     ($($code:literal $procedure:ident $($criticality:ident)? {
-        $(InitiatingMessage $initiating:ident $initiating_name:literal $initiating_type:path
+        $(InitiatingMessage $initiating:ident $initiating_name:literal $initiating_type:ty
             $([$($initiating_ie:literal $initiating_criticality:ident
                 $initiating_presence:ident),*])?;)?
-        $(SuccessfulOutcome $successful:ident $successful_name:literal $successful_type:path
+        $(SuccessfulOutcome $successful:ident $successful_name:literal $successful_type:ty
             $([$($successful_ie:literal $successful_criticality:ident
                 $successful_presence:ident),*])?;)?
         $(UnsuccessfulOutcome $unsuccessful:ident $unsuccessful_name:literal
-            $unsuccessful_type:path
+            $unsuccessful_type:ty
             $([$($unsuccessful_ie:literal $unsuccessful_criticality:ident
                 $unsuccessful_presence:ident),*])?;)?
     })*) => {
@@ -284,13 +340,13 @@ macro_rules! procedures {
         #[allow(non_snake_case, non_camel_case_types)]
         pub mod messages {
             pub mod InitiatingMessage {
-                $($(pub type $procedure = $initiating_type;)?)*
+                $($(pub type $procedure<'a> = $initiating_type;)?)*
             }
             pub mod SuccessfulOutcome {
-                $($(pub type $procedure = $successful_type;)?)*
+                $($(pub type $procedure<'a> = $successful_type;)?)*
             }
             pub mod UnsuccessfulOutcome {
-                $($(pub type $procedure = $unsuccessful_type;)?)*
+                $($(pub type $procedure<'a> = $unsuccessful_type;)?)*
             }
         }
 
@@ -323,33 +379,30 @@ macro_rules! procedures {
 
         // The type of each message is a message, and no other type is one.
         $($(
-            impl $crate::message::sealed::Sealed for $initiating_type {}
-            impl $crate::Message for $initiating_type {
-                const NAME: &'static str = $initiating_name;
+            impl<'a> $crate::message::sealed::Sealed for $initiating_type {}
+            impl<'a> $crate::Message<'a> for $initiating_type {
                 const DIRECTION: &'static str = "InitiatingMessage";
                 const PROCEDURE_CODE: u8 = $code;
-                const __OF_PROTOCOL_IES: Option<fn(ProtocolIEContainer) -> Self> =
-                    $crate::macros::of_protocol_ies!($initiating_type $([$($initiating_ie),*])?);
+                const __OF_PROTOCOL_IES: bool =
+                    $crate::macros::of_protocol_ies!($([$($initiating_ie),*])?);
             }
         )?)*
         $($(
-            impl $crate::message::sealed::Sealed for $successful_type {}
-            impl $crate::Message for $successful_type {
-                const NAME: &'static str = $successful_name;
+            impl<'a> $crate::message::sealed::Sealed for $successful_type {}
+            impl<'a> $crate::Message<'a> for $successful_type {
                 const DIRECTION: &'static str = "SuccessfulOutcome";
                 const PROCEDURE_CODE: u8 = $code;
-                const __OF_PROTOCOL_IES: Option<fn(ProtocolIEContainer) -> Self> =
-                    $crate::macros::of_protocol_ies!($successful_type $([$($successful_ie),*])?);
+                const __OF_PROTOCOL_IES: bool =
+                    $crate::macros::of_protocol_ies!($([$($successful_ie),*])?);
             }
         )?)*
         $($(
-            impl $crate::message::sealed::Sealed for $unsuccessful_type {}
-            impl $crate::Message for $unsuccessful_type {
-                const NAME: &'static str = $unsuccessful_name;
+            impl<'a> $crate::message::sealed::Sealed for $unsuccessful_type {}
+            impl<'a> $crate::Message<'a> for $unsuccessful_type {
                 const DIRECTION: &'static str = "UnsuccessfulOutcome";
                 const PROCEDURE_CODE: u8 = $code;
-                const __OF_PROTOCOL_IES: Option<fn(ProtocolIEContainer) -> Self> =
-                    $crate::macros::of_protocol_ies!($unsuccessful_type $([$($unsuccessful_ie),*])?);
+                const __OF_PROTOCOL_IES: bool =
+                    $crate::macros::of_protocol_ies!($([$($unsuccessful_ie),*])?);
             }
         )?)*
 
@@ -363,7 +416,7 @@ macro_rules! procedures {
             }
         }
 
-        impl $crate::ngap::NGAPPDU {
+        impl $crate::ngap::NGAPPDU<'_> {
             /// Return the ASN.1 procedure name.
             pub fn procedure_name(&self) -> &'static str {
                 match self.procedure_code() {
@@ -395,25 +448,56 @@ macro_rules! procedures {
         }
 
         /// The types of the bindings that the code which the two protocols share names.
-        pub(crate) use $crate::ngap::{
-            Criticality, ProtocolIEContainer, ProtocolIEField, ProtocolIEID,
-        };
+        pub(crate) use $crate::ngap::Criticality;
         #[cfg(any(test, fuzzing))]
+        #[allow(unused_imports)]
         pub(crate) use $crate::ngap::NGAP_PDU as Pdu;
+        /// The name of the type of a PDU in the bindings.
+        #[cfg(any(test, fuzzing))]
+        #[allow(dead_code)]
+        pub(crate) const PDU_TYPE: &str = "NGAPPDU";
 
-        /// For the fuzz targets: give `reader` the type of the message of a direction
-        /// and a procedure code, when the protocol has that message.
-        #[cfg(fuzzing)]
-        pub(crate) fn with_message_type(
-            direction: &str,
-            code: u8,
-            reader: &mut impl $crate::fuzzing::Reader,
-        ) {
+        /// For the fuzz targets and the tests: the name in the bindings of the type of
+        /// the message of a direction and a procedure code, when the protocol has that
+        /// message.
+        #[cfg(any(test, fuzzing))]
+        #[allow(dead_code)]
+        pub(crate) fn message_type_name(direction: &str, code: u8) -> Option<&'static str> {
             match (direction, code) {
-                $($(("InitiatingMessage", $code) => reader.read::<$initiating_type>(),)?)*
-                $($(("SuccessfulOutcome", $code) => reader.read::<$successful_type>(),)?)*
-                $($(("UnsuccessfulOutcome", $code) => reader.read::<$unsuccessful_type>(),)?)*
-                _ => {}
+                $($(("InitiatingMessage", $code) => {
+                    Some($crate::macros::type_name(stringify!($initiating_type)))
+                })?)*
+                $($(("SuccessfulOutcome", $code) => {
+                    Some($crate::macros::type_name(stringify!($successful_type)))
+                })?)*
+                $($(("UnsuccessfulOutcome", $code) => {
+                    Some($crate::macros::type_name(stringify!($unsuccessful_type)))
+                })?)*
+                _ => None,
+            }
+        }
+
+        /// For the fuzz targets and the tests: the message of a PDU as its type, read
+        /// and written back, when the protocol has a message for the PDU: the octets
+        /// that it encodes to, or why it does not decode.
+        #[cfg(any(test, fuzzing))]
+        #[allow(dead_code)]
+        pub(crate) fn message_read_and_written<'a>(
+            pdu: &'a $crate::ngap::NGAPPDU<'_>,
+        ) -> Option<Result<Vec<u8>, $crate::Error>> {
+            fn rewritten<'a, T: $crate::Message<'a>>(
+                pdu: &'a $crate::ngap::NGAPPDU<'_>,
+            ) -> Result<Vec<u8>, $crate::Error> {
+                let message: T = pdu.decode_value()?;
+                $crate::aper::encode(&message)
+            }
+            match (pdu.direction(), pdu.procedure_code()) {
+                $($(("InitiatingMessage", $code) => Some(rewritten::<$initiating_type>(pdu)),)?)*
+                $($(("SuccessfulOutcome", $code) => Some(rewritten::<$successful_type>(pdu)),)?)*
+                $($(("UnsuccessfulOutcome", $code) => {
+                    Some(rewritten::<$unsuccessful_type>(pdu))
+                })?)*
+                _ => None,
             }
         }
 
@@ -469,15 +553,15 @@ macro_rules! procedures {
             &str,
         )] = &[
             $($(("InitiatingMessage", $code, $initiating_name,
-                $crate::inspect::Typed::of::<$initiating_type>,
+                || $crate::inspect::typed!($initiating_type),
                 &[$($(($initiating_ie, $crate::macros::presence!($initiating_presence))),*)?],
                 stringify!($initiating_type)),)?)*
             $($(("SuccessfulOutcome", $code, $successful_name,
-                $crate::inspect::Typed::of::<$successful_type>,
+                || $crate::inspect::typed!($successful_type),
                 &[$($(($successful_ie, $crate::macros::presence!($successful_presence))),*)?],
                 stringify!($successful_type)),)?)*
             $($(("UnsuccessfulOutcome", $code, $unsuccessful_name,
-                $crate::inspect::Typed::of::<$unsuccessful_type>,
+                || $crate::inspect::typed!($unsuccessful_type),
                 &[$($(($unsuccessful_ie, $crate::macros::presence!($unsuccessful_presence))),*)?],
                 stringify!($unsuccessful_type)),)?)*
         ];
@@ -503,14 +587,22 @@ macro_rules! procedures {
 }
 pub(crate) use procedures;
 
-/// How a message is made of its protocol IEs: nothing for a message that has no
-/// container of them, which the registry lists without an object set.
+/// The name of a type of the bindings, of its path as the registry writes it: without
+/// the modules before it and the lifetime after it.
+#[cfg(any(test, fuzzing, feature = "inspect"))]
+pub(crate) fn type_name(path: &'static str) -> &'static str {
+    let name = path.rsplit(':').next().unwrap_or(path);
+    name.split('<').next().unwrap_or(name).trim()
+}
+
+/// Whether a message is a container of protocol IEs: the registry lists one that is
+/// none without an object set.
 macro_rules! of_protocol_ies {
-    ($message:path) => {
-        None
+    () => {
+        false
     };
-    ($message:path [$($ie:literal),*]) => {
-        Some(<$message>::new)
+    ([$($ie:literal),*]) => {
+        true
     };
 }
 pub(crate) use of_protocol_ies;
@@ -551,25 +643,46 @@ pub(crate) use presence;
 /// then the names that the macros take it by: its own, then those of its type. An IE
 /// that a value holds alone, in a single container, has its criticality after its
 /// identifier when its object sets give it one. An IE of an extension container that
-/// has the type which the type that it extends gives it has its types in brackets, each
-/// with the types that it extends so.
+/// has the type which the type that it extends gives it has its types in brackets
+/// after `where`, each with the types that it extends so.
 ///
 /// The identifier and the type that a name stands for in the macros and, with the
 /// `inspect` feature, the names and the types of a view and of a tree and the
-/// criticality of an IE in a single container all come from these lines.
+/// criticality of an IE in a single container all come from these lines. A type that
+/// borrows is written with the lifetime `'a`, which the macro declares where it names
+/// the type.
 macro_rules! ies {
     ($($id:literal $($item:ident)? $name:literal
-        $($ie:path $(, $contents:path)? $(=> $own:ident $($alias:ident)*)?)?
-        $([$($extending:path: $($extended:ident)+),+])?;
+        $($ie:ty $(, $contents:ty)? $(=> $own:ident $($alias:ident)*)?)?
+        $(where [$($extending:ty: $($extended:ident)+),+])?;
     )*) => {
-        /// The identifier and the type of each IE, by the names that the macros take.
+        /// What each IE is, by the names that the macros take: its identifier, and its
+        /// type in the functions that read and write its value.
         #[doc(hidden)]
-        #[allow(non_camel_case_types)]
+        #[allow(non_snake_case)]
         pub mod ies {
-            use $crate::macros::Ie;
             $($($(
-                pub type $own = Ie<$id, $ie>;
-                $(pub type $alias = Ie<$id, $ie>;)*
+                pub mod $own {
+                    /// The identifier of the IE.
+                    pub const ID: u16 = $id;
+
+                    /// The value of the IE that the octets of an open type hold.
+                    // The type of an IE that borrows nothing leaves the lifetime
+                    // without a use.
+                    #[allow(clippy::needless_lifetimes)]
+                    #[inline]
+                    pub fn decode<'a>(octets: &'a [u8]) -> Result<$ie, $crate::Error> {
+                        $crate::aper::decode(octets)
+                    }
+
+                    /// The value of the IE that `value` converts into.
+                    #[allow(clippy::extra_unused_lifetimes)]
+                    #[inline]
+                    pub fn value<'a>(value: impl Into<$ie>) -> $ie {
+                        value.into()
+                    }
+                }
+                $(pub use $own as $alias;)*
             )?)?)*
         }
 
@@ -605,7 +718,7 @@ macro_rules! ies {
         pub(crate) fn extension(id: u16, extended: &str) -> Option<$crate::inspect::Typed> {
             match (id, extended) {
                 $($($($(($id, stringify!($extended)) => {
-                    Some($crate::inspect::Typed::of::<$extending>())
+                    Some($crate::inspect::typed!($extending))
                 })+)+)?)*
                 _ => None,
             }
@@ -614,7 +727,7 @@ macro_rules! ies {
         #[cfg(feature = "inspect")]
         pub(crate) fn ie(id: u16) -> Result<$crate::inspect::Typed, $crate::Error> {
             match id {
-                $($($id => Ok($crate::inspect::Typed::of::<$ie>()),)?)*
+                $($($id => Ok($crate::inspect::typed!($ie)),)?)*
                 _ => {
                     // An IE that has a type for each type that it extends has none
                     // elsewhere.
@@ -635,7 +748,7 @@ macro_rules! ies {
         #[allow(clippy::match_single_binding)]
         pub(crate) fn ie_contents(id: u16) -> Option<$crate::inspect::Typed> {
             match id {
-                $($($($id => Some($crate::inspect::Typed::of::<$contents>()),)?)?)*
+                $($($($id => Some($crate::inspect::typed!($contents)),)?)?)*
                 _ => None,
             }
         }
@@ -643,52 +756,12 @@ macro_rules! ies {
 }
 pub(crate) use ies;
 
-/// An IE as the macros name it: a type of the `ies` of the registry, which has the
-/// identifier of the IE and the type of its value.
-#[doc(hidden)]
-pub struct Ie<const ID: u16, T>(core::marker::PhantomData<T>);
-
-/// What a name of the macros stands for.
-#[doc(hidden)]
-pub trait Named {
-    /// The identifier of the IE.
-    const ID: u16;
-    /// The type of its value.
-    type Type;
-}
-
-impl<const ID: u16, T> Named for Ie<ID, T> {
-    const ID: u16 = ID;
-    type Type = T;
-}
-
 /// The identifier of the IE that the macros take by this name.
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __ngap_ie_id {
     ($name:ident) => {
-        <$crate::registry::ies::$name as $crate::macros::Named>::ID
-    };
-}
-
-/// The open type of a value of the IE that the macros take by this name.
-#[macro_export]
-#[doc(hidden)]
-macro_rules! __ngap_encode_ie {
-    ($name:ident, $value:expr) => {{
-        let value: <$crate::registry::ies::$name as $crate::macros::Named>::Type = ($value).into();
-        $crate::ngap::encode_open_type(&value)
-    }};
-}
-
-/// The value in an open type of the IE that the macros take by this name.
-#[macro_export]
-#[doc(hidden)]
-macro_rules! __ngap_decode_ie {
-    ($name:ident, $value:expr) => {
-        $crate::ngap::decode_open_type::<
-            <$crate::registry::ies::$name as $crate::macros::Named>::Type,
-        >($value)
+        $crate::registry::ies::$name::ID
     };
 }
 
@@ -752,7 +825,7 @@ macro_rules! extract_ngap_ies {
         $(,)?
     ) => {
         // The name is the type of what the IEs are taken from.
-        let _: &$crate::ngap::$msg = &$msg_var;
+        let _: &$crate::ngap::$msg<'_> = &$msg_var;
         $(
             let mut $name: ::core::option::Option<::core::result::Result<$ty, $crate::Error>> =
                 ::core::option::Option::None;
@@ -763,12 +836,16 @@ macro_rules! extract_ngap_ies {
                     // `$bind` is out of scope where `$name` is assigned, as
                     // both may have the same name.
                     let _value: ::core::result::Result<$ty, $crate::Error> =
-                        match $crate::__ngap_decode_ie!($ie_name, &_ie.value) {
+                        match $crate::registry::ies::$ie_name::decode(&_ie.value) {
                             ::core::result::Result::Ok($bind) => ::core::result::Result::Ok(
                                 $crate::extract_ngap_ies!(@val $bind $(, $expr)?),
                             ),
                             ::core::result::Result::Err(_error) => ::core::result::Result::Err(
-                                _error.__undecodable_ie(stringify!($msg), _ie.id.0),
+                                $crate::macros::__undecodable_ie(
+                                    _error,
+                                    stringify!($msg),
+                                    _ie.id.0,
+                                ),
                             ),
                         };
                     $name = $crate::extract_ngap_ies!(@last $kind $name, _value);
@@ -801,7 +878,7 @@ macro_rules! extract_ngap_ies {
             }
             ::core::option::Option::None => {
                 return ::core::result::Result::Err(::core::convert::From::from(
-                    $crate::Error::__missing_ie(
+                    $crate::macros::__missing_ie(
                         stringify!($msg),
                         $crate::__ngap_ie_id!($ie_name),
                         stringify!($name),
@@ -859,42 +936,60 @@ macro_rules! with_ngap_ie_mut {
     }};
     ($msg_var:expr, $msg:ident, $ie_name:ident($bind:ident) => $expr:expr $(,)?) => {{
         // The name is the type of what the IE is in.
-        let _: &$crate::ngap::$msg = &$msg_var;
+        let _: &$crate::ngap::$msg<'_> = &$msg_var;
         // The IE that `extract_ngap_ies!` reads: the last one, and one that does not
-        // decode is an error.
-        let mut _found = ::core::result::Result::Ok(::core::option::Option::None);
-        for (_index, _ie) in $msg_var.protocol_ies.0.iter().enumerate() {
-            if _ie.id.0 == $crate::__ngap_ie_id!($ie_name) && _found.is_ok() {
-                _found = match $crate::__ngap_decode_ie!($ie_name, &_ie.value) {
-                    ::core::result::Result::Ok(_value) => {
-                        ::core::result::Result::Ok(::core::option::Option::Some((_index, _value)))
-                    }
-                    ::core::result::Result::Err(_error) => ::core::result::Result::Err(
-                        _error.__undecodable_ie(stringify!($msg), _ie.id.0),
-                    ),
-                };
+        // decode is an error. The value is changed and written to octets of its own
+        // before the message is, which it borrowed its octets from.
+        let _written = {
+            let mut _found = ::core::result::Result::Ok(::core::option::Option::None);
+            for (_index, _ie) in $msg_var.protocol_ies.0.iter().enumerate() {
+                if _ie.id.0 == $crate::__ngap_ie_id!($ie_name) && _found.is_ok() {
+                    _found = match $crate::registry::ies::$ie_name::decode(&_ie.value) {
+                        ::core::result::Result::Ok(_value) => ::core::result::Result::Ok(
+                            ::core::option::Option::Some((_index, _value)),
+                        ),
+                        ::core::result::Result::Err(_error) => ::core::result::Result::Err(
+                            $crate::macros::__undecodable_ie(_error, stringify!($msg), _ie.id.0),
+                        ),
+                    };
+                }
             }
-        }
-        match _found {
+            match _found {
+                ::core::result::Result::Err(_error) => ::core::result::Result::Err(_error),
+                ::core::result::Result::Ok(::core::option::Option::None) => {
+                    ::core::result::Result::Ok(::core::option::Option::None)
+                }
+                ::core::result::Result::Ok(::core::option::Option::Some((_index, mut $bind))) => {
+                    let _changed: bool = $expr;
+                    match $crate::ngap::encode_open_type(&$bind) {
+                        ::core::result::Result::Ok(_value) => ::core::result::Result::Ok(
+                            ::core::option::Option::Some((_index, _changed, _value)),
+                        ),
+                        ::core::result::Result::Err(_error) => {
+                            ::core::result::Result::Err(_error)
+                        }
+                    }
+                }
+            }
+        };
+        match _written {
             ::core::result::Result::Err(_error) => ::core::result::Result::Err(_error),
             ::core::result::Result::Ok(::core::option::Option::None) => {
                 ::core::result::Result::Ok(false)
             }
-            ::core::result::Result::Ok(::core::option::Option::Some((_index, mut $bind))) => {
-                let _changed: bool = $expr;
-                match $crate::ngap::encode_open_type(&$bind) {
-                    ::core::result::Result::Ok(_value) => {
-                        // The IE is where it was read, unless the message is another
-                        // one each time that its expression is read.
-                        match $msg_var.protocol_ies.0.get_mut(_index) {
-                            ::core::option::Option::Some(_ie) => {
-                                _ie.value = _value;
-                                ::core::result::Result::Ok(_changed)
-                            }
-                            ::core::option::Option::None => ::core::result::Result::Ok(false),
-                        }
+            ::core::result::Result::Ok(::core::option::Option::Some((
+                _index,
+                _changed,
+                _value,
+            ))) => {
+                // The IE is where it was read, unless the message is another one each
+                // time that its expression is read.
+                match $msg_var.protocol_ies.0.get_mut(_index) {
+                    ::core::option::Option::Some(_ie) => {
+                        _ie.value = _value;
+                        ::core::result::Result::Ok(_changed)
                     }
-                    ::core::result::Result::Err(_error) => ::core::result::Result::Err(_error),
+                    ::core::option::Option::None => ::core::result::Result::Ok(false),
                 }
             }
         }
@@ -913,23 +1008,27 @@ macro_rules! build_ngap {
      $($ie_crit:ident $ie_name:ident ($($ie_value:tt)+)),*
      $(,)?
     ) => {
-        $crate::macros::__pdu(
-            $crate::build_ngap!(@criticality $outer_crit),
-            [$(
-                $crate::macros::__ie(
+        {
+            // The message is the one that the procedure has in that direction, and a
+            // container of protocol IEs.
+            $crate::macros::__message_of(
+                |message: $crate::ngap::$msg<'static>|
+                    -> $crate::registry::messages::$direction::$proc<'static> { message },
+                $crate::ngap::$msg::new,
+            );
+            #[allow(unused_mut)]
+            let mut _message = $crate::macros::__Message::new();
+            $(
+                _message.ie(
                     $crate::__ngap_ie_id!($ie_name),
                     $crate::build_ngap!(@criticality $ie_crit),
-                    $crate::__ngap_encode_ie!($ie_name, ($($ie_value)+)),
-                ),
-            )*],
-            // The message is the one that the procedure has in that direction.
-            {
-                let new: fn(
-                    $crate::ngap::ProtocolIEContainer,
-                ) -> $crate::registry::messages::$direction::$proc = $crate::ngap::$msg::new;
-                new
-            },
-        )
+                    &$crate::registry::ies::$ie_name::value(($($ie_value)+)),
+                );
+            )*
+            _message.pdu::<$crate::ngap::$msg<'static>>(
+                $crate::build_ngap!(@criticality $outer_crit),
+            )
+        }
     };
     // The criticality of the PDU is left out: the message follows the procedure.
     ($direction:ident, $proc:ident, $msg:ident,
@@ -967,13 +1066,13 @@ macro_rules! build_ngap {
 macro_rules! build_ngap_ie {
     ($msg:ident, $criticality:ident $ie_name:ident ($($value:tt)+)) => {{
         // The name is a type that has IEs.
-        let _ = |of: &$crate::ngap::$msg| {
-            let _: &$crate::ngap::ProtocolIEContainer = &of.protocol_ies;
+        let _ = |of: &$crate::ngap::$msg<'_>| {
+            let _: &$crate::ngap::ProtocolIEContainer<'_> = &of.protocol_ies;
         };
         $crate::macros::__ie(
             $crate::__ngap_ie_id!($ie_name),
             $crate::build_ngap!(@criticality $criticality),
-            $crate::__ngap_encode_ie!($ie_name, ($($value)+)),
+            &$crate::registry::ies::$ie_name::value(($($value)+)),
         )
     }};
     ($msg:ident, $ie_name:ident ($($value:tt)+)) => {
@@ -1003,7 +1102,7 @@ mod tests {
             panic!("expected initiating message");
         };
         let request: UEContextReleaseRequest =
-            rasn::aper::decode(message.value.as_bytes()).expect("decode request");
+            oxirush_aper::decode(&message.value).expect("decode request");
         let mut request = request;
 
         let changed =
@@ -1016,7 +1115,7 @@ mod tests {
             .iter()
             .find(|ie| ie.id.0 == 10)
             .expect("AMF UE ID");
-        let id: AMFUENGAPID = rasn::aper::decode(ie.value.as_bytes()).expect("decode ID");
+        let id: AMFUENGAPID = oxirush_aper::decode(&ie.value).expect("decode ID");
         assert_eq!(id.0, 42);
         Ok(())
     }
@@ -1033,7 +1132,7 @@ mod tests {
     fn an_ie_that_is_there_twice_is_read_and_changed_at_the_same_place() -> Result<(), Error> {
         let ids = |request: &UEContextReleaseRequest| -> Vec<Vec<u8>> {
             let ies = request.protocol_ies.0.iter();
-            ies.map(|ie| ie.value.as_bytes().to_vec()).collect()
+            ies.map(|ie| ie.value.to_vec()).collect()
         };
         let entry = |id: u64| build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(id));
         let mut request =
@@ -1056,7 +1155,7 @@ mod tests {
         // An entry with the identifier of this IE whose octets are not its value,
         // after one that decodes and before it.
         let undecodable = || {
-            let octets = rasn::types::Any::new(vec![0xff]);
+            let octets = crate::Octets::from(vec![0xff]);
             ProtocolIEField::new(10u16, Criticality::reject, octets)
         };
         let entry = build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(1u64))?;
@@ -1081,11 +1180,11 @@ mod tests {
         // The macro reads the expression of its message more than once: one that gives
         // a message with the IE, then one without it, has nowhere to write the IE.
         struct Each {
-            messages: [UEContextReleaseRequest; 2],
+            messages: [UEContextReleaseRequest<'static>; 2],
             reads: usize,
         }
         impl Each {
-            fn next(&mut self) -> &mut UEContextReleaseRequest {
+            fn next(&mut self) -> &mut UEContextReleaseRequest<'static> {
                 self.reads += 1;
                 &mut self.messages[usize::from(self.reads > 2)]
             }
@@ -1136,7 +1235,7 @@ mod tests {
     #[test]
     fn octet_string_containing_ies_have_macros() -> Result<(), Error> {
         let transfer = MBSSessionSetupOrModRequestTransfer::new(ProtocolIEContainer(vec![]));
-        let octets = rasn::aper::encode(&transfer).expect("encode transfer");
+        let octets = oxirush_aper::encode(&transfer).expect("encode transfer");
         let ie = build_ngap_ie!(
             BroadcastSessionSetupRequest,
             REJECT MBSSessionSetupRequestTransfer(octets.clone())
@@ -1149,7 +1248,7 @@ mod tests {
         );
         assert_eq!(extracted, octets);
         let decoded: MBSSessionSetupOrModRequestTransfer =
-            rasn::aper::decode(&extracted).expect("decode transfer");
+            oxirush_aper::decode(&extracted).expect("decode transfer");
         assert_eq!(decoded, transfer);
         Ok(())
     }

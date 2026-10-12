@@ -11,7 +11,9 @@ name = "oxirush-ngap-generator"
 path = "main.rs"
 
 [dependencies]
+# What the generators of the two protocols share, in the repository of oxirush-aper,
+# which is checked out beside this one.
+generator = { package = "oxirush-aper-generator", path = "../../oxirush-aper/generator" }
 rasn-compiler = "=0.16.0"
 anyhow = "1"
 regex = "1"
-syn = { version = "=2.0.98", features = ["full"] }

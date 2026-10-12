@@ -21,7 +21,7 @@ include = [
 ]
 
 [features]
-inspect = ["dep:serde_json"]
+inspect = ["dep:serde_json", "oxirush-aper/inspect"]
 
 [package.metadata.docs.rs]
 all-features = true
@@ -32,11 +32,13 @@ all-features = true
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(fuzzing)'] }
 
 [dependencies]
-rasn = { version = "0.29.0", default-features = false, features = ["bytes"] }
+oxirush-aper = "0.1.0"
 serde_json = { version = "1.0.106", optional = true }
 
 [dev-dependencies]
 hex = "0.4"
+# The oracle of the tests: the same types with the codec of rasn.
+oxirush-ngap-oracle = { path = "oracle" }
 
 [[example]]
 name = "build_pdu"

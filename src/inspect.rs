@@ -321,8 +321,9 @@ use crate::inspect_paths::{
 };
 pub use crate::inspect_paths::{check_path, enumerated_at, insert, paths, remove, select, set};
 use crate::inspect_registry as registry;
-use crate::json::{self, hex};
-use crate::ngap::NGAP_PDU;
+use crate::ngap::{NGAP_PDU, NGAPPDU};
+use oxirush_aper::json::{self, Json, hex};
+use oxirush_aper::{AsnType, Decode, Encode, Octets};
 
 /// The identifier and the name of each IE that an object set of the ASN.1 has, those of
 /// the extension containers included. An identifier that the ASN.1 defines and that no
@@ -340,7 +341,7 @@ pub fn message_names() -> impl Iterator<Item = (&'static str, u8, &'static str)>
 
 /// The name that ASN.1 gives the message of a PDU, as `InitialContextSetupResponse`; `None`
 /// for a procedure that the specification does not have in that direction.
-pub fn message_name(pdu: &NGAP_PDU) -> Option<&'static str> {
+pub fn message_name(pdu: &NGAPPDU<'_>) -> Option<&'static str> {
     let (direction, code) = (pdu.direction(), pdu.procedure_code());
     message_names()
         .find(|(of, procedure, _)| *procedure == code && *of == direction)
@@ -409,27 +410,45 @@ fn message_type(direction: &str, code: u8) -> Result<Typed, Error> {
     })
 }
 
-/// The value of the type `T` that the octets `raw` are, in its JSON form.
-fn decode_typed<T>(raw: &[u8]) -> Result<Value, Error>
+/// The value of the type `T` that the octets `raw` are, in its JSON form. `name` is the
+/// name of the type in the bindings.
+pub(crate) fn decode_typed<'a, T>(name: &'static str, raw: &'a [u8]) -> Result<Value, Error>
 where
-    T: rasn::Decode + rasn::Encode + PartialEq + core::fmt::Debug,
+    T: Decode<'a> + Json,
 {
-    let value: T = crate::per::decode_complete(raw)?;
+    let read: Result<T, Error> = oxirush_aper::decode(raw);
+    let shown = read.map(|value| value.to_json());
     #[cfg(any(test, fuzzing))]
-    json::as_rasn_writes_it(&value);
-    json::to_value(&value)
+    if let Some(observer) = OBSERVER.get() {
+        observer(name, raw, &shown);
+    }
+    let _ = name;
+    shown
 }
 
 /// The octets of the value of the type `T` that `value` writes in its JSON form.
-fn encode_typed<T>(value: &Value) -> Result<Vec<u8>, Error>
+pub(crate) fn encode_typed<T>(value: &Value) -> Result<Vec<u8>, Error>
 where
-    T: rasn::Decode + rasn::Encode + PartialEq + core::fmt::Debug,
+    T: Encode + Json + AsnType,
 {
     let typed: T = json::from_value(value)?;
     // A value that is read and does not encode is outside a constraint of its type.
-    let octets = crate::per::encode_open_type(&typed).map_err(Error::outside_its_type::<T>)?;
-    Ok(octets.into_bytes())
+    oxirush_aper::encode(&typed).map_err(|error| error.__outside_its_type(T::NAME))
 }
+
+#[cfg(any(test, fuzzing))]
+thread_local! {
+    /// What is told of each value that this thread decodes as a type of the registry:
+    /// the name of the type in the bindings, the octets, and the JSON form of the
+    /// value or why the octets are none. A test and a fuzz target compare them with
+    /// what another codec makes of the same octets.
+    pub(crate) static OBSERVER: core::cell::Cell<Option<Observer>> =
+        const { core::cell::Cell::new(None) };
+}
+
+/// What observes the values that are decoded as a type of the registry.
+#[cfg(any(test, fuzzing))]
+pub(crate) type Observer = fn(&'static str, &[u8], &Result<Value, Error>);
 
 /// The transfers of the registry: the member that holds each, and the type that its
 /// octets contain. A member that has several types has its name alone.
@@ -439,7 +458,7 @@ macro_rules! transfers {
         #[allow(clippy::match_single_binding)]
         pub(crate) fn transfer(field: &str) -> Result<Typed, $crate::Error> {
             match field {
-                $($($field => Ok(Typed::of::<$transfer>()),)?)*
+                $($($field => Ok($crate::inspect::typed!($transfer)),)?)*
                 _ => Err($crate::Error::form(format!(
                     "{PROTOCOL} has several types for {field}, or none: it is read and \
                      written as its octets"
@@ -459,7 +478,7 @@ macro_rules! carried {
             &[$(($id, $name, stringify!($carried)),)*];
         pub(crate) fn carried(name: &str) -> Option<Typed> {
             $(if $crate::inspect_paths::same_name($name, name) {
-                return Some(Typed::of::<$carried>());
+                return Some($crate::inspect::typed!($carried));
             })*
             None
         }
@@ -473,17 +492,24 @@ pub(crate) struct Typed {
     pub(crate) encode: fn(&Value) -> Result<Vec<u8>, Error>,
 }
 
-impl Typed {
-    pub(crate) fn of<T>() -> Self
-    where
-        T: rasn::Decode + rasn::Encode + PartialEq + core::fmt::Debug,
-    {
-        Self {
-            decode: decode_typed::<T>,
-            encode: encode_typed::<T>,
+/// The functions of a type of the bindings, which is written with the lifetime `'a`
+/// when it borrows, or without one in a function.
+macro_rules! typed {
+    ($type:ty) => {{
+        // A type that borrows nothing leaves the lifetime without a use.
+        #[allow(clippy::needless_lifetimes)]
+        fn decode<'a>(raw: &'a [u8]) -> Result<serde_json::Value, $crate::Error> {
+            let name = $crate::macros::type_name(stringify!($type));
+            $crate::inspect::decode_typed::<$type>(name, raw)
         }
-    }
+        #[allow(clippy::needless_lifetimes)]
+        fn encode<'a>(value: &'a serde_json::Value) -> Result<Vec<u8>, $crate::Error> {
+            $crate::inspect::encode_typed::<$type>(value)
+        }
+        $crate::inspect::Typed { decode, encode }
+    }};
 }
+pub(crate) use typed;
 
 /// The octets that `value` writes in hexadecimal.
 fn unhex(value: &Value) -> Result<Vec<u8>, Error> {
@@ -998,7 +1024,7 @@ fn collapse(value: &mut Value, member: &str, depth: usize, shape: Shape) -> Resu
 /// The two JSON forms of a PDU, with the `inspect` feature: its tree, the short form in
 /// which a message is shown and written, and its view, which keeps what was received and
 /// is read and edited by the paths of [`inspect`](crate::inspect).
-impl NGAP_PDU {
+impl NGAPPDU<'_> {
     /// The tree of this PDU, which is the name of its message and its IEs by name, in
     /// their order:
     ///
@@ -1103,7 +1129,7 @@ impl NGAP_PDU {
     /// assert_eq!(hex::encode(octets), "002a4015000003000a0002002a005500020007000f40020500");
     /// # Ok::<(), oxirush_ngap::Error>(())
     /// ```
-    pub fn from_tree(tree: &Value) -> Result<Self, Error> {
+    pub fn from_tree(tree: &Value) -> Result<NGAP_PDU, Error> {
         const FORM: &str = "a tree is {\"message\": NAME, \"ies\": [{NAME: VALUE}, …]}";
         let form = || Error::form(FORM);
         let written = tree.as_object().ok_or_else(form)?;
@@ -1127,7 +1153,7 @@ impl NGAP_PDU {
             "protocolIEs".into(),
             listed_ies(name, listed.ok_or_else(form)?)?,
         );
-        Self::of_view(direction, code, criticality, Value::Object(message), None)
+        NGAP_PDU::of_view(direction, code, criticality, Value::Object(message), None)
     }
 
     /// The PDU of a direction and a procedure code that has `criticality` and the
@@ -1139,7 +1165,7 @@ impl NGAP_PDU {
         criticality: &Value,
         mut message: Value,
         received: Option<&Value>,
-    ) -> Result<Self, Error> {
+    ) -> Result<NGAP_PDU, Error> {
         collapse(&mut message, "", 0, message_shape(direction, code))?;
         let raw = if let Some(original) = received {
             let original = unhex(original)?;
@@ -1159,8 +1185,8 @@ impl NGAP_PDU {
             (message_type(direction, code)?.encode)(&message)?
         };
         let criticality = json::from_value(criticality)?;
-        let value = rasn::types::Any::new(raw);
-        Self::of(direction, code, criticality, value).ok_or_else(no_direction)
+        let value = Octets::owned(raw);
+        NGAP_PDU::of(direction, code, criticality, value).ok_or_else(no_direction)
     }
 
     /// The view of this PDU: its `procedure_code`, its `direction`, its `criticality` and
@@ -1184,13 +1210,13 @@ impl NGAP_PDU {
     /// ```
     pub fn to_view(&self) -> Result<Value, Error> {
         let (direction, code) = (self.direction(), self.procedure_code());
-        let raw = self.value().as_bytes();
+        let raw: &[u8] = self.value();
         let mut message = (message_type(direction, code)?.decode)(raw)?;
         expand(&mut message, 0, message_shape(direction, code));
         let mut view = Map::new();
         view.insert("procedure_code".into(), code.into());
         view.insert("direction".into(), direction.into());
-        view.insert("criticality".into(), json::to_value(&self.criticality())?);
+        view.insert("criticality".into(), json::to_value(&self.criticality()));
         view.insert("message".into(), message);
         view.insert("_raw_message".into(), hex(raw).into());
         Ok(Value::Object(view))
@@ -1202,7 +1228,7 @@ impl NGAP_PDU {
     ///
     /// [`with_view`](Self::with_view) is this for the view of a PDU that is at hand, and
     /// refuses the view of another message.
-    pub fn from_view(view: &Value) -> Result<Self, Error> {
+    pub fn from_view(view: &Value) -> Result<NGAP_PDU, Error> {
         const MEMBERS: [&str; 5] = [
             "procedure_code",
             "direction",
@@ -1233,7 +1259,7 @@ impl NGAP_PDU {
         }
         let message = view.get("message").ok_or_else(|| Error::form(FORM))?;
         let received = view.get("_raw_message");
-        Self::of_view(
+        NGAP_PDU::of_view(
             direction,
             code,
             &view["criticality"],
@@ -1267,7 +1293,7 @@ impl NGAP_PDU {
     /// assert_eq!(pdu.with_view(&view).unwrap_err().kind(), ErrorKind::Form);
     /// # Ok::<(), oxirush_ngap::Error>(())
     /// ```
-    pub fn with_view(&self, view: &Value) -> Result<Self, Error> {
+    pub fn with_view(&self, view: &Value) -> Result<NGAP_PDU, Error> {
         let (direction, code) = (self.direction(), self.procedure_code());
         let of = (view["direction"].as_str(), view["procedure_code"].as_u64());
         // A view that does not say which message it is of is refused as any view is.
@@ -1288,34 +1314,6 @@ impl NGAP_PDU {
                 message(direction, code.into()),
             )));
         }
-        Self::from_view(view)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    /// The values of the messages of the fixtures and of the vectors with content have
-    /// the JSON form that the codec of the JSON Encoding Rules of rasn gives them, and
-    /// are read back from it as they are: each message, each of its IEs, and each IE and
-    /// each transfer that a value holds. `same_but_for_a_length` has the one form that
-    /// is another.
-    #[test]
-    fn the_values_of_the_fixtures_are_written_as_rasn_writes_them() {
-        crate::json::COMPARED.set(Some(0));
-        let messages = include_str!("../tests/fixtures/messages.tsv").lines();
-        let lines = messages.chain(include_str!("../tests/fixtures/vectors.tsv").lines());
-        let mut messages = 0;
-        for line in lines.filter(|line| !line.starts_with('#')) {
-            let octets = crate::json::unhex(line.split('\t').nth(1).unwrap()).unwrap();
-            NGAP_PDU::decode(&octets).unwrap().to_view().unwrap();
-            messages += 1;
-        }
-        let compared = crate::json::COMPARED.get().unwrap_or_default();
-        assert!(
-            messages >= 100 && compared > 3 * messages,
-            "{compared} values of {messages} messages"
-        );
+        NGAP_PDU::from_view(view)
     }
 }

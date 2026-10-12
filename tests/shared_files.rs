@@ -1,10 +1,13 @@
 //! The files that oxirush-ngap and oxirush-s1ap have in common, octet for octet: the
-//! error, the codec helpers, the JSON codec and the paths of the inspection, the
-//! generators that both protocols run, the test of the README, the scripts of the
-//! vectors, the benchmarks and the fuzz targets. Each
-//! crate holds the digest of each file, so that an edit in one fails here until the
-//! file is the same in the other and both record its new digest. This file is one of
-//! them, and the two crates keep it the same too.
+//! check of a message against its object set, the paths of the inspection, what names
+//! a message and its errors, the oracle of the tests and the comparison with it, the
+//! test of the README, the scripts of the vectors and of the ASN.1, the benchmarks and
+//! the fuzz targets. Each crate holds the digest of each file, so that an edit in one
+//! fails here until the file is the same in the other and both record its new digest.
+//! This file is one of them, and the two crates keep it the same too.
+//!
+//! The codec, its errors, the JSON forms and the generator of the bindings are not
+//! copied: both crates take them from oxirush-aper.
 
 use std::path::Path;
 
@@ -13,28 +16,22 @@ const SHARED: &[(&str, u64)] = &[
     ("benches/benches/allocations.rs", 0x7e9caf0d00bb13de),
     ("benches/benches/codec.rs", 0x904d8a5909d190c1),
     ("benches/benches/heap.rs", 0xffc0849cd2e0625d),
-    ("benches/build_cost.py", 0x84c70b1ce3c14ed6),
-    ("benches/src/lib.rs", 0x296993cddf8c05c2),
-    ("build/aper_fix.rs", 0x6f465c49ce231fc8),
-    ("build/asn1.rs", 0x12ba71fec8268ee1),
-    ("build/containers.rs", 0x9d134011ce89fec9),
+    ("benches/build_cost.py", 0x16af153b5eb68c84),
+    ("benches/src/lib.rs", 0x67549eb6f8c9549b),
     ("build/extract_asn1.py", 0xd5c10df676fed9aa),
-    ("build/inspection.rs", 0xc1a15755d6ee7e94),
-    ("build/registry.rs", 0xd1c828575adadf7c),
     ("fuzz/fuzz_targets/decode.rs", 0x45a0d53107995c8a),
     ("fuzz/fuzz_targets/paths.rs", 0x68daa1c78c9c02da),
     ("fuzz/fuzz_targets/view.rs", 0xa0e7481987d00ee0),
     ("fuzz/seed.sh", 0x8e0693288352de1c),
-    ("fuzz/src/lib.rs", 0x6a1a849f70857932),
+    ("fuzz/src/lib.rs", 0x771ea7f6104c647d),
+    ("oracle/src/lib.rs", 0x6a1cbee8accf92ae),
+    ("oracle/src/per.rs", 0x6bbde8dc6ab67c89),
+    ("oracle/src/sized.rs", 0x05d05e62217fc26a),
     ("src/check.rs", 0x6a14609dae13ca66),
-    ("src/error.rs", 0x5b938dac1af61881),
-    ("src/fuzzing.rs", 0x2bbd5f7f5f5c6f21),
-    ("src/inspect_paths.rs", 0xf3dc92ad52e906b2),
-    ("src/json.rs", 0x6e7e9633e49709a0),
-    ("src/message.rs", 0x80820382c540a0cc),
-    ("src/per.rs", 0x2b1e451772f0ff2e),
-    ("src/sized.rs", 0x05d05e62217fc26a),
-    ("src/wire.rs", 0x358dcf6e51fd8ab1),
+    ("src/error.rs", 0x4014f8f5f88cb9b8),
+    ("src/inspect_paths.rs", 0x56eb0a31dc507c38),
+    ("src/message.rs", 0x345b979b1e030e11),
+    ("src/oracle_tests.rs", 0xca334f80a187d3a2),
     ("tests/fixtures/dissect.py", 0xe83af66722907219),
     ("tests/fixtures/generate.py", 0x313265374d7367d9),
     ("tests/readme.rs", 0x8649417b32dae0f4),

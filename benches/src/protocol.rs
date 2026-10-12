@@ -26,8 +26,11 @@ use codec::ngap;
 use codec::{Error, build_ngap, extract_ngap_ies};
 use serde_json::{Value, json};
 
-/// A PDU of the protocol.
+/// A PDU of the protocol, which owns its octets.
 pub type Pdu = ngap::NGAP_PDU;
+
+/// A PDU that borrows its message from the octets that it is decoded from.
+pub type Borrowed<'a> = ngap::NGAPPDU<'a>;
 
 /// The fixtures of the crate: a line for each message, with its name and its
 /// octets in hexadecimal.
@@ -41,43 +44,56 @@ pub const ROOT: &str = "/ngap";
 /// as the macros name it, with its criticality and the type of its value.
 macro_rules! typed {
     ($direction:ident $procedure:ident $criticality:ident $message:ident {
-        $($ie_criticality:ident $ie:ident: $type:ident,)*
+        $($ie_criticality:ident $ie:ident: $type:ident $(<$borrows:lifetime>)?,)*
     }) => {{
-        /// The values of the IEs of the message, in their order.
-        type Values = ($(ngap::$type,)*);
+        /// The values of the IEs of the message, in their order. Those that hold
+        /// octets borrow them.
+        type Values<'a> = ($(ngap::$type $(<$borrows>)?,)*);
 
         #[allow(non_snake_case)]
-        fn read(message: &ngap::$message) -> Result<Values, Error> {
+        fn read<'a>(message: &'a ngap::$message<'a>) -> Result<Values<'a>, Error> {
             extract_ngap_ies!(message, $message,
-                $(req $ie: ngap::$type = $ie(value) => value,)*
+                $(req $ie: ngap::$type $(<$borrows>)? = $ie(value) => value,)*
             );
             Ok(($($ie,)*))
         }
 
+        /// The same values, which borrow nothing.
         #[allow(non_snake_case)]
-        fn build(($($ie,)*): Values) -> Result<Pdu, Error> {
+        fn owned(($($ie,)*): Values<'_>) -> Values<'static> {
+            ($(typed!(@owned $ie $(, $borrows)?),)*)
+        }
+
+        #[allow(non_snake_case)]
+        fn build(($($ie,)*): Values<'_>) -> Result<Pdu, Error> {
             build_ngap!($direction, $procedure, $criticality, $message,
                 $($ie_criticality $ie($ie),)*
             )
         }
 
-        fn message(pdu: &Pdu) -> ngap::$message {
+        fn message(pdu: &Pdu) -> ngap::$message<'_> {
             pdu.decode_value().unwrap()
         }
 
         Typed {
-            decode_value: |pdu| done(pdu.decode_value::<ngap::$message>()),
+            decode_value: |pdu| done(pdu.decode_value::<ngap::$message<'_>>()),
             extract: |pdu| {
                 let message = message(pdu);
                 Box::new(move || done(read(&message)))
             },
             build: |pdu| {
-                let mut values = Some(read(&message(pdu)).unwrap());
+                let mut values = Some(owned(read(&message(pdu)).unwrap()));
                 Box::new(move || done(build(values.take().unwrap())))
             },
             rebuilt: |pdu| build(read(&message(pdu)).unwrap()).unwrap(),
         }
     }};
+    (@owned $value:ident) => {
+        $value
+    };
+    (@owned $value:ident, $borrows:lifetime) => {
+        $value.into_owned()
+    };
 }
 
 /// `length` octets in hexadecimal, which are not all the same.
@@ -172,16 +188,16 @@ fn initial_context_setup_request() -> Written {
         typed: typed!(InitiatingMessage InitialContextSetup REJECT InitialContextSetupRequest {
             REJECT AMF_UE_NGAP_ID: AMFUENGAPID,
             REJECT RAN_UE_NGAP_ID: RANUENGAPID,
-            REJECT UEAggregateMaximumBitRate: UEAggregateMaximumBitRate,
-            REJECT GUAMI: GUAMI,
-            REJECT PDUSessionResourceSetupListCxtReq: PDUSessionResourceSetupListCxtReq,
-            REJECT AllowedNSSAI: AllowedNSSAI,
-            REJECT UESecurityCapabilities: UESecurityCapabilities,
-            REJECT SecurityKey: SecurityKey,
-            IGNORE MobilityRestrictionList: MobilityRestrictionList,
-            IGNORE UERadioCapability: UERadioCapability,
+            REJECT UEAggregateMaximumBitRate: UEAggregateMaximumBitRate<'a>,
+            REJECT GUAMI: GUAMI<'a>,
+            REJECT PDUSessionResourceSetupListCxtReq: PDUSessionResourceSetupListCxtReq<'a>,
+            REJECT AllowedNSSAI: AllowedNSSAI<'a>,
+            REJECT UESecurityCapabilities: UESecurityCapabilities<'a>,
+            REJECT SecurityKey: SecurityKey<'a>,
+            IGNORE MobilityRestrictionList: MobilityRestrictionList<'a>,
+            IGNORE UERadioCapability: UERadioCapability<'a>,
             IGNORE MaskedIMEISV: MaskedIMEISV,
-            IGNORE NAS_PDU: NASPDU,
+            IGNORE NAS_PDU: NASPDU<'a>,
         }),
     }
 }
@@ -218,8 +234,8 @@ fn pdu_session_resource_setup_request() -> Written {
             InitiatingMessage PDUSessionResourceSetup REJECT PDUSessionResourceSetupRequest {
                 REJECT AMF_UE_NGAP_ID: AMFUENGAPID,
                 REJECT RAN_UE_NGAP_ID: RANUENGAPID,
-                REJECT PDUSessionResourceSetupListSUReq: PDUSessionResourceSetupListSUReq,
-                IGNORE UEAggregateMaximumBitRate: UEAggregateMaximumBitRate,
+                REJECT PDUSessionResourceSetupListSUReq: PDUSessionResourceSetupListSUReq<'a>,
+                IGNORE UEAggregateMaximumBitRate: UEAggregateMaximumBitRate<'a>,
             }
         ),
     }
@@ -282,11 +298,11 @@ fn handover_required() -> Written {
             REJECT AMF_UE_NGAP_ID: AMFUENGAPID,
             REJECT RAN_UE_NGAP_ID: RANUENGAPID,
             REJECT HandoverType: HandoverType,
-            IGNORE Cause: Cause,
-            REJECT TargetID: TargetID,
+            IGNORE Cause: Cause<'a>,
+            REJECT TargetID: TargetID<'a>,
             IGNORE DirectForwardingPathAvailability: DirectForwardingPathAvailability,
-            REJECT PDUSessionResourceListHORqd: PDUSessionResourceListHORqd,
-            REJECT SourceToTarget_TransparentContainer: SourceToTargetTransparentContainer,
+            REJECT PDUSessionResourceListHORqd: PDUSessionResourceListHORqd<'a>,
+            REJECT SourceToTarget_TransparentContainer: SourceToTargetTransparentContainer<'a>,
         }),
     }
 }
@@ -309,9 +325,9 @@ fn paging() -> Written {
         path: "/ngap/TAIListForPaging/15/tAI/tAC",
         edit: ("/ngap/TAIListForPaging/15/tAI/tAC", json!(17)),
         typed: typed!(InitiatingMessage Paging IGNORE Paging {
-            IGNORE UEPagingIdentity: UEPagingIdentity,
+            IGNORE UEPagingIdentity: UEPagingIdentity<'a>,
             IGNORE PagingDRX: PagingDRX,
-            IGNORE TAIListForPaging: TAIListForPaging,
+            IGNORE TAIListForPaging: TAIListForPaging<'a>,
             IGNORE PagingPriority: PagingPriority,
         }),
     }

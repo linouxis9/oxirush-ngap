@@ -323,7 +323,7 @@ fn resolve(path: &str) -> Result<(Vec<String>, bool), Error> {
 
 /// The last segment of the path of a type in the bindings: its name.
 fn type_name(path: &'static str) -> &'static str {
-    path.rsplit(':').next().unwrap_or(path).trim()
+    crate::macros::type_name(path)
 }
 
 /// The message of a direction and a procedure code, or of a name.
@@ -353,17 +353,6 @@ fn kind_of(name: &str) -> Option<&'static Kind> {
     static KINDS: LazyLock<HashMap<&'static str, &'static Kind>> =
         LazyLock::new(|| TYPES.iter().map(|(name, kind)| (*name, kind)).collect());
     KINDS.get(name).copied()
-}
-
-/// The name that ASN.1 gives a member which the bindings name `field`, as `gNB-ID` for
-/// `g_nb_id`, where a type of the list has such a member.
-pub(crate) fn member_spelling(field: &str) -> Option<&'static str> {
-    let members = TYPES.iter().flat_map(|(_, kind)| match kind {
-        Kind::Sequence(members) | Kind::Choice(members) => *members,
-        Kind::Is(_) => &[],
-    });
-    let mut names = members.map(|(name, ..)| *name);
-    names.find(|name| same_name(name, field))
 }
 
 /// The names of the values of the ENUMERATED that the bindings name `name`.

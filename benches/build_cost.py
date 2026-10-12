@@ -10,7 +10,11 @@ The arguments are those of `cargo build`, after the toolchain when one is
 named. The files that Git tracks are copied to a temporary directory, under
 `TMPDIR`, and built there with a target directory of its own: no workspace
 that the crate is in takes part, and nothing is compiled already. The
-dependencies are fetched before the build is timed.
+dependencies are fetched before the build is timed, with the `--config KEY=VALUE`
+of the arguments: until oxirush-aper is on crates.io, one says where it is.
+
+    APER='patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"'
+    python3 benches/build_cost.py --config "$APER" --features inspect
 
 The peak is the summed resident memory of cargo and of the compilers that it
 runs, sampled four times a second from `/proc`, so it needs Linux. On a
@@ -71,7 +75,11 @@ def main():
             os.makedirs(os.path.dirname(target), exist_ok=True)
             shutil.copy2(os.path.join(CRATE, path), target)
         environment = dict(os.environ, CARGO_TARGET_DIR=os.path.join(directory, "target"))
-        subprocess.run([*cargo, "fetch", "--quiet"], cwd=copy, env=environment, check=True)
+        # A configuration of cargo holds for the fetch as for the build.
+        pairs = zip(arguments, arguments[1:])
+        config = [word for pair in pairs if pair[0] == "--config" for word in pair]
+        fetch = [*cargo, "fetch", "--quiet", *config]
+        subprocess.run(fetch, cwd=copy, env=environment, check=True)
 
         started = time.monotonic()
         build = subprocess.Popen([*cargo, "build", "--quiet", *arguments], cwd=copy, env=environment)

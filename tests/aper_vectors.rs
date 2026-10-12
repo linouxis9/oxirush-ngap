@@ -1,9 +1,9 @@
 //! Independent APER vectors for every procedure outcome in 3GPP TS 38.413 v19.4.0.
+use oxirush_ngap::Octets;
 use oxirush_ngap::ngap::*;
-use rasn::types::Any;
 use std::collections::BTreeSet;
 
-fn value(pdu: &NGAP_PDU) -> &Any {
+fn value(pdu: &NGAP_PDU) -> &Octets<'static> {
     match pdu {
         NGAP_PDU::initiatingMessage(message) => &message.value,
         NGAP_PDU::successfulOutcome(message) => &message.value,
@@ -28,45 +28,50 @@ fn cuts(length: usize) -> Vec<usize> {
     cuts
 }
 
-fn check_typed<T: oxirush_ngap::Message>(pdu: &NGAP_PDU, name: &str) {
-    let raw = value(pdu);
-    let decoded: T = pdu
-        .decode_value()
-        .unwrap_or_else(|error| panic!("{name}: {error}"));
-    assert_eq!(encode_open_type(&decoded).unwrap(), *raw, "{name}");
-    for cut in cuts(raw.as_bytes().len()) {
-        let partial = Any::new(raw.as_bytes()[..cut].to_vec());
-        assert!(
-            decode_open_type::<T>(&partial).is_err(),
-            "{name}: prefix {cut}"
-        );
-    }
-    for octet in [0, 0xff] {
-        let mut bytes = raw.as_bytes().to_vec();
-        bytes.push(octet);
-        assert!(
-            decode_open_type::<T>(&Any::new(bytes.clone())).is_err(),
-            "{name}: trailing octet"
-        );
-        let mut extra = pdu.clone();
-        match &mut extra {
-            NGAP_PDU::initiatingMessage(message) => message.value = Any::new(bytes),
-            NGAP_PDU::successfulOutcome(message) => message.value = Any::new(bytes),
-            NGAP_PDU::unsuccessfulOutcome(message) => message.value = Any::new(bytes),
-            _ => panic!("unexpected NGAP_PDU alternative"),
+/// The message of a PDU as its type `$message`: it is written back as the octets that
+/// it was read from, and these octets cut short or with one more are refused. A type
+/// that borrows is named without its lifetime, which each use gives it.
+macro_rules! check_typed {
+    ($message:ident, $pdu:expr, $name:expr) => {{
+        let (pdu, name): (&NGAP_PDU, &str) = ($pdu, $name);
+        let raw = value(pdu);
+        let decoded: $message = pdu
+            .decode_value()
+            .unwrap_or_else(|error| panic!("{name}: {error}"));
+        assert_eq!(encode_open_type(&decoded).unwrap(), *raw, "{name}");
+        for cut in cuts(raw.len()) {
+            assert!(
+                decode_open_type::<$message>(&raw[..cut]).is_err(),
+                "{name}: prefix {cut}"
+            );
         }
-        assert!(
-            extra.decode_value::<T>().is_err(),
-            "{name}: convenience API trailing octet"
-        );
-    }
+        for octet in [0, 0xff] {
+            let mut bytes = raw.to_vec();
+            bytes.push(octet);
+            assert!(
+                decode_open_type::<$message>(&bytes).is_err(),
+                "{name}: trailing octet"
+            );
+            let mut extra = pdu.clone();
+            match &mut extra {
+                NGAP_PDU::initiatingMessage(message) => message.value = bytes.into(),
+                NGAP_PDU::successfulOutcome(message) => message.value = bytes.into(),
+                NGAP_PDU::unsuccessfulOutcome(message) => message.value = bytes.into(),
+                _ => panic!("unexpected NGAP_PDU alternative"),
+            }
+            assert!(
+                extra.decode_value::<$message>().is_err(),
+                "{name}: convenience API trailing octet"
+            );
+        }
+    }};
 }
 
 macro_rules! message_types {
     ($($message:ident),+ $(,)?) => {
         fn check_message(name: &str, pdu: &NGAP_PDU) {
             match name.replace('-', "_").as_str() {
-                $(stringify!($message) => check_typed::<$message>(pdu, name),)+
+                $(stringify!($message) => check_typed!($message, pdu, name),)+
                 _ => panic!("missing message type: {name}"),
             }
         }
@@ -298,10 +303,10 @@ fn the_vectors_with_content_round_trip_and_reject_incomplete_encodings() {
 #[test]
 fn complete_open_types_require_a_zero_octet_even_for_null() {
     for bytes in [vec![], vec![0xff], vec![0, 0], vec![0, 0xff]] {
-        assert!(decode_open_type::<()>(&Any::new(bytes)).is_err());
+        assert!(decode_open_type::<()>(&bytes).is_err());
     }
-    decode_open_type::<()>(&Any::new(vec![0])).unwrap();
-    assert_eq!(encode_open_type(&()).unwrap().as_bytes(), [0]);
+    decode_open_type::<()>(&[0]).unwrap();
+    assert_eq!(encode_open_type(&()).unwrap(), [0]);
     // Fewer than eight unused bits retain the decoder's receive policy.
-    assert!(decode_open_type::<bool>(&Any::new(vec![0xff])).unwrap());
+    assert!(decode_open_type::<bool>(&[0xff]).unwrap());
 }

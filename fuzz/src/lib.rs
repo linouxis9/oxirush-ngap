@@ -18,25 +18,34 @@
 //! What the fuzz targets do with the octets that they are given: the three programs
 //! of `fuzz_targets/` call these functions.
 //!
-//! A target does not only look for a panic. Where the crate has a path of its own
-//! beside the codec of rasn, the target takes both and compares them: the layout of a
-//! PDU and of a message of protocol IEs, which the crate reads and writes octet by
-//! octet, the message that `decode_value` reads, and the JSON form of each value, which
-//! the crate writes without the JSON Encoding Rules of rasn. And what was read is
-//! written and read again as the same.
+//! A target does not only look for a panic. It gives the same octets to the crate and
+//! to the oracle of its tests, which has the same types with the codec of rasn, another
+//! implementation of aligned PER, and compares what the two make of them: the PDU, the
+//! protocol IEs of its message, the message that `decode_value` reads, and the JSON
+//! form of each value that a view decodes. What one reads the other reads, as a value
+//! that both write as the same octets, and what one refuses the other refuses. And
+//! what was read is written and read again as the same.
+//!
+//! The crate differs from the oracle in one thing, which the comparison of the oracle
+//! names where it meets it: its bindings hold an INTEGER in 64 bits.
 //!
 //! This file is the same in oxirush-ngap and oxirush-s1ap. What depends on the protocol
 //! is in `protocol.rs`.
 
 mod protocol;
 
-use protocol::rasn::types::Any;
-use protocol::{AnyMessage, ErrorKind, Pdu, ROOT, decode_open_type, encode_open_type};
-use protocol::{fuzzing, inspect, rasn};
+use protocol::{ANY_MESSAGE, Borrowed, Error, ErrorKind, PDU_TYPE, Pdu, ROOT};
+use protocol::{fuzzing, inspect};
 use serde_json::Value;
 
-/// The open type that holds the message of a PDU.
-fn message(pdu: &Pdu) -> &Any {
+/// What the crate wrote of a value that it read, or why it read none, for the oracle.
+fn ours(written: &Result<Vec<u8>, Error>) -> Result<&[u8], String> {
+    let written = written.as_ref().map(Vec::as_slice);
+    written.map_err(ToString::to_string)
+}
+
+/// The octets of the open type that holds the message of a PDU.
+fn message(pdu: &Pdu) -> &[u8] {
     match pdu {
         Pdu::initiatingMessage(message) => &message.value,
         Pdu::successfulOutcome(message) => &message.value,
@@ -46,38 +55,42 @@ fn message(pdu: &Pdu) -> &Any {
 }
 
 /// A PDU, the protocol IEs of its message and the message as its type: each as the
-/// crate reads and writes it, and as the codec of rasn alone does.
+/// crate reads and writes it, and as the codec of rasn does.
 pub fn decode(octets: &[u8]) {
-    // The PDU, whose layout the crate reads itself.
-    let ours = Pdu::decode(octets);
-    let theirs = decode_open_type::<Pdu>(&Any::new(octets.to_vec()));
-    assert_eq!(ours.as_ref().ok(), theirs.as_ref().ok(), "{octets:02x?}");
-    let Ok(pdu) = ours else {
+    // The PDU, which both read or both refuse, and write back as the same octets.
+    let read = Pdu::decode(octets);
+    let written = read.as_ref().map_err(Clone::clone).and_then(Pdu::encode);
+    oracle::same_octets(PDU_TYPE, octets, ours(&written));
+    let Ok(pdu) = read else {
         return;
     };
-
-    // Its octets, which both write, are read as the same PDU.
-    let written = match pdu.encode() {
+    let written = match written {
         Ok(written) => written,
         Err(error) => panic!("a PDU that was decoded does not encode: {error}: {pdu:?}"),
     };
-    assert_eq!(rasn::aper::encode(&pdu).ok().as_ref(), Some(&written));
     assert_eq!(Pdu::decode(&written).as_ref(), Ok(&pdu), "{written:02x?}");
+
+    // A PDU that borrows its message from the octets is the same PDU.
+    let borrowed = Borrowed::decode_borrowed(octets);
+    assert_eq!(borrowed.as_ref(), Ok(&pdu), "{octets:02x?}");
+    assert_eq!(borrowed.unwrap().into_owned(), pdu);
 
     // What the octets of the message have no part in.
     let _ = (pdu.to_string(), pdu.procedure_name(), pdu.kind());
 
-    // The protocol IEs of the message, whatever the message is.
-    let theirs = decode_open_type::<AnyMessage>(message(&pdu));
-    let theirs = theirs.map(|message| message.protocol_ies);
+    // The protocol IEs of the message, whatever the message is: rasn reads them as
+    // those of a message that is a container of protocol IEs and nothing else.
+    let theirs = oracle::read(ANY_MESSAGE, message(&pdu)).unwrap();
     match pdu.protocol_ies() {
         Ok(ies) => {
-            assert_eq!(Ok(&ies), theirs.as_ref(), "{pdu:?}");
             // Put back, they are the message that rasn writes of them.
+            let ies = ies.into_owned();
             let mut again = pdu.clone();
             again.set_protocol_ies(ies.clone()).unwrap();
-            let theirs = encode_open_type(&AnyMessage::new(ies.clone())).unwrap();
-            assert_eq!(message(&again), &theirs, "{pdu:?}");
+            match &theirs {
+                Ok(theirs) => assert_eq!(message(&again), &theirs.octets[..], "{pdu:?}"),
+                Err(error) => panic!("{pdu:?} has protocol IEs here, and by rasn: {error}"),
+            }
             assert_eq!(again.protocol_ies(), Ok(ies));
             let _ = pdu.check();
         }
@@ -87,7 +100,9 @@ pub fn decode(octets: &[u8]) {
     }
 
     // The message as its type.
-    fuzzing::message_as_rasn_reads_it(&pdu);
+    if let Some((name, written)) = fuzzing::message_read_and_written(&pdu) {
+        oracle::same_octets(name, message(&pdu), ours(&written));
+    }
 }
 
 /// `value` without what a view keeps of what was received: the members whose name
@@ -116,14 +131,20 @@ fn undecoded(value: &Value) -> bool {
     }
 }
 
+/// What a view decoded as the type that the bindings name `name` is what the oracle
+/// reads in the same octets: the same JSON form, or no value for both.
+fn observed(name: &'static str, octets: &[u8], ours: &Result<Value, Error>) {
+    oracle::same_json(name, octets, ours.as_ref().map_err(ToString::to_string));
+}
+
 /// The JSON forms of a PDU: its view, which gives the PDU back and is written from its
 /// values, its tree, and the paths of its view. Each value that a view shows is
-/// compared with what the JSON Encoding Rules of rasn write of it.
+/// compared with what the JSON Encoding Rules of rasn write of the same octets.
 pub fn view(octets: &[u8]) {
     let Ok(pdu) = Pdu::decode(octets) else {
         return;
     };
-    fuzzing::compare_json_with_rasn();
+    fuzzing::observe(observed);
     let Ok(view) = pdu.to_view() else {
         // A message that does not decode has no view, and no tree.
         assert!(pdu.to_tree().is_err(), "{pdu:?}");

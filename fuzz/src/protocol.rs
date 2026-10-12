@@ -18,12 +18,15 @@
 //! The names of the protocol, for the targets that oxirush-ngap and oxirush-s1ap share.
 
 pub use oxirush_ngap::ngap::NGAP_PDU as Pdu;
-pub use oxirush_ngap::ngap::{decode_open_type, encode_open_type};
-pub use oxirush_ngap::{ErrorKind, fuzzing, inspect, rasn};
+pub use oxirush_ngap::ngap::NGAPPDU as Borrowed;
+pub use oxirush_ngap::{Error, ErrorKind, fuzzing, inspect};
+
+/// The name that the bindings give the type of a PDU.
+pub const PDU_TYPE: &str = "NGAPPDU";
 
 /// A message that is a container of protocol IEs, as every message but the private one
 /// is: the codec of rasn reads the protocol IEs of any of them as this one.
-pub use oxirush_ngap::ngap::ErrorIndication as AnyMessage;
+pub const ANY_MESSAGE: &str = "ErrorIndication";
 
 /// The root of the paths of a view.
 pub const ROOT: &str = "/ngap";

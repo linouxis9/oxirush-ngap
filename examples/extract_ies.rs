@@ -6,7 +6,6 @@
 
 use oxirush_ngap::helpers::*;
 use oxirush_ngap::ngap::*;
-use oxirush_ngap::rasn::types::FixedBitString;
 use oxirush_ngap::{Error, build_ngap, extract_ngap_ies};
 
 // ── 1. Simple extraction: required IDs + optional cause ────────────────────
@@ -133,11 +132,8 @@ fn main() -> Result<(), Error> {
     // 3. InitialContextSetupRequest. The NAS PDU is nested in a PDU-session
     // item, as specified by TS 38.413.
     let network = plmn("208", "93")?;
-    let bit_rate = UEAggregateMaximumBitRate::new(
-        BitRate(1_000_000_000u64.into()),
-        BitRate(500_000_000u64.into()),
-        None,
-    );
+    let bit_rate =
+        UEAggregateMaximumBitRate::new(BitRate(1_000_000_000), BitRate(500_000_000), None);
     let sessions = session_setup_request_list(vec![0x7e, 0x00, 0x42, 0x01]);
     let allowed_slice = AllowedNSSAIItem::new(s_nssai(1, Some([0x00, 0x00, 0x01])), None);
     let ics_pdu = build_ngap!(InitiatingMessage, InitialContextSetup,
@@ -152,7 +148,7 @@ fn main() -> Result<(), Error> {
         REJECT AllowedNSSAI(AllowedNSSAI(vec![allowed_slice])),
 
         REJECT UESecurityCapabilities(ue_security_capabilities(0xe0, 0xe0)),
-        REJECT SecurityKey(SecurityKey(FixedBitString::<256>::ZERO)),
+        REJECT SecurityKey([0; 32]),
     )?;
 
     // Encode → decode round-trip, then extract.
@@ -192,9 +188,9 @@ fn main() -> Result<(), Error> {
     Ok(())
 }
 
-fn target_gnb() -> Result<TargetID, Error> {
+fn target_gnb() -> Result<TargetID<'static>, Error> {
     let network = plmn("208", "93")?;
-    let gnb = GlobalRANNodeID::globalGNB_ID(global_gnb_id(network.clone(), 0x123456)?);
+    let gnb = GlobalRANNodeID::globalGNB_ID(global_gnb_id(network, 0x123456)?);
     let area = tai(network, [0x00, 0x00, 0x01]);
 
     Ok(TargetID::targetRANNodeID(TargetRANNodeID::new(
@@ -202,7 +198,7 @@ fn target_gnb() -> Result<TargetID, Error> {
     )))
 }
 
-fn session_setup_request_list(nas: Vec<u8>) -> PDUSessionResourceSetupListCxtReq {
+fn session_setup_request_list(nas: Vec<u8>) -> PDUSessionResourceSetupListCxtReq<'static> {
     PDUSessionResourceSetupListCxtReq(vec![PDUSessionResourceSetupItemCxtReq::new(
         PDUSessionID(1),
         Some(NASPDU::from(nas)),
@@ -212,7 +208,7 @@ fn session_setup_request_list(nas: Vec<u8>) -> PDUSessionResourceSetupListCxtReq
     )])
 }
 
-fn handover_required_sessions() -> PDUSessionResourceListHORqd {
+fn handover_required_sessions() -> PDUSessionResourceListHORqd<'static> {
     PDUSessionResourceListHORqd(vec![PDUSessionResourceItemHORqd::new(
         PDUSessionID(1),
         vec![0x01].into(),

@@ -1,4 +1,4 @@
-//! APER codecs that the generated bindings use in place of rasn 0.29's.
+//! APER codecs that the bindings of the oracle use in place of rasn 0.29's.
 
 use rasn::prelude::*;
 
@@ -6,7 +6,7 @@ use rasn::prelude::*;
 /// by one open type for each present addition. Small bitmaps are unaligned;
 /// larger ones use an unconstrained length, including fragmentation
 /// (§11.9.3.4). The additions are unknown to these generated SEQUENCE types.
-pub(crate) fn skip_unknown_extensions<D: Decoder>(decoder: &mut D) -> Result<(), D::Error> {
+pub fn skip_unknown_extensions<D: Decoder>(decoder: &mut D) -> Result<(), D::Error> {
     let present = if decoder.decode_bool(Tag::BOOL)? {
         decoder
             .decode_bit_string(Tag::BIT_STRING, &Constraints::default())?
@@ -26,47 +26,6 @@ pub(crate) fn skip_unknown_extensions<D: Decoder>(decoder: &mut D) -> Result<(),
     Ok(())
 }
 
-/// The open type of `value`: its complete encoding in aligned PER, in which an empty
-/// encoding becomes one zero octet (X.691 (02/2021) §11.1.4, §11.2.1).
-pub(crate) fn encode_open_type<T: Encode>(value: &T) -> Result<Any, crate::Error> {
-    let mut bytes = rasn::aper::encode(value).map_err(crate::Error::encoding::<T>)?;
-    if bytes.is_empty() {
-        bytes.push(0);
-    }
-    Ok(Any::new(bytes))
-}
-
-/// The value of the type `T` that `bytes` are the complete encoding of, in aligned PER:
-/// one value, whole, and no octet after it.
-pub(crate) fn decode_complete<T: Decode>(bytes: &[u8]) -> Result<T, crate::Error> {
-    if bytes.is_empty() {
-        return Err(crate::Error::not_a::<T>("there are no octets"));
-    }
-    match rasn::aper::decode_with_remainder(bytes) {
-        Ok((decoded, remainder)) => match followed(bytes, remainder) {
-            None => Ok(decoded),
-            Some(after) => Err(crate::Error::not_a::<T>(after)),
-        },
-        Err(error) => Err(crate::Error::decoding::<T>(error)),
-    }
-}
-
-/// What follows a value in `bytes`, which were decoded up to `remainder`, when octets
-/// do: `None` for a complete encoding. It is compiled once, and `decode_complete` for
-/// each type.
-fn followed(bytes: &[u8], remainder: &[u8]) -> Option<String> {
-    // A zero-bit field-list has exactly one zero octet as its complete encoding.
-    let zero_bit_encoding = bytes == [0] && remainder == bytes;
-    if remainder.is_empty() || zero_bit_encoding {
-        return None;
-    }
-    let after = match remainder.len() {
-        1 => "1 octet".to_string(),
-        length => format!("{length} octets"),
-    };
-    Some(format!("the value is followed by {after}"))
-}
-
 /// Whether `E` is the encoder of the Packed Encoding Rules of rasn, which is one type
 /// for the aligned and the unaligned variant. It is known where the code is compiled
 /// for `E`, so that a branch on it is compiled for the encoders that take it and for no
@@ -81,7 +40,7 @@ fn followed(bytes: &[u8], remainder: &[u8]) -> Option<String> {
 /// version of rasn that the crate is built with, or the crate does not compile: the
 /// size of the PER encoder changes with both numbers, and no other codec of rasn is
 /// taken for it.
-pub(crate) const fn is_per_encoder<'a, E: rasn::Encoder<'a>>() -> bool {
+pub const fn is_per_encoder<'a, E: rasn::Encoder<'a>>() -> bool {
     use core::mem::size_of;
     use rasn::aper::Encoder as Per;
     size_of::<E::AnyEncoder<'static, 0, 0>>() == size_of::<Per<0, 0>>()
@@ -92,7 +51,7 @@ pub(crate) const fn is_per_encoder<'a, E: rasn::Encoder<'a>>() -> bool {
 
 /// Whether `D` is the decoder of the Packed Encoding Rules of rasn: see
 /// [`is_per_encoder`].
-pub(crate) const fn is_per_decoder<D: rasn::Decoder>() -> bool {
+pub const fn is_per_decoder<D: rasn::Decoder>() -> bool {
     use core::mem::size_of;
     use rasn::aper::Decoder as Per;
     size_of::<D::AnyDecoder<0, 0>>() == size_of::<Per<'static, 0, 0>>()
@@ -119,13 +78,6 @@ const _: () = {
         !is_per_decoder::<ber::de::Decoder<'static>>() && !is_per_decoder::<jer::de::Decoder>()
     );
     assert!(!is_per_decoder::<xer::de::Decoder>() && !is_per_decoder::<avn::de::Decoder>());
-};
-
-// Nor is the JSON codec of the crate.
-#[cfg(feature = "inspect")]
-const _: () = {
-    assert!(!is_per_encoder::<crate::json::Encoder>());
-    assert!(!is_per_decoder::<crate::json::Decoder<'static>>());
 };
 
 /// The codec of a SEQUENCE that has no extension addition and no default value.

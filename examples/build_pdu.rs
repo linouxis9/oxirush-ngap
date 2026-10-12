@@ -2,12 +2,11 @@
 //!
 //! The examples cover simple and complex context setup, UE release, handover
 //! outcomes, failure handling, and standalone IE construction. The macro
-//! invocations hide numeric IDs and rasn open-type encoding; the commented
+//! invocations hide numeric IDs and open-type encoding; the commented
 //! construction at the end shows the equivalent generated types.
 
 use oxirush_ngap::helpers::*;
 use oxirush_ngap::ngap::*;
-use oxirush_ngap::rasn::types::FixedBitString;
 use oxirush_ngap::{Error, build_ngap, build_ngap_ie};
 
 fn main() -> Result<(), Error> {
@@ -50,11 +49,8 @@ fn main() -> Result<(), Error> {
 
     let network = plmn("208", "93")?;
     let sessions = session_setup_request_list(vec![0x7e, 0x00, 0x42]);
-    let bit_rate = UEAggregateMaximumBitRate::new(
-        BitRate(1_000_000_000u64.into()),
-        BitRate(500_000_000u64.into()),
-        None,
-    );
+    let bit_rate =
+        UEAggregateMaximumBitRate::new(BitRate(1_000_000_000), BitRate(500_000_000), None);
     let allowed_slice = AllowedNSSAIItem::new(s_nssai(1, Some([0x00, 0x00, 0x01])), None);
 
     let pdu = build_ngap!(InitiatingMessage, InitialContextSetup,
@@ -66,13 +62,13 @@ fn main() -> Result<(), Error> {
 
         // Its bit rate, its AMF, its sessions and its slices
         REJECT UEAggregateMaximumBitRate(bit_rate),
-        REJECT GUAMI(guami(network.clone(), 1, 1, 0)?),
+        REJECT GUAMI(guami(network, 1, 1, 0)?),
         REJECT PDUSessionResourceSetupListCxtReq(sessions),
         REJECT AllowedNSSAI(AllowedNSSAI(vec![allowed_slice])),
 
         // Its security capabilities and its key
         REJECT UESecurityCapabilities(ue_security_capabilities(0xe0, 0xe0)),
-        REJECT SecurityKey(SecurityKey(FixedBitString::<256>::ZERO)),
+        REJECT SecurityKey([0; 32]),
     )?;
 
     println!("\n=== 3. InitialContextSetupRequest (complex) ===");
@@ -83,7 +79,7 @@ fn main() -> Result<(), Error> {
     // HandoverPreparation procedure → HandoverRequired message. The target gNB
     // and PDU-session resource list are mandatory NGAP IEs.
 
-    let target_gnb = GlobalRANNodeID::globalGNB_ID(global_gnb_id(network.clone(), 0x123456)?);
+    let target_gnb = GlobalRANNodeID::globalGNB_ID(global_gnb_id(network, 0x123456)?);
     let target_area = tai(network, [0x00, 0x00, 0x01]);
     let target = TargetID::targetRANNodeID(TargetRANNodeID::new(target_gnb, target_area, None));
     let cause = Cause::radioNetwork(CauseRadioNetwork::handover_desirable_for_radio_reason);
@@ -173,7 +169,7 @@ fn main() -> Result<(), Error> {
     Ok(())
 }
 
-fn session_setup_response_list() -> PDUSessionResourceSetupListCxtRes {
+fn session_setup_response_list() -> PDUSessionResourceSetupListCxtRes<'static> {
     PDUSessionResourceSetupListCxtRes(vec![PDUSessionResourceSetupItemCxtRes::new(
         PDUSessionID(1),
         vec![0x01].into(),
@@ -181,7 +177,7 @@ fn session_setup_response_list() -> PDUSessionResourceSetupListCxtRes {
     )])
 }
 
-fn session_setup_request_list(nas: Vec<u8>) -> PDUSessionResourceSetupListCxtReq {
+fn session_setup_request_list(nas: Vec<u8>) -> PDUSessionResourceSetupListCxtReq<'static> {
     PDUSessionResourceSetupListCxtReq(vec![PDUSessionResourceSetupItemCxtReq::new(
         PDUSessionID(1),
         Some(NASPDU::from(nas)),
@@ -191,7 +187,7 @@ fn session_setup_request_list(nas: Vec<u8>) -> PDUSessionResourceSetupListCxtReq
     )])
 }
 
-fn handover_required_sessions() -> PDUSessionResourceListHORqd {
+fn handover_required_sessions() -> PDUSessionResourceListHORqd<'static> {
     PDUSessionResourceListHORqd(vec![PDUSessionResourceItemHORqd::new(
         PDUSessionID(1),
         vec![0x01].into(),
@@ -199,7 +195,7 @@ fn handover_required_sessions() -> PDUSessionResourceListHORqd {
     )])
 }
 
-fn admitted_sessions() -> PDUSessionResourceAdmittedList {
+fn admitted_sessions() -> PDUSessionResourceAdmittedList<'static> {
     PDUSessionResourceAdmittedList(vec![PDUSessionResourceAdmittedItem::new(
         PDUSessionID(1),
         vec![0x01].into(),

@@ -13,6 +13,8 @@ env:
   # The tests need no debug information, and with it the compiler needs more
   # memory for this crate than a hosted runner gives a job.
   CARGO_PROFILE_DEV_DEBUG: 0
+  # oxirush-aper 0.1.0 is not on crates.io yet: take it from its repository.
+  APER: --config patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"
 
 jobs:
   test:
@@ -22,8 +24,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo test --all-features
-      - run: cargo test
+      # With the oracle of the tests: the same types with the codec of rasn, which
+      # each vector, and what a peer may send in its place, is compared with.
+      - run: cargo test $APER --all-features
+      - run: cargo test $APER
 
   msrv:
     name: MSRV (1.88)
@@ -32,7 +36,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@1.88.0
       - uses: Swatinem/rust-cache@v2
-      - run: cargo test --all-features
+      - run: cargo test $APER --all-features
 
   clippy:
     name: Clippy
@@ -43,8 +47,8 @@ jobs:
         with:
           components: clippy
       - uses: Swatinem/rust-cache@v2
-      - run: cargo clippy --all-targets --all-features -- -D warnings
-      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo clippy $APER --all-targets --all-features -- -D warnings
+      - run: cargo clippy $APER --all-targets -- -D warnings
 
   doc:
     name: Doc
@@ -53,12 +57,32 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo doc --no-deps --all-features
+      - run: cargo doc $APER --no-deps --all-features
         env:
           RUSTDOCFLAGS: -D warnings
 
+  benches:
+    name: Benchmarks build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: benches
+      # The package takes oxirush-aper from its repository by a patch of its own
+      # manifest, so its commands need no `--config`.
+      # The inputs of the benchmarks are messages that the codec gives back.
+      - run: cargo test --manifest-path benches/Cargo.toml
+      - run: cargo clippy --manifest-path benches/Cargo.toml --all-targets -- -D warnings
+      - run: cargo bench --manifest-path benches/Cargo.toml --no-run
+
+  # Each target gives its octets to the crate and to the oracle of the tests, the
+  # codec of rasn, and compares what the two read and write.
   fuzz:
-    name: Fuzz the codec and the JSON forms (3 minutes)
+    name: Fuzz the codec and the JSON forms against the oracle (3 minutes)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -82,4 +106,5 @@ jobs:
         with:
           components: rustfmt
       - run: cargo fmt --check
+      - run: cargo fmt --check --manifest-path benches/Cargo.toml
       - run: cargo fmt --check --manifest-path fuzz/Cargo.toml

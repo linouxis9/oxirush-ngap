@@ -33,8 +33,8 @@
 
 mod protocol;
 
-use protocol::Pdu;
 use protocol::codec::inspect;
+use protocol::{Borrowed, Pdu};
 use serde_json::{Value, json};
 use std::hint::black_box;
 
@@ -60,9 +60,9 @@ struct Written {
 struct Typed {
     /// `decode_value` of the PDU, as the type of its message.
     decode_value: fn(&Pdu),
-    /// The message of the PDU is decoded first: the call reads each of its
-    /// IEs with the macro that extracts.
-    extract: fn(&Pdu) -> Call<'static>,
+    /// The message of the PDU is decoded first, and borrows from it: the call
+    /// reads each of its IEs with the macro that extracts.
+    extract: for<'a> fn(&'a Pdu) -> Call<'a>,
     /// The values of the IEs of the PDU are read first: the call builds the
     /// PDU of these values with the macro that builds.
     build: fn(&Pdu) -> Call<'static>,
@@ -284,13 +284,16 @@ impl Input {
             operation("decode", count, move |at| {
                 done(Pdu::decode(&message(at).octets))
             }),
+            operation("decode-borrowed", count, move |at| {
+                done(Borrowed::decode_borrowed(&message(at).octets))
+            }),
             operation("encode", count, move |at| done(message(at).pdu.encode())),
             operation("protocol-ies", count, move |at| {
                 done(message(at).pdu.protocol_ies())
             }),
             prepared("set-protocol-ies", count, move |at| {
                 let mut pdu = message(at).pdu.clone();
-                let mut ies = Some(pdu.protocol_ies().unwrap());
+                let mut ies = Some(pdu.protocol_ies().unwrap().into_owned());
                 move || done(pdu.set_protocol_ies(ies.take().unwrap()))
             }),
             operation("check", count, move |at| done(message(at).pdu.check())),
@@ -398,7 +401,7 @@ mod tests {
         for input in inputs() {
             let operations = input.operations();
             let typed = input.messages[0].typed.is_some();
-            assert_eq!(operations.len(), if typed { 17 } else { 14 });
+            assert_eq!(operations.len(), if typed { 18 } else { 15 });
             for operation in operations {
                 assert_eq!(operation.messages, input.messages.len());
                 for mut call in operation.calls() {

@@ -163,7 +163,7 @@ fn block_5() {
     use oxirush_ngap::{extract_ngap_ies, ngap::*};
 
     // The cause of a request, when it has one that is read
-    fn cause(request: &UEContextReleaseRequest) -> Option<Cause> {
+    fn cause<'a>(request: &'a UEContextReleaseRequest<'a>) -> Option<Cause<'a>> {
         extract_ngap_ies!(request, UEContextReleaseRequest,
             lax cause: Cause = Cause(value) => value,
         );
@@ -205,10 +205,11 @@ fn block_7() {
         let bytes = hex::decode("40150008000001000f400188").unwrap();
         let mut pdu = NGAP_PDU::decode(&bytes)?;
 
-        // Its IEs as they were received: identifier, criticality and octets
-        let mut ies = pdu.protocol_ies()?;
+        // Its IEs as they were received: identifier, criticality and octets. They
+        // borrow from the PDU, and are owned here, as the PDU is changed below
+        let mut ies = pdu.protocol_ies()?.into_owned();
         for ie in &ies.0 {
-            let octets = hex::encode(ie.value.as_bytes());
+            let octets = hex::encode(&ie.value);
             println!("{} {:?} {octets}", ie.id.0, ie.criticality);
         }
 
@@ -259,14 +260,14 @@ fn block_9() {
 
     // A PLMN from its MCC and its MNC, and what is identified within it
     let network = plmn("208", "93").unwrap();
-    let amf = guami(network.clone(), 1, 1, 0).unwrap(); // region, set, pointer
-    let tracking_area = tai(network.clone(), [0x00, 0x00, 0x01]); // TAC
-    let cell = nr_cgi(network.clone(), 0x123456, 1).unwrap(); // gNB, cell
-    let gnb = global_gnb_id(network.clone(), 0x123456).unwrap();
+    let amf = guami(network, 1, 1, 0).unwrap(); // region, set, pointer
+    let tracking_area = tai(network, [0x00, 0x00, 0x01]); // TAC
+    let cell = nr_cgi(network, 0x123456, 1).unwrap(); // gNB, cell
+    let gnb = global_gnb_id(network, 0x123456).unwrap();
 
     // A bit string from octets, and the NR algorithms of a UE: the first
     // octet of its encryption bitmap, then of its integrity bitmap
-    let algorithm_mask = bytes_to_bitvec(&[0xe0]);
+    let algorithm_mask = oxirush_ngap::BitString::from([0xe0]);
     let capabilities = ue_security_capabilities(0xe0, 0xe0);
 
     // What is no MCC, and an AMF Set ID that does not fit in its 10 bits
@@ -285,11 +286,10 @@ fn block_10() {
     assert_eq!(wrong.kind(), ErrorKind::WrongMessage);
     println!("{wrong}");
 
-    // Octets that end early: the message, and what rasn said
+    // Octets that end early
     let short = NGAP_PDU::decode(&bytes[..10]).unwrap_err();
     assert_eq!(short.kind(), ErrorKind::Decode);
     println!("{short}");
-    println!("{}", std::error::Error::source(&short).unwrap());
 }
 
 /// The Rust block 11 of README.md.

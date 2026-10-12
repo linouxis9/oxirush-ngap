@@ -96,7 +96,7 @@ fn contained_transfer_edits_are_typed_and_do_not_reorder_outer_ies() {
         None,
         None,
     );
-    let raw = encode_open_type(&transfer).unwrap().as_bytes().to_vec();
+    let raw = encode_open_type(&transfer).unwrap().to_vec();
     let pdu = build_ngap!(SuccessfulOutcome, PDUSessionResourceSetup,
         IGNORE, PDUSessionResourceSetupResponse,
         IGNORE AMF_UE_NGAP_ID(1u64),
@@ -133,7 +133,7 @@ fn editing_a_known_ie_cannot_drop_unknown_sequence_additions() {
     // The first SliceSupportItem has a future SEQUENCE addition. Its bytes
     // come from the independent unknown_extensions fixture, inside PLMNSupportList.
     let raw = hex::decode("0002f839000180080801000010").unwrap();
-    let list: PLMNSupportList = decode_open_type(&raw.clone().into()).unwrap();
+    let list: PLMNSupportList = decode_open_type(&raw).unwrap();
     assert_eq!(list.0[0].slice_support_list.0[1].s_nssai.s_st.0[0], 2);
     let response = NGSetupResponse::new(ProtocolIEContainer(vec![ProtocolIEField::new(
         ProtocolIEID(80),
@@ -821,13 +821,12 @@ fn the_container_of_a_handover_is_written_and_selected_by_the_type_that_it_carri
     let pdu = NGAP_PDU::from_tree(&required(json!({name: container}))).unwrap();
     // The octets are the APER encoding of the type, which the bindings read.
     let message: HandoverRequired = pdu.decode_value().unwrap();
-    let octets = message.protocol_ies.0[2].value.as_bytes();
     let octets: SourceToTargetTransparentContainer =
-        decode_open_type(&rasn::types::Any::new(octets.to_vec())).unwrap();
+        decode_open_type(&message.protocol_ies.0[2].value).unwrap();
     let carried: SourceNGRANNodeToTargetNGRANNodeTransparentContainer =
-        rasn::aper::decode(&octets.0).unwrap();
-    assert_eq!(carried.r_rccontainer.0.as_ref(), [1, 2]);
-    assert_eq!(rasn::aper::encode(&carried).unwrap(), octets.0.as_ref());
+        oxirush_ngap::aper::decode(&octets.0).unwrap();
+    assert_eq!(carried.r_rccontainer.0, [1, 2]);
+    assert_eq!(oxirush_ngap::aper::encode(&carried).unwrap(), octets.0);
     // Nothing says what the octets carry: a view and a tree have them as they are.
     let mut view = pdu.to_view().unwrap();
     let ie = "/ngap/SourceToTarget-TransparentContainer";
@@ -1195,7 +1194,7 @@ fn the_parts_of_a_guami_are_numbers_of_their_bits() {
     let expected = encode_open_type(&expected).unwrap();
     assert_eq!(
         ie(&mut shown, 28)["_raw_value"],
-        json!(hex::encode_upper(expected.as_bytes()))
+        json!(hex::encode_upper(&expected))
     );
     assert_eq!(ie(&mut shown, 28)["value"]["aMFSetID"], json!(0x3FF));
     // The AMF Set ID has ten bits.
@@ -1205,7 +1204,6 @@ fn the_parts_of_a_guami_are_numbers_of_their_bits() {
 
 #[test]
 fn a_tunnel_endpoint_is_an_ip_address_and_a_number() {
-    use oxirush_ngap::helpers::bytes_to_bitvec;
     use serde_json::json;
     let added = |id: u16, value: serde_json::Value| {
         sent(&[json!({"id": id, "criticality": "ignore", "value": value})])
@@ -1214,7 +1212,7 @@ fn a_tunnel_endpoint_is_an_ip_address_and_a_number() {
     let tunnel = json!({"gTPTunnel": {"transportLayerAddress": "10.0.0.1", "gTP-TEID": 7}});
     let mut shown = added(139, tunnel.clone()).unwrap();
     let expected = UPTransportLayerInformation::gTPTunnel(GTPTunnel::new(
-        TransportLayerAddress(bytes_to_bitvec(&[10, 0, 0, 1])),
+        TransportLayerAddress(oxirush_ngap::BitString::from([10, 0, 0, 1])),
         GTPTEID::from([0, 0, 0, 7]),
         None,
     ));
@@ -1222,7 +1220,7 @@ fn a_tunnel_endpoint_is_an_ip_address_and_a_number() {
     assert_eq!(ie(&mut shown, 139)["value"], tunnel);
     assert_eq!(
         ie(&mut shown, 139)["_raw_value"],
-        json!(hex::encode_upper(expected.as_bytes()))
+        json!(hex::encode_upper(&expected))
     );
     // TraceCollectionEntityIPAddress is IE 109, a TransportLayerAddress itself.
     for (address, octets) in [
@@ -1920,7 +1918,7 @@ fn a_kind_that_the_specification_does_not_have_says_the_direction_of_its_pdu() {
     let pdu = NGAP_PDU::unsuccessfulOutcome(UnsuccessfulOutcome::new(
         ProcedureCode(46),
         Criticality::ignore,
-        rasn::types::Any::new(vec![0]),
+        oxirush_ngap::Octets::from(vec![0]),
     ));
     let oxirush_ngap::NgapPduKind::Other {
         direction,
@@ -2340,9 +2338,13 @@ fn the_identifier_that_the_octets_were_decoded_as_is_a_number() {
 /// A request to modify a UE context: its aggregate maximum bit rate for the downlink,
 /// and UE security capabilities whose NR encryption algorithms are this many bits.
 fn modification(rate: u64, bits: usize) -> NGAP_PDU {
-    let mask =
-        |length: usize| -> rasn::types::BitString { (0..length).map(|bit| bit < 2).collect() };
-    let rates = UEAggregateMaximumBitRate::new(BitRate(rate.into()), BitRate(1u64.into()), None);
+    // The first two bits of a string of this length.
+    let mask = |length: usize| {
+        let mut octets = vec![0; length.div_ceil(8)];
+        octets[0] = 0xc0;
+        oxirush_ngap::BitString::new(octets, length).unwrap()
+    };
+    let rates = UEAggregateMaximumBitRate::new(BitRate(rate), BitRate(1), None);
     let capabilities = UESecurityCapabilities::new(
         NRencryptionAlgorithms(mask(bits)),
         NRintegrityProtectionAlgorithms(mask(16)),
@@ -2360,9 +2362,10 @@ fn modification(rate: u64, bits: usize) -> NGAP_PDU {
     .unwrap()
 }
 
-/// An INTEGER is a number of any size (ITU-T X.697 (02/2021) §21). One of 2^63 or more
-/// is read, edited and written as any other: the octets are those that the bindings
-/// encode. One that JSON has no exact number for, 2^64 or more, is its decimal digits.
+/// An INTEGER is a number (ITU-T X.697 (02/2021) §21). One of 2^63 or more is read,
+/// edited and written as any other: the octets are those that the bindings encode. The
+/// bindings hold a number in 64 bits: an IE with a larger one keeps the octets that it
+/// was received as.
 #[test]
 fn an_integer_of_two_to_the_63_or_more_is_a_number() {
     use serde_json::json;
@@ -2391,10 +2394,46 @@ fn an_integer_of_two_to_the_63_or_more_is_a_number() {
         assert_eq!(edited, modification(rate - 1, 16));
     }
 
-    // A bit rate has an extension marker: 2^64 is a value of it, which JSON has no
-    // exact number for. It is its decimal digits, read and written.
-    let digits = "18446744073709551616";
-    let beyond = |downlink: serde_json::Value| {
+    // A bit rate has an extension marker, so a later version may have a rate of 2^64
+    // or more. The bindings hold a number in 64 bits, and refuse that one: its IE is
+    // shown as the octets that were received, with why they do not decode, and is
+    // written back as it is. The octets are those of the largest rate that the
+    // bindings hold, with the nine octets of 2^64 in the place of its own nine.
+    let largest = UEAggregateMaximumBitRate::new(BitRate(u64::MAX), BitRate(1), None);
+    let largest = encode_open_type(&largest).unwrap();
+    let nine = [0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
+    assert_eq!(
+        largest,
+        [&[0x20, 0x09][..], &nine[..], &[0x00, 0x01][..]].concat()
+    );
+    let beyond = [&[0x20, 0x09, 0x01][..], &[0; 8][..], &[0x00, 0x01][..]].concat();
+    let error = decode_open_type::<UEAggregateMaximumBitRate>(&beyond).unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        "these octets do not decode as UEAggregateMaximumBitRate: the number does not fit in \
+         64 bits, in its field `u_eaggregate_maximum_bit_rate_dl`"
+    );
+    let mut pdu = modification(1, 16);
+    let mut ies = pdu.protocol_ies().unwrap().into_owned();
+    ies.0[2].value = beyond.clone().into();
+    pdu.set_protocol_ies(ies).unwrap();
+    let wire = pdu.encode().unwrap();
+
+    let view = NGAP_PDU::decode(&wire).unwrap().to_view().unwrap();
+    let entry = &view["message"]["protocolIEs"][2];
+    assert_eq!(entry["_raw_value"], json!(hex::encode_upper(&beyond)));
+    assert_eq!(entry["value"], entry["_raw_value"]);
+    let why = entry["_decode_error"].as_str().unwrap();
+    assert!(why.contains("the number does not fit in 64 bits"), "{why}");
+    // The other IEs are read, and the view and the tree give the octets back.
+    assert_eq!(view["message"]["protocolIEs"][1]["value"], json!(1));
+    assert_eq!(NGAP_PDU::from_view(&view).unwrap().encode().unwrap(), wire);
+    let tree = pdu.to_tree().unwrap();
+    assert_eq!(NGAP_PDU::from_tree(&tree).unwrap().encode().unwrap(), wire);
+
+    // JSON has no exact number for 2^64, and its decimal digits are no number: a rate
+    // is written as a number that 64 bits hold.
+    let written = |downlink: serde_json::Value| {
         json!({"message": "UEContextModificationRequest", "ies": [
             {"AMF-UE-NGAP-ID": 1},
             {"RAN-UE-NGAP-ID": 1},
@@ -2404,24 +2443,22 @@ fn an_integer_of_two_to_the_63_or_more_is_a_number() {
             }},
         ]})
     };
-    let pdu = NGAP_PDU::from_tree(&beyond(json!(digits))).unwrap();
-    let request: UEContextModificationRequest = pdu.decode_value().unwrap();
-    let rates: UEAggregateMaximumBitRate =
-        decode_open_type(&request.protocol_ies.0[2].value).unwrap();
-    assert_eq!(rates.u_eaggregate_maximum_bit_rate_dl.0.to_string(), digits);
-    assert_eq!(pdu.to_tree().unwrap(), beyond(json!(digits)));
-    let view = pdu.to_view().unwrap();
-    assert_eq!(inspect::select(&view, &downlink).unwrap(), [&json!(digits)]);
-    assert_eq!(NGAP_PDU::from_view(&view).unwrap(), pdu);
-
-    // A number that JSON has is written as that number, and not as its digits.
-    let digits = beyond(json!(u64::MAX.to_string()));
-    let error = NGAP_PDU::from_tree(&digits).unwrap_err();
-    assert_eq!(error.kind(), oxirush_ngap::ErrorKind::Value);
+    for digits in ["18446744073709551616", "18446744073709551615"] {
+        let error = NGAP_PDU::from_tree(&written(json!(digits))).unwrap_err();
+        assert_eq!(error.kind(), oxirush_ngap::ErrorKind::Value);
+        assert_eq!(
+            error.to_string(),
+            format!(
+                "this is not a value of UEAggregateMaximumBitRate, at \
+                 uEAggregateMaximumBitRateDL: a number is expected, and \"{digits}\" is written"
+            )
+        );
+    }
+    let negative = NGAP_PDU::from_tree(&written(json!(-1))).unwrap_err();
     assert_eq!(
-        error.to_string(),
-        "this is not a value of UEAggregateMaximumBitRate, at uEAggregateMaximumBitRateDL: a \
-         number is expected, and \"18446744073709551615\" is written"
+        negative.to_string(),
+        "this is not a value of UEAggregateMaximumBitRate, at uEAggregateMaximumBitRateDL: -1 \
+         is outside its constraint (0..18446744073709551615)"
     );
 }
 
@@ -2522,8 +2559,8 @@ fn an_extension_has_its_type(
     tree: serde_json::Value,
     extension: &str,
     at: &str,
-    (value, octets): (serde_json::Value, rasn::types::Any),
-    (other, other_octets): (serde_json::Value, rasn::types::Any),
+    (value, octets): (serde_json::Value, oxirush_ngap::Octets<'static>),
+    (other, other_octets): (serde_json::Value, oxirush_ngap::Octets<'static>),
 ) {
     let at = format!("{extension}/{at}");
     let received = |view: &serde_json::Value| -> String {
@@ -2536,7 +2573,7 @@ fn an_extension_has_its_type(
     let wire = pdu.encode().unwrap();
     let mut view = NGAP_PDU::decode(&wire).unwrap().to_view().unwrap();
     assert_eq!(inspect::select(&view, &at).unwrap(), [&value], "{at}");
-    assert_eq!(received(&view), hex::encode(octets.as_bytes()), "{at}");
+    assert_eq!(received(&view), hex::encode(&octets), "{at}");
     let entries = inspect::select(&view, extension).unwrap();
     assert!(entries[0]["_decode_error"].is_null(), "{}", entries[0]);
 
@@ -2551,11 +2588,7 @@ fn an_extension_has_its_type(
     let edited = NGAP_PDU::from_view(&view).unwrap();
     let after = edited.to_view().unwrap();
     assert_eq!(inspect::select(&after, &at).unwrap(), [&other], "{at}");
-    assert_eq!(
-        received(&after),
-        hex::encode(other_octets.as_bytes()),
-        "{at}"
-    );
+    assert_eq!(received(&after), hex::encode(&other_octets), "{at}");
     let shown = edited.to_tree().unwrap();
     let written = NGAP_PDU::from_tree(&shown).unwrap();
     assert_eq!(written.encode().unwrap(), edited.encode().unwrap());
@@ -2572,7 +2605,7 @@ fn the_qos_parameter_set_index_has_the_type_of_what_it_extends() {
     let notified =
         |index: u8| encode_open_type(&AlternativeQoSParaSetNotifyIndex(index.into())).unwrap();
     assert_eq!(
-        (index(3).as_bytes(), notified(3).as_bytes()),
+        (index(3).as_slice(), notified(3).as_slice()),
         (&[0x20][..], &[0x18][..])
     );
 
@@ -2687,7 +2720,7 @@ fn the_qos_parameter_set_index_has_the_type_of_what_it_extends() {
 #[test]
 fn the_additional_information_of_qos_flows_has_the_type_of_what_it_extends() {
     use serde_json::json;
-    let flow = || QosFlowIdentifier(1.into());
+    let flow = || QosFlowIdentifier(1);
     let container = |octets: &[u8]| Some(TLContainer(octets.to_vec().into()));
     let command = |octets: &[u8]| {
         let item = QosFlowAdditionalInfoItemRelCom::new(flow(), container(octets), None);

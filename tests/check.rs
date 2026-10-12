@@ -9,9 +9,9 @@
 //! wrong order or with too many occurrences (10.3.6). These tests are for a tool that
 //! sends such a message to see what its peer does.
 
+use oxirush_ngap::Octets;
 use oxirush_ngap::ngap::*;
 use oxirush_ngap::{Deviation, Error, ErrorKind, build_ngap};
-use rasn::types::Any;
 
 /// What `check()` reports of `pdu`, which is the same for the PDU that its octets
 /// decode to. With the `inspect` feature, `tree` is the same message written as a
@@ -33,7 +33,7 @@ fn checked(pdu: &NGAP_PDU, tree: &str) -> Vec<Deviation> {
     deviations
 }
 
-fn cause() -> Cause {
+fn cause() -> Cause<'static> {
     Cause::radioNetwork(CauseRadioNetwork::user_inactivity)
 }
 
@@ -245,9 +245,9 @@ fn every_deviation_of_a_message_is_reported_in_the_order_of_the_message() -> Res
 
     // An IE that the protocol does not have is told by its identifier.
     let mut unknown = pdu.clone();
-    let mut ies = unknown.protocol_ies()?;
+    let mut ies = unknown.protocol_ies()?.into_owned();
     ies.0.truncate(1);
-    let octets = Any::new(vec![0xc0, 0xff]);
+    let octets = Octets::from(vec![0xc0, 0xff]);
     ies.0
         .push(ProtocolIEField::new(60000u16, Criticality::ignore, octets));
     unknown.set_protocol_ies(ies)?;
@@ -313,7 +313,7 @@ fn what_has_no_object_set_is_not_checked_against_one() -> Result<(), Error> {
     let NGAP_PDU::initiatingMessage(mut held) = request else {
         panic!("an initiating message");
     };
-    held.value = Any::new(vec![0x00, 0x00, 0x03, 0x00]);
+    held.value = Octets::from(vec![0x00, 0x00, 0x03, 0x00]);
     let error = NGAP_PDU::initiatingMessage(held).check().unwrap_err();
     assert_eq!(error.kind(), ErrorKind::Decode);
     Ok(())

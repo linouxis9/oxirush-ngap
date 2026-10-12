@@ -7,7 +7,7 @@
 //! gives an [`Error`] of the kind `Argument` for a number that does not fit,
 //! and cuts none short.
 
-use rasn::types::{BitString, FixedBitString, FixedOctetString};
+use oxirush_aper::{BitString, Bits};
 
 use crate::Error;
 use crate::ngap::*;
@@ -20,37 +20,6 @@ fn fits(what: &str, value: u64, bits: u32) -> Result<u64, Error> {
             "{what} {value} does not fit in {bits} bits"
         ))),
     }
-}
-
-/// Convert an integer to a most-significant-bit-first bit string of `width` bits.
-///
-/// An error of the kind `Argument` for a width over the 64 bits of the value, and
-/// for a value that does not fit in `width` bits.
-pub fn int_to_bitvec(value: u64, width: usize) -> Result<BitString, Error> {
-    let bits = u32::try_from(width).ok().filter(|bits| *bits <= 64);
-    let bits = bits.ok_or_else(|| {
-        Error::argument(format!(
-            "a bit string of {width} bits does not come from a number of 64 bits"
-        ))
-    })?;
-    let value = fits("the number", value, bits)?;
-    Ok((0..bits).rev().map(|bit| (value >> bit) & 1 == 1).collect())
-}
-
-/// Convert bytes to a most-significant-bit-first bit string.
-pub fn bytes_to_bitvec(bytes: &[u8]) -> BitString {
-    bytes
-        .iter()
-        .flat_map(|byte| (0..8u8).rev().map(move |bit| (byte >> bit) & 1 == 1))
-        .collect()
-}
-
-fn fixed_bit_string<const N: usize>(value: u64) -> FixedBitString<N> {
-    let mut bits = FixedBitString::<N>::ZERO;
-    for index in 0..N {
-        bits.set(index, (value >> (N - index - 1)) & 1 == 1);
-    }
-    bits
 }
 
 /// The octets of the PLMN identity of an MCC and an MNC: the three digits of `mcc`, and
@@ -118,7 +87,7 @@ pub fn plmn(mcc: &str, mnc: &str) -> Result<PLMNIdentity, Error> {
     let mcc_digits = mcc_digits.ok_or_else(|| refused("an MCC", mcc, "three"))?;
     let octets = digits(mnc).and_then(|mnc| plmn_octets(mcc_digits, &mnc));
     let octets = octets.ok_or_else(|| refused("an MNC", mnc, "two or three"))?;
-    Ok(PLMNIdentity(FixedOctetString::new(octets)))
+    Ok(PLMNIdentity(octets))
 }
 
 /// Decode a `PLMNIdentity` into MCC and MNC strings, in the order of
@@ -128,8 +97,7 @@ pub fn plmn(mcc: &str, mnc: &str) -> Result<PLMNIdentity, Error> {
 /// is not the filler before an MNC of two digits. `ab cd ef` is none, and so is
 /// `02 f8 f9`.
 pub fn plmn_from(identity: &PLMNIdentity) -> Option<(String, String)> {
-    let octets = &identity.0;
-    plmn_digits([octets[0], octets[1], octets[2]])
+    plmn_digits(identity.0)
 }
 
 /// AMF Region ID field width.
@@ -148,21 +116,21 @@ pub fn guami(
     region_id: u8,
     set_id: u16,
     pointer: u8,
-) -> Result<GUAMI, Error> {
+) -> Result<GUAMI<'static>, Error> {
     let set_id = fits("the AMF Set ID", set_id.into(), 10)?;
     let pointer = fits("the AMF Pointer", pointer.into(), 6)?;
     Ok(GUAMI::new(
         plmn_identity,
-        AMFRegionID(fixed_bit_string::<8>(u64::from(region_id))),
-        AMFSetID(fixed_bit_string::<10>(set_id)),
-        AMFPointer(fixed_bit_string::<6>(pointer)),
+        AMFRegionID(Bits::from(region_id)),
+        AMFSetID(Bits::low(set_id, AMF_SET_ID_BITS)),
+        AMFPointer(Bits::low(pointer, AMF_POINTER_BITS)),
         None,
     ))
 }
 
 /// Build a 5G Tracking Area Identity: a PLMN and the three octets of a TAC.
-pub fn tai(plmn_identity: PLMNIdentity, tac: [u8; 3]) -> TAI {
-    TAI::new(plmn_identity, TAC(FixedOctetString::new(tac)), None)
+pub fn tai(plmn_identity: PLMNIdentity, tac: [u8; 3]) -> TAI<'static> {
+    TAI::new(plmn_identity, TAC(tac), None)
 }
 
 /// Build an NR Cell Global Identifier from a 24-bit gNB ID and 12-bit cell ID.
@@ -170,13 +138,17 @@ pub fn tai(plmn_identity: PLMNIdentity, tac: [u8; 3]) -> TAI {
 /// An error of the kind `Argument` for a gNB ID that does not fit in 24 bits and for a
 /// cell that does not fit in the 12 bits that follow it in the 36 of an NR Cell
 /// Identity (TS 38.413 clause 9.3.1.7).
-pub fn nr_cgi(plmn_identity: PLMNIdentity, gnb_id: u32, cell_id: u16) -> Result<NRCGI, Error> {
+pub fn nr_cgi(
+    plmn_identity: PLMNIdentity,
+    gnb_id: u32,
+    cell_id: u16,
+) -> Result<NRCGI<'static>, Error> {
     let gnb_id = fits("the gNB ID", gnb_id.into(), 24)?;
     let cell_id = fits("the cell of the gNB", cell_id.into(), 12)?;
     let nci = (gnb_id << 12) | cell_id;
     Ok(NRCGI::new(
         plmn_identity,
-        NRCellIdentity(fixed_bit_string::<36>(nci)),
+        NRCellIdentity(Bits::low(nci, 36)),
         None,
     ))
 }
@@ -184,22 +156,21 @@ pub fn nr_cgi(plmn_identity: PLMNIdentity, gnb_id: u32, cell_id: u16) -> Result<
 /// Build a `GlobalGNBID` for a 24-bit gNB identifier.
 ///
 /// An error of the kind `Argument` for a gNB ID that does not fit in 24 bits.
-pub fn global_gnb_id(plmn_identity: PLMNIdentity, gnb_id: u32) -> Result<GlobalGNBID, Error> {
+pub fn global_gnb_id(
+    plmn_identity: PLMNIdentity,
+    gnb_id: u32,
+) -> Result<GlobalGNBID<'static>, Error> {
     let gnb_id = fits("the gNB ID", gnb_id.into(), 24)?;
     Ok(GlobalGNBID::new(
         plmn_identity,
-        GNBID::gNB_ID(int_to_bitvec(gnb_id, 24)?),
+        GNBID::gNB_ID(Bits::low(gnb_id, 24)),
         None,
     ))
 }
 
 /// Build Single Network Slice Selection Assistance Information.
-pub fn s_nssai(sst: u8, sd: Option<[u8; 3]>) -> SNSSAI {
-    SNSSAI::new(
-        SST(FixedOctetString::new([sst])),
-        sd.map(|value| SD(FixedOctetString::new(value))),
-        None,
-    )
+pub fn s_nssai(sst: u8, sd: Option<[u8; 3]>) -> SNSSAI<'static> {
+    SNSSAI::new(SST([sst]), sd.map(SD), None)
 }
 
 /// Build 5G UE security capabilities from the first octet of the NR encryption
@@ -210,19 +181,14 @@ pub fn s_nssai(sst: u8, sd: Option<[u8; 3]>) -> SNSSAI {
 /// security capability IE lead with 5G-EA0 and 5G-IA0 (TS 24.501 §9.11.3.54),
 /// so shift them left by one bit first. The E-UTRA bitmaps are all zeros:
 /// EEA0 and EIA0 only.
-pub fn ue_security_capabilities(encryption: u8, integrity: u8) -> UESecurityCapabilities {
-    let algorithms = |byte: u8| {
-        (0..16u8)
-            .map(|index| index < 8 && (byte >> (7 - index)) & 1 == 1)
-            .collect()
-    };
-    let zeroes = || (0..16).map(|_| false).collect();
-
+pub fn ue_security_capabilities(encryption: u8, integrity: u8) -> UESecurityCapabilities<'static> {
+    // Sixteen bits, of which the first eight are the algorithms.
+    let algorithms = |byte: u8| BitString::from([byte, 0]);
     UESecurityCapabilities::new(
         NRencryptionAlgorithms(algorithms(encryption)),
         NRintegrityProtectionAlgorithms(algorithms(integrity)),
-        EUTRAencryptionAlgorithms(zeroes()),
-        EUTRAintegrityProtectionAlgorithms(zeroes()),
+        EUTRAencryptionAlgorithms(algorithms(0)),
+        EUTRAintegrityProtectionAlgorithms(algorithms(0)),
         None,
     )
 }
@@ -235,7 +201,7 @@ mod tests {
     #[test]
     fn plmn_round_trips_for_two_digit_mnc() {
         let identity = plmn("208", "93").unwrap();
-        assert_eq!(&identity.0[..], &[0x02, 0xF8, 0x39]);
+        assert_eq!(identity.0, [0x02, 0xF8, 0x39]);
         assert_eq!(plmn_from(&identity), Some(("208".into(), "93".into())));
     }
 
@@ -243,7 +209,7 @@ mod tests {
     fn plmn_round_trips_for_three_digit_mnc() {
         // The digits 9 9 9 0 7 0, two in each octet, the second over the first.
         let identity = plmn("999", "070").unwrap();
-        assert_eq!(&identity.0[..], &[0x99, 0x09, 0x07]);
+        assert_eq!(identity.0, [0x99, 0x09, 0x07]);
         assert_eq!(plmn_from(&identity), Some(("999".into(), "070".into())));
     }
 
@@ -299,25 +265,20 @@ mod tests {
         let plmn = plmn("208", "93").unwrap();
         // The 24-bit gNB ID and the 12-bit cell: a 36-bit NR cell identity,
         // octet-aligned after the PLMN (X.691 (02/2021) §16.10).
-        let cgi = nr_cgi(plmn.clone(), 0xab_cdef, 0x123).unwrap();
+        let cgi = nr_cgi(plmn, 0xab_cdef, 0x123).unwrap();
         assert_eq!(
-            cgi.n_rcell_identity.0[..36],
-            int_to_bitvec(0xa_bcde_f123, 36).unwrap()[..]
+            cgi.n_rcell_identity.0,
+            Bits::new(0xa_bcde_f123, 36).unwrap()
         );
         assert_eq!(
-            rasn::aper::encode(&cgi).unwrap(),
+            oxirush_aper::encode(&cgi).unwrap(),
             [0x00, 0x02, 0xf8, 0x39, 0xab, 0xcd, 0xef, 0x12, 0x30]
         );
         let gnb = global_gnb_id(plmn, 0xab_cdef).unwrap();
         let GNBID::gNB_ID(bits) = gnb.g_nb_id else {
             panic!("expected gNB ID");
         };
-        assert_eq!(bits, int_to_bitvec(0xab_cdef, 24).unwrap());
-    }
-
-    /// The number that the bits are, the first bit the most significant.
-    fn number(bits: impl Iterator<Item = bool>) -> u64 {
-        bits.fold(0, |number, bit| number << 1 | u64::from(bit))
+        assert_eq!(bits, Bits::new(0xab_cdef, 24).unwrap());
     }
 
     #[test]
@@ -331,8 +292,18 @@ mod tests {
         // An AMF Set ID of 10 bits and an AMF Pointer of 6: the last value of each,
         // and the one after it.
         let amf = guami(network(), 0xff, 1023, 63).unwrap();
-        assert_eq!(number(amf.a_mfset_id.0[..10].iter().map(|bit| *bit)), 1023);
-        assert_eq!(number(amf.a_mfpointer.0[..6].iter().map(|bit| *bit)), 63);
+        assert_eq!(
+            (amf.a_mfregion_id.0.value(), amf.a_mfregion_id.0.len()),
+            (0xff, 8)
+        );
+        assert_eq!(
+            (amf.a_mfset_id.0.value(), amf.a_mfset_id.0.len()),
+            (1023, 10)
+        );
+        assert_eq!(
+            (amf.a_mfpointer.0.value(), amf.a_mfpointer.0.len()),
+            (63, 6)
+        );
         assert_eq!(
             argument(guami(network(), 1, 1024, 0).unwrap_err()),
             "the AMF Set ID 1024 does not fit in 10 bits"
@@ -360,34 +331,10 @@ mod tests {
     }
 
     #[test]
-    fn a_bit_string_has_the_bits_of_a_number_that_fits_its_width() {
-        let bits = int_to_bitvec(0b101, 3).unwrap();
-        assert_eq!(
-            bits.iter().map(|bit| *bit).collect::<Vec<_>>(),
-            [true, false, true]
-        );
-        assert_eq!(int_to_bitvec(0, 0).unwrap().len(), 0);
-        assert_eq!(
-            number(int_to_bitvec(u64::MAX, 64).unwrap().iter().map(|bit| *bit)),
-            u64::MAX
-        );
-        // A number of more bits than the width, and a width of more bits than a number.
-        let wide = int_to_bitvec(0b1000, 3).unwrap_err();
-        assert_eq!(wide.kind(), ErrorKind::Argument);
-        assert_eq!(wide.to_string(), "the number 8 does not fit in 3 bits");
-        let long = int_to_bitvec(1, 65).unwrap_err();
-        assert_eq!(long.kind(), ErrorKind::Argument);
-        assert_eq!(
-            long.to_string(),
-            "a bit string of 65 bits does not come from a number of 64 bits"
-        );
-    }
-
-    #[test]
     fn security_capability_octets_lead_with_the_first_algorithm() {
         // 128-NEA1 and 128-NEA2; 128-NIA2.
         let capabilities = ue_security_capabilities(0xC0, 0x40);
-        let leading = |bits: &BitString| bits.iter().take(3).map(|bit| *bit).collect::<Vec<_>>();
+        let leading = |bits: &BitString| (0..3).map(|at| bits.get(at).unwrap()).collect::<Vec<_>>();
         assert_eq!(
             leading(&capabilities.n_rencryption_algorithms.0),
             [true, true, false]
@@ -395,6 +342,16 @@ mod tests {
         assert_eq!(
             leading(&capabilities.n_rintegrity_protection_algorithms.0),
             [false, true, false]
+        );
+        // Sixteen bits each, of which the last eight are not set.
+        assert_eq!(capabilities.n_rencryption_algorithms.0.len(), 16);
+        assert_eq!(
+            capabilities.n_rencryption_algorithms.0.as_octets(),
+            [0xC0, 0x00]
+        );
+        assert_eq!(
+            capabilities.e_utraencryption_algorithms.0.as_octets(),
+            [0, 0]
         );
     }
 

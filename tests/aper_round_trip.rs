@@ -1,5 +1,6 @@
+use oxirush_ngap::aper::{Decode, Encode, decode, encode};
 use oxirush_ngap::ngap::*;
-use oxirush_ngap::{Error, ErrorKind, build_ngap, extract_ngap_ies};
+use oxirush_ngap::{BitString, Bits, Error, ErrorKind, build_ngap, extract_ngap_ies};
 
 #[test]
 fn public_macros_round_trip_typed_open_message() -> Result<(), Error> {
@@ -14,7 +15,7 @@ fn public_macros_round_trip_typed_open_message() -> Result<(), Error> {
         panic!("expected initiating message");
     };
     // Extension bit, octet padding, then the aligned 16-bit ProtocolIE count.
-    assert_eq!(&message.value.as_bytes()[..3], &[0x00, 0x00, 0x03]);
+    assert_eq!(&message.value[..3], &[0x00, 0x00, 0x03]);
 
     let wire = pdu.encode().expect("encode PDU");
     let decoded = NGAP_PDU::decode(&wire).expect("decode PDU");
@@ -37,72 +38,48 @@ fn public_macros_round_trip_typed_open_message() -> Result<(), Error> {
 
 #[test]
 fn snssai_round_trips_with_optional_sd() {
-    use rasn::types::FixedOctetString;
-
-    let value = SNSSAI::new(
-        SST(FixedOctetString::new([1])),
-        Some(SD(FixedOctetString::new([0, 0, 1]))),
-        None,
-    );
-    let wire = rasn::aper::encode(&value).expect("encode S-NSSAI");
-    let decoded: SNSSAI = rasn::aper::decode(&wire).expect("decode S-NSSAI");
+    let value = SNSSAI::new(SST([1]), Some(SD([0, 0, 1])), None);
+    let wire = encode(&value).expect("encode S-NSSAI");
+    let decoded: SNSSAI = decode(&wire).expect("decode S-NSSAI");
     assert_eq!(decoded, value);
 }
 
 #[test]
 fn plmn_support_list_round_trips_nested_slice() {
-    use rasn::types::FixedOctetString;
-
-    let slice = SNSSAI::new(
-        SST(FixedOctetString::new([1])),
-        Some(SD(FixedOctetString::new([0, 0, 1]))),
-        None,
-    );
+    let slice = SNSSAI::new(SST([1]), Some(SD([0, 0, 1])), None);
     let value = PLMNSupportList(vec![PLMNSupportItem::new(
-        PLMNIdentity(FixedOctetString::new([0x02, 0xf8, 0x39])),
+        PLMNIdentity([0x02, 0xf8, 0x39]),
         SliceSupportList(vec![SliceSupportItem::new(slice, None)]),
         None,
     )]);
-    let wire = rasn::aper::encode(&value).expect("encode PLMN support");
-    let decoded: PLMNSupportList = rasn::aper::decode(&wire).expect("decode PLMN support");
+    let wire = encode(&value).expect("encode PLMN support");
+    let decoded: PLMNSupportList = decode(&wire).expect("decode PLMN support");
     assert_eq!(decoded, value);
 }
 
 #[test]
 fn slice_support_list_round_trips() {
-    use rasn::types::FixedOctetString;
-
     let value = SliceSupportList(vec![SliceSupportItem::new(
-        SNSSAI::new(
-            SST(FixedOctetString::new([1])),
-            Some(SD(FixedOctetString::new([0, 0, 1]))),
-            None,
-        ),
+        SNSSAI::new(SST([1]), Some(SD([0, 0, 1])), None),
         None,
     )]);
-    let wire = rasn::aper::encode(&value).expect("encode slice support");
-    let decoded: SliceSupportList = rasn::aper::decode(&wire).expect("decode slice support");
+    let wire = encode(&value).expect("encode slice support");
+    let decoded: SliceSupportList = decode(&wire).expect("decode slice support");
     assert_eq!(decoded, value);
 }
 
 #[test]
 fn plmn_support_item_round_trips() {
-    use rasn::types::FixedOctetString;
-
     let value = PLMNSupportItem::new(
-        PLMNIdentity(FixedOctetString::new([0x02, 0xf8, 0x39])),
+        PLMNIdentity([0x02, 0xf8, 0x39]),
         SliceSupportList(vec![SliceSupportItem::new(
-            SNSSAI::new(
-                SST(FixedOctetString::new([1])),
-                Some(SD(FixedOctetString::new([0, 0, 1]))),
-                None,
-            ),
+            SNSSAI::new(SST([1]), Some(SD([0, 0, 1])), None),
             None,
         )]),
         None,
     );
-    let wire = rasn::aper::encode(&value).expect("encode PLMN support item");
-    let decoded: PLMNSupportItem = rasn::aper::decode(&wire).expect("decode PLMN support item");
+    let wire = encode(&value).expect("encode PLMN support item");
+    let decoded: PLMNSupportItem = decode(&wire).expect("decode PLMN support item");
     assert_eq!(decoded, value);
 }
 
@@ -110,7 +87,7 @@ fn plmn_support_item_round_trips() {
 /// id-OldAMF is an AMFName and id-RRC-Resume-Cause an RRCEstablishmentCause.
 #[test]
 fn ie_names_address_their_own_ie_before_a_same_named_type() -> Result<(), Error> {
-    let name = AMFName(rasn::types::PrintableString::try_from("amf").expect("printable"));
+    let name = AMFName("amf".into());
     let ie = oxirush_ngap::build_ngap_ie!(NGSetupResponse, REJECT AMFName(name.clone()))?;
     assert_eq!(ie.id, ID_AMFNAME);
     let ie = oxirush_ngap::build_ngap_ie!(DownlinkNASTransport, REJECT OldAMF(name.clone()))?;
@@ -206,10 +183,9 @@ fn multiline_extension_list_has_an_aligned_count() {
         ])),
     );
     let wire = hex::decode("2000010164400400000a000164400400000a00").unwrap();
-    assert_eq!(rasn::aper::encode(&value).unwrap(), wire);
+    assert_eq!(encode(&value).unwrap(), wire);
     assert_eq!(
-        rasn::aper::decode::<TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainer>(&wire)
-            .unwrap(),
+        decode::<TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainer>(&wire).unwrap(),
         value,
     );
 }
@@ -227,31 +203,35 @@ fn utf8_string_names_have_an_unconstrained_length() -> Result<(), Error> {
     )?;
     let wire = pdu.encode().expect("encode NGSetupResponse");
     assert_eq!(hex::encode(&wire), "2015000f000001011240082006616d662dc3a9");
-    let response: NGSetupResponse = NGAP_PDU::decode(&wire)
-        .expect("decode PDU")
-        .decode_value()
-        .expect("decode message");
+    // The message borrows from the PDU, which is kept beside it.
+    let decoded = NGAP_PDU::decode(&wire).expect("decode PDU");
+    let response: NGSetupResponse = decoded.decode_value().expect("decode message");
     extract_ngap_ies!(&response, NGSetupResponse,
         req extended: ExtendedAMFName = Extended_AMFName(value) => value,
     );
     assert_eq!(extended, name);
 
     let node = RANNodeNameUTF8String("gNB".into());
-    let wire = rasn::aper::encode(&node).expect("encode RAN node name");
+    let wire = encode(&node).expect("encode RAN node name");
     assert_eq!(wire, [0x03, b'g', b'N', b'B']);
     assert_eq!(
-        rasn::aper::decode::<RANNodeNameUTF8String>(&wire).expect("decode RAN node name"),
+        decode::<RANNodeNameUTF8String>(&wire).expect("decode RAN node name"),
         node
     );
     Ok(())
 }
 
-fn assert_round_trip<T>(value: &T)
-where
-    T: rasn::Decode + rasn::Encode + PartialEq + std::fmt::Debug,
-{
-    let wire = rasn::aper::encode(value).expect("encode");
-    assert_eq!(&rasn::aper::decode::<T>(&wire).expect("decode"), value);
+/// `value` is read back from the octets that it is written to. A value that borrows
+/// is read with the lifetime of these octets.
+macro_rules! assert_round_trip {
+    ($value:expr) => {{
+        fn read_as<'a, T: Decode<'a>>(_: &T, wire: &'a [u8]) -> T {
+            decode(wire).expect("decode")
+        }
+        let value = $value;
+        let wire = encode(&value).expect("encode");
+        assert_eq!(read_as(&value, &wire), value);
+    }};
 }
 
 /// A fixed-size BIT STRING longer than 16 bits is octet-aligned in APER
@@ -260,12 +240,10 @@ where
 /// 2-bit NgENB-ID choice index before the 20-bit ng-eNB ID.
 #[test]
 fn long_fixed_size_bit_strings_are_octet_aligned() -> Result<(), Error> {
-    use rasn::types::{BitString, FixedBitString};
-
-    let mut nh = FixedBitString::<256>::ZERO;
-    nh.set(0, true);
-    nh.set(255, true);
-    let context = SecurityContext::new(NextHopChainingCount(5), SecurityKey(nh), None);
+    // The first and the last bit of the 256.
+    let mut nh = [0u8; 32];
+    (nh[0], nh[31]) = (0x80, 0x01);
+    let context = SecurityContext::new(NextHopChainingCount(5), SecurityKey(nh.into()), None);
     let pdu = build_ngap!(SuccessfulOutcome, PathSwitchRequest,
         REJECT, PathSwitchRequestAcknowledge,
         REJECT SecurityContext(context.clone()),
@@ -275,16 +253,19 @@ fn long_fixed_size_bit_strings_are_octet_aligned() -> Result<(), Error> {
         hex::encode(&wire),
         "20190028000001005d0021288000000000000000000000000000000000000000000000000000000000000001"
     );
-    let acknowledge: PathSwitchRequestAcknowledge = NGAP_PDU::decode(&wire)
-        .expect("decode PDU")
-        .decode_value()
-        .expect("decode message");
+    // The message borrows from the PDU, which is kept beside it.
+    let decoded = NGAP_PDU::decode(&wire).expect("decode PDU");
+    let acknowledge: PathSwitchRequestAcknowledge = decoded.decode_value().expect("decode message");
     extract_ngap_ies!(&acknowledge, PathSwitchRequestAcknowledge,
         req security_context: SecurityContext = SecurityContext(value) => value,
     );
     assert_eq!(security_context, context);
 
-    let bits = |length: usize| (0..length).map(|bit| bit % 3 == 0).collect::<BitString>();
+    // One bit in three, from the first.
+    let bits = |length: usize| {
+        let number = (0..length).fold(0, |number, bit| number << 1 | u64::from(bit % 3 == 0));
+        Bits::new(number, length).unwrap()
+    };
     let node = GlobalRANNodeID::globalNgENB_ID(GlobalNgENBID::new(
         oxirush_ngap::helpers::plmn("208", "93")?,
         NgENBID::macroNgENB_ID(bits(20)),
@@ -296,10 +277,9 @@ fn long_fixed_size_bit_strings_are_octet_aligned() -> Result<(), Error> {
     )?;
     let wire = pdu.encode().expect("encode NGSetupRequest");
     assert_eq!(hex::encode(&wire), "0015000f000001001b00084002f83900924920");
-    let request: NGSetupRequest = NGAP_PDU::decode(&wire)
-        .expect("decode PDU")
-        .decode_value()
-        .expect("decode message");
+    // The message borrows from the PDU, which is kept beside it.
+    let decoded = NGAP_PDU::decode(&wire).expect("decode PDU");
+    let request: NGSetupRequest = decoded.decode_value().expect("decode message");
     extract_ngap_ies!(&request, NGSetupRequest,
         req global_ran_node_id: GlobalRANNodeID = GlobalRANNodeID(value) => value,
     );
@@ -310,7 +290,7 @@ fn long_fixed_size_bit_strings_are_octet_aligned() -> Result<(), Error> {
         NgENBID::shortMacroNgENB_ID(bits(18)),
         NgENBID::longMacroNgENB_ID(bits(21)),
     ] {
-        assert_round_trip(&id);
+        assert_round_trip!(id);
     }
     for id in [
         ENBID::macroENB_ID(bits(20)),
@@ -318,28 +298,26 @@ fn long_fixed_size_bit_strings_are_octet_aligned() -> Result<(), Error> {
         ENBID::short_macroENB_ID(bits(18)),
         ENBID::long_macroENB_ID(bits(21)),
     ] {
-        assert_round_trip(&id);
+        assert_round_trip!(id);
     }
-    // SIZE(32, ...): an extension bit, then the root size as above.
-    for id in [TNGFID::tNGF_ID(bits(32)), TNGFID::tNGF_ID(bits(40))] {
-        assert_round_trip(&id);
+    // SIZE(32, ...): an extension bit, then the root size as above. A later version
+    // may have another size, so the value is a bit string of any length.
+    let long = |length: usize| BitString::from(bits(length));
+    for id in [TNGFID::tNGF_ID(long(32)), TNGFID::tNGF_ID(long(40))] {
+        assert_round_trip!(id);
     }
-    for id in [TWIFID::tWIF_ID(bits(32)), TWIFID::tWIF_ID(bits(40))] {
-        assert_round_trip(&id);
+    for id in [TWIFID::tWIF_ID(long(32)), TWIFID::tWIF_ID(long(40))] {
+        assert_round_trip!(id);
     }
-    let mut set_id = FixedBitString::<22>::ZERO;
-    set_id.set(0, true);
-    assert_round_trip(&RIMInformation::new(
-        GNBSetID(set_id),
+    // The first bit alone.
+    let first = |length: usize| Bits::new(1 << (length - 1), length).unwrap();
+    assert_round_trip!(RIMInformation::new(
+        GNBSetID(first(22)),
         RIMInformationRIMRSDetection::rs_detected,
         None,
     ));
-    let mut cag_id = FixedBitString::<32>::ZERO;
-    cag_id.set(0, true);
-    assert_round_trip(&CellCAGList(vec![CAGID(cag_id)]));
-    let mut nid = FixedBitString::<44>::ZERO;
-    nid.set(0, true);
-    assert_round_trip(&SNPNMobilityInformation::new(NID(nid), None));
+    assert_round_trip!(CellCAGList(vec![CAGID(first(32))]));
+    assert_round_trip!(SNPNMobilityInformation::new(NID(first(44)), None));
     Ok(())
 }
 
@@ -365,10 +343,9 @@ fn octet_string_ies_have_ie_names() -> Result<(), Error> {
         hex::encode(&wire),
         "00240023000002005500020007002a001615000f401100000200550002000700260004037e0041"
     );
-    let request: RerouteNASRequest = NGAP_PDU::decode(&wire)
-        .expect("decode PDU")
-        .decode_value()
-        .expect("decode message");
+    // The message borrows from the PDU, which is kept beside it.
+    let decoded = NGAP_PDU::decode(&wire).expect("decode PDU");
+    let request: RerouteNASRequest = decoded.decode_value().expect("decode message");
     assert_eq!(request.protocol_ies.0[1].id, ID_NGAP_MESSAGE);
     extract_ngap_ies!(&request, RerouteNASRequest,
         req message: Vec<u8> = NGAP_Message(value) => value.to_vec(),
@@ -399,7 +376,7 @@ fn extraction_binding_may_share_the_field_name() -> Result<(), Error> {
 }
 
 /// A message with the identifier that the functions below require, or without it.
-fn release_request(id: Option<u64>) -> UEContextReleaseRequest {
+fn release_request(id: Option<u64>) -> UEContextReleaseRequest<'static> {
     let ie =
         |id: u64| oxirush_ngap::build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(id));
     let ies = id.map(|id| ie(id).expect("an identifier"));
@@ -472,7 +449,7 @@ fn a_missing_required_ie_is_an_error_of_the_crate() {
 #[test]
 fn an_empty_open_type_value_is_one_zero_octet() {
     let value = encode_open_type(&()).expect("encode NULL");
-    assert_eq!(value.as_bytes(), [0]);
+    assert_eq!(value, [0]);
     decode_open_type::<()>(&value).expect("decode NULL");
 }
 
@@ -485,14 +462,15 @@ fn an_empty_open_type_value_is_one_zero_octet() {
 /// two reads what the other writes.
 #[test]
 fn a_number_between_the_ranges_of_an_extensible_root_is_written_in_the_root() {
-    let period = |value: u8| {
-        let period = ExpectedActivityPeriod(value.into());
+    let period = |value: u8| -> ExpectedUEActivityBehaviour<'static> {
+        let period = ExpectedActivityPeriod(u64::from(value));
         ExpectedUEActivityBehaviour::new(Some(period), None, None, None)
     };
-    let written = |value| hex::encode(rasn::aper::encode(&period(value)).unwrap());
+    let written = |value| hex::encode(encode(&period(value)).unwrap());
     let read = |octets: &str| {
         let octets = hex::decode(octets).unwrap();
-        rasn::aper::decode::<ExpectedUEActivityBehaviour>(&octets).unwrap()
+        let read = decode::<ExpectedUEActivityBehaviour>(&octets).unwrap();
+        read.into_owned()
     };
 
     // The extension bit of the SEQUENCE, a bit for each of its four members, the
@@ -516,22 +494,19 @@ fn pattern(octets: usize) -> String {
 
 /// `octets`, which pycrate wrote, are a value of `T` that is written as the same octets,
 /// and are none with an octet less.
-fn as_pycrate_writes_it<T: rasn::Decode + rasn::Encode>(octets: &str) -> T {
-    let octets = hex::decode(octets).unwrap();
-    let value = rasn::aper::decode::<T>(&octets).expect("decode");
-    assert_eq!(
-        hex::encode(rasn::aper::encode(&value).unwrap()),
-        hex::encode(&octets)
-    );
-    assert!(rasn::aper::decode::<T>(&octets[..octets.len() - 1]).is_err());
+fn as_pycrate_writes_it<T: Decode<'static> + Encode>(octets: &str) -> T {
+    // The value borrows from the octets, which a test keeps to its end.
+    let octets: &'static [u8] = hex::decode(octets).unwrap().leak();
+    let value = decode::<T>(octets).expect("decode");
+    assert_eq!(hex::encode(encode(&value).unwrap()), hex::encode(octets));
+    assert!(decode::<T>(&octets[..octets.len() - 1]).is_err());
     value
 }
 
 /// A string whose size has a range of 256 or more is after a length of two octets,
 /// which starts an octet (X.691 (02/2021) §11.5.7.3, §16.11, §17.8): the four members
 /// and alternatives of the bindings that are such a string, as pycrate 0.8.1 writes a
-/// value of each. Without the types of `sized` in their place, rasn 0.29 writes none of
-/// them so.
+/// value of each.
 #[test]
 fn a_string_with_a_length_of_two_octets_is_written_as_pycrate_writes_it() {
     // receiveStatusOfUL-PDCP-SDUs BIT STRING (SIZE(1..2048)), of 300 bits and of 2048:
@@ -545,7 +520,7 @@ fn a_string_with_a_length_of_two_octets_is_written_as_pycrate_writes_it() {
 
     // singleDevice and groupDevices BIT STRING (SIZE(1..1024, ...)): 300 bits and 1024
     // in the root, and 1025 after the extension bit, with an unconstrained length.
-    type Devices = AIoTDeviceIdentificationRequested;
+    type Devices = AIoTDeviceIdentificationRequested<'static>;
     let Devices::singleDevice(device) = as_pycrate_writes_it(&format!("00012b{bits}b0")) else {
         panic!("a single device");
     };

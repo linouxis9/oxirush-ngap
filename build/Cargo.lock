@@ -157,16 +157,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
 
 [[package]]
-name = "oxirush-ngap-generator"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "rasn-compiler",
- "regex",
- "syn 2.0.98",
-]
-
-[[package]]
 name = "nom"
 version = "8.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -240,6 +230,26 @@ name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
+
+[[package]]
+name = "oxirush-aper-generator"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "quote",
+ "regex",
+ "syn 2.0.98",
+]
+
+[[package]]
+name = "oxirush-ngap-generator"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "oxirush-aper-generator",
+ "rasn-compiler",
+ "regex",
+]
 
 [[package]]
 name = "pin-project-lite"

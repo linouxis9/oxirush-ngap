@@ -4,11 +4,12 @@
 use std::alloc::{GlobalAlloc, Layout, System};
 use std::sync::atomic::{AtomicUsize, Ordering};
 
+use oracle::bindings::CellIDCancelledNRItem;
+use oracle::rasn::{self, prelude::*};
+use oxirush_ngap::aper::{Decode, decode};
 use oxirush_ngap::ngap::{
-    CellIDCancelledNR, CellIDCancelledNRItem, MBSIntendedServiceAreaList,
-    UEAssociatedLogicalNGConnectionList,
+    CellIDCancelledNR, MBSIntendedServiceAreaList, UEAssociatedLogicalNGConnectionList,
 };
-use rasn::prelude::*;
 
 struct PeakAllocator;
 
@@ -31,19 +32,24 @@ unsafe impl GlobalAlloc for PeakAllocator {
 #[global_allocator]
 static ALLOCATOR: PeakAllocator = PeakAllocator;
 
-/// `CellIDCancelledNR` with the list codec that rasn derives for it, in place of the
-/// one of the crate.
+/// `CellIDCancelledNR` of the oracle, with the list codec that rasn derives for it in
+/// place of the one that the oracle has.
 #[derive(AsnType, Decode)]
 #[rasn(delegate, size("1..=65535"))]
 struct Derived(#[allow(dead_code)] SequenceOf<CellIDCancelledNRItem>);
 
-/// The most memory that is reserved at once while `octets`, which are no `T`, are
-/// decoded as one.
-fn reserved<T: Decode>(octets: &[u8]) -> usize {
+/// The most memory that is reserved at once while `read` reads octets that are no
+/// value, and refuses them.
+fn reserved(read: impl FnOnce() -> bool) -> usize {
     let before = CURRENT.load(Ordering::SeqCst);
     PEAK.store(before, Ordering::SeqCst);
-    assert!(rasn::aper::decode::<T>(octets).is_err());
+    assert!(!read());
     PEAK.load(Ordering::SeqCst) - before
+}
+
+/// The same for octets that the crate decodes as `T`.
+fn reserved_as<'a, T: Decode<'a>>(octets: &'a [u8]) -> usize {
+    reserved(|| decode::<T>(octets).is_ok())
 }
 
 // One test: the counters are those of the process.
@@ -55,12 +61,14 @@ fn a_claimed_list_length_reserves_no_memory() {
     // CellIDCancelledNR is SIZE(1..65535): a count of 65535, then no element, then
     // octets that are none.
     for octets in [vec![0xff, 0xfe], after(&[0xff, 0xfe])] {
-        let cells = reserved::<CellIDCancelledNR>(&octets);
+        let cells = reserved_as::<CellIDCancelledNR>(&octets);
         assert!(cells < 64 * 1024, "reserved {cells} bytes");
     }
     // The list codec of rasn reserves for the count that it reads, as far as the
-    // octets after it have bits: the codec of the crate is in its place.
-    let derived = reserved::<Derived>(&after(&[0xff, 0xfe]));
+    // octets after it have bits: the reader of the crate reserves a little, and grows
+    // the list with the elements that it reads.
+    let octets = after(&[0xff, 0xfe]);
+    let derived = reserved(|| rasn::aper::decode::<Derived>(&octets).is_ok());
     assert!(
         derived > 1024 * 1024,
         "the codec of rasn reserved {derived} bytes"
@@ -69,9 +77,10 @@ fn a_claimed_list_length_reserves_no_memory() {
     // The two lists of SIZE(1..65536) have an unconstrained count: 16383 in two
     // octets, and a fragment of 65536.
     for count in [&[0xbf, 0xff][..], &[0xc4]] {
-        let connections = reserved::<UEAssociatedLogicalNGConnectionList>(&after(count));
+        let octets = after(count);
+        let connections = reserved_as::<UEAssociatedLogicalNGConnectionList>(&octets);
         assert!(connections < 64 * 1024, "reserved {connections} bytes");
-        let areas = reserved::<MBSIntendedServiceAreaList>(&after(count));
+        let areas = reserved_as::<MBSIntendedServiceAreaList>(&octets);
         assert!(areas < 64 * 1024, "reserved {areas} bytes");
     }
 }

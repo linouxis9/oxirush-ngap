@@ -3,9 +3,9 @@
 
 use oxirush_ngap::ngap::*;
 use oxirush_ngap::{
-    Error, ErrorKind, Message, build_ngap, build_ngap_ie, extract_ngap_ies, with_ngap_ie_mut,
+    AsnType, Error, ErrorKind, Message, Octets, build_ngap, build_ngap_ie, extract_ngap_ies,
+    with_ngap_ie_mut,
 };
-use rasn::types::Any;
 
 /// A UE CONTEXT RELEASE REQUEST with its three IEs, the message of the README.
 const RELEASE_REQUEST: &str = "002a4015000003000a0002002a005500020007000f40020500";
@@ -112,12 +112,8 @@ fn octets_that_are_no_pdu_are_a_decode_error() {
             text.starts_with("these octets do not decode as NGAP-PDU: "),
             "{text}"
         );
-        // What rasn says is the source, and is not the message.
-        assert!(!text.contains("Codec"), "{text}");
-        assert!(source(&short).is_some_and(|source| source.contains("Codec: APER")));
-        // And is that error itself, for the one who reads its kind.
-        let rasn = std::error::Error::source(&short).unwrap();
-        assert!(rasn.downcast_ref::<rasn::error::DecodeError>().is_some());
+        // The codec is that of the family: the error is whole, and has no source.
+        assert_eq!(source(&short), None);
     }
     let long = NGAP_PDU::decode(&[&octets[..], &[0]].concat()).unwrap_err();
     assert_eq!(long.kind(), ErrorKind::Decode);
@@ -131,15 +127,15 @@ fn octets_that_are_no_pdu_are_a_decode_error() {
 fn an_open_type_that_is_not_the_value_asked_for_is_a_decode_error() {
     // An AMF UE NGAP ID is an INTEGER (0..1099511627775): a length of one octet, then
     // the octet.
-    let id: AMFUENGAPID = decode_open_type(&Any::new(vec![0x00, 0x2a])).unwrap();
+    let id: AMFUENGAPID = decode_open_type(&Octets::from(vec![0x00, 0x2a])).unwrap();
     assert_eq!(id.0, 42);
-    let short = decode_open_type::<AMFUENGAPID>(&Any::new(vec![0x40, 0x2a])).unwrap_err();
+    let short = decode_open_type::<AMFUENGAPID>(&Octets::from(vec![0x40, 0x2a])).unwrap_err();
     assert_eq!(short.kind(), ErrorKind::Decode);
     assert_eq!(
         short.to_string(),
         "these octets do not decode as AMF-UE-NGAP-ID: the octets end before the value does"
     );
-    let long = decode_open_type::<AMFUENGAPID>(&Any::new(vec![0x00, 0x2a, 0x00, 0x00]));
+    let long = decode_open_type::<AMFUENGAPID>(&Octets::from(vec![0x00, 0x2a, 0x00, 0x00]));
     assert_eq!(
         long.unwrap_err().to_string(),
         "these octets do not decode as AMF-UE-NGAP-ID: the value is followed by 2 octets"
@@ -155,7 +151,7 @@ fn a_value_outside_its_constraint_is_an_encode_error() {
         "a value of AMF-UE-NGAP-ID does not encode: 18446744073709551615 is outside its \
          constraint (0..1099511627775)"
     );
-    assert!(source(&error).is_some_and(|source| source.contains("Codec: APER")));
+    assert_eq!(source(&error), None);
 }
 
 #[test]
@@ -191,15 +187,15 @@ fn request(ies: Vec<ProtocolIEField>) -> UEContextReleaseRequest {
 }
 
 /// The entry of an AMF UE NGAP ID and that of a RAN UE NGAP ID.
-fn amf_and_ran() -> (ProtocolIEField, ProtocolIEField) {
+fn amf_and_ran() -> (ProtocolIEField<'static>, ProtocolIEField<'static>) {
     let amf = build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(42u64));
     let ran = build_ngap_ie!(UEContextReleaseRequest, REJECT RAN_UE_NGAP_ID(7u32));
     (amf.unwrap(), ran.unwrap())
 }
 
 /// An entry with the identifier of an IE, whose octets are not the value of that IE.
-fn undecodable(id: u16) -> ProtocolIEField {
-    ProtocolIEField::new(id, Criticality::reject, Any::new(vec![0xff]))
+fn undecodable(id: u16) -> ProtocolIEField<'static> {
+    ProtocolIEField::new(id, Criticality::reject, Octets::from(vec![0xff]))
 }
 
 #[test]
@@ -232,7 +228,7 @@ fn an_ie_that_does_not_decode_is_an_error_for_a_required_and_for_an_optional_fie
         "the AMF-UE-NGAP-ID of this UEContextReleaseRequest does not decode: the octets end \
          before the value does"
     );
-    assert!(source(&required).is_some_and(|source| source.contains("Codec: APER")));
+    assert_eq!(source(&required), None);
 
     // The one that may be absent is there: it is not `None`.
     let optional = ids(&request(vec![amf, undecodable(85)])).unwrap_err();
@@ -250,13 +246,16 @@ fn an_ie_that_does_not_decode_is_an_error_for_a_required_and_for_an_optional_fie
 /// not been received (TS 38.413 clause 10.3.4.2).
 const SPOILED_CAUSE: &str = "002a4015000003000a0002002a005500020007000f4002e500";
 
-fn spoiled_request() -> UEContextReleaseRequest {
+fn spoiled_request() -> UEContextReleaseRequest<'static> {
     let pdu = NGAP_PDU::decode(&hex::decode(SPOILED_CAUSE).unwrap()).unwrap();
-    pdu.decode_value().unwrap()
+    let request: UEContextReleaseRequest = pdu.decode_value().unwrap();
+    request.into_owned()
 }
 
 /// What a receiver reads in a request when it takes the cause if it can.
-fn id_and_cause(request: &UEContextReleaseRequest) -> Result<(u64, Option<Cause>), Error> {
+fn id_and_cause<'a>(
+    request: &'a UEContextReleaseRequest<'a>,
+) -> Result<(u64, Option<Cause<'a>>), Error> {
     extract_ngap_ies!(request, UEContextReleaseRequest,
         req id: u64 = AMF_UE_NGAP_ID(id),
         lax cause: Cause = Cause(cause) => cause,
@@ -265,21 +264,23 @@ fn id_and_cause(request: &UEContextReleaseRequest) -> Result<(u64, Option<Cause>
 }
 
 /// A call with `lax` fields alone has no error: its function returns no `Result`.
-fn cause_if_read(request: &UEContextReleaseRequest) -> Option<Cause> {
+fn cause_if_read<'a>(request: &'a UEContextReleaseRequest<'a>) -> Option<Cause<'a>> {
     extract_ngap_ies!(request, UEContextReleaseRequest,
         lax cause: Cause = Cause(cause) => cause,
     );
     cause
 }
 
-fn optional_cause(request: &UEContextReleaseRequest) -> Result<Option<Cause>, Error> {
+fn optional_cause<'a>(
+    request: &'a UEContextReleaseRequest<'a>,
+) -> Result<Option<Cause<'a>>, Error> {
     extract_ngap_ies!(request, UEContextReleaseRequest,
         opt cause: Cause = Cause(cause) => cause,
     );
     Ok(cause)
 }
 
-fn required_cause(request: &UEContextReleaseRequest) -> Result<Cause, Error> {
+fn required_cause<'a>(request: &'a UEContextReleaseRequest<'a>) -> Result<Cause<'a>, Error> {
     extract_ngap_ies!(request, UEContextReleaseRequest,
         req cause: Cause = Cause(cause) => cause,
     );
@@ -291,7 +292,8 @@ fn a_lax_field_is_the_ie_if_it_decodes_and_none_otherwise() {
     let inactivity = Cause::radioNetwork(CauseRadioNetwork::user_inactivity);
 
     // The IE is there and decodes.
-    let received: UEContextReleaseRequest = release_request().decode_value().unwrap();
+    let pdu = release_request();
+    let received: UEContextReleaseRequest = pdu.decode_value().unwrap();
     assert_eq!(id_and_cause(&received), Ok((42, Some(inactivity.clone()))));
     assert_eq!(cause_if_read(&received), Some(inactivity));
 
@@ -323,7 +325,8 @@ fn a_lax_field_is_the_ie_if_it_decodes_and_none_otherwise() {
 #[test]
 fn the_last_of_an_ie_that_is_there_twice_decides_a_lax_field() {
     let inactivity = Cause::radioNetwork(CauseRadioNetwork::user_inactivity);
-    let received: UEContextReleaseRequest = release_request().decode_value().unwrap();
+    let pdu = release_request();
+    let received: UEContextReleaseRequest = pdu.decode_value().unwrap();
     let read = received.protocol_ies.0[2].clone();
     let unread = spoiled_request().protocol_ies.0[2].clone();
 
@@ -415,7 +418,7 @@ fn an_argument_that_a_helper_does_not_take_is_an_error_and_no_panic() {
     let panicked = [
         plmn("20", "93").unwrap_err(),
         plmn("208", "9").unwrap_err(),
-        int_to_bitvec(1, 65).unwrap_err(),
+        oxirush_ngap::Bits::new(1, 65).unwrap_err(),
     ];
     // What was cut short: an AMF Set ID over 10 bits and an AMF Pointer over 6
     // (TS 38.413 clauses 9.3.3.12 and 9.3.3.19), a gNB ID over the 24 bits that the
@@ -427,7 +430,7 @@ fn an_argument_that_a_helper_does_not_take_is_an_error_and_no_panic() {
         global_gnb_id(network(), 0x1ff_ffff).unwrap_err(),
         nr_cgi(network(), 0x1ff_ffff, 1).unwrap_err(),
         nr_cgi(network(), 1, 0x1000).unwrap_err(),
-        int_to_bitvec(0x100, 8).unwrap_err(),
+        oxirush_ngap::Bits::new(0x100, 8).unwrap_err(),
     ];
     for error in panicked.iter().chain(&cut_short) {
         assert_eq!(error.kind(), ErrorKind::Argument, "{error}");
@@ -447,9 +450,9 @@ fn an_argument_that_a_helper_does_not_take_is_an_error_and_no_panic() {
 #[cfg(feature = "inspect")]
 mod inspect_errors {
     use super::release_request;
+    use oxirush_ngap::Octets;
     use oxirush_ngap::ngap::*;
     use oxirush_ngap::{Error, ErrorKind, inspect};
-    use rasn::types::Any;
     use serde_json::{Value, json};
 
     /// The view of the UE CONTEXT RELEASE REQUEST.
@@ -733,7 +736,6 @@ mod inspect_errors {
             "this is not a value of GlobalRANNodeID, at globalGNB-ID/gNB-ID: an object with one \
              member is expected, the name of an alternative with its value, and 5 is written"
         );
-        // The codec of the JSON forms is that of the crate: no error of rasn is its source.
         assert!(std::error::Error::source(&member).is_none());
     }
 
@@ -871,7 +873,7 @@ mod inspect_errors {
         let NGAP_PDU::initiatingMessage(mut held) = release_request() else {
             panic!("an initiating message");
         };
-        held.value = Any::new(vec![0xff]);
+        held.value = Octets::from(vec![0xff]);
         let pdu = NGAP_PDU::initiatingMessage(held);
         let error = pdu.to_view().unwrap_err();
         assert_eq!(error.kind(), ErrorKind::Decode);

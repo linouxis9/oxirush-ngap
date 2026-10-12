@@ -1,5 +1,5 @@
-use oxirush_ngap::ngap::{SNSSAI, SST, SliceSupportList};
-use rasn::prelude::*;
+use oxirush_ngap::aper::{AsnType, Decode, Error, Reader, decode, encode};
+use oxirush_ngap::ngap::{SD, SNSSAI, SST, SliceSupportList};
 
 /// The first SliceSupportItem has a future SEQUENCE extension addition.
 /// Its open type must be skipped before decoding the following item
@@ -7,7 +7,7 @@ use rasn::prelude::*;
 #[test]
 fn unknown_sequence_addition_preserves_the_following_item() {
     let wire = hex::decode("000180080801000010").unwrap();
-    let value = rasn::aper::decode::<SliceSupportList>(&wire).unwrap();
+    let value = decode::<SliceSupportList>(&wire).unwrap();
     assert_eq!(
         value
             .0
@@ -18,25 +18,38 @@ fn unknown_sequence_addition_preserves_the_following_item() {
     );
     // Unknown additions are skipped, so encoding retains the understood root.
     assert_eq!(
-        rasn::aper::encode(&value).unwrap(),
+        encode(&value).unwrap(),
         hex::decode("000100080080").unwrap()
     );
 }
 
-#[derive(AsnType, Decode, Debug, PartialEq)]
-#[rasn(automatic_tags)]
-struct FollowingSNSSAI {
-    value: SNSSAI,
-    #[rasn(value("0..=255"))]
+/// An S-NSSAI, then a number of one octet: what follows the additions of a value is
+/// read where they end.
+#[derive(Debug, PartialEq)]
+struct FollowingSNSSAI<'a> {
+    value: SNSSAI<'a>,
     following: u8,
 }
 
-/// Hand-built X.691 fields, independent of rasn's encoder. In particular,
+impl AsnType for FollowingSNSSAI<'_> {
+    const NAME: &'static str = "FollowingSNSSAI";
+}
+
+impl<'a> Decode<'a> for FollowingSNSSAI<'a> {
+    fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
+        Ok(Self {
+            value: SNSSAI::decode(reader)?,
+            following: reader.unsigned(0, 255)? as u8,
+        })
+    }
+}
+
+/// Hand-built X.691 fields, independent of the writer of the crate. In particular,
 /// normally small lengths <=64 encode n-1 in six unaligned bits; larger
 /// bitmaps use an unconstrained length (X.691 (02/2021) §11.9.3.4),
 /// including fragments.
 #[derive(Default)]
-struct Wire(BitString);
+struct Wire(Vec<bool>);
 
 impl Wire {
     fn bits(&mut self, value: usize, count: usize) {
@@ -67,7 +80,11 @@ impl Wire {
 
     fn finish(mut self) -> Vec<u8> {
         self.align();
-        self.0.into_vec()
+        let octet = |bits: &[bool]| {
+            bits.iter()
+                .fold(0, |octet, bit| octet << 1 | u8::from(*bit))
+        };
+        self.0.chunks(8).map(octet).collect()
     }
 }
 
@@ -117,16 +134,13 @@ fn extended_snssai(count: usize, fragmented_open_type: bool) -> Vec<u8> {
 #[test]
 fn unknown_additions_handle_small_large_and_fragmented_bitmaps() {
     let expected = FollowingSNSSAI {
-        value: SNSSAI::new(SST([1].into()), None, None),
+        value: SNSSAI::new(SST([1]), None, None),
         following: 0x7c,
     };
     for count in [1, 64, 65, 128, 16384, 65536] {
         let wire = extended_snssai(count, false);
-        assert_eq!(
-            rasn::aper::decode::<FollowingSNSSAI>(&wire).unwrap(),
-            expected
-        );
-        assert!(rasn::aper::decode::<FollowingSNSSAI>(&wire[..wire.len() - 1]).is_err());
+        assert_eq!(decode::<FollowingSNSSAI>(&wire).unwrap(), expected);
+        assert!(decode::<FollowingSNSSAI>(&wire[..wire.len() - 1]).is_err());
     }
 }
 
@@ -134,15 +148,10 @@ fn unknown_additions_handle_small_large_and_fragmented_bitmaps() {
 fn unknown_fragmented_open_types_preserve_following_fields_and_reject_truncation() {
     for count in [1, 64, 65, 128] {
         let wire = extended_snssai(count, true);
-        assert_eq!(
-            rasn::aper::decode::<FollowingSNSSAI>(&wire)
-                .unwrap()
-                .following,
-            0x7c
-        );
+        assert_eq!(decode::<FollowingSNSSAI>(&wire).unwrap().following, 0x7c);
         for cut in 0..wire.len() {
             assert!(
-                rasn::aper::decode::<FollowingSNSSAI>(&wire[..cut]).is_err(),
+                decode::<FollowingSNSSAI>(&wire[..cut]).is_err(),
                 "accepted truncated addition: bitmap={count}, prefix={cut}",
             );
         }
@@ -154,26 +163,17 @@ fn unknown_additions_reject_truncated_small_open_types() {
     for count in [1, 64, 65, 128] {
         let wire = extended_snssai(count, false);
         for cut in 0..wire.len() {
-            assert!(rasn::aper::decode::<FollowingSNSSAI>(&wire[..cut]).is_err());
+            assert!(decode::<FollowingSNSSAI>(&wire[..cut]).is_err());
         }
     }
 }
 
 #[test]
-fn root_fields_and_other_codecs_keep_the_original_sequence_layout() {
-    let value = SNSSAI::new(SST([1].into()), Some([1, 2, 3].into()), None);
-    macro_rules! round_trip {
-        ($codec:ident) => {
-            let wire = rasn::$codec::encode(&value).unwrap();
-            assert_eq!(rasn::$codec::decode::<SNSSAI>(&wire).unwrap(), value);
-        };
-    }
-    round_trip!(aper);
-    round_trip!(uper);
-    round_trip!(ber);
-    round_trip!(der);
-    round_trip!(oer);
-    round_trip!(coer);
-    round_trip!(jer);
-    round_trip!(xer);
+fn root_fields_keep_the_original_sequence_layout() {
+    // The extension bit, a bit for each of the two members that may be absent, the SST
+    // in eight bits, then the SD, which is three octets and so starts an octet.
+    let value = SNSSAI::new(SST([1]), Some(SD([1, 2, 3])), None);
+    let wire = encode(&value).unwrap();
+    assert_eq!(wire, [0b0100_0000, 0b0010_0000, 1, 2, 3]);
+    assert_eq!(decode::<SNSSAI>(&wire).unwrap(), value);
 }

@@ -1,53 +1,48 @@
-//! Encode and decode NGAP PDUs **without macros** using rasn and the generated types.
+//! Encode and decode NGAP PDUs **without macros** using the codec and the generated types.
 //!
 //! This example demonstrates the complete raw-codec workflow:
-//! - Constructing an `NGAP_PDU` by hand (`ProtocolIEID`, `Criticality`, `Any`)
-//! - Encoding and decoding with the raw rasn APER functions
+//! - Constructing an `NGAP_PDU` by hand (`ProtocolIEID`, `Criticality`, the octets of
+//!   an open type)
+//! - Encoding and decoding with the functions of the aligned PER runtime
 //! - Decoding and pattern-matching open protocol IE values
 //! - Verifying encode → decode round-trip fidelity
 //!
-//! `rasn` is the one that the crate re-exports, so the example needs no
-//! dependency on it.
+//! `oxirush_ngap::aper` is the runtime that the crate re-exports, `oxirush-aper`, so
+//! the example needs no dependency on it.
 //!
 //! For the ergonomic `build_ngap!` / `extract_ngap_ies!` versions, see
 //! `build_pdu.rs` and `extract_ies.rs`.
 
 use oxirush_ngap::ngap::*;
-use oxirush_ngap::rasn::{
-    self,
-    types::{FixedBitString, FixedOctetString, PrintableString},
-};
+use oxirush_ngap::{Bits, aper};
 
 fn main() {
     // ── 1. Build an NGSetupResponse by hand ─────────────────────────────────
     //
     // The response identifies its served GUAMIs, capacity, PLMNs, and slices.
 
-    let plmn_identity = PLMNIdentity(FixedOctetString::new([0x02, 0xF8, 0x39]));
+    let plmn_identity = PLMNIdentity([0x02, 0xF8, 0x39]);
 
     // The GUAMI that the AMF serves.
     let guami = GUAMI::new(
-        plmn_identity.clone(),
-        AMFRegionID(fixed_bits::<8>(1)),
-        AMFSetID(fixed_bits::<10>(1)),
-        AMFPointer(fixed_bits::<6>(0)),
+        plmn_identity,
+        // A bit string of 64 bits at most is a number with a length.
+        AMFRegionID(Bits::from(1u8)),
+        AMFSetID(Bits::new(1, 10).expect("an AMF Set ID of 10 bits")),
+        AMFPointer(Bits::new(0, 6).expect("an AMF Pointer of 6 bits")),
         None,
     );
     let served_guamis = ServedGUAMIList(vec![ServedGUAMIItem::new(guami, None, None)]);
 
     // The PLMN that it supports, with one slice.
-    let slice = SNSSAI::new(
-        SST(FixedOctetString::new([1])),
-        Some(SD(FixedOctetString::new([0x00, 0x00, 0x01]))),
-        None,
-    );
+    let slice = SNSSAI::new(SST([1]), Some(SD([0x00, 0x00, 0x01])), None);
     let slices = SliceSupportList(vec![SliceSupportItem::new(slice, None)]);
     let plmn_support = PLMNSupportList(vec![PLMNSupportItem::new(plmn_identity, slices, None)]);
 
-    let amf_name = AMFName(PrintableString::try_from("amf-1").expect("valid AMF name"));
+    let amf_name = AMFName("amf-1".into());
 
-    // In rasn's stable opaque-open-type representation, every entry holds its
-    // numeric ID, criticality, and the APER bytes of its concrete NGAP value.
+    // The value of an IE is an open type: every entry holds its numeric ID, its
+    // criticality, and the APER octets of its concrete NGAP value.
     let ies = vec![
         ProtocolIEField::new(
             ID_AMFNAME,
@@ -81,9 +76,9 @@ fn main() {
     ));
 
     // ── 2. Encode to APER ───────────────────────────────────────────────────
-    // `pdu.encode()` is the convenience API; this deliberately uses raw rasn.
+    // `pdu.encode()` is the convenience API; this deliberately uses the runtime.
 
-    let aper_bytes = rasn::aper::encode(&pdu).expect("APER encode failed");
+    let aper_bytes = aper::encode(&pdu).expect("APER encode failed");
 
     println!("Encoded NGSetupResponse: {} bytes", aper_bytes.len());
     println!("APER hex: {}", hex::encode(&aper_bytes));
@@ -91,7 +86,8 @@ fn main() {
     // ── 3. Decode from APER ─────────────────────────────────────────────────
     // `NGAP_PDU::decode(&bytes)` is the equivalent convenience API.
 
-    let decoded: NGAP_PDU = rasn::aper::decode(&aper_bytes).expect("APER decode failed");
+    // The PDU borrows the octets of its message from `aper_bytes`: nothing is copied.
+    let decoded: NGAPPDU = aper::decode(&aper_bytes).expect("APER decode failed");
 
     println!("\n=== Decoded: {decoded} ===");
     println!(
@@ -106,7 +102,9 @@ fn main() {
     // type, iterate `protocol_ies`, then decode each recognized IE open type.
 
     match &decoded {
-        NGAP_PDU::successfulOutcome(outcome) => {
+        // `NGAP_PDU` is the PDU that owns its octets, `NGAPPDU<'static>`: a PDU that
+        // borrows is matched by the name of its type.
+        NGAPPDU::successfulOutcome(outcome) => {
             println!("Type:           SuccessfulOutcome");
             println!("Procedure code: {}", outcome.procedure_code.0);
             println!("Criticality:    {:?}", outcome.criticality);
@@ -118,9 +116,7 @@ fn main() {
                 match ie.id {
                     ID_AMFNAME => {
                         let name: AMFName = decode_open_type(&ie.value).expect("decode AMF name");
-                        let text = String::from_utf8_lossy(name.0.as_bytes());
-
-                        println!("AMF Name:       {text}");
+                        println!("AMF Name:       {}", name.0);
                     }
 
                     ID_RELATIVE_AMFCAPACITY => {
@@ -170,12 +166,4 @@ fn main() {
     assert_eq!(aper_bytes, re_encoded, "Round-trip mismatch!");
 
     println!("\nRound-trip OK ({} bytes)", re_encoded.len());
-}
-
-fn fixed_bits<const N: usize>(value: u64) -> FixedBitString<N> {
-    let mut bits = FixedBitString::<N>::ZERO;
-    for index in 0..N {
-        bits.set(index, (value >> (N - index - 1)) & 1 == 1);
-    }
-    bits
 }

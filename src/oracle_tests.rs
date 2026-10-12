@@ -8,7 +8,7 @@
 //! oracle in one thing, which the comparison names where it meets it: they hold an
 //! INTEGER in 64 bits, where rasn holds a number of any size.
 
-use crate::registry::{PDU_TYPE, Pdu, message_read_and_written, message_type_name};
+use crate::registry::{BorrowedPdu, PDU_TYPE, Pdu, message_read_and_written, message_type_name};
 
 /// The octets that hexadecimal writes.
 fn unhex(text: &str) -> Vec<u8> {
@@ -75,6 +75,15 @@ fn same(name: &str, octets: &[u8], ours: &Result<Vec<u8>, crate::Error>) -> bool
 fn pdu_and_message(octets: &[u8]) -> (usize, usize) {
     let pdu = Pdu::decode(octets);
     let written = pdu.as_ref().map_err(Clone::clone).and_then(Pdu::encode);
+    // `decode` and `encode` take a PDU of the usual layout octet by octet. The codec of
+    // the type, which they stand for, gives the same PDU, the same error and the same
+    // octets, and so does the PDU that borrows.
+    let as_its_type = oxirush_aper::decode::<BorrowedPdu>(octets);
+    assert_eq!(as_its_type, pdu, "{octets:02x?}");
+    assert_eq!(BorrowedPdu::decode_borrowed(octets), pdu, "{octets:02x?}");
+    if let Ok(pdu) = &pdu {
+        assert_eq!(oxirush_aper::encode(pdu), written, "{pdu:?}");
+    }
     if !same(PDU_TYPE, octets, &written) {
         return (0, 0);
     }

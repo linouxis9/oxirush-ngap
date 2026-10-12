@@ -456,6 +456,10 @@ macro_rules! procedures {
         #[cfg(any(test, fuzzing))]
         #[allow(unused_imports)]
         pub(crate) use $crate::ngap::NGAP_PDU as Pdu;
+        /// A PDU that borrows its message from the octets that it is decoded from.
+        #[cfg(test)]
+        #[allow(unused_imports)]
+        pub(crate) use $crate::ngap::NGAPPDU as BorrowedPdu;
         /// The name of the type of a PDU in the bindings.
         #[cfg(any(test, fuzzing))]
         #[allow(dead_code)]

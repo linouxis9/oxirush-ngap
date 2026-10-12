@@ -237,10 +237,70 @@ impl NGAPPDU<'static> {
     /// The PDU that `bytes` are, in aligned PER: the octets of one PDU, whole, and no
     /// octet after it. The PDU owns the octets of its message, which are copied once.
     pub fn decode(bytes: &[u8]) -> Result<Self, crate::Error> {
-        NGAPPDU::decode_borrowed(bytes).map(NGAPPDU::into_owned)
+        match NGAPPDU::usual(bytes) {
+            Some((alternative, code, criticality, message)) => Ok(Self::of_alternative(
+                alternative,
+                code,
+                criticality,
+                Octets::owned(message.to_vec()),
+            )),
+            None => oxirush_aper::decode(bytes).map(NGAPPDU::into_owned),
+        }
     }
 }
 impl<'a> NGAPPDU<'a> {
+    /// A PDU of the usual layout, read octet by octet: its alternative, its procedure
+    /// code and its criticality, in an octet each, then its message in one piece up to
+    /// the last octet. `None` for octets of another layout and for octets that are no
+    /// PDU, which the codec of the type reads or refuses: this is a shorter way to
+    /// what it gives, and the tests hold the two to the same PDU.
+    #[inline]
+    fn usual(bytes: &'a [u8]) -> Option<(u8, u8, Criticality, &'a [u8])> {
+        let [alternative, code, criticality, ref rest @ ..] = *bytes else {
+            return None;
+        };
+        // No extension bit, and one of the three alternatives.
+        if alternative & 0x80 != 0 || alternative >> 5 > 2 {
+            return None;
+        }
+        let criticality = *Criticality::VALUES.get(usize::from(criticality >> 6))?;
+        // The length of the message in one octet or in two, and no fragment.
+        let message = match *rest {
+            [length @ 1..=0x7f, ref message @ ..] if message.len() == usize::from(length) => {
+                message
+            }
+            [high @ 0x80..=0xbf, low, ref message @ ..]
+                if !message.is_empty()
+                    && message.len() == usize::from(high & 0x3f) << 8 | usize::from(low) =>
+            {
+                message
+            }
+            _ => return None,
+        };
+        Some((alternative >> 5, code, criticality, message))
+    }
+    /// The PDU of an alternative, which is one of the three.
+    #[inline]
+    fn of_alternative(alternative: u8, code: u8, criticality: Criticality, value: Octets<'a>) -> Self {
+        let procedure_code = ProcedureCode(code);
+        match alternative {
+            0 => Self::initiatingMessage(InitiatingMessage {
+                procedure_code,
+                criticality,
+                value,
+            }),
+            1 => Self::successfulOutcome(SuccessfulOutcome {
+                procedure_code,
+                criticality,
+                value,
+            }),
+            _ => Self::unsuccessfulOutcome(UnsuccessfulOutcome {
+                procedure_code,
+                criticality,
+                value,
+            }),
+        }
+    }
     /// The PDU that `bytes` are, as `decode` reads it, with the octets of its message
     /// borrowed from `bytes`: nothing is copied, and the PDU lives as long as they do.
     ///
@@ -259,11 +319,19 @@ impl<'a> NGAPPDU<'a> {
     /// # Ok::<(), oxirush_ngap::Error>(())
     /// ```
     pub fn decode_borrowed(bytes: &'a [u8]) -> Result<Self, crate::Error> {
-        oxirush_aper::decode(bytes)
+        match Self::usual(bytes) {
+            Some((alternative, code, criticality, message)) => Ok(Self::of_alternative(
+                alternative,
+                code,
+                criticality,
+                Octets::borrowed(message),
+            )),
+            None => oxirush_aper::decode(bytes),
+        }
     }
     /// The octets of this PDU, in aligned PER.
     pub fn encode(&self) -> Result<Vec<u8>, crate::Error> {
-        let mut octets = Vec::with_capacity(self.value().len() + 8);
+        let mut octets = Vec::with_capacity(self.value().len() + 6);
         self.encode_into(&mut octets)?;
         Ok(octets)
     }
@@ -271,7 +339,23 @@ impl<'a> NGAPPDU<'a> {
     /// kept from one PDU to the next is allocated once. After an error, `octets` are as
     /// they were.
     pub fn encode_into(&self, octets: &mut Vec<u8>) -> Result<(), crate::Error> {
-        oxirush_aper::encode_into(self, octets)
+        // Octet by octet, as `decode` reads the usual layout: the alternative, the
+        // procedure code and the criticality, then the message in its open type. It
+        // is what the codec of the type writes, which the tests hold it to.
+        let (alternative, code, criticality, value) = match self {
+            NGAPPDU::initiatingMessage(message) => {
+                (0, message.procedure_code.0, message.criticality, &message.value)
+            }
+            NGAPPDU::successfulOutcome(message) => {
+                (1, message.procedure_code.0, message.criticality, &message.value)
+            }
+            NGAPPDU::unsuccessfulOutcome(message) => {
+                (2, message.procedure_code.0, message.criticality, &message.value)
+            }
+        };
+        octets.extend_from_slice(&[alternative << 5, code, (criticality as u8) << 6]);
+        oxirush_aper::Writer::new(octets).open_type(value);
+        Ok(())
     }
     /// The message that this PDU holds, as its type `T`. What the message holds of
     /// octets is borrowed from the PDU: the PDU is a variable of its own, which the

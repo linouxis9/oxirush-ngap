@@ -35,7 +35,7 @@
 mod protocol;
 
 use protocol::{ANY_MESSAGE, Borrowed, Error, ErrorKind, PDU_TYPE, Pdu, ROOT};
-use protocol::{fuzzing, inspect};
+use protocol::{aper, fuzzing, inspect};
 use serde_json::Value;
 
 /// What the crate wrote of a value that it read, or why it read none, for the oracle.
@@ -61,8 +61,13 @@ pub fn decode(octets: &[u8]) {
     let read = Pdu::decode(octets);
     let written = read.as_ref().map_err(Clone::clone).and_then(Pdu::encode);
     oracle::same_octets(PDU_TYPE, octets, ours(&written));
-    let Ok(pdu) = read else {
-        return;
+    let pdu = match read {
+        Ok(pdu) => pdu,
+        // What `decode` refuses, the codec of the type refuses in the same words.
+        Err(error) => {
+            assert_eq!(aper::decode::<Borrowed>(octets), Err(error));
+            return;
+        }
     };
     let written = match written {
         Ok(written) => written,
@@ -74,6 +79,10 @@ pub fn decode(octets: &[u8]) {
     let borrowed = Borrowed::decode_borrowed(octets);
     assert_eq!(borrowed.as_ref(), Ok(&pdu), "{octets:02x?}");
     assert_eq!(borrowed.unwrap().into_owned(), pdu);
+    // `decode` and `encode` take a PDU of the usual layout octet by octet: the codec of
+    // the type gives the same PDU and the same octets.
+    assert_eq!(aper::decode::<Borrowed>(octets).as_ref(), Ok(&pdu));
+    assert_eq!(aper::encode(&pdu).as_ref(), Ok(&written), "{pdu:?}");
 
     // What the octets of the message have no part in.
     let _ = (pdu.to_string(), pdu.procedure_name(), pdu.kind());

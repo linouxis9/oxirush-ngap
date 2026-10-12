@@ -1218,6 +1218,7 @@ S1AP.
 |------|---------------|
 | `tests/aper_vectors.rs` | [The vectors](#the-vectors) of `tests/fixtures`, which pycrate 0.8.1 encoded from the ASN.1 of the specification: the 144 messages of `messages.tsv`, one for each message of each procedure with what is mandatory and nothing else, and the 479 vectors of `vectors.tsv`, which have content. Each decodes to its type and encodes to the same octets, and its truncations and one more octet are refused. |
 | `tests/vectors.rs` | With `inspect`, each vector of `vectors.tsv` is read with the type of each IE, each transfer and each container of a handover, and is the same octets when it is written from its view, from its values alone and from its tree. A message of a later release, in `later.tsv`, is read as the same message without the additions that pycrate gave it. The vectors hold each of the 144 messages and each of the 489 IEs that the registry names, those of the extension containers among them: the messages of `messages.tsv` hold 111 of the IEs. |
+| `tests/captured.rs` | [The captured PDUs](#the-captured-pdus) of `tests/fixtures/captured.tsv`: 177 PDUs that the AMF of Open5GS 2.8.0, the AMF of free5GC 4.2.3 and PacketRusher as gNB sent in lab runs, which nothing of this crate wrote or chose. Each is read with the procedure code and the alternative that its first two octets have, and is written as the octets that were sent, by the PDU that borrows them too. The oracle reads and writes the same, and its protocol IEs are put back as the same octets. With `inspect`, the message has the name that tshark gives the frame, every IE and every transfer of its view is read with its type, and the view, its values alone and its tree give the octets back. |
 | `tests/aper_round_trip.rs` | The macros, and the encodings that rasn 0.29 has otherwise than X.691: constrained lists, `UTF8String`, long bit strings, and each string with a length of two octets, as pycrate writes it. A number between the ranges of the root of an extensible constraint. |
 | `tests/errors.rs` | The errors of the typed API, each with its kind and its message: a PDU that is decoded as another message, octets that are no PDU, a value outside its constraint in a function and in each macro, an IE that is absent or does not decode, for a `req` and for an `opt` field, and what each helper refuses. With `inspect`, a test for each kind of error of the JSON forms. |
 | `tests/protocol_ies.rs` | The protocol IEs of each of the 144 messages but the private one, and of each vector, are read from its PDU and put back as the same octets. An IE that the protocol does not have and one that is there twice are kept with their criticality, a message that the macros built has the IEs that it was built with, and the private message is an error. |
@@ -1227,7 +1228,7 @@ S1AP.
 | `tests/inspection.rs` | Each of the 144 messages is the same octets through its view, and through its tree where it has IEs to name. Each path of each selects its value, with and without `value` and `decoded`, and is one that `check_path` takes. Edits, written trees, criticalities, the two IEs that have the type of what they extend, and the identifiers of the registry against the constants of the bindings. |
 | `tests/oracle_codec.rs` | The codecs that the oracle has in the place of those that rasn 0.29 derives: the `SEQUENCE`, the list of a size constraint, and the strings whose length takes two octets. Each gives what the derived codec gives where the two are to agree, and the octets of the clause where they are not. |
 | `tests/shared_files.rs` | The files that this crate shares with `oxirush-s1ap` are as they were last mirrored. |
-| The unit tests of `src/oracle_tests.rs` | The crate against the oracle of `oracle/`, which has the same types with the codec of rasn 0.29, another implementation of aligned PER. Each vector, its truncations, it with one more octet and with each bit of chosen octets changed is given to both, as a PDU and as its message: both read it and write the same octets, or neither reads it. With `inspect`, each IE and each transfer that a view decodes has the JSON form that the JSON Encoding Rules of rasn give it, but for two bit strings that rasn writes otherwise than X.697 has them. The comparison takes one difference: the bindings hold an `INTEGER` in 64 bits. `decode` and `encode` of a PDU and `set_protocol_ies`, which take the usual layout octet by octet, give the PDU, the error and the octets that the codec of the type gives |
+| The unit tests of `src/oracle_tests.rs` | The crate against the oracle of `oracle/`, which has the same types with the codec of rasn 0.29, another implementation of aligned PER. Each vector and each captured PDU, its truncations, it with one more octet and with each bit of chosen octets changed is given to both, as a PDU and as its message: both read it and write the same octets, or neither reads it. With `inspect`, each IE and each transfer that a view decodes has the JSON form that the JSON Encoding Rules of rasn give it, but for two bit strings that rasn writes otherwise than X.697 has them. The comparison takes one difference: the bindings hold an `INTEGER` in 64 bits. `decode` and `encode` of a PDU and `set_protocol_ies`, which take the usual layout octet by octet, give the PDU, the error and the octets that the codec of the type gives |
 | The unit tests of the paths | No two names that a path takes can be mistaken for each other. No value has a member with the same name as a member of its IE, except the `value` of a bit string. |
 | The Rust blocks of this page | They compile and run as documentation tests, with the `inspect` feature, and `tests/readme.rs` compares what each prints with the output shown under it. |
 
@@ -1315,13 +1316,47 @@ crate, as X.691 (02/2021) 13.1 has a value "within the range of the extension
 root", and after the extension bit by pycrate. Each reads what the other
 writes, and the vectors have no such number.
 
+### The captured PDUs
+
+`tests/fixtures/captured.tsv` has 177 PDUs that other implementations sent,
+where the vectors are what pycrate wrote: each distinct PDU of a sender,
+captured with tcpdump on the SCTP association of lab runs, in which each core
+ran from the sources of its release. Nothing of this crate wrote or chose
+them. Each line has the octets, the procedure code and the alternative of the
+PDU that their first two octets have, the sender with its revision, the
+direction, and what tshark 4.6.4 says the frame is. The head of the file has
+the full revisions.
+
+| Sender | PDUs |
+|--------|------|
+| Open5GS v2.8.0 (`157f611a`), AMF | 85, to the RAN |
+| free5GC v4.2.3 (`3b34a08e`), AMF v1.4.5 with free5gc/ngap v1.1.3 | 79, to the RAN |
+| PacketRusher 20250225 (`3210a263`), with free5gc/ngap v1.0.8, as gNB | 13, to the core |
+
+The procedures are registrations with sessions, deregistrations, service
+requests, N2 and Xn handovers, and what a core answers to messages that are
+deliberately wrong. The subscribers are test values, 208-93 0000000001 to
+0000000008 with the key of the sample configuration of PacketRusher.
+
+`tests/captured.rs` holds each of them, the comparison with the oracle of
+`src/oracle_tests.rs` gives each to both codecs with its truncations and its
+changed bits, as it does the vectors, and the corpus of the fuzz targets
+starts from them too. `tests/fixtures/dissect.py` gives them to tshark with
+the vectors: Wireshark 4.6.4 reads the procedure, the alternative of the PDU
+and the IEs of each as the file has them, and all 177 without a remark.
+
+They are what these runs had: two open-source cores and one open-source
+simulator, of which free5GC and PacketRusher have two versions of one NGAP
+library, no commercial RAN or core, and 18 of the 144 messages, most often a
+Downlink NAS Transport.
+
 ### Fuzzing
 
 `fuzz/` has three [cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets,
 a package of its own that is not published. A target does not only look for a
 panic: it gives its octets to the crate and to the oracle of the tests, the
 same types with the codec of rasn, and compares what the two make of them.
-CI runs each for a minute, from the vectors.
+CI runs each for a minute, from the vectors and the captured PDUs.
 
 | Target | What holds for any octets |
 |--------|---------------------------|

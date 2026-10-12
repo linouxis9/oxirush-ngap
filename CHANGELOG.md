@@ -319,6 +319,17 @@ what each type became.
   that the bindings do not have: they are read as the messages without them.
   `tests/fixtures/generate.py` writes the three files, and
   `tests/fixtures/dissect.py` gives them to tshark.
+- PDUs that other implementations sent, in `tests/fixtures/captured.tsv`: 177
+  distinct PDUs that were captured on the wire in lab runs, 85 that the AMF
+  of Open5GS 2.8.0 sent, 79 that the AMF of free5GC 4.2.3 sent and 13 that
+  PacketRusher sent as gNB, each with its sender, its direction and what
+  tshark 4.6.4 says the frame is. Nothing of this crate wrote or chose them.
+  `tests/captured.rs` reads each and writes it back as the octets that were
+  sent, and with `inspect` the message has the name that tshark gives it,
+  each of its IEs is read with its type, and its view, its values alone and
+  its tree give the octets back. The comparison with the oracle, the corpus
+  of the fuzz targets and `tests/fixtures/dissect.py`, which gives them to
+  tshark, take them beside the vectors.
 - For maintainers: `build/asn1.sha256` records the SHA-256 of the six ASN.1
   modules that the bindings are generated from, `build/extract_asn1.py`
   takes them out of the archive that 3GPP publishes, and the generator reads

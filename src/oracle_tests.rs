@@ -26,12 +26,13 @@ fn vectors(file: &str) -> Vec<Vec<u8>> {
         .collect()
 }
 
-/// The vectors of the fixtures: the messages, the vectors with content, and the
-/// messages of a later release.
+/// The vectors of the fixtures: the messages, the vectors with content, the messages
+/// of a later release, and the PDUs that other implementations sent.
 fn fixtures() -> Vec<Vec<u8>> {
     let mut fixtures = vectors(include_str!("../tests/fixtures/messages.tsv"));
     fixtures.extend(vectors(include_str!("../tests/fixtures/vectors.tsv")));
     fixtures.extend(vectors(include_str!("../tests/fixtures/later.tsv")));
+    fixtures.extend(vectors(include_str!("../tests/fixtures/captured.tsv")));
     fixtures
 }
 

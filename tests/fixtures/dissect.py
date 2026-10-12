@@ -7,10 +7,10 @@ Run it from the directory of the crate, with `tshark` and `text2pcap` of Wiresha
 the path. Nothing of the crate takes part, and nothing of pycrate, which encoded the
 vectors: this is a third reading of the octets.
 
-For each vector of `messages.tsv`, `vectors.tsv` and `later.tsv`, tshark must read the
-procedure code and the alternative of the PDU that the file says, and the identifiers of
-the IEs of the message in their order, as this script reads them from the layout of the
-octets. In a
+For each vector of `messages.tsv`, `vectors.tsv` and `later.tsv`, and for each PDU of
+`captured.tsv`, which other implementations sent, tshark must read the procedure code
+and the alternative of the PDU that the file says, and the identifiers of the IEs of the
+message in their order, as this script reads them from the layout of the octets. In a
 vector that is made for a size, it must read a string of that many octets or bits, or a
 list of that many entries. The script fails when one of these differs.
 
@@ -135,7 +135,7 @@ def main():
     version = subprocess.run(["tshark", "--version"], capture_output=True, text=True).stdout
     print(version.splitlines()[0])
     failed = False
-    for file in ("messages.tsv", "vectors.tsv", "later.tsv"):
+    for file in ("messages.tsv", "vectors.tsv", "later.tsv", "captured.tsv"):
         lines = pathlib.Path("tests/fixtures", file).read_text().splitlines()
         rows = [line.split("\t") for line in lines if not line.startswith("#")]
         with tempfile.TemporaryDirectory() as directory:

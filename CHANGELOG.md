@@ -320,11 +320,27 @@ is not source compatible with 0.4.2.
   is refused.
 - `paths` lists the `octets` of an IE or of a transfer that has no value
   beside them.
-- An IE or a transfer whose value JER does not read back as it is stays its
-  octets beside a `_decode_error`. rasn's JER writes a `BIT STRING` of one
-  extensible size as its octets, without its length: an algorithm mask of
-  20 bits and one of 24 were shown as the same value, an edit of their IE
-  was refused, and the tree of their PDU was not written back.
+- The JSON forms are written and read by a codec of the crate, which makes
+  a `serde_json::Value` of a value of the bindings and back with no text
+  between them, where the codec of the JSON Encoding Rules of rasn wrote
+  text that was parsed, and read it back to compare. A value has the form
+  that it had, which the documentation of `inspect` lists under Values, and
+  two values that stayed octets beside a `_decode_error` have one:
+  - an integer of 2^63 or more is a number, and one above 2^64-1 or below
+    -2^63, which JSON has no exact number for, a string of its decimal
+    digits;
+  - a `BIT STRING` of another size than the one that its type gives beside
+    an extension marker is `{"value", "length"}`, as an algorithm mask of 24
+    bits is `{"value": "C00000", "length": 24}`. One of the size of its type
+    is its octets in hexadecimal, as before, and a path goes into the two
+    members.
+
+  A value that is written is read strictly, and the error says where the
+  fault is by the names of the value: a member that its type does not have,
+  a second alternative of a `CHOICE`, an integer outside its constraint or
+  written as its digits where JSON has a number for it, a bit string with
+  other octets than its length has and padding bits that are not zero. The name of an `ENUMERATED` value is taken whatever its case and
+  its separators where it is read.
 - The examples of the documentation and of the README are compiled and run
   by the documentation tests.
 

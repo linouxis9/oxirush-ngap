@@ -13,7 +13,8 @@
 //! keeps what was received, and the rest of this page is about it.
 //!
 //! [`to_view`] returns `procedure_code`, `direction`, `criticality` and `message`: the
-//! message in the ASN.1 JSON encoding (JER). An IE whose identifier is known has its typed
+//! message in JSON, each value in the form of its ASN.1 type, which [Values](#values)
+//! lists. An IE whose identifier is known has its typed
 //! `value` (`extensionValue` in an extension container) in place of its octets. Its type
 //! is that of its identifier, and for an IE of an extension container the one that the
 //! type which the container extends gives it: id-CurrentQoSParaSetIndex is an
@@ -31,9 +32,9 @@
 //!   parts of a GUAMI or an SST, as a number.
 //!
 //! [`from_view`] takes them in this form, a number also as a `"0x…"` string, and
-//! as JER writes them. It takes the name of an ENUMERATED value as any other name: see
+//! in the form of their ASN.1 type. It takes the name of an ENUMERATED value as any other name: see
 //! [Names](#names). A value that does not fit its form, such as a transport layer address
-//! of another length, stays as JER writes it. The other strings stay in hexadecimal: an
+//! of another length, stays in the form of its type. The other strings stay in hexadecimal: an
 //! SD, keys and algorithm masks, the NAS-PDU and the other containers, and the node
 //! identifiers, whose length is part of their value.
 //!
@@ -219,6 +220,36 @@
 //! # Ok::<(), oxirush_ngap::Error>(())
 //! ```
 //!
+//! # Values
+//!
+//! A value has the JSON form of its ASN.1 type. It is that of the JSON Encoding Rules,
+//! ITU-T X.697 (02/2021), but for what the rows of an `INTEGER`, of a `BIT STRING` and
+//! of an open type say:
+//!
+//! | ASN.1 | JSON |
+//! | --- | --- |
+//! | `BOOLEAN`, `NULL` | `true` or `false`, and `null` |
+//! | `INTEGER` | A number. One above 2^64-1 or below -2^63 is a string of its decimal digits: `serde_json` has no exact number for it, and X.697 has a number of any size |
+//! | `ENUMERATED` | The name of the value |
+//! | `OCTET STRING` | Its octets in hexadecimal |
+//! | `BIT STRING` of one size | Its octets in hexadecimal, the last one padded with zero bits |
+//! | `BIT STRING` whose size varies | `{"value": HEXADECIMAL, "length": BITS}`. Where the type gives one size and an extension marker, a string of that size is its octets in hexadecimal alone, and one of another size has its length: X.697 gives every string of such a type its length |
+//! | A character string, an `OBJECT IDENTIFIER` | A string: the arcs of an identifier in decimal, with a full stop between them |
+//! | `SEQUENCE` | An object with a member for each component that is there, by the name that ASN.1 gives it |
+//! | `SEQUENCE OF` | A list |
+//! | `CHOICE` | An object with one member, the name of the alternative with its value |
+//! | An open type | Its octets in hexadecimal, where X.697 has the value that they hold: a view shows that value in their place |
+//!
+//! A `BIT STRING` member that may be absent and that has its size where the member is
+//! declared, and not in a type of its own, has its length whatever that size is, as
+//! the `dayofWeek` of a `ScheduledCommunicationTime`.
+//!
+//! A value that is written is read strictly: a member that its type does not have, a
+//! second alternative of a `CHOICE`, an integer outside the constraint of its type or
+//! written as its digits where JSON has a number for it, a bit string with other octets
+//! than its length has and padding bits that are not zero are each an error, which says
+//! where the fault is by the names of the value.
+//!
 //! # Errors
 //!
 //! Each function that can fail returns the [`Error`] of the crate, and the kind of
@@ -232,7 +263,7 @@
 //! | `NoSuchMember` | A name that the type at that place cannot have: in a path, a member of a value, an IE of the object set of a message, a name where a list goes by position; in a value that is written, a member that its type does not have |
 //! | `NothingSelected` | An edit whose path selects nothing: an IE that the message does not have, or a position after the end of a list |
 //! | `NotOpened` | A path through the type that octets carry, before [`open`] decoded them: open, then select again |
-//! | `Value` | A JSON value that is not a value of its ASN.1 type: of another form, a name that an `ENUMERATED` does not have, a number outside its constraint, octets that are no hexadecimal. The message says at which member, by the names of the value |
+//! | `Value` | A JSON value that is not a value of its ASN.1 type: of another form than [Values](#values) lists, a name that an `ENUMERATED` does not have, a number outside its constraint, octets that are no hexadecimal. The message says at which member, by the names of the value |
 //! | `Form` | JSON that is not written as a tree or as a view: no name of a message, a member that neither has, an IE with its value and its octets, an IE that says no criticality where no table has one |
 //! | `Edit` | An edit that is refused: a member that its type always has, the value of an IE or the alternative of a `CHOICE` taken out, an insertion where there is no list, and the octets of a value that was edited since |
 //! | `Limit` | A path of more than 64 segments or 4096 octets, a selection of more than 4096 values, a tree nested deeper than 256 levels, and the tree of a message without a list of IEs |
@@ -482,7 +513,7 @@ pub(crate) enum Form {
 }
 
 impl Form {
-    /// The readable form of a value as JER has it; `None` when it has none.
+    /// The readable form of a value as its ASN.1 type has it; `None` when it has none.
     fn read(self, jer: &Value) -> Option<Value> {
         // The decimal digits that these half octets are; none when one of them is no digit.
         let digits = |digits: &[u8]| {
@@ -529,8 +560,9 @@ impl Form {
         }
     }
 
-    /// The value as JER has it, from its readable form. A value in another form is kept
-    /// as it is: the JER form is still taken, and the codec refuses what is neither.
+    /// The value as its ASN.1 type has it, from its readable form. A value in another
+    /// form is kept as it is: the form of the type is still taken, and the codec refuses
+    /// what is neither.
     fn write(self, shown: &Value) -> Result<Value, Error> {
         let number = |bits: u32, number: u64| {
             if bits < 64 && number >> bits != 0 {
@@ -613,7 +645,7 @@ fn show(form: Form, value: &mut Value) {
     }
 }
 
-/// `value`, or each value of a list, as JER has it again.
+/// `value`, or each value of a list, as its ASN.1 type has it again.
 fn unshow(form: Form, value: &mut Value) -> Result<(), Error> {
     match value {
         Value::Array(values) => values.iter_mut().try_for_each(|value| unshow(form, value)),

@@ -1057,10 +1057,12 @@ written, and take them so.
 | a bit string of another size than the one that its type gives beside an extension marker, as an algorithm mask of 24 bits | `{"value": "C00000", "length": 24}`, where a mask of the 16 bits of its type is `"C000"` |
 | the other strings: an SD, keys and algorithm masks, the NAS-PDU and the other containers | hexadecimal, read in either case |
 
-Each is also read as JER writes it, and a value that does not fit its
-notation, such as a transport layer address of another length, stays as JER
-writes it. The octets of a bit string start with its first bit: `"C000"`
-is the first two bits of sixteen, and `"000004"` the number 1 in 22 bits.
+Each is also read in the form of its ASN.1 type, and a value that does not
+fit its notation, such as a transport layer address of another length, stays
+in that form: the documentation of the [`inspect`] module lists the form of
+each type under [Values]. The octets of a bit string start with its first
+bit: `"C000"` is the first two bits of sixteen, and `"000004"` the number 1
+in 22 bits.
 
 ### Errors of the JSON forms
 
@@ -1245,6 +1247,7 @@ Licensed under the Apache License, Version 2.0. See [LICENSE](https://github.com
 [Names]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/inspect/index.html#names
 [What is not there]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/inspect/index.html#what-is-not-there
 [Edits]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/inspect/index.html#edits
+[Values]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/inspect/index.html#values
 [Octets that carry a type]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/inspect/index.html#octets-that-carry-a-type
 [`to_tree()`]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/ngap/ngap_pdu_descriptions/enum.NGAPPDU.html#method.to_tree
 [`from_tree()`]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/ngap/ngap_pdu_descriptions/enum.NGAPPDU.html#method.from_tree

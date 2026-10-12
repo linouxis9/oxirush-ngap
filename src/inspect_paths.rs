@@ -210,8 +210,19 @@ pub(crate) fn ie_id(name: &str) -> Option<u16> {
         }
         ids
     });
-    let name: Vec<u8> = letters(name).collect();
-    IDS.get(&name).copied()
+    // The letters of the name, on the stack for a name of the length that an IE has:
+    // the longest has 51 of them.
+    let mut short = [0; 64];
+    let mut length = 0;
+    for letter in letters(name) {
+        let Some(place) = short.get_mut(length) else {
+            let long: Vec<u8> = letters(name).collect();
+            return IDS.get(&long).copied();
+        };
+        *place = letter;
+        length += 1;
+    }
+    IDS.get(&short[..length]).copied()
 }
 
 /// The identifier of an entry of a list of IEs: its number, or the name of its IE as an

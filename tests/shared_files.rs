@@ -8,7 +8,7 @@ use std::path::Path;
 
 /// The shared files, and the FNV-1a digest of each as it was last mirrored.
 const SHARED: &[(&str, u64)] = &[
-    ("build/aper_fix.rs", 0x0468956d2aad0ba6),
+    ("build/aper_fix.rs", 0x00b83a662f2e1d4c),
     ("build/containers.rs", 0x9d134011ce89fec9),
     ("build/inspection.rs", 0xcc54553d89f026e5),
     ("build/registry.rs", 0xd1c828575adadf7c),
@@ -16,8 +16,8 @@ const SHARED: &[(&str, u64)] = &[
     ("src/error.rs", 0xe3604d5e30f8758a),
     ("src/inspect_paths.rs", 0x92f5cef9146d9104),
     ("src/message.rs", 0x95e7ef29b6bc50cf),
-    ("src/per.rs", 0x0a3fd42cad850a6f),
-    ("src/sized.rs", 0xacd754552266ad78),
+    ("src/per.rs", 0x3ccde6c46ad3f8b6),
+    ("src/sized.rs", 0x05d05e62217fc26a),
     ("tests/readme.rs", 0x8649417b32dae0f4),
 ];
 

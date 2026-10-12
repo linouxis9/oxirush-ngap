@@ -5,11 +5,17 @@ All notable changes to `oxirush-ngap` are recorded here.
 ## Unreleased (0.5.0)
 
 The bindings come from TS 38.413 V19.4.0 (Release 19) instead of V16.6.0,
-and the APER codec follows ITU-T X.691 where rasn 0.28 departs from it. It
+and the APER codec follows ITU-T X.691 where rasn 0.29 departs from it. It
 is not source compatible with 0.4.2.
 
 ### Breaking changes relative to 0.4.2
 
+- The crate is built with rasn 0.29, where 0.4.2 had rasn 0.28, and
+  `oxirush_ngap::rasn` is that version: the values of the bindings are its
+  types. A crate that depends on `rasn` itself beside this one moves to
+  0.29 with it, or takes the types from `oxirush_ngap::rasn`. rasn 0.29
+  takes constraints by reference: an `Encode` or a `Decode` that is written
+  by hand has `&Constraints` where it had `Constraints`.
 - The bindings are generated from the Release 19 ASN.1 (`38413-j40`), with
   every procedure, IE and extension up to Release 19.
 - Each protocol IE container, each extension container and their fields are
@@ -23,7 +29,7 @@ is not source compatible with 0.4.2.
   type name is an alias only for the one IE of that type: `AMFName` built
   id-OldAMF, and `SONConfigurationTransfer` the uplink IE in a downlink
   message. A type name shared by several IEs is no longer an IE name.
-- The minimum supported Rust version is 1.88, which rasn 0.28.15 needs:
+- The minimum supported Rust version is 1.88, which rasn needs:
   0.4.2 declared 1.85 and did not build with it.
 - `helpers::plmn` writes other octets for an MNC of three digits, and
   `helpers::plmn_from` reads them: see the first entry of Fixed.

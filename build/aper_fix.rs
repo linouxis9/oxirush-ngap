@@ -44,7 +44,7 @@ pub fn fix_constrained_sequences(generated: &str) -> Result<String> {
 
 /// Decode unknown extension additions before returning an extensible SEQUENCE.
 ///
-/// rasn 0.28 leaves them unread when the type has no known additions. All
+/// rasn 0.29 leaves them unread when the type has no known additions. All
 /// current SEQUENCE additions are empty; the protocol's named extension
 /// containers remain ordinary root fields. Preserve their root field tokens
 /// and constraints in the decoder macro, and fail if a future ASN.1 version
@@ -123,7 +123,7 @@ pub fn fix_extensible_sequences(generated: &str) -> Result<String> {
     Ok(generated)
 }
 
-/// Work around rasn 0.28 APER decoding of size-constrained `UTF8String` values.
+/// Work around rasn 0.29 APER decoding of size-constrained `UTF8String` values.
 ///
 /// A constraint on a character string type that is not a known-multiplier
 /// type is not PER-visible (X.691 (02/2021) §10.3.7): the value is an
@@ -148,14 +148,14 @@ pub fn fix_utf8_strings(generated: &str) -> Result<String> {
         fn decode_with_tag_and_constraints<D: Decoder>(
             decoder: &mut D,
             tag: Tag,
-            constraints: Constraints,
+            constraints: &Constraints,
         ) -> Result<Self, D::Error> {{
             if decoder.codec() != rasn::Codec::Aper {{
                 return Utf8String::decode_with_tag_and_constraints(decoder, tag, constraints)
                     .map(Self);
             }}
             decoder
-                .decode_utf8_string(tag, Constraints::default())
+                .decode_utf8_string(tag, &Constraints::default())
                 .map(Self)
         }}
     }}"#
@@ -170,7 +170,7 @@ pub fn fix_utf8_strings(generated: &str) -> Result<String> {
     Ok(generated)
 }
 
-/// Work around rasn 0.28 APER decoding of fixed-size `BIT STRING` values
+/// Work around rasn 0.29 APER decoding of fixed-size `BIT STRING` values
 /// longer than 16 bits.
 ///
 /// Such a bit string is octet-aligned in APER, with no length determinant
@@ -203,7 +203,7 @@ pub fn fix_fixed_bit_strings(generated: &str) -> Result<String> {
         fn decode_with_tag_and_constraints<D: Decoder>(
             decoder: &mut D,
             tag: Tag,
-            constraints: Constraints,
+            constraints: &Constraints,
         ) -> Result<Self, D::Error> {{
             if decoder.codec() != rasn::Codec::Aper {{
                 return FixedBitString::<{length}usize>::decode_with_tag_and_constraints(
@@ -286,7 +286,7 @@ pub fn fix_fixed_bit_strings(generated: &str) -> Result<String> {
                                 r#"
                 if decoder.decode_bool(Tag::BOOL)? {{
                     return decoder
-                        .decode_bit_string(Tag::BIT_STRING, Constraints::default())
+                        .decode_bit_string(Tag::BIT_STRING, &Constraints::default())
                         .map(Self::{variant_name});
                 }}"#
                             ),
@@ -300,7 +300,7 @@ pub fn fix_fixed_bit_strings(generated: &str) -> Result<String> {
             if tag == Tag::new(Class::Context, {index}) {{
                 const SIZE: Constraints = rasn::constraints!(rasn::size_constraint!({size}));
                 if decoder.codec() != rasn::Codec::Aper {{
-                    return BitString::decode_with_tag_and_constraints(decoder, tag, SIZE)
+                    return BitString::decode_with_tag_and_constraints(decoder, tag, &SIZE)
                         .map(Self::{variant_name});
                 }}{extension}
 {bits}
@@ -335,12 +335,12 @@ pub fn fix_fixed_bit_strings(generated: &str) -> Result<String> {
         fn decode_with_tag_and_constraints<D: Decoder>(
             decoder: &mut D,
             tag: Tag,
-            _: Constraints,
+            _: &Constraints,
         ) -> Result<Self, D::Error> {{
             decoder.decode_explicit_prefix(tag)
         }}
         fn decode<D: Decoder>(decoder: &mut D) -> Result<Self, D::Error> {{
-            decoder.decode_choice(Self::CONSTRAINTS)
+            decoder.decode_choice(&Self::CONSTRAINTS)
         }}
     }}
 "#
@@ -357,7 +357,7 @@ pub fn fix_fixed_bit_strings(generated: &str) -> Result<String> {
     Ok(generated)
 }
 
-/// Work around rasn 0.28 APER encoding of inline `OCTET STRING` and
+/// Work around rasn 0.29 APER encoding of inline `OCTET STRING` and
 /// `BIT STRING` values whose size range is 256 or more with an upper bound
 /// below 64K.
 ///
@@ -450,9 +450,9 @@ fn aligned_bits(length: usize, indent: &str) -> String {
         "const OCTET: Constraints = rasn::constraints!(rasn::value_constraint!(0, 255));"
             .to_string(),
         format!("const REST: Constraints = rasn::constraints!(rasn::size_constraint!({rest}));"),
-        "let first = decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?;".to_string(),
+        "let first = decoder.decode_integer::<u8>(Tag::INTEGER, &OCTET)?;".to_string(),
         "let mut bits = BitString::from_element(first);".to_string(),
-        "bits.extend_from_bitslice(&decoder.decode_bit_string(Tag::BIT_STRING, REST)?);"
+        "bits.extend_from_bitslice(&decoder.decode_bit_string(Tag::BIT_STRING, &REST)?);"
             .to_string(),
     ]
     .map(|line| format!("{indent}{line}"))

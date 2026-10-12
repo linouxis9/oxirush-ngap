@@ -1,9 +1,9 @@
-//! OCTET STRING and BIT STRING values whose size range makes rasn 0.28
+//! OCTET STRING and BIT STRING values whose size range makes rasn 0.29
 //! misplace their length determinant in APER.
 //!
 //! A size with a range of 256 or more and an upper bound below 64K has a
 //! length determinant of one or two octets, octet-aligned in APER (ITU-T
-//! X.691 (02/2021) §11.5.7.2, §11.5.7.3, §11.9.3.3). rasn 0.28 encodes a
+//! X.691 (02/2021) §11.5.7.2, §11.5.7.3, §11.9.3.3). rasn 0.29 encodes a
 //! two-octet length without that alignment, which shows only where the
 //! value does not start on an octet boundary. The generated bindings use
 //! these types for such values inside a SEQUENCE or CHOICE. In APER they
@@ -39,19 +39,23 @@ impl<const LB: usize, const UB: usize> Encode for SizedOctetString<LB, UB> {
         &self,
         encoder: &mut E,
         tag: Tag,
-        _: Constraints,
+        _: &Constraints,
         identifier: Identifier,
     ) -> Result<(), E::Error> {
         let () = Self::SIZE_NEEDS_ALIGNMENT;
         if encoder.codec() != rasn::Codec::Aper {
             return encoder
-                .encode_octet_string(tag, Self::CONSTRAINTS, &self.0, identifier)
+                .encode_octet_string(tag, &Self::CONSTRAINTS, &self.0, identifier)
                 .map(drop);
         }
-        let _ =
-            encoder.encode_integer(Tag::INTEGER, Self::LENGTH, &self.0.len(), Identifier::EMPTY)?;
+        let _ = encoder.encode_integer(
+            Tag::INTEGER,
+            &Self::LENGTH,
+            &self.0.len(),
+            Identifier::EMPTY,
+        )?;
         for octet in self.0.iter() {
-            let _ = encoder.encode_integer(Tag::INTEGER, OCTET, octet, Identifier::EMPTY)?;
+            let _ = encoder.encode_integer(Tag::INTEGER, &OCTET, octet, Identifier::EMPTY)?;
         }
         Ok(())
     }
@@ -61,19 +65,19 @@ impl<const LB: usize, const UB: usize> Decode for SizedOctetString<LB, UB> {
     fn decode_with_tag_and_constraints<D: Decoder>(
         decoder: &mut D,
         tag: Tag,
-        _: Constraints,
+        _: &Constraints,
     ) -> Result<Self, D::Error> {
         let () = Self::SIZE_NEEDS_ALIGNMENT;
         if decoder.codec() != rasn::Codec::Aper {
             return decoder
-                .decode_octet_string(tag, Self::CONSTRAINTS)
+                .decode_octet_string(tag, &Self::CONSTRAINTS)
                 .map(Self);
         }
-        let length = decoder.decode_integer::<usize>(Tag::INTEGER, Self::LENGTH)?;
+        let length = decoder.decode_integer::<usize>(Tag::INTEGER, &Self::LENGTH)?;
         // The octets grow as they are read, so a length alone reserves nothing.
         let mut octets = Vec::new();
         for _ in 0..length {
-            octets.push(decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?);
+            octets.push(decoder.decode_integer::<u8>(Tag::INTEGER, &OCTET)?);
         }
         Ok(Self(octets.into()))
     }
@@ -131,13 +135,13 @@ impl<const LB: usize, const UB: usize, const EXTENSIBLE: bool> Encode
         &self,
         encoder: &mut E,
         tag: Tag,
-        _: Constraints,
+        _: &Constraints,
         identifier: Identifier,
     ) -> Result<(), E::Error> {
         let () = Self::SIZE_NEEDS_ALIGNMENT;
         if encoder.codec() != rasn::Codec::Aper {
             return encoder
-                .encode_bit_string(tag, Self::CONSTRAINTS, &self.0, identifier)
+                .encode_bit_string(tag, &Self::CONSTRAINTS, &self.0, identifier)
                 .map(drop);
         }
         let length = self.0.len();
@@ -146,17 +150,17 @@ impl<const LB: usize, const UB: usize, const EXTENSIBLE: bool> Encode
             let _ = encoder.encode_bool(Tag::BOOL, extended, Identifier::EMPTY)?;
             if extended {
                 return encoder
-                    .encode_bit_string(tag, Constraints::default(), &self.0, identifier)
+                    .encode_bit_string(tag, &Constraints::default(), &self.0, identifier)
                     .map(drop);
             }
         }
-        let _ = encoder.encode_integer(Tag::INTEGER, Self::LENGTH, &length, Identifier::EMPTY)?;
+        let _ = encoder.encode_integer(Tag::INTEGER, &Self::LENGTH, &length, Identifier::EMPTY)?;
         let mut octets = self.0.chunks_exact(8);
         for octet in &mut octets {
             let octet = octet
                 .iter()
                 .fold(0u8, |octet, bit| octet << 1 | u8::from(*bit));
-            let _ = encoder.encode_integer(Tag::INTEGER, OCTET, &octet, Identifier::EMPTY)?;
+            let _ = encoder.encode_integer(Tag::INTEGER, &OCTET, &octet, Identifier::EMPTY)?;
         }
         for bit in octets.remainder() {
             let _ = encoder.encode_bool(Tag::BOOL, *bit, Identifier::EMPTY)?;
@@ -171,22 +175,22 @@ impl<const LB: usize, const UB: usize, const EXTENSIBLE: bool> Decode
     fn decode_with_tag_and_constraints<D: Decoder>(
         decoder: &mut D,
         tag: Tag,
-        _: Constraints,
+        _: &Constraints,
     ) -> Result<Self, D::Error> {
         let () = Self::SIZE_NEEDS_ALIGNMENT;
         if decoder.codec() != rasn::Codec::Aper {
-            return decoder.decode_bit_string(tag, Self::CONSTRAINTS).map(Self);
+            return decoder.decode_bit_string(tag, &Self::CONSTRAINTS).map(Self);
         }
         if EXTENSIBLE && decoder.decode_bool(Tag::BOOL)? {
             return decoder
-                .decode_bit_string(tag, Constraints::default())
+                .decode_bit_string(tag, &Constraints::default())
                 .map(Self);
         }
-        let length = decoder.decode_integer::<usize>(Tag::INTEGER, Self::LENGTH)?;
+        let length = decoder.decode_integer::<usize>(Tag::INTEGER, &Self::LENGTH)?;
         // The bits grow as they are read, so a length alone reserves nothing.
         let mut bits = BitString::new();
         for _ in 0..length / 8 {
-            let octet = decoder.decode_integer::<u8>(Tag::INTEGER, OCTET)?;
+            let octet = decoder.decode_integer::<u8>(Tag::INTEGER, &OCTET)?;
             bits.extend_from_bitslice(BitString::from_element(octet).as_bitslice());
         }
         for _ in 0..length % 8 {

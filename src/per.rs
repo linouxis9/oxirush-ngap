@@ -1,4 +1,4 @@
-//! APER codecs that the generated bindings use in place of rasn 0.28's.
+//! APER codecs that the generated bindings use in place of rasn 0.29's.
 
 use rasn::prelude::*;
 
@@ -9,11 +9,11 @@ use rasn::prelude::*;
 pub(crate) fn skip_unknown_extensions<D: Decoder>(decoder: &mut D) -> Result<(), D::Error> {
     let present = if decoder.decode_bool(Tag::BOOL)? {
         decoder
-            .decode_bit_string(Tag::BIT_STRING, Constraints::default())?
+            .decode_bit_string(Tag::BIT_STRING, &Constraints::default())?
             .count_ones()
     } else {
         const LENGTH: Constraints = rasn::constraints!(rasn::value_constraint!(0, 63));
-        let count = decoder.decode_integer::<usize>(Tag::INTEGER, LENGTH)? + 1;
+        let count = decoder.decode_integer::<usize>(Tag::INTEGER, &LENGTH)? + 1;
         let mut present = 0;
         for _ in 0..count {
             present += usize::from(decoder.decode_bool(Tag::BOOL)?);
@@ -73,7 +73,7 @@ macro_rules! decode_extensible_sequence {
             fn decode_with_tag_and_constraints<D: rasn::Decoder>(
                 decoder: &mut D,
                 tag: rasn::types::Tag,
-                constraints: rasn::types::Constraints,
+                constraints: &rasn::types::Constraints,
             ) -> Result<Self, D::Error> {
                 #[derive(rasn::Decode)]
                 #[rasn(automatic_tags)]
@@ -130,7 +130,7 @@ macro_rules! sequence_of {
                 &self,
                 encoder: &mut E,
                 tag: rasn::types::Tag,
-                constraints: rasn::types::Constraints,
+                constraints: &rasn::types::Constraints,
                 identifier: rasn::types::Identifier,
             ) -> Result<(), E::Error> {
                 if encoder.codec() != rasn::Codec::Aper {
@@ -142,7 +142,7 @@ macro_rules! sequence_of {
                     rasn::constraints!(rasn::value_constraint!($lower, $upper));
                 let _ = encoder.encode_integer(
                     rasn::types::Tag::INTEGER,
-                    LENGTH,
+                    &LENGTH,
                     &self.0.len(),
                     rasn::types::Identifier::EMPTY,
                 )?;
@@ -156,14 +156,14 @@ macro_rules! sequence_of {
             fn decode_with_tag_and_constraints<D: rasn::Decoder>(
                 decoder: &mut D,
                 tag: rasn::types::Tag,
-                constraints: rasn::types::Constraints,
+                constraints: &rasn::types::Constraints,
             ) -> Result<Self, D::Error> {
                 if decoder.codec() != rasn::Codec::Aper {
                     return decoder.decode_sequence_of(tag, constraints).map(Self);
                 }
                 const LENGTH: rasn::types::Constraints =
                     rasn::constraints!(rasn::value_constraint!($lower, $upper));
-                let length = decoder.decode_integer::<usize>(rasn::types::Tag::INTEGER, LENGTH)?;
+                let length = decoder.decode_integer::<usize>(rasn::types::Tag::INTEGER, &LENGTH)?;
                 let mut values = Vec::new();
                 for _ in 0..length {
                     values.push(rasn::Decode::decode(decoder)?);
@@ -178,7 +178,7 @@ macro_rules! sequence_of {
                 &self,
                 encoder: &mut E,
                 tag: rasn::types::Tag,
-                constraints: rasn::types::Constraints,
+                constraints: &rasn::types::Constraints,
                 identifier: rasn::types::Identifier,
             ) -> Result<(), E::Error> {
                 if encoder.codec() != rasn::Codec::Aper {
@@ -200,7 +200,7 @@ macro_rules! sequence_of {
                     .encode_sequence_of(
                         tag,
                         &self.0,
-                        rasn::types::Constraints::default(),
+                        &rasn::types::Constraints::default(),
                         identifier,
                     )
                     .map(drop)
@@ -210,13 +210,13 @@ macro_rules! sequence_of {
             fn decode_with_tag_and_constraints<D: rasn::Decoder>(
                 decoder: &mut D,
                 tag: rasn::types::Tag,
-                constraints: rasn::types::Constraints,
+                constraints: &rasn::types::Constraints,
             ) -> Result<Self, D::Error> {
                 if decoder.codec() != rasn::Codec::Aper {
                     return decoder.decode_sequence_of(tag, constraints).map(Self);
                 }
                 let values =
-                    decoder.decode_sequence_of(tag, rasn::types::Constraints::default())?;
+                    decoder.decode_sequence_of(tag, &rasn::types::Constraints::default())?;
                 if !($lower..=$upper).contains(&values.len()) {
                     return Err(rasn::error::DecodeError::size_constraint_not_satisfied(
                         Some(values.len()),

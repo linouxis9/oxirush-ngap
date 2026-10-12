@@ -1375,7 +1375,7 @@ impl rasn::Decoder for Decoder<'_> {
 
 // ── What rasn writes ────────────────────────────────────────────────────────
 
-#[cfg(test)]
+#[cfg(any(test, fuzzing))]
 thread_local! {
     /// How many values this thread compared with what rasn writes of them; `None`
     /// for a thread that compares none, as every test but one is.
@@ -1385,8 +1385,8 @@ thread_local! {
 
 /// In a test that asks for it: `value` is read back from its JSON form as it is, and
 /// that form is the one that the codec of the JSON Encoding Rules of rasn gives it,
-/// where that codec writes the value.
-#[cfg(test)]
+/// where that codec writes the value. A fuzz target asks for it too.
+#[cfg(any(test, fuzzing))]
 pub(crate) fn as_rasn_writes_it<T: Encode + Decode + PartialEq + core::fmt::Debug>(value: &T) {
     let Some(compared) = COMPARED.get() else {
         return;
@@ -1417,7 +1417,7 @@ pub(crate) fn as_rasn_writes_it<T: Encode + Decode + PartialEq + core::fmt::Debu
 /// look at the size that the member gives it, and writes its length. A string of
 /// another size than the one that its type has beside an extension marker is written
 /// with its length: rasn writes its octets alone, and reads another string back.
-#[cfg(test)]
+#[cfg(any(test, fuzzing))]
 pub(crate) fn same_but_for_a_length(ours: &Value, theirs: &Value) -> bool {
     // The octets and the length of a bit string that is written with its length.
     let with_length = |members: &Map<String, Value>| {

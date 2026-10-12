@@ -273,6 +273,8 @@ is not source compatible with 0.4.2.
   modules that the bindings are generated from, `build/extract_asn1.py`
   takes them out of the archive that 3GPP publishes, and the generator reads
   no module that has another digest.
+- Fuzz targets, in `fuzz/`, which CI runs: they compare what the crate reads
+  and writes itself with what the codec of rasn alone does.
 
 ### Changed
 

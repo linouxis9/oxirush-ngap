@@ -57,6 +57,22 @@ jobs:
         env:
           RUSTDOCFLAGS: -D warnings
 
+  fuzz:
+    name: Fuzz the codec and the JSON forms (3 minutes)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: fuzz
+      - run: cargo install cargo-fuzz --locked
+      # Each corpus starts from the vectors of tests/fixtures.
+      - run: ./fuzz/seed.sh
+      - run: cargo fuzz run decode -- -max_total_time=60 -max_len=4096
+      - run: cargo fuzz run view -- -max_total_time=60 -max_len=4096
+      - run: cargo fuzz run paths -- -max_total_time=60 -max_len=4096
+
   fmt:
     name: Format
     runs-on: ubuntu-latest
@@ -66,3 +82,4 @@ jobs:
         with:
           components: rustfmt
       - run: cargo fmt --check
+      - run: cargo fmt --check --manifest-path fuzz/Cargo.toml

@@ -1201,6 +1201,25 @@ crate, as X.691 (02/2021) 13.1 has a value "within the range of the extension
 root", and after the extension bit by pycrate. Each reads what the other
 writes, and the vectors have no such number.
 
+### Fuzzing
+
+`fuzz/` has three [cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets,
+a package of its own that is not published. A target does not only look for a
+panic: where the crate has a path of its own beside the codec of rasn, it
+takes both and compares them. CI runs each for a minute, from the vectors.
+
+| Target | What holds for any octets |
+|--------|---------------------------|
+| `decode` | A PDU, the protocol IEs of its message and the message as its type are read and written by the crate as the codec of rasn alone reads and writes them, and what was read is written and read again as the same |
+| `view` | The view of a PDU gives that PDU back, a view and a tree are written to a PDU that has the same view and the same tree, each path of a view selects its value, and each value has the JSON form that the JSON Encoding Rules codec of rasn gives it |
+| `paths` | `select`, `set`, `insert`, `remove`, `open`, `check_path` and `enumerated_at` take any path and any value without a panic, and a view that one of them changed is a PDU or an error |
+
+```bash
+cargo install cargo-fuzz
+./fuzz/seed.sh
+cargo +nightly fuzz run decode -- -max_total_time=60 -max_len=4096
+```
+
 ## Benchmarks
 
 The benchmarks and their profilers are a package of their own, `benches/`,
@@ -1265,9 +1284,9 @@ depend on the protocol: `build/aper_fix.rs`, `build/asn1.rs`,
 `build/containers.rs`, `build/extract_asn1.py`, `build/inspection.rs`,
 `build/registry.rs`, `src/check.rs`, `src/error.rs`,
 `src/inspect_paths.rs`, `src/json.rs`, `src/message.rs`, `src/per.rs`,
-`src/sized.rs`, `src/wire.rs`, the test `tests/readme.rs`, the scripts
-`tests/fixtures/generate.py` and `tests/fixtures/dissect.py`, and the
-benchmarks but for their `protocol.rs`.
+`src/sized.rs`, `src/wire.rs`, `src/fuzzing.rs`, the test `tests/readme.rs`,
+the scripts `tests/fixtures/generate.py` and `tests/fixtures/dissect.py`, and
+the benchmarks and the fuzz targets but for their `protocol.rs`.
 `tests/shared_files.rs` holds a digest of each, so that an edit in one crate
 fails its tests until the file is the same in the other and both record the
 new digest.

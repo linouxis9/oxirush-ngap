@@ -50,6 +50,9 @@
 
 mod check;
 mod error;
+#[cfg(fuzzing)]
+#[doc(hidden)]
+pub mod fuzzing;
 pub mod helpers;
 #[cfg(feature = "inspect")]
 pub mod inspect;

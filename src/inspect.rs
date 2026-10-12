@@ -415,7 +415,7 @@ where
     T: rasn::Decode + rasn::Encode + PartialEq + core::fmt::Debug,
 {
     let value: T = crate::per::decode_complete(raw)?;
-    #[cfg(test)]
+    #[cfg(any(test, fuzzing))]
     json::as_rasn_writes_it(&value);
     json::to_value(&value)
 }

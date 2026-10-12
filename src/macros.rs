@@ -398,8 +398,24 @@ macro_rules! procedures {
         pub(crate) use $crate::ngap::{
             Criticality, ProtocolIEContainer, ProtocolIEField, ProtocolIEID,
         };
-        #[cfg(test)]
+        #[cfg(any(test, fuzzing))]
         pub(crate) use $crate::ngap::NGAP_PDU as Pdu;
+
+        /// For the fuzz targets: give `reader` the type of the message of a direction
+        /// and a procedure code, when the protocol has that message.
+        #[cfg(fuzzing)]
+        pub(crate) fn with_message_type(
+            direction: &str,
+            code: u8,
+            reader: &mut impl $crate::fuzzing::Reader,
+        ) {
+            match (direction, code) {
+                $($(("InitiatingMessage", $code) => reader.read::<$initiating_type>(),)?)*
+                $($(("SuccessfulOutcome", $code) => reader.read::<$successful_type>(),)?)*
+                $($(("UnsuccessfulOutcome", $code) => reader.read::<$unsuccessful_type>(),)?)*
+                _ => {}
+            }
+        }
 
         /// The criticality that ASN.1 assigns to the procedure of a code.
         pub(crate) fn procedure_criticality(code: u8) -> Option<Criticality> {

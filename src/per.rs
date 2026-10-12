@@ -431,10 +431,17 @@ pub(crate) use sequence;
 /// constrained whole number, through rasn's integer codec, and the elements
 /// follow it. An `unconstrained` list has an upper bound of 64K or more, so
 /// its length is an unconstrained length determinant (X.691 (02/2021)
-/// §11.9.3.5):
-/// rasn's sequence codec without the size, which is checked here. The
-/// decoded list grows with the elements read, so that a count alone reserves
-/// no memory. Every other encoding rule keeps rasn's sequence codec.
+/// §11.9.3.5-11.9.3.8): one octet up to 127, two up to 16383, and for more a
+/// fragment of one to four times 16384 elements, each after its count, until
+/// a count that is less than 16384. It is written by rasn's sequence codec
+/// without the size, which is checked here, and read here: each octet of a
+/// count starts an octet, and is read as a number of eight bits.
+///
+/// The decoded list grows with the elements read, so that a count alone
+/// reserves no memory. rasn's sequence codec reserves for the count that it
+/// reads, as far as the octets after it have bits: 3 MiB for a fragment count
+/// and 8192 octets that are no element. Every other encoding rule keeps rasn's
+/// sequence codec.
 macro_rules! sequence_of {
     ($name:ident, $lower:literal, $upper:literal) => {
         impl rasn::Encode for $name {
@@ -527,8 +534,33 @@ macro_rules! sequence_of {
                 if decoder.codec() != rasn::Codec::Aper {
                     return decoder.decode_sequence_of(tag, constraints).map(Self);
                 }
-                let values =
-                    decoder.decode_sequence_of(tag, &rasn::types::Constraints::default())?;
+                const OCTET: rasn::types::Constraints =
+                    rasn::constraints!(rasn::value_constraint!(0, 255));
+                let mut values = Vec::new();
+                loop {
+                    let first = decoder.decode_integer::<u8>(rasn::types::Tag::INTEGER, &OCTET)?;
+                    let (count, last) = match first {
+                        0..=0x7f => (usize::from(first), true),
+                        0x80..=0xbf => {
+                            let second =
+                                decoder.decode_integer::<u8>(rasn::types::Tag::INTEGER, &OCTET)?;
+                            (usize::from(first & 0x3f) << 8 | usize::from(second), true)
+                        }
+                        0xc1..=0xc4 => (usize::from(first & 0x3f) * 16384, false),
+                        _ => {
+                            return Err(rasn::de::Error::custom(
+                                "a fragment of a list has one to four times 16384 elements",
+                                decoder.codec(),
+                            ));
+                        }
+                    };
+                    for _ in 0..count {
+                        values.push(rasn::Decode::decode(decoder)?);
+                    }
+                    if last {
+                        break;
+                    }
+                }
                 if !($lower..=$upper).contains(&values.len()) {
                     return Err(rasn::error::DecodeError::size_constraint_not_satisfied(
                         Some(values.len()),
@@ -763,6 +795,46 @@ mod tests {
             same!(aper, uper, ber, der, cer, oer, coer, jer, xer);
         }
         assert!(read >= 3 * 9, "{read} values read");
+    }
+
+    /// A list of 1 to 65536 elements, with the codec of `sequence_of!`.
+    #[derive(rasn::AsnType, Debug, PartialEq)]
+    #[rasn(delegate)]
+    struct Flags(Vec<bool>);
+    crate::per::sequence_of! { Flags, 1, 65536, unconstrained }
+
+    #[test]
+    fn a_list_in_fragments_is_read_as_the_sequence_codec_of_rasn_reads_it() {
+        // A count of each form: what is written for it, then the same cut at each of
+        // its counts and with another octet in the place of each.
+        let mut read = 0;
+        for count in [1, 127, 128, 16383, 16384, 16385, 49153, 65536] {
+            let flags: Vec<bool> = (0..count).map(|at| at % 3 == 0).collect();
+            let written = rasn::aper::encode(&flags).unwrap();
+            assert_eq!(rasn::aper::encode(&Flags(flags)).unwrap(), written);
+            // The first count, and the count after a fragment of 16384 flags or more.
+            let fragment = usize::from(written[0] & 0x3f) * 2048;
+            let after = (written[0] >= 0xc0).then_some(1 + fragment);
+            let counts = [0, 1].into_iter().chain(after).chain([written.len() - 1]);
+            let mut inputs = vec![written.clone()];
+            for at in counts {
+                inputs.push(written[..at].to_vec());
+                for other in [0x00, 0x7f, 0x80, 0xc0, 0xc1, 0xc5] {
+                    let mut changed = written.clone();
+                    changed[at] = other;
+                    inputs.push(changed);
+                }
+            }
+            for octets in inputs {
+                let ours = rasn::aper::decode::<Flags>(&octets).ok();
+                let theirs = rasn::aper::decode::<Vec<bool>>(&octets).ok();
+                // The size of the list is checked here alone.
+                let theirs = theirs.filter(|flags| (1..=65536).contains(&flags.len()));
+                assert_eq!(ours.map(|flags| flags.0), theirs, "{} octets", octets.len());
+                read += usize::from(theirs.is_some());
+            }
+        }
+        assert!(read > 50, "{read} lists read");
     }
 
     #[test]

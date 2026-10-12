@@ -83,6 +83,11 @@ fn pdu_and_message(octets: &[u8]) -> (usize, usize) {
     assert_eq!(BorrowedPdu::decode_borrowed(octets), pdu, "{octets:02x?}");
     if let Ok(pdu) = &pdu {
         assert_eq!(oxirush_aper::encode(pdu), written, "{pdu:?}");
+        // The protocol IEs of its message are put back octet by octet too.
+        if let Ok(ies) = pdu.protocol_ies() {
+            let as_its_type = crate::pdu::message_octets_as_its_type(&ies);
+            assert_eq!(crate::pdu::message_octets(&ies), as_its_type, "{pdu:?}");
+        }
     }
     if !same(PDU_TYPE, octets, &written) {
         return (0, 0);

@@ -24,8 +24,30 @@ fn message_ies<'a>(octets: &'a [u8]) -> Result<ProtocolIEContainer<'a>, Error> {
     Ok(ies)
 }
 
-/// The octets of the message that has these protocol IEs.
+/// The octets of the message that has these protocol IEs, written octet by octet: the
+/// extension bit of the message in an octet, the count of its IEs in two, and for each
+/// IE its identifier in two octets, its criticality in the next, and its value in its
+/// open type. It is what the codec of the type writes, which the tests hold it to.
 pub(crate) fn message_octets(ies: &ProtocolIEContainer<'_>) -> Result<Vec<u8>, Error> {
+    // More IEs than a container has are refused by the codec of the type.
+    let Ok(count) = u16::try_from(ies.0.len()) else {
+        return message_octets_as_its_type(ies);
+    };
+    let values: usize = ies.0.iter().map(|ie| ie.value.len() + 5).sum();
+    let mut octets = Vec::with_capacity(3 + values);
+    octets.push(0);
+    octets.extend_from_slice(&count.to_be_bytes());
+    for ie in &ies.0 {
+        let [high, low] = ie.id.0.to_be_bytes();
+        octets.extend_from_slice(&[high, low, (ie.criticality as u8) << 6]);
+        Writer::new(&mut octets).open_type(&ie.value);
+    }
+    Ok(octets)
+}
+
+/// The octets of the message that has these protocol IEs, as the codec of the type
+/// writes them.
+pub(crate) fn message_octets_as_its_type(ies: &ProtocolIEContainer<'_>) -> Result<Vec<u8>, Error> {
     let values: usize = ies.0.iter().map(|ie| ie.value.len() + 5).sum();
     let mut octets = Vec::with_capacity(3 + values);
     let mut writer = Writer::new(&mut octets);

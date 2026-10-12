@@ -330,9 +330,19 @@ what each type became.
   the message, and with `inspect` each IE and each transfer of a view. The
   fuzz targets, in `fuzz/`, which CI runs, make the same comparison on the
   octets that they find. rasn is a dependency of the tests alone.
+  The crate depends on the oracle by path, so a workspace that has the crate
+  as a member has the oracle as a member too: the oracle has no workspace of
+  its own, and is empty without its feature `rasn`, which the tests and the
+  fuzz targets ask for, so that such a workspace builds nothing of rasn until
+  it builds the tests of the crate. `tests/workspace_member.sh` makes such a
+  workspace, and CI has cargo load it and clippy and rustdoc accept it.
 
 ### Changed
 
+- The examples are named after the protocol, `ngap_build_pdu` where it was
+  `build_pdu`, and so are their files: a workspace that has oxirush-ngap and
+  oxirush-s1ap as members builds the examples of both, which wrote the
+  same files under the same names.
 - The macros and the `inspect` feature read one generated list,
   `src/registry.rs`, with one line for each procedure and for each IE. An IE
   or a procedure that a macro does not know is reported by its name, with

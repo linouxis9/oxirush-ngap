@@ -11,7 +11,7 @@
 //! the example needs no dependency on it.
 //!
 //! For the ergonomic `build_ngap!` / `extract_ngap_ies!` versions, see
-//! `build_pdu.rs` and `extract_ies.rs`.
+//! `ngap_build_pdu.rs` and `ngap_extract_ies.rs`.
 
 use oxirush_ngap::aper;
 use oxirush_ngap::ngap::*;

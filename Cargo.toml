@@ -37,22 +37,23 @@ serde_json = { version = "1.0.106", optional = true }
 
 [dev-dependencies]
 hex = "0.4"
-# The oracle of the tests: the same types with the codec of rasn.
-oxirush-ngap-oracle = { path = "oracle" }
+# The oracle of the tests: the same types with the codec of rasn. The tests that the
+# two protocols share name it `oracle`.
+oracle = { package = "oxirush-ngap-oracle", path = "oracle", features = ["rasn"] }
 
 [[example]]
-name = "build_pdu"
+name = "ngap_build_pdu"
 doc-scrape-examples = false
 
 [[example]]
-name = "decode_manually"
+name = "ngap_decode_manually"
 doc-scrape-examples = false
 
 [[example]]
-name = "extract_ies"
+name = "ngap_extract_ies"
 doc-scrape-examples = false
 
 [[example]]
-name = "inspect"
+name = "ngap_inspect"
 required-features = ["inspect"]
 doc-scrape-examples = false

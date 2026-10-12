@@ -183,7 +183,7 @@ fn main() -> Result<(), Error> {
         println!();
     }
 
-    // The `decode_manually` example reads the IEs of a message by hand, which is
+    // The `ngap_decode_manually` example reads the IEs of a message by hand, which is
     // what `extract_ngap_ies!` does for each field.
     Ok(())
 }

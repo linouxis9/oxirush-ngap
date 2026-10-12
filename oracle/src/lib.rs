@@ -35,6 +35,11 @@
 //! [`same_octets`] and [`same_json`] compare that with what the crate made of the same
 //! octets, and say where the two differ by design: the tests and the fuzz targets call
 //! them. The bindings themselves are in [`bindings`], for a test that needs a value.
+//!
+//! All of it is behind the feature `rasn`, which the tests and the fuzz targets ask
+//! for: without it the package is empty, and builds nothing of rasn.
+
+#![cfg(feature = "rasn")]
 
 #[allow(clippy::all, missing_docs)]
 pub mod bindings;

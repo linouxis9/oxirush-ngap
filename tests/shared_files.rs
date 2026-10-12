@@ -1,8 +1,8 @@
 //! The files that oxirush-ngap and oxirush-s1ap have in common, octet for octet: the
 //! check of a message against its object set, the paths of the inspection, what names
 //! a message and its errors, the oracle of the tests and the comparison with it, the
-//! test of the README, the scripts of the vectors and of the ASN.1, the benchmarks and
-//! the fuzz targets. Each crate holds the digest of each file, so that an edit in one
+//! test of the README, the scripts of the vectors and of the ASN.1, the script that
+//! makes a workspace of the crate, the benchmarks and the fuzz targets. Each crate holds the digest of each file, so that an edit in one
 //! fails here until the file is the same in the other and both record its new digest.
 //! This file is one of them, and the two crates keep it the same too.
 //!
@@ -24,9 +24,9 @@ const SHARED: &[(&str, u64)] = &[
     ("fuzz/fuzz_targets/view.rs", 0xa0e7481987d00ee0),
     ("fuzz/seed.sh", 0x8e0693288352de1c),
     ("fuzz/src/lib.rs", 0xee97c91adb23f265),
-    ("oracle/src/lib.rs", 0x6a1cbee8accf92ae),
-    ("oracle/src/per.rs", 0x6bbde8dc6ab67c89),
-    ("oracle/src/sized.rs", 0x05d05e62217fc26a),
+    ("oracle/src/lib.rs", 0x791a184a7bb58f34),
+    ("oracle/src/per.rs", 0xfcdad4b315ccfb9a),
+    ("oracle/src/sized.rs", 0x65f4c1e8ee1593db),
     ("src/check.rs", 0x6a14609dae13ca66),
     ("src/error.rs", 0x4014f8f5f88cb9b8),
     ("src/inspect_paths.rs", 0x56eb0a31dc507c38),
@@ -34,7 +34,9 @@ const SHARED: &[(&str, u64)] = &[
     ("src/oracle_tests.rs", 0xbe40491f62fa4794),
     ("tests/fixtures/dissect.py", 0xe83af66722907219),
     ("tests/fixtures/generate.py", 0x313265374d7367d9),
+    ("tests/oracle_codec.rs", 0x5ead793cb4ab1fce),
     ("tests/readme.rs", 0x8649417b32dae0f4),
+    ("tests/workspace_member.sh", 0xd02f1cb822764ad2),
 ];
 
 /// The 64-bit FNV-1a digest of `octets`, without the carriage returns that a checkout
@@ -50,11 +52,11 @@ fn digest(octets: &[u8]) -> u64 {
 fn the_files_shared_with_the_other_protocol_are_as_they_were_mirrored() {
     let mut read = 0;
     for (path, recorded) in SHARED {
-        // The published crate has the sources and the tests, and neither the
-        // generator, the benchmarks, the fuzz targets nor the scripts of the vectors.
+        // The published crate has the Rust files of `src` and of `tests`, and neither
+        // the generator, the benchmarks, the fuzz targets, the oracle nor the scripts.
         let Ok(octets) = std::fs::read(Path::new(env!("CARGO_MANIFEST_DIR")).join(path)) else {
-            let apart = ["build/", "benches/", "fuzz/", "tests/fixtures/"];
-            let published = !apart.iter().any(|apart| path.starts_with(apart));
+            let sources = path.starts_with("src/") || path.starts_with("tests/");
+            let published = sources && path.ends_with(".rs");
             assert!(!published, "{path} is missing");
             continue;
         };

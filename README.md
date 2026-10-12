@@ -1192,14 +1192,14 @@ is as it was after an edit that returns an error.
 
 | Example | Shows | Feature |
 |---------|-------|---------|
-| `build_pdu` | Initial Context Setup request and response, UE Context Release, Handover Required and Acknowledge, NG Setup Failure, and one IE built alone | |
-| `decode_manually` | An NG Setup Response built and read without the macros: the identifier, the criticality and the octets of each IE | |
-| `extract_ies` | UE release, handover, and nested PDU session and NAS data read from decoded messages | |
-| `inspect` | An NG Setup Request: its values with their paths, one IE edited, one added by its value and one by its octets, and the PDU encoded again | `inspect` |
+| `ngap_build_pdu` | Initial Context Setup request and response, UE Context Release, Handover Required and Acknowledge, NG Setup Failure, and one IE built alone | |
+| `ngap_decode_manually` | An NG Setup Response built and read without the macros: the identifier, the criticality and the octets of each IE | |
+| `ngap_extract_ies` | UE release, handover, and nested PDU session and NAS data read from decoded messages | |
+| `ngap_inspect` | An NG Setup Request: its values with their paths, one IE edited, one added by its value and one by its octets, and the PDU encoded again | `inspect` |
 
 ```bash
-cargo run --example build_pdu
-cargo run --example inspect --features inspect
+cargo run --example ngap_build_pdu
+cargo run --example ngap_inspect --features inspect
 ```
 
 Each has its counterpart in `oxirush-s1ap`, with the messages and the IEs of
@@ -1225,6 +1225,7 @@ S1AP.
 | `tests/unknown_extensions.rs` | The additions of a later release to an extensible `SEQUENCE` are skipped, and what follows them is read. |
 | `tests/allocation.rs` | Decoding reserves memory for the elements that it reads, not for the count that a length determinant claims, in two octets or in a fragment. The list codec that rasn derives, in the place of the one of the oracle, reserves for the count. |
 | `tests/inspection.rs` | Each of the 144 messages is the same octets through its view, and through its tree where it has IEs to name. Each path of each selects its value, with and without `value` and `decoded`, and is one that `check_path` takes. Edits, written trees, criticalities, the two IEs that have the type of what they extend, and the identifiers of the registry against the constants of the bindings. |
+| `tests/oracle_codec.rs` | The codecs that the oracle has in the place of those that rasn 0.29 derives: the `SEQUENCE`, the list of a size constraint, and the strings whose length takes two octets. Each gives what the derived codec gives where the two are to agree, and the octets of the clause where they are not. |
 | `tests/shared_files.rs` | The files that this crate shares with `oxirush-s1ap` are as they were last mirrored. |
 | The unit tests of `src/oracle_tests.rs` | The crate against the oracle of `oracle/`, which has the same types with the codec of rasn 0.29, another implementation of aligned PER. Each vector, its truncations, it with one more octet and with each bit of chosen octets changed is given to both, as a PDU and as its message: both read it and write the same octets, or neither reads it. With `inspect`, each IE and each transfer that a view decodes has the JSON form that the JSON Encoding Rules of rasn give it, but for two bit strings that rasn writes otherwise than X.697 has them. The comparison takes one difference: the bindings hold an `INTEGER` in 64 bits. `decode` and `encode` of a PDU and `set_protocol_ies`, which take the usual layout octet by octet, give the PDU, the error and the octets that the codec of the type gives |
 | The unit tests of the paths | No two names that a path takes can be mistaken for each other. No value has a member with the same name as a member of its IE, except the `value` of a bit string. |
@@ -1237,6 +1238,17 @@ cargo test
 
 The tests run in a checkout of the repository: the oracle is its package
 `oracle/`, which the published crate does not have.
+
+The crate depends on the oracle by path, so a workspace that has the crate as
+a member has the oracle as a member too. The oracle has no workspace of its
+own, and is empty without its feature `rasn`, which the tests and the fuzz
+targets ask for: `cargo build --workspace` builds nothing of rasn in such a
+workspace, and `cargo test --workspace` builds the oracle for the tests of
+the crate. `tests/workspace_member.sh DIRECTORY [CRATE...]` makes a
+workspace of this crate and of the others that it is given, as
+`oxirush-s1ap` and `oxirush-aper`: cargo loads it, clippy accepts every
+target of every member, and rustdoc documents them. CI runs it with the crate
+alone.
 
 ### The vectors
 
@@ -1360,7 +1372,7 @@ crate has neither the generator nor the ASN.1.
 | `src/ngap.rs` | The bindings: each type of the ASN.1 with its codec on `oxirush-aper`, its conversions and, with `inspect`, its JSON form, then the flat API, the convenience methods and the `Display` implementation |
 | `src/registry.rs` | The list of the procedures and of the IEs, one line for each: its code or its identifier, its names and its types, and for each message of a procedure the IEs of its object set. The names that the macros take, `NgapPduKind` and the names and the types of `inspect` all expand from it, so each is written once |
 | `src/inspect_registry.rs` | What `inspect` alone needs, with the `inspect` feature: among it the list of the types, one line for each `SEQUENCE` and each `CHOICE` with its members, which the paths are read against, and the types that a handover's containers carry, which the generator has from the prose of the specification |
-| `oracle/src/bindings.rs`, `oracle/src/types.rs` | The oracle of the tests, a package of its own that the crate does not build: the same types with the codec of rasn 0.29, and the list of those that the crate decodes by a name or by an identifier |
+| `oracle/src/bindings.rs`, `oracle/src/types.rs` | The oracle of the tests, a package of its own that the tests of the crate build, and the crate does not: the same types with the codec of rasn 0.29, and the list of those that the crate decodes by a name or by an identifier |
 
 For maintainers, `build/` holds the generator, a package of its own whose
 lockfile pins `rasn-compiler`. What the generators of the two protocols share
@@ -1394,9 +1406,10 @@ of pycrate.
 oxirush-ngap and oxirush-s1ap share, octet for octet, the code that does not
 depend on the protocol and is not in `oxirush-aper`: `src/check.rs`,
 `src/error.rs`, `src/inspect_paths.rs`, `src/message.rs`,
-`src/oracle_tests.rs`, the oracle but for its bindings, the test
-`tests/readme.rs`, the scripts `build/extract_asn1.py`,
-`tests/fixtures/generate.py` and `tests/fixtures/dissect.py`, and the
+`src/oracle_tests.rs`, the oracle but for its bindings, the tests
+`tests/readme.rs` and `tests/oracle_codec.rs`, the scripts
+`build/extract_asn1.py`, `tests/fixtures/generate.py`,
+`tests/fixtures/dissect.py` and `tests/workspace_member.sh`, and the
 benchmarks and the fuzz targets but for their `protocol.rs`.
 `tests/shared_files.rs` holds a digest of each, so that an edit in one crate
 fails its tests until the file is the same in the other and both record the

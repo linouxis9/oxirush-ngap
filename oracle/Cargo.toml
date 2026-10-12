@@ -9,13 +9,21 @@ edition = "2024"
 publish = false
 license = "Apache-2.0"
 
-# The name is the same in oxirush-ngap and oxirush-s1ap, whose tests are the same files.
+# Support of the tests of the crate: it has no test of its own, which are in the
+# tests of the crate, and nothing documents it. It has no workspace of its own either:
+# the crate depends on it by path, so it is a member of each workspace that the crate
+# is a member of.
 [lib]
-name = "oracle"
+test = false
+doctest = false
+doc = false
+
+[features]
+# The types and their codec, which the tests of the crate and its fuzz targets ask
+# for. Without it the package is empty: a workspace that has the crate as a member
+# builds nothing of rasn until it builds the tests of the crate.
+rasn = ["dep:rasn", "dep:serde_json"]
 
 [dependencies]
-rasn = { version = "0.29.0", default-features = false, features = ["bytes"] }
-serde_json = "1.0.106"
-
-# Not a member of a workspace that the crate may be in.
-[workspace]
+rasn = { version = "0.29.0", default-features = false, features = ["bytes"], optional = true }
+serde_json = { version = "1.0.106", optional = true }

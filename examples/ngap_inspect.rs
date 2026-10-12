@@ -2,7 +2,7 @@
 //! it again.
 //!
 //! ```sh
-//! cargo run --example inspect --features inspect
+//! cargo run --example ngap_inspect --features inspect
 //! ```
 
 use oxirush_ngap::{inspect, ngap::NGAP_PDU};

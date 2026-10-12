@@ -415,8 +415,9 @@ what each type became.
   taken whatever its case and its separators where it is read.
 - The codec reads what a peer may send as rasn read it where the value is
   the same: padding bits that are not zero, a length in a longer form than
-  it needs and a number with leading zero octets. It refuses a number of no
-  octet where ITU-T X.691 has one at least.
+  it needs and a number with leading zero octets, up to the octets that a
+  number of 64 bits may have. It refuses a number of no octet, where ITU-T
+  X.691 has one at least.
 - The examples of the documentation and of the README are compiled and run
   by the documentation tests.
 - The crate compiles to less code, with `inspect` and without: a type

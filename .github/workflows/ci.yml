@@ -10,8 +10,9 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
-  # The tests need no debug information, and with it the compiler needs more
-  # memory for this crate than a hosted runner gives a job.
+  # The tests need no debug information: without it the oracle of the tests,
+  # which is the types of the protocol once more with the codec of rasn, builds
+  # faster and in less memory.
   CARGO_PROFILE_DEV_DEBUG: 0
   # oxirush-aper 0.1.0 is not on crates.io yet: take it from its repository.
   APER: --config patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"

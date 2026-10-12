@@ -165,7 +165,6 @@ without debug information.
 | Procedures | It is a codec: no procedure, no state and no transport. `check()` reports a mandatory IE that a message lacks, an IE that it cannot have or has twice, the order of its IEs and a criticality that is not the assigned one ([below](#check-a-message-against-its-object-set)), and nothing is refused for them. It does not know when a conditional IE is due, and it does not look into the values of the IEs. |
 | Unknown additions | A PDU keeps the octets of its open types. A typed value that is decoded and encoded again loses the additions of a later release. |
 | RRC, other systems | An RRC container stays octets. The container of a handover is read as the NG-RAN type of TS 38.413 alone ([below](#the-container-of-a-handover)). |
-| `inspect`: two values | An IE with an integer of 2^63 or more stays octets beside a `_decode_error`, and so does one with a `BIT STRING` of another size than the one that its extensible type gives, as an algorithm mask of 24 bits: rasn's JER does not represent them. |
 | `inspect`: criticalities | The tables have those of the object set of each message of a procedure, and of each single container. Anywhere else an IE says its own, as the [rules](#rules) list. |
 | `inspect`: `check_path` | What the types do not say is not refused: the value of an IE selected by `@id=N` whose identifier is unknown or has no type where it is, the entries of a container of a value when they are selected by position, and a segment under such an IE. |
 
@@ -1038,7 +1037,7 @@ headings that the rows link to.
 | An IE that is written in a view | `{"id", "criticality", "value"}`, or `octets` in place of `value`. The `id` is a number or a name, and the value has the type of the IE whatever JSON it is. |
 | A transfer that is written | Its decoded value, alone or as `decoded`, or its octets, in hexadecimal or as `octets`. |
 | A tree that is written | The name of the message gives the procedure code, the direction and the criticalities. An IE says its `criticality` where no table has it: when the message does not have it, in a message that a transfer contains, and in an extension container. |
-| What does not decode | An IE or a transfer that is unknown, does not decode, has a value that JER does not represent or is nested deeper than 64 levels stays octets beside a `_decode_error`, and the rest of the PDU is read. |
+| What does not decode | An IE or a transfer that is unknown, does not decode or is nested deeper than 64 levels stays octets beside a `_decode_error`, and the rest of the PDU is read. |
 | [Octets that carry a type] | The container of a handover is written as `{NAME: VALUE}` by the name of its type, and read once [`open`] decoded it in the view. |
 | [`check_path`], [`enumerated_at`] | Read a path against the types of a message of a name, without a view: under `/ngap`, the IE is one of the object set of the message. |
 
@@ -1053,7 +1052,9 @@ written, and take them so.
 | `TransportLayerAddress` | `"10.0.0.1"`, `"2001:db8::1"`, or the two with a comma |
 | `TAC`, `EPS-TAC`, `LAC`, `GTP-TEID`, `FiveG-TMSI`, `SST`, `PortNumber`, `AMFRegionID`, `AMFSetID`, `AMFPointer`, `NRCellIdentity`, `EUTRACellIdentity`, `UL-NAS-Count` | a number, also read as a `"0x…"` string |
 | `ENUMERATED` | the name of the value, read in any case |
+| `INTEGER` | a number. One above 2^64-1 or below -2^63, which JSON has no exact number for, is a string of its decimal digits |
 | a bit string whose size varies, as the identifier of a gNB | `{"value": "000004", "length": 22}`: the octets that hold it, in hexadecimal, and its length in bits |
+| a bit string of another size than the one that its type gives beside an extension marker, as an algorithm mask of 24 bits | `{"value": "C00000", "length": 24}`, where a mask of the 16 bits of its type is `"C000"` |
 | the other strings: an SD, keys and algorithm masks, the NAS-PDU and the other containers | hexadecimal, read in either case |
 
 Each is also read as JER writes it, and a value that does not fit its
@@ -1078,7 +1079,7 @@ The methods and the functions of the JSON forms have these kinds, and two of the
 | `Value` | A JSON value that is not a value of its ASN.1 type: of another form, a name that an `ENUMERATED` does not have, a number outside its constraint, octets that are no hexadecimal. The message says at which member, by the names of the value |
 | `Form` | JSON that is not written as a tree or as a view: no name of a message, a member that neither has, an IE with its value and its octets, an IE that says no criticality where no table has one |
 | `Edit` | An edit that is refused: a member that its type always has, the value of an IE or the alternative of a `CHOICE` taken out, an insertion where there is no list, and the octets of a value that was edited since |
-| `Limit` | A path of more than 64 segments or 4096 octets, a selection of more than 4096 values, a tree nested deeper than 256 levels, a value that JER does not represent, and the tree of a message without a list of IEs |
+| `Limit` | A path of more than 64 segments or 4096 octets, a selection of more than 4096 values, a tree nested deeper than 256 levels, and the tree of a message without a list of IEs |
 
 A kind says what a caller can do: write octets for an `UnknownIe`, call
 [`open`] for a `NotOpened`, show the octets of a PDU for a `Limit`. The view

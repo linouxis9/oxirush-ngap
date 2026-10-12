@@ -955,7 +955,7 @@ types! {
     AIoTRequestedReaderItem sequence { "globalgNB-ID": GlobalGNBID, "readerIndex": _, "iE-Extensions"? extensions };
     AIoTRequestedReaderList = [AIoTRequestedReaderItem];
     AIoTRequestedServiceAreaInformation sequence { "requestedReaderList"? AIoTRequestedReaderList, "requestedAIoTAreaList"? AIoTRequestedAIoTAreaList, "iE-Extensions"? extensions };
-    AIoTSecurityInfo choice { "a-IoT-RAND-n": _, "choice-Extensions": ie };
+    AIoTSecurityInfo choice { "a-IoT-RAND-n": bits, "choice-Extensions": ie };
     AMFCPRelocationIndication sequence { "protocolIEs": ies };
     AMFConfigurationUpdate sequence { "protocolIEs": ies };
     AMFConfigurationUpdateAcknowledge sequence { "protocolIEs": ies };
@@ -1088,7 +1088,7 @@ types! {
     CellType sequence { "cellSize": CellSize, "iE-Extensions"? extensions };
     CellsToActivateList = [NGRANCGI];
     ClockAccuracy choice { "clockAccuracyValue": _, "clockAccuracyIndex": _, "choice-Extensions": ie };
-    ClockQualityAcceptanceCriteria sequence { "synchronisationState"? _, "traceabletoUTC"? ClockQualityAcceptanceCriteriaTraceabletoUTC, "traceabletoGNSS"? ClockQualityAcceptanceCriteriaTraceabletoGNSS, "clockFrequencyStability"? _, "clockAccuracy"? _, "parentTImeSource"? _, "iE-Extensions"? extensions };
+    ClockQualityAcceptanceCriteria sequence { "synchronisationState"? bits, "traceabletoUTC"? ClockQualityAcceptanceCriteriaTraceabletoUTC, "traceabletoGNSS"? ClockQualityAcceptanceCriteriaTraceabletoGNSS, "clockFrequencyStability"? bits, "clockAccuracy"? _, "parentTImeSource"? bits, "iE-Extensions"? extensions };
     ClockQualityAcceptanceIndication sequence { "clockQualityAcceptanceCriteria": ClockQualityAcceptanceCriteria, "iE-Extensions"? extensions };
     ClockQualityDetailLevel choice { "clockQualityMetrics": _, "clockQualityAcceptanceIndication": ClockQualityAcceptanceIndication, "choice-extensions": ie };
     ClockQualityReportingControlInfo sequence { "clockQualityDetailLevel": ClockQualityDetailLevel, "iE-Extensions"? extensions };
@@ -1170,6 +1170,8 @@ types! {
     EUTRANReportingStatusIEs sequence { "eUTRAN-CellReportList": EUTRANCellReportList, "iE-Extensions"? extensions };
     EUTRANReportingSystemIEs sequence { "eUTRAN-CellToReportList": EUTRANCellToReportList, "iE-Extensions"? extensions };
     EUTRAPagingeDRXInformation sequence { "eUTRA-paging-eDRX-Cycle": EUTRAPagingEDRXCycle, "eUTRA-paging-Time-Window"? EUTRAPagingTimeWindow, "iE-Extensions"? extensions };
+    EUTRAencryptionAlgorithms = bits;
+    EUTRAintegrityProtectionAlgorithms = bits;
     EarlyStatusTransferTransparentContainer sequence { "procedureStage": ProcedureStageChoice, "iE-Extensions"? extensions };
     EmergencyAreaIDBroadcastEUTRA = [EmergencyAreaIDBroadcastEUTRAItem];
     EmergencyAreaIDBroadcastEUTRAItem sequence { "emergencyAreaID": _, "completedCellsInEAI-EUTRA": CompletedCellsInEAIEUTRA, "iE-Extensions"? extensions };
@@ -1198,7 +1200,7 @@ types! {
     ExpectedUEMovingTrajectoryItem sequence { "nGRAN-CGI": NGRANCGI, "timeStayedInCell"? _, "iE-Extensions"? extensions };
     ExtendedAMFName sequence { "aMFNameVisibleString"? _, "aMFNameUTF8String"? _, "iE-Extensions"? extensions };
     ExtendedRANNodeName sequence { "rANNodeNameVisibleString"? _, "rANNodeNameUTF8String"? _, "iE-Extensions"? extensions };
-    ExtendedRATRestrictionInformation sequence { "primaryRATRestriction": _, "secondaryRATRestriction": _, "iE-Extensions"? extensions };
+    ExtendedRATRestrictionInformation sequence { "primaryRATRestriction": bits, "secondaryRATRestriction": bits, "iE-Extensions"? extensions };
     ExtendedSliceSupportList = [SliceSupportItem];
     FailureIndication sequence { "uERLFReportContainer": UERLFReportContainer, "iE-Extensions"? extensions };
     FirstDLCount sequence { "dRBsSubjectToEarlyStatusTransfer": DRBsSubjectToEarlyStatusTransferList, "iE-Extension"? extensions };
@@ -1234,7 +1236,7 @@ types! {
     HFCNodeIDNew sequence { "hFCNode-ID": _, "tAI": TAI, "iE-Extensions"? extensions };
     HLComActivate sequence { "nR-Paging-Long-eDRX-Information-for-RRC-INACTIVE": NRPagingLongEDRXInformationForRRCINACTIVE, "iE-Extensions"? extensions };
     HLComDeactivate sequence { "uEReachabilityIndication": HLComDeactivateUEReachabilityIndication, "iE-Extensions"? extensions };
-    HOReport sequence { "handoverReportType": HOReportHandoverReportType, "handoverCause": Cause, "sourcecellCGI": NGRANCGI, "targetcellCGI": NGRANCGI, "reestablishmentcellCGI"? NGRANCGI, "sourcecellC-RNTI"? _, "targetcellinE-UTRAN"? EUTRACGI, "mobilityInformation"? _, "uERLFReportContainer"? UERLFReportContainer, "iE-Extensions"? extensions };
+    HOReport sequence { "handoverReportType": HOReportHandoverReportType, "handoverCause": Cause, "sourcecellCGI": NGRANCGI, "targetcellCGI": NGRANCGI, "reestablishmentcellCGI"? NGRANCGI, "sourcecellC-RNTI"? bits, "targetcellinE-UTRAN"? EUTRACGI, "mobilityInformation"? _, "uERLFReportContainer"? UERLFReportContainer, "iE-Extensions"? extensions };
     HandoverCancel sequence { "protocolIEs": ies };
     HandoverCancelAcknowledge sequence { "protocolIEs": ies };
     HandoverCommand sequence { "protocolIEs": ies };
@@ -1250,6 +1252,7 @@ types! {
     HandoverRequiredTransfer sequence { "directForwardingPathAvailability"? DirectForwardingPathAvailability, "iE-Extensions"? extensions };
     HandoverResourceAllocationUnsuccessfulTransfer sequence { "cause": Cause, "criticalityDiagnostics"? CriticalityDiagnostics, "iE-Extensions"? extensions };
     HandoverSuccess sequence { "protocolIEs": ies };
+    HashedUEIdentityIndexValue = bits;
     ImmediateMDTNr sequence { "measurementsToActivate": _, "m1Configuration"? M1Configuration, "m4Configuration"? M4Configuration, "m5Configuration"? M5Configuration, "m6Configuration"? M6Configuration, "m7Configuration"? M7Configuration, "bluetoothMeasurementConfiguration"? BluetoothMeasurementConfiguration, "wLANMeasurementConfiguration"? WLANMeasurementConfiguration, "mDT-Location-Info"? MDTLocationInfo, "sensorMeasurementConfiguration"? SensorMeasurementConfiguration, "iE-Extensions"? extensions };
     InfoOnRecommendedCellsAndRANNodesForPaging sequence { "recommendedCellsForPaging": RecommendedCellsForPaging, "recommendRANNodesForPaging": RecommendedRANNodesForPaging, "iE-Extensions"? extensions };
     InitialContextSetupFailure sequence { "protocolIEs": ies };
@@ -1431,6 +1434,8 @@ types! {
     NRPagingeDRXInformation sequence { "nR-paging-eDRX-Cycle": NRPagingEDRXCycle, "nR-paging-Time-Window"? NRPagingTimeWindow, "iE-Extensions"? extensions };
     NRUESidelinkAggregateMaximumBitrate sequence { "uESidelinkAggregateMaximumBitRate": _, "iE-Extensions"? extensions };
     NRV2XServicesAuthorized sequence { "vehicleUE"? VehicleUE, "pedestrianUE"? PedestrianUE, "iE-Extensions"? extensions };
+    NRencryptionAlgorithms = bits;
+    NRintegrityProtectionAlgorithms = bits;
     NTNGeographicalAreaItem choice { "circle": MDTCircle, "polygon": _, "choice-Extensions": ie };
     NTNGeographicalAreaList = [NTNGeographicalAreaItem];
     NetworkSliceAreaScopeofMDT sequence { "networkSliceListforMDT": NetworkSliceListforMDT, "iE-Extensions"? extensions };
@@ -1612,7 +1617,7 @@ types! {
     QosFlowAdditionalInfoItemRelRes sequence { "qosFlowIdentifier": _, "uplinkTLContainer"? _, "iE-Extensions"? extensions };
     QosFlowAdditionalInfoListRelCom = [QosFlowAdditionalInfoItemRelCom];
     QosFlowAdditionalInfoListRelRes = [QosFlowAdditionalInfoItemRelRes];
-    QosFlowFeedbackItem sequence { "qosFlowIdentifier": _, "updateFeedback"? _, "cNpacketDelayBudgetDL"? _, "cNpacketDelayBudgetUL"? _, "iE-Extensions"? extensions };
+    QosFlowFeedbackItem sequence { "qosFlowIdentifier": _, "updateFeedback"? UpdateFeedback, "cNpacketDelayBudgetDL"? _, "cNpacketDelayBudgetUL"? _, "iE-Extensions"? extensions };
     QosFlowFeedbackList = [QosFlowFeedbackItem];
     QosFlowInformationItem sequence { "qosFlowIdentifier": _, "dLForwarding"? DLForwarding, "iE-Extensions"? extensions };
     QosFlowInformationList = [QosFlowInformationItem];
@@ -1643,12 +1648,13 @@ types! {
     RANTSSCellItem sequence { "nRCGI": NRCGI, "iE-Extensions"? extensions };
     RANTSSCellList = [RANTSSCellItem];
     RANTSSScope choice { "rANNodeLevel": GlobalGNBID, "cellListLevel": RANTSSCellList, "choice-Extensions": ie };
-    RANTimingSynchronisationStatusInfo sequence { "synchronisationState"? RANTimingSynchronisationStatusInfoSynchronisationState, "traceabletoUTC"? RANTimingSynchronisationStatusInfoTraceabletoUTC, "traceabletoGNSS"? RANTimingSynchronisationStatusInfoTraceabletoGNSS, "clockFrequencyStability"? _, "clockAccuracy"? ClockAccuracy, "parentTImeSource"? ParentTImeSource, "iE-Extensions"? extensions };
+    RANTimingSynchronisationStatusInfo sequence { "synchronisationState"? RANTimingSynchronisationStatusInfoSynchronisationState, "traceabletoUTC"? RANTimingSynchronisationStatusInfoTraceabletoUTC, "traceabletoGNSS"? RANTimingSynchronisationStatusInfoTraceabletoGNSS, "clockFrequencyStability"? bits, "clockAccuracy"? ClockAccuracy, "parentTImeSource"? ParentTImeSource, "iE-Extensions"? extensions };
     RANfeedbacktype choice { "proactive": RANfeedbacktypeProactive, "reactive": RANfeedbacktypeReactive, "choice-extensions": ie };
     RANfeedbacktypeProactive sequence { "burstArrivalTimeWindow": BurstArrivalTimeWindow, "periodicityRange"? PeriodicityRange, "iE-Extension"? extensions };
     RANfeedbacktypeReactive sequence { "capabilityForBATAdaptation": RANfeedbacktypeReactiveCapabilityForBATAdaptation, "iE-Extension"? extensions };
+    RATRestrictionInformation = bits;
     RATRestrictions = [RATRestrictionsItem];
-    RATRestrictionsItem sequence { "pLMNIdentity": _, "rATRestrictionInformation": _, "iE-Extensions"? extensions };
+    RATRestrictionsItem sequence { "pLMNIdentity": _, "rATRestrictionInformation": RATRestrictionInformation, "iE-Extensions"? extensions };
     RIMInformation sequence { "targetgNBSetID": _, "rIM-RSDetection": RIMInformationRIMRSDetection, "iE-Extensions"? extensions };
     RIMInformationTransfer sequence { "targetRANNodeID-RIM": TargetRANNodeIDRIM, "sourceRANNodeID": SourceRANNodeID, "rIMInformation": RIMInformation, "iE-Extensions"? extensions };
     RRCInactiveTransitionReport sequence { "protocolIEs": ies };
@@ -1689,7 +1695,7 @@ types! {
     SONInformation choice { "sONInformationRequest": SONInformationRequest, "sONInformationReply": SONInformationReply, "choice-Extensions": ie };
     SONInformationReply sequence { "xnTNLConfigurationInfo"? XnTNLConfigurationInfo, "iE-Extensions"? extensions };
     SONInformationReport choice { "failureIndicationInformation": FailureIndication, "hOReportInformation": HOReport, "choice-Extensions": ie };
-    ScheduledCommunicationTime sequence { "dayofWeek"? _, "timeofDayStart"? _, "timeofDayEnd"? _, "iE-Extensions"? extensions };
+    ScheduledCommunicationTime sequence { "dayofWeek"? bits, "timeofDayStart"? _, "timeofDayEnd"? _, "iE-Extensions"? extensions };
     SecondaryRATDataUsageReport sequence { "protocolIEs": ies };
     SecondaryRATDataUsageReportTransfer sequence { "secondaryRATUsageInformation"? SecondaryRATUsageInformation, "iE-Extensions"? extensions };
     SecondaryRATUsageInformation sequence { "pDUSessionUsageReport"? PDUSessionUsageReport, "qosFlowsUsageReportList"? QoSFlowsUsageReportList, "iE-Extension"? extensions };
@@ -1753,14 +1759,14 @@ types! {
     TAINSAGSupportList = [TAINSAGSupportItem];
     TAListforMDT = [_];
     TAListforQMC = [_];
-    TNGFID choice { "tNGF-ID": _, "choice-Extensions": ie };
+    TNGFID choice { "tNGF-ID": bits, "choice-Extensions": ie };
     TNLAssociationItem sequence { "tNLAssociationAddress": CPTransportLayerInformation, "cause": Cause, "iE-Extensions"? extensions };
     TNLAssociationList = [TNLAssociationItem];
     TSCAssistanceInformation sequence { "periodicity": _, "burstArrivalTime"? _, "iE-Extensions"? extensions };
     TSCFeedbackInformation sequence { "burstArrivalTimeOffset": _, "adjustedPeriodicity"? _, "iE-Extensions"? extensions };
     TSCTrafficCharacteristics sequence { "tSCAssistanceInformationDL"? TSCAssistanceInformation, "tSCAssistanceInformationUL"? TSCAssistanceInformation, "iE-Extensions"? extensions };
     TSCTrafficCharacteristicsFeedback sequence { "tSCFeedbackInformationDL"? TSCFeedbackInformation, "tSCFeedbackInformationUL"? TSCFeedbackInformation, "iE-Extensions"? extensions };
-    TWIFID choice { "tWIF-ID": _, "choice-Extensions": ie };
+    TWIFID choice { "tWIF-ID": bits, "choice-Extensions": ie };
     TargetHomeENBID sequence { "pLMNidentity": _, "homeENB-ID": _, "selected-EPS-TAI": EPSTAI, "iE-Extensions"? extensions };
     TargetID choice { "targetRANNodeID": TargetRANNodeID, "targeteNB-ID": TargeteNBID, "choice-Extensions": ie };
     TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainer sequence { "cell-CAGInformation"? CellCAGInformation, "iE-Extensions"? extensions };
@@ -1824,7 +1830,7 @@ types! {
     UERadioCapabilityIDMappingRequest sequence { "protocolIEs": ies };
     UERadioCapabilityIDMappingResponse sequence { "protocolIEs": ies };
     UERadioCapabilityInfoIndication sequence { "protocolIEs": ies };
-    UESecurityCapabilities sequence { "nRencryptionAlgorithms": _, "nRintegrityProtectionAlgorithms": _, "eUTRAencryptionAlgorithms": _, "eUTRAintegrityProtectionAlgorithms": _, "iE-Extensions"? extensions };
+    UESecurityCapabilities sequence { "nRencryptionAlgorithms": NRencryptionAlgorithms, "nRintegrityProtectionAlgorithms": NRintegrityProtectionAlgorithms, "eUTRAencryptionAlgorithms": EUTRAencryptionAlgorithms, "eUTRAintegrityProtectionAlgorithms": EUTRAintegrityProtectionAlgorithms, "iE-Extensions"? extensions };
     UESliceMaximumBitRateItem sequence { "s-NSSAI": SNSSAI, "uESliceMaximumBitRateDL": _, "uESliceMaximumBitRateUL": _, "iE-Extensions"? extensions };
     UESliceMaximumBitRateList = [UESliceMaximumBitRateItem];
     UETNLABindingReleaseRequest sequence { "protocolIEs": ies };
@@ -1839,6 +1845,7 @@ types! {
     UnavailableGUAMIItem sequence { "gUAMI": GUAMI, "timerApproachForGUAMIRemoval"? TimerApproachForGUAMIRemoval, "backupAMFName"? _, "iE-Extensions"? extensions };
     UnavailableGUAMIList = [UnavailableGUAMIItem];
     UnsuccessfulOutcome sequence { "procedureCode": _, "criticality": Criticality, "value": _ };
+    UpdateFeedback = bits;
     UplinkNASTransport sequence { "protocolIEs": ies };
     UplinkNonUEAssociatedNRPPaTransport sequence { "protocolIEs": ies };
     UplinkRANConfigurationTransfer sequence { "protocolIEs": ies };
@@ -1858,7 +1865,7 @@ types! {
     UserPlaneSecurityInformation sequence { "securityResult": SecurityResult, "securityIndication": SecurityIndication, "iE-Extensions"? extensions };
     VolumeTimedReportItem sequence { "startTimeStamp": _, "endTimeStamp": _, "usageCountUL": _, "usageCountDL": _, "iE-Extensions"? extensions };
     VolumeTimedReportList = [VolumeTimedReportItem];
-    WAGFID choice { "w-AGF-ID": _, "choice-Extensions": ie };
+    WAGFID choice { "w-AGF-ID": bits, "choice-Extensions": ie };
     WLANMeasConfigNameItem sequence { "wLANName": _, "iE-Extensions"? extensions };
     WLANMeasConfigNameList = [WLANMeasConfigNameItem];
     WLANMeasurementConfiguration sequence { "wlanMeasConfig": WLANMeasConfig, "wlanMeasConfigNameList"? WLANMeasConfigNameList, "wlan-rssi"? WLANMeasurementConfigurationWlanRssi, "wlan-rtt"? WLANMeasurementConfigurationWlanRtt, "iE-Extensions"? extensions };

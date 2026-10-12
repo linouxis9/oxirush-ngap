@@ -2360,82 +2360,83 @@ fn modification(rate: u64, bits: usize) -> NGAP_PDU {
     .unwrap()
 }
 
-/// rasn's JER writes an INTEGER as an `i64`, where ITU-T X.697 (02/2021) §21 has a number
-/// of any size. An IE with an integer of 2^63 or more has no typed value: it stays its
-/// octets, as the README says.
+/// An INTEGER is a number of any size (ITU-T X.697 (02/2021) §21). One of 2^63 or more
+/// is read, edited and written as any other: the octets are those that the bindings
+/// encode. One that JSON has no exact number for, 2^64 or more, is its decimal digits.
 #[test]
-fn an_ie_with_an_integer_of_two_to_the_63_stays_octets() {
+fn an_integer_of_two_to_the_63_or_more_is_a_number() {
     use serde_json::json;
     let rates = "/ngap/UEAggregateMaximumBitRate";
     let downlink = format!("{rates}/uEAggregateMaximumBitRateDL");
 
-    // The largest integer that is typed is read, edited and encoded.
-    let largest = (1u64 << 63) - 1;
-    let mut view = modification(largest, 16).to_view().unwrap();
-    assert_eq!(
-        inspect::select(&view, &downlink).unwrap(),
-        [&json!(largest)]
-    );
-    inspect::set(&mut view, &downlink, json!(largest - 1)).unwrap();
-    let edited = NGAP_PDU::from_view(&view).unwrap();
-    assert_eq!(edited, modification(largest - 1, 16));
+    for rate in [(1u64 << 63) - 1, 1 << 63, u64::MAX] {
+        // Received, it is the number that it is.
+        let pdu = modification(rate, 16);
+        let wire = pdu.encode().unwrap();
+        let mut view = NGAP_PDU::decode(&wire).unwrap().to_view().unwrap();
+        let entry = &view["message"]["protocolIEs"][2];
+        assert!(entry.get("_decode_error").is_none(), "{entry}");
+        assert_eq!(inspect::select(&view, &downlink).unwrap(), [&json!(rate)]);
 
-    // One more, and the IE is its octets beside why it has no value. The rest of the PDU
-    // is read.
-    let pdu = modification(1 << 63, 16);
-    let wire = pdu.encode().unwrap();
-    let mut view = NGAP_PDU::decode(&wire).unwrap().to_view().unwrap();
-    let entry = view["message"]["protocolIEs"][2].clone();
-    assert!(entry["_decode_error"].is_string(), "{entry}");
-    assert_eq!(entry["value"], entry["_raw_value"]);
-    let octets = inspect::select(&view, &format!("{rates}/octets")).unwrap()[0].clone();
-    assert_eq!(octets, entry["_raw_value"]);
-    assert!(inspect::select(&view, &downlink).is_err());
-    let other = "/ngap/RAN-UE-NGAP-ID/value";
-    assert_eq!(inspect::select(&view, other).unwrap(), [&json!(1)]);
+        // A tree has it, and both forms are the octets that the bindings encoded.
+        let tree = pdu.to_tree().unwrap();
+        let shown = &tree["ies"][2]["UEAggregateMaximumBitRate"];
+        assert_eq!(shown["uEAggregateMaximumBitRateDL"], json!(rate));
+        assert_eq!(NGAP_PDU::from_tree(&tree).unwrap().encode().unwrap(), wire);
+        assert_eq!(NGAP_PDU::from_view(&view).unwrap().encode().unwrap(), wire);
 
-    // A tree has the octets too, and both forms send them as they were received, also
-    // beside an edit of another IE.
-    let tree = pdu.to_tree().unwrap();
-    assert_eq!(
-        tree["ies"][2],
-        json!({"UEAggregateMaximumBitRate": {"octets": octets}})
-    );
-    assert_eq!(NGAP_PDU::from_tree(&tree).unwrap().encode().unwrap(), wire);
-    assert_eq!(NGAP_PDU::from_view(&view).unwrap().encode().unwrap(), wire);
-    inspect::set(&mut view, other, json!(2)).unwrap();
-    let edited = NGAP_PDU::from_view(&view).unwrap().to_view().unwrap();
-    assert_eq!(inspect::select(&edited, other).unwrap(), [&json!(2)]);
-    assert_eq!(
-        inspect::select(&edited, &format!("{rates}/octets")).unwrap(),
-        [&octets]
-    );
+        // Edited, it is what the bindings encode for the other number.
+        inspect::set(&mut view, &downlink, json!(rate - 1)).unwrap();
+        let edited = NGAP_PDU::from_view(&view).unwrap();
+        assert_eq!(edited, modification(rate - 1, 16));
+    }
 
-    // Such an integer is not written as a typed value either.
-    let written = json!({"message": "UEContextModificationRequest", "ies": [
-        {"AMF-UE-NGAP-ID": 1},
-        {"RAN-UE-NGAP-ID": 1},
-        {"UEAggregateMaximumBitRate": {
-            "uEAggregateMaximumBitRateDL": 1u64 << 63,
-            "uEAggregateMaximumBitRateUL": 1,
-        }},
-    ]});
-    assert!(NGAP_PDU::from_tree(&written).is_err());
+    // A bit rate has an extension marker: 2^64 is a value of it, which JSON has no
+    // exact number for. It is its decimal digits, read and written.
+    let digits = "18446744073709551616";
+    let beyond = |downlink: serde_json::Value| {
+        json!({"message": "UEContextModificationRequest", "ies": [
+            {"AMF-UE-NGAP-ID": 1},
+            {"RAN-UE-NGAP-ID": 1},
+            {"UEAggregateMaximumBitRate": {
+                "uEAggregateMaximumBitRateDL": downlink,
+                "uEAggregateMaximumBitRateUL": 1,
+            }},
+        ]})
+    };
+    let pdu = NGAP_PDU::from_tree(&beyond(json!(digits))).unwrap();
+    let request: UEContextModificationRequest = pdu.decode_value().unwrap();
+    let rates: UEAggregateMaximumBitRate =
+        decode_open_type(&request.protocol_ies.0[2].value).unwrap();
+    assert_eq!(rates.u_eaggregate_maximum_bit_rate_dl.0.to_string(), digits);
+    assert_eq!(pdu.to_tree().unwrap(), beyond(json!(digits)));
+    let view = pdu.to_view().unwrap();
+    assert_eq!(inspect::select(&view, &downlink).unwrap(), [&json!(digits)]);
+    assert_eq!(NGAP_PDU::from_view(&view).unwrap(), pdu);
+
+    // A number that JSON has is written as that number, and not as its digits.
+    let digits = beyond(json!(u64::MAX.to_string()));
+    let error = NGAP_PDU::from_tree(&digits).unwrap_err();
+    assert_eq!(error.kind(), oxirush_ngap::ErrorKind::Value);
+    assert_eq!(
+        error.to_string(),
+        "this is not a value of UEAggregateMaximumBitRate, at uEAggregateMaximumBitRateDL: a \
+         number is expected, and \"18446744073709551615\" is written"
+    );
 }
 
-/// rasn's JER writes a BIT STRING of one extensible size as its octets alone, where
-/// ITU-T X.697 (02/2021) §7.2.1 and §24.3 give it its length. A string of another size
-/// than its type gives would be shown as a string that it is not, 20 bits as 24: its IE
-/// has no typed value and stays its octets, as the README says.
+/// A BIT STRING whose type gives one size and an extension marker has its length when
+/// it is of another size (ITU-T X.697 (02/2021) §24.3), and is its octets alone when it
+/// is of that size, as it always was. Both are read, edited and written: the octets
+/// are those that the bindings encode.
 #[test]
-fn an_ie_with_a_string_of_bits_of_another_size_stays_octets() {
+fn a_bit_string_of_another_size_than_its_type_gives_has_its_length() {
     use serde_json::json;
     let capabilities = "/ngap/UESecurityCapabilities";
-    let member = |of: &str| format!("{capabilities}/{of}");
-    let algorithms = member("nRencryptionAlgorithms");
-    let other = "/ngap/RAN-UE-NGAP-ID/value";
+    let algorithms = format!("{capabilities}/nRencryptionAlgorithms");
+    let message = "UEContextModificationRequest";
 
-    // The size that the type gives is typed: hexadecimal, read and edited.
+    // The size that the type gives: hexadecimal, read and edited.
     let mut view = modification(1, 16).to_view().unwrap();
     assert_eq!(
         inspect::select(&view, &algorithms).unwrap(),
@@ -2448,52 +2449,67 @@ fn an_ie_with_a_string_of_bits_of_another_size_stays_octets() {
         [&json!("8000")]
     );
 
-    // 20 bits and 24 bits are the same three octets to JER. Each is the octets of its IE
-    // beside why it has no value, and the rest of the PDU is read.
-    let mut received = Vec::new();
+    // 20 bits and 24 bits are the same three octets, and not the same string.
     for bits in [20, 24] {
         let pdu = modification(1, bits);
         let wire = pdu.encode().unwrap();
-        let view = NGAP_PDU::decode(&wire).unwrap().to_view().unwrap();
-        let entry = view["message"]["protocolIEs"][3].clone();
-        let error = entry["_decode_error"].as_str().unwrap_or_default();
-        assert!(
-            error.starts_with("JER does not represent this value"),
-            "{entry}"
-        );
-        assert_eq!(entry["value"], entry["_raw_value"]);
-        assert!(inspect::select(&view, &algorithms).is_err());
-        assert_eq!(inspect::select(&view, other).unwrap(), [&json!(1)]);
+        let mut view = NGAP_PDU::decode(&wire).unwrap().to_view().unwrap();
+        let entry = &view["message"]["protocolIEs"][3];
+        assert!(entry.get("_decode_error").is_none(), "{entry}");
+        let shown = json!({"value": "C00000", "length": bits});
+        assert_eq!(inspect::select(&view, &algorithms).unwrap(), [&shown]);
 
-        // A tree has the octets too, and both forms send them as they were received.
-        let octets = json!({"UESecurityCapabilities": {"octets": entry["_raw_value"]}});
+        // Its two members have paths, which a message is checked against.
+        let length = format!("{algorithms}/length");
+        assert_eq!(inspect::select(&view, &length).unwrap(), [&json!(bits)]);
+        let listed = format!("{capabilities}/value/nRencryptionAlgorithms/length");
+        let paths = inspect::paths(&view);
+        assert!(paths.iter().any(|(path, _)| *path == listed), "{paths:?}");
+        assert_eq!(inspect::check_path(message, &length), Ok(()));
+
+        // A tree has it, and both forms are the octets that the bindings encoded.
         let tree = pdu.to_tree().unwrap();
-        assert_eq!(tree["ies"][3], octets);
+        let written = &tree["ies"][3]["UESecurityCapabilities"];
+        assert_eq!(written["nRencryptionAlgorithms"], shown);
         assert_eq!(NGAP_PDU::from_tree(&tree).unwrap().encode().unwrap(), wire);
         assert_eq!(NGAP_PDU::from_view(&view).unwrap().encode().unwrap(), wire);
-        received.push(entry["_raw_value"].clone());
+
+        // Edited to the size of the type, it is what the bindings encode for that.
+        inspect::set(&mut view, &algorithms, json!("C000")).unwrap();
+        assert_eq!(NGAP_PDU::from_view(&view).unwrap(), modification(1, 16));
     }
-    assert_ne!(received[0], received[1]);
 
-    // The octets of the IE are set in its place.
-    let mut view = modification(1, 24).to_view().unwrap();
-    let usual = modification(1, 16).to_view().unwrap();
-    let usual = inspect::select(&usual, &member("octets")).unwrap()[0].clone();
-    inspect::set(&mut view, &member("octets"), usual).unwrap();
-    assert_eq!(NGAP_PDU::from_view(&view).unwrap(), modification(1, 16));
+    // From the size of the type to another one, by the whole value and by its length.
+    let mut view = modification(1, 16).to_view().unwrap();
+    let longer = json!({"value": "C00000", "length": 24});
+    inspect::set(&mut view, &algorithms, longer).unwrap();
+    assert_eq!(NGAP_PDU::from_view(&view).unwrap(), modification(1, 24));
+    inspect::set(&mut view, &format!("{algorithms}/length"), json!(20)).unwrap();
+    assert_eq!(NGAP_PDU::from_view(&view).unwrap(), modification(1, 20));
 
-    // Such a string is not written as a typed value either.
-    let written = json!({"message": "UEContextModificationRequest", "ies": [
-        {"AMF-UE-NGAP-ID": 1},
-        {"RAN-UE-NGAP-ID": 1},
-        {"UESecurityCapabilities": {
-            "nRencryptionAlgorithms": "C00000",
-            "nRintegrityProtectionAlgorithms": "C000",
-            "eUTRAencryptionAlgorithms": "C000",
-            "eUTRAintegrityProtectionAlgorithms": "C000",
-        }},
-    ]});
-    assert!(NGAP_PDU::from_tree(&written).is_err());
+    // What is not the string that it says is refused: three octets without a length
+    // are not the 16 bits of the type, and 20 bits are not two octets.
+    let written = |algorithms: serde_json::Value| {
+        NGAP_PDU::from_tree(&json!({"message": message, "ies": [
+            {"AMF-UE-NGAP-ID": 1},
+            {"RAN-UE-NGAP-ID": 1},
+            {"UESecurityCapabilities": {
+                "nRencryptionAlgorithms": algorithms,
+                "nRintegrityProtectionAlgorithms": "C000",
+                "eUTRAencryptionAlgorithms": "C000",
+                "eUTRAintegrityProtectionAlgorithms": "C000",
+            }},
+        ]}))
+    };
+    assert!(written(json!("C000")).is_ok());
+    let error = written(json!("C00000")).unwrap_err();
+    assert_eq!(error.kind(), oxirush_ngap::ErrorKind::Value);
+    assert_eq!(
+        error.to_string(),
+        "this is not a value of UESecurityCapabilities, at nRencryptionAlgorithms: 3 octets are \
+         written for a bit string of 16 bits, which has 2"
+    );
+    assert!(written(json!({"value": "C000", "length": 20})).is_err());
 }
 
 /// What a PDU that is written from `tree` has for the IE of the extension container at

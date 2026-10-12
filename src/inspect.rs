@@ -45,9 +45,8 @@
 //!   its new identifier;
 //! - `_decode_error`: why an IE's `value` is still its octets in hexadecimal, or why a
 //!   transfer has no `decoded` member. The identifier is unknown, or is one of an
-//!   extension where it extends no type that gives it one, the octets do not decode, JER
-//!   does not write the value or does not read it back as it is, or the IE is nested
-//!   deeper than 64 levels. The rest of the PDU is read all the same;
+//!   extension where it extends no type that gives it one, the octets do not decode, or
+//!   the IE is nested deeper than 64 levels. The rest of the PDU is read all the same;
 //! - `_edited`: [`set`], [`remove`] or [`insert`] changed something under the value, whose
 //!   octets are no longer those beside it.
 //!
@@ -236,7 +235,7 @@
 //! | `Value` | A JSON value that is not a value of its ASN.1 type: of another form, a name that an `ENUMERATED` does not have, a number outside its constraint, octets that are no hexadecimal. The message says at which member, by the names of the value |
 //! | `Form` | JSON that is not written as a tree or as a view: no name of a message, a member that neither has, an IE with its value and its octets, an IE that says no criticality where no table has one |
 //! | `Edit` | An edit that is refused: a member that its type always has, the value of an IE or the alternative of a `CHOICE` taken out, an insertion where there is no list, and the octets of a value that was edited since |
-//! | `Limit` | A path of more than 64 segments or 4096 octets, a selection of more than 4096 values, a tree nested deeper than 256 levels, a value that JER does not represent, and the tree of a message without a list of IEs |
+//! | `Limit` | A path of more than 64 segments or 4096 octets, a selection of more than 4096 values, a tree nested deeper than 256 levels, and the tree of a message without a list of IEs |
 //! | `UndecodableIe` | A path into an IE or a transfer that did not decode |
 //! | `Decode` | A PDU whose message does not decode, and octets of a view that are not what they were decoded as |
 //!

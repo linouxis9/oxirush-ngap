@@ -682,7 +682,7 @@ mod inspect_errors {
         }
         assert_eq!(
             string.to_string(),
-            "this is not a value of AMF-UE-NGAP-ID: a number below 2^63 is expected, and \"forty-two\" is written"
+            "this is not a value of AMF-UE-NGAP-ID: a number is expected, and \"forty-two\" is written"
         );
         assert_eq!(
             name.to_string(),

@@ -62,8 +62,8 @@ fn rasn(attributes: &[syn::Attribute]) -> Result<(Option<String>, bool)> {
     Ok((identifier, enumerated))
 }
 
-/// Whether the attributes of a string give it one size: JER then writes a bit string
-/// as its octets alone, without its length.
+/// Whether the attributes of a string give it one size and no extension marker: a bit
+/// string of such a type is written as its octets alone, without its length.
 fn one_size(attributes: &[syn::Attribute]) -> Result<bool> {
     use syn::{Meta, Token, punctuated::Punctuated};
     for attribute in attributes.iter().filter(|a| a.path().is_ident("rasn")) {
@@ -73,9 +73,10 @@ fn one_size(attributes: &[syn::Attribute]) -> Result<bool> {
                 && list.path.is_ident("size")
             {
                 let size = list.tokens.to_string();
-                let size = size.split(',').next().unwrap_or_default().trim();
-                let digits = size.trim_matches('"');
-                return Ok(!digits.is_empty() && digits.bytes().all(|digit| digit.is_ascii_digit()));
+                let mut parts = size.split(',').map(str::trim);
+                let digits = parts.next().unwrap_or_default().trim_matches('"');
+                let one = !digits.is_empty() && digits.bytes().all(|digit| digit.is_ascii_digit());
+                return Ok(one && !parts.any(|part| part == "extensible"));
             }
         }
     }
@@ -368,7 +369,9 @@ fn generate_types(
         let (name, _, default) = rasn_kind(attributes)?;
         let name = name.unwrap_or_else(|| ident.unraw().to_string());
         let (mut written, optional) = shape(ty, &declared, 0);
-        if written == "bits" && one_size(attributes)? {
+        // The constraint of a member that may be absent is not that of its value, as
+        // rasn has it: a bit string has its length there, whatever its size.
+        if written == "bits" && one_size(attributes)? && !(optional || default) {
             written = "_".to_string();
         }
         // The octets of a transfer are shown as the value that they contain.

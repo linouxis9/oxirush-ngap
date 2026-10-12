@@ -10,10 +10,10 @@
 //! | ASN.1 | JSON |
 //! | --- | --- |
 //! | `BOOLEAN` | `true` or `false` |
-//! | `INTEGER` | A number from -2^63 to 2^63-1, as rasn wrote it: X.697 §21 has a number of any size, and a larger one is not written |
+//! | `INTEGER` | A number. One that is below -2^63 or above 2^64-1 is a string of its decimal digits, and no other integer is: X.697 §21 has a number of any size, and `serde_json` has no exact number for these without a feature that every user of the crate would have to build with |
 //! | `ENUMERATED` | The name of the value, a string |
 //! | `BIT STRING` of one size | Its octets in hexadecimal, the last one padded with zero bits |
-//! | `BIT STRING` whose size varies | `{"value": HEXADECIMAL, "length": BITS}`. Where the type gives one size and an extension marker, a string of that size is its octets in hexadecimal, as rasn wrote every string of such a type, and one of another size is not written: X.697 §24.3 has every string of such a type with its length |
+//! | `BIT STRING` whose size varies | `{"value": HEXADECIMAL, "length": BITS}`. Where the type gives one size and an extension marker, a string of that size is its octets in hexadecimal, as rasn wrote every string of such a type, and one of another size has its length: X.697 §24.3 has every string of such a type with its length |
 //! | `OCTET STRING` | Its octets in hexadecimal |
 //! | `NULL` | `null` |
 //! | `OBJECT IDENTIFIER` | Its arcs in decimal, with a full stop between them |
@@ -118,14 +118,10 @@ pub(crate) fn to_value<T: Encode>(value: &T) -> Result<Value, Error> {
 
 /// What an encoder wrote, or why it wrote nothing.
 fn finished(written: Result<(), EncodeError>, value: Option<Value>) -> Result<Value, Error> {
-    let unwritten = |why: String| Error::limit(format!("JER does not represent this value: {why}"));
+    let unwritten =
+        |why: String| Error::limit(format!("the JSON forms do not represent this value: {why}"));
     written.map_err(|error| unwritten(crate::error::encode_reason(&error)))?;
     value.ok_or_else(|| unwritten("it is absent".to_string()))
-}
-
-/// What the JSON forms do not write yet, as the codec of rasn did not.
-fn not_yet(what: &str) -> EncodeError {
-    rasn::enc::Error::custom(what, Codec::Jer)
 }
 
 /// What the JSON forms do not write: a type that neither protocol has.
@@ -172,38 +168,29 @@ impl Encoder {
         }
     }
 
-    /// An integer: a number, as the codec of rasn wrote one.
-    fn integer(&mut self, value: i128) -> Result<(), EncodeError> {
-        match i64::try_from(value) {
-            Ok(number) => {
-                self.put(Value::Number(Number::from(number)));
-                Ok(())
-            }
-            Err(_) => Err(not_yet("an integer of 2^63 or more has no number")),
-        }
+    /// An integer: a number, or its decimal digits where JSON has no exact number.
+    fn integer(&mut self, value: i128) {
+        self.put(match (i64::try_from(value), u64::try_from(value)) {
+            (Ok(number), _) => Value::Number(Number::from(number)),
+            (_, Ok(number)) => Value::Number(Number::from(number)),
+            _ => Value::String(value.to_string()),
+        });
     }
 
     /// A bit string: its octets, with its length unless its type gives it.
-    fn bits(&mut self, constraints: &Constraints, value: &BitStr) -> Result<(), EncodeError> {
+    fn bits(&mut self, constraints: &Constraints, value: &BitStr) {
         let text = hex(&octets_of(value));
         self.put(match one_size(constraints) {
-            // rasn writes a string of a type of one size without its length, which a
-            // string of another size is not read back from.
-            Some((size, true)) if size != value.len() => {
-                return Err(not_yet(
-                    "a bit string of another size than the one that its type gives has no \
-                     length",
-                ));
-            }
-            Some(_) => Value::String(text),
-            None => {
+            Some((size, _)) if size == value.len() => Value::String(text),
+            // rasn writes a string of a type of one size without its length.
+            Some((_, false)) => Value::String(text),
+            _ => {
                 let mut members = Map::new();
                 members.insert("value".into(), Value::String(text));
                 members.insert("length".into(), Value::Number(Number::from(value.len())));
                 Value::Object(members)
             }
         });
-        Ok(())
     }
 
     /// A string.
@@ -305,7 +292,8 @@ impl rasn::Encoder<'_> for Encoder {
         value: &BitStr,
         _: Identifier,
     ) -> Result<(), EncodeError> {
-        self.bits(constraints, value)
+        self.bits(constraints, value);
+        Ok(())
     }
 
     fn encode_enumerated<E: types::Enumerated>(
@@ -338,8 +326,10 @@ impl rasn::Encoder<'_> for Encoder {
     ) -> Result<(), EncodeError> {
         match value.clone().try_into() {
             Ok(value) => self.integer(value),
-            Err(_) => Err(not_yet("an integer of 2^63 or more has no number")),
+            // An integer of more than 127 bits.
+            Err(_) => self.put(Value::String(value.to_string())),
         }
+        Ok(())
     }
 
     fn encode_real<R: types::RealType>(
@@ -770,17 +760,26 @@ impl<'v> Decoder<'v> {
         self.string("a string is expected")
     }
 
-    /// The next value, an integer: a number from -2^63 to 2^63-1, as the codec of rasn
-    /// read one. One that is outside the constraint of its type, which has no extension
-    /// marker, is refused.
+    /// The next value, an integer: a number, or the decimal digits of one that JSON
+    /// has no exact number for. One that is outside the constraint of its type, which
+    /// has no extension marker, is refused.
     fn integer(&mut self, constraints: &Constraints) -> Result<Integral, DecodeError> {
         let (name, value) = self.next()?;
         let read = match value {
-            Value::Number(number) => number.as_i64().map(i128::from).map(Integral::Small),
+            Value::Number(number) => (number.as_i64().map(i128::from))
+                .or_else(|| number.as_u64().map(i128::from))
+                .map(Integral::Small),
+            // The digits of an integer that JSON has no exact number for, and of no other.
+            Value::String(digits) => decimal(digits).filter(|read| match read {
+                Integral::Small(value) => {
+                    i64::try_from(*value).is_err() && u64::try_from(*value).is_err()
+                }
+                Integral::Large(_) => true,
+            }),
             _ => None,
         };
         let Some(read) = read else {
-            return Err(self.mismatch(name, "a number below 2^63 is expected", value));
+            return Err(self.mismatch(name, "a number is expected", value));
         };
         if let Some(constraint) = constraints
             .value()
@@ -794,6 +793,8 @@ impl<'v> Decoder<'v> {
                 Integral::Small(value) => {
                     start.is_none_or(|start| start <= value) && end.is_none_or(|end| value <= end)
                 }
+                // More than 127 bits: within no constraint that has a bound.
+                Integral::Large(_) => start.is_none() && end.is_none(),
             };
             if !inside {
                 let bound = |bound: Option<&i128>| bound.map(i128::to_string).unwrap_or_default();
@@ -818,7 +819,7 @@ impl<'v> Decoder<'v> {
         let (digits, length) = match (value, size) {
             // A string of the one size of its type is its octets.
             (Value::String(digits), Some((size, _))) => (digits.as_str(), size),
-            (Value::Object(members), None) => {
+            (Value::Object(members), None | Some((_, true))) => {
                 let digits = members.get("value").and_then(Value::as_str);
                 let length = members.get("length").and_then(Value::as_u64);
                 let length = length.and_then(|length| usize::try_from(length).ok());
@@ -827,8 +828,15 @@ impl<'v> Decoder<'v> {
                     None => return Err(self.mismatch(name, WITH_LENGTH, value)),
                 }
             }
-            (_, Some((size, _))) => {
+            (_, Some((size, false))) => {
                 let expected = format!("a bit string of {size} bits is expected, in hexadecimal");
+                return Err(self.mismatch(name, &expected, value));
+            }
+            (_, Some((size, true))) => {
+                let expected = format!(
+                    "a bit string of {size} bits is expected, in hexadecimal, or one of another \
+                     size as {{\"value\": HEXADECIMAL, \"length\": BITS}}"
+                );
                 return Err(self.mismatch(name, &expected, value));
             }
             (_, None) => return Err(self.mismatch(name, WITH_LENGTH, value)),
@@ -962,8 +970,54 @@ impl<'v> Decoder<'v> {
 
 /// An integer that JSON writes.
 enum Integral {
-    /// One of 63 bits at most.
+    /// One of 127 bits at most.
     Small(i128),
+    /// A larger one, as its octets in two's complement, the most significant first.
+    Large(Vec<u8>),
+}
+
+/// The integer that `digits` are in decimal, with `-` before those of a negative one.
+fn decimal(digits: &str) -> Option<Integral> {
+    let (negative, magnitude) = match digits.strip_prefix('-') {
+        Some(magnitude) => (true, magnitude),
+        None => (false, digits),
+    };
+    // A number is written one way: no sign of its own, and no zero before it.
+    let canonical = magnitude.bytes().all(|digit| digit.is_ascii_digit())
+        && !magnitude.is_empty()
+        && (magnitude == "0" || !magnitude.starts_with('0'))
+        && !(negative && magnitude == "0");
+    if !canonical {
+        return None;
+    }
+    if let Ok(small) = digits.parse::<i128>() {
+        return Some(Integral::Small(small));
+    }
+    // The magnitude in base 256, the least significant octet first.
+    let mut octets = vec![0u8];
+    for digit in magnitude.bytes() {
+        let mut carry = u32::from(digit - b'0');
+        for octet in &mut octets {
+            let value = u32::from(*octet) * 10 + carry;
+            *octet = value as u8;
+            carry = value >> 8;
+        }
+        if carry != 0 {
+            octets.push(carry as u8);
+        }
+    }
+    // An octet for the sign, then two's complement for a negative number.
+    octets.push(0);
+    if negative {
+        let mut carry = true;
+        for octet in &mut octets {
+            let (value, overflow) = (!*octet).overflowing_add(u8::from(carry));
+            *octet = value;
+            carry = overflow;
+        }
+    }
+    octets.reverse();
+    Some(Integral::Large(octets))
 }
 
 impl rasn::Decoder for Decoder<'_> {
@@ -1012,8 +1066,10 @@ impl rasn::Decoder for Decoder<'_> {
         _: Tag,
         constraints: &Constraints,
     ) -> Result<I, DecodeError> {
-        let Integral::Small(value) = self.integer(constraints)?;
-        let read = I::try_from(value).ok();
+        let read = match self.integer(constraints)? {
+            Integral::Small(value) => I::try_from(value).ok(),
+            Integral::Large(octets) => I::try_from_signed_bytes(&octets, Codec::Jer).ok(),
+        };
         // A type of the bindings holds every integer of its constraint.
         read.ok_or_else(|| DecodeError::integer_overflow(I::WIDTH, Codec::Jer))
     }
@@ -1483,24 +1539,40 @@ mod tests {
     }
 
     #[test]
-    fn an_integer_of_two_to_the_63_or_more_is_not_written_yet() {
-        let rate = |value: Integer| to_value(&Rate(value));
+    fn an_integer_is_a_number_of_any_size() {
+        let rate = |value: Integer| to_value(&Rate(value)).unwrap();
         let read = |value: Value| from_value::<Rate>(&value).map(|rate| rate.0);
-        let largest = i64::MAX;
-        assert_eq!(rate(largest.into()), Ok(json!(largest)));
+        let largest = u64::MAX;
+        assert_eq!(rate(largest.into()), json!(largest));
         assert_eq!(read(json!(largest)), Ok(largest.into()));
-        assert_eq!(rate(i64::MIN.into()), Ok(json!(i64::MIN)));
+        assert_eq!(rate((1u64 << 63).into()), json!(1u64 << 63));
+        assert_eq!(rate(i64::MIN.into()), json!(i64::MIN));
 
-        // The codec of rasn has no number for more, and neither has this one yet.
-        let error = rate((1u64 << 63).into()).unwrap_err();
-        assert_eq!(error.kind(), ErrorKind::Limit);
-        assert_eq!(
-            error.to_string(),
-            "JER does not represent this value: an integer of 2^63 or more has no number"
-        );
-        for other in [json!(1u64 << 63), json!("1"), json!(1.5)] {
-            assert!(read(other.clone()).is_err(), "{other}");
+        // JSON has no exact number above 2^64-1 or below -2^63: the decimal digits.
+        let above: Integer = (i128::from(largest) + 1).into();
+        assert_eq!(rate(above.clone()), json!("18446744073709551616"));
+        assert_eq!(read(json!("18446744073709551616")), Ok(above));
+        let below: Integer = (i128::from(i64::MIN) - 1).into();
+        assert_eq!(rate(below.clone()), json!("-9223372036854775809"));
+        assert_eq!(read(json!("-9223372036854775809")), Ok(below));
+
+        // More than 127 bits, both ways.
+        let digits = "340282366920938463463374607431768211456";
+        let huge = read(json!(digits)).unwrap();
+        assert_eq!(huge.to_string(), digits);
+        assert_eq!(rate(huge), json!(digits));
+        let negative = format!("-{digits}");
+        let huge = read(json!(negative)).unwrap();
+        assert_eq!(huge.to_string(), negative);
+        assert_eq!(rate(huge), json!(negative));
+
+        // A number is written one way, and one that JSON has a number for is that
+        // number: its digits are refused.
+        for other in ["+1", "01", "-0", "", "1e3", "5", "18446744073709551615"] {
+            assert!(read(json!(other)).is_err(), "{other}");
         }
+        assert!(read(json!(1.5)).is_err());
+        assert!(read(json!("-9223372036854775808")).is_err());
     }
 
     #[test]
@@ -1519,7 +1591,7 @@ mod tests {
         );
         let (_, why) = refused(&with("id", json!("one")));
         assert!(
-            why.ends_with("at id: a number below 2^63 is expected, and \"one\" is written"),
+            why.ends_with("at id: a number is expected, and \"one\" is written"),
             "{why}"
         );
         // A constraint that has an extension marker takes any integer.
@@ -1558,15 +1630,17 @@ mod tests {
     #[test]
     fn a_bit_string_has_its_length_unless_its_type_gives_it() {
         // A type of one size and an extension marker: a string of that size is its
-        // octets, as the codec of rasn wrote it, and one of another size is not written
-        // yet.
-        let mask = |bits: BitString| to_value(&Mask(bits));
+        // octets, and one of another size has its length.
+        let mask = |bits: BitString| to_value(&Mask(bits)).unwrap();
         let read = |value: Value| from_value::<Mask>(&value).map(|mask| mask.0);
-        assert_eq!(mask(bits(&[0xc0, 0x00], 16)), Ok(json!("C000")));
+        assert_eq!(mask(bits(&[0xc0, 0x00], 16)), json!("C000"));
+        let longer = json!({"value": "C00000", "length": 20});
+        assert_eq!(mask(bits(&[0xc0, 0x00, 0x00], 20)), longer);
+        assert_eq!(read(longer), Ok(bits(&[0xc0, 0x00, 0x00], 20)));
         assert_eq!(read(json!("c000")), Ok(bits(&[0xc0, 0x00], 16)));
-        let error = mask(bits(&[0xc0, 0x00, 0x00], 20)).unwrap_err();
-        assert_eq!(error.kind(), ErrorKind::Limit);
-        assert!(read(json!({"value": "C00000", "length": 20})).is_err());
+        // The size of the type is also read with its length.
+        let sized = json!({"value": "C000", "length": 16});
+        assert_eq!(read(sized), Ok(bits(&[0xc0, 0x00], 16)));
         assert!(read(json!("C00000")).is_err());
 
         // A string that does not start an octet is read bit by bit.

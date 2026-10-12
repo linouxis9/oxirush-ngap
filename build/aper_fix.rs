@@ -42,19 +42,24 @@ pub fn fix_constrained_sequences(generated: &str) -> Result<String> {
     Ok(generated)
 }
 
-/// Decode unknown extension additions before returning an extensible SEQUENCE.
+/// Give each SEQUENCE the codec of `crate::per::sequence!` in place of rasn's
+/// derived one.
 ///
-/// rasn 0.29 leaves them unread when the type has no known additions. All
-/// current SEQUENCE additions are empty; the protocol's named extension
-/// containers remain ordinary root fields. Preserve their root field tokens
-/// and constraints in the decoder macro, and fail if a future ASN.1 version
-/// defines additions that need a different decoder.
-pub fn fix_extensible_sequences(generated: &str) -> Result<String> {
+/// It writes and reads the preamble and the members in the encoder and the
+/// decoder that the SEQUENCE is given, and skips the unknown extension
+/// additions of an extensible one, which rasn 0.29 leaves unread when the type
+/// has no known additions. All current SEQUENCE additions are empty; the
+/// protocol's named extension containers remain ordinary root fields. The
+/// macro takes the root field tokens and their constraints, with what each
+/// member is when it may be absent and whether its attributes constrain it.
+/// Fail if a future ASN.1 version defines additions or default values, which
+/// need a different codec.
+pub fn fix_sequences(generated: &str) -> Result<String> {
     let sequence = Regex::new(
         r#"(?ms)(    #\[derive\(AsnType, Debug, Clone, )Decode, (Encode, PartialEq, Eq, Hash\)\]
     #\[rasn\(\s*automatic_tags(?:,\s*identifier = "[^"]+")?,?\s*\)\]
-    #\[non_exhaustive\]
-    pub struct ([A-Za-z0-9_]+) \{
+(    #\[non_exhaustive\]
+)?    pub struct ([A-Za-z0-9_]+) \{
 (.*?)^    \})"#,
     )?;
     let field = Regex::new(r"(?m)^        pub ([a-z0-9_]+):\s*")?;
@@ -62,8 +67,13 @@ pub fn fix_extensible_sequences(generated: &str) -> Result<String> {
     let mut failure = None;
     let generated = sequence
         .replace_all(generated, |captures: &Captures<'_>| {
-            let name = &captures[3];
-            let fields = &captures[4];
+            // An extensible SEQUENCE is the one that the bindings mark non-exhaustive.
+            let marker = match captures.get(3) {
+                Some(_) => "extensible",
+                None => "closed",
+            };
+            let name = &captures[4];
+            let fields = &captures[5];
             if fields.contains("extension_addition") {
                 failure.get_or_insert_with(|| format!("defined SEQUENCE additions in {name}"));
                 return captures[0].to_string();
@@ -87,10 +97,28 @@ pub fn fix_extensible_sequences(generated: &str) -> Result<String> {
                     failure.get_or_insert_with(|| format!("unterminated field in {name}"));
                     return captures[0].to_string();
                 };
-                arguments.push_str(&fields[rest..whole.start()]);
+                let attributes = &fields[rest..whole.start()];
+                if attributes.contains("default") {
+                    failure.get_or_insert_with(|| format!("a default value in {name}"));
+                    return captures[0].to_string();
+                }
+                // What the codec of the SEQUENCE needs of the member: what it is when
+                // it may be absent, and whether its attributes constrain it.
+                let ty = fields[start..end].trim();
+                let optional = ty.strip_prefix("Option<").and_then(|ty| ty.strip_suffix('>'));
+                // rustfmt may have the type of a long member on lines of its own.
+                let optional = optional.map(|inner| inner.trim().trim_end_matches(',').trim_end());
+                let constrained = attributes.contains("value(") || attributes.contains("size(");
+                let kind = match (optional, constrained) {
+                    (Some(inner), true) => format!("? [{inner}] !"),
+                    (Some(inner), false) => format!("? [{inner}]"),
+                    (None, true) => "!".to_string(),
+                    (None, false) => String::new(),
+                };
+                arguments.push_str(attributes);
                 // Raw token groups preserve Option<T> for rasn's derives;
                 // forwarding a macro `ty` would hide it behind a Type::Group.
-                write!(arguments, "        {}: [{}],", &member[1], &fields[start..end])
+                write!(arguments, "        {}: [{ty}] {{{kind}}},", &member[1])
                     .expect("write to String");
                 rest = end + 1;
             }
@@ -100,25 +128,25 @@ pub fn fix_extensible_sequences(generated: &str) -> Result<String> {
                 return captures[0].to_string();
             }
             replacements += 1;
-            let declaration = captures[0].replacen("Decode, Encode, ", "Encode, ", 1);
+            let declaration = captures[0].replacen("Decode, Encode, ", "", 1);
             format!(
-                "{declaration}\n    crate::per::decode_extensible_sequence! {{ {name} {{\n{arguments}    }} }}"
+                "{declaration}\n    crate::per::sequence! {{ {name} {marker} {{\n{arguments}    }} }}"
             )
         })
         .into_owned();
     if let Some(failure) = failure {
-        bail!("extensible SEQUENCE: {failure}");
+        bail!("SEQUENCE: {failure}");
     }
     ensure!(
         replacements > 0,
-        "no extensible SEQUENCE declarations found"
+        "no SEQUENCE declarations found"
     );
     let unpatched = Regex::new(
-        r"(?ms)#\[derive\([^\]]*\bDecode\b[^\]]*\)\]\s*#\[rasn\([^\]]*\)\]\s*#\[non_exhaustive\]\s*pub struct",
+        r"(?ms)#\[derive\([^\]]*\b(?:Decode|Encode)\b[^\]]*\)\]\s*#\[rasn\([^\]]*\)\]\s*(?:#\[non_exhaustive\]\s*)?pub struct [A-Za-z0-9_]+ \{",
     )?;
     ensure!(
         !unpatched.is_match(&generated),
-        "an extensible SEQUENCE declaration still uses the derived decoder"
+        "a SEQUENCE declaration still uses a derived codec"
     );
     Ok(generated)
 }

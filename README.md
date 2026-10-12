@@ -1126,6 +1126,7 @@ S1AP.
 | `tests/shared_files.rs` | The files that this crate shares with `oxirush-s1ap` are as they were last mirrored. |
 | The unit tests of the JSON codec | Each ASN.1 construct of the protocol has its JSON form and is read back from it, with what is refused and where. Each value of each message of the fixtures has the form that the JSON Encoding Rules codec of rasn gives it. |
 | The unit tests of `src/wire.rs` | A PDU and the protocol IEs of a message are read and written octet by octet as the codec of rasn reads and writes them: each message of the fixtures, each of its truncations, and each with one bit that is another. |
+| The unit tests of `src/per.rs` | A `SEQUENCE` with the codec of the crate is written and read as the same one with the derived codec of rasn, in each encoding rule: members that are there and that are not, constrained and not, in a list and in a `CHOICE`, and each truncation of their octets. |
 | The unit tests of the paths | No two names that a path takes can be mistaken for each other. No value has a member with the same name as a member of its IE, except the `value` of a bit string. |
 | The Rust blocks of this page | They compile and run as documentation tests, with the `inspect` feature, and `tests/readme.rs` compares what each prints with the output shown under it. |
 
@@ -1211,8 +1212,13 @@ macros give typed construction, extraction and mutation.
 
 rasn 0.29's APER codec departs from ITU-T X.691 where NGAP reaches it. There
 the generator replaces the derived codec with `Encode` and `Decode`
-implementations written against rasn's public codec traits; every other value
-uses the derived codec unchanged.
+implementations written against rasn's public codec traits. Each `SEQUENCE`
+has one too, for PER: it writes and reads its preamble and its members in the
+encoder and the decoder that it is given, where the derived codec has rasn
+make an encoder of another type for each number of members, and the compiler
+build the codec of every member once more for each. In the other encoding
+rules a `SEQUENCE` is the sequence codec of rasn, called as the derived codec
+calls it, and every other value uses the derived codec unchanged.
 
 | Value | Correction |
 |-------|------------|

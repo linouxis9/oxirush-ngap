@@ -357,6 +357,13 @@ is not source compatible with 0.4.2.
   members of a `SEQUENCE` in a function that is compiled once, where an
   iterator was compiled for each type, and so is what a typed function does
   whatever its type is.
+- A `SEQUENCE` is written and read in PER by a codec of the crate, in the
+  encoder and the decoder that it is given. The derived codec had rasn make
+  an encoder of another type for each number of components, and the PER
+  codec of every member was compiled once more for each. In the other
+  encoding rules, and for the JSON forms, a `SEQUENCE` is written and read
+  as the derived codec did it, and the additions of a later release are
+  skipped in the unaligned variant too.
 
 ### Fixed
 

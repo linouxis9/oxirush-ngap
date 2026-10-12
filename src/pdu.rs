@@ -1,8 +1,8 @@
 //! The protocol IEs of the message of a PDU, whatever the message: read, put back, and
 //! compared with the object set that the ASN.1 gives the message.
 
+use rasn::AsnType;
 use rasn::types::Any;
-use rasn::{AsnType, Decoder, Encode};
 
 use crate::Error;
 use crate::check::{Deviation, deviations, object_set};
@@ -11,16 +11,16 @@ use crate::registry::procedure_criticality;
 
 /// A message as the ASN.1 has every message but the private one: a SEQUENCE of one
 /// container of protocol IEs, which a later release may add to.
-#[derive(AsnType, Encode)]
+#[derive(AsnType)]
 #[rasn(automatic_tags)]
 #[non_exhaustive]
 pub(crate) struct AnyMessage {
     #[rasn(identifier = "protocolIEs")]
     pub(crate) protocol_ies: ProtocolIEContainer,
 }
-crate::per::decode_extensible_sequence! { AnyMessage {
+crate::per::sequence! { AnyMessage extensible {
     #[rasn(identifier = "protocolIEs")]
-    protocol_ies: [ProtocolIEContainer],
+    protocol_ies: [ProtocolIEContainer] {},
 } }
 
 #[cfg(test)]

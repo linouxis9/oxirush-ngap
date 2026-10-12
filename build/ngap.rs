@@ -69,7 +69,7 @@ fn post_process(path: &Path, asn_files: &[PathBuf]) -> Result<()> {
     generated = crate::aper_fix::fix_utf8_strings(&generated)?;
     generated = crate::aper_fix::fix_fixed_bit_strings(&generated)?;
     generated = crate::aper_fix::fix_long_inline_strings(&generated)?;
-    generated = crate::aper_fix::fix_extensible_sequences(&generated)?;
+    generated = crate::aper_fix::fix_sequences(&generated)?;
 
     // The private IE container uses PrivateIE-ID, which rasn-compiler omits
     // from the import list of its module.

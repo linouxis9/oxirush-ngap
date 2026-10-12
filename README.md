@@ -94,6 +94,7 @@ and its README has the sections of this one.
 [Examples](#examples) ·
 [Specifications](#specifications) ·
 [Tests](#tests) ·
+[Benchmarks](#benchmarks) ·
 [Generated code](#generated-code) ·
 [API reference](https://docs.rs/oxirush-ngap)
 
@@ -1090,6 +1091,28 @@ cargo test --all-features
 cargo test
 ```
 
+## Benchmarks
+
+The benchmarks and their profilers are a package of their own, `benches/`,
+so that criterion and pprof are no dependencies of the crate. They measure
+the codec, the macros and the JSON forms on the messages of
+`tests/fixtures/messages.tsv` and on four messages of the size that a
+network sends.
+
+```bash
+cd benches
+cargo bench --bench codec -- decode/                   # the time, with criterion
+cargo bench --bench allocations                        # the allocations of each operation
+cargo bench --bench heap -- to-view/fixtures           # where they are made
+cargo bench --bench codec -- --profile-time 10 to-view/fixtures
+go tool pprof -top target/criterion/to-view/fixtures/profile/profile.pb
+python3 build_cost.py +1.88.0 --features inspect       # a clean build: its time and its memory
+```
+
+`--profile-time` runs the benchmark under [pprof](https://crates.io/crates/pprof)
+and writes a CPU profile that `go tool pprof` reads; with `PROFILE=flamegraph`
+in the environment it writes `flamegraph.svg` beside it instead.
+
 ## Generated code
 
 Cargo compiles three checked-in files. A build, docs.rs and the verification
@@ -1122,8 +1145,8 @@ regenerates them, as the ASN.1 is not in the repository.
 oxirush-ngap and oxirush-s1ap share, octet for octet, the code that does not
 depend on the protocol: `build/aper_fix.rs`, `build/containers.rs`,
 `build/inspection.rs`, `build/registry.rs`, `src/check.rs`, `src/error.rs`,
-`src/inspect_paths.rs`, `src/message.rs`, `src/per.rs`, `src/sized.rs` and
-the test `tests/readme.rs`.
+`src/inspect_paths.rs`, `src/message.rs`, `src/per.rs`, `src/sized.rs`, the
+test `tests/readme.rs`, and the benchmarks but for their `protocol.rs`.
 `tests/shared_files.rs` holds a digest of each, so that an edit in one crate
 fails its tests until the file is the same in the other and both record the
 new digest.

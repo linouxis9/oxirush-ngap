@@ -1,13 +1,19 @@
 //! The files that oxirush-ngap and oxirush-s1ap have in common, octet for octet: the
 //! error, the codec helpers, the paths of the inspection, the generators that both
-//! protocols run and the test of the README. Each crate holds the digest of each file, so that an
-//! edit in one fails here until the file is the same in the other and both record its
-//! new digest. This file is one of them, and the two crates keep it the same too.
+//! protocols run, the test of the README and the benchmarks. Each crate holds the digest
+//! of each file, so that an edit in one fails here until the file is the same in the
+//! other and both record its new digest. This file is one of them, and the two crates
+//! keep it the same too.
 
 use std::path::Path;
 
 /// The shared files, and the FNV-1a digest of each as it was last mirrored.
 const SHARED: &[(&str, u64)] = &[
+    ("benches/benches/allocations.rs", 0x7e9caf0d00bb13de),
+    ("benches/benches/codec.rs", 0x904d8a5909d190c1),
+    ("benches/benches/heap.rs", 0xffc0849cd2e0625d),
+    ("benches/build_cost.py", 0x84c70b1ce3c14ed6),
+    ("benches/src/lib.rs", 0x296993cddf8c05c2),
     ("build/aper_fix.rs", 0x00b83a662f2e1d4c),
     ("build/containers.rs", 0x9d134011ce89fec9),
     ("build/inspection.rs", 0xcc54553d89f026e5),
@@ -34,9 +40,11 @@ fn digest(octets: &[u8]) -> u64 {
 fn the_files_shared_with_the_other_protocol_are_as_they_were_mirrored() {
     let mut read = 0;
     for (path, recorded) in SHARED {
-        // The published crate has the sources and not the generator.
+        // The published crate has the sources, and neither the generator nor the
+        // benchmarks.
         let Ok(octets) = std::fs::read(Path::new(env!("CARGO_MANIFEST_DIR")).join(path)) else {
-            assert!(path.starts_with("build/"), "{path} is missing");
+            let published = !path.starts_with("build/") && !path.starts_with("benches/");
+            assert!(!published, "{path} is missing");
             continue;
         };
         read += 1;

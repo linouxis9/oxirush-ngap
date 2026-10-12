@@ -6,9 +6,9 @@
 
 A Rust codec for NGAP, the NG Application Protocol between an NG-RAN node and
 an AMF, per 3GPP TS 38.413. Its types are generated from the ASN.1 of the
-specification and encoded in aligned PER with
-[`rasn`](https://crates.io/crates/rasn), and macros build a message and read
-its IEs by their names.
+specification and encoded in aligned PER by
+[`oxirush-aper`](https://crates.io/crates/oxirush-aper), the runtime of the
+OxiRush crates, and macros build a message and read its IEs by their names.
 
 ```rust
 use oxirush_ngap::{build_ngap, extract_ngap_ies, ngap::*};
@@ -112,18 +112,21 @@ oxirush-ngap = "0.5"
 | `inspect` | A PDU as a `serde_json::Value`: its tree, in which a message is shown and written as its name and its IEs, its view and the paths of its values | `serde_json` |
 
 No feature is on by default. The examples of this page also use the `hex`
-crate, and `serde_json` for JSON. The values of the bindings are those of
-`rasn`, such as `Integer`, `FixedBitString`, `OctetString` and `Any`. The
-crate re-exports it as `oxirush_ngap::rasn`, which is where the examples take
-these names from: a crate that names them needs no dependency on `rasn` of
-its own. The errors of the codec are the crate's own: see [Errors](#errors).
+crate, and `serde_json` for JSON. The values of the bindings are native
+numbers, arrays and the types of `oxirush-aper`: `Octets`, `Bits` and
+`BitString`. The crate has them at its root, and the runtime as
+`oxirush_ngap::aper`: a crate that names them needs no dependency of its own.
+The errors of the codec are those of the runtime: see [Errors](#errors).
 
-The minimum supported Rust version is 1.88. A project that is built with
-Rust 1.88 needs a resolver that looks at the Rust version, which edition
-2024 has and `resolver = "3"` in its `Cargo.toml` gives an older edition:
-the default resolver of edition 2021 takes a `uuid` that needs Rust 1.89,
-through the macros of `rasn`, and the build stops with
-`uuid@1.28.0 requires rustc 1.89.0`.
+`oxirush-aper` 0.1.0 is not on crates.io yet. Until it is, a build takes it
+from its repository:
+
+```toml
+[patch.crates-io]
+oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper" }
+```
+
+The minimum supported Rust version is 1.88.
 
 The bindings are checked in and large, and with `inspect` the compiler also
 builds the code of the JSON forms and of APER for every type of the protocol. A clean
@@ -150,8 +153,8 @@ without debug information.
 
 | Area | Contents |
 |------|----------|
-| Bindings | Rust types for the six ASN.1 modules of TS 38.413 V19.4.0, generated with [`rasn-compiler`](https://crates.io/crates/rasn-compiler) and checked in |
-| Codec | Aligned PER encoding and decoding through `rasn`, with the corrections of [rasn integration](#rasn-integration) |
+| Bindings | Rust types for the six ASN.1 modules of TS 38.413 V19.4.0, generated from what [`rasn-compiler`](https://crates.io/crates/rasn-compiler) resolves of them and checked in |
+| Codec | Aligned PER encoding and decoding by `oxirush-aper`, as ITU-T X.691 has it. A value that is decoded borrows its octets from what it was decoded from: a NAS-PDU is a slice of the PDU |
 | Names | Flat re-exports of the generated types, and the aliases `NGAP_PDU`, `AMF_UE_NGAP_ID` and `RAN_UE_NGAP_ID`. IE identifiers, procedure codes, procedure names, directions and the kinds of a PDU (`NgapPduKind`) come from the ASN.1 |
 | Macros | `build_ngap!`, `build_ngap_ie!`, `extract_ngap_ies!` and `with_ngap_ie_mut!`: typed values in and out of the open types |
 | Any message | `protocol_ies()` and `set_protocol_ies()` read and replace the IEs of a PDU whatever its message is, and `check()` reports how a message deviates from its object set: a mandatory IE that is missing, an IE that it cannot have or has twice, the order of its IEs and the criticalities |
@@ -174,12 +177,13 @@ without debug information.
 
 | Of an `NGAP_PDU` | Gives |
 |------------------|-------|
-| `NGAP_PDU::decode(&bytes)` | The PDU of the octets of one message. Octets that are incomplete, and octets after the message, are an error of the kind `Decode` |
-| `encode()` | Its octets, a `Vec<u8>` |
+| `NGAP_PDU::decode(&bytes)` | The PDU of the octets of one message, which owns its octets. Octets that are incomplete, and octets after the message, are an error of the kind `Decode` |
+| `NGAPPDU::decode_borrowed(&bytes)` | The same PDU, which borrows its message from `bytes` and copies nothing; `into_owned()` gives the one that owns |
+| `encode()`, `encode_into(&mut octets)` | Its octets, a `Vec<u8>`, or appended to a buffer that is kept |
 | `procedure_code()`, `procedure_name()` | The code and the name of its procedure: `42` and `"UEContextReleaseRequest"` |
 | `direction()` | `"InitiatingMessage"`, `"SuccessfulOutcome"` or `"UnsuccessfulOutcome"`; `is_initiating()`, `is_successful()` and `is_unsuccessful()` say which |
 | `kind()` | An `NgapPduKind`: one variant for each message, and `Other` for a procedure that the specification does not have in that direction |
-| `decode_value()` | The message, as its type, which the caller names. The type of another message is an error of the kind `WrongMessage`, and a type that is no message does not compile |
+| `decode_value()` | The message, as its type, which the caller names. It borrows from the PDU. The type of another message is an error of the kind `WrongMessage`, and a type that is no message does not compile |
 | `protocol_ies()`, `set_protocol_ies(ies)` | The IEs of its message, whatever the message is, and the same PDU with other IEs: [below](#the-ies-of-any-message) |
 | `check()` | How it deviates from the object set of its message, a `Vec<Deviation>`: [below](#check-a-message-against-its-object-set) |
 
@@ -214,6 +218,96 @@ println!("{}", receive(&failure).unwrap());
 ```text
 a release request with 3 IEs
 Unsuccessful_NGSetup is not handled here
+```
+
+### Keep a value after its PDU
+
+A value that is decoded borrows the octets that it holds: a type that holds
+octets has a lifetime, as `NASPDU<'a>`, and one that holds none, as `Cause`,
+has not. `into_owned()` gives the same value with the lifetime `'static`,
+which is the type to write in a struct.
+
+```rust
+use oxirush_ngap::{Error, build_ngap, extract_ngap_ies, ngap::*};
+
+// What a node keeps of a UE after its first message
+struct Ue {
+    ran_id: u32,
+    nas: NASPDU<'static>,
+}
+
+fn admit(pdu: &NGAP_PDU) -> Result<Ue, Error> {
+    // `message` borrows from `pdu`, and `nas` from `message`
+    let message: InitialUEMessage = pdu.decode_value()?;
+    extract_ngap_ies!(message, InitialUEMessage,
+        req ran_id: u32 = RAN_UE_NGAP_ID(id),
+        req nas: NASPDU = NAS_PDU(nas) => nas,
+    );
+    // Kept beyond the PDU: the octets are copied here, once
+    Ok(Ue { ran_id, nas: nas.into_owned() })
+}
+
+fn main() -> Result<(), Error> {
+    let pdu = build_ngap!(InitiatingMessage, InitialUEMessage, IGNORE, InitialUEMessage,
+        REJECT RAN_UE_NGAP_ID(7u32),
+        REJECT NAS_PDU(vec![0x7e, 0x00, 0x41]),
+    )?;
+    let ue = admit(&pdu)?;
+    drop(pdu);
+    println!("UE {}: a NAS-PDU of {} octets", ue.ran_id, ue.nas.0.len());
+    Ok(())
+}
+```
+
+```text
+UE 7: a NAS-PDU of 3 octets
+```
+
+A message may be held across an `.await`. The future of this handler owns
+the buffer, the PDU borrows from the buffer, the message from the PDU and the
+NAS-PDU from the message, and the future is `Send`, as every value of the
+bindings is.
+
+```rust
+use oxirush_ngap::{Error, build_ngap, extract_ngap_ies, ngap::*};
+
+async fn deliver(nas: &[u8]) {
+    println!("a NAS-PDU of {} octets", nas.len());
+}
+
+async fn handle(received: Vec<u8>) -> Result<(), Error> {
+    // Nothing of `received` is copied
+    let pdu = NGAPPDU::decode_borrowed(&received)?;
+    let message: UplinkNASTransport = pdu.decode_value()?;
+    extract_ngap_ies!(message, UplinkNASTransport,
+        req nas: NASPDU = NAS_PDU(nas) => nas,
+    );
+    deliver(&nas.0).await;
+    Ok(())
+}
+
+fn main() -> Result<(), Error> {
+    let transport = build_ngap!(InitiatingMessage, UplinkNASTransport, IGNORE, UplinkNASTransport,
+        REJECT AMF_UE_NGAP_ID(1u64),
+        REJECT RAN_UE_NGAP_ID(7u32),
+        REJECT NAS_PDU(vec![0x7e, 0x00, 0x5d]),
+    )?;
+    let handler = handle(transport.encode()?);
+
+    // A runtime may move the handler to another thread
+    fn is_send(_: &impl Send) {}
+    is_send(&handler);
+
+    // Polled here without a runtime: this handler never waits
+    let mut handler = std::pin::pin!(handler);
+    let mut context = std::task::Context::from_waker(std::task::Waker::noop());
+    assert!(handler.as_mut().poll(&mut context).is_ready());
+    Ok(())
+}
+```
+
+```text
+a NAS-PDU of 3 octets
 ```
 
 ### Build a PDU
@@ -492,9 +586,8 @@ of a PLMN identity, and has `None` for octets that are not one, as
 `ab cd ef`.
 
 No helper panics, and none cuts a number short. `plmn` gives an error of the
-kind `Argument` for what is no MCC or no MNC, and so do `guami`, `nr_cgi`,
-`global_gnb_id` and `int_to_bitvec` for a number that does not fit in the
-bits of its field. `tai` takes the three octets of a TAC as an array.
+kind `Argument` for what is no MCC or no MNC, and so do `guami`, `nr_cgi`
+and `global_gnb_id` for a number that does not fit in the bits of its field. `tai` takes the three octets of a TAC as an array.
 
 ### Errors
 
@@ -556,6 +649,16 @@ these octets do not decode as NGAP-PDU: the octets end before the value does, in
 | `NRCGI` | PLMN and a 36-bit NR cell identity |
 | `SNSSAI` | Slice/service type and optional slice differentiator |
 | `NASPDU` | A 5GS NAS message, as octets |
+| `Octets` | The octets of an `OCTET STRING` or of an open type: a slice of what they were decoded from, or their own |
+| `Bits` | A `BIT STRING` of 64 bits at most without an extension marker, as the AMF Set ID: a number with its length |
+| `BitString` | Another `BIT STRING`, as a transport layer address or a key |
+
+An `INTEGER` is a native number, of 64 bits at most. A number that an
+extension marker lets a later release send beyond that does not decode: the
+error says `the number does not fit in 64 bits`, the rest of the PDU is read,
+and the JSON forms show that IE as the octets that were received.
+[The documentation](https://docs.rs/oxirush-ngap#the-types-of-the-values) has
+the type of each ASN.1 construct, and which bit strings are `Bits`.
 
 ## JSON: trees, views and paths
 
@@ -1050,7 +1153,7 @@ written, and take them so.
 | `TransportLayerAddress` | `"10.0.0.1"`, `"2001:db8::1"`, or the two with a comma |
 | `TAC`, `EPS-TAC`, `LAC`, `GTP-TEID`, `FiveG-TMSI`, `SST`, `PortNumber`, `AMFRegionID`, `AMFSetID`, `AMFPointer`, `NRCellIdentity`, `EUTRACellIdentity`, `UL-NAS-Count` | a number, also read as a `"0x…"` string |
 | `ENUMERATED` | the name of the value, read in any case |
-| `INTEGER` | a number. One above 2^64-1 or below -2^63, which JSON has no exact number for, is a string of its decimal digits |
+| `INTEGER` | a number, which 64 bits hold, as the bindings hold it |
 | a bit string whose size varies, as the identifier of a gNB | `{"value": "000004", "length": 22}`: the octets that hold it, in hexadecimal, and its length in bits |
 | a bit string of another size than the one that its type gives beside an extension marker, as an algorithm mask of 24 bits | `{"value": "C00000", "length": 24}`, where a mask of the 16 bits of its type is `"C000"` |
 | the other strings: an SD, keys and algorithm masks, the NAS-PDU and the other containers | hexadecimal, read in either case |
@@ -1090,7 +1193,7 @@ is as it was after an edit that returns an error.
 | Example | Shows | Feature |
 |---------|-------|---------|
 | `build_pdu` | Initial Context Setup request and response, UE Context Release, Handover Required and Acknowledge, NG Setup Failure, and one IE built alone | |
-| `decode_manually` | An NG Setup Response built and read through rasn's APER API | |
+| `decode_manually` | An NG Setup Response built and read without the macros: the identifier, the criticality and the octets of each IE | |
 | `extract_ies` | UE release, handover, and nested PDU session and NAS data read from decoded messages | |
 | `inspect` | An NG Setup Request: its values with their paths, one IE edited, one added by its value and one by its octets, and the PDU encoded again | `inspect` |
 
@@ -1115,17 +1218,15 @@ S1AP.
 |------|---------------|
 | `tests/aper_vectors.rs` | [The vectors](#the-vectors) of `tests/fixtures`, which pycrate 0.8.1 encoded from the ASN.1 of the specification: the 144 messages of `messages.tsv`, one for each message of each procedure with what is mandatory and nothing else, and the 479 vectors of `vectors.tsv`, which have content. Each decodes to its type and encodes to the same octets, and its truncations and one more octet are refused. |
 | `tests/vectors.rs` | With `inspect`, each vector of `vectors.tsv` is read with the type of each IE, each transfer and each container of a handover, and is the same octets when it is written from its view, from its values alone and from its tree. A message of a later release, in `later.tsv`, is read as the same message without the additions that pycrate gave it. The vectors hold each of the 144 messages and each of the 489 IEs that the registry names, those of the extension containers among them: the messages of `messages.tsv` hold 111 of the IEs. |
-| `tests/aper_round_trip.rs` | The macros, and the encodings where the codec departs from rasn's: constrained lists, `UTF8String`, long bit strings, and each string with a length of two octets, as pycrate writes it. A number between the ranges of the root of an extensible constraint. |
+| `tests/aper_round_trip.rs` | The macros, and the encodings that rasn 0.29 has otherwise than X.691: constrained lists, `UTF8String`, long bit strings, and each string with a length of two octets, as pycrate writes it. A number between the ranges of the root of an extensible constraint. |
 | `tests/errors.rs` | The errors of the typed API, each with its kind and its message: a PDU that is decoded as another message, octets that are no PDU, a value outside its constraint in a function and in each macro, an IE that is absent or does not decode, for a `req` and for an `opt` field, and what each helper refuses. With `inspect`, a test for each kind of error of the JSON forms. |
 | `tests/protocol_ies.rs` | The protocol IEs of each of the 144 messages but the private one, and of each vector, are read from its PDU and put back as the same octets. An IE that the protocol does not have and one that is there twice are kept with their criticality, a message that the macros built has the IEs that it was built with, and the private message is an error. |
 | `tests/check.rs` | What `check()` reports: a message without a mandatory IE, with an IE twice, with an IE of another message, with its IEs out of order and with another criticality is each built by the macros, written from a tree, encoded and decoded, and reported as exactly that. Each of the 144 messages of the fixtures and each vector against its object set, which pycrate has from the ASN.1 too. |
 | `tests/unknown_extensions.rs` | The additions of a later release to an extensible `SEQUENCE` are skipped, and what follows them is read. |
-| `tests/allocation.rs` | Decoding reserves memory for the elements that it reads, not for the count that a length determinant claims, in two octets or in a fragment. The list codec of rasn, in the place of the one of the crate, reserves for the count. |
+| `tests/allocation.rs` | Decoding reserves memory for the elements that it reads, not for the count that a length determinant claims, in two octets or in a fragment. The list codec that rasn derives, in the place of the one of the oracle, reserves for the count. |
 | `tests/inspection.rs` | Each of the 144 messages is the same octets through its view, and through its tree where it has IEs to name. Each path of each selects its value, with and without `value` and `decoded`, and is one that `check_path` takes. Edits, written trees, criticalities, the two IEs that have the type of what they extend, and the identifiers of the registry against the constants of the bindings. |
 | `tests/shared_files.rs` | The files that this crate shares with `oxirush-s1ap` are as they were last mirrored. |
-| The unit tests of the JSON codec | Each ASN.1 construct of the protocol has its JSON form and is read back from it, with what is refused and where. Each value of each message of the fixtures and of each vector has the form that the JSON Encoding Rules codec of rasn gives it, but for two bit strings that rasn writes otherwise than X.697 has them: one of one size in a member that may be absent, and one of another size than its extensible type has. |
-| The unit tests of `src/wire.rs` | A PDU and the protocol IEs of a message are read and written octet by octet as the codec of rasn reads and writes them: each message of the fixtures and each vector, its truncations, and it with one bit that is another. A message and a value of 16384 octets or more are left to rasn. |
-| The unit tests of `src/per.rs` | A `SEQUENCE` with the codec of the crate is written and read as the same one with the derived codec of rasn, in each encoding rule: members that are there and that are not, constrained and not, in a list and in a `CHOICE`, and each truncation of their octets. A list in fragments is read as the sequence codec of rasn reads it. |
+| The unit tests of `src/oracle_tests.rs` | The crate against the oracle of `oracle/`, which has the same types with the codec of rasn 0.29, another implementation of aligned PER. Each vector, its truncations, it with one more octet and with each bit of chosen octets changed is given to both, as a PDU and as its message: both read it and write the same octets, or neither reads it. With `inspect`, each IE and each transfer that a view decodes has the JSON form that the JSON Encoding Rules of rasn give it, but for two bit strings that rasn writes otherwise than X.697 has them. The comparison takes one difference: the bindings hold an `INTEGER` in 64 bits |
 | The unit tests of the paths | No two names that a path takes can be mistaken for each other. No value has a member with the same name as a member of its IE, except the `value` of a bit string. |
 | The Rust blocks of this page | They compile and run as documentation tests, with the `inspect` feature, and `tests/readme.rs` compares what each prints with the output shown under it. |
 
@@ -1133,6 +1234,9 @@ S1AP.
 cargo test --all-features
 cargo test
 ```
+
+The tests run in a checkout of the repository: the oracle is its package
+`oracle/`, which the published crate does not have.
 
 ### The vectors
 
@@ -1203,13 +1307,14 @@ writes, and the vectors have no such number.
 
 `fuzz/` has three [cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets,
 a package of its own that is not published. A target does not only look for a
-panic: where the crate has a path of its own beside the codec of rasn, it
-takes both and compares them. CI runs each for a minute, from the vectors.
+panic: it gives its octets to the crate and to the oracle of the tests, the
+same types with the codec of rasn, and compares what the two make of them.
+CI runs each for a minute, from the vectors.
 
 | Target | What holds for any octets |
 |--------|---------------------------|
-| `decode` | A PDU, the protocol IEs of its message and the message as its type are read and written by the crate as the codec of rasn alone reads and writes them, and what was read is written and read again as the same |
-| `view` | The view of a PDU gives that PDU back, a view and a tree are written to a PDU that has the same view and the same tree, each path of a view selects its value, and each value has the JSON form that the JSON Encoding Rules codec of rasn gives it |
+| `decode` | A PDU, the protocol IEs of its message and the message as its type are read by the crate and by rasn as the same value, which both write as the same octets, or by neither, and what was read is written and read again as the same |
+| `view` | The view of a PDU gives that PDU back, a view and a tree are written to a PDU that has the same view and the same tree, each path of a view selects its value, and each value that a view decodes has the JSON form that the JSON Encoding Rules of rasn give the same octets |
 | `paths` | `select`, `set`, `insert`, `remove`, `open`, `check_path` and `enumerated_at` take any path and any value without a panic, and a view that one of them changed is a PDU or an error |
 
 ```bash
@@ -1236,24 +1341,32 @@ go tool pprof -top target/criterion/to-view/fixtures/profile/profile.pb
 python3 build_cost.py +1.88.0 --features inspect       # a clean build: its time and its memory
 ```
 
+Until `oxirush-aper` is on crates.io, `build_cost.py` is told where it is:
+`--config 'patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"'`
+before the other arguments.
+
 `--profile-time` runs the benchmark under [pprof](https://crates.io/crates/pprof)
 and writes a CPU profile that `go tool pprof` reads; with `PROFILE=flamegraph`
 in the environment it writes `flamegraph.svg` beside it instead.
 
 ## Generated code
 
-Cargo compiles three checked-in files. A build, docs.rs and the verification
-of a package run no generator, and the published crate has neither the
-generator nor the ASN.1.
+Cargo compiles three checked-in files, and two more for the tests. A build,
+docs.rs and the verification of a package run no generator, and the published
+crate has neither the generator nor the ASN.1.
 
 | File | Contents |
 |------|----------|
-| `src/ngap.rs` | The bindings of `rasn-compiler`, with the flat API, the convenience methods and the `Display` implementation that the generator adds |
+| `src/ngap.rs` | The bindings: each type of the ASN.1 with its codec on `oxirush-aper`, its conversions and, with `inspect`, its JSON form, then the flat API, the convenience methods and the `Display` implementation |
 | `src/registry.rs` | The list of the procedures and of the IEs, one line for each: its code or its identifier, its names and its types, and for each message of a procedure the IEs of its object set. The names that the macros take, `NgapPduKind` and the names and the types of `inspect` all expand from it, so each is written once |
 | `src/inspect_registry.rs` | What `inspect` alone needs, with the `inspect` feature: among it the list of the types, one line for each `SEQUENCE` and each `CHOICE` with its members, which the paths are read against, and the types that a handover's containers carry, which the generator has from the prose of the specification |
+| `oracle/src/bindings.rs`, `oracle/src/types.rs` | The oracle of the tests, a package of its own that the crate does not build: the same types with the codec of rasn 0.29, and the list of those that the crate decodes by a name or by an identifier |
 
 For maintainers, `build/` holds the generator, a package of its own whose
-lockfile pins `rasn-compiler`. It reads the six `.asn` modules in `ngap/`:
+lockfile pins `rasn-compiler`. What the generators of the two protocols share
+is `generator/` of [oxirush-aper](https://github.com/linouxis9/oxirush-aper),
+which `build/` takes from a checkout of that repository beside this one. It
+reads the six `.asn` modules in `ngap/`:
 the ASN.1 of clause 9.4 of TS 38.413 V19.4.0, one file per module. Their
 text is 3GPP's, and the repository does not have it. `build/asn1.sha256`
 records the SHA-256 of each module, `build/extract_asn1.py` takes them out
@@ -1264,10 +1377,11 @@ generator reads no module that has another digest. From the crate directory:
 curl -A "Mozilla/5.0" -O https://www.3gpp.org/ftp/Specs/archive/38_series/38.413/38413-j40.zip
 python3 build/extract_asn1.py 38413-j40.zip
 CARGO="$(command -v cargo)" cargo run --locked --manifest-path build/Cargo.toml
-rustfmt --edition 2024 src/ngap.rs src/registry.rs src/inspect_registry.rs
+rustfmt --edition 2024 src/ngap.rs src/registry.rs src/inspect_registry.rs \
+    oracle/src/bindings.rs oracle/src/types.rs
 ```
 
-`rasn-compiler` finds rustfmt through `CARGO`. Commit the three files after
+`rasn-compiler` finds rustfmt through `CARGO`. Commit the five files after
 regenerating them, and do not edit them by hand. They were last regenerated
 on 2026-10-12, with the generator of that revision and the rustfmt of Rust
 1.88: they came out as they are committed, octet for octet. The `Reproduce`
@@ -1278,47 +1392,45 @@ has pycrate write [the vectors](#the-vectors) and the crate write the values
 of pycrate.
 
 oxirush-ngap and oxirush-s1ap share, octet for octet, the code that does not
-depend on the protocol: `build/aper_fix.rs`, `build/asn1.rs`,
-`build/containers.rs`, `build/extract_asn1.py`, `build/inspection.rs`,
-`build/registry.rs`, `src/check.rs`, `src/error.rs`,
-`src/inspect_paths.rs`, `src/json.rs`, `src/message.rs`, `src/per.rs`,
-`src/sized.rs`, `src/wire.rs`, `src/fuzzing.rs`, the test `tests/readme.rs`,
-the scripts `tests/fixtures/generate.py` and `tests/fixtures/dissect.py`, and
-the benchmarks and the fuzz targets but for their `protocol.rs`.
+depend on the protocol and is not in `oxirush-aper`: `src/check.rs`,
+`src/error.rs`, `src/inspect_paths.rs`, `src/message.rs`,
+`src/oracle_tests.rs`, the oracle but for its bindings, the test
+`tests/readme.rs`, the scripts `build/extract_asn1.py`,
+`tests/fixtures/generate.py` and `tests/fixtures/dissect.py`, and the
+benchmarks and the fuzz targets but for their `protocol.rs`.
 `tests/shared_files.rs` holds a digest of each, so that an edit in one crate
 fails its tests until the file is the same in the other and both record the
 new digest.
 
-### rasn integration
+### rasn-compiler and the oracle
 
 `rasn-compiler` runs in its stable mode, which leaves an open type opaque:
 TS 38.413 relies on parameterized information object classes, and the
 experimental typed mode emits unresolved object sets and bindings that do not
-compile for these modules. `Any` stays inside the generated types, and the
-macros give typed construction, extraction and mutation.
+compile for these modules. The value of an IE stays octets inside the
+generated types, and the macros give typed construction, extraction and
+mutation.
 
-| Subject | What the crate does |
-|---------|---------------------|
+What `rasn-compiler` resolves is written twice: as the bindings of the crate,
+and as bindings for rasn 0.29, in `oracle/`, which the tests and the fuzz
+targets build and the crate does not. Both have the same types by
+construction.
+
+| Subject | What the generator does |
+|---------|-------------------------|
 | Containers | The protocol IE and extension containers take an object set as a parameter, which an opaque open type does not use. Each is one type, `ProtocolIEContainer` of `ProtocolIEField` and `ProtocolExtensionContainer` of `ProtocolExtensionField`, in place of the one that `rasn-compiler` resolves for each use. |
-| rasn features | `bytes` storage is on; `f32` and `f64`, which nothing uses, are off. |
 | Complete values | `NGAP_PDU::decode`, `decode_value` and the extraction of a typed IE refuse incomplete values and trailing whole octets. |
 
 rasn 0.29's APER codec departs from ITU-T X.691 where NGAP reaches it. There
-the generator replaces the derived codec with `Encode` and `Decode`
-implementations written against rasn's public codec traits. Each `SEQUENCE`
-has one too, for PER: it writes and reads its preamble and its members in the
-encoder and the decoder that it is given, where the derived codec has rasn
-make an encoder of another type for each number of members, and the compiler
-build the codec of every member once more for each. In the other encoding
-rules a `SEQUENCE` is the sequence codec of rasn, called as the derived codec
-calls it, and every other value uses the derived codec unchanged.
+the oracle has a codec of its own in the place of the derived one, so that
+the vectors, which pycrate wrote and tshark reads, hold for both:
 
-| Value | Correction |
-|-------|------------|
+| Value | Correction of the oracle |
+|-------|--------------------------|
 | Constrained `SEQUENCE OF` | rasn misaligns the length determinant and the components |
 | Size-constrained `UTF8String` | Its size is not PER-visible, so its length is an unconstrained count of octets |
 | Fixed-size `BIT STRING` longer than 16 bits | It is octet-aligned |
-| `OCTET STRING` and `BIT STRING` with a two-octet length determinant | Components and alternatives take the types of the `sized` module |
+| `OCTET STRING` and `BIT STRING` with a two-octet length determinant | The length is octet-aligned wherever the string starts |
 | Extensible `SEQUENCE` | Its decoder consumes and skips the additions that it does not know |
 
 ## Contributing

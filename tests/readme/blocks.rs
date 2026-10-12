@@ -51,6 +51,8 @@ pub const BLOCKS: &[fn()] = &[
     block_20,
     block_21,
     block_22,
+    block_23,
+    block_24,
 ];
 
 /// The Rust block 1 of README.md.
@@ -144,6 +146,82 @@ fn block_3() {
 
 /// The Rust block 4 of README.md.
 fn block_4() {
+    use oxirush_ngap::{Error, build_ngap, extract_ngap_ies, ngap::*};
+
+    // What a node keeps of a UE after its first message
+    struct Ue {
+        ran_id: u32,
+        nas: NASPDU<'static>,
+    }
+
+    fn admit(pdu: &NGAP_PDU) -> Result<Ue, Error> {
+        // `message` borrows from `pdu`, and `nas` from `message`
+        let message: InitialUEMessage = pdu.decode_value()?;
+        extract_ngap_ies!(message, InitialUEMessage,
+            req ran_id: u32 = RAN_UE_NGAP_ID(id),
+            req nas: NASPDU = NAS_PDU(nas) => nas,
+        );
+        // Kept beyond the PDU: the octets are copied here, once
+        Ok(Ue { ran_id, nas: nas.into_owned() })
+    }
+
+    fn main() -> Result<(), Error> {
+        let pdu = build_ngap!(InitiatingMessage, InitialUEMessage, IGNORE, InitialUEMessage,
+            REJECT RAN_UE_NGAP_ID(7u32),
+            REJECT NAS_PDU(vec![0x7e, 0x00, 0x41]),
+        )?;
+        let ue = admit(&pdu)?;
+        drop(pdu);
+        println!("UE {}: a NAS-PDU of {} octets", ue.ran_id, ue.nas.0.len());
+        Ok(())
+    }
+
+    main().unwrap();
+}
+
+/// The Rust block 5 of README.md.
+fn block_5() {
+    use oxirush_ngap::{Error, build_ngap, extract_ngap_ies, ngap::*};
+
+    async fn deliver(nas: &[u8]) {
+        println!("a NAS-PDU of {} octets", nas.len());
+    }
+
+    async fn handle(received: Vec<u8>) -> Result<(), Error> {
+        // Nothing of `received` is copied
+        let pdu = NGAPPDU::decode_borrowed(&received)?;
+        let message: UplinkNASTransport = pdu.decode_value()?;
+        extract_ngap_ies!(message, UplinkNASTransport,
+            req nas: NASPDU = NAS_PDU(nas) => nas,
+        );
+        deliver(&nas.0).await;
+        Ok(())
+    }
+
+    fn main() -> Result<(), Error> {
+        let transport = build_ngap!(InitiatingMessage, UplinkNASTransport, IGNORE, UplinkNASTransport,
+            REJECT AMF_UE_NGAP_ID(1u64),
+            REJECT RAN_UE_NGAP_ID(7u32),
+            REJECT NAS_PDU(vec![0x7e, 0x00, 0x5d]),
+        )?;
+        let handler = handle(transport.encode()?);
+
+        // A runtime may move the handler to another thread
+        fn is_send(_: &impl Send) {}
+        is_send(&handler);
+
+        // Polled here without a runtime: this handler never waits
+        let mut handler = std::pin::pin!(handler);
+        let mut context = std::task::Context::from_waker(std::task::Waker::noop());
+        assert!(handler.as_mut().poll(&mut context).is_ready());
+        Ok(())
+    }
+
+    main().unwrap();
+}
+
+/// The Rust block 6 of README.md.
+fn block_6() {
     use oxirush_ngap::{Error, extract_ngap_ies, ngap::*};
 
     fn handle(request: &UEContextReleaseRequest) -> Result<(), Error> {
@@ -158,8 +236,8 @@ fn block_4() {
     }
 }
 
-/// The Rust block 5 of README.md.
-fn block_5() {
+/// The Rust block 7 of README.md.
+fn block_7() {
     use oxirush_ngap::{extract_ngap_ies, ngap::*};
 
     // The cause of a request, when it has one that is read
@@ -180,8 +258,8 @@ fn block_5() {
     }
 }
 
-/// The Rust block 6 of README.md.
-fn block_6() {
+/// The Rust block 8 of README.md.
+fn block_8() {
     use oxirush_ngap::{build_ngap_ie, ngap::*, with_ngap_ie_mut};
 
     // A message with one IE, which is built alone
@@ -196,8 +274,8 @@ fn block_6() {
     assert_eq!(updated, Ok(true));
 }
 
-/// The Rust block 7 of README.md.
-fn block_7() {
+/// The Rust block 9 of README.md.
+fn block_9() {
     use oxirush_ngap::{build_ngap_ie, ngap::*};
 
     fn main() -> Result<(), oxirush_ngap::Error> {
@@ -225,8 +303,8 @@ fn block_7() {
     main().unwrap();
 }
 
-/// The Rust block 8 of README.md.
-fn block_8() {
+/// The Rust block 10 of README.md.
+fn block_10() {
     use oxirush_ngap::{build_ngap, ngap::*};
 
     fn main() -> Result<(), oxirush_ngap::Error> {
@@ -254,8 +332,8 @@ fn block_8() {
     main().unwrap();
 }
 
-/// The Rust block 9 of README.md.
-fn block_9() {
+/// The Rust block 11 of README.md.
+fn block_11() {
     use oxirush_ngap::helpers::*;
 
     // A PLMN from its MCC and its MNC, and what is identified within it
@@ -275,8 +353,8 @@ fn block_9() {
     println!("{}", guami(network, 1, 1024, 0).unwrap_err());
 }
 
-/// The Rust block 10 of README.md.
-fn block_10() {
+/// The Rust block 12 of README.md.
+fn block_12() {
     use oxirush_ngap::{ErrorKind, ngap::*};
 
     // A UE CONTEXT RELEASE REQUEST is not decoded as an NG SETUP REQUEST
@@ -292,8 +370,8 @@ fn block_10() {
     println!("{short}");
 }
 
-/// The Rust block 11 of README.md.
-fn block_11() {
+/// The Rust block 13 of README.md.
+fn block_13() {
     use oxirush_ngap::ngap::NGAP_PDU;
 
     // UE CONTEXT RELEASE REQUEST
@@ -306,8 +384,8 @@ fn block_11() {
     println!("{}", view["message"]["protocolIEs"][2]);
 }
 
-/// The Rust block 12 of README.md.
-fn block_12() {
+/// The Rust block 14 of README.md.
+fn block_14() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::json;
 
@@ -337,8 +415,8 @@ fn block_12() {
     }
 }
 
-/// The Rust block 13 of README.md.
-fn block_13() {
+/// The Rust block 15 of README.md.
+fn block_15() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::json;
 
@@ -362,8 +440,8 @@ fn block_13() {
     println!("{}", wrong.unwrap_err());
 }
 
-/// The Rust block 14 of README.md.
-fn block_14() {
+/// The Rust block 16 of README.md.
+fn block_16() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::json;
 
@@ -386,8 +464,8 @@ fn block_14() {
     println!("{}", edited.to_tree().unwrap()["ies"]);
 }
 
-/// The Rust block 15 of README.md.
-fn block_15() {
+/// The Rust block 17 of README.md.
+fn block_17() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::json;
 
@@ -412,8 +490,8 @@ fn block_15() {
     println!("{}", json!(inspect::select(&view, "/ngap/*/criticality").unwrap()));
 }
 
-/// The Rust block 16 of README.md.
-fn block_16() {
+/// The Rust block 18 of README.md.
+fn block_18() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::json;
 
@@ -435,8 +513,8 @@ fn block_16() {
     println!("{}", edited.to_tree().unwrap());
 }
 
-/// The Rust block 17 of README.md.
-fn block_17() {
+/// The Rust block 19 of README.md.
+fn block_19() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::json;
 
@@ -467,8 +545,8 @@ fn block_17() {
     }
 }
 
-/// The Rust block 18 of README.md.
-fn block_18() {
+/// The Rust block 20 of README.md.
+fn block_20() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::{Value, json};
 
@@ -501,8 +579,8 @@ fn block_18() {
     println!("{}", edited.to_tree().unwrap());
 }
 
-/// The Rust block 19 of README.md.
-fn block_19() {
+/// The Rust block 21 of README.md.
+fn block_21() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use serde_json::json;
 
@@ -544,8 +622,8 @@ fn block_19() {
     println!("{}", edited.to_tree().unwrap()["ies"][2]);
 }
 
-/// The Rust block 20 of README.md.
-fn block_20() {
+/// The Rust block 22 of README.md.
+fn block_22() {
     use oxirush_ngap::inspect;
 
     // The names that the value at a path can have, as the specification spells them
@@ -557,8 +635,8 @@ fn block_20() {
     assert_eq!(choice, Ok(None));
 }
 
-/// The Rust block 21 of README.md.
-fn block_21() {
+/// The Rust block 23 of README.md.
+fn block_23() {
     use oxirush_ngap::inspect;
 
     // Whether a path can select anything in a message of a name, without a view
@@ -572,8 +650,8 @@ fn block_21() {
     }
 }
 
-/// The Rust block 22 of README.md.
-fn block_22() {
+/// The Rust block 24 of README.md.
+fn block_24() {
     use oxirush_ngap::{ErrorKind, inspect, ngap::NGAP_PDU};
     use serde_json::json;
 

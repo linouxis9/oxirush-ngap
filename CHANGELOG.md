@@ -29,7 +29,7 @@ what each type became.
   | `Integer`, for an `INTEGER` whose constraint has an extension marker | `u64`, or `i64` for a type whose root goes below zero | `BitRate(n)` for `(0..4000000000000, ...)`, where `n` is a `u64`: no `.into()`, and no `Integer` to convert. A number that 64 bits do not hold does not decode: see below |
   | `FixedOctetString<N>` | `[u8; N]` | `PLMNIdentity([0x02, 0xf8, 0x39])` |
   | `OctetString`, `Any` | `Octets<'a>` | `Octets::from(vec)`, `Octets::from(&slice)`, or `.into()` of either. It derefs to `[u8]`: `.as_bytes()` is gone |
-  | `FixedBitString<N>` and `BitString` of 64 bits at most, without an extension marker | `Bits`, a number with a length | `AMFSetID(Bits::new(1, 10)?)`, `bits.value()` and `bits.len()` |
+  | `FixedBitString<N>` and `BitString` of 64 bits at most, without an extension marker | `Bits`, a number with a length | `AMFSetID::new(1)?`, which a type of one size has, or `AMFSetID(Bits::new(1, 10)?)`, `bits.value()` and `bits.len()` |
   | Another `BitString` | `BitString<'a>` | `BitString::from([0xe0, 0x00])`, `BitString::new(octets, length)?`, `.as_octets()` and `.len()` |
   | `PrintableString`, `VisibleString`, `Utf8String` | `Cow<'a, str>` | `AMFName("amf-1".into())`, and `&name.0` is a `&str` |
   | `SequenceOf<T>` | `Vec<T>` | As before |

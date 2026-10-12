@@ -142,7 +142,7 @@
 //! | `INTEGER` whose constraint has an extension marker | `u64`: `BitRate(pub u64)` for `(0..4000000000000, ...)` |
 //! | `OCTET STRING (SIZE (n))` | `[u8; n]`: `PLMNIdentity(pub [u8; 3])` |
 //! | Another `OCTET STRING`, and an open type | [`Octets`]: `NASPDU<'a>(pub Octets<'a>)` |
-//! | `BIT STRING` of 64 bits at most, without an extension marker | [`Bits`], a number with a length, which is `Copy` |
+//! | `BIT STRING` of 64 bits at most, without an extension marker | [`Bits`], a number with a length, which is `Copy`. A type of one size is made of the number: `AMFSetID::new(1)?` |
 //! | Another `BIT STRING` | [`BitString`], which borrows its octets when it is longer than 64 bits |
 //! | `PrintableString`, `VisibleString`, `UTF8String` | `Cow<'a, str>`: `AMFName<'a>` |
 //! | `ENUMERATED`, `CHOICE`, `SEQUENCE`, `SEQUENCE OF` | An enum, an enum, a struct, and a `Vec` in a struct |

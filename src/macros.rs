@@ -230,8 +230,12 @@ impl __Message {
     #[doc(hidden)]
     #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
+        // Room for a message of the usual size, so that its octets seldom move as
+        // the IEs are written.
+        let mut octets = Vec::with_capacity(256);
+        octets.extend_from_slice(&[0, 0, 0]);
         Self {
-            octets: vec![0, 0, 0],
+            octets,
             count: 0,
             error: None,
         }

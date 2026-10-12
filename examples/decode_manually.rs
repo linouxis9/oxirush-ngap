@@ -13,8 +13,8 @@
 //! For the ergonomic `build_ngap!` / `extract_ngap_ies!` versions, see
 //! `build_pdu.rs` and `extract_ies.rs`.
 
+use oxirush_ngap::aper;
 use oxirush_ngap::ngap::*;
-use oxirush_ngap::{Bits, aper};
 
 fn main() {
     // ── 1. Build an NGSetupResponse by hand ─────────────────────────────────
@@ -26,10 +26,11 @@ fn main() {
     // The GUAMI that the AMF serves.
     let guami = GUAMI::new(
         plmn_identity,
-        // A bit string of 64 bits at most is a number with a length.
-        AMFRegionID(Bits::from(1u8)),
-        AMFSetID(Bits::new(1, 10).expect("an AMF Set ID of 10 bits")),
-        AMFPointer(Bits::new(0, 6).expect("an AMF Pointer of 6 bits")),
+        // A bit string of 64 bits at most is a number with a length, which the type
+        // of one size has.
+        AMFRegionID::new(1).expect("an AMF Region ID of 8 bits"),
+        AMFSetID::new(1).expect("an AMF Set ID of 10 bits"),
+        AMFPointer::new(0).expect("an AMF Pointer of 6 bits"),
         None,
     );
     let served_guamis = ServedGUAMIList(vec![ServedGUAMIItem::new(guami, None, None)]);

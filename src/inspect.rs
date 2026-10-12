@@ -229,7 +229,7 @@
 //! | ASN.1 | JSON |
 //! | --- | --- |
 //! | `BOOLEAN`, `NULL` | `true` or `false`, and `null` |
-//! | `INTEGER` | A number. One above 2^64-1 or below -2^63 is a string of its decimal digits: `serde_json` has no exact number for it, and X.697 has a number of any size |
+//! | `INTEGER` | A number, which 64 bits hold, as the bindings hold it: X.697 has a number of any size |
 //! | `ENUMERATED` | The name of the value |
 //! | `OCTET STRING` | Its octets in hexadecimal |
 //! | `BIT STRING` of one size | Its octets in hexadecimal, the last one padded with zero bits |

@@ -256,6 +256,21 @@ is not source compatible with 0.4.2.
   `inspect::check_path` and `inspect::enumerated_at` read a path into them
   against their type. The list of `src/registry.rs` has each of their types
   with the types that it extends.
+- Vectors with content, in `tests/fixtures/vectors.tsv`: 479 messages that
+  pycrate 0.8.1 encoded from the ASN.1 of TS 38.413, beside the 144 of
+  `messages.tsv`, which have what is mandatory and nothing else. They hold
+  each message with every IE of its object set, each of the 489 IEs that the
+  crate names, where the messages of `messages.tsv` hold 111, each
+  alternative of each `CHOICE`, each value of each `ENUMERATED` but those of
+  the type of handover, and strings and lists around each form of the length
+  determinant, in fragments too. The tests read each with its types and
+  write it back to the same octets, from its values alone too.
+  `tests/fixtures/generate.py` writes both files, and
+  `tests/fixtures/dissect.py` gives them to tshark.
+- For maintainers: `build/asn1.sha256` records the SHA-256 of the six ASN.1
+  modules that the bindings are generated from, `build/extract_asn1.py`
+  takes them out of the archive that 3GPP publishes, and the generator reads
+  no module that has another digest.
 
 ### Changed
 

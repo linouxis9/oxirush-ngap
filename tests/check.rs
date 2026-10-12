@@ -39,7 +39,12 @@ fn cause() -> Cause {
 
 /// The messages of the fixtures: the name of each, and the octets of its PDU.
 fn fixtures() -> impl Iterator<Item = (&'static str, Vec<u8>)> {
-    let lines = include_str!("fixtures/messages.tsv").lines();
+    vectors(include_str!("fixtures/messages.tsv"))
+}
+
+/// The vectors of a file of the fixtures: the name of each, and the octets of its PDU.
+fn vectors(file: &'static str) -> impl Iterator<Item = (&'static str, Vec<u8>)> {
+    let lines = file.lines();
     let lines = lines.filter(|line| !line.starts_with('#') && !line.is_empty());
     lines.map(|line| {
         let mut fields = line.split('\t');
@@ -330,4 +335,20 @@ fn the_messages_of_the_fixtures_are_checked_against_their_object_sets() {
     }
     assert_eq!(checked, 144);
     assert_eq!(deviating, Vec::<String>::new(), "{deviating:#?}");
+}
+
+/// The vectors with content have the IEs of the object sets as pycrate has them from
+/// the ASN.1: each IE that a set has, in the order of the set and with its criticality.
+#[test]
+fn the_vectors_with_content_are_checked_against_their_object_sets() {
+    let mut checked = 0;
+    for (name, wire) in vectors(include_str!("fixtures/vectors.tsv")) {
+        let pdu = NGAP_PDU::decode(&wire).unwrap();
+        let found = pdu
+            .check()
+            .unwrap_or_else(|error| panic!("{name}: {error}"));
+        assert_eq!(found, [], "{name}");
+        checked += 1;
+    }
+    assert!(checked > 144, "{checked} vectors");
 }

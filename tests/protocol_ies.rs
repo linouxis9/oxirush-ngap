@@ -4,9 +4,11 @@ use oxirush_ngap::ngap::*;
 use oxirush_ngap::{Error, ErrorKind, build_ngap, build_ngap_ie};
 use rasn::types::Any;
 
-/// The messages of the fixtures: the name of each, and the octets of its PDU.
+/// The messages of the fixtures, then the vectors with content: the name of each, and
+/// the octets of its PDU.
 fn fixtures() -> impl Iterator<Item = (&'static str, Vec<u8>)> {
-    let lines = include_str!("fixtures/messages.tsv").lines();
+    let messages = include_str!("fixtures/messages.tsv").lines();
+    let lines = messages.chain(include_str!("fixtures/vectors.tsv").lines());
     let lines = lines.filter(|line| !line.starts_with('#') && !line.is_empty());
     lines.map(|line| {
         let mut fields = line.split('\t');
@@ -24,7 +26,7 @@ fn the_ies_of_every_message_are_read_and_put_back_as_the_same_octets() {
     for (name, wire) in fixtures() {
         let mut pdu = NGAP_PDU::decode(&wire).unwrap();
         // The private message has private IEs: see the test of the errors.
-        if name == "PrivateMessage" {
+        if name.split('/').next() == Some("PrivateMessage") {
             continue;
         }
         let ies = pdu.protocol_ies();
@@ -33,7 +35,8 @@ fn the_ies_of_every_message_are_read_and_put_back_as_the_same_octets() {
         assert_eq!(pdu.encode().unwrap(), wire, "{name}");
         read += 1;
     }
-    assert_eq!(read, 143);
+    // Each message of the fixtures but the private one, and each vector.
+    assert!(read > 143, "{read} messages");
 }
 
 #[test]

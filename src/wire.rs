@@ -168,7 +168,7 @@ mod tests {
     use crate::pdu::AnyMessage;
     use crate::registry::Pdu;
 
-    /// The octets of each message of the fixtures.
+    /// The octets of each message of the fixtures, then of each vector with content.
     fn fixtures() -> Vec<Vec<u8>> {
         let octets = |text: &str| -> Vec<u8> {
             let digits = text.as_bytes().chunks(2);
@@ -176,25 +176,45 @@ mod tests {
                 .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap(), 16).unwrap())
                 .collect()
         };
-        let lines = include_str!("../tests/fixtures/messages.tsv").lines();
-        let messages = lines.filter(|line| !line.starts_with('#'));
-        messages
+        let messages = include_str!("../tests/fixtures/messages.tsv").lines();
+        let lines = messages.chain(include_str!("../tests/fixtures/vectors.tsv").lines());
+        let vectors = lines.filter(|line| !line.starts_with('#'));
+        vectors
             .map(|line| octets(line.split('\t').nth(1).unwrap()))
             .collect()
     }
 
-    /// `octets`, then what a peer may send in their place: each of their truncations,
-    /// one octet more, and each of them with one bit that is another.
-    fn variants(octets: &[u8]) -> Vec<Vec<u8>> {
-        let mut variants = vec![octets.to_vec()];
-        variants.extend((0..octets.len()).map(|length| octets[..length].to_vec()));
-        variants.push([octets, &[0]].concat());
-        for bit in 0..octets.len() * 8 {
-            let mut other = octets.to_vec();
-            other[bit / 8] ^= 0x80 >> (bit % 8);
-            variants.push(other);
+    /// Give `read` the `octets`, then what a peer may send in their place: the octets
+    /// with one more, and for a place among them the octets up to it and the octets
+    /// with each bit of it changed. The places are each of the first 32 octets, where
+    /// the layout of a short message is, then one in 13, and each of the last 8. Octets
+    /// that are more than 2048 are cut at their first 32 and their last 8 places, and
+    /// none of their bits is changed: what they have more is the octets of one value.
+    fn variants(octets: &[u8], mut read: impl FnMut(&[u8])) {
+        let long = octets.len() > 2048;
+        let chosen = |at: &usize| match *at {
+            0..32 => true,
+            at if at + 8 >= octets.len() => true,
+            at => !long && at % 13 == 0,
+        };
+        read(octets);
+        let mut other = [octets, &[0]].concat();
+        read(&other);
+        other.pop();
+        for at in (0..octets.len()).filter(chosen) {
+            read(&octets[..at]);
+            for bit in (0..8).filter(|_| !long) {
+                other[at] ^= 0x80 >> bit;
+                read(&other);
+                other[at] ^= 0x80 >> bit;
+            }
         }
-        variants
+    }
+
+    /// Whether a value is of the length that these functions read and write: one that
+    /// is not in fragments.
+    fn whole(value: &[u8]) -> bool {
+        value.len() < 16384
     }
 
     /// What the codec of rasn reads as a PDU.
@@ -212,21 +232,23 @@ mod tests {
     fn a_pdu_is_read_as_the_codec_of_rasn_reads_it() {
         let (mut read, mut left) = (0, 0);
         for fixture in fixtures() {
-            // The octets of a PDU as a sender writes them are read here.
-            assert!(pdu(&fixture).is_some(), "{fixture:02x?}");
-            for octets in variants(&fixture) {
-                let Some((alternative, code, criticality, message)) = pdu(&octets) else {
+            // The octets of a PDU as a sender writes them are read here, but for a
+            // message in fragments.
+            let message = pdu_by_rasn(&fixture).unwrap();
+            assert_eq!(pdu(&fixture).is_some(), whole(message.value().as_bytes()));
+            variants(&fixture, |octets| {
+                let Some((alternative, code, criticality, message)) = pdu(octets) else {
                     left += 1;
-                    continue;
+                    return;
                 };
-                let theirs = pdu_by_rasn(&octets);
+                let theirs = pdu_by_rasn(octets);
                 let theirs = theirs.unwrap_or_else(|| panic!("rasn refuses {octets:02x?}"));
                 assert_eq!(theirs.alternative(), alternative, "{octets:02x?}");
                 assert_eq!(theirs.procedure_code(), code, "{octets:02x?}");
                 assert_eq!(theirs.criticality(), criticality, "{octets:02x?}");
                 assert_eq!(theirs.value().as_bytes(), message, "{octets:02x?}");
                 read += 1;
-            }
+            });
         }
         // Both ways are taken: what is not of the layout is left to rasn.
         assert!(
@@ -239,27 +261,24 @@ mod tests {
     fn the_protocol_ies_of_a_message_are_read_as_the_codec_of_rasn_reads_them() {
         let (mut read, mut left) = (0, 0);
         for fixture in fixtures() {
-            let whole = pdu_by_rasn(&fixture).unwrap();
+            let sent = pdu_by_rasn(&fixture).unwrap();
             // The private message is no container of protocol IEs.
-            if whole.protocol_ies().is_err() {
+            if sent.protocol_ies().is_err() {
                 continue;
             }
-            let message = whole.value().as_bytes();
-            assert_eq!(
-                protocol_ies(message),
-                ies_by_rasn(message),
-                "{message:02x?}"
-            );
-            assert!(protocol_ies(message).is_some(), "{message:02x?}");
-            for octets in variants(message) {
-                match protocol_ies(&octets) {
-                    Some(ies) => {
-                        assert_eq!(Some(ies), ies_by_rasn(&octets), "{octets:02x?}");
-                        read += 1;
-                    }
-                    None => left += 1,
+            let message = sent.value().as_bytes();
+            // The IEs of a message as a sender writes them are read here, but for a
+            // value in fragments.
+            let ies = ies_by_rasn(message).unwrap();
+            let here = ies.0.iter().all(|ie| whole(ie.value.as_bytes()));
+            assert_eq!(protocol_ies(message), here.then_some(ies));
+            variants(message, |octets| match protocol_ies(octets) {
+                Some(ies) => {
+                    assert_eq!(Some(ies), ies_by_rasn(octets), "{octets:02x?}");
+                    read += 1;
                 }
-            }
+                None => left += 1,
+            });
         }
         assert!(
             read > 1000 && left > 1000,
@@ -270,17 +289,19 @@ mod tests {
     #[test]
     fn a_pdu_and_a_message_are_written_as_the_codec_of_rasn_writes_them() {
         for fixture in fixtures() {
-            let whole = pdu_by_rasn(&fixture).unwrap();
-            let message = whole.value().as_bytes();
+            let sent = pdu_by_rasn(&fixture).unwrap();
+            let message = sent.value().as_bytes();
             let written = pdu_octets(
-                whole.alternative(),
-                whole.procedure_code(),
-                whole.criticality(),
+                sent.alternative(),
+                sent.procedure_code(),
+                sent.criticality(),
                 message,
             );
-            assert_eq!(written.as_deref(), Some(&fixture[..]));
+            // A message and a value in fragments are left to rasn.
+            assert_eq!(written, whole(message).then(|| fixture.clone()));
             if let Some(ies) = ies_by_rasn(message) {
-                assert_eq!(message_octets(&ies).as_deref(), Some(message));
+                let written = ies.0.iter().all(|ie| whole(ie.value.as_bytes()));
+                assert_eq!(message_octets(&ies), written.then(|| message.to_vec()));
             }
         }
         // A value of 16384 octets or more has a fragmented length, and an empty one

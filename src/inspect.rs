@@ -1296,15 +1296,18 @@ impl NGAP_PDU {
 mod tests {
     use super::*;
 
-    /// The values of the messages of the fixtures have the JSON form that the codec of
-    /// the JSON Encoding Rules of rasn gives them, and are read back from it as they are:
-    /// each message, each of its IEs, and each IE and each transfer that a value holds.
+    /// The values of the messages of the fixtures and of the vectors with content have
+    /// the JSON form that the codec of the JSON Encoding Rules of rasn gives them, and
+    /// are read back from it as they are: each message, each of its IEs, and each IE and
+    /// each transfer that a value holds. `same_but_for_a_length` has the one form that
+    /// is another.
     #[test]
     fn the_values_of_the_fixtures_are_written_as_rasn_writes_them() {
         crate::json::COMPARED.set(Some(0));
-        let fixtures = include_str!("../tests/fixtures/messages.tsv");
+        let messages = include_str!("../tests/fixtures/messages.tsv").lines();
+        let lines = messages.chain(include_str!("../tests/fixtures/vectors.tsv").lines());
         let mut messages = 0;
-        for line in fixtures.lines().filter(|line| !line.starts_with('#')) {
+        for line in lines.filter(|line| !line.starts_with('#')) {
             let octets = crate::json::unhex(line.split('\t').nth(1).unwrap()).unwrap();
             NGAP_PDU::decode(&octets).unwrap().to_view().unwrap();
             messages += 1;

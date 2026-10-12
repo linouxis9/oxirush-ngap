@@ -12,13 +12,29 @@ fn value(pdu: &NGAP_PDU) -> &Any {
     }
 }
 
+/// Where the octets of a value are cut short: at each octet for a value of the size
+/// that a network sends, and for a longer one at its first and its last octets, in its
+/// middle, and around the lengths at which a length determinant changes its form.
+fn cuts(length: usize) -> Vec<usize> {
+    if length <= 2048 {
+        return (0..length).collect();
+    }
+    let forms = [127, 128, 16383, 16384, 32768, 49152, 65536];
+    let around = forms.iter().flat_map(|form| form - 2..form + 6);
+    let ends = (0..64).chain(length - 64..length).chain([length / 2]);
+    let mut cuts: Vec<_> = ends.chain(around).filter(|cut| *cut < length).collect();
+    cuts.sort_unstable();
+    cuts.dedup();
+    cuts
+}
+
 fn check_typed<T: oxirush_ngap::Message>(pdu: &NGAP_PDU, name: &str) {
     let raw = value(pdu);
     let decoded: T = pdu
         .decode_value()
         .unwrap_or_else(|error| panic!("{name}: {error}"));
     assert_eq!(encode_open_type(&decoded).unwrap(), *raw, "{name}");
-    for cut in 0..raw.as_bytes().len() {
+    for cut in cuts(raw.as_bytes().len()) {
         let partial = Any::new(raw.as_bytes()[..cut].to_vec());
         assert!(
             decode_open_type::<T>(&partial).is_err(),
@@ -204,6 +220,39 @@ message_types!(
     AIOTSessionReleaseRequest,
 );
 
+/// A vector of the fixtures: the name of its message, its octets, the code of its
+/// procedure and the alternative of its PDU. It decodes to that message and encodes to
+/// the same octets, and its octets cut short or with one more are refused. Returns the
+/// alternative.
+fn check_vector(name: &str, fields: &[&str]) -> &'static str {
+    assert_eq!(fields.len(), 4, "{name}");
+    let message = fields[0].split('/').next().unwrap();
+    let wire = hex::decode(fields[1]).unwrap();
+    let pdu = NGAP_PDU::decode(&wire).unwrap_or_else(|error| panic!("{name}: {error}"));
+    assert_eq!(hex::encode(pdu.encode().unwrap()), fields[1], "{name}");
+    assert_eq!(pdu.procedure_code().to_string(), fields[2], "{name}");
+    let choice = match &pdu {
+        NGAP_PDU::initiatingMessage(_) => "0",
+        NGAP_PDU::successfulOutcome(_) => "1",
+        NGAP_PDU::unsuccessfulOutcome(_) => "2",
+        _ => panic!("unexpected NGAP_PDU alternative"),
+    };
+    assert_eq!(choice, fields[3], "{name}");
+    check_message(message, &pdu);
+    for cut in cuts(wire.len()) {
+        assert!(
+            NGAP_PDU::decode(&wire[..cut]).is_err(),
+            "{name}: prefix {cut}"
+        );
+    }
+    for octet in [0, 0xff] {
+        let mut extra = wire.clone();
+        extra.push(octet);
+        assert!(NGAP_PDU::decode(&extra).is_err(), "{name}: trailing octet");
+    }
+    choice
+}
+
 #[test]
 fn all_procedure_outcomes_round_trip_and_reject_incomplete_encodings() {
     let mut names = BTreeSet::new();
@@ -213,36 +262,37 @@ fn all_procedure_outcomes_round_trip_and_reject_incomplete_encodings() {
             continue;
         }
         let fields: Vec<_> = line.split('\t').collect();
-        assert_eq!(fields.len(), 4);
         let name = fields[0];
         assert!(names.insert(name), "duplicate message: {name}");
-        let wire = hex::decode(fields[1]).unwrap();
-        let pdu = NGAP_PDU::decode(&wire).unwrap_or_else(|error| panic!("{name}: {error}"));
-        assert_eq!(pdu.encode().unwrap(), wire, "{name}");
-        assert_eq!(pdu.procedure_code().to_string(), fields[2], "{name}");
-        let choice = match &pdu {
-            NGAP_PDU::initiatingMessage(_) => "0",
-            NGAP_PDU::successfulOutcome(_) => "1",
-            NGAP_PDU::unsuccessfulOutcome(_) => "2",
-            _ => panic!("unexpected NGAP_PDU alternative"),
-        };
-        assert_eq!(choice, fields[3], "{name}");
-        choices.insert(choice);
-        check_message(name, &pdu);
-        for cut in 0..wire.len() {
-            assert!(
-                NGAP_PDU::decode(&wire[..cut]).is_err(),
-                "{name}: prefix {cut}"
-            );
-        }
-        for octet in [0, 0xff] {
-            let mut extra = wire.clone();
-            extra.push(octet);
-            assert!(NGAP_PDU::decode(&extra).is_err(), "{name}: trailing octet");
-        }
+        choices.insert(check_vector(name, &fields));
     }
     assert_eq!(names.len(), 144);
     assert_eq!(choices.len(), 3);
+}
+
+/// `vectors.tsv` has each message with content, and vectors that are made for a length
+/// or a size: `tests/fixtures/generate.py` says what each kind holds.
+#[test]
+fn the_vectors_with_content_round_trip_and_reject_incomplete_encodings() {
+    let mut names = BTreeSet::new();
+    let mut messages = BTreeSet::new();
+    let mut kinds = BTreeSet::new();
+    for line in include_str!("fixtures/vectors.tsv").lines() {
+        if line.starts_with('#') {
+            continue;
+        }
+        let fields: Vec<_> = line.split('\t').collect();
+        let name = fields[0];
+        assert!(names.insert(name), "duplicate vector: {name}");
+        let (message, variant) = name.split_once('/').unwrap();
+        messages.insert(message);
+        kinds.insert(variant.split('-').next().unwrap());
+        check_vector(name, &fields);
+    }
+    // Each message of each procedure has content in one vector at least.
+    assert_eq!(messages.len(), 144);
+    let kinds: Vec<_> = kinds.into_iter().collect();
+    assert_eq!(kinds, ["bits", "count", "cover", "largest", "length"]);
 }
 
 #[test]

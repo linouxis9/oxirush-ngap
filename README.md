@@ -1115,18 +1115,19 @@ S1AP.
 
 | Test | What it holds |
 |------|---------------|
-| `tests/aper_vectors.rs` | The 144 messages of `tests/fixtures/messages.tsv`, one for each message of each procedure, were encoded by pycrate 0.8.1. Each decodes to its type and encodes to the same octets, and each of its truncations and one more octet are refused. |
-| `tests/aper_round_trip.rs` | The macros, and the encodings where the codec departs from rasn's: constrained lists, `UTF8String`, long bit strings. |
+| `tests/aper_vectors.rs` | [The vectors](#the-vectors) of `tests/fixtures`, which pycrate 0.8.1 encoded from the ASN.1 of the specification: the 144 messages of `messages.tsv`, one for each message of each procedure with what is mandatory and nothing else, and the 479 vectors of `vectors.tsv`, which have content. Each decodes to its type and encodes to the same octets, and its truncations and one more octet are refused. |
+| `tests/vectors.rs` | With `inspect`, each vector of `vectors.tsv` is read with the type of each IE, each transfer and each container of a handover, and is the same octets when it is written from its view, from its values alone and from its tree. The vectors hold each of the 144 messages and each of the 489 IEs that the registry names, those of the extension containers among them: the messages of `messages.tsv` hold 111 of the IEs. |
+| `tests/aper_round_trip.rs` | The macros, and the encodings where the codec departs from rasn's: constrained lists, `UTF8String`, long bit strings, and each string with a length of two octets, as pycrate writes it. A number between the ranges of the root of an extensible constraint. |
 | `tests/errors.rs` | The errors of the typed API, each with its kind and its message: a PDU that is decoded as another message, octets that are no PDU, a value outside its constraint in a function and in each macro, an IE that is absent or does not decode, for a `req` and for an `opt` field, and what each helper refuses. With `inspect`, a test for each kind of error of the JSON forms. |
-| `tests/protocol_ies.rs` | The protocol IEs of each of the 144 messages but the private one are read from its PDU and put back as the same octets. An IE that the protocol does not have and one that is there twice are kept with their criticality, a message that the macros built has the IEs that it was built with, and the private message is an error. |
-| `tests/check.rs` | What `check()` reports: a message without a mandatory IE, with an IE twice, with an IE of another message, with its IEs out of order and with another criticality is each built by the macros, written from a tree, encoded and decoded, and reported as exactly that. Each of the 144 messages of the fixtures against its object set. |
+| `tests/protocol_ies.rs` | The protocol IEs of each of the 144 messages but the private one, and of each vector, are read from its PDU and put back as the same octets. An IE that the protocol does not have and one that is there twice are kept with their criticality, a message that the macros built has the IEs that it was built with, and the private message is an error. |
+| `tests/check.rs` | What `check()` reports: a message without a mandatory IE, with an IE twice, with an IE of another message, with its IEs out of order and with another criticality is each built by the macros, written from a tree, encoded and decoded, and reported as exactly that. Each of the 144 messages of the fixtures and each vector against its object set, which pycrate has from the ASN.1 too. |
 | `tests/unknown_extensions.rs` | The additions of a later release to an extensible `SEQUENCE` are skipped, and what follows them is read. |
-| `tests/allocation.rs` | Decoding reserves memory for the elements that it reads, not for the count that a length determinant claims. |
+| `tests/allocation.rs` | Decoding reserves memory for the elements that it reads, not for the count that a length determinant claims, in two octets or in a fragment. The list codec of rasn, in the place of the one of the crate, reserves for the count. |
 | `tests/inspection.rs` | Each of the 144 messages is the same octets through its view, and through its tree where it has IEs to name. Each path of each selects its value, with and without `value` and `decoded`, and is one that `check_path` takes. Edits, written trees, criticalities, the two IEs that have the type of what they extend, and the identifiers of the registry against the constants of the bindings. |
 | `tests/shared_files.rs` | The files that this crate shares with `oxirush-s1ap` are as they were last mirrored. |
-| The unit tests of the JSON codec | Each ASN.1 construct of the protocol has its JSON form and is read back from it, with what is refused and where. Each value of each message of the fixtures has the form that the JSON Encoding Rules codec of rasn gives it. |
-| The unit tests of `src/wire.rs` | A PDU and the protocol IEs of a message are read and written octet by octet as the codec of rasn reads and writes them: each message of the fixtures, each of its truncations, and each with one bit that is another. |
-| The unit tests of `src/per.rs` | A `SEQUENCE` with the codec of the crate is written and read as the same one with the derived codec of rasn, in each encoding rule: members that are there and that are not, constrained and not, in a list and in a `CHOICE`, and each truncation of their octets. |
+| The unit tests of the JSON codec | Each ASN.1 construct of the protocol has its JSON form and is read back from it, with what is refused and where. Each value of each message of the fixtures and of each vector has the form that the JSON Encoding Rules codec of rasn gives it, but for two bit strings that rasn writes otherwise than X.697 has them: one of one size in a member that may be absent, and one of another size than its extensible type has. |
+| The unit tests of `src/wire.rs` | A PDU and the protocol IEs of a message are read and written octet by octet as the codec of rasn reads and writes them: each message of the fixtures and each vector, its truncations, and it with one bit that is another. A message and a value of 16384 octets or more are left to rasn. |
+| The unit tests of `src/per.rs` | A `SEQUENCE` with the codec of the crate is written and read as the same one with the derived codec of rasn, in each encoding rule: members that are there and that are not, constrained and not, in a list and in a `CHOICE`, and each truncation of their octets. A list in fragments is read as the sequence codec of rasn reads it. |
 | The unit tests of the paths | No two names that a path takes can be mistaken for each other. No value has a member with the same name as a member of its IE, except the `value` of a bit string. |
 | The Rust blocks of this page | They compile and run as documentation tests, with the `inspect` feature, and `tests/readme.rs` compares what each prints with the output shown under it. |
 
@@ -1134,6 +1135,59 @@ S1AP.
 cargo test --all-features
 cargo test
 ```
+
+### The vectors
+
+`tests/fixtures/generate.py` writes the two files of vectors, and with
+`--check` it compares them with what is committed. It needs pycrate 0.8.1 and
+the ASN.1 modules of [Generated code](#generated-code), and nothing of this
+crate: pycrate compiles the modules with its own compiler and encodes, with
+its own codec, values that the script makes from the compiled types.
+
+| Vectors | What they hold |
+|---------|----------------|
+| `messages.tsv`, 144 | Each message with the IEs and the members that are mandatory, at their lower bounds |
+| `vectors.tsv`, 447 `cover` | Each message with every IE of its object set and every member, in passes that take each alternative of each `CHOICE`, each value of each `ENUMERATED` but those of the type of handover, the bounds of each number and each size, the value after them where a constraint is extensible, and that leave members out: 1142 IEs of object sets, 181 alternatives and 839 values |
+| 12 `length`, 6 `count`, 11 `bits` | A NAS-PDU, a list and a bit string around each form of the length determinant: 127 and 128, 16383 and 16384, and fragments, up to 65537 octets, 65536 entries and 131072 bits. The lengths are those of the string, of the open type of its IE and of the open type of the message |
+| 3 `largest` | A list of 65535 entries in an extension container, a list of 4096, and a string of 9600 octets |
+
+Three readings of the vectors do not depend on each other:
+
+- The crate reads each vector and writes the same octets, in the tests above.
+- pycrate has the value of each vector, and `generate.py --values FILE` writes
+  them in the JSON encoding of ASN.1. An ignored test of `tests/vectors.rs`
+  writes a PDU from each, and its octets are those of the vector, for each of
+  the 479: the crate gives each name and each number of the reference the bits
+  that the reference gave it.
+- `tests/fixtures/dissect.py` gives each vector to tshark, which must read
+  the procedure, the alternative of the PDU, the IEs of the message and the
+  size that a vector is made for. Wireshark 4.6.4 reads them as the vectors
+  have them, and 418 of the 479 vectors without a remark. In the others it
+  stops in octets that hold a value of another specification, which are
+  random in the vectors, or at one of the three lists in fragments, which it
+  does not read: the IEs after that place are not compared.
+
+```bash
+python3 -m venv venv && venv/bin/pip install pycrate==0.8.1
+venv/bin/python tests/fixtures/generate.py --check
+venv/bin/python tests/fixtures/generate.py --values values.jsonl
+REFERENCE_VALUES=values.jsonl cargo test --features inspect --test vectors -- --ignored
+python3 tests/fixtures/dissect.py
+```
+
+`generate.py` repairs two defects of pycrate 0.8.1, which does not write two
+values in fragments: for a list of 16384 entries or more it calls a function
+that it does not have, and for a bit string it takes the octets of each
+fragment after the first from the wrong place. Wireshark reads the bit strings
+in fragments as the repaired pycrate writes them, and pycrate itself reads back
+the lists, which Wireshark does not read.
+
+The crate and pycrate write one kind of value differently. A number that is
+in the range of the root of an extensible constraint and is none of its
+values, as 96 for `INTEGER (1..30|40|50, ...)`, is written in the root by the
+crate, as X.691 (02/2021) 13.1 has a value "within the range of the extension
+root", and after the extension bit by pycrate. Each reads what the other
+writes, and the vectors have no such number.
 
 ## Benchmarks
 
@@ -1187,15 +1241,20 @@ rustfmt --edition 2024 src/ngap.rs src/registry.rs src/inspect_registry.rs
 `rasn-compiler` finds rustfmt through `CARGO`. Commit the three files after
 regenerating them, and do not edit them by hand. They were last regenerated
 on 2026-10-12, with the generator of that revision and the rustfmt of Rust
-1.88: they came out as they are committed, octet for octet. No CI job
-regenerates them, as the ASN.1 is not in the repository.
+1.88: they came out as they are committed, octet for octet. The `Reproduce`
+workflow does it again from the archive of 3GPP when the generator, the
+bindings or the vectors change, and on demand: it extracts the modules, runs
+the generator and compares what it writes with the committed files, then
+has pycrate write [the vectors](#the-vectors) and the crate write the values
+of pycrate.
 
 oxirush-ngap and oxirush-s1ap share, octet for octet, the code that does not
 depend on the protocol: `build/aper_fix.rs`, `build/asn1.rs`,
 `build/containers.rs`, `build/extract_asn1.py`, `build/inspection.rs`,
 `build/registry.rs`, `src/check.rs`, `src/error.rs`,
 `src/inspect_paths.rs`, `src/json.rs`, `src/message.rs`, `src/per.rs`,
-`src/sized.rs`, `src/wire.rs`, the test `tests/readme.rs`, and the
+`src/sized.rs`, `src/wire.rs`, the test `tests/readme.rs`, the scripts
+`tests/fixtures/generate.py` and `tests/fixtures/dissect.py`, and the
 benchmarks but for their `protocol.rs`.
 `tests/shared_files.rs` holds a digest of each, so that an edit in one crate
 fails its tests until the file is the same in the other and both record the

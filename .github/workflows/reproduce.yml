@@ -1,0 +1,72 @@
+name: Reproduce
+
+# The bindings from the ASN.1 of the specification, and the vectors from pycrate:
+# what the README says anyone can check. It fetches the archive of the
+# specification from 3GPP and pycrate from PyPI, so it runs when what it checks
+# changes, and on demand.
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - build/**
+      - src/ngap.rs
+      - src/registry.rs
+      - src/inspect_registry.rs
+      - tests/fixtures/**
+      - tests/vectors.rs
+      - .github/workflows/reproduce.yml
+  pull_request:
+    paths:
+      - build/**
+      - src/ngap.rs
+      - src/registry.rs
+      - src/inspect_registry.rs
+      - tests/fixtures/**
+      - tests/vectors.rs
+      - .github/workflows/reproduce.yml
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  # As in the CI workflow: the tests need no debug information.
+  CARGO_PROFILE_DEV_DEBUG: 0
+
+jobs:
+  reproduce:
+    name: Bindings and vectors
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The generated files are formatted with the rustfmt of this version.
+      - uses: dtolnay/rust-toolchain@1.88.0
+        with:
+          components: rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            .
+            build
+      - name: The ASN.1 modules, out of the archive of 3GPP
+        run: |
+          curl -sS --fail -A "Mozilla/5.0" -o "$RUNNER_TEMP/38413-j40.zip" \
+            https://www.3gpp.org/ftp/Specs/archive/38_series/38.413/38413-j40.zip
+          python3 build/extract_asn1.py "$RUNNER_TEMP/38413-j40.zip"
+      - name: The bindings, which the generator writes as they are committed
+        run: |
+          CARGO="$(command -v cargo)" cargo run --locked --manifest-path build/Cargo.toml
+          rustfmt --edition 2024 src/ngap.rs src/registry.rs src/inspect_registry.rs
+          git diff --exit-code -- src
+      - name: The vectors, which pycrate writes as they are committed
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install pycrate==0.8.1
+          "$RUNNER_TEMP/venv/bin/python" tests/fixtures/generate.py --check
+          "$RUNNER_TEMP/venv/bin/python" tests/fixtures/generate.py --values "$RUNNER_TEMP/values.jsonl"
+          git diff --exit-code -- tests/fixtures
+      - name: The values of pycrate, which the crate writes to the octets of pycrate
+        run: cargo test --features inspect --test vectors -- --ignored
+        env:
+          REFERENCE_VALUES: ${{ runner.temp }}/values.jsonl

@@ -1,6 +1,7 @@
 //! The files that oxirush-ngap and oxirush-s1ap have in common, octet for octet: the
 //! error, the codec helpers, the JSON codec and the paths of the inspection, the
-//! generators that both protocols run, the test of the README and the benchmarks. Each
+//! generators that both protocols run, the test of the README, the scripts of the
+//! vectors and the benchmarks. Each
 //! crate holds the digest of each file, so that an edit in one fails here until the
 //! file is the same in the other and both record its new digest. This file is one of
 //! them, and the two crates keep it the same too.
@@ -27,7 +28,9 @@ const SHARED: &[(&str, u64)] = &[
     ("src/message.rs", 0x80820382c540a0cc),
     ("src/per.rs", 0x2b1e451772f0ff2e),
     ("src/sized.rs", 0x05d05e62217fc26a),
-    ("src/wire.rs", 0x6e7764143db2ce5e),
+    ("src/wire.rs", 0x358dcf6e51fd8ab1),
+    ("tests/fixtures/dissect.py", 0xb306e19dae11f351),
+    ("tests/fixtures/generate.py", 0x560531d5a4e0e5a3),
     ("tests/readme.rs", 0x8649417b32dae0f4),
 ];
 
@@ -44,10 +47,11 @@ fn digest(octets: &[u8]) -> u64 {
 fn the_files_shared_with_the_other_protocol_are_as_they_were_mirrored() {
     let mut read = 0;
     for (path, recorded) in SHARED {
-        // The published crate has the sources, and neither the generator nor the
-        // benchmarks.
+        // The published crate has the sources and the tests, and neither the
+        // generator, the benchmarks nor the scripts of the vectors.
         let Ok(octets) = std::fs::read(Path::new(env!("CARGO_MANIFEST_DIR")).join(path)) else {
-            let published = !path.starts_with("build/") && !path.starts_with("benches/");
+            let apart = ["build/", "benches/", "tests/fixtures/"];
+            let published = !apart.iter().any(|apart| path.starts_with(apart));
             assert!(!published, "{path} is missing");
             continue;
         };

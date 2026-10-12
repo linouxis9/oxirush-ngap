@@ -475,3 +475,98 @@ fn an_empty_open_type_value_is_one_zero_octet() {
     assert_eq!(value.as_bytes(), [0]);
     decode_open_type::<()>(&value).expect("decode NULL");
 }
+
+/// A number of an extensible constraint whose root is several ranges, as
+/// `ExpectedActivityPeriod ::= INTEGER (1..30|40|50|60|80|100|120|150|180|181, ...)`:
+/// 96 is in the range of the root, 1 to 181, and is none of its values. X.691
+/// (02/2021) 13.1 has the extension bit set for a value that "is not within the range
+/// of the extension root", so 96 is written in the eight bits of the root, as 181 is.
+/// pycrate 0.8.1 writes it after the extension bit, as it writes 182, and each of the
+/// two reads what the other writes.
+#[test]
+fn a_number_between_the_ranges_of_an_extensible_root_is_written_in_the_root() {
+    let period = |value: u8| {
+        let period = ExpectedActivityPeriod(value.into());
+        ExpectedUEActivityBehaviour::new(Some(period), None, None, None)
+    };
+    let written = |value| hex::encode(rasn::aper::encode(&period(value)).unwrap());
+    let read = |octets: &str| {
+        let octets = hex::decode(octets).unwrap();
+        rasn::aper::decode::<ExpectedUEActivityBehaviour>(&octets).unwrap()
+    };
+
+    // The extension bit of the SEQUENCE, a bit for each of its four members, the
+    // extension bit of the number, then the number less one in eight bits.
+    assert_eq!(written(30), "4074");
+    assert_eq!(written(181), "42d0");
+    assert_eq!(written(96), "417c");
+    assert_eq!(read("417c"), period(96));
+    // After the extension bit: a length, and the number.
+    assert_eq!(written(182), "440200b6");
+    assert_eq!(read("440200b6"), period(182));
+    // What pycrate writes for 96.
+    assert_eq!(read("440160"), period(96));
+}
+
+/// The octets of a string of a size that a vector is made for, as
+/// `tests/fixtures/generate.py` fills it.
+fn pattern(octets: usize) -> String {
+    (0..octets).map(|at| format!("{:02x}", at % 251)).collect()
+}
+
+/// `octets`, which pycrate wrote, are a value of `T` that is written as the same octets,
+/// and are none with an octet less.
+fn as_pycrate_writes_it<T: rasn::Decode + rasn::Encode>(octets: &str) -> T {
+    let octets = hex::decode(octets).unwrap();
+    let value = rasn::aper::decode::<T>(&octets).expect("decode");
+    assert_eq!(
+        hex::encode(rasn::aper::encode(&value).unwrap()),
+        hex::encode(&octets)
+    );
+    assert!(rasn::aper::decode::<T>(&octets[..octets.len() - 1]).is_err());
+    value
+}
+
+/// A string whose size has a range of 256 or more is after a length of two octets,
+/// which starts an octet (X.691 (02/2021) §11.5.7.3, §16.11, §17.8): the four members
+/// and alternatives of the bindings that are such a string, as pycrate 0.8.1 writes a
+/// value of each. Without the types of `sized` in their place, rasn 0.29 writes none of
+/// them so.
+#[test]
+fn a_string_with_a_length_of_two_octets_is_written_as_pycrate_writes_it() {
+    // receiveStatusOfUL-PDCP-SDUs BIT STRING (SIZE(1..2048)), of 300 bits and of 2048:
+    // the two counts of the PDCP SN, the length less one, then the bits.
+    let bits = "a5".repeat(37);
+    let status: DRBStatusUL12 = as_pycrate_writes_it(&format!("4000000000012b{bits}b0"));
+    assert_eq!(status.receive_status_of_ul_pdcp_sdus.unwrap().len(), 300);
+    let longest = format!("400000000007ff{}", "a5".repeat(256));
+    let status: DRBStatusUL12 = as_pycrate_writes_it(&longest);
+    assert_eq!(status.receive_status_of_ul_pdcp_sdus.unwrap().len(), 2048);
+
+    // singleDevice and groupDevices BIT STRING (SIZE(1..1024, ...)): 300 bits and 1024
+    // in the root, and 1025 after the extension bit, with an unconstrained length.
+    type Devices = AIoTDeviceIdentificationRequested;
+    let Devices::singleDevice(device) = as_pycrate_writes_it(&format!("00012b{bits}b0")) else {
+        panic!("a single device");
+    };
+    assert_eq!(device.len(), 300);
+    let Devices::groupDevices(group) = as_pycrate_writes_it(&format!("4003ff{}", "a5".repeat(128)))
+    else {
+        panic!("a group of devices");
+    };
+    assert_eq!(group.len(), 1024);
+    let Devices::groupDevices(group) =
+        as_pycrate_writes_it(&format!("608401{}80", "a5".repeat(128)))
+    else {
+        panic!("a group of devices");
+    };
+    assert_eq!(group.len(), 1025);
+
+    // containerForAppLayerMeasConfig OCTET STRING (SIZE(1..8000)), of 300 octets.
+    let config = format!("1000adcd4894fa3b000000012b{}", pattern(300));
+    let config: UEAppLayerMeasConfigInfo = as_pycrate_writes_it(&config);
+    assert_eq!(
+        config.container_for_app_layer_meas_config.unwrap().len(),
+        300
+    );
+}

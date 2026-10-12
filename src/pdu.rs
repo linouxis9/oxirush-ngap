@@ -39,8 +39,23 @@ pub(crate) fn message_octets(ies: &ProtocolIEContainer<'_>) -> Result<Vec<u8>, E
     octets.extend_from_slice(&count.to_be_bytes());
     for ie in &ies.0 {
         let [high, low] = ie.id.0.to_be_bytes();
-        octets.extend_from_slice(&[high, low, (ie.criticality as u8) << 6]);
-        Writer::new(&mut octets).open_type(&ie.value);
+        let criticality = (ie.criticality as u8) << 6;
+        let value: &[u8] = &ie.value;
+        // The length of the value in one octet or in two, as nearly every IE has it.
+        match value.len() {
+            length @ 0..=0x7f => octets.extend_from_slice(&[high, low, criticality, length as u8]),
+            length @ 0x80..=0x3fff => {
+                let [first, second] = (length as u16 | 0x8000).to_be_bytes();
+                octets.extend_from_slice(&[high, low, criticality, first, second]);
+            }
+            // A longer value is in fragments, which the writer of the runtime writes.
+            _ => {
+                octets.extend_from_slice(&[high, low, criticality]);
+                Writer::new(&mut octets).open_type(value);
+                continue;
+            }
+        }
+        octets.extend_from_slice(value);
     }
     Ok(octets)
 }

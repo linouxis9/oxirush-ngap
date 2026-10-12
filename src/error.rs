@@ -102,18 +102,34 @@ impl Error {
 
     /// Octets that are not a value of the type `T`, and why.
     pub(crate) fn not_a<T: rasn::AsnType>(why: impl Into<String>) -> Self {
-        let what = format!("these octets do not decode as {}", name::<T>());
+        Self::not_a_named(name::<T>(), why.into())
+    }
+
+    /// Octets that are not a value of the type that ASN.1 names `name`. This and the
+    /// functions that take a name are compiled once, and those that take a type for
+    /// each type: they do nothing but name it.
+    fn not_a_named(name: &str, why: String) -> Self {
+        let what = format!("these octets do not decode as {name}");
         Self::new(ErrorKind::Decode, what).because(why)
     }
 
     /// Octets that rasn does not decode as a value of the type `T`.
     pub(crate) fn decoding<T: rasn::AsnType>(error: DecodeError) -> Self {
-        Self::not_a::<T>(in_its_field(&error)).caused_by(error)
+        Self::decoding_named(name::<T>(), error)
+    }
+
+    /// Octets that rasn does not decode as a value of the type that ASN.1 names `name`.
+    fn decoding_named(name: &str, error: DecodeError) -> Self {
+        Self::not_a_named(name, in_its_field(&error)).caused_by(error)
     }
 
     /// A value of the type `T` that rasn does not encode.
     pub(crate) fn encoding<T: rasn::AsnType>(error: EncodeError) -> Self {
-        let name = T::IDENTIFIER.0.unwrap_or("this type");
+        Self::encoding_named(T::IDENTIFIER.0.unwrap_or("this type"), error)
+    }
+
+    /// A value of the type that ASN.1 names `name`, which rasn does not encode.
+    fn encoding_named(name: &str, error: EncodeError) -> Self {
         let what = format!("a value of {name} does not encode");
         let why = encode_reason(&error);
         Self::new(ErrorKind::Encode, what)
@@ -206,9 +222,15 @@ impl Error {
     /// what the codec said of it.
     #[cfg(feature = "inspect")]
     pub(crate) fn outside_its_type<T: rasn::AsnType>(self) -> Self {
+        self.outside_named(name::<T>())
+    }
+
+    /// This error, for a value that is not one of the type that ASN.1 names `name`.
+    #[cfg(feature = "inspect")]
+    fn outside_named(self, name: &str) -> Self {
         Self {
             kind: ErrorKind::Value,
-            what: format!("this is not a value of {}", name::<T>()).into_boxed_str(),
+            what: format!("this is not a value of {name}").into_boxed_str(),
             why: Some(self.why.unwrap_or(self.what)),
             source: self.source,
         }

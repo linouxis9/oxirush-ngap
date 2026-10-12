@@ -34,6 +34,7 @@
 //! the names on the way to the value.
 
 use rasn::error::{DecodeError, EncodeError};
+use rasn::types::fields::Field;
 use rasn::types::{self, Any, BitStr, BitString, Constraints, Identifier, Tag, TagTree};
 use rasn::{Codec, Decode, Encode};
 use serde_json::{Map, Number, Value};
@@ -107,21 +108,20 @@ pub(crate) struct Encoder {
 
 /// The JSON form of `value`.
 pub(crate) fn to_value<T: Encode>(value: &T) -> Result<Value, Error> {
-    let mut encoder = Encoder {
-        open: Vec::new(),
-        names: Vec::new(),
-        value: None,
-    };
+    // What does not depend on `T` is in functions that are compiled once.
+    let mut encoder = Encoder::new();
     let written = value.encode(&mut encoder);
-    finished(written, encoder.value)
+    finished(written, encoder)
 }
 
 /// What an encoder wrote, or why it wrote nothing.
-fn finished(written: Result<(), EncodeError>, value: Option<Value>) -> Result<Value, Error> {
+fn finished(written: Result<(), EncodeError>, encoder: Encoder) -> Result<Value, Error> {
     let unwritten =
         |why: String| Error::limit(format!("the JSON forms do not represent this value: {why}"));
     written.map_err(|error| unwritten(crate::error::encode_reason(&error)))?;
-    value.ok_or_else(|| unwritten("it is absent".to_string()))
+    encoder
+        .value
+        .ok_or_else(|| unwritten("it is absent".to_string()))
 }
 
 /// What the JSON forms do not write: a type that neither protocol has.
@@ -151,11 +151,29 @@ impl Encoder {
         }
     }
 
-    /// The members of these names come next, in this order.
-    fn members(&mut self, names: &mut dyn Iterator<Item = &'static str>) {
+    /// An encoder that has written nothing.
+    fn new() -> Self {
+        Self {
+            open: Vec::new(),
+            names: Vec::new(),
+            value: None,
+        }
+    }
+
+    /// The members of a SEQUENCE come next, in the order of its components and of its
+    /// additions. They are taken as slices: an iterator over the components of a type
+    /// would be compiled for each SEQUENCE.
+    fn members(&mut self, root: &[Field], extended: &[Field]) {
         let first = self.names.len();
-        self.names.extend(names);
+        let fields = root.iter().chain(extended);
+        self.names.extend(fields.map(|field| field.name));
         self.names[first..].reverse();
+        self.open.push(Open::Members(Map::new()));
+    }
+
+    /// One member of this name comes next: the alternative of a CHOICE.
+    fn member(&mut self, name: &'static str) {
+        self.names.push(name);
         self.open.push(Open::Members(Map::new()));
     }
 
@@ -491,8 +509,7 @@ impl rasn::Encoder<'_> for Encoder {
         F: FnOnce(&mut Self::AnyEncoder<'b, RL, EL>) -> Result<(), EncodeError>,
     {
         let (root, extended) = (C::FIELDS, C::EXTENDED_FIELDS);
-        let extended = extended.iter().flat_map(|fields| fields.iter());
-        self.members(&mut root.iter().chain(extended).map(|field| field.name));
+        self.members(&root, extended.as_deref().unwrap_or_default());
         encoder_scope(self)?;
         self.close();
         Ok(())
@@ -570,7 +587,7 @@ impl rasn::Encoder<'_> for Encoder {
     ) -> Result<(), EncodeError> {
         let name = alternative_of(tag, E::VARIANTS, E::EXTENDED_VARIANTS, E::IDENTIFIERS);
         let name = name.ok_or_else(|| EncodeError::variant_not_in_choice(Codec::Jer))?;
-        self.members(&mut std::iter::once(name));
+        self.member(name);
         encode_fn(self)?;
         self.close();
         Ok(())
@@ -639,28 +656,21 @@ pub(crate) struct Decoder<'v> {
 
 /// The value of the type `T` that `value` writes.
 pub(crate) fn from_value<T: Decode>(value: &Value) -> Result<T, Error> {
-    let mut decoder = Decoder {
-        values: vec![(Name::Root, Some(value))],
-        at: Vec::new(),
-        refusal: None,
-    };
-    let read = T::decode(&mut decoder);
-    let name = T::IDENTIFIER.0.unwrap_or("its type");
-    refused(read, decoder.refusal, name)
+    // What does not depend on `T` is in functions that are compiled once.
+    let mut decoder = Decoder::new(value);
+    match T::decode(&mut decoder) {
+        Ok(value) => Ok(value),
+        Err(error) => Err(refused(
+            error,
+            decoder,
+            T::IDENTIFIER.0.unwrap_or("its type"),
+        )),
+    }
 }
 
-/// What a decoder read, or why it read nothing, of a value of the type that ASN.1
-/// names `name`.
-fn refused<T>(
-    read: Result<T, DecodeError>,
-    refusal: Option<Refusal>,
-    name: &str,
-) -> Result<T, Error> {
-    let error = match read {
-        Ok(value) => return Ok(value),
-        Err(error) => error,
-    };
-    let (kind, at, why) = match refusal {
+/// Why a decoder read no value of the type that ASN.1 names `name`.
+fn refused(error: DecodeError, decoder: Decoder, name: &str) -> Error {
+    let (kind, at, why) = match decoder.refusal {
         Some(refusal) => (refusal.kind, refusal.at, refusal.why),
         // What the bindings refuse themselves, as a string of another size than its
         // type has.
@@ -677,7 +687,7 @@ fn refused<T>(
         true => format!("this is not a value of {name}"),
         false => format!("this is not a value of {name}, at {}", at.join("/")),
     };
-    Err(Error::new(kind, what).because(why))
+    Error::new(kind, what).because(why)
 }
 
 /// What the JSON forms do not read: a type that neither protocol has.
@@ -686,6 +696,15 @@ fn unread(of: &str) -> DecodeError {
 }
 
 impl<'v> Decoder<'v> {
+    /// A decoder of `value`, which has read nothing.
+    fn new(value: &'v Value) -> Self {
+        Self {
+            values: vec![(Name::Root, Some(value))],
+            at: Vec::new(),
+            refusal: None,
+        }
+    }
+
     /// The error of a value that is refused: `why`, at the value that `name` names in
     /// what is being read. The first refusal is the one that is told.
     fn refuse(&mut self, kind: ErrorKind, name: Name, why: String) -> DecodeError {
@@ -882,19 +901,18 @@ impl<'v> Decoder<'v> {
         })
     }
 
-    /// The next value, a SEQUENCE: its members come next, by these names in this order,
-    /// and a member of another name is refused.
-    fn members(
-        &mut self,
-        names: &mut dyn Iterator<Item = &'static str>,
-    ) -> Result<(), DecodeError> {
+    /// The next value, a SEQUENCE: its members come next, by the names of its components
+    /// and of its additions in this order, and a member of another name is refused. They
+    /// are taken as slices: an iterator over the components of a type would be compiled
+    /// for each SEQUENCE.
+    fn members(&mut self, root: &[Field], extended: &[Field]) -> Result<(), DecodeError> {
         let (name, value) = self.next()?;
         let Some(members) = value.as_object() else {
             return Err(self.mismatch(name, "an object is expected", value));
         };
         let first = self.values.len();
         let mut read = 0;
-        for known in names {
+        for known in root.iter().chain(extended).map(|field| field.name) {
             let member = members.get(known);
             read += usize::from(member.is_some());
             self.values.push((Name::Member(known), member));
@@ -1113,8 +1131,7 @@ impl rasn::Decoder for Decoder<'_> {
         F: FnOnce(&mut Self) -> Result<D, DecodeError>,
     {
         let (root, extended) = (D::FIELDS, D::EXTENDED_FIELDS);
-        let extended = extended.iter().flat_map(|fields| fields.iter());
-        self.members(&mut root.iter().chain(extended).map(|field| field.name))?;
+        self.members(&root, extended.as_deref().unwrap_or_default())?;
         let value = decode_fn(self)?;
         self.close();
         Ok(value)

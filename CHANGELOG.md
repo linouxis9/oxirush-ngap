@@ -353,6 +353,10 @@ is not source compatible with 0.4.2.
   go on after the value.
 - The examples of the documentation and of the README are compiled and run
   by the documentation tests.
+- The crate with `inspect` compiles to less code: the JSON codec names the
+  members of a `SEQUENCE` in a function that is compiled once, where an
+  iterator was compiled for each type, and so is what a typed function does
+  whatever its type is.
 
 ### Fixed
 

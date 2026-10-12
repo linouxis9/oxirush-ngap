@@ -42,20 +42,29 @@ pub(crate) fn decode_complete<T: Decode>(bytes: &[u8]) -> Result<T, crate::Error
     if bytes.is_empty() {
         return Err(crate::Error::not_a::<T>("there are no octets"));
     }
-    let decoded = rasn::aper::decode_with_remainder(bytes);
-    let (decoded, remainder) = decoded.map_err(crate::Error::decoding::<T>)?;
+    match rasn::aper::decode_with_remainder(bytes) {
+        Ok((decoded, remainder)) => match followed(bytes, remainder) {
+            None => Ok(decoded),
+            Some(after) => Err(crate::Error::not_a::<T>(after)),
+        },
+        Err(error) => Err(crate::Error::decoding::<T>(error)),
+    }
+}
+
+/// What follows a value in `bytes`, which were decoded up to `remainder`, when octets
+/// do: `None` for a complete encoding. It is compiled once, and `decode_complete` for
+/// each type.
+fn followed(bytes: &[u8], remainder: &[u8]) -> Option<String> {
     // A zero-bit field-list has exactly one zero octet as its complete encoding.
     let zero_bit_encoding = bytes == [0] && remainder == bytes;
-    if !remainder.is_empty() && !zero_bit_encoding {
-        let after = match remainder.len() {
-            1 => "1 octet".to_string(),
-            length => format!("{length} octets"),
-        };
-        return Err(crate::Error::not_a::<T>(format!(
-            "the value is followed by {after}"
-        )));
+    if remainder.is_empty() || zero_bit_encoding {
+        return None;
     }
-    Ok(decoded)
+    let after = match remainder.len() {
+        1 => "1 octet".to_string(),
+        length => format!("{length} octets"),
+    };
+    Some(format!("the value is followed by {after}"))
 }
 
 /// Keep the public SEQUENCE's AsnType and Encode implementations. In APER,

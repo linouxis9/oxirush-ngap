@@ -4,25 +4,8 @@ use std::fmt::Write;
 
 use anyhow::{Result, anyhow, ensure};
 use regex::Regex;
-use syn::visit::Visit;
 
 use crate::registry::{Ie, Registry, alone, canonical};
-
-struct TypeNames(std::collections::BTreeSet<String>);
-impl<'ast> Visit<'ast> for TypeNames {
-    fn visit_type_path(&mut self, path: &'ast syn::TypePath) {
-        if let Some(segment) = path.path.segments.last() {
-            self.0.insert(segment.ident.to_string());
-        }
-        syn::visit::visit_type_path(self, path);
-    }
-}
-
-fn references(ty: &syn::Type) -> std::collections::BTreeSet<String> {
-    let mut visitor = TypeNames(Default::default());
-    visitor.visit_type(ty);
-    visitor.0
-}
 
 fn items<'a>(input: &'a [syn::Item], prefix: &str, output: &mut Vec<(String, &'a syn::Item)>) {
     for item in input {
@@ -36,103 +19,6 @@ fn items<'a>(input: &'a [syn::Item], prefix: &str, output: &mut Vec<(String, &'a
             _ => {}
         }
     }
-}
-
-/// `roots` are the types that the registry gives to `Typed::of`: one of them that
-/// reaches no open type still has an implementation, which does nothing.
-fn generate_open_type_repair(
-    generated: &str,
-    module: &str,
-    roots: &std::collections::BTreeSet<String>,
-    out: &mut String,
-) -> Result<()> {
-    let syntax = syn::parse_file(generated)?;
-    let mut declarations = Vec::new();
-    items(
-        &syntax.items,
-        &format!("crate::{module}::"),
-        &mut declarations,
-    );
-    fn fields(item: &syn::Item) -> Vec<&syn::Field> {
-        match item {
-            syn::Item::Struct(item) => item.fields.iter().collect(),
-            syn::Item::Enum(item) => item.variants.iter().flat_map(|v| v.fields.iter()).collect(),
-            _ => unreachable!(),
-        }
-    }
-    let mut affected: std::collections::BTreeSet<String> = ["Any".to_string()].into();
-    loop {
-        let before = affected.len();
-        for (_, item) in &declarations {
-            let name = match item {
-                syn::Item::Struct(item) => &item.ident,
-                syn::Item::Enum(item) => &item.ident,
-                _ => unreachable!(),
-            };
-            if fields(item)
-                .iter()
-                .any(|f| !references(&f.ty).is_disjoint(&affected))
-            {
-                affected.insert(name.to_string());
-            }
-        }
-        if affected.len() == before {
-            break;
-        }
-    }
-    // One line per type: the fields, or the CHOICE alternatives, through which it reaches an
-    // open type. rustfmt leaves the lines of a macro called with braces as they are.
-    let list = |names: Vec<String>| match names.is_empty() {
-        true => "{}".to_string(),
-        false => format!("{{ {} }}", names.join(", ")),
-    };
-    writeln!(out, "use crate::inspect::open_types;")?;
-    for (prefix, item) in declarations {
-        let open = |field: &syn::Field| !references(&field.ty).is_disjoint(&affected);
-        match item {
-            syn::Item::Struct(item) => {
-                let fields = item.fields.iter().enumerate().filter(|(_, f)| open(f));
-                let fields = fields.map(|(index, field)| match &field.ident {
-                    Some(name) => name.to_string(),
-                    None => index.to_string(),
-                });
-                let fields: Vec<_> = fields.collect();
-                if !fields.is_empty() || roots.contains(&item.ident.to_string()) {
-                    let fields = list(fields);
-                    writeln!(out, "open_types! {{ {prefix}{} {fields} }}", item.ident)?;
-                }
-            }
-            syn::Item::Enum(item) => {
-                let (with, without): (Vec<_>, Vec<_>) = item
-                    .variants
-                    .iter()
-                    .partition(|v| v.fields.iter().any(open));
-                ensure!(
-                    with.iter().all(|variant| variant.fields.len() == 1),
-                    "{}: an alternative with an open type has one value",
-                    item.ident
-                );
-                let names = |variants: Vec<&syn::Variant>| {
-                    list(variants.iter().map(|v| v.ident.to_string()).collect())
-                };
-                if with.is_empty() {
-                    if roots.contains(&item.ident.to_string()) {
-                        writeln!(out, "open_types! {{ {prefix}{} {{}} }}", item.ident)?;
-                    }
-                } else {
-                    writeln!(
-                        out,
-                        "open_types! {{ {prefix}{} {} else {} }}",
-                        item.ident,
-                        names(with),
-                        names(without)
-                    )?;
-                }
-            }
-            _ => unreachable!(),
-        }
-    }
-    Ok(())
 }
 
 /// The well-known types whose values a view and a tree show in a readable form: the
@@ -306,7 +192,6 @@ fn generate_readable(generated: &str, ies: &BTreeMap<u16, Ie>, out: &mut String)
     // The forms of the members of each name, with the type that has each. A name that
     // some type gives a member of another kind has several, and so has no form.
     let mut members: BTreeMap<String, BTreeMap<Option<String>, String>> = BTreeMap::new();
-    let mut enumerated = std::collections::BTreeSet::new();
     // The names of the values of each ENUMERATED, in the order of its definition.
     let mut enumerations: BTreeMap<String, Vec<String>> = BTreeMap::new();
     for (_, item) in &declarations {
@@ -330,8 +215,7 @@ fn generate_readable(generated: &str, ies: &BTreeMap<u16, Ie>, out: &mut String)
                 for value in &item.variants {
                     let name = rasn(&value.attrs)?.0;
                     let name = name.unwrap_or_else(|| value.ident.unraw().to_string());
-                    enumerations.entry(item.ident.to_string()).or_default().push(name.clone());
-                    enumerated.insert(name);
+                    enumerations.entry(item.ident.to_string()).or_default().push(name);
                 }
             }
             syn::Item::Enum(item) => {
@@ -392,11 +276,6 @@ fn generate_readable(generated: &str, ies: &BTreeMap<u16, Ie>, out: &mut String)
         }
         writeln!(out, "_ => return None, }}) }}")?;
     }
-    writeln!(out, "pub(crate) const ENUMERATED: &[&str] = &[")?;
-    for name in &enumerated {
-        writeln!(out, "{name:?},")?;
-    }
-    writeln!(out, "];")?;
     writeln!(
         out,
         "/// The names of the values of each ENUMERATED, by the name of its type in the \
@@ -592,7 +471,6 @@ pub(super) fn generate(
     writeln!(out, "}}")?;
     // The identifier of an IE whose octets may carry a type, the name that ASN.1 gives
     // that type, and the type.
-    let mut carriers = Vec::new();
     writeln!(out, "carried! {{")?;
     for (ie, name) in carried {
         let mut ies = registry.ies.iter();
@@ -602,22 +480,9 @@ pub(super) fn generate(
         let ty = registry.resolve(name);
         let ty = ty.ok_or_else(|| anyhow!("{name} names no type"))?;
         writeln!(out, "    {id} {name:?} {ty};")?;
-        carriers.push(ty);
     }
     writeln!(out, "}}")?;
     generate_readable(generated, &registry.ies, &mut out)?;
     generate_types(generated, &transfers, &mut out)?;
-    // The types that the registry, the transfers and the carried types have the
-    // functions of.
-    let messages = registry.procedures.values().flat_map(|p| p.messages.iter());
-    let roots = (messages.flatten().map(|message| message.ty.clone()))
-        .chain(registry.ies.values().filter_map(|ie| alone(&ie.types)))
-        .chain(registry.ies.values().flat_map(|ie| ie.extends.keys().cloned()))
-        .chain(registry.ies.values().filter_map(|ie| alone(&ie.contents)))
-        .chain(transfers.values().filter_map(alone))
-        .chain(carriers)
-        .filter_map(|ty| Some(ty.rsplit("::").next()?.to_string()))
-        .collect();
-    generate_open_type_repair(generated, &module, &roots, &mut out)?;
     Ok(out)
 }

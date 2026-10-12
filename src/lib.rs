@@ -57,9 +57,7 @@ pub mod inspect;
 mod inspect_paths;
 #[cfg(feature = "inspect")]
 mod inspect_registry;
-// Nothing but its tests reads the JSON forms through it yet.
 #[cfg(feature = "inspect")]
-#[allow(dead_code)]
 mod json;
 pub mod macros;
 mod message;

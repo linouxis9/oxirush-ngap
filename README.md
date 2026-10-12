@@ -126,7 +126,7 @@ through the macros of `rasn`, and the build stops with
 `uuid@1.28.0 requires rustc 1.89.0`.
 
 The bindings are checked in and large, and with `inspect` the compiler also
-builds JER and APER code for every type of the protocol. A clean
+builds the code of the JSON forms and of APER for every type of the protocol. A clean
 `cargo build -j 8` of the crate and its dependencies, in the `dev` profile
 where the row does not say `--release`:
 

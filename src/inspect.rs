@@ -284,14 +284,15 @@
 
 use serde_json::{Value, json};
 
+use crate::Error;
 use crate::inspect_paths::{
     EDITED, Shape, carried_shape, entry_shape, extended, listed_ies, member_shape, member_shapes,
-    member_spelling, message_shape, named_ies, of_a_transfer, open_with, same_name, written_ie,
+    message_shape, named_ies, of_a_transfer, open_with, same_name, written_ie,
 };
 pub use crate::inspect_paths::{check_path, enumerated_at, insert, paths, remove, select, set};
 use crate::inspect_registry as registry;
+use crate::json::{self, hex};
 use crate::ngap::NGAP_PDU;
-use crate::{Error, ErrorKind};
 
 /// The identifier and the name of each IE that an object set of the ASN.1 has, those of
 /// the extension containers included. An identifier that the ASN.1 defines and that no
@@ -378,295 +379,26 @@ fn message_type(direction: &str, code: u8) -> Result<Typed, Error> {
     })
 }
 
-/// A value as JER writes it. JER does not write every value: an integer of 2^63 or
-/// more is one that it refuses.
-fn jer<T: rasn::Encode>(value: &T) -> Result<Value, Error> {
-    let text = rasn::jer::encode(value).map_err(Error::unwritten)?;
-    serde_json::from_str(&text).map_err(|error| Error::unrepresented(error.to_string()))
-}
-
-/// The value of the type `T` that the octets `raw` are, as JER writes it. An error for
-/// a value that JER does not read back as it is: it is not shown as what it is not.
+/// The value of the type `T` that the octets `raw` are, in its JSON form.
 fn decode_typed<T>(raw: &[u8]) -> Result<Value, Error>
 where
-    T: rasn::Decode + rasn::Encode + RepairOpenTypes + PartialEq + core::fmt::Debug,
+    T: rasn::Decode + rasn::Encode + PartialEq + core::fmt::Debug,
 {
-    let value = crate::ngap::decode_open_type::<T>(&rasn::types::Any::new(raw.to_vec()))?;
+    let value: T = crate::per::decode_complete(raw)?;
     #[cfg(test)]
-    crate::json::as_rasn_writes_it(&value);
-    let shown = jer(&value)?;
-    // rasn's JER writes a bit string of one extensible size as its octets, without
-    // its length: one of another size would be shown as a string that it is not.
-    let unread = |error: Error| Error::unrepresented(error.to_string());
-    let (mut read, _) = decode_jer::<T>(&shown).map_err(unread)?;
-    read.repair_open_types().map_err(unread)?;
-    match read == value {
-        true => Ok(shown),
-        false => Err(Error::unrepresented(
-            "it is not read back as the value that it is",
-        )),
-    }
+    json::as_rasn_writes_it(&value);
+    json::to_value(&value)
 }
 
-pub(crate) trait RepairOpenTypes {
-    fn repair_open_types(&mut self) -> Result<(), Error>;
-}
-
-/// Implements [`RepairOpenTypes`] for a generated type, from the fields, or the CHOICE
-/// alternatives, through which it reaches an open type.
-macro_rules! open_types {
-    ($type:path { $($open:ident),* } else { $($closed:ident),* }) => {
-        impl $crate::inspect::RepairOpenTypes for $type {
-            fn repair_open_types(&mut self) -> Result<(), $crate::Error> {
-                match self {
-                    $(Self::$open(value) => {
-                        $crate::inspect::RepairOpenTypes::repair_open_types(value)
-                    })*
-                    $(Self::$closed { .. } => Ok(()),)*
-                }
-            }
-        }
-    };
-    ($type:path { $($field:tt),* }) => {
-        impl $crate::inspect::RepairOpenTypes for $type {
-            fn repair_open_types(&mut self) -> Result<(), $crate::Error> {
-                $($crate::inspect::RepairOpenTypes::repair_open_types(&mut self.$field)?;)*
-                Ok(())
-            }
-        }
-    };
-}
-pub(crate) use open_types;
-
-impl RepairOpenTypes for rasn::types::Any {
-    fn repair_open_types(&mut self) -> Result<(), Error> {
-        // JER Any retains JSON text. APER Any needs decoded open-type bytes.
-        let json: Value = serde_json::from_slice(self.as_bytes())
-            .map_err(|error| Error::value(format!("an open type is its octets: {error}")))?;
-        *self = Self::new(unhex(&json)?);
-        Ok(())
-    }
-}
-impl RepairOpenTypes for rasn::types::OctetString {
-    fn repair_open_types(&mut self) -> Result<(), Error> {
-        Ok(())
-    }
-}
-impl<T: RepairOpenTypes> RepairOpenTypes for Option<T> {
-    fn repair_open_types(&mut self) -> Result<(), Error> {
-        if let Some(value) = self {
-            value.repair_open_types()?;
-        }
-        Ok(())
-    }
-}
-impl<T: RepairOpenTypes> RepairOpenTypes for Vec<T> {
-    fn repair_open_types(&mut self) -> Result<(), Error> {
-        for value in self {
-            value.repair_open_types()?;
-        }
-        Ok(())
-    }
-}
-impl<T: RepairOpenTypes> RepairOpenTypes for Box<T> {
-    fn repair_open_types(&mut self) -> Result<(), Error> {
-        self.as_mut().repair_open_types()
-    }
-}
-
-/// The value of the type `T` that JER reads `value` as, and `value` with the names of
-/// ENUMERATED values as the specification spells them.
-fn decode_jer<T: rasn::Decode>(value: &Value) -> Result<(T, std::borrow::Cow<'_, Value>), Error> {
-    let mut value = std::borrow::Cow::Borrowed(value);
-    let mut respellings = 0;
-    loop {
-        match rasn::jer::decode::<T>(&value.to_string()) {
-            Ok(typed) => return Ok((typed, value)),
-            Err(error) => match respelled(&value, &error).filter(|_| respellings < 64) {
-                Some(respelled) => {
-                    value = std::borrow::Cow::Owned(respelled);
-                    respellings += 1;
-                }
-                None => return Err(refused::<T>(error, &value)),
-            },
-        }
-    }
-}
-
-/// Why JER does not read `value` as a `T`: where it stopped, by the names that the
-/// value has for the members on the way, and what is wrong there.
-fn refused<T: rasn::AsnType>(error: rasn::error::DecodeError, value: &Value) -> Error {
-    let (fields, why) = crate::error::decode_reason(&error);
-    // rasn names a member as the bindings do, as `g_nb_id`: the value has the name
-    // that ASN.1 gives it, and the list of the types has it for a member that the
-    // value is without.
-    let mut within = Some(value);
-    let mut at = Vec::new();
-    for field in fields {
-        match within.and_then(|within| member_named(within, field, 0)) {
-            Some((trail, member)) => {
-                at.extend(trail);
-                within = Some(member);
-            }
-            None => {
-                at.push(member_spelling(field).unwrap_or(field).to_string());
-                within = None;
-            }
-        }
-    }
-    // A name that an ENUMERATED does not have is where the value has it.
-    let name = no_such_name(&error).zip(within);
-    if let Some(trail) = name.and_then(|(name, within)| written_at(within, name, 0)) {
-        at.extend(trail);
-    }
-    Error::not_a_value::<T>(&at, why, error)
-}
-
-/// The member of `value`, or of what it holds, that the bindings name `field`, after
-/// the names on the way to it: a CHOICE has it in its alternative, and a list in one
-/// of its entries, which `*` stands for as rasn does not say which.
-fn member_named<'v>(
-    value: &'v Value,
-    field: &str,
-    depth: usize,
-) -> Option<(Vec<String>, &'v Value)> {
-    if depth > 4 {
-        return None;
-    }
-    let under = |name: &str, held: &'v Value| {
-        let (mut trail, member) = member_named(held, field, depth + 1)?;
-        trail.insert(0, name.to_string());
-        Some((trail, member))
-    };
-    match value {
-        Value::Object(members) => {
-            let mut own = members.iter();
-            match own.find(|(name, _)| same_name(name, field)) {
-                Some((name, member)) => Some((vec![name.clone()], member)),
-                None => members.iter().find_map(|(name, held)| under(name, held)),
-            }
-        }
-        Value::Array(entries) => entries.iter().find_map(|entry| under("*", entry)),
-        _ => None,
-    }
-}
-
-/// The names on the way to where `value` has the string `text`.
-fn written_at(value: &Value, text: &str, depth: usize) -> Option<Vec<String>> {
-    if depth > 8 {
-        return None;
-    }
-    let under = |name: &str, held: &Value| {
-        let mut trail = written_at(held, text, depth + 1)?;
-        trail.insert(0, name.to_string());
-        Some(trail)
-    };
-    match value {
-        Value::String(written) => (written == text).then(Vec::new),
-        Value::Object(members) => members.iter().find_map(|(name, held)| under(name, held)),
-        Value::Array(entries) => entries.iter().find_map(|entry| under("*", entry)),
-        _ => None,
-    }
-}
-
-/// The name that JER did not find among those of an ENUMERATED type, when that is
-/// why it refuses a value.
-fn no_such_name(error: &rasn::error::DecodeError) -> Option<&str> {
-    use rasn::error::{CodecDecodeError, DecodeErrorKind, JerDecodeErrorKind};
-    // The error of a member is in the errors of the fields that lead to it.
-    let mut error = error;
-    while let DecodeErrorKind::FieldError { nested, .. } = &*error.kind {
-        error = nested;
-    }
-    match &*error.kind {
-        DecodeErrorKind::CodecSpecific {
-            inner:
-                CodecDecodeError::Jer(JerDecodeErrorKind::InvalidEnumDiscriminant { discriminant }),
-        } => Some(discriminant),
-        _ => None,
-    }
-}
-
-fn encode_typed<T: rasn::Decode + rasn::Encode + RepairOpenTypes>(
-    value: &Value,
-) -> Result<Vec<u8>, Error> {
-    let (mut typed, value) = decode_jer::<T>(value)?;
-    typed.repair_open_types()?;
-    let checked = jer(&typed)?;
-    let mut at = Vec::new();
-    if let Some((kind, why)) = difference(&checked, &value, &mut at) {
-        return Err(Error::not_written_as::<T>(kind, &at, why));
-    }
+/// The octets of the value of the type `T` that `value` writes in its JSON form.
+fn encode_typed<T>(value: &Value) -> Result<Vec<u8>, Error>
+where
+    T: rasn::Decode + rasn::Encode + PartialEq + core::fmt::Debug,
+{
+    let typed: T = json::from_value(value)?;
     // A value that is read and does not encode is outside a constraint of its type.
-    let octets = crate::ngap::encode_open_type(&typed).map_err(Error::outside_its_type::<T>)?;
-    Ok(octets.as_bytes().to_vec())
-}
-
-/// Where `written` is not the value that JER writes as `checked`, which is the same
-/// with hexadecimal in either case: the kind of the error and what is wrong, with the
-/// members on the way in `at`. A member that the value of its type does not have is one
-/// that the type does not have, or one that is written and is not read.
-fn difference(
-    checked: &Value,
-    written: &Value,
-    at: &mut Vec<String>,
-) -> Option<(ErrorKind, String)> {
-    let differs = |checked: &Value, written: &Value| {
-        let why = format!("{written} is written, and its type has {checked}");
-        Some((ErrorKind::Value, why))
-    };
-    match (checked, written) {
-        (Value::String(read), Value::String(text)) => {
-            let same = read == text
-                || (read.eq_ignore_ascii_case(text)
-                    && read.bytes().all(|digit| digit.is_ascii_hexdigit()));
-            (!same).then(|| differs(checked, written)).flatten()
-        }
-        (Value::Array(read), Value::Array(entries)) => {
-            if read.len() != entries.len() {
-                let why = format!(
-                    "{} entries are written, and its type has {}",
-                    entries.len(),
-                    read.len()
-                );
-                return Some((ErrorKind::Value, why));
-            }
-            read.iter()
-                .zip(entries)
-                .enumerate()
-                .find_map(|(index, (read, entry))| {
-                    at.push(index.to_string());
-                    let found = difference(read, entry, at);
-                    if found.is_none() {
-                        at.pop();
-                    }
-                    found
-                })
-        }
-        (Value::Object(read), Value::Object(members)) => {
-            if let Some(other) = members.keys().find(|name| !read.contains_key(*name)) {
-                let why = format!("{other:?} is not a member that its type has");
-                return Some((ErrorKind::NoSuchMember, why));
-            }
-            read.iter().find_map(|(name, read)| {
-                at.push(name.clone());
-                let found = match members.get(name) {
-                    Some(member) => difference(read, member, at),
-                    None => Some((
-                        ErrorKind::Value,
-                        format!("it is not written, and its type has {read}"),
-                    )),
-                };
-                if found.is_none() {
-                    at.pop();
-                }
-                found
-            })
-        }
-        _ => (checked != written)
-            .then(|| differs(checked, written))
-            .flatten(),
-    }
+    let octets = crate::per::encode_open_type(&typed).map_err(Error::outside_its_type::<T>)?;
+    Ok(octets.into_bytes())
 }
 
 /// The transfers of the registry: the member that holds each, and the type that its
@@ -714,7 +446,7 @@ pub(crate) struct Typed {
 impl Typed {
     pub(crate) fn of<T>() -> Self
     where
-        T: rasn::Decode + rasn::Encode + RepairOpenTypes + PartialEq + core::fmt::Debug,
+        T: rasn::Decode + rasn::Encode + PartialEq + core::fmt::Debug,
     {
         Self {
             decode: decode_typed::<T>,
@@ -723,40 +455,16 @@ impl Typed {
     }
 }
 
-fn hex(raw: &[u8]) -> String {
-    const DIGITS: &[u8] = b"0123456789ABCDEF";
-    raw.iter()
-        .flat_map(|b| {
-            [
-                DIGITS[(b >> 4) as usize] as char,
-                DIGITS[(b & 15) as usize] as char,
-            ]
-        })
-        .collect()
-}
-
+/// The octets that `value` writes in hexadecimal.
 fn unhex(value: &Value) -> Result<Vec<u8>, Error> {
-    let refused = || {
+    let octets = value.as_str().and_then(json::unhex);
+    octets.ok_or_else(|| {
         // The start of what is written says which value it is.
         let written: String = value.to_string().chars().take(40).collect();
         Error::value(format!(
             "{written} is not octets: octets are written in hexadecimal, two digits for each"
         ))
-    };
-    let s = value.as_str().ok_or_else(refused)?;
-    if !s.len().is_multiple_of(2) {
-        return Err(refused());
-    }
-    s.as_bytes()
-        .as_chunks::<2>()
-        .0
-        .iter()
-        .map(|pair| {
-            let a = (pair[0] as char).to_digit(16).ok_or_else(refused)?;
-            let b = (pair[1] as char).to_digit(16).ok_or_else(refused)?;
-            Ok(((a << 4) | b) as u8)
-        })
-        .collect()
+    })
 }
 
 /// How a view and a tree show the values of a well-known type, and take them back.
@@ -915,30 +623,6 @@ fn unshow(form: Form, value: &mut Value) -> Result<(), Error> {
             Ok(())
         }
     }
-}
-
-/// `value` with the name that JER did not find among those of an ENUMERATED type as the
-/// specification spells it: a name is its letters and its digits, whatever their case
-/// and whatever is between them.
-fn respelled(value: &Value, error: &rasn::error::DecodeError) -> Option<Value> {
-    let discriminant = no_such_name(error)?;
-    let same = |name: &&&str| same_name(name, discriminant);
-    // Two types may spell a name differently: the next decoding tries the other.
-    let mut names = registry::ENUMERATED.iter().filter(same);
-    let name = names.find(|name| **name != discriminant)?;
-    fn rename(value: &mut Value, from: &str, to: &str) {
-        match value {
-            Value::String(text) if text == from => *text = to.into(),
-            Value::Array(values) => values.iter_mut().for_each(|value| rename(value, from, to)),
-            Value::Object(members) => members
-                .values_mut()
-                .for_each(|value| rename(value, from, to)),
-            _ => {}
-        }
-    }
-    let mut value = value.clone();
-    rename(&mut value, discriminant, name);
-    Some(value)
 }
 
 /// The value that the octets `raw` contain, beside them, or why they did not decode.
@@ -1421,19 +1105,17 @@ impl NGAP_PDU {
     /// # Ok::<(), oxirush_ngap::Error>(())
     /// ```
     pub fn to_view(&self) -> Result<Value, Error> {
-        let top = jer(self)?;
-        let body = top
-            .as_object()
-            .and_then(|o| o.values().next())
-            .ok_or_else(|| Error::unrepresented("a PDU is one of three alternatives"))?;
-        let code = self.procedure_code();
-        let direction = self.direction();
-        let raw = body["value"].clone();
-        let mut message = (message_type(direction, code)?.decode)(&unhex(&raw)?)?;
+        let (direction, code) = (self.direction(), self.procedure_code());
+        let raw = self.value().as_bytes();
+        let mut message = (message_type(direction, code)?.decode)(raw)?;
         expand(&mut message, 0, message_shape(direction, code));
-        Ok(
-            json!({"procedure_code": code, "direction": direction, "criticality": body["criticality"], "message": message, "_raw_message": raw}),
-        )
+        Ok(json!({
+            "procedure_code": code,
+            "direction": direction,
+            "criticality": json::to_value(&self.criticality())?,
+            "message": message,
+            "_raw_message": hex(raw),
+        }))
     }
 
     /// The PDU of a view, as [`to_view`](Self::to_view) gives one and the edits leave
@@ -1469,12 +1151,14 @@ impl NGAP_PDU {
             )
         };
         let direction = view["direction"].as_str().ok_or_else(directions)?;
-        let variant = match direction {
-            "InitiatingMessage" => "initiatingMessage",
-            "SuccessfulOutcome" => "successfulOutcome",
-            "UnsuccessfulOutcome" => "unsuccessfulOutcome",
-            _ => return Err(directions()),
-        };
+        const DIRECTIONS: [&str; 3] = [
+            "InitiatingMessage",
+            "SuccessfulOutcome",
+            "UnsuccessfulOutcome",
+        ];
+        if !DIRECTIONS.contains(&direction) {
+            return Err(directions());
+        }
         let message = view.get("message").ok_or_else(|| Error::form(FORM))?;
         let mut message = message.clone();
         collapse(&mut message, "", 0, message_shape(direction, code))?;
@@ -1495,10 +1179,9 @@ impl NGAP_PDU {
         } else {
             (message_type(direction, code)?.encode)(&message)?
         };
-        let top = json!({variant: {"procedureCode": code, "criticality": view["criticality"], "value": hex(&raw)}});
-        let (mut pdu, _) = decode_jer::<Self>(&top)?;
-        pdu.repair_open_types()?;
-        Ok(pdu)
+        let criticality = json::from_value(&view["criticality"])?;
+        let value = rasn::types::Any::new(raw);
+        Self::of(direction, code, criticality, value).ok_or_else(directions)
     }
 
     /// The PDU of a view of this PDU, as [`to_view`](Self::to_view) gives it and the

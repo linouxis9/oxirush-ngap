@@ -201,60 +201,6 @@ impl Error {
         }
     }
 
-    /// A value that the JSON encoding rules of rasn do not write.
-    #[cfg(feature = "inspect")]
-    pub(crate) fn unwritten(error: EncodeError) -> Self {
-        let why = encode_reason(&error);
-        Self::unrepresented(why).caused_by(error)
-    }
-
-    /// A value that the JSON encoding rules of rasn do not write, or do not read back
-    /// as it is: a limit of the inspection, and no fault of the value.
-    #[cfg(feature = "inspect")]
-    pub(crate) fn unrepresented(why: impl Into<String>) -> Self {
-        Self::new(ErrorKind::Limit, "JER does not represent this value").because(why)
-    }
-
-    /// JSON that rasn does not read as a value of the type `T`: the members on the way
-    /// to where it stopped, by the names that ASN.1 gives them, and what is wrong there.
-    #[cfg(feature = "inspect")]
-    pub(crate) fn not_a_value<T: rasn::AsnType>(
-        at: &[String],
-        why: String,
-        source: DecodeError,
-    ) -> Self {
-        let what = match at.is_empty() {
-            true => format!("this is not a value of {}", name::<T>()),
-            false => format!(
-                "this is not a value of {}, at {}",
-                name::<T>(),
-                at.join("/")
-            ),
-        };
-        Self::new(ErrorKind::Value, what)
-            .because(why)
-            .caused_by(source)
-    }
-
-    /// JSON that is read as a value of the type `T` and is not what that value is
-    /// written as: the kind of the error, the members on the way and what is wrong.
-    #[cfg(feature = "inspect")]
-    pub(crate) fn not_written_as<T: rasn::AsnType>(
-        kind: ErrorKind,
-        at: &[String],
-        why: String,
-    ) -> Self {
-        let what = match at.is_empty() {
-            true => format!("this is not a value of {}", name::<T>()),
-            false => format!(
-                "this is not a value of {}, at {}",
-                name::<T>(),
-                at.join("/")
-            ),
-        };
-        Self::new(kind, what).because(why)
-    }
-
     /// A value of the type `T` that is written in JSON and does not encode: it is
     /// outside a constraint of its type, and so no value of that type. This error is
     /// what the codec said of it.
@@ -460,52 +406,10 @@ pub(crate) fn decode_reason(error: &DecodeError) -> (Vec<&'static str>, String) 
             "the member is there twice".to_string()
         }
         DecodeErrorKind::Custom { msg } => msg.clone(),
-        DecodeErrorKind::CodecSpecific { inner } => codec_reason(inner),
+        DecodeErrorKind::CodecSpecific { inner } => inner.to_string(),
         other => other.to_string(),
     };
     (members, why)
-}
-
-/// Why the JSON encoding rules do not read a value, and what another codec says.
-fn codec_reason(error: &rasn::error::CodecDecodeError) -> String {
-    use rasn::error::{CodecDecodeError, JerDecodeErrorKind};
-    let CodecDecodeError::Jer(error) = error else {
-        return error.to_string();
-    };
-    match error {
-        JerDecodeErrorKind::EndOfInput {} => "the value is incomplete".to_string(),
-        // A bit string whose size varies is the one type that rasn names so.
-        JerDecodeErrorKind::TypeMismatch { needed, .. } if needed.contains("'length'") => {
-            "a bit string whose size varies is written as {\"value\": HEXADECIMAL, \"length\": BITS}"
-                .to_string()
-        }
-        JerDecodeErrorKind::TypeMismatch { needed, found } => {
-            let needed = match *needed {
-                "enumerated item as string" => "the name of a value of the ENUMERATED",
-                "number (supported range -2^63..2^63)" => "a number below 2^63",
-                "hex string" => "octets in hexadecimal",
-                "object" => "an object",
-                "array" => "a list",
-                "string" => "a string",
-                "boolean" => "true or false",
-                other => other,
-            };
-            match found.as_str() {
-                "unknown" => format!("{needed} is expected"),
-                found => format!("{needed} is expected, and {found} is written"),
-            }
-        }
-        JerDecodeErrorKind::InvalidJerBitstring { .. } => {
-            "a bit string is written in hexadecimal".to_string()
-        }
-        JerDecodeErrorKind::InvalidJerOctetString {} => {
-            "octets are written in hexadecimal, two digits for each".to_string()
-        }
-        JerDecodeErrorKind::InvalidEnumDiscriminant { discriminant } => {
-            format!("{discriminant:?} is no value of the ENUMERATED")
-        }
-        other => other.to_string(),
-    }
 }
 
 /// Why rasn does not encode a value, without the name of its codec.

@@ -1944,12 +1944,14 @@ mod tests {
     }
 
     #[test]
-    fn an_enumerated_value_has_two_spellings_at_most() {
-        // A name that one type does not have is tried as the other types spell it.
-        let names = crate::inspect_registry::ENUMERATED;
-        for name in names {
-            let same = names.iter().filter(|other| same_name(other, name));
-            assert!(same.count() <= 2, "{name}");
+    fn no_two_names_of_an_enumerated_are_the_same() {
+        // A name is read whatever its case and its separators: no two values of one
+        // type are then one name.
+        for (ty, names) in ENUMERATIONS {
+            for (at, name) in names.iter().enumerate() {
+                let other = names[..at].iter().find(|other| same_name(other, name));
+                assert!(other.is_none(), "{ty}: {name} and {other:?}");
+            }
         }
     }
 

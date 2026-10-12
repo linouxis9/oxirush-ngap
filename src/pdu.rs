@@ -25,7 +25,7 @@ crate::per::decode_extensible_sequence! { AnyMessage {
 
 impl NGAP_PDU {
     /// The open type that holds the message of this PDU.
-    fn value(&self) -> &Any {
+    pub(crate) fn value(&self) -> &Any {
         match self {
             Self::initiatingMessage(message) => &message.value,
             Self::successfulOutcome(message) => &message.value,
@@ -132,8 +132,42 @@ impl NGAP_PDU {
         Ok(())
     }
 
+    /// The PDU of a direction, as `direction()` says it, with the code of its procedure,
+    /// its criticality and the open type that holds its message; `None` for what is no
+    /// direction.
+    #[cfg(feature = "inspect")]
+    pub(crate) fn of(
+        direction: &str,
+        procedure_code: u8,
+        criticality: Criticality,
+        value: Any,
+    ) -> Option<Self> {
+        use crate::ngap::{
+            InitiatingMessage, ProcedureCode, SuccessfulOutcome, UnsuccessfulOutcome,
+        };
+        let procedure_code = ProcedureCode(procedure_code);
+        Some(match direction {
+            "InitiatingMessage" => Self::initiatingMessage(InitiatingMessage {
+                procedure_code,
+                criticality,
+                value,
+            }),
+            "SuccessfulOutcome" => Self::successfulOutcome(SuccessfulOutcome {
+                procedure_code,
+                criticality,
+                value,
+            }),
+            "UnsuccessfulOutcome" => Self::unsuccessfulOutcome(UnsuccessfulOutcome {
+                procedure_code,
+                criticality,
+                value,
+            }),
+            _ => return None,
+        })
+    }
+
     /// The criticality of this PDU.
-    fn criticality(&self) -> Criticality {
+    pub(crate) fn criticality(&self) -> Criticality {
         match self {
             Self::initiatingMessage(message) => message.criticality,
             Self::successfulOutcome(message) => message.criticality,

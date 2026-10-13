@@ -6,11 +6,26 @@ use rasn::prelude::*;
 /// by one open type for each present addition. Small bitmaps are unaligned;
 /// larger ones use an unconstrained length, including fragmentation
 /// (§11.9.3.4). The additions are unknown to these generated SEQUENCE types.
+///
+/// What the clauses give no encoding for is refused, where rasn 0.29 reads it: a bitmap
+/// of no bit or of which no bit is set, as the extension bit is one when an addition is
+/// present and zero otherwise (§19.1, and the note of §19.8); a bitmap of 64 bits at
+/// most whose length is in the form of more; and an addition of no octet, as an open
+/// type holds a complete encoding (§11.1.3.1).
 pub fn skip_unknown_extensions<D: Decoder>(decoder: &mut D) -> Result<(), D::Error> {
+    let refused = |why: &str, decoder: &D| {
+        let codec = decoder.codec();
+        Err(<D::Error as rasn::de::Error>::custom(why, codec))
+    };
     let present = if decoder.decode_bool(Tag::BOOL)? {
-        decoder
-            .decode_bit_string(Tag::BIT_STRING, &Constraints::default())?
-            .count_ones()
+        let bitmap = decoder.decode_bit_string(Tag::BIT_STRING, &Constraints::default())?;
+        if (1..=64).contains(&bitmap.len()) {
+            return refused(
+                "a bitmap of 64 additions at most has its length in six bits",
+                decoder,
+            );
+        }
+        bitmap.count_ones()
     } else {
         const LENGTH: Constraints = rasn::constraints!(rasn::value_constraint!(0, 63));
         let count = decoder.decode_integer::<usize>(Tag::INTEGER, &LENGTH)? + 1;
@@ -20,8 +35,16 @@ pub fn skip_unknown_extensions<D: Decoder>(decoder: &mut D) -> Result<(), D::Err
         }
         present
     };
+    if present == 0 {
+        return refused(
+            "the extension bit is set, and no addition is present",
+            decoder,
+        );
+    }
     for _ in 0..present {
-        let _ = Any::decode(decoder)?;
+        if Any::decode(decoder)?.as_bytes().is_empty() {
+            return refused("an extension addition has no octet", decoder);
+        }
     }
     Ok(())
 }

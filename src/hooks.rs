@@ -13,6 +13,8 @@
 use crate::Error;
 use crate::ngap::{NGAPPDU, ProtocolIEContainer};
 
+/// The bindings, by a name that is the same for both protocols.
+pub use crate::ngap as bindings;
 /// A PDU that owns its octets, by a name that is the same for both protocols.
 pub use crate::ngap::NGAP_PDU as Pdu;
 /// A PDU that borrows its message from the octets that it is decoded from.

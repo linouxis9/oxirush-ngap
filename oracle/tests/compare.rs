@@ -135,6 +135,34 @@ fn pdu_and_message(octets: &[u8]) -> (usize, usize) {
 }
 
 #[test]
+fn the_additions_that_the_clauses_give_no_encoding_for_are_refused_by_both() {
+    // ULCPSecurityInformation, which both protocols have: the extension bit, no
+    // iE-Extensions, a MAC of 16 bits and a count of 5, then the additions of a later
+    // version. The first is what a differential run against the codec of rasn found:
+    // the crate and the oracle read it as a value without additions.
+    let name = "ULCPSecurityInformation";
+    type Value<'a> = codec::hooks::bindings::ULCPSecurityInformation<'a>;
+    for (octets, read) in [
+        // A bitmap of no bit, in the form of more than 64 bits (X.691 §19.8).
+        (&[0x80, 0x02, 0x01, 0x00][..], false),
+        // A bitmap of one addition that is not present (§19.1).
+        (&[0x80, 0x02, 0x00, 0x00], false),
+        // One addition, counted in the form of more than 64 bits (§11.9.3.4).
+        (&[0x80, 0x02, 0x01, 0x01, 0x80, 0x01, 0xaa], false),
+        // One addition of no octet (§11.1.3.1).
+        (&[0x80, 0x02, 0x00, 0x02, 0x00], false),
+        // One addition of one octet, and the value without its extension bit.
+        (&[0x80, 0x02, 0x00, 0x02, 0x01, 0x00], true),
+        (&[0x00, 0x02, 0x00], true),
+    ] {
+        let ours = codec::aper::decode::<Value>(octets);
+        let written = ours.and_then(|value| codec::aper::encode(&value));
+        assert_eq!(written.is_ok(), read, "{octets:02x?}: {written:?}");
+        assert_eq!(same(name, octets, &written), read, "{octets:02x?}");
+    }
+}
+
+#[test]
 fn a_pdu_and_its_message_are_read_and_written_as_the_oracle_reads_and_writes_them() {
     let (mut pdus, mut messages, mut refused) = (0, 0, 0);
     for fixture in fixtures() {

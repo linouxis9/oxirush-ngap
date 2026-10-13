@@ -178,6 +178,12 @@ what each type became.
   that send one. A conditional IE is not reported, as its condition is in
   the prose of TS 38.413, and the IEs that a value holds are not looked at.
   0.4.2 left all of it to the caller.
+- A field of `extract_ngap_ies!` has the type of the IE, or the type of the
+  one value that the IE is a name for: `req id: u64 = AMF_UE_NGAP_ID(id)` and
+  `req cause: Cause = Cause(cause)` both read, without `=>`. Another type is a
+  compile error that says what the IE is. `build_ngap_ie!(REJECT Name(value))`,
+  without the name of a message, builds an IE that is in none:
+  the alternative that a later version added to a CHOICE.
 - A value outside the root of an extensible constraint, as `AMFName("")`
   where the type has `SIZE (1..150, ...)`, is written as an extension, which
   is right for a test and no value for an AMF to send. `check()` reports it

@@ -12,6 +12,12 @@ use oxirush_aper::{Decode, Encode};
 ///
 /// The name that ASN.1 gives the message, as `UEContextReleaseRequest`, is the `NAME`
 /// of its type, which every type of the bindings has.
+#[diagnostic::on_unimplemented(
+    message = "`{Self}` is no message of the protocol",
+    label = "the type of a message is expected here",
+    note = "a message is the type of what a PDU holds, as `UEContextReleaseRequest`; an IE of a \
+            list of single containers is built without the name of a type"
+)]
 pub trait Message<'a>: Decode<'a> + Encode + sealed::Sealed {
     /// The direction of the PDU that holds it, as `direction()` of a PDU says it:
     /// `"InitiatingMessage"`, `"SuccessfulOutcome"` or `"UnsuccessfulOutcome"`.
@@ -26,6 +32,29 @@ pub trait Message<'a>: Decode<'a> + Encode + sealed::Sealed {
     /// of octets is copied.
     #[doc(hidden)]
     fn __decode_owned(octets: &[u8]) -> Result<Self, oxirush_aper::Error>;
+}
+
+/// What a field of the macro that extracts IEs is given of the value of an IE: the
+/// value itself, for a field of the type of the IE, and the one value that the type
+/// of the IE is a name for, for a field of the type of that value. The bindings
+/// implement it for each type that is a name for one value.
+#[diagnostic::on_unimplemented(
+    message = "a field of the type `{T}` does not take the value of this IE, which is a `{Self}`",
+    label = "the value of the IE is a `{Self}`",
+    note = "declare the field as `{Self}`, or as the type of the one value that a `{Self}` holds, \
+            or write `=> expression` after the IE to make the field of its value"
+)]
+#[doc(hidden)]
+pub trait __Field<T> {
+    /// The field.
+    fn __field(self) -> T;
+}
+
+impl<T> __Field<T> for T {
+    #[inline]
+    fn __field(self) -> T {
+        self
+    }
 }
 
 pub(crate) mod sealed {

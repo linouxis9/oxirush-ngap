@@ -191,3 +191,46 @@ fn a_message_without_protocol_ies_and_octets_that_are_none_are_errors() -> Resul
     assert_eq!(pdu, request);
     Ok(())
 }
+
+/// A field of the macro that extracts is the value of the IE when it has the type of
+/// the IE, and the one value that the type is a name for when it has the type of that
+/// value: an AMF-UE-NGAP-ID is a name for a number, and a Cause is a name for nothing.
+#[test]
+fn a_field_takes_the_value_of_an_ie_as_its_type_or_as_the_value_that_it_names() -> Result<(), Error>
+{
+    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
+        IGNORE, UEContextReleaseRequest,
+        REJECT AMF_UE_NGAP_ID(42u64),
+        REJECT RAN_UE_NGAP_ID(7u32),
+        IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
+    )?;
+    let request: UEContextReleaseRequest = pdu.decode_value()?;
+    oxirush_ngap::extract_ngap_ies!(request, UEContextReleaseRequest,
+        req cause: Cause = Cause(cause),
+        req id: AMFUENGAPID = AMF_UE_NGAP_ID(id),
+        req number: u64 = AMF_UE_NGAP_ID(id),
+        opt ran: RANUENGAPID = RAN_UE_NGAP_ID(id),
+        lax ran_number: u32 = RAN_UE_NGAP_ID(id),
+        opt twice: u64 = AMF_UE_NGAP_ID(id) => id.0 * 2,
+    );
+    assert_eq!(
+        cause,
+        Cause::radioNetwork(CauseRadioNetwork::user_inactivity)
+    );
+    assert_eq!((id, number), (AMFUENGAPID(42), 42));
+    assert_eq!((ran, ran_number), (Some(RANUENGAPID(7)), Some(7)));
+    assert_eq!(twice, Some(84));
+    Ok(())
+}
+
+/// An IE that is in no message is built without the name of one: the name of a message
+/// before an IE says where the IE goes, and gives the same IE.
+#[test]
+fn an_ie_is_built_with_the_name_of_its_message_or_without_one() -> Result<(), Error> {
+    let named = build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(42u64))?;
+    let alone = build_ngap_ie!(REJECT AMF_UE_NGAP_ID(42u64))?;
+    assert_eq!(named, alone);
+    assert_eq!((alone.id.0, alone.criticality), (10, Criticality::reject));
+    assert_eq!(alone.value, [0x00, 0x2a]);
+    Ok(())
+}

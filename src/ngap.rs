@@ -174,6 +174,12 @@ pub mod ngap_common_data_types {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ProcedureCode(pub u8);
+    impl crate::message::__Field<u8> for ProcedureCode {
+        #[inline]
+        fn __field(self) -> u8 {
+            self.0
+        }
+    }
     impl From<u8> for ProcedureCode {
         fn from(value: u8) -> Self {
             Self(value)
@@ -208,6 +214,12 @@ pub mod ngap_common_data_types {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ProtocolExtensionID(pub u16);
+    impl crate::message::__Field<u16> for ProtocolExtensionID {
+        #[inline]
+        fn __field(self) -> u16 {
+            self.0
+        }
+    }
     impl From<u16> for ProtocolExtensionID {
         fn from(value: u16) -> Self {
             Self(value)
@@ -244,6 +256,12 @@ pub mod ngap_common_data_types {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ProtocolIEID(pub u16);
+    impl crate::message::__Field<u16> for ProtocolIEID {
+        #[inline]
+        fn __field(self) -> u16 {
+            self.0
+        }
+    }
     impl From<u16> for ProtocolIEID {
         fn from(value: u16) -> Self {
             Self(value)
@@ -1195,6 +1213,12 @@ pub mod ngap_containers {
     #[doc = " `ProtocolIE-Container`: the IEs of a message."]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ProtocolIEContainer<'a>(pub Vec<ProtocolIEField<'a>>);
+    impl<'a> crate::message::__Field<Vec<ProtocolIEField<'a>>> for ProtocolIEContainer<'a> {
+        #[inline]
+        fn __field(self) -> Vec<ProtocolIEField<'a>> {
+            self.0
+        }
+    }
     impl<'a> ProtocolIEContainer<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `ProtocolIEContainer<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -1351,6 +1375,14 @@ pub mod ngap_containers {
     #[doc = " `ProtocolExtensionContainer`: the `iE-Extensions` of a type."]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ProtocolExtensionContainer<'a>(pub Vec<ProtocolExtensionField<'a>>);
+    impl<'a> crate::message::__Field<Vec<ProtocolExtensionField<'a>>>
+        for ProtocolExtensionContainer<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<ProtocolExtensionField<'a>> {
+            self.0
+        }
+    }
     impl<'a> ProtocolExtensionContainer<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `ProtocolExtensionContainer<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -1757,6 +1789,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct A2XPC5QoSFlowList<'a>(pub Vec<A2XPC5QoSFlowItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<A2XPC5QoSFlowItem<'a>>> for A2XPC5QoSFlowList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<A2XPC5QoSFlowItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> A2XPC5QoSFlowList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `A2XPC5QoSFlowList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -1935,6 +1973,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AIOTFIdentifier<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for AIOTFIdentifier<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> AIOTFIdentifier<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AIOTFIdentifier<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -2125,6 +2169,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AIOTFNameUTF8String<'a>(pub Cow<'a, str>);
+    impl<'a> crate::message::__Field<Cow<'a, str>> for AIOTFNameUTF8String<'a> {
+        #[inline]
+        fn __field(self) -> Cow<'a, str> {
+            self.0
+        }
+    }
     impl<'a> AIOTFNameUTF8String<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AIOTFNameUTF8String<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -2175,6 +2225,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AIOTFNameVisibleString<'a>(pub Cow<'a, str>);
+    impl<'a> crate::message::__Field<Cow<'a, str>> for AIOTFNameVisibleString<'a> {
+        #[inline]
+        fn __field(self) -> Cow<'a, str> {
+            self.0
+        }
+    }
     impl<'a> AIOTFNameVisibleString<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AIOTFNameVisibleString<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -2620,6 +2676,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AIoTCorrelationIdentifier(pub u64);
+    impl crate::message::__Field<u64> for AIoTCorrelationIdentifier {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for AIoTCorrelationIdentifier {
         fn from(value: u64) -> Self {
             Self(value)
@@ -2894,6 +2956,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AIoTDeviceReportList<'a>(pub Vec<AIoTDeviceReportItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<AIoTDeviceReportItem<'a>>> for AIoTDeviceReportList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<AIoTDeviceReportItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AIoTDeviceReportList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AIoTDeviceReportList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -3147,6 +3215,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AIoTNASPDU<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for AIoTNASPDU<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> AIoTNASPDU<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AIoTNASPDU<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -3197,6 +3271,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AIoTReaderIndex(pub u64);
+    impl crate::message::__Field<u64> for AIoTReaderIndex {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for AIoTReaderIndex {
         fn from(value: u64) -> Self {
             Self(value)
@@ -3336,6 +3416,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AIoTReaderReportList<'a>(pub Vec<AIoTReaderReportItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<AIoTReaderReportItem<'a>>> for AIoTReaderReportList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<AIoTReaderReportItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AIoTReaderReportList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AIoTReaderReportList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -3385,6 +3471,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AIoTRequestedAIoTAreaList<'a>(pub Vec<AIoTAreaID<'a>>);
+    impl<'a> crate::message::__Field<Vec<AIoTAreaID<'a>>> for AIoTRequestedAIoTAreaList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<AIoTAreaID<'a>> {
+            self.0
+        }
+    }
     impl<'a> AIoTRequestedAIoTAreaList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AIoTRequestedAIoTAreaList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -3540,6 +3632,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AIoTRequestedReaderList<'a>(pub Vec<AIoTRequestedReaderItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<AIoTRequestedReaderItem<'a>>> for AIoTRequestedReaderList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<AIoTRequestedReaderItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AIoTRequestedReaderList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AIoTRequestedReaderList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -4082,6 +4180,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AMFTNLAssociationSetupList<'a>(pub Vec<AMFTNLAssociationSetupItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<AMFTNLAssociationSetupItem<'a>>>
+        for AMFTNLAssociationSetupList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<AMFTNLAssociationSetupItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AMFTNLAssociationSetupList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AMFTNLAssociationSetupList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -4280,6 +4386,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AMFTNLAssociationToAddList<'a>(pub Vec<AMFTNLAssociationToAddItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<AMFTNLAssociationToAddItem<'a>>>
+        for AMFTNLAssociationToAddList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<AMFTNLAssociationToAddItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AMFTNLAssociationToAddList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AMFTNLAssociationToAddList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -4424,6 +4538,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AMFTNLAssociationToRemoveList<'a>(pub Vec<AMFTNLAssociationToRemoveItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<AMFTNLAssociationToRemoveItem<'a>>>
+        for AMFTNLAssociationToRemoveList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<AMFTNLAssociationToRemoveItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AMFTNLAssociationToRemoveList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AMFTNLAssociationToRemoveList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -4633,6 +4755,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AMFTNLAssociationToUpdateList<'a>(pub Vec<AMFTNLAssociationToUpdateItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<AMFTNLAssociationToUpdateItem<'a>>>
+        for AMFTNLAssociationToUpdateList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<AMFTNLAssociationToUpdateItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AMFTNLAssociationToUpdateList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AMFTNLAssociationToUpdateList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -4684,6 +4814,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AMFUENGAPID(pub u64);
+    impl crate::message::__Field<u64> for AMFUENGAPID {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for AMFUENGAPID {
         fn from(value: u64) -> Self {
             Self(value)
@@ -4716,6 +4852,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AMFName<'a>(pub Cow<'a, str>);
+    impl<'a> crate::message::__Field<Cow<'a, str>> for AMFName<'a> {
+        #[inline]
+        fn __field(self) -> Cow<'a, str> {
+            self.0
+        }
+    }
     impl<'a> AMFName<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AMFName<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -4766,6 +4908,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AMFNameUTF8String<'a>(pub Cow<'a, str>);
+    impl<'a> crate::message::__Field<Cow<'a, str>> for AMFNameUTF8String<'a> {
+        #[inline]
+        fn __field(self) -> Cow<'a, str> {
+            self.0
+        }
+    }
     impl<'a> AMFNameUTF8String<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AMFNameUTF8String<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -4816,6 +4964,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AMFNameVisibleString<'a>(pub Cow<'a, str>);
+    impl<'a> crate::message::__Field<Cow<'a, str>> for AMFNameVisibleString<'a> {
+        #[inline]
+        fn __field(self) -> Cow<'a, str> {
+            self.0
+        }
+    }
     impl<'a> AMFNameVisibleString<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AMFNameVisibleString<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -4964,6 +5118,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AMFPointer(pub Bits);
+    impl crate::message::__Field<Bits> for AMFPointer {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for AMFPointer {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -5006,6 +5166,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AMFRegionID(pub Bits);
+    impl crate::message::__Field<Bits> for AMFRegionID {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for AMFRegionID {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -5048,6 +5214,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AMFSetID(pub Bits);
+    impl crate::message::__Field<Bits> for AMFSetID {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for AMFSetID {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -5302,6 +5474,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ActivatedCellList<'a>(pub Vec<NGRANCGI<'a>>);
+    impl<'a> crate::message::__Field<Vec<NGRANCGI<'a>>> for ActivatedCellList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<NGRANCGI<'a>> {
+            self.0
+        }
+    }
     impl<'a> ActivatedCellList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `ActivatedCellList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -5501,6 +5679,14 @@ pub mod ngap_ies {
     pub struct AdditionalCancelledlocationReportingReferenceIDList<'a>(
         pub Vec<AdditionalCancelledlocationReportingReferenceIDItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<AdditionalCancelledlocationReportingReferenceIDItem<'a>>>
+        for AdditionalCancelledlocationReportingReferenceIDList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<AdditionalCancelledlocationReportingReferenceIDItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AdditionalCancelledlocationReportingReferenceIDList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AdditionalCancelledlocationReportingReferenceIDList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -5720,6 +5906,14 @@ pub mod ngap_ies {
     pub struct AdditionalDLUPTNLInformationForHOList<'a>(
         pub Vec<AdditionalDLUPTNLInformationForHOItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<AdditionalDLUPTNLInformationForHOItem<'a>>>
+        for AdditionalDLUPTNLInformationForHOList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<AdditionalDLUPTNLInformationForHOItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AdditionalDLUPTNLInformationForHOList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AdditionalDLUPTNLInformationForHOList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -6303,6 +6497,14 @@ pub mod ngap_ies {
     pub struct AerialUEFlightInformationReportingControlList<'a>(
         pub Vec<AerialUEFlightInformationReportingControlItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<AerialUEFlightInformationReportingControlItem<'a>>>
+        for AerialUEFlightInformationReportingControlList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<AerialUEFlightInformationReportingControlItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AerialUEFlightInformationReportingControlList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AerialUEFlightInformationReportingControlList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -6610,6 +6812,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AllowedCAGListPerPLMN(pub Vec<CAGID>);
+    impl crate::message::__Field<Vec<CAGID>> for AllowedCAGListPerPLMN {
+        #[inline]
+        fn __field(self) -> Vec<CAGID> {
+            self.0
+        }
+    }
     impl From<Vec<CAGID>> for AllowedCAGListPerPLMN {
         fn from(value: Vec<CAGID>) -> Self {
             Self(value)
@@ -6829,6 +7037,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AllowedPNINPNList<'a>(pub Vec<AllowedPNINPNItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<AllowedPNINPNItem<'a>>> for AllowedPNINPNList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<AllowedPNINPNItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AllowedPNINPNList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AllowedPNINPNList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -6878,6 +7092,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AllowedNSSAI<'a>(pub Vec<AllowedNSSAIItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<AllowedNSSAIItem<'a>>> for AllowedNSSAI<'a> {
+        #[inline]
+        fn __field(self) -> Vec<AllowedNSSAIItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AllowedNSSAI<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AllowedNSSAI<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -7017,6 +7237,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AllowedPeriodicityList(pub Vec<Periodicity>);
+    impl crate::message::__Field<Vec<Periodicity>> for AllowedPeriodicityList {
+        #[inline]
+        fn __field(self) -> Vec<Periodicity> {
+            self.0
+        }
+    }
     impl From<Vec<Periodicity>> for AllowedPeriodicityList {
         fn from(value: Vec<Periodicity>) -> Self {
             Self(value)
@@ -7059,6 +7285,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AllowedTACs(pub Vec<TAC>);
+    impl crate::message::__Field<Vec<TAC>> for AllowedTACs {
+        #[inline]
+        fn __field(self) -> Vec<TAC> {
+            self.0
+        }
+    }
     impl From<Vec<TAC>> for AllowedTACs {
         fn from(value: Vec<TAC>) -> Self {
             Self(value)
@@ -7101,6 +7333,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AlternativeQoSParaSetIndex(pub u64);
+    impl crate::message::__Field<u64> for AlternativeQoSParaSetIndex {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for AlternativeQoSParaSetIndex {
         fn from(value: u64) -> Self {
             Self(value)
@@ -7344,6 +7582,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AlternativeQoSParaSetList<'a>(pub Vec<AlternativeQoSParaSetItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<AlternativeQoSParaSetItem<'a>>>
+        for AlternativeQoSParaSetList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<AlternativeQoSParaSetItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AlternativeQoSParaSetList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AlternativeQoSParaSetList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -7393,6 +7639,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AlternativeQoSParaSetNotifyIndex(pub u64);
+    impl crate::message::__Field<u64> for AlternativeQoSParaSetNotifyIndex {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for AlternativeQoSParaSetNotifyIndex {
         fn from(value: u64) -> Self {
             Self(value)
@@ -7425,6 +7677,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct Altitude(pub i64);
+    impl crate::message::__Field<i64> for Altitude {
+        #[inline]
+        fn __field(self) -> i64 {
+            self.0
+        }
+    }
     impl From<i64> for Altitude {
         fn from(value: i64) -> Self {
             Self(value)
@@ -7830,6 +8088,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AreaOfInterestCellList<'a>(pub Vec<AreaOfInterestCellItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<AreaOfInterestCellItem<'a>>> for AreaOfInterestCellList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<AreaOfInterestCellItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AreaOfInterestCellList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AreaOfInterestCellList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -7996,6 +8260,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AreaOfInterestList<'a>(pub Vec<AreaOfInterestItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<AreaOfInterestItem<'a>>> for AreaOfInterestList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<AreaOfInterestItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AreaOfInterestList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AreaOfInterestList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -8135,6 +8405,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AreaOfInterestRANNodeList<'a>(pub Vec<AreaOfInterestRANNodeItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<AreaOfInterestRANNodeItem<'a>>>
+        for AreaOfInterestRANNodeList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<AreaOfInterestRANNodeItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AreaOfInterestRANNodeList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AreaOfInterestRANNodeList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -8271,6 +8549,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AreaOfInterestTAIList<'a>(pub Vec<AreaOfInterestTAIItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<AreaOfInterestTAIItem<'a>>> for AreaOfInterestTAIList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<AreaOfInterestTAIItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AreaOfInterestTAIList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AreaOfInterestTAIList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -8700,6 +8984,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AreaScopeOfNeighCellsList<'a>(pub Vec<AreaScopeOfNeighCellsItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<AreaScopeOfNeighCellsItem<'a>>>
+        for AreaScopeOfNeighCellsList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<AreaScopeOfNeighCellsItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AreaScopeOfNeighCellsList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AreaScopeOfNeighCellsList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -9120,6 +9412,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AssistanceInformationQoEMeas(pub u64);
+    impl crate::message::__Field<u64> for AssistanceInformationQoEMeas {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for AssistanceInformationQoEMeas {
         fn from(value: u64) -> Self {
             Self(value)
@@ -9274,6 +9572,14 @@ pub mod ngap_ies {
     pub struct AssociatedMBSQosFlowSetupRequestList<'a>(
         pub Vec<AssociatedMBSQosFlowSetupRequestItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<AssociatedMBSQosFlowSetupRequestItem<'a>>>
+        for AssociatedMBSQosFlowSetupRequestList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<AssociatedMBSQosFlowSetupRequestItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AssociatedMBSQosFlowSetupRequestList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AssociatedMBSQosFlowSetupRequestList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -9449,6 +9755,14 @@ pub mod ngap_ies {
     pub struct AssociatedMBSQosFlowSetuporModifyRequestList<'a>(
         pub Vec<AssociatedMBSQosFlowSetuporModifyRequestItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<AssociatedMBSQosFlowSetuporModifyRequestItem<'a>>>
+        for AssociatedMBSQosFlowSetuporModifyRequestList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<AssociatedMBSQosFlowSetuporModifyRequestItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AssociatedMBSQosFlowSetuporModifyRequestList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AssociatedMBSQosFlowSetuporModifyRequestList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -9678,6 +9992,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AssociatedQosFlowList<'a>(pub Vec<AssociatedQosFlowItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<AssociatedQosFlowItem<'a>>> for AssociatedQosFlowList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<AssociatedQosFlowItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AssociatedQosFlowList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AssociatedQosFlowList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -9727,6 +10047,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AssociatedSessionID<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for AssociatedSessionID<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> AssociatedSessionID<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AssociatedSessionID<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -9911,6 +10237,14 @@ pub mod ngap_ies {
     pub struct AvailableBitrateReportThresholdList<'a>(
         pub Vec<AvailableBitrateReportThresholdItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<AvailableBitrateReportThresholdItem<'a>>>
+        for AvailableBitrateReportThresholdList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<AvailableBitrateReportThresholdItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> AvailableBitrateReportThresholdList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `AvailableBitrateReportThresholdList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -10208,6 +10542,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AveragingWindow(pub u64);
+    impl crate::message::__Field<u64> for AveragingWindow {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for AveragingWindow {
         fn from(value: u64) -> Self {
             Self(value)
@@ -10636,6 +10976,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct BitRate(pub u64);
+    impl crate::message::__Field<u64> for BitRate {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for BitRate {
         fn from(value: u64) -> Self {
             Self(value)
@@ -10800,6 +11146,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BluetoothMeasConfigNameList<'a>(pub Vec<BluetoothMeasConfigNameItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<BluetoothMeasConfigNameItem<'a>>>
+        for BluetoothMeasConfigNameList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<BluetoothMeasConfigNameItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> BluetoothMeasConfigNameList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `BluetoothMeasConfigNameList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -11052,6 +11406,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BluetoothName<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for BluetoothName<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> BluetoothName<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `BluetoothName<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -11619,6 +11979,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BroadcastPLMNList<'a>(pub Vec<BroadcastPLMNItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<BroadcastPLMNItem<'a>>> for BroadcastPLMNList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<BroadcastPLMNItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> BroadcastPLMNList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `BroadcastPLMNList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -12013,6 +12379,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BurstArrivalTime<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for BurstArrivalTime<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> BurstArrivalTime<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `BurstArrivalTime<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -12190,6 +12562,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct CRNTI(pub Bits);
+    impl crate::message::__Field<Bits> for CRNTI {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for CRNTI {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -12233,6 +12611,12 @@ pub mod ngap_ies {
     #[doc = " C"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct CAGID(pub Bits);
+    impl crate::message::__Field<Bits> for CAGID {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for CAGID {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -12275,6 +12659,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CAGListforMDT<'a>(pub Vec<CAGListforMDTItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<CAGListforMDTItem<'a>>> for CAGListforMDT<'a> {
+        #[inline]
+        fn __field(self) -> Vec<CAGListforMDTItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> CAGListforMDT<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CAGListforMDT<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -12661,6 +13051,14 @@ pub mod ngap_ies {
     pub struct CNTypeRestrictionsForEquivalent<'a>(
         pub Vec<CNTypeRestrictionsForEquivalentItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<CNTypeRestrictionsForEquivalentItem<'a>>>
+        for CNTypeRestrictionsForEquivalent<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<CNTypeRestrictionsForEquivalentItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> CNTypeRestrictionsForEquivalent<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CNTypeRestrictionsForEquivalent<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -12909,6 +13307,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct CNsubgroupID(pub u64);
+    impl crate::message::__Field<u64> for CNsubgroupID {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for CNsubgroupID {
         fn from(value: u64) -> Self {
             Self(value)
@@ -13299,6 +13703,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CancelledCellsInEAIEUTRA<'a>(pub Vec<CancelledCellsInEAIEUTRAItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<CancelledCellsInEAIEUTRAItem<'a>>>
+        for CancelledCellsInEAIEUTRA<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<CancelledCellsInEAIEUTRAItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> CancelledCellsInEAIEUTRA<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CancelledCellsInEAIEUTRA<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -13455,6 +13867,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CancelledCellsInEAINR<'a>(pub Vec<CancelledCellsInEAINRItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<CancelledCellsInEAINRItem<'a>>> for CancelledCellsInEAINR<'a> {
+        #[inline]
+        fn __field(self) -> Vec<CancelledCellsInEAINRItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> CancelledCellsInEAINR<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CancelledCellsInEAINR<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -13611,6 +14029,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CancelledCellsInTAIEUTRA<'a>(pub Vec<CancelledCellsInTAIEUTRAItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<CancelledCellsInTAIEUTRAItem<'a>>>
+        for CancelledCellsInTAIEUTRA<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<CancelledCellsInTAIEUTRAItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> CancelledCellsInTAIEUTRA<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CancelledCellsInTAIEUTRA<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -13767,6 +14193,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CancelledCellsInTAINR<'a>(pub Vec<CancelledCellsInTAINRItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<CancelledCellsInTAINRItem<'a>>> for CancelledCellsInTAINR<'a> {
+        #[inline]
+        fn __field(self) -> Vec<CancelledCellsInTAINRItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> CancelledCellsInTAINR<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CancelledCellsInTAINR<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -14203,6 +14635,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CandidateCellList<'a>(pub Vec<CandidateCellItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<CandidateCellItem<'a>>> for CandidateCellList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<CandidateCellItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> CandidateCellList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CandidateCellList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -14369,6 +14807,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct CandidateRelayUEID(pub Bits);
+    impl crate::message::__Field<Bits> for CandidateRelayUEID {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for CandidateRelayUEID {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -14502,6 +14946,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CandidateRelayUEInformationList<'a>(pub Vec<CandidateRelayUEInformationItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<CandidateRelayUEInformationItem<'a>>>
+        for CandidateRelayUEInformationList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<CandidateRelayUEInformationItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> CandidateRelayUEInformationList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CandidateRelayUEInformationList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -15554,6 +16006,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CellCAGList(pub Vec<CAGID>);
+    impl crate::message::__Field<Vec<CAGID>> for CellCAGList {
+        #[inline]
+        fn __field(self) -> Vec<CAGID> {
+            self.0
+        }
+    }
     impl From<Vec<CAGID>> for CellCAGList {
         fn from(value: Vec<CAGID>) -> Self {
             Self(value)
@@ -15596,6 +16054,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CellIDBroadcastEUTRA<'a>(pub Vec<CellIDBroadcastEUTRAItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<CellIDBroadcastEUTRAItem<'a>>> for CellIDBroadcastEUTRA<'a> {
+        #[inline]
+        fn __field(self) -> Vec<CellIDBroadcastEUTRAItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> CellIDBroadcastEUTRA<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CellIDBroadcastEUTRA<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -15735,6 +16199,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CellIDBroadcastNR<'a>(pub Vec<CellIDBroadcastNRItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<CellIDBroadcastNRItem<'a>>> for CellIDBroadcastNR<'a> {
+        #[inline]
+        fn __field(self) -> Vec<CellIDBroadcastNRItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> CellIDBroadcastNR<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CellIDBroadcastNR<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -15874,6 +16344,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CellIDCancelledEUTRA<'a>(pub Vec<CellIDCancelledEUTRAItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<CellIDCancelledEUTRAItem<'a>>> for CellIDCancelledEUTRA<'a> {
+        #[inline]
+        fn __field(self) -> Vec<CellIDCancelledEUTRAItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> CellIDCancelledEUTRA<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CellIDCancelledEUTRA<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -16030,6 +16506,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CellIDCancelledNR<'a>(pub Vec<CellIDCancelledNRItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<CellIDCancelledNRItem<'a>>> for CellIDCancelledNR<'a> {
+        #[inline]
+        fn __field(self) -> Vec<CellIDCancelledNRItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> CellIDCancelledNR<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CellIDCancelledNR<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -16298,6 +16780,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CellIdListforMDTEUTRA<'a>(pub Vec<EUTRACGI<'a>>);
+    impl<'a> crate::message::__Field<Vec<EUTRACGI<'a>>> for CellIdListforMDTEUTRA<'a> {
+        #[inline]
+        fn __field(self) -> Vec<EUTRACGI<'a>> {
+            self.0
+        }
+    }
     impl<'a> CellIdListforMDTEUTRA<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CellIdListforMDTEUTRA<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -16347,6 +16835,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CellIdListforMDTNR<'a>(pub Vec<NRCGI<'a>>);
+    impl<'a> crate::message::__Field<Vec<NRCGI<'a>>> for CellIdListforMDTNR<'a> {
+        #[inline]
+        fn __field(self) -> Vec<NRCGI<'a>> {
+            self.0
+        }
+    }
     impl<'a> CellIdListforMDTNR<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CellIdListforMDTNR<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -16396,6 +16890,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CellIdListforQMC<'a>(pub Vec<NGRANCGI<'a>>);
+    impl<'a> crate::message::__Field<Vec<NGRANCGI<'a>>> for CellIdListforQMC<'a> {
+        #[inline]
+        fn __field(self) -> Vec<NGRANCGI<'a>> {
+            self.0
+        }
+    }
     impl<'a> CellIdListforQMC<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CellIdListforQMC<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -16581,6 +17081,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CellsToActivateList<'a>(pub Vec<NGRANCGI<'a>>);
+    impl<'a> crate::message::__Field<Vec<NGRANCGI<'a>>> for CellsToActivateList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<NGRANCGI<'a>> {
+            self.0
+        }
+    }
     impl<'a> CellsToActivateList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CellsToActivateList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -17819,6 +18325,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CommonNetworkInstance<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for CommonNetworkInstance<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> CommonNetworkInstance<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CommonNetworkInstance<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -17869,6 +18381,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CompletedCellsInEAIEUTRA<'a>(pub Vec<CompletedCellsInEAIEUTRAItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<CompletedCellsInEAIEUTRAItem<'a>>>
+        for CompletedCellsInEAIEUTRA<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<CompletedCellsInEAIEUTRAItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> CompletedCellsInEAIEUTRA<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CompletedCellsInEAIEUTRA<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -18008,6 +18528,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CompletedCellsInEAINR<'a>(pub Vec<CompletedCellsInEAINRItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<CompletedCellsInEAINRItem<'a>>> for CompletedCellsInEAINR<'a> {
+        #[inline]
+        fn __field(self) -> Vec<CompletedCellsInEAINRItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> CompletedCellsInEAINR<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CompletedCellsInEAINR<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -18147,6 +18673,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CompletedCellsInTAIEUTRA<'a>(pub Vec<CompletedCellsInTAIEUTRAItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<CompletedCellsInTAIEUTRAItem<'a>>>
+        for CompletedCellsInTAIEUTRA<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<CompletedCellsInTAIEUTRAItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> CompletedCellsInTAIEUTRA<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CompletedCellsInTAIEUTRA<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -18286,6 +18820,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CompletedCellsInTAINR<'a>(pub Vec<CompletedCellsInTAINRItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<CompletedCellsInTAINRItem<'a>>> for CompletedCellsInTAINR<'a> {
+        #[inline]
+        fn __field(self) -> Vec<CompletedCellsInTAINRItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> CompletedCellsInTAINR<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CompletedCellsInTAINR<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -18694,6 +19234,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ConfiguredNSSAI(pub [u8; 128]);
+    impl crate::message::__Field<[u8; 128]> for ConfiguredNSSAI {
+        #[inline]
+        fn __field(self) -> [u8; 128] {
+            self.0
+        }
+    }
     impl From<[u8; 128]> for ConfiguredNSSAI {
         fn from(value: [u8; 128]) -> Self {
             Self(value)
@@ -19035,6 +19581,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CoverageEnhancementLevel<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for CoverageEnhancementLevel<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> CoverageEnhancementLevel<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CoverageEnhancementLevel<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -19401,6 +19953,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CriticalityDiagnosticsIEList<'a>(pub Vec<CriticalityDiagnosticsIEItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<CriticalityDiagnosticsIEItem<'a>>>
+        for CriticalityDiagnosticsIEList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<CriticalityDiagnosticsIEItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> CriticalityDiagnosticsIEList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `CriticalityDiagnosticsIEList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -19832,6 +20392,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DAPSResponseInfoList<'a>(pub Vec<DAPSResponseInfoItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<DAPSResponseInfoItem<'a>>> for DAPSResponseInfoList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<DAPSResponseInfoItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> DAPSResponseInfoList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `DAPSResponseInfoList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -19971,6 +20537,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct DLNASMAC(pub Bits);
+    impl crate::message::__Field<Bits> for DLNASMAC {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for DLNASMAC {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -20374,6 +20946,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct DRBID(pub u64);
+    impl crate::message::__Field<u64> for DRBID {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for DRBID {
         fn from(value: u64) -> Self {
             Self(value)
@@ -21149,6 +21727,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DRBsSubjectToDLDiscardingList<'a>(pub Vec<DRBsSubjectToDLDiscardingItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<DRBsSubjectToDLDiscardingItem<'a>>>
+        for DRBsSubjectToDLDiscardingList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<DRBsSubjectToDLDiscardingItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> DRBsSubjectToDLDiscardingList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `DRBsSubjectToDLDiscardingList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -21307,6 +21893,14 @@ pub mod ngap_ies {
     pub struct DRBsSubjectToEarlyStatusTransferList<'a>(
         pub Vec<DRBsSubjectToEarlyStatusTransferItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<DRBsSubjectToEarlyStatusTransferItem<'a>>>
+        for DRBsSubjectToEarlyStatusTransferList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<DRBsSubjectToEarlyStatusTransferItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> DRBsSubjectToEarlyStatusTransferList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `DRBsSubjectToEarlyStatusTransferList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -21483,6 +22077,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DRBsSubjectToStatusTransferList<'a>(pub Vec<DRBsSubjectToStatusTransferItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<DRBsSubjectToStatusTransferItem<'a>>>
+        for DRBsSubjectToStatusTransferList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<DRBsSubjectToStatusTransferItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> DRBsSubjectToStatusTransferList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `DRBsSubjectToStatusTransferList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -21644,6 +22246,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DRBsToQosFlowsMappingList<'a>(pub Vec<DRBsToQosFlowsMappingItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<DRBsToQosFlowsMappingItem<'a>>>
+        for DRBsToQosFlowsMappingList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<DRBsToQosFlowsMappingItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> DRBsToQosFlowsMappingList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `DRBsToQosFlowsMappingList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -21694,6 +22304,12 @@ pub mod ngap_ies {
     #[doc = " D"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct DataCodingScheme(pub Bits);
+    impl crate::message::__Field<Bits> for DataCodingScheme {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for DataCodingScheme {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -21978,6 +22594,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DataForwardingResponseDRBList<'a>(pub Vec<DataForwardingResponseDRBItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<DataForwardingResponseDRBItem<'a>>>
+        for DataForwardingResponseDRBList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<DataForwardingResponseDRBItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> DataForwardingResponseDRBList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `DataForwardingResponseDRBList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -22029,6 +22653,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DataForwardingResponseERABList<'a>(pub Vec<DataForwardingResponseERABListItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<DataForwardingResponseERABListItem<'a>>>
+        for DataForwardingResponseERABList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<DataForwardingResponseERABListItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> DataForwardingResponseERABList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `DataForwardingResponseERABList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -22510,6 +23142,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ERABID(pub u64);
+    impl crate::message::__Field<u64> for ERABID {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for ERABID {
         fn from(value: u64) -> Self {
             Self(value)
@@ -22657,6 +23295,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ERABInformationList<'a>(pub Vec<ERABInformationItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<ERABInformationItem<'a>>> for ERABInformationList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<ERABInformationItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> ERABInformationList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `ERABInformationList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -22944,6 +23588,14 @@ pub mod ngap_ies {
     pub struct ECNMarkingorCongestionInformationReportingStatus<'a>(
         pub Vec<ECNMarkingorCongestionInformationReportingStatusItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<ECNMarkingorCongestionInformationReportingStatusItem<'a>>>
+        for ECNMarkingorCongestionInformationReportingStatus<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<ECNMarkingorCongestionInformationReportingStatusItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> ECNMarkingorCongestionInformationReportingStatus<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `ECNMarkingorCongestionInformationReportingStatus<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -23149,6 +23801,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ENDCSONConfigurationTransfer<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for ENDCSONConfigurationTransfer<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> ENDCSONConfigurationTransfer<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `ENDCSONConfigurationTransfer<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -23341,6 +23999,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct EPSTAC(pub [u8; 2]);
+    impl crate::message::__Field<[u8; 2]> for EPSTAC {
+        #[inline]
+        fn __field(self) -> [u8; 2] {
+            self.0
+        }
+    }
     impl From<[u8; 2]> for EPSTAC {
         fn from(value: [u8; 2]) -> Self {
             Self(value)
@@ -23628,6 +24292,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EUTRACGIList<'a>(pub Vec<EUTRACGI<'a>>);
+    impl<'a> crate::message::__Field<Vec<EUTRACGI<'a>>> for EUTRACGIList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<EUTRACGI<'a>> {
+            self.0
+        }
+    }
     impl<'a> EUTRACGIList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `EUTRACGIList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -23677,6 +24347,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EUTRACGIListForWarning<'a>(pub Vec<EUTRACGI<'a>>);
+    impl<'a> crate::message::__Field<Vec<EUTRACGI<'a>>> for EUTRACGIListForWarning<'a> {
+        #[inline]
+        fn __field(self) -> Vec<EUTRACGI<'a>> {
+            self.0
+        }
+    }
     impl<'a> EUTRACGIListForWarning<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `EUTRACGIListForWarning<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -24005,6 +24681,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct EUTRACellIdentity(pub Bits);
+    impl crate::message::__Field<Bits> for EUTRACellIdentity {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for EUTRACellIdentity {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -24263,6 +24945,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EUTRANCellReportList<'a>(pub Vec<EUTRANCellReportItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<EUTRANCellReportItem<'a>>> for EUTRANCellReportList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<EUTRANCellReportItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> EUTRANCellReportList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `EUTRANCellReportList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -24402,6 +25090,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EUTRANCellToReportList<'a>(pub Vec<EUTRANCellToReportItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<EUTRANCellToReportItem<'a>>> for EUTRANCellToReportList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<EUTRANCellToReportItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> EUTRANCellToReportList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `EUTRANCellToReportList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -24577,6 +25271,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct EUTRANNumberOfActiveUEs(pub u64);
+    impl crate::message::__Field<u64> for EUTRANNumberOfActiveUEs {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for EUTRANNumberOfActiveUEs {
         fn from(value: u64) -> Self {
             Self(value)
@@ -25065,6 +25765,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EUTRAencryptionAlgorithms<'a>(pub BitString<'a>);
+    impl<'a> crate::message::__Field<BitString<'a>> for EUTRAencryptionAlgorithms<'a> {
+        #[inline]
+        fn __field(self) -> BitString<'a> {
+            self.0
+        }
+    }
     impl<'a> EUTRAencryptionAlgorithms<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `EUTRAencryptionAlgorithms<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -25105,6 +25811,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EUTRAintegrityProtectionAlgorithms<'a>(pub BitString<'a>);
+    impl<'a> crate::message::__Field<BitString<'a>> for EUTRAintegrityProtectionAlgorithms<'a> {
+        #[inline]
+        fn __field(self) -> BitString<'a> {
+            self.0
+        }
+    }
     impl<'a> EUTRAintegrityProtectionAlgorithms<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `EUTRAintegrityProtectionAlgorithms<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -25291,6 +26003,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct EmergencyAreaID(pub [u8; 3]);
+    impl crate::message::__Field<[u8; 3]> for EmergencyAreaID {
+        #[inline]
+        fn __field(self) -> [u8; 3] {
+            self.0
+        }
+    }
     impl From<[u8; 3]> for EmergencyAreaID {
         fn from(value: [u8; 3]) -> Self {
             Self(value)
@@ -25323,6 +26041,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EmergencyAreaIDBroadcastEUTRA<'a>(pub Vec<EmergencyAreaIDBroadcastEUTRAItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<EmergencyAreaIDBroadcastEUTRAItem<'a>>>
+        for EmergencyAreaIDBroadcastEUTRA<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<EmergencyAreaIDBroadcastEUTRAItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> EmergencyAreaIDBroadcastEUTRA<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `EmergencyAreaIDBroadcastEUTRA<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -25490,6 +26216,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EmergencyAreaIDBroadcastNR<'a>(pub Vec<EmergencyAreaIDBroadcastNRItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<EmergencyAreaIDBroadcastNRItem<'a>>>
+        for EmergencyAreaIDBroadcastNR<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<EmergencyAreaIDBroadcastNRItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> EmergencyAreaIDBroadcastNR<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `EmergencyAreaIDBroadcastNR<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -25651,6 +26385,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EmergencyAreaIDCancelledEUTRA<'a>(pub Vec<EmergencyAreaIDCancelledEUTRAItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<EmergencyAreaIDCancelledEUTRAItem<'a>>>
+        for EmergencyAreaIDCancelledEUTRA<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<EmergencyAreaIDCancelledEUTRAItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> EmergencyAreaIDCancelledEUTRA<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `EmergencyAreaIDCancelledEUTRA<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -25818,6 +26560,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EmergencyAreaIDCancelledNR<'a>(pub Vec<EmergencyAreaIDCancelledNRItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<EmergencyAreaIDCancelledNRItem<'a>>>
+        for EmergencyAreaIDCancelledNR<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<EmergencyAreaIDCancelledNRItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> EmergencyAreaIDCancelledNR<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `EmergencyAreaIDCancelledNR<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -25979,6 +26729,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EmergencyAreaIDList(pub Vec<EmergencyAreaID>);
+    impl crate::message::__Field<Vec<EmergencyAreaID>> for EmergencyAreaIDList {
+        #[inline]
+        fn __field(self) -> Vec<EmergencyAreaID> {
+            self.0
+        }
+    }
     impl From<Vec<EmergencyAreaID>> for EmergencyAreaIDList {
         fn from(value: Vec<EmergencyAreaID>) -> Self {
             Self(value)
@@ -26021,6 +26777,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EmergencyAreaIDListForRestart(pub Vec<EmergencyAreaID>);
+    impl crate::message::__Field<Vec<EmergencyAreaID>> for EmergencyAreaIDListForRestart {
+        #[inline]
+        fn __field(self) -> Vec<EmergencyAreaID> {
+            self.0
+        }
+    }
     impl From<Vec<EmergencyAreaID>> for EmergencyAreaIDListForRestart {
         fn from(value: Vec<EmergencyAreaID>) -> Self {
             Self(value)
@@ -26466,6 +27228,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EquivalentPLMNs(pub Vec<PLMNIdentity>);
+    impl crate::message::__Field<Vec<PLMNIdentity>> for EquivalentPLMNs {
+        #[inline]
+        fn __field(self) -> Vec<PLMNIdentity> {
+            self.0
+        }
+    }
     impl From<Vec<PLMNIdentity>> for EquivalentPLMNs {
         fn from(value: Vec<PLMNIdentity>) -> Self {
             Self(value)
@@ -26613,6 +27381,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EquivalentSNPNsList<'a>(pub Vec<EquivalentSNPNsItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<EquivalentSNPNsItem<'a>>> for EquivalentSNPNsList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<EquivalentSNPNsItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> EquivalentSNPNsList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `EquivalentSNPNsList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -27159,6 +27933,14 @@ pub mod ngap_ies {
     pub struct ExcessPacketDelayThresholdConfiguration<'a>(
         pub Vec<ExcessPacketDelayThresholdItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<ExcessPacketDelayThresholdItem<'a>>>
+        for ExcessPacketDelayThresholdConfiguration<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<ExcessPacketDelayThresholdItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> ExcessPacketDelayThresholdConfiguration<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `ExcessPacketDelayThresholdConfiguration<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -27408,6 +28190,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ExpectedActivityPeriod(pub u64);
+    impl crate::message::__Field<u64> for ExpectedActivityPeriod {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for ExpectedActivityPeriod {
         fn from(value: u64) -> Self {
             Self(value)
@@ -27504,6 +28292,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ExpectedIdlePeriod(pub u64);
+    impl crate::message::__Field<u64> for ExpectedIdlePeriod {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for ExpectedIdlePeriod {
         fn from(value: u64) -> Self {
             Self(value)
@@ -27957,6 +28751,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ExpectedUEMovingTrajectory<'a>(pub Vec<ExpectedUEMovingTrajectoryItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<ExpectedUEMovingTrajectoryItem<'a>>>
+        for ExpectedUEMovingTrajectory<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<ExpectedUEMovingTrajectoryItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> ExpectedUEMovingTrajectory<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `ExpectedUEMovingTrajectory<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -28262,6 +29064,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ExtendedConnectedTime(pub u8);
+    impl crate::message::__Field<u8> for ExtendedConnectedTime {
+        #[inline]
+        fn __field(self) -> u8 {
+            self.0
+        }
+    }
     impl From<u8> for ExtendedConnectedTime {
         fn from(value: u8) -> Self {
             Self(value)
@@ -28438,6 +29246,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ExtendedMobilityInformation(pub Bits);
+    impl crate::message::__Field<Bits> for ExtendedMobilityInformation {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for ExtendedMobilityInformation {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -28480,6 +29294,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ExtendedPacketDelayBudget(pub u64);
+    impl crate::message::__Field<u64> for ExtendedPacketDelayBudget {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for ExtendedPacketDelayBudget {
         fn from(value: u64) -> Self {
             Self(value)
@@ -28634,6 +29454,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ExtendedRNCID(pub u16);
+    impl crate::message::__Field<u16> for ExtendedRNCID {
+        #[inline]
+        fn __field(self) -> u16 {
+            self.0
+        }
+    }
     impl From<u16> for ExtendedRNCID {
         fn from(value: u16) -> Self {
             Self(value)
@@ -28713,6 +29539,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ExtendedSliceSupportList<'a>(pub Vec<SliceSupportItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<SliceSupportItem<'a>>> for ExtendedSliceSupportList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<SliceSupportItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> ExtendedSliceSupportList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `ExtendedSliceSupportList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -28762,6 +29594,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ExtendedUEIdentityIndexValue(pub Bits);
+    impl crate::message::__Field<Bits> for ExtendedUEIdentityIndexValue {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for ExtendedUEIdentityIndexValue {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -29496,6 +30334,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct FiveGTMSI(pub [u8; 4]);
+    impl crate::message::__Field<[u8; 4]> for FiveGTMSI {
+        #[inline]
+        fn __field(self) -> [u8; 4] {
+            self.0
+        }
+    }
     impl From<[u8; 4]> for FiveGTMSI {
         fn from(value: [u8; 4]) -> Self {
             Self(value)
@@ -30419,6 +31263,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct FiveGProSePC5QoSFlowList<'a>(pub Vec<FiveGProSePC5QoSFlowItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<FiveGProSePC5QoSFlowItem<'a>>>
+        for FiveGProSePC5QoSFlowList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<FiveGProSePC5QoSFlowItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> FiveGProSePC5QoSFlowList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `FiveGProSePC5QoSFlowList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -30468,6 +31320,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct FiveQI(pub u64);
+    impl crate::message::__Field<u64> for FiveQI {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for FiveQI {
         fn from(value: u64) -> Self {
             Self(value)
@@ -30500,6 +31358,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ForbiddenAreaInformation<'a>(pub Vec<ForbiddenAreaInformationItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<ForbiddenAreaInformationItem<'a>>>
+        for ForbiddenAreaInformation<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<ForbiddenAreaInformationItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> ForbiddenAreaInformation<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `ForbiddenAreaInformation<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -30655,6 +31521,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ForbiddenTACs(pub Vec<TAC>);
+    impl crate::message::__Field<Vec<TAC>> for ForbiddenTACs {
+        #[inline]
+        fn __field(self) -> Vec<TAC> {
+            self.0
+        }
+    }
     impl From<Vec<TAC>> for ForbiddenTACs {
         fn from(value: Vec<TAC>) -> Self {
             Self(value)
@@ -30903,6 +31775,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct FurtherExtendedUEIdentityIndexValue(pub Bits);
+    impl crate::message::__Field<Bits> for FurtherExtendedUEIdentityIndexValue {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for FurtherExtendedUEIdentityIndexValue {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -31267,6 +32145,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct GNBSetID(pub Bits);
+    impl crate::message::__Field<Bits> for GNBSetID {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for GNBSetID {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -31322,6 +32206,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct GTPTEID(pub [u8; 4]);
+    impl crate::message::__Field<[u8; 4]> for GTPTEID {
+        #[inline]
+        fn __field(self) -> [u8; 4] {
+            self.0
+        }
+    }
     impl From<[u8; 4]> for GTPTEID {
         fn from(value: [u8; 4]) -> Self {
             Self(value)
@@ -31610,6 +32500,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct GUAMIList<'a>(pub Vec<GUAMIListItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<GUAMIListItem<'a>>> for GUAMIList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<GUAMIListItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> GUAMIList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `GUAMIList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -31956,6 +32852,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct GlobalCableID<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for GlobalCableID<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> GlobalCableID<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `GlobalCableID<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -32438,6 +33340,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct GlobalLineIdentity<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for GlobalLineIdentity<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> GlobalLineIdentity<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `GlobalLineIdentity<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -33136,6 +34044,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct HFCNodeID<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for HFCNodeID<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> HFCNodeID<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `HFCNodeID<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -34710,6 +35624,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct HandoverWindowDuration(pub u16);
+    impl crate::message::__Field<u16> for HandoverWindowDuration {
+        #[inline]
+        fn __field(self) -> u16 {
+            self.0
+        }
+    }
     impl From<u16> for HandoverWindowDuration {
         fn from(value: u16) -> Self {
             Self(value)
@@ -34746,6 +35666,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct HandoverWindowStart(pub u64);
+    impl crate::message::__Field<u64> for HandoverWindowStart {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for HandoverWindowStart {
         fn from(value: u64) -> Self {
             Self(value)
@@ -34778,6 +35704,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct HashedUEIdentityIndexValue<'a>(pub BitString<'a>);
+    impl<'a> crate::message::__Field<BitString<'a>> for HashedUEIdentityIndexValue<'a> {
+        #[inline]
+        fn __field(self) -> BitString<'a> {
+            self.0
+        }
+    }
     impl<'a> HashedUEIdentityIndexValue<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `HashedUEIdentityIndexValue<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -34818,6 +35750,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct Hysteresis(pub u8);
+    impl crate::message::__Field<u8> for Hysteresis {
+        #[inline]
+        fn __field(self) -> u8 {
+            self.0
+        }
+    }
     impl From<u8> for Hysteresis {
         fn from(value: u8) -> Self {
             Self(value)
@@ -35416,6 +36354,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct IndexToRFSP(pub u64);
+    impl crate::message::__Field<u64> for IndexToRFSP {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for IndexToRFSP {
         fn from(value: u64) -> Self {
             Self(value)
@@ -35697,6 +36641,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct IntendedNumberOfPagingAttempts(pub u64);
+    impl crate::message::__Field<u64> for IntendedNumberOfPagingAttempts {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for IntendedNumberOfPagingAttempts {
         fn from(value: u64) -> Self {
             Self(value)
@@ -35729,6 +36679,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct IntendedServiceAreaCoordinates<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for IntendedServiceAreaCoordinates<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> IntendedServiceAreaCoordinates<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `IntendedServiceAreaCoordinates<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -36085,6 +37041,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct InterfacesToTrace(pub Bits);
+    impl crate::message::__Field<Bits> for InterfacesToTrace {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for InterfacesToTrace {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -37033,6 +37995,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct IntersystemResourceThreshold(pub u8);
+    impl crate::message::__Field<u8> for IntersystemResourceThreshold {
+        #[inline]
+        fn __field(self) -> u8 {
+            self.0
+        }
+    }
     impl From<u8> for IntersystemResourceThreshold {
         fn from(value: u8) -> Self {
             Self(value)
@@ -38802,6 +39770,12 @@ pub mod ngap_ies {
     #[doc = " L"]
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct LAC(pub [u8; 2]);
+    impl crate::message::__Field<[u8; 2]> for LAC {
+        #[inline]
+        fn __field(self) -> [u8; 2] {
+            self.0
+        }
+    }
     impl From<[u8; 2]> for LAC {
         fn from(value: [u8; 2]) -> Self {
             Self(value)
@@ -38939,6 +39913,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct LPWUSCNsubgroupID(pub u64);
+    impl crate::message::__Field<u64> for LPWUSCNsubgroupID {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for LPWUSCNsubgroupID {
         fn from(value: u64) -> Self {
             Self(value)
@@ -39368,6 +40348,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct LTEUERLFReportContainer<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for LTEUERLFReportContainer<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> LTEUERLFReportContainer<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `LTEUERLFReportContainer<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -39880,6 +40866,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct LastVisitedEUTRANCellInformation<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for LastVisitedEUTRANCellInformation<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> LastVisitedEUTRANCellInformation<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `LastVisitedEUTRANCellInformation<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -39930,6 +40922,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct LastVisitedGERANCellInformation<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for LastVisitedGERANCellInformation<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> LastVisitedGERANCellInformation<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `LastVisitedGERANCellInformation<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -40294,6 +41292,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct LastVisitedPSCellList<'a>(pub Vec<LastVisitedPSCellInformation<'a>>);
+    impl<'a> crate::message::__Field<Vec<LastVisitedPSCellInformation<'a>>>
+        for LastVisitedPSCellList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<LastVisitedPSCellInformation<'a>> {
+            self.0
+        }
+    }
     impl<'a> LastVisitedPSCellList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `LastVisitedPSCellList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -40343,6 +41349,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct LastVisitedUTRANCellInformation<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for LastVisitedUTRANCellInformation<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> LastVisitedUTRANCellInformation<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `LastVisitedUTRANCellInformation<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -40524,6 +41536,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct LocationReportingReferenceID(pub u64);
+    impl crate::message::__Field<u64> for LocationReportingReferenceID {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for LocationReportingReferenceID {
         fn from(value: u64) -> Self {
             Self(value)
@@ -42566,6 +43584,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct M7period(pub u64);
+    impl crate::message::__Field<u64> for M7period {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for M7period {
         fn from(value: u64) -> Self {
             Self(value)
@@ -42814,6 +43838,14 @@ pub mod ngap_ies {
     pub struct MBSActiveSessionInformationSourcetoTargetList<'a>(
         pub Vec<MBSActiveSessionInformationSourcetoTargetItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<MBSActiveSessionInformationSourcetoTargetItem<'a>>>
+        for MBSActiveSessionInformationSourcetoTargetList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<MBSActiveSessionInformationSourcetoTargetItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> MBSActiveSessionInformationSourcetoTargetList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MBSActiveSessionInformationSourcetoTargetList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -43000,6 +44032,14 @@ pub mod ngap_ies {
     pub struct MBSActiveSessionInformationTargettoSourceList<'a>(
         pub Vec<MBSActiveSessionInformationTargettoSourceItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<MBSActiveSessionInformationTargettoSourceItem<'a>>>
+        for MBSActiveSessionInformationTargettoSourceList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<MBSActiveSessionInformationTargettoSourceItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> MBSActiveSessionInformationTargettoSourceList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MBSActiveSessionInformationTargettoSourceList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -43055,6 +44095,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MBSAreaSessionID(pub u64);
+    impl crate::message::__Field<u64> for MBSAreaSessionID {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for MBSAreaSessionID {
         fn from(value: u64) -> Self {
             Self(value)
@@ -43087,6 +44133,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSAreaTAIList<'a>(pub Vec<TAI<'a>>);
+    impl<'a> crate::message::__Field<Vec<TAI<'a>>> for MBSAreaTAIList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<TAI<'a>> {
+            self.0
+        }
+    }
     impl<'a> MBSAreaTAIList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MBSAreaTAIList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -43326,6 +44378,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSDataForwardingResponseMRBList<'a>(pub Vec<MBSDataForwardingResponseMRBItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<MBSDataForwardingResponseMRBItem<'a>>>
+        for MBSDataForwardingResponseMRBList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<MBSDataForwardingResponseMRBItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> MBSDataForwardingResponseMRBList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MBSDataForwardingResponseMRBList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -44095,6 +45155,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSIntendedServiceAreaList<'a>(pub Vec<IntendedServiceAreaCoordinates<'a>>);
+    impl<'a> crate::message::__Field<Vec<IntendedServiceAreaCoordinates<'a>>>
+        for MBSIntendedServiceAreaList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<IntendedServiceAreaCoordinates<'a>> {
+            self.0
+        }
+    }
     impl<'a> MBSIntendedServiceAreaList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MBSIntendedServiceAreaList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -44306,6 +45374,14 @@ pub mod ngap_ies {
     pub struct MBSMappingandDataForwardingRequestList<'a>(
         pub Vec<MBSMappingandDataForwardingRequestItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<MBSMappingandDataForwardingRequestItem<'a>>>
+        for MBSMappingandDataForwardingRequestList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<MBSMappingandDataForwardingRequestItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> MBSMappingandDataForwardingRequestList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MBSMappingandDataForwardingRequestList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -44471,6 +45547,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSQoSFlowList(pub Vec<QosFlowIdentifier>);
+    impl crate::message::__Field<Vec<QosFlowIdentifier>> for MBSQoSFlowList {
+        #[inline]
+        fn __field(self) -> Vec<QosFlowIdentifier> {
+            self.0
+        }
+    }
     impl From<Vec<QosFlowIdentifier>> for MBSQoSFlowList {
         fn from(value: Vec<QosFlowIdentifier>) -> Self {
             Self(value)
@@ -44636,6 +45718,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSQoSFlowsToBeSetupList<'a>(pub Vec<MBSQoSFlowsToBeSetupItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<MBSQoSFlowsToBeSetupItem<'a>>>
+        for MBSQoSFlowsToBeSetupList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<MBSQoSFlowsToBeSetupItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> MBSQoSFlowsToBeSetupList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MBSQoSFlowsToBeSetupList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -44797,6 +45887,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSServiceAreaCellList<'a>(pub Vec<NRCGI<'a>>);
+    impl<'a> crate::message::__Field<Vec<NRCGI<'a>>> for MBSServiceAreaCellList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<NRCGI<'a>> {
+            self.0
+        }
+    }
     impl<'a> MBSServiceAreaCellList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MBSServiceAreaCellList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -45104,6 +46200,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSServiceAreaInformationList<'a>(pub Vec<MBSServiceAreaInformationItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<MBSServiceAreaInformationItem<'a>>>
+        for MBSServiceAreaInformationList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<MBSServiceAreaInformationItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> MBSServiceAreaInformationList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MBSServiceAreaInformationList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -45155,6 +46259,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSServiceAreaTAIList<'a>(pub Vec<TAI<'a>>);
+    impl<'a> crate::message::__Field<Vec<TAI<'a>>> for MBSServiceAreaTAIList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<TAI<'a>> {
+            self.0
+        }
+    }
     impl<'a> MBSServiceAreaTAIList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MBSServiceAreaTAIList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -45217,6 +46327,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MBSSessionFSAID(pub [u8; 3]);
+    impl crate::message::__Field<[u8; 3]> for MBSSessionFSAID {
+        #[inline]
+        fn __field(self) -> [u8; 3] {
+            self.0
+        }
+    }
     impl From<[u8; 3]> for MBSSessionFSAID {
         fn from(value: [u8; 3]) -> Self {
             Self(value)
@@ -45249,6 +46365,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSSessionFSAIDList(pub Vec<MBSSessionFSAID>);
+    impl crate::message::__Field<Vec<MBSSessionFSAID>> for MBSSessionFSAIDList {
+        #[inline]
+        fn __field(self) -> Vec<MBSSessionFSAID> {
+            self.0
+        }
+    }
     impl From<Vec<MBSSessionFSAID>> for MBSSessionFSAIDList {
         fn from(value: Vec<MBSSessionFSAID>) -> Self {
             Self(value)
@@ -45634,6 +46756,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSSessionTNLInfo5GCList<'a>(pub Vec<MBSSessionTNLInfo5GCItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<MBSSessionTNLInfo5GCItem<'a>>>
+        for MBSSessionTNLInfo5GCList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<MBSSessionTNLInfo5GCItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> MBSSessionTNLInfo5GCList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MBSSessionTNLInfo5GCList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -45922,6 +47052,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSSessionTNLInfoNGRANList<'a>(pub Vec<MBSSessionTNLInfoNGRANItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<MBSSessionTNLInfoNGRANItem<'a>>>
+        for MBSSessionTNLInfoNGRANList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<MBSSessionTNLInfoNGRANItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> MBSSessionTNLInfoNGRANList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MBSSessionTNLInfoNGRANList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -46178,6 +47316,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSUPFailureIndicationList<'a>(pub Vec<MBSUPFailureIndicationItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<MBSUPFailureIndicationItem<'a>>>
+        for MBSUPFailureIndicationList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<MBSUPFailureIndicationItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> MBSUPFailureIndicationList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MBSUPFailureIndicationList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -46368,6 +47514,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSSessionFailedtoSetupList<'a>(pub Vec<MBSSessionFailedtoSetupItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<MBSSessionFailedtoSetupItem<'a>>>
+        for MBSSessionFailedtoSetupList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<MBSSessionFailedtoSetupItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> MBSSessionFailedtoSetupList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MBSSessionFailedtoSetupList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -46964,6 +48118,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSSessionSetupRequestList<'a>(pub Vec<MBSSessionSetupRequestItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<MBSSessionSetupRequestItem<'a>>>
+        for MBSSessionSetupRequestList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<MBSSessionSetupRequestItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> MBSSessionSetupRequestList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MBSSessionSetupRequestList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -47134,6 +48296,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSSessionSetupResponseList<'a>(pub Vec<MBSSessionSetupResponseItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<MBSSessionSetupResponseItem<'a>>>
+        for MBSSessionSetupResponseList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<MBSSessionSetupResponseItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> MBSSessionSetupResponseList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MBSSessionSetupResponseList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -47388,6 +48558,14 @@ pub mod ngap_ies {
     pub struct MBSSessionSetuporModifyRequestList<'a>(
         pub Vec<MBSSessionSetuporModifyRequestItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<MBSSessionSetuporModifyRequestItem<'a>>>
+        for MBSSessionSetuporModifyRequestList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<MBSSessionSetuporModifyRequestItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> MBSSessionSetuporModifyRequestList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MBSSessionSetuporModifyRequestList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -47589,6 +48767,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSSessionToReleaseList<'a>(pub Vec<MBSSessionToReleaseItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<MBSSessionToReleaseItem<'a>>> for MBSSessionToReleaseList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<MBSSessionToReleaseItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> MBSSessionToReleaseList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MBSSessionToReleaseList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -48310,6 +49494,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MDTLocationInformation(pub Bits);
+    impl crate::message::__Field<Bits> for MDTLocationInformation {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for MDTLocationInformation {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -48468,6 +49658,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MDTPolygon<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for MDTPolygon<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> MDTPolygon<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MDTPolygon<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -48518,6 +49714,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MDTModeEutra<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for MDTModeEutra<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> MDTModeEutra<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MDTModeEutra<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -48666,6 +49868,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MDTPLMNList(pub Vec<PLMNIdentity>);
+    impl crate::message::__Field<Vec<PLMNIdentity>> for MDTPLMNList {
+        #[inline]
+        fn __field(self) -> Vec<PLMNIdentity> {
+            self.0
+        }
+    }
     impl From<Vec<PLMNIdentity>> for MDTPLMNList {
         fn from(value: Vec<PLMNIdentity>) -> Self {
             Self(value)
@@ -48708,6 +49916,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MDTPLMNModificationList(pub Vec<PLMNIdentity>);
+    impl crate::message::__Field<Vec<PLMNIdentity>> for MDTPLMNModificationList {
+        #[inline]
+        fn __field(self) -> Vec<PLMNIdentity> {
+            self.0
+        }
+    }
     impl From<Vec<PLMNIdentity>> for MDTPLMNModificationList {
         fn from(value: Vec<PLMNIdentity>) -> Self {
             Self(value)
@@ -48805,6 +50019,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MMSID(pub [u8; 1]);
+    impl crate::message::__Field<[u8; 1]> for MMSID {
+        #[inline]
+        fn __field(self) -> [u8; 1] {
+            self.0
+        }
+    }
     impl From<[u8; 1]> for MMSID {
         fn from(value: [u8; 1]) -> Self {
             Self(value)
@@ -48879,6 +50099,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MRBID(pub u64);
+    impl crate::message::__Field<u64> for MRBID {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for MRBID {
         fn from(value: u64) -> Self {
             Self(value)
@@ -49023,6 +50249,12 @@ pub mod ngap_ies {
     #[doc = " M"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MaskedIMEISV(pub Bits);
+    impl crate::message::__Field<Bits> for MaskedIMEISV {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for MaskedIMEISV {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -49065,6 +50297,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MaxNrofRSIndexesToReport(pub u64);
+    impl crate::message::__Field<u64> for MaxNrofRSIndexesToReport {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for MaxNrofRSIndexesToReport {
         fn from(value: u64) -> Self {
             Self(value)
@@ -49097,6 +50335,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MaximumDataBurstVolume(pub u64);
+    impl crate::message::__Field<u64> for MaximumDataBurstVolume {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for MaximumDataBurstVolume {
         fn from(value: u64) -> Self {
             Self(value)
@@ -49279,6 +50523,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MeasurementsToActivate(pub Bits);
+    impl crate::message::__Field<Bits> for MeasurementsToActivate {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for MeasurementsToActivate {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -49321,6 +50571,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MessageIdentifier(pub Bits);
+    impl crate::message::__Field<Bits> for MessageIdentifier {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for MessageIdentifier {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -49637,6 +50893,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MobilityInformation(pub Bits);
+    impl crate::message::__Field<Bits> for MobilityInformation {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for MobilityInformation {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -50308,6 +51570,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MulticastGroupPagingAreaList<'a>(pub Vec<MulticastGroupPagingAreaItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<MulticastGroupPagingAreaItem<'a>>>
+        for MulticastGroupPagingAreaList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<MulticastGroupPagingAreaItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> MulticastGroupPagingAreaList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `MulticastGroupPagingAreaList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -50790,6 +52060,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NASPDU<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for NASPDU<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> NASPDU<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `NASPDU<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -50840,6 +52116,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NASSecurityParametersFromNGRAN<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for NASSecurityParametersFromNGRAN<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> NASSecurityParametersFromNGRAN<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `NASSecurityParametersFromNGRAN<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -51269,6 +52551,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NBIoTUEPriority(pub u64);
+    impl crate::message::__Field<u64> for NBIoTUEPriority {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for NBIoTUEPriority {
         fn from(value: u64) -> Self {
             Self(value)
@@ -51393,6 +52681,14 @@ pub mod ngap_ies {
     pub struct NGAPIESupportInformationRequestList<'a>(
         pub Vec<NGAPIESupportInformationRequestItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<NGAPIESupportInformationRequestItem<'a>>>
+        for NGAPIESupportInformationRequestList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<NGAPIESupportInformationRequestItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> NGAPIESupportInformationRequestList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `NGAPIESupportInformationRequestList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -51684,6 +52980,14 @@ pub mod ngap_ies {
     pub struct NGAPIESupportInformationResponseList<'a>(
         pub Vec<NGAPIESupportInformationResponseItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<NGAPIESupportInformationResponseItem<'a>>>
+        for NGAPIESupportInformationResponseList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<NGAPIESupportInformationResponseItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> NGAPIESupportInformationResponseList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `NGAPIESupportInformationResponseList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -52041,6 +53345,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NGRANCellReportList<'a>(pub Vec<NGRANCellReportItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<NGRANCellReportItem<'a>>> for NGRANCellReportList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<NGRANCellReportItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> NGRANCellReportList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `NGRANCellReportList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -52180,6 +53490,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NGRANCellToReportList<'a>(pub Vec<NGRANCellToReportItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<NGRANCellToReportItem<'a>>> for NGRANCellToReportList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<NGRANCellToReportItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> NGRANCellToReportList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `NGRANCellToReportList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -52229,6 +53545,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NGRANNoofRRCConnections(pub u64);
+    impl crate::message::__Field<u64> for NGRANNoofRRCConnections {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for NGRANNoofRRCConnections {
         fn from(value: u64) -> Self {
             Self(value)
@@ -52261,6 +53583,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NGRANNumberOfActiveUEs(pub u64);
+    impl crate::message::__Field<u64> for NGRANNumberOfActiveUEs {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for NGRANNumberOfActiveUEs {
         fn from(value: u64) -> Self {
             Self(value)
@@ -52831,6 +54159,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NGRANTNLAssociationToRemoveList<'a>(pub Vec<NGRANTNLAssociationToRemoveItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<NGRANTNLAssociationToRemoveItem<'a>>>
+        for NGRANTNLAssociationToRemoveList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<NGRANTNLAssociationToRemoveItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> NGRANTNLAssociationToRemoveList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `NGRANTNLAssociationToRemoveList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -52895,6 +54231,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NGRANTraceID(pub [u8; 8]);
+    impl crate::message::__Field<[u8; 8]> for NGRANTraceID {
+        #[inline]
+        fn __field(self) -> [u8; 8] {
+            self.0
+        }
+    }
     impl From<[u8; 8]> for NGRANTraceID {
         fn from(value: [u8; 8]) -> Self {
             Self(value)
@@ -52927,6 +54269,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NID(pub Bits);
+    impl crate::message::__Field<Bits> for NID {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for NID {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -53654,6 +55002,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NRCGIList<'a>(pub Vec<NRCGI<'a>>);
+    impl<'a> crate::message::__Field<Vec<NRCGI<'a>>> for NRCGIList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<NRCGI<'a>> {
+            self.0
+        }
+    }
     impl<'a> NRCGIList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `NRCGIList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -53703,6 +55057,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NRCGIListForWarning<'a>(pub Vec<NRCGI<'a>>);
+    impl<'a> crate::message::__Field<Vec<NRCGI<'a>>> for NRCGIListForWarning<'a> {
+        #[inline]
+        fn __field(self) -> Vec<NRCGI<'a>> {
+            self.0
+        }
+    }
     impl<'a> NRCGIListForWarning<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `NRCGIListForWarning<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -53752,6 +55112,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NRPCI(pub u64);
+    impl crate::message::__Field<u64> for NRPCI {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for NRPCI {
         fn from(value: u64) -> Self {
             Self(value)
@@ -54410,6 +55776,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NRARFCN(pub u32);
+    impl crate::message::__Field<u32> for NRARFCN {
+        #[inline]
+        fn __field(self) -> u32 {
+            self.0
+        }
+    }
     impl From<u32> for NRARFCN {
         fn from(value: u32) -> Self {
             Self(value)
@@ -54446,6 +55818,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NRCellIdentity(pub Bits);
+    impl crate::message::__Field<Bits> for NRCellIdentity {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for NRCellIdentity {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -54488,6 +55866,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NRFrequencyBand(pub u64);
+    impl crate::message::__Field<u64> for NRFrequencyBand {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for NRFrequencyBand {
         fn from(value: u64) -> Self {
             Self(value)
@@ -54520,6 +55904,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NRFrequencyBandList<'a>(pub Vec<NRFrequencyBandItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<NRFrequencyBandItem<'a>>> for NRFrequencyBandList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<NRFrequencyBandItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> NRFrequencyBandList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `NRFrequencyBandList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -54766,6 +56156,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NRMobilityHistoryReport<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for NRMobilityHistoryReport<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> NRMobilityHistoryReport<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `NRMobilityHistoryReport<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -54956,6 +56352,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NRPPaPDU<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for NRPPaPDU<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> NRPPaPDU<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `NRPPaPDU<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -55006,6 +56408,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NRUERLFReportContainer<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for NRUERLFReportContainer<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> NRUERLFReportContainer<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `NRUERLFReportContainer<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -55279,6 +56687,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NRencryptionAlgorithms<'a>(pub BitString<'a>);
+    impl<'a> crate::message::__Field<BitString<'a>> for NRencryptionAlgorithms<'a> {
+        #[inline]
+        fn __field(self) -> BitString<'a> {
+            self.0
+        }
+    }
     impl<'a> NRencryptionAlgorithms<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `NRencryptionAlgorithms<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -55319,6 +56733,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NRintegrityProtectionAlgorithms<'a>(pub BitString<'a>);
+    impl<'a> crate::message::__Field<BitString<'a>> for NRintegrityProtectionAlgorithms<'a> {
+        #[inline]
+        fn __field(self) -> BitString<'a> {
+            self.0
+        }
+    }
     impl<'a> NRintegrityProtectionAlgorithms<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `NRintegrityProtectionAlgorithms<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -55359,6 +56779,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NSAGID(pub u64);
+    impl crate::message::__Field<u64> for NSAGID {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for NSAGID {
         fn from(value: u64) -> Self {
             Self(value)
@@ -55481,6 +56907,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NTNGeographicalAreaList<'a>(pub Vec<NTNGeographicalAreaItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<NTNGeographicalAreaItem<'a>>> for NTNGeographicalAreaList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<NTNGeographicalAreaItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> NTNGeographicalAreaList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `NTNGeographicalAreaList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -55573,6 +57005,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NetworkInstance(pub u64);
+    impl crate::message::__Field<u64> for NetworkInstance {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for NetworkInstance {
         fn from(value: u64) -> Self {
             Self(value)
@@ -55804,6 +57242,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NetworkSliceListforMDT<'a>(pub Vec<NetworkSliceItemforMDT<'a>>);
+    impl<'a> crate::message::__Field<Vec<NetworkSliceItemforMDT<'a>>> for NetworkSliceListforMDT<'a> {
+        #[inline]
+        fn __field(self) -> Vec<NetworkSliceItemforMDT<'a>> {
+            self.0
+        }
+    }
     impl<'a> NetworkSliceListforMDT<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `NetworkSliceListforMDT<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -55895,6 +57339,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NextHopChainingCount(pub u8);
+    impl crate::message::__Field<u8> for NextHopChainingCount {
+        #[inline]
+        fn __field(self) -> u8 {
+            self.0
+        }
+    }
     impl From<u8> for NextHopChainingCount {
         fn from(value: u8) -> Self {
             Self(value)
@@ -56308,6 +57758,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NotAllowedTACs(pub Vec<TAC>);
+    impl crate::message::__Field<Vec<TAC>> for NotAllowedTACs {
+        #[inline]
+        fn __field(self) -> Vec<TAC> {
+            self.0
+        }
+    }
     impl From<Vec<TAC>> for NotAllowedTACs {
         fn from(value: Vec<TAC>) -> Self {
             Self(value)
@@ -56555,6 +58011,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NotificationCellList<'a>(pub Vec<NotificationCellItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<NotificationCellItem<'a>>> for NotificationCellList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<NotificationCellItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> NotificationCellList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `NotificationCellList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -56688,6 +58150,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NumberOfBroadcasts(pub u16);
+    impl crate::message::__Field<u16> for NumberOfBroadcasts {
+        #[inline]
+        fn __field(self) -> u16 {
+            self.0
+        }
+    }
     impl From<u16> for NumberOfBroadcasts {
         fn from(value: u16) -> Self {
             Self(value)
@@ -56724,6 +58192,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NumberOfBroadcastsRequested(pub u16);
+    impl crate::message::__Field<u16> for NumberOfBroadcastsRequested {
+        #[inline]
+        fn __field(self) -> u16 {
+            self.0
+        }
+    }
     impl From<u16> for NumberOfBroadcastsRequested {
         fn from(value: u16) -> Self {
             Self(value)
@@ -57148,6 +58622,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct OverloadStartNSSAIList<'a>(pub Vec<OverloadStartNSSAIItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<OverloadStartNSSAIItem<'a>>> for OverloadStartNSSAIList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<OverloadStartNSSAIItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> OverloadStartNSSAIList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `OverloadStartNSSAIList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -57452,6 +58932,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PC5QoSFlowList<'a>(pub Vec<PC5QoSFlowItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<PC5QoSFlowItem<'a>>> for PC5QoSFlowList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<PC5QoSFlowItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> PC5QoSFlowList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PC5QoSFlowList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -57625,6 +59111,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PCIListForMDT(pub Vec<NRPCI>);
+    impl crate::message::__Field<Vec<NRPCI>> for PCIListForMDT {
+        #[inline]
+        fn __field(self) -> Vec<NRPCI> {
+            self.0
+        }
+    }
     impl From<Vec<NRPCI>> for PCIListForMDT {
         fn from(value: Vec<NRPCI>) -> Self {
             Self(value)
@@ -57918,6 +59410,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionForPagingList<'a>(pub Vec<PDUSessionForPagingItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<PDUSessionForPagingItem<'a>>> for PDUSessionForPagingList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionForPagingItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionForPagingList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionForPagingList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -57967,6 +59465,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PDUSessionID(pub u8);
+    impl crate::message::__Field<u8> for PDUSessionID {
+        #[inline]
+        fn __field(self) -> u8 {
+            self.0
+        }
+    }
     impl From<u8> for PDUSessionID {
         fn from(value: u8) -> Self {
             Self(value)
@@ -58001,6 +59505,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionListMTCommHReq<'a>(pub Vec<PDUSessionListMTCommHReqItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<PDUSessionListMTCommHReqItem<'a>>>
+        for PDUSessionListMTCommHReq<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionListMTCommHReqItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionListMTCommHReq<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionListMTCommHReq<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -58140,6 +59652,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PDUSessionPairID(pub u64);
+    impl crate::message::__Field<u64> for PDUSessionPairID {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for PDUSessionPairID {
         fn from(value: u64) -> Self {
             Self(value)
@@ -58292,6 +59810,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceAdmittedList<'a>(pub Vec<PDUSessionResourceAdmittedItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceAdmittedItem<'a>>>
+        for PDUSessionResourceAdmittedList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceAdmittedItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceAdmittedList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceAdmittedList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -58600,6 +60126,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToModifyListModCfm<'a>(
         pub Vec<PDUSessionResourceFailedToModifyItemModCfm<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceFailedToModifyItemModCfm<'a>>>
+        for PDUSessionResourceFailedToModifyListModCfm<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceFailedToModifyItemModCfm<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceFailedToModifyListModCfm<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceFailedToModifyListModCfm<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -58655,6 +60189,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToModifyListModRes<'a>(
         pub Vec<PDUSessionResourceFailedToModifyItemModRes<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceFailedToModifyItemModRes<'a>>>
+        for PDUSessionResourceFailedToModifyListModRes<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceFailedToModifyItemModRes<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceFailedToModifyListModRes<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceFailedToModifyListModRes<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -58920,6 +60462,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToResumeListRESReq<'a>(
         pub Vec<PDUSessionResourceFailedToResumeItemRESReq<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceFailedToResumeItemRESReq<'a>>>
+        for PDUSessionResourceFailedToResumeListRESReq<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceFailedToResumeItemRESReq<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceFailedToResumeListRESReq<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceFailedToResumeListRESReq<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -58975,6 +60525,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToResumeListRESRes<'a>(
         pub Vec<PDUSessionResourceFailedToResumeItemRESRes<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceFailedToResumeItemRESRes<'a>>>
+        for PDUSessionResourceFailedToResumeListRESRes<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceFailedToResumeItemRESRes<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceFailedToResumeListRESRes<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceFailedToResumeListRESRes<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -59659,6 +61217,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToSetupListCxtFail<'a>(
         pub Vec<PDUSessionResourceFailedToSetupItemCxtFail<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceFailedToSetupItemCxtFail<'a>>>
+        for PDUSessionResourceFailedToSetupListCxtFail<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceFailedToSetupItemCxtFail<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceFailedToSetupListCxtFail<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceFailedToSetupListCxtFail<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -59714,6 +61280,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToSetupListCxtRes<'a>(
         pub Vec<PDUSessionResourceFailedToSetupItemCxtRes<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceFailedToSetupItemCxtRes<'a>>>
+        for PDUSessionResourceFailedToSetupListCxtRes<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceFailedToSetupItemCxtRes<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceFailedToSetupListCxtRes<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceFailedToSetupListCxtRes<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -59769,6 +61343,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToSetupListHOAck<'a>(
         pub Vec<PDUSessionResourceFailedToSetupItemHOAck<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceFailedToSetupItemHOAck<'a>>>
+        for PDUSessionResourceFailedToSetupListHOAck<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceFailedToSetupItemHOAck<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceFailedToSetupListHOAck<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceFailedToSetupListHOAck<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -59824,6 +61406,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToSetupListPSReq<'a>(
         pub Vec<PDUSessionResourceFailedToSetupItemPSReq<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceFailedToSetupItemPSReq<'a>>>
+        for PDUSessionResourceFailedToSetupListPSReq<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceFailedToSetupItemPSReq<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceFailedToSetupListPSReq<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceFailedToSetupListPSReq<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -59879,6 +61469,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToSetupListSURes<'a>(
         pub Vec<PDUSessionResourceFailedToSetupItemSURes<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceFailedToSetupItemSURes<'a>>>
+        for PDUSessionResourceFailedToSetupListSURes<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceFailedToSetupItemSURes<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceFailedToSetupListSURes<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceFailedToSetupListSURes<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -60044,6 +61642,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceHandoverList<'a>(pub Vec<PDUSessionResourceHandoverItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceHandoverItem<'a>>>
+        for PDUSessionResourceHandoverList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceHandoverItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceHandoverList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceHandoverList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -60244,6 +61850,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceInformationList<'a>(
         pub Vec<PDUSessionResourceInformationItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceInformationItem<'a>>>
+        for PDUSessionResourceInformationList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceInformationItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceInformationList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceInformationList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -60590,6 +62204,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceListCxtRelCpl<'a>(pub Vec<PDUSessionResourceItemCxtRelCpl<'a>>);
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceItemCxtRelCpl<'a>>>
+        for PDUSessionResourceListCxtRelCpl<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceItemCxtRelCpl<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceListCxtRelCpl<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceListCxtRelCpl<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -60641,6 +62263,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceListCxtRelReq<'a>(pub Vec<PDUSessionResourceItemCxtRelReq<'a>>);
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceItemCxtRelReq<'a>>>
+        for PDUSessionResourceListCxtRelReq<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceItemCxtRelReq<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceListCxtRelReq<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceListCxtRelReq<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -60692,6 +62322,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceListHORqd<'a>(pub Vec<PDUSessionResourceItemHORqd<'a>>);
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceItemHORqd<'a>>>
+        for PDUSessionResourceListHORqd<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceItemHORqd<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceListHORqd<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceListHORqd<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -61675,6 +63313,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceModifyListModCfm<'a>(
         pub Vec<PDUSessionResourceModifyItemModCfm<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceModifyItemModCfm<'a>>>
+        for PDUSessionResourceModifyListModCfm<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceModifyItemModCfm<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceModifyListModCfm<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceModifyListModCfm<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -61730,6 +63376,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceModifyListModInd<'a>(
         pub Vec<PDUSessionResourceModifyItemModInd<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceModifyItemModInd<'a>>>
+        for PDUSessionResourceModifyListModInd<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceModifyItemModInd<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceModifyListModInd<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceModifyListModInd<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -61785,6 +63439,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceModifyListModReq<'a>(
         pub Vec<PDUSessionResourceModifyItemModReq<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceModifyItemModReq<'a>>>
+        for PDUSessionResourceModifyListModReq<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceModifyItemModReq<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceModifyListModReq<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceModifyListModReq<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -61840,6 +63502,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceModifyListModRes<'a>(
         pub Vec<PDUSessionResourceModifyItemModRes<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceModifyItemModRes<'a>>>
+        for PDUSessionResourceModifyListModRes<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceModifyItemModRes<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceModifyListModRes<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceModifyListModRes<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -62430,6 +64100,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceNotifyList<'a>(pub Vec<PDUSessionResourceNotifyItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceNotifyItem<'a>>>
+        for PDUSessionResourceNotifyList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceNotifyItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceNotifyList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceNotifyList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -63363,6 +65041,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceReleasedListNot<'a>(
         pub Vec<PDUSessionResourceReleasedItemNot<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceReleasedItemNot<'a>>>
+        for PDUSessionResourceReleasedListNot<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceReleasedItemNot<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceReleasedListNot<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceReleasedListNot<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -63418,6 +65104,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceReleasedListPSAck<'a>(
         pub Vec<PDUSessionResourceReleasedItemPSAck<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceReleasedItemPSAck<'a>>>
+        for PDUSessionResourceReleasedListPSAck<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceReleasedItemPSAck<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceReleasedListPSAck<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceReleasedListPSAck<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -63473,6 +65167,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceReleasedListPSFail<'a>(
         pub Vec<PDUSessionResourceReleasedItemPSFail<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceReleasedItemPSFail<'a>>>
+        for PDUSessionResourceReleasedListPSFail<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceReleasedItemPSFail<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceReleasedListPSFail<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceReleasedListPSFail<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -63528,6 +65230,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceReleasedListRelRes<'a>(
         pub Vec<PDUSessionResourceReleasedItemRelRes<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceReleasedItemRelRes<'a>>>
+        for PDUSessionResourceReleasedListRelRes<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceReleasedItemRelRes<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceReleasedListRelRes<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceReleasedListRelRes<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -63823,6 +65533,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceResumeListRESReq<'a>(
         pub Vec<PDUSessionResourceResumeItemRESReq<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceResumeItemRESReq<'a>>>
+        for PDUSessionResourceResumeListRESReq<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceResumeItemRESReq<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceResumeListRESReq<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceResumeListRESReq<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -63878,6 +65596,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceResumeListRESRes<'a>(
         pub Vec<PDUSessionResourceResumeItemRESRes<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceResumeItemRESRes<'a>>>
+        for PDUSessionResourceResumeListRESRes<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceResumeItemRESRes<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceResumeListRESRes<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceResumeListRESRes<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -64053,6 +65779,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceSecondaryRATUsageList<'a>(
         pub Vec<PDUSessionResourceSecondaryRATUsageItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceSecondaryRATUsageItem<'a>>>
+        for PDUSessionResourceSecondaryRATUsageList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceSecondaryRATUsageItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceSecondaryRATUsageList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceSecondaryRATUsageList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -64826,6 +66560,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceSetupListCxtReq<'a>(
         pub Vec<PDUSessionResourceSetupItemCxtReq<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceSetupItemCxtReq<'a>>>
+        for PDUSessionResourceSetupListCxtReq<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceSetupItemCxtReq<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceSetupListCxtReq<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceSetupListCxtReq<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -64881,6 +66623,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceSetupListCxtRes<'a>(
         pub Vec<PDUSessionResourceSetupItemCxtRes<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceSetupItemCxtRes<'a>>>
+        for PDUSessionResourceSetupListCxtRes<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceSetupItemCxtRes<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceSetupListCxtRes<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceSetupListCxtRes<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -64934,6 +66684,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceSetupListHOReq<'a>(pub Vec<PDUSessionResourceSetupItemHOReq<'a>>);
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceSetupItemHOReq<'a>>>
+        for PDUSessionResourceSetupListHOReq<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceSetupItemHOReq<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceSetupListHOReq<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceSetupListHOReq<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -64985,6 +66743,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceSetupListSUReq<'a>(pub Vec<PDUSessionResourceSetupItemSUReq<'a>>);
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceSetupItemSUReq<'a>>>
+        for PDUSessionResourceSetupListSUReq<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceSetupItemSUReq<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceSetupListSUReq<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceSetupListSUReq<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -65036,6 +66802,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceSetupListSURes<'a>(pub Vec<PDUSessionResourceSetupItemSURes<'a>>);
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceSetupItemSURes<'a>>>
+        for PDUSessionResourceSetupListSURes<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceSetupItemSURes<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceSetupListSURes<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceSetupListSURes<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -65575,6 +67349,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceSuspendListSUSReq<'a>(
         pub Vec<PDUSessionResourceSuspendItemSUSReq<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceSuspendItemSUSReq<'a>>>
+        for PDUSessionResourceSuspendListSUSReq<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceSuspendItemSUSReq<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceSuspendListSUSReq<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceSuspendListSUSReq<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -65750,6 +67532,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceSwitchedList<'a>(pub Vec<PDUSessionResourceSwitchedItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceSwitchedItem<'a>>>
+        for PDUSessionResourceSwitchedList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceSwitchedItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceSwitchedList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceSwitchedList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -65917,6 +67707,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceToBeSwitchedDLList<'a>(
         pub Vec<PDUSessionResourceToBeSwitchedDLItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceToBeSwitchedDLItem<'a>>>
+        for PDUSessionResourceToBeSwitchedDLList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceToBeSwitchedDLItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceToBeSwitchedDLList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceToBeSwitchedDLList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -66222,6 +68020,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceToReleaseListHOCmd<'a>(
         pub Vec<PDUSessionResourceToReleaseItemHOCmd<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceToReleaseItemHOCmd<'a>>>
+        for PDUSessionResourceToReleaseListHOCmd<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceToReleaseItemHOCmd<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceToReleaseListHOCmd<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceToReleaseListHOCmd<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -66277,6 +68083,14 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceToReleaseListRelCmd<'a>(
         pub Vec<PDUSessionResourceToReleaseItemRelCmd<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<PDUSessionResourceToReleaseItemRelCmd<'a>>>
+        for PDUSessionResourceToReleaseListRelCmd<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PDUSessionResourceToReleaseItemRelCmd<'a>> {
+            self.0
+        }
+    }
     impl<'a> PDUSessionResourceToReleaseListRelCmd<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PDUSessionResourceToReleaseListRelCmd<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -67162,6 +68976,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PLMNIdentity(pub [u8; 3]);
+    impl crate::message::__Field<[u8; 3]> for PLMNIdentity {
+        #[inline]
+        fn __field(self) -> [u8; 3] {
+            self.0
+        }
+    }
     impl From<[u8; 3]> for PLMNIdentity {
         fn from(value: [u8; 3]) -> Self {
             Self(value)
@@ -67194,6 +69014,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PLMNListforQMC(pub Vec<PLMNIdentity>);
+    impl crate::message::__Field<Vec<PLMNIdentity>> for PLMNListforQMC {
+        #[inline]
+        fn __field(self) -> Vec<PLMNIdentity> {
+            self.0
+        }
+    }
     impl From<Vec<PLMNIdentity>> for PLMNListforQMC {
         fn from(value: Vec<PLMNIdentity>) -> Self {
             Self(value)
@@ -67344,6 +69170,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PLMNSupportList<'a>(pub Vec<PLMNSupportItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<PLMNSupportItem<'a>>> for PLMNSupportList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<PLMNSupportItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> PLMNSupportList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PLMNSupportList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -67776,6 +69608,12 @@ pub mod ngap_ies {
     #[doc = " P"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PacketDelayBudget(pub u64);
+    impl crate::message::__Field<u64> for PacketDelayBudget {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for PacketDelayBudget {
         fn from(value: u64) -> Self {
             Self(value)
@@ -67917,6 +69755,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PacketLossRate(pub u64);
+    impl crate::message::__Field<u64> for PacketLossRate {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for PacketLossRate {
         fn from(value: u64) -> Self {
             Self(value)
@@ -68061,6 +69905,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PagingAttemptCount(pub u64);
+    impl crate::message::__Field<u64> for PagingAttemptCount {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for PagingAttemptCount {
         fn from(value: u64) -> Self {
             Self(value)
@@ -68727,6 +70577,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PagingPolicyDifferentiationList<'a>(pub Vec<PagingPolicyDifferentiationItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<PagingPolicyDifferentiationItem<'a>>>
+        for PagingPolicyDifferentiationList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<PagingPolicyDifferentiationItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> PagingPolicyDifferentiationList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PagingPolicyDifferentiationList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -68778,6 +70636,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PagingPolicyIndicator(pub u64);
+    impl crate::message::__Field<u64> for PagingPolicyIndicator {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for PagingPolicyIndicator {
         fn from(value: u64) -> Self {
             Self(value)
@@ -69034,6 +70898,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PartiallyAllowedNSSAI<'a>(pub Vec<PartiallyAllowedNSSAIItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<PartiallyAllowedNSSAIItem<'a>>> for PartiallyAllowedNSSAI<'a> {
+        #[inline]
+        fn __field(self) -> Vec<PartiallyAllowedNSSAIItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> PartiallyAllowedNSSAI<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PartiallyAllowedNSSAI<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -69713,6 +71583,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PeriodicRegistrationUpdateTimer(pub Bits);
+    impl crate::message::__Field<Bits> for PeriodicRegistrationUpdateTimer {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for PeriodicRegistrationUpdateTimer {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -69846,6 +71722,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct Periodicity(pub u64);
+    impl crate::message::__Field<u64> for Periodicity {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for Periodicity {
         fn from(value: u64) -> Self {
             Self(value)
@@ -70209,6 +72091,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PortNumber(pub [u8; 2]);
+    impl crate::message::__Field<[u8; 2]> for PortNumber {
+        #[inline]
+        fn __field(self) -> [u8; 2] {
+            self.0
+        }
+    }
     impl From<[u8; 2]> for PortNumber {
         fn from(value: [u8; 2]) -> Self {
             Self(value)
@@ -70331,6 +72219,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PriorityLevelARP(pub u8);
+    impl crate::message::__Field<u8> for PriorityLevelARP {
+        #[inline]
+        fn __field(self) -> u8 {
+            self.0
+        }
+    }
     impl From<u8> for PriorityLevelARP {
         fn from(value: u8) -> Self {
             Self(value)
@@ -70365,6 +72259,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PriorityLevelQos(pub u64);
+    impl crate::message::__Field<u64> for PriorityLevelQos {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for PriorityLevelQos {
         fn from(value: u64) -> Self {
             Self(value)
@@ -70952,6 +72852,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct QoEReference(pub [u8; 6]);
+    impl crate::message::__Field<[u8; 6]> for QoEReference {
+        #[inline]
+        fn __field(self) -> [u8; 6] {
+            self.0
+        }
+    }
     impl From<[u8; 6]> for QoEReference {
         fn from(value: [u8; 6]) -> Self {
             Self(value)
@@ -70984,6 +72890,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QoEReferenceList(pub Vec<QoEReference>);
+    impl crate::message::__Field<Vec<QoEReference>> for QoEReferenceList {
+        #[inline]
+        fn __field(self) -> Vec<QoEReference> {
+            self.0
+        }
+    }
     impl From<Vec<QoEReference>> for QoEReferenceList {
         fn from(value: Vec<QoEReference>) -> Self {
             Self(value)
@@ -71026,6 +72938,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QoSFlowList(pub Vec<QosFlowIdentifier>);
+    impl crate::message::__Field<Vec<QosFlowIdentifier>> for QoSFlowList {
+        #[inline]
+        fn __field(self) -> Vec<QosFlowIdentifier> {
+            self.0
+        }
+    }
     impl From<Vec<QosFlowIdentifier>> for QoSFlowList {
         fn from(value: Vec<QosFlowIdentifier>) -> Self {
             Self(value)
@@ -71226,6 +73144,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QoSFlowTSCList<'a>(pub Vec<QoSFlowTSCItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<QoSFlowTSCItem<'a>>> for QoSFlowTSCList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<QoSFlowTSCItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> QoSFlowTSCList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `QoSFlowTSCList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -71460,6 +73384,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QoSFlowsUsageReportList<'a>(pub Vec<QoSFlowsUsageReportItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<QoSFlowsUsageReportItem<'a>>> for QoSFlowsUsageReportList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<QoSFlowsUsageReportItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> QoSFlowsUsageReportList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `QoSFlowsUsageReportList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -71697,6 +73627,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowAcceptedList<'a>(pub Vec<QosFlowAcceptedItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<QosFlowAcceptedItem<'a>>> for QosFlowAcceptedList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<QosFlowAcceptedItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> QosFlowAcceptedList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `QosFlowAcceptedList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -71899,6 +73835,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowAddOrModifyRequestList<'a>(pub Vec<QosFlowAddOrModifyRequestItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<QosFlowAddOrModifyRequestItem<'a>>>
+        for QosFlowAddOrModifyRequestList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<QosFlowAddOrModifyRequestItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> QosFlowAddOrModifyRequestList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `QosFlowAddOrModifyRequestList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -72040,6 +73984,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowAddOrModifyResponseList<'a>(pub Vec<QosFlowAddOrModifyResponseItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<QosFlowAddOrModifyResponseItem<'a>>>
+        for QosFlowAddOrModifyResponseList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<QosFlowAddOrModifyResponseItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> QosFlowAddOrModifyResponseList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `QosFlowAddOrModifyResponseList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -72331,6 +74283,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowAdditionalInfoListRelCom<'a>(pub Vec<QosFlowAdditionalInfoItemRelCom<'a>>);
+    impl<'a> crate::message::__Field<Vec<QosFlowAdditionalInfoItemRelCom<'a>>>
+        for QosFlowAdditionalInfoListRelCom<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<QosFlowAdditionalInfoItemRelCom<'a>> {
+            self.0
+        }
+    }
     impl<'a> QosFlowAdditionalInfoListRelCom<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `QosFlowAdditionalInfoListRelCom<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -72382,6 +74342,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowAdditionalInfoListRelRes<'a>(pub Vec<QosFlowAdditionalInfoItemRelRes<'a>>);
+    impl<'a> crate::message::__Field<Vec<QosFlowAdditionalInfoItemRelRes<'a>>>
+        for QosFlowAdditionalInfoListRelRes<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<QosFlowAdditionalInfoItemRelRes<'a>> {
+            self.0
+        }
+    }
     impl<'a> QosFlowAdditionalInfoListRelRes<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `QosFlowAdditionalInfoListRelRes<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -72613,6 +74581,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowFeedbackList<'a>(pub Vec<QosFlowFeedbackItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<QosFlowFeedbackItem<'a>>> for QosFlowFeedbackList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<QosFlowFeedbackItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> QosFlowFeedbackList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `QosFlowFeedbackList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -72662,6 +74636,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct QosFlowIdentifier(pub u64);
+    impl crate::message::__Field<u64> for QosFlowIdentifier {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for QosFlowIdentifier {
         fn from(value: u64) -> Self {
             Self(value)
@@ -72812,6 +74792,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowInformationList<'a>(pub Vec<QosFlowInformationItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<QosFlowInformationItem<'a>>> for QosFlowInformationList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<QosFlowInformationItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> QosFlowInformationList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `QosFlowInformationList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -73192,6 +75178,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowListWithCause<'a>(pub Vec<QosFlowWithCauseItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<QosFlowWithCauseItem<'a>>> for QosFlowListWithCause<'a> {
+        #[inline]
+        fn __field(self) -> Vec<QosFlowWithCauseItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> QosFlowListWithCause<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `QosFlowListWithCause<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -73241,6 +75233,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowListWithDataForwarding<'a>(pub Vec<QosFlowItemWithDataForwarding<'a>>);
+    impl<'a> crate::message::__Field<Vec<QosFlowItemWithDataForwarding<'a>>>
+        for QosFlowListWithDataForwarding<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<QosFlowItemWithDataForwarding<'a>> {
+            self.0
+        }
+    }
     impl<'a> QosFlowListWithDataForwarding<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `QosFlowListWithDataForwarding<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -73382,6 +75382,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowModifyConfirmList<'a>(pub Vec<QosFlowModifyConfirmItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<QosFlowModifyConfirmItem<'a>>>
+        for QosFlowModifyConfirmList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<QosFlowModifyConfirmItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> QosFlowModifyConfirmList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `QosFlowModifyConfirmList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -73539,6 +75547,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowNotifyList<'a>(pub Vec<QosFlowNotifyItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<QosFlowNotifyItem<'a>>> for QosFlowNotifyList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<QosFlowNotifyItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> QosFlowNotifyList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `QosFlowNotifyList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -73715,6 +75729,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowParametersList<'a>(pub Vec<QosFlowParametersItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<QosFlowParametersItem<'a>>> for QosFlowParametersList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<QosFlowParametersItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> QosFlowParametersList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `QosFlowParametersList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -73978,6 +75998,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowPerTNLInformationList<'a>(pub Vec<QosFlowPerTNLInformationItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<QosFlowPerTNLInformationItem<'a>>>
+        for QosFlowPerTNLInformationList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<QosFlowPerTNLInformationItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> QosFlowPerTNLInformationList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `QosFlowPerTNLInformationList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -74169,6 +76197,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowSetupRequestList<'a>(pub Vec<QosFlowSetupRequestItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<QosFlowSetupRequestItem<'a>>> for QosFlowSetupRequestList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<QosFlowSetupRequestItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> QosFlowSetupRequestList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `QosFlowSetupRequestList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -74308,6 +76342,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowToBeForwardedList<'a>(pub Vec<QosFlowToBeForwardedItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<QosFlowToBeForwardedItem<'a>>>
+        for QosFlowToBeForwardedList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<QosFlowToBeForwardedItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> QosFlowToBeForwardedList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `QosFlowToBeForwardedList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -74463,6 +76505,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct QosMonitoringReportingFrequency(pub u64);
+    impl crate::message::__Field<u64> for QosMonitoringReportingFrequency {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for QosMonitoringReportingFrequency {
         fn from(value: u64) -> Self {
             Self(value)
@@ -74540,6 +76588,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct RANAIOTDeviceNGAPID(pub u32);
+    impl crate::message::__Field<u32> for RANAIOTDeviceNGAPID {
+        #[inline]
+        fn __field(self) -> u32 {
+            self.0
+        }
+    }
     impl From<u32> for RANAIOTDeviceNGAPID {
         fn from(value: u32) -> Self {
             Self(value)
@@ -74719,6 +76773,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct RANUENGAPID(pub u32);
+    impl crate::message::__Field<u32> for RANUENGAPID {
+        #[inline]
+        fn __field(self) -> u32 {
+            self.0
+        }
+    }
     impl From<u32> for RANUENGAPID {
         fn from(value: u32) -> Self {
             Self(value)
@@ -74755,6 +76815,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RANNodeName<'a>(pub Cow<'a, str>);
+    impl<'a> crate::message::__Field<Cow<'a, str>> for RANNodeName<'a> {
+        #[inline]
+        fn __field(self) -> Cow<'a, str> {
+            self.0
+        }
+    }
     impl<'a> RANNodeName<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `RANNodeName<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -74805,6 +76871,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RANNodeNameUTF8String<'a>(pub Cow<'a, str>);
+    impl<'a> crate::message::__Field<Cow<'a, str>> for RANNodeNameUTF8String<'a> {
+        #[inline]
+        fn __field(self) -> Cow<'a, str> {
+            self.0
+        }
+    }
     impl<'a> RANNodeNameUTF8String<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `RANNodeNameUTF8String<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -74855,6 +76927,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RANNodeNameVisibleString<'a>(pub Cow<'a, str>);
+    impl<'a> crate::message::__Field<Cow<'a, str>> for RANNodeNameVisibleString<'a> {
+        #[inline]
+        fn __field(self) -> Cow<'a, str> {
+            self.0
+        }
+    }
     impl<'a> RANNodeNameVisibleString<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `RANNodeNameVisibleString<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -74905,6 +76983,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct RANPagingPriority(pub u16);
+    impl crate::message::__Field<u16> for RANPagingPriority {
+        #[inline]
+        fn __field(self) -> u16 {
+            self.0
+        }
+    }
     impl From<u16> for RANPagingPriority {
         fn from(value: u16) -> Self {
             Self(value)
@@ -75131,6 +77215,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RANTSSCellList<'a>(pub Vec<RANTSSCellItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<RANTSSCellItem<'a>>> for RANTSSCellList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<RANTSSCellItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> RANTSSCellList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `RANTSSCellList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -75998,6 +78088,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RATRestrictionInformation<'a>(pub BitString<'a>);
+    impl<'a> crate::message::__Field<BitString<'a>> for RATRestrictionInformation<'a> {
+        #[inline]
+        fn __field(self) -> BitString<'a> {
+            self.0
+        }
+    }
     impl<'a> RATRestrictionInformation<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `RATRestrictionInformation<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -76038,6 +78134,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RATRestrictions<'a>(pub Vec<RATRestrictionsItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<RATRestrictionsItem<'a>>> for RATRestrictions<'a> {
+        #[inline]
+        fn __field(self) -> Vec<RATRestrictionsItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> RATRestrictions<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `RATRestrictions<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -76199,6 +78301,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RGLevelWirelineAccessCharacteristics<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for RGLevelWirelineAccessCharacteristics<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> RGLevelWirelineAccessCharacteristics<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `RGLevelWirelineAccessCharacteristics<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -76531,6 +78639,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct RNCID(pub u16);
+    impl crate::message::__Field<u16> for RNCID {
+        #[inline]
+        fn __field(self) -> u16 {
+            self.0
+        }
+    }
     impl From<u16> for RNCID {
         fn from(value: u16) -> Self {
             Self(value)
@@ -76567,6 +78681,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RRCContainer<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for RRCContainer<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> RRCContainer<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `RRCContainer<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -77091,6 +79211,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RSPPQoSFlowList<'a>(pub Vec<RSPPQoSFlowItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<RSPPQoSFlowItem<'a>>> for RSPPQoSFlowList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<RSPPQoSFlowItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> RSPPQoSFlowList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `RSPPQoSFlowList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -77322,6 +79448,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RecommendedCellList<'a>(pub Vec<RecommendedCellItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<RecommendedCellItem<'a>>> for RecommendedCellList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<RecommendedCellItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> RecommendedCellList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `RecommendedCellList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -77552,6 +79684,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RecommendedRANNodeList<'a>(pub Vec<RecommendedRANNodeItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<RecommendedRANNodeItem<'a>>> for RecommendedRANNodeList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<RecommendedRANNodeItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> RecommendedRANNodeList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `RecommendedRANNodeList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -77964,6 +80102,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct RejectedNSSAIinPLMN(pub [u8; 32]);
+    impl crate::message::__Field<[u8; 32]> for RejectedNSSAIinPLMN {
+        #[inline]
+        fn __field(self) -> [u8; 32] {
+            self.0
+        }
+    }
     impl From<[u8; 32]> for RejectedNSSAIinPLMN {
         fn from(value: [u8; 32]) -> Self {
             Self(value)
@@ -78009,6 +80153,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct RejectedNSSAIinTA(pub [u8; 32]);
+    impl crate::message::__Field<[u8; 32]> for RejectedNSSAIinTA {
+        #[inline]
+        fn __field(self) -> [u8; 32] {
+            self.0
+        }
+    }
     impl From<[u8; 32]> for RejectedNSSAIinTA {
         fn from(value: [u8; 32]) -> Self {
             Self(value)
@@ -78041,6 +80191,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct RelativeAMFCapacity(pub u8);
+    impl crate::message::__Field<u8> for RelativeAMFCapacity {
+        #[inline]
+        fn __field(self) -> u8 {
+            self.0
+        }
+    }
     impl From<u8> for RelativeAMFCapacity {
         fn from(value: u8) -> Self {
             Self(value)
@@ -78075,6 +80231,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct RepetitionPeriod(pub u32);
+    impl crate::message::__Field<u32> for RepetitionPeriod {
+        #[inline]
+        fn __field(self) -> u32 {
+            self.0
+        }
+    }
     impl From<u32> for RepetitionPeriod {
         fn from(value: u32) -> Self {
             Self(value)
@@ -78211,6 +80373,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ReportCharacteristics(pub Bits);
+    impl crate::message::__Field<Bits> for ReportCharacteristics {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for ReportCharacteristics {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -78603,6 +80771,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ReportingThreshold(pub u64);
+    impl crate::message::__Field<u64> for ReportingThreshold {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for ReportingThreshold {
         fn from(value: u64) -> Self {
             Self(value)
@@ -78635,6 +80809,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RequestedNSSAI<'a>(pub Vec<RequestedNSSAIItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<RequestedNSSAIItem<'a>>> for RequestedNSSAI<'a> {
+        #[inline]
+        fn __field(self) -> Vec<RequestedNSSAIItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> RequestedNSSAI<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `RequestedNSSAI<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -79120,6 +81300,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RoutingID<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for RoutingID<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> RoutingID<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `RoutingID<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -79282,6 +81468,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct SCGActivationTime(pub u16);
+    impl crate::message::__Field<u16> for SCGActivationTime {
+        #[inline]
+        fn __field(self) -> u16 {
+            self.0
+        }
+    }
     impl From<u16> for SCGActivationTime {
         fn from(value: u16) -> Self {
             Self(value)
@@ -79318,6 +81510,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SCTPTLAs<'a>(pub Vec<TransportLayerAddress<'a>>);
+    impl<'a> crate::message::__Field<Vec<TransportLayerAddress<'a>>> for SCTPTLAs<'a> {
+        #[inline]
+        fn __field(self) -> Vec<TransportLayerAddress<'a>> {
+            self.0
+        }
+    }
     impl<'a> SCTPTLAs<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `SCTPTLAs<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -79380,6 +81578,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct SD(pub [u8; 3]);
+    impl crate::message::__Field<[u8; 3]> for SD {
+        #[inline]
+        fn __field(self) -> [u8; 3] {
+            self.0
+        }
+    }
     impl From<[u8; 3]> for SD {
         fn from(value: [u8; 3]) -> Self {
             Self(value)
@@ -80078,6 +82282,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SNPNCellIdListforMDT<'a>(pub Vec<SNPNCellIdListforMDTItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<SNPNCellIdListforMDTItem<'a>>> for SNPNCellIdListforMDT<'a> {
+        #[inline]
+        fn __field(self) -> Vec<SNPNCellIdListforMDTItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> SNPNCellIdListforMDT<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `SNPNCellIdListforMDT<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -80232,6 +82442,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SNPNListforMDT<'a>(pub Vec<SNPNListforMDTItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<SNPNListforMDTItem<'a>>> for SNPNListforMDT<'a> {
+        #[inline]
+        fn __field(self) -> Vec<SNPNListforMDTItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> SNPNListforMDT<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `SNPNListforMDT<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -80386,6 +82602,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SNPNTAIListforMDT<'a>(pub Vec<SNPNTAIListforMDTItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<SNPNTAIListforMDTItem<'a>>> for SNPNTAIListforMDT<'a> {
+        #[inline]
+        fn __field(self) -> Vec<SNPNTAIListforMDTItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> SNPNTAIListforMDT<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `SNPNTAIListforMDT<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -81127,6 +83349,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct SST(pub [u8; 1]);
+    impl crate::message::__Field<[u8; 1]> for SST {
+        #[inline]
+        fn __field(self) -> [u8; 1] {
+            self.0
+        }
+    }
     impl From<[u8; 1]> for SST {
         fn from(value: [u8; 1]) -> Self {
             Self(value)
@@ -81850,6 +84078,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash)]
     pub struct SecurityKey<'a>(pub BitString<'a>);
+    impl<'a> crate::message::__Field<BitString<'a>> for SecurityKey<'a> {
+        #[inline]
+        fn __field(self) -> BitString<'a> {
+            self.0
+        }
+    }
     impl<'a> SecurityKey<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `SecurityKey<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -82148,6 +84382,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SensorMeasConfigNameList<'a>(pub Vec<SensorMeasConfigNameItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<SensorMeasConfigNameItem<'a>>>
+        for SensorMeasConfigNameList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<SensorMeasConfigNameItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> SensorMeasConfigNameList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `SensorMeasConfigNameList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -82589,6 +84831,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct SerialNumber(pub Bits);
+    impl crate::message::__Field<Bits> for SerialNumber {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for SerialNumber {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -82746,6 +84994,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ServedGUAMIList<'a>(pub Vec<ServedGUAMIItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<ServedGUAMIItem<'a>>> for ServedGUAMIList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<ServedGUAMIItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> ServedGUAMIList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `ServedGUAMIList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -82795,6 +85049,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ServiceAreaInformation<'a>(pub Vec<ServiceAreaInformationItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<ServiceAreaInformationItem<'a>>>
+        for ServiceAreaInformation<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<ServiceAreaInformationItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> ServiceAreaInformation<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `ServiceAreaInformation<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -83036,6 +85298,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct SgNBUEX2APID(pub u32);
+    impl crate::message::__Field<u32> for SgNBUEX2APID {
+        #[inline]
+        fn __field(self) -> u32 {
+            self.0
+        }
+    }
     impl From<u32> for SgNBUEX2APID {
         fn from(value: u32) -> Self {
             Self(value)
@@ -83292,6 +85560,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SliceMDTList<'a>(pub Vec<SliceMDTItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<SliceMDTItem<'a>>> for SliceMDTList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<SliceMDTItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> SliceMDTList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `SliceMDTList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -83431,6 +85705,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SliceOverloadList<'a>(pub Vec<SliceOverloadItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<SliceOverloadItem<'a>>> for SliceOverloadList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<SliceOverloadItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> SliceOverloadList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `SliceOverloadList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -83570,6 +85850,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SliceSupportList<'a>(pub Vec<SliceSupportItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<SliceSupportItem<'a>>> for SliceSupportList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<SliceSupportItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> SliceSupportList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `SliceSupportList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -83619,6 +85905,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SliceSupportListQMC<'a>(pub Vec<SliceSupportQMCItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<SliceSupportQMCItem<'a>>> for SliceSupportListQMC<'a> {
+        #[inline]
+        fn __field(self) -> Vec<SliceSupportQMCItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> SliceSupportListQMC<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `SliceSupportListQMC<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -84373,6 +86665,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SourceToTargetTransparentContainer<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for SourceToTargetTransparentContainer<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> SourceToTargetTransparentContainer<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `SourceToTargetTransparentContainer<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -84557,6 +86855,14 @@ pub mod ngap_ies {
     #[doc = ""]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SuccessfulHandoverReportList<'a>(pub Vec<SuccessfulHandoverReportItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<SuccessfulHandoverReportItem<'a>>>
+        for SuccessfulHandoverReportList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<SuccessfulHandoverReportItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> SuccessfulHandoverReportList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `SuccessfulHandoverReportList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -84712,6 +87018,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SuccessfulPSCellChangeReportList<'a>(pub Vec<SuccessfulPSCellChangeReportItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<SuccessfulPSCellChangeReportItem<'a>>>
+        for SuccessfulPSCellChangeReportList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<SuccessfulPSCellChangeReportItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> SuccessfulPSCellChangeReportList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `SuccessfulPSCellChangeReportList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -84868,6 +87182,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SupportedTAList<'a>(pub Vec<SupportedTAItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<SupportedTAItem<'a>>> for SupportedTAList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<SupportedTAItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> SupportedTAList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `SupportedTAList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -84960,6 +87280,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SupportedUETypeList(pub Vec<SupportedUEType>);
+    impl crate::message::__Field<Vec<SupportedUEType>> for SupportedUETypeList {
+        #[inline]
+        fn __field(self) -> Vec<SupportedUEType> {
+            self.0
+        }
+    }
     impl From<Vec<SupportedUEType>> for SupportedUETypeList {
         fn from(value: Vec<SupportedUEType>) -> Self {
             Self(value)
@@ -85002,6 +87328,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct SurvivalTime(pub u64);
+    impl crate::message::__Field<u64> for SurvivalTime {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for SurvivalTime {
         fn from(value: u64) -> Self {
             Self(value)
@@ -85354,6 +87686,12 @@ pub mod ngap_ies {
     #[doc = " T"]
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TAC(pub [u8; 3]);
+    impl crate::message::__Field<[u8; 3]> for TAC {
+        #[inline]
+        fn __field(self) -> [u8; 3] {
+            self.0
+        }
+    }
     impl From<[u8; 3]> for TAC {
         fn from(value: [u8; 3]) -> Self {
             Self(value)
@@ -85386,6 +87724,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TACListInNRNTN(pub Vec<TAC>);
+    impl crate::message::__Field<Vec<TAC>> for TACListInNRNTN {
+        #[inline]
+        fn __field(self) -> Vec<TAC> {
+            self.0
+        }
+    }
     impl From<Vec<TAC>> for TACListInNRNTN {
         fn from(value: Vec<TAC>) -> Self {
             Self(value)
@@ -85713,6 +88057,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAIBroadcastEUTRA<'a>(pub Vec<TAIBroadcastEUTRAItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<TAIBroadcastEUTRAItem<'a>>> for TAIBroadcastEUTRA<'a> {
+        #[inline]
+        fn __field(self) -> Vec<TAIBroadcastEUTRAItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> TAIBroadcastEUTRA<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TAIBroadcastEUTRA<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -85874,6 +88224,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAIBroadcastNR<'a>(pub Vec<TAIBroadcastNRItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<TAIBroadcastNRItem<'a>>> for TAIBroadcastNR<'a> {
+        #[inline]
+        fn __field(self) -> Vec<TAIBroadcastNRItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> TAIBroadcastNR<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TAIBroadcastNR<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -86033,6 +88389,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAICancelledEUTRA<'a>(pub Vec<TAICancelledEUTRAItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<TAICancelledEUTRAItem<'a>>> for TAICancelledEUTRA<'a> {
+        #[inline]
+        fn __field(self) -> Vec<TAICancelledEUTRAItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> TAICancelledEUTRA<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TAICancelledEUTRA<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -86194,6 +88556,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAICancelledNR<'a>(pub Vec<TAICancelledNRItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<TAICancelledNRItem<'a>>> for TAICancelledNR<'a> {
+        #[inline]
+        fn __field(self) -> Vec<TAICancelledNRItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> TAICancelledNR<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TAICancelledNR<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -86353,6 +88721,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAIListForInactive<'a>(pub Vec<TAIListForInactiveItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<TAIListForInactiveItem<'a>>> for TAIListForInactive<'a> {
+        #[inline]
+        fn __field(self) -> Vec<TAIListForInactiveItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> TAIListForInactive<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TAIListForInactive<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -86489,6 +88863,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAIListForPaging<'a>(pub Vec<TAIListForPagingItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<TAIListForPagingItem<'a>>> for TAIListForPaging<'a> {
+        #[inline]
+        fn __field(self) -> Vec<TAIListForPagingItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> TAIListForPaging<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TAIListForPaging<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -86625,6 +89005,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAIListForRestart<'a>(pub Vec<TAI<'a>>);
+    impl<'a> crate::message::__Field<Vec<TAI<'a>>> for TAIListForRestart<'a> {
+        #[inline]
+        fn __field(self) -> Vec<TAI<'a>> {
+            self.0
+        }
+    }
     impl<'a> TAIListForRestart<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TAIListForRestart<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -86674,6 +89060,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAIListForWarning<'a>(pub Vec<TAI<'a>>);
+    impl<'a> crate::message::__Field<Vec<TAI<'a>>> for TAIListForWarning<'a> {
+        #[inline]
+        fn __field(self) -> Vec<TAI<'a>> {
+            self.0
+        }
+    }
     impl<'a> TAIListForWarning<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TAIListForWarning<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -86723,6 +89115,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAIListforMDT<'a>(pub Vec<TAI<'a>>);
+    impl<'a> crate::message::__Field<Vec<TAI<'a>>> for TAIListforMDT<'a> {
+        #[inline]
+        fn __field(self) -> Vec<TAI<'a>> {
+            self.0
+        }
+    }
     impl<'a> TAIListforMDT<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TAIListforMDT<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -86772,6 +89170,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAIListforQMC<'a>(pub Vec<TAI<'a>>);
+    impl<'a> crate::message::__Field<Vec<TAI<'a>>> for TAIListforQMC<'a> {
+        #[inline]
+        fn __field(self) -> Vec<TAI<'a>> {
+            self.0
+        }
+    }
     impl<'a> TAIListforQMC<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TAIListforQMC<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -86908,6 +89312,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAIMBSSupportList<'a>(pub Vec<TAIMBSSupportItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<TAIMBSSupportItem<'a>>> for TAIMBSSupportList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<TAIMBSSupportItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> TAIMBSSupportList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TAIMBSSupportList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -87067,6 +89477,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAINSAGSupportList<'a>(pub Vec<TAINSAGSupportItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<TAINSAGSupportItem<'a>>> for TAINSAGSupportList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<TAINSAGSupportItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> TAINSAGSupportList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TAINSAGSupportList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -87116,6 +89532,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAListforMDT(pub Vec<TAC>);
+    impl crate::message::__Field<Vec<TAC>> for TAListforMDT {
+        #[inline]
+        fn __field(self) -> Vec<TAC> {
+            self.0
+        }
+    }
     impl From<Vec<TAC>> for TAListforMDT {
         fn from(value: Vec<TAC>) -> Self {
             Self(value)
@@ -87158,6 +89580,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAListforQMC(pub Vec<TAC>);
+    impl crate::message::__Field<Vec<TAC>> for TAListforQMC {
+        #[inline]
+        fn __field(self) -> Vec<TAC> {
+            self.0
+        }
+    }
     impl From<Vec<TAC>> for TAListforQMC {
         fn from(value: Vec<TAC>) -> Self {
             Self(value)
@@ -87200,6 +89628,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TLContainer<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for TLContainer<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> TLContainer<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TLContainer<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -87263,6 +89697,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TMGI(pub [u8; 6]);
+    impl crate::message::__Field<[u8; 6]> for TMGI {
+        #[inline]
+        fn __field(self) -> [u8; 6] {
+            self.0
+        }
+    }
     impl From<[u8; 6]> for TMGI {
         fn from(value: [u8; 6]) -> Self {
             Self(value)
@@ -87295,6 +89735,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TNAPID<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for TNAPID<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> TNAPID<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TNAPID<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -87426,6 +89872,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TNLAddressWeightFactor(pub u8);
+    impl crate::message::__Field<u8> for TNLAddressWeightFactor {
+        #[inline]
+        fn __field(self) -> u8 {
+            self.0
+        }
+    }
     impl From<u8> for TNLAddressWeightFactor {
         fn from(value: u8) -> Self {
             Self(value)
@@ -87570,6 +90022,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TNLAssociationList<'a>(pub Vec<TNLAssociationItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<TNLAssociationItem<'a>>> for TNLAssociationList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<TNLAssociationItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> TNLAssociationList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TNLAssociationList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -88196,6 +90654,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TWAPID<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for TWAPID<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> TWAPID<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TWAPID<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -88751,6 +91215,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TargetNSSAI<'a>(pub Vec<TargetNSSAIItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<TargetNSSAIItem<'a>>> for TargetNSSAI<'a> {
+        #[inline]
+        fn __field(self) -> Vec<TargetNSSAIItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> TargetNSSAI<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TargetNSSAI<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -89445,6 +91915,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TargetToSourceTransparentContainer<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for TargetToSourceTransparentContainer<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> TargetToSourceTransparentContainer<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TargetToSourceTransparentContainer<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -89605,6 +92081,12 @@ pub mod ngap_ies {
     #[doc = " The octets of the OCTET STRING are encoded according to the specifications of the target system."]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TargettoSourceFailureTransparentContainer<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for TargettoSourceFailureTransparentContainer<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> TargettoSourceFailureTransparentContainer<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TargettoSourceFailureTransparentContainer<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -89655,6 +92137,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ThresholdRSRP(pub u8);
+    impl crate::message::__Field<u8> for ThresholdRSRP {
+        #[inline]
+        fn __field(self) -> u8 {
+            self.0
+        }
+    }
     impl From<u8> for ThresholdRSRP {
         fn from(value: u8) -> Self {
             Self(value)
@@ -89689,6 +92177,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ThresholdRSRQ(pub u8);
+    impl crate::message::__Field<u8> for ThresholdRSRQ {
+        #[inline]
+        fn __field(self) -> u8 {
+            self.0
+        }
+    }
     impl From<u8> for ThresholdRSRQ {
         fn from(value: u8) -> Self {
             Self(value)
@@ -89723,6 +92217,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ThresholdSINR(pub u8);
+    impl crate::message::__Field<u8> for ThresholdSINR {
+        #[inline]
+        fn __field(self) -> u8 {
+            self.0
+        }
+    }
     impl From<u8> for ThresholdSINR {
         fn from(value: u8) -> Self {
             Self(value)
@@ -89868,6 +92368,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TimeSinceFailure(pub u64);
+    impl crate::message::__Field<u64> for TimeSinceFailure {
+        #[inline]
+        fn __field(self) -> u64 {
+            self.0
+        }
+    }
     impl From<u64> for TimeSinceFailure {
         fn from(value: u64) -> Self {
             Self(value)
@@ -89913,6 +92419,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TimeStamp(pub [u8; 4]);
+    impl crate::message::__Field<[u8; 4]> for TimeStamp {
+        #[inline]
+        fn __field(self) -> [u8; 4] {
+            self.0
+        }
+    }
     impl From<[u8; 4]> for TimeStamp {
         fn from(value: [u8; 4]) -> Self {
             Self(value)
@@ -90253,6 +92765,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TimeUEStayedInCell(pub u16);
+    impl crate::message::__Field<u16> for TimeUEStayedInCell {
+        #[inline]
+        fn __field(self) -> u16 {
+            self.0
+        }
+    }
     impl From<u16> for TimeUEStayedInCell {
         fn from(value: u16) -> Self {
             Self(value)
@@ -90289,6 +92807,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TimeUEStayedInCellEnhancedGranularity(pub u16);
+    impl crate::message::__Field<u16> for TimeUEStayedInCellEnhancedGranularity {
+        #[inline]
+        fn __field(self) -> u16 {
+            self.0
+        }
+    }
     impl From<u16> for TimeUEStayedInCellEnhancedGranularity {
         fn from(value: u16) -> Self {
             Self(value)
@@ -90728,6 +93252,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TrafficLoadReductionIndication(pub u8);
+    impl crate::message::__Field<u8> for TrafficLoadReductionIndication {
+        #[inline]
+        fn __field(self) -> u8 {
+            self.0
+        }
+    }
     impl From<u8> for TrafficLoadReductionIndication {
         fn from(value: u8) -> Self {
             Self(value)
@@ -90762,6 +93292,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TransportLayerAddress<'a>(pub BitString<'a>);
+    impl<'a> crate::message::__Field<BitString<'a>> for TransportLayerAddress<'a> {
+        #[inline]
+        fn __field(self) -> BitString<'a> {
+            self.0
+        }
+    }
     impl<'a> TransportLayerAddress<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `TransportLayerAddress<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -91641,6 +94177,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEPagingList<'a>(pub Vec<UEPagingItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<UEPagingItem<'a>>> for UEPagingList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<UEPagingItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> UEPagingList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `UEPagingList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -91862,6 +94404,14 @@ pub mod ngap_ies {
     pub struct UEAssociatedLogicalNGConnectionList<'a>(
         pub Vec<UEAssociatedLogicalNGConnectionItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<UEAssociatedLogicalNGConnectionItem<'a>>>
+        for UEAssociatedLogicalNGConnectionList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<UEAssociatedLogicalNGConnectionItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> UEAssociatedLogicalNGConnectionList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `UEAssociatedLogicalNGConnectionList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -92531,6 +95081,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEAppLayerMeasInfoList<'a>(pub Vec<UEAppLayerMeasInfoItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<UEAppLayerMeasInfoItem<'a>>> for UEAppLayerMeasInfoList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<UEAppLayerMeasInfoItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> UEAppLayerMeasInfoList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `UEAppLayerMeasInfoList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -92976,6 +95532,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEHistoryInformation<'a>(pub Vec<LastVisitedCellItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<LastVisitedCellItem<'a>>> for UEHistoryInformation<'a> {
+        #[inline]
+        fn __field(self) -> Vec<LastVisitedCellItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> UEHistoryInformation<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `UEHistoryInformation<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -93426,6 +95988,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEPresenceInAreaOfInterestList<'a>(pub Vec<UEPresenceInAreaOfInterestItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<UEPresenceInAreaOfInterestItem<'a>>>
+        for UEPresenceInAreaOfInterestList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<UEPresenceInAreaOfInterestItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> UEPresenceInAreaOfInterestList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `UEPresenceInAreaOfInterestList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -93567,6 +96137,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UERadioCapability<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for UERadioCapability<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> UERadioCapability<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `UERadioCapability<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -93763,6 +96339,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UERadioCapabilityForPagingOfEUTRA<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for UERadioCapabilityForPagingOfEUTRA<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> UERadioCapabilityForPagingOfEUTRA<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `UERadioCapabilityForPagingOfEUTRA<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -93813,6 +96395,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UERadioCapabilityForPagingOfNBIoT<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for UERadioCapabilityForPagingOfNBIoT<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> UERadioCapabilityForPagingOfNBIoT<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `UERadioCapabilityForPagingOfNBIoT<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -93863,6 +96451,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UERadioCapabilityForPagingOfNR<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for UERadioCapabilityForPagingOfNR<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> UERadioCapabilityForPagingOfNR<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `UERadioCapabilityForPagingOfNR<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -93913,6 +96507,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UERadioCapabilityID<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for UERadioCapabilityID<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> UERadioCapabilityID<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `UERadioCapabilityID<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -94307,6 +96907,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UESliceMaximumBitRateList<'a>(pub Vec<UESliceMaximumBitRateItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<UESliceMaximumBitRateItem<'a>>>
+        for UESliceMaximumBitRateList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<UESliceMaximumBitRateItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> UESliceMaximumBitRateList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `UESliceMaximumBitRateList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -94462,6 +97070,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ULNASCount(pub Bits);
+    impl crate::message::__Field<Bits> for ULNASCount {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for ULNASCount {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -94504,6 +97118,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ULNASMAC(pub Bits);
+    impl crate::message::__Field<Bits> for ULNASMAC {
+        #[inline]
+        fn __field(self) -> Bits {
+            self.0
+        }
+    }
     impl From<Bits> for ULNASMAC {
         fn from(value: Bits) -> Self {
             Self(value)
@@ -94666,6 +97286,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ULNGUUPTNLModifyList<'a>(pub Vec<ULNGUUPTNLModifyItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<ULNGUUPTNLModifyItem<'a>>> for ULNGUUPTNLModifyList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<ULNGUUPTNLModifyItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> ULNGUUPTNLModifyList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `ULNGUUPTNLModifyList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -94929,6 +97555,14 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UPTransportLayerInformationList<'a>(pub Vec<UPTransportLayerInformationItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<UPTransportLayerInformationItem<'a>>>
+        for UPTransportLayerInformationList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<UPTransportLayerInformationItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> UPTransportLayerInformationList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `UPTransportLayerInformationList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -95102,6 +97736,14 @@ pub mod ngap_ies {
     pub struct UPTransportLayerInformationPairList<'a>(
         pub Vec<UPTransportLayerInformationPairItem<'a>>,
     );
+    impl<'a> crate::message::__Field<Vec<UPTransportLayerInformationPairItem<'a>>>
+        for UPTransportLayerInformationPairList<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<UPTransportLayerInformationPairItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> UPTransportLayerInformationPairList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `UPTransportLayerInformationPairList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -95155,6 +97797,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct URIAddress<'a>(pub Cow<'a, str>);
+    impl<'a> crate::message::__Field<Cow<'a, str>> for URIAddress<'a> {
+        #[inline]
+        fn __field(self) -> Cow<'a, str> {
+            self.0
+        }
+    }
     impl<'a> URIAddress<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `URIAddress<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -95356,6 +98004,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UnavailableGUAMIList<'a>(pub Vec<UnavailableGUAMIItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<UnavailableGUAMIItem<'a>>> for UnavailableGUAMIList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<UnavailableGUAMIItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> UnavailableGUAMIList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `UnavailableGUAMIList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -95405,6 +98059,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UpdateFeedback<'a>(pub BitString<'a>);
+    impl<'a> crate::message::__Field<BitString<'a>> for UpdateFeedback<'a> {
+        #[inline]
+        fn __field(self) -> BitString<'a> {
+            self.0
+        }
+    }
     impl<'a> UpdateFeedback<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `UpdateFeedback<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -97011,6 +99671,12 @@ pub mod ngap_ies {
     #[doc = " V"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct VolumeTimedReportList<'a>(pub Vec<VolumeTimedReportItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<VolumeTimedReportItem<'a>>> for VolumeTimedReportList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<VolumeTimedReportItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> VolumeTimedReportList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `VolumeTimedReportList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -97274,6 +99940,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct WLANMeasConfigNameList<'a>(pub Vec<WLANMeasConfigNameItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<WLANMeasConfigNameItem<'a>>> for WLANMeasConfigNameList<'a> {
+        #[inline]
+        fn __field(self) -> Vec<WLANMeasConfigNameItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> WLANMeasConfigNameList<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `WLANMeasConfigNameList<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -97590,6 +100262,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct WLANName<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for WLANName<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> WLANName<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `WLANName<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -97736,6 +100414,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct WarningAreaCoordinates<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for WarningAreaCoordinates<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> WarningAreaCoordinates<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `WarningAreaCoordinates<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -97942,6 +100626,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct WarningMessageContents<'a>(pub Octets<'a>);
+    impl<'a> crate::message::__Field<Octets<'a>> for WarningMessageContents<'a> {
+        #[inline]
+        fn __field(self) -> Octets<'a> {
+            self.0
+        }
+    }
     impl<'a> WarningMessageContents<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `WarningMessageContents<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -98005,6 +100695,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct WarningSecurityInfo(pub [u8; 50]);
+    impl crate::message::__Field<[u8; 50]> for WarningSecurityInfo {
+        #[inline]
+        fn __field(self) -> [u8; 50] {
+            self.0
+        }
+    }
     impl From<[u8; 50]> for WarningSecurityInfo {
         fn from(value: [u8; 50]) -> Self {
             Self(value)
@@ -98050,6 +100746,12 @@ pub mod ngap_ies {
     }
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct WarningType(pub [u8; 2]);
+    impl crate::message::__Field<[u8; 2]> for WarningType {
+        #[inline]
+        fn __field(self) -> [u8; 2] {
+            self.0
+        }
+    }
     impl From<[u8; 2]> for WarningType {
         fn from(value: [u8; 2]) -> Self {
             Self(value)
@@ -98208,6 +100910,12 @@ pub mod ngap_ies {
     #[doc = " X"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct XnExtTLAs<'a>(pub Vec<XnExtTLAItem<'a>>);
+    impl<'a> crate::message::__Field<Vec<XnExtTLAItem<'a>>> for XnExtTLAs<'a> {
+        #[inline]
+        fn __field(self) -> Vec<XnExtTLAItem<'a>> {
+            self.0
+        }
+    }
     impl<'a> XnExtTLAs<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `XnExtTLAs<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -98257,6 +100965,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct XnGTPTLAs<'a>(pub Vec<TransportLayerAddress<'a>>);
+    impl<'a> crate::message::__Field<Vec<TransportLayerAddress<'a>>> for XnGTPTLAs<'a> {
+        #[inline]
+        fn __field(self) -> Vec<TransportLayerAddress<'a>> {
+            self.0
+        }
+    }
     impl<'a> XnGTPTLAs<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `XnGTPTLAs<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -98306,6 +101020,12 @@ pub mod ngap_ies {
     }
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct XnTLAs<'a>(pub Vec<TransportLayerAddress<'a>>);
+    impl<'a> crate::message::__Field<Vec<TransportLayerAddress<'a>>> for XnTLAs<'a> {
+        #[inline]
+        fn __field(self) -> Vec<TransportLayerAddress<'a>> {
+            self.0
+        }
+    }
     impl<'a> XnTLAs<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `XnTLAs<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]
@@ -104924,6 +107644,14 @@ pub mod ngap_pdu_contents {
     #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PrivateMessagePrivateIEs<'a>(pub Vec<AnonymousPrivateMessagePrivateIEs<'a>>);
+    impl<'a> crate::message::__Field<Vec<AnonymousPrivateMessagePrivateIEs<'a>>>
+        for PrivateMessagePrivateIEs<'a>
+    {
+        #[inline]
+        fn __field(self) -> Vec<AnonymousPrivateMessagePrivateIEs<'a>> {
+            self.0
+        }
+    }
     impl<'a> PrivateMessagePrivateIEs<'a> {
         /// The same value, which borrows nothing and is kept as long as it is needed: a `PrivateMessagePrivateIEs<'static>`, which is the type to write in a struct. What the value borrowed from the octets that it was decoded from is copied.
         #[doc(alias("to_owned", "owned", "keep"))]

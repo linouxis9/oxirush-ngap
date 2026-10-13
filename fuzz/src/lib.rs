@@ -35,7 +35,7 @@
 mod protocol;
 
 use protocol::{ANY_MESSAGE, Borrowed, Error, ErrorKind, PDU_TYPE, Pdu, ROOT};
-use protocol::{aper, fuzzing, inspect};
+use protocol::{aper, hooks, inspect};
 use serde_json::Value;
 
 /// What the crate wrote of a value that it read, or why it read none, for the oracle.
@@ -109,7 +109,7 @@ pub fn decode(octets: &[u8]) {
     }
 
     // The message as its type.
-    if let Some((name, written)) = fuzzing::message_read_and_written(&pdu) {
+    if let Some((name, written)) = hooks::message_read_and_written(&pdu) {
         oracle::same_octets(name, message(&pdu), ours(&written));
     }
 }
@@ -153,7 +153,7 @@ pub fn view(octets: &[u8]) {
     let Ok(pdu) = Pdu::decode(octets) else {
         return;
     };
-    fuzzing::observe(observed);
+    hooks::observe(observed);
     let Ok(view) = pdu.to_view() else {
         // A message that does not decode has no view, and no tree.
         assert!(pdu.to_tree().is_err(), "{pdu:?}");

@@ -1,5 +1,7 @@
 //! What the fuzz targets of `fuzz/` take from the inside of the crate. It is compiled
-//! with `--cfg fuzzing`, which cargo-fuzz sets, and is no part of the crate without.
+//! with `--cfg oxirush_ngap_hooks`, which the fuzz targets of the crate are built with, and is no
+//! part of the crate without: the fuzz build of another program, for which cargo-fuzz
+//! sets `fuzzing`, has the crate as every other build has it.
 //!
 //! A target compares what the crate does with what the codec of rasn does, which the
 //! oracle of the tests has. The oracle is no dependency of the crate, so the comparison

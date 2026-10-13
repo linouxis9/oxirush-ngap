@@ -168,10 +168,10 @@ extern crate alloc;
 
 mod check;
 mod error;
-#[cfg(fuzzing)]
-#[doc(hidden)]
-pub mod fuzzing;
 pub mod helpers;
+#[cfg(oxirush_ngap_hooks)]
+#[doc(hidden)]
+pub mod hooks;
 #[cfg(feature = "inspect")]
 pub mod inspect;
 #[cfg(feature = "inspect")]

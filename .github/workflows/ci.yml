@@ -101,6 +101,9 @@ jobs:
   fuzz:
     name: Fuzz the codec and the JSON forms against the oracle (3 minutes)
     runs-on: ubuntu-latest
+    env:
+      # What the targets take from the inside of the crate.
+      RUSTFLAGS: --cfg oxirush_ngap_hooks
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly

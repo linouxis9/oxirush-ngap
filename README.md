@@ -1371,6 +1371,8 @@ CI runs each for a minute, from the vectors and the captured PDUs.
 ```bash
 cargo install cargo-fuzz
 ./fuzz/seed.sh
+# What the targets take from the inside of the crate is behind its own name
+export RUSTFLAGS="--cfg oxirush_ngap_hooks"
 cargo +nightly fuzz run decode -- -max_total_time=60 -max_len=4096
 ```
 

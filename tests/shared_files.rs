@@ -25,7 +25,7 @@ const SHARED: &[(&str, u64)] = &[
     ("fuzz/fuzz_targets/paths.rs", 0x68daa1c78c9c02da),
     ("fuzz/fuzz_targets/view.rs", 0xa0e7481987d00ee0),
     ("fuzz/seed.sh", 0x45e3d85c62151ab4),
-    ("fuzz/src/lib.rs", 0xee97c91adb23f265),
+    ("fuzz/src/lib.rs", 0x18cd62014301c840),
     ("oracle/src/lib.rs", 0x791a184a7bb58f34),
     ("oracle/src/per.rs", 0xfcdad4b315ccfb9a),
     ("oracle/src/sized.rs", 0x65f4c1e8ee1593db),

@@ -26,10 +26,11 @@ inspect = ["dep:serde_json", "oxirush-aper/inspect"]
 [package.metadata.docs.rs]
 all-features = true
 
-# cargo-fuzz sets `fuzzing`: with it the crate has what the targets of `fuzz/` take
-# from its inside.
+# `--cfg oxirush_ngap_hooks` gives the fuzz targets of `fuzz/` what they take from the
+# inside of the crate, the module `hooks`. No other build has it: cargo-fuzz sets
+# `fuzzing` for every crate of a fuzz build, and that changes nothing here.
 [lints.rust]
-unexpected_cfgs = { level = "warn", check-cfg = ['cfg(fuzzing)'] }
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(oxirush_ngap_hooks)'] }
 
 [dependencies]
 oxirush-aper = "0.1.0"

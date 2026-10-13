@@ -91,8 +91,9 @@ what each type became.
   `Box<dyn std::error::Error>`. `error.kind()` is an `ErrorKind` to match on,
   and the message says what is wrong and where: `these octets do not decode
   as NGAP-PDU: the octets end before the value does, in its field
-  `value``. It is the error of `oxirush-aper`, and has no `source()`: no
-  error of rasn is behind it.
+  `value``. An error of an encoding names the member that does not encode
+  in the same way, and `error.fields()` gives the fields. It is the error of
+  `oxirush-aper`, and has no `source()`: no error of rasn is behind it.
 - `decode_value::<T>()` takes the type of a message alone, and checks that
   the PDU holds that message: on another one the error has the kind
   `WrongMessage`, where 0.4.2 decoded the octets as whatever type was named,

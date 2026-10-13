@@ -6,7 +6,8 @@
     non_snake_case,
     non_upper_case_globals,
     unused,
-    clippy::too_many_arguments
+    clippy::too_many_arguments,
+    clippy::collapsible_if
 )]
 pub mod ngap_common_data_types {
     use super::*;
@@ -334,7 +335,8 @@ pub mod ngap_common_data_types {
     non_snake_case,
     non_upper_case_globals,
     unused,
-    clippy::too_many_arguments
+    clippy::too_many_arguments,
+    clippy::collapsible_if
 )]
 pub mod ngap_constants {
     use super::*;
@@ -1072,7 +1074,8 @@ pub mod ngap_constants {
     non_snake_case,
     non_upper_case_globals,
     unused,
-    clippy::too_many_arguments
+    clippy::too_many_arguments,
+    clippy::collapsible_if
 )]
 pub mod ngap_containers {
     use super::*;
@@ -1158,8 +1161,12 @@ pub mod ngap_containers {
     impl Encode for ProtocolIEField<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            self.id.encode(writer)?;
-            self.criticality.encode(writer)?;
+            if let Err(error) = self.id.encode(writer) {
+                return Err(error.in_field("id"));
+            }
+            if let Err(error) = self.criticality.encode(writer) {
+                return Err(error.in_field("criticality"));
+            }
             writer.open_type(&self.value);
             Ok(())
         }
@@ -1309,8 +1316,12 @@ pub mod ngap_containers {
     impl Encode for ProtocolExtensionField<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            self.id.encode(writer)?;
-            self.criticality.encode(writer)?;
+            if let Err(error) = self.id.encode(writer) {
+                return Err(error.in_field("id"));
+            }
+            if let Err(error) = self.criticality.encode(writer) {
+                return Err(error.in_field("criticality"));
+            }
             writer.open_type(&self.extension_value);
             Ok(())
         }
@@ -1393,7 +1404,8 @@ pub mod ngap_containers {
     non_snake_case,
     non_upper_case_globals,
     unused,
-    clippy::too_many_arguments
+    clippy::too_many_arguments,
+    clippy::collapsible_if
 )]
 pub mod ngap_ies {
     use super::*;
@@ -1473,10 +1485,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.a2_x_guaranteed_flow_bit_rate.encode(writer)?;
-            self.a2_x_maximum_flow_bit_rate.encode(writer)?;
+            if let Err(error) = self.a2_x_guaranteed_flow_bit_rate.encode(writer) {
+                return Err(error.in_field("a2_x_guaranteed_flow_bit_rate"));
+            }
+            if let Err(error) = self.a2_x_maximum_flow_bit_rate.encode(writer) {
+                return Err(error.in_field("a2_x_maximum_flow_bit_rate"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -1671,13 +1689,19 @@ pub mod ngap_ies {
             writer.bit(self.i_e_extensions.is_some());
             writer.unsigned_extensible(self.a2_x_pqi, 0, 255);
             if let Some(value) = &self.a2_x_pc5_flow_bit_rates {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("a2_x_pc5_flow_bit_rates"));
+                }
             }
             if let Some(value) = &self.a2_x_range {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("a2_x_range"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -1849,12 +1873,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.a2_x_pc5_link_aggregate_bit_rates.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.a2_x_pc5_qo_s_flow_list.encode(writer)?;
+            if let Err(error) = self.a2_x_pc5_qo_s_flow_list.encode(writer) {
+                return Err(error.in_field("a2_x_pc5_qo_s_flow_list"));
+            }
             if let Some(value) = &self.a2_x_pc5_link_aggregate_bit_rates {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("a2_x_pc5_link_aggregate_bit_rates"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -2030,13 +2060,19 @@ pub mod ngap_ies {
             writer.bit(self.a_iotfname_utf8_string.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.a_iotfname_visible_string {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("a_iotfname_visible_string"));
+                }
             }
             if let Some(value) = &self.a_iotfname_utf8_string {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("a_iotfname_utf8_string"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -2221,7 +2257,9 @@ pub mod ngap_ies {
     impl Encode for AIOTSessionReleaseCommandTransfer<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -2311,12 +2349,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.criticality_diagnostics.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.correlation_identifier.encode(writer)?;
+            if let Err(error) = self.correlation_identifier.encode(writer) {
+                return Err(error.in_field("correlation_identifier"));
+            }
             if let Some(value) = &self.criticality_diagnostics {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("criticality_diagnostics"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -2429,10 +2473,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.correlation_identifier.encode(writer)?;
-            self.cause.encode(writer)?;
+            if let Err(error) = self.correlation_identifier.encode(writer) {
+                return Err(error.in_field("correlation_identifier"));
+            }
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -2526,7 +2576,9 @@ pub mod ngap_ies {
             writer.bit(self.i_e_extensions.is_some());
             writer.unsigned_extensible(self.estimateof_expected_d2_rmsg_size, 1, 256);
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -2784,12 +2836,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.r_an_aiot_device_ngap_id.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.a_io_t_naspdu.encode(writer)?;
+            if let Err(error) = self.a_io_t_naspdu.encode(writer) {
+                return Err(error.in_field("a_io_t_naspdu"));
+            }
             if let Some(value) = &self.r_an_aiot_device_ngap_id {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("r_an_aiot_device_ngap_id"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -3012,7 +3070,9 @@ pub mod ngap_ies {
                 writer.unsigned_extensible(*value, 1, 256);
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -3221,10 +3281,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.reader_index.encode(writer)?;
-            self.device_report_list.encode(writer)?;
+            if let Err(error) = self.reader_index.encode(writer) {
+                return Err(error.in_field("reader_index"));
+            }
+            if let Err(error) = self.device_report_list.encode(writer) {
+                return Err(error.in_field("device_report_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -3420,10 +3486,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.globalg_nb_id.encode(writer)?;
-            self.reader_index.encode(writer)?;
+            if let Err(error) = self.globalg_nb_id.encode(writer) {
+                return Err(error.in_field("globalg_nb_id"));
+            }
+            if let Err(error) = self.reader_index.encode(writer) {
+                return Err(error.in_field("reader_index"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -3582,13 +3654,19 @@ pub mod ngap_ies {
             writer.bit(self.requested_aio_tarea_list.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.requested_reader_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("requested_reader_list"));
+                }
             }
             if let Some(value) = &self.requested_aio_tarea_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("requested_aio_tarea_list"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -3845,13 +3923,19 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.n_id.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
             if let Some(value) = &self.n_id {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("n_id"));
+                }
             }
             writer.octet_array(&self.a_io_tarea_code);
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -3946,9 +4030,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.a_mf_tnlassociation_address.encode(writer)?;
+            if let Err(error) = self.a_mf_tnlassociation_address.encode(writer) {
+                return Err(error.in_field("a_mf_tnlassociation_address"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -4109,13 +4197,21 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.t_nlassociation_usage.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.a_mf_tnlassociation_address.encode(writer)?;
-            if let Some(value) = &self.t_nlassociation_usage {
-                value.encode(writer)?;
+            if let Err(error) = self.a_mf_tnlassociation_address.encode(writer) {
+                return Err(error.in_field("a_mf_tnlassociation_address"));
             }
-            self.t_nladdress_weight_factor.encode(writer)?;
+            if let Some(value) = &self.t_nlassociation_usage {
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("t_nlassociation_usage"));
+                }
+            }
+            if let Err(error) = self.t_nladdress_weight_factor.encode(writer) {
+                return Err(error.in_field("t_nladdress_weight_factor"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -4276,9 +4372,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.a_mf_tnlassociation_address.encode(writer)?;
+            if let Err(error) = self.a_mf_tnlassociation_address.encode(writer) {
+                return Err(error.in_field("a_mf_tnlassociation_address"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -4446,15 +4546,23 @@ pub mod ngap_ies {
             writer.bit(self.t_nlassociation_usage.is_some());
             writer.bit(self.t_nladdress_weight_factor.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.a_mf_tnlassociation_address.encode(writer)?;
+            if let Err(error) = self.a_mf_tnlassociation_address.encode(writer) {
+                return Err(error.in_field("a_mf_tnlassociation_address"));
+            }
             if let Some(value) = &self.t_nlassociation_usage {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("t_nlassociation_usage"));
+                }
             }
             if let Some(value) = &self.t_nladdress_weight_factor {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("t_nladdress_weight_factor"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -5126,11 +5234,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.a_un3_device_access.encode(writer)?;
-            self.existing_ngconnectionwith_same_location
-                .encode(writer)?;
+            if let Err(error) = self.a_un3_device_access.encode(writer) {
+                return Err(error.in_field("a_un3_device_access"));
+            }
+            if let Err(error) = self.existing_ngconnectionwith_same_location.encode(writer) {
+                return Err(error.in_field("existing_ngconnectionwith_same_location"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -5328,10 +5441,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.location_reporting_reference_idto_be_cancelled
-                .encode(writer)?;
+            if let Err(error) = self
+                .location_reporting_reference_idto_be_cancelled
+                .encode(writer)
+            {
+                return Err(error.in_field("location_reporting_reference_idto_be_cancelled"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -5515,14 +5634,21 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.additional_dlforwarding_uptnlinformation.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.additional_dl_ngu_up_tnlinformation.encode(writer)?;
-            self.additional_qos_flow_setup_response_list
-                .encode(writer)?;
+            if let Err(error) = self.additional_dl_ngu_up_tnlinformation.encode(writer) {
+                return Err(error.in_field("additional_dl_ngu_up_tnlinformation"));
+            }
+            if let Err(error) = self.additional_qos_flow_setup_response_list.encode(writer) {
+                return Err(error.in_field("additional_qos_flow_setup_response_list"));
+            }
             if let Some(value) = &self.additional_dlforwarding_uptnlinformation {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("additional_dlforwarding_uptnlinformation"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -5741,10 +5867,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_rcgi.encode(writer)?;
-            self.t_ai.encode(writer)?;
+            if let Err(error) = self.n_rcgi.encode(writer) {
+                return Err(error.in_field("n_rcgi"));
+            }
+            if let Err(error) = self.t_ai.encode(writer) {
+                return Err(error.in_field("t_ai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -5840,10 +5972,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.altitude.encode(writer)?;
-            self.time_stamp.encode(writer)?;
+            if let Err(error) = self.altitude.encode(writer) {
+                return Err(error.in_field("altitude"));
+            }
+            if let Err(error) = self.time_stamp.encode(writer) {
+                return Err(error.in_field("time_stamp"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -5962,14 +6100,24 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.aerial_ue_report_periodicity.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.higher_altitude_threshold.encode(writer)?;
-            self.lower_altitude_threshold.encode(writer)?;
-            if let Some(value) = &self.aerial_ue_report_periodicity {
-                value.encode(writer)?;
+            if let Err(error) = self.higher_altitude_threshold.encode(writer) {
+                return Err(error.in_field("higher_altitude_threshold"));
             }
-            self.area_id.encode(writer)?;
+            if let Err(error) = self.lower_altitude_threshold.encode(writer) {
+                return Err(error.in_field("lower_altitude_threshold"));
+            }
+            if let Some(value) = &self.aerial_ue_report_periodicity {
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("aerial_ue_report_periodicity"));
+                }
+            }
+            if let Err(error) = self.area_id.encode(writer) {
+                return Err(error.in_field("area_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -6089,10 +6237,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.aerial_ue_flight_information_reporting_control
-                .encode(writer)?;
+            if let Err(error) = self
+                .aerial_ue_flight_information_reporting_control
+                .encode(writer)
+            {
+                return Err(error.in_field("aerial_ue_flight_information_reporting_control"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -6381,11 +6535,19 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.priority_level_arp.encode(writer)?;
-            self.pre_emption_capability.encode(writer)?;
-            self.pre_emption_vulnerability.encode(writer)?;
+            if let Err(error) = self.priority_level_arp.encode(writer) {
+                return Err(error.in_field("priority_level_arp"));
+            }
+            if let Err(error) = self.pre_emption_capability.encode(writer) {
+                return Err(error.in_field("pre_emption_capability"));
+            }
+            if let Err(error) = self.pre_emption_vulnerability.encode(writer) {
+                return Err(error.in_field("pre_emption_vulnerability"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -6595,11 +6757,19 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            self.p_ni_npn_restricted.encode(writer)?;
-            self.allowed_cag_list_per_plmn.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = self.p_ni_npn_restricted.encode(writer) {
+                return Err(error.in_field("p_ni_npn_restricted"));
+            }
+            if let Err(error) = self.allowed_cag_list_per_plmn.encode(writer) {
+                return Err(error.in_field("allowed_cag_list_per_plmn"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -6800,9 +6970,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.s_nssai.encode(writer)?;
+            if let Err(error) = self.s_nssai.encode(writer) {
+                return Err(error.in_field("s_nssai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -7058,21 +7232,33 @@ pub mod ngap_ies {
             writer.bit(self.packet_delay_budget.is_some());
             writer.bit(self.packet_error_rate.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.alternative_qo_spara_set_index.encode(writer)?;
+            if let Err(error) = self.alternative_qo_spara_set_index.encode(writer) {
+                return Err(error.in_field("alternative_qo_spara_set_index"));
+            }
             if let Some(value) = &self.guaranteed_flow_bit_rate_dl {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("guaranteed_flow_bit_rate_dl"));
+                }
             }
             if let Some(value) = &self.guaranteed_flow_bit_rate_ul {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("guaranteed_flow_bit_rate_ul"));
+                }
             }
             if let Some(value) = &self.packet_delay_budget {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("packet_delay_budget"));
+                }
             }
             if let Some(value) = &self.packet_error_rate {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("packet_error_rate"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -7464,16 +7650,24 @@ pub mod ngap_ies {
             writer.bit(self.area_of_interest_rannode_list.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.area_of_interest_tailist {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("area_of_interest_tailist"));
+                }
             }
             if let Some(value) = &self.area_of_interest_cell_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("area_of_interest_cell_list"));
+                }
             }
             if let Some(value) = &self.area_of_interest_rannode_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("area_of_interest_rannode_list"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -7589,9 +7783,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_gran_cgi.encode(writer)?;
+            if let Err(error) = self.n_gran_cgi.encode(writer) {
+                return Err(error.in_field("n_gran_cgi"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -7734,10 +7932,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.area_of_interest.encode(writer)?;
-            self.location_reporting_reference_id.encode(writer)?;
+            if let Err(error) = self.area_of_interest.encode(writer) {
+                return Err(error.in_field("area_of_interest"));
+            }
+            if let Err(error) = self.location_reporting_reference_id.encode(writer) {
+                return Err(error.in_field("location_reporting_reference_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -7884,9 +8088,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.global_rannode_id.encode(writer)?;
+            if let Err(error) = self.global_rannode_id.encode(writer) {
+                return Err(error.in_field("global_rannode_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -8016,9 +8224,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.t_ai.encode(writer)?;
+            if let Err(error) = self.t_ai.encode(writer) {
+                return Err(error.in_field("t_ai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -8427,12 +8639,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.pci_list_for_mdt.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.nr_frequency_info.encode(writer)?;
+            if let Err(error) = self.nr_frequency_info.encode(writer) {
+                return Err(error.in_field("nr_frequency_info"));
+            }
             if let Some(value) = &self.pci_list_for_mdt {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("pci_list_for_mdt"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -8732,13 +8950,19 @@ pub mod ngap_ies {
             writer.bit(self.paging_attempt_information.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.assistance_data_for_recommended_cells {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("assistance_data_for_recommended_cells"));
+                }
             }
             if let Some(value) = &self.paging_attempt_information {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("paging_attempt_information"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -8844,9 +9068,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.recommended_cells_for_paging.encode(writer)?;
+            if let Err(error) = self.recommended_cells_for_paging.encode(writer) {
+                return Err(error.in_field("recommended_cells_for_paging"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -8976,10 +9204,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_qos_flow_identifier.encode(writer)?;
-            self.associated_unicast_qos_flow_identifier.encode(writer)?;
+            if let Err(error) = self.m_bs_qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("m_bs_qos_flow_identifier"));
+            }
+            if let Err(error) = self.associated_unicast_qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("associated_unicast_qos_flow_identifier"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -9145,10 +9379,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_qos_flow_identifier.encode(writer)?;
-            self.associated_unicast_qos_flow_identifier.encode(writer)?;
+            if let Err(error) = self.m_bs_qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("m_bs_qos_flow_identifier"));
+            }
+            if let Err(error) = self.associated_unicast_qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("associated_unicast_qos_flow_identifier"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -9367,12 +9607,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.qos_flow_mapping_indication.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_flow_identifier.encode(writer)?;
+            if let Err(error) = self.qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("qos_flow_identifier"));
+            }
             if let Some(value) = &self.qos_flow_mapping_indication {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("qos_flow_mapping_indication"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -9616,9 +9862,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.reporting_threshold.encode(writer)?;
+            if let Err(error) = self.reporting_threshold.encode(writer) {
+                return Err(error.in_field("reporting_threshold"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -9877,13 +10127,19 @@ pub mod ngap_ies {
             writer.bit(self.playout_delay_for_media_startup.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.application_layer_buffer_level_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("application_layer_buffer_level_list"));
+                }
             }
             if let Some(value) = &self.playout_delay_for_media_startup {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("playout_delay_for_media_startup"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -10050,13 +10306,19 @@ pub mod ngap_ies {
             writer.bit(self.max_nrof_rs_indexes_to_report.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.beam_measurements_report_quantity {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("beam_measurements_report_quantity"));
+                }
             }
             if let Some(value) = &self.max_nrof_rs_indexes_to_report {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("max_nrof_rs_indexes_to_report"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -10312,11 +10574,19 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.r_srp.encode(writer)?;
-            self.r_srq.encode(writer)?;
-            self.s_inr.encode(writer)?;
+            if let Err(error) = self.r_srp.encode(writer) {
+                return Err(error.in_field("r_srp"));
+            }
+            if let Err(error) = self.r_srq.encode(writer) {
+                return Err(error.in_field("r_srq"));
+            }
+            if let Err(error) = self.s_inr.encode(writer) {
+                return Err(error.in_field("s_inr"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -10483,9 +10753,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.bluetooth_name.encode(writer)?;
+            if let Err(error) = self.bluetooth_name.encode(writer) {
+                return Err(error.in_field("bluetooth_name"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -10693,15 +10967,23 @@ pub mod ngap_ies {
             writer.bit(self.bluetooth_meas_config_name_list.is_some());
             writer.bit(self.bt_rssi.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.bluetooth_meas_config.encode(writer)?;
+            if let Err(error) = self.bluetooth_meas_config.encode(writer) {
+                return Err(error.in_field("bluetooth_meas_config"));
+            }
             if let Some(value) = &self.bluetooth_meas_config_name_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("bluetooth_meas_config_name_list"));
+                }
             }
             if let Some(value) = &self.bt_rssi {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("bt_rssi"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -11280,10 +11562,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            self.t_aislice_support_list.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = self.t_aislice_support_list.encode(writer) {
+                return Err(error.in_field("t_aislice_support_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -11448,13 +11736,21 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.criticality_diagnostics.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_session_id.encode(writer)?;
-            self.cause.encode(writer)?;
+            if let Err(error) = self.m_bs_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_session_id"));
+            }
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.criticality_diagnostics {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("criticality_diagnostics"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -11567,10 +11863,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_session_id.encode(writer)?;
-            self.m_bs_session_tnlinfo_ngran.encode(writer)?;
+            if let Err(error) = self.m_bs_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_session_id"));
+            }
+            if let Err(error) = self.m_bs_session_tnlinfo_ngran.encode(writer) {
+                return Err(error.in_field("m_bs_session_tnlinfo_ngran"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -11664,9 +11966,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_session_id.encode(writer)?;
+            if let Err(error) = self.m_bs_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_session_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -11812,7 +12118,9 @@ pub mod ngap_ies {
             writer.unsigned_extensible(self.burst_arrival_time_window_start, 0, 640000);
             writer.unsigned_extensible(self.burst_arrival_time_window_end, 0, 640000);
             if let Some(value) = &self.i_e_extension {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extension"));
+                }
             }
             Ok(())
         }
@@ -12060,10 +12368,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.plmn_id.encode(writer)?;
-            self.c_agid.encode(writer)?;
+            if let Err(error) = self.plmn_id.encode(writer) {
+                return Err(error.in_field("plmn_id"));
+            }
+            if let Err(error) = self.c_agid.encode(writer) {
+                return Err(error.in_field("c_agid"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -12283,10 +12597,14 @@ pub mod ngap_ies {
             writer.bit(self.expected_uebehaviour.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.expected_uebehaviour {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("expected_uebehaviour"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -12484,10 +12802,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.plmn_identity.encode(writer)?;
-            self.cn_type.encode(writer)?;
+            if let Err(error) = self.plmn_identity.encode(writer) {
+                return Err(error.in_field("plmn_identity"));
+            }
+            if let Err(error) = self.cn_type.encode(writer) {
+                return Err(error.in_field("cn_type"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -12661,10 +12985,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            writer.unsigned(u64::from(self.p_dcp_sn12), 0, 4095)?;
-            writer.unsigned(u64::from(self.h_fn_pdcp_sn12), 0, 1048575)?;
+            if let Err(error) = writer.unsigned(u64::from(self.p_dcp_sn12), 0, 4095) {
+                return Err(error.in_field("p_dcp_sn12"));
+            }
+            if let Err(error) = writer.unsigned(u64::from(self.h_fn_pdcp_sn12), 0, 1048575) {
+                return Err(error.in_field("h_fn_pdcp_sn12"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -12770,10 +13100,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            writer.unsigned(u64::from(self.p_dcp_sn18), 0, 262143)?;
-            writer.unsigned(u64::from(self.h_fn_pdcp_sn18), 0, 16383)?;
+            if let Err(error) = writer.unsigned(u64::from(self.p_dcp_sn18), 0, 262143) {
+                return Err(error.in_field("p_dcp_sn18"));
+            }
+            if let Err(error) = writer.unsigned(u64::from(self.h_fn_pdcp_sn18), 0, 16383) {
+                return Err(error.in_field("h_fn_pdcp_sn18"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -13056,10 +13392,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.e_utra_cgi.encode(writer)?;
-            self.number_of_broadcasts.encode(writer)?;
+            if let Err(error) = self.e_utra_cgi.encode(writer) {
+                return Err(error.in_field("e_utra_cgi"));
+            }
+            if let Err(error) = self.number_of_broadcasts.encode(writer) {
+                return Err(error.in_field("number_of_broadcasts"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -13206,10 +13548,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_r_cgi.encode(writer)?;
-            self.number_of_broadcasts.encode(writer)?;
+            if let Err(error) = self.n_r_cgi.encode(writer) {
+                return Err(error.in_field("n_r_cgi"));
+            }
+            if let Err(error) = self.number_of_broadcasts.encode(writer) {
+                return Err(error.in_field("number_of_broadcasts"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -13356,10 +13704,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.e_utra_cgi.encode(writer)?;
-            self.number_of_broadcasts.encode(writer)?;
+            if let Err(error) = self.e_utra_cgi.encode(writer) {
+                return Err(error.in_field("e_utra_cgi"));
+            }
+            if let Err(error) = self.number_of_broadcasts.encode(writer) {
+                return Err(error.in_field("number_of_broadcasts"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -13506,10 +13860,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_r_cgi.encode(writer)?;
-            self.number_of_broadcasts.encode(writer)?;
+            if let Err(error) = self.n_r_cgi.encode(writer) {
+                return Err(error.in_field("n_r_cgi"));
+            }
+            if let Err(error) = self.number_of_broadcasts.encode(writer) {
+                return Err(error.in_field("number_of_broadcasts"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -13698,9 +14058,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.candidate_cell_id.encode(writer)?;
+            if let Err(error) = self.candidate_cell_id.encode(writer) {
+                return Err(error.in_field("candidate_cell_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -13784,9 +14148,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.candidate_cell.encode(writer)?;
+            if let Err(error) = self.candidate_cell.encode(writer) {
+                return Err(error.in_field("candidate_cell"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -13929,9 +14297,13 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
             writer.unsigned_extensible(self.candidate_pci, 0, 1007);
-            writer.unsigned(u64::from(self.candidate_nrarfcn), 0, 3279165)?;
+            if let Err(error) = writer.unsigned(u64::from(self.candidate_nrarfcn), 0, 3279165) {
+                return Err(error.in_field("candidate_nrarfcn"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -14072,9 +14444,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.candidate_relay_ue_id.encode(writer)?;
+            if let Err(error) = self.candidate_relay_ue_id.encode(writer) {
+                return Err(error.in_field("candidate_relay_ue_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -14844,10 +15220,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_gran_cgi.encode(writer)?;
-            self.cell_caglist.encode(writer)?;
+            if let Err(error) = self.n_gran_cgi.encode(writer) {
+                return Err(error.in_field("n_gran_cgi"));
+            }
+            if let Err(error) = self.cell_caglist.encode(writer) {
+                return Err(error.in_field("cell_caglist"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -14934,9 +15316,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.cell_id_listfor_mdt.encode(writer)?;
+            if let Err(error) = self.cell_id_listfor_mdt.encode(writer) {
+                return Err(error.in_field("cell_id_listfor_mdt"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -15021,9 +15407,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.cell_id_listfor_mdt.encode(writer)?;
+            if let Err(error) = self.cell_id_listfor_mdt.encode(writer) {
+                return Err(error.in_field("cell_id_listfor_mdt"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -15107,9 +15497,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.cell_id_listfor_qmc.encode(writer)?;
+            if let Err(error) = self.cell_id_listfor_qmc.encode(writer) {
+                return Err(error.in_field("cell_id_listfor_qmc"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -15284,9 +15678,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.e_utra_cgi.encode(writer)?;
+            if let Err(error) = self.e_utra_cgi.encode(writer) {
+                return Err(error.in_field("e_utra_cgi"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -15419,9 +15817,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_r_cgi.encode(writer)?;
+            if let Err(error) = self.n_r_cgi.encode(writer) {
+                return Err(error.in_field("n_r_cgi"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -15563,10 +15965,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.e_utra_cgi.encode(writer)?;
-            self.number_of_broadcasts.encode(writer)?;
+            if let Err(error) = self.e_utra_cgi.encode(writer) {
+                return Err(error.in_field("e_utra_cgi"));
+            }
+            if let Err(error) = self.number_of_broadcasts.encode(writer) {
+                return Err(error.in_field("number_of_broadcasts"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -15713,10 +16121,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_r_cgi.encode(writer)?;
-            self.number_of_broadcasts.encode(writer)?;
+            if let Err(error) = self.n_r_cgi.encode(writer) {
+                return Err(error.in_field("n_r_cgi"));
+            }
+            if let Err(error) = self.number_of_broadcasts.encode(writer) {
+                return Err(error.in_field("number_of_broadcasts"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -16110,9 +16524,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.cell_size.encode(writer)?;
+            if let Err(error) = self.cell_size.encode(writer) {
+                return Err(error.in_field("cell_size"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -16515,13 +16933,19 @@ pub mod ngap_ies {
                 writer.bit_string_extensible(value, 8, 8);
             }
             if let Some(value) = &self.traceableto_utc {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("traceableto_utc"));
+                }
             }
             if let Some(value) = &self.traceableto_gnss {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("traceableto_gnss"));
+                }
             }
             if let Some(value) = &self.clock_frequency_stability {
-                writer.bits_sized(*value, 16, 16)?;
+                if let Err(error) = writer.bits_sized(*value, 16, 16) {
+                    return Err(error.in_field("clock_frequency_stability"));
+                }
             }
             if let Some(value) = &self.clock_accuracy {
                 writer.unsigned_extensible(*value, 1, 40000000);
@@ -16530,7 +16954,9 @@ pub mod ngap_ies {
                 writer.bit_string_extensible(value, 16, 16);
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -16684,9 +17110,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.clock_quality_acceptance_criteria.encode(writer)?;
+            if let Err(error) = self.clock_quality_acceptance_criteria.encode(writer) {
+                return Err(error.in_field("clock_quality_acceptance_criteria"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -16888,9 +17318,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.clock_quality_detail_level.encode(writer)?;
+            if let Err(error) = self.clock_quality_detail_level.encode(writer) {
+                return Err(error.in_field("clock_quality_detail_level"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -17057,14 +17491,24 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.criticality_diagnostics.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.correlation_identifier.encode(writer)?;
-            self.r_an_aiot_device_ngap_id.encode(writer)?;
-            self.cause.encode(writer)?;
+            if let Err(error) = self.correlation_identifier.encode(writer) {
+                return Err(error.in_field("correlation_identifier"));
+            }
+            if let Err(error) = self.r_an_aiot_device_ngap_id.encode(writer) {
+                return Err(error.in_field("r_an_aiot_device_ngap_id"));
+            }
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.criticality_diagnostics {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("criticality_diagnostics"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -17159,7 +17603,9 @@ pub mod ngap_ies {
     impl Encode for CommandRequestTransfer<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -17267,14 +17713,24 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.criticality_diagnostics.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.correlation_identifier.encode(writer)?;
-            self.r_an_aiot_device_ngap_id.encode(writer)?;
-            self.a_io_t_naspdu.encode(writer)?;
+            if let Err(error) = self.correlation_identifier.encode(writer) {
+                return Err(error.in_field("correlation_identifier"));
+            }
+            if let Err(error) = self.r_an_aiot_device_ngap_id.encode(writer) {
+                return Err(error.in_field("r_an_aiot_device_ngap_id"));
+            }
+            if let Err(error) = self.a_io_t_naspdu.encode(writer) {
+                return Err(error.in_field("a_io_t_naspdu"));
+            }
             if let Some(value) = &self.criticality_diagnostics {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("criticality_diagnostics"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -17489,9 +17945,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.e_utra_cgi.encode(writer)?;
+            if let Err(error) = self.e_utra_cgi.encode(writer) {
+                return Err(error.in_field("e_utra_cgi"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -17624,9 +18084,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_r_cgi.encode(writer)?;
+            if let Err(error) = self.n_r_cgi.encode(writer) {
+                return Err(error.in_field("n_r_cgi"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -17759,9 +18223,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.e_utra_cgi.encode(writer)?;
+            if let Err(error) = self.e_utra_cgi.encode(writer) {
+                return Err(error.in_field("e_utra_cgi"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -17894,9 +18362,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_r_cgi.encode(writer)?;
+            if let Err(error) = self.n_r_cgi.encode(writer) {
+                return Err(error.in_field("n_r_cgi"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -17997,9 +18469,13 @@ pub mod ngap_ies {
             if let Some(value) = &self.cell_capacity_class_value {
                 writer.unsigned_extensible(*value, 1, 100);
             }
-            writer.unsigned(u64::from(self.capacity_value), 0, 100)?;
+            if let Err(error) = writer.unsigned(u64::from(self.capacity_value), 0, 100) {
+                return Err(error.in_field("capacity_value"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -18423,20 +18899,34 @@ pub mod ngap_ies {
             writer.bit(self.m_icomode_indication.is_some());
             writer.bit(self.expected_uebehaviour.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.u_eidentity_index_value.encode(writer)?;
+            if let Err(error) = self.u_eidentity_index_value.encode(writer) {
+                return Err(error.in_field("u_eidentity_index_value"));
+            }
             if let Some(value) = &self.u_especific_drx {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("u_especific_drx"));
+                }
             }
-            self.periodic_registration_update_timer.encode(writer)?;
+            if let Err(error) = self.periodic_registration_update_timer.encode(writer) {
+                return Err(error.in_field("periodic_registration_update_timer"));
+            }
             if let Some(value) = &self.m_icomode_indication {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_icomode_indication"));
+                }
             }
-            self.t_ailist_for_inactive.encode(writer)?;
+            if let Err(error) = self.t_ailist_for_inactive.encode(writer) {
+                return Err(error.in_field("t_ailist_for_inactive"));
+            }
             if let Some(value) = &self.expected_uebehaviour {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("expected_uebehaviour"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -18670,19 +19160,29 @@ pub mod ngap_ies {
             writer.bit(self.i_es_criticality_diagnostics.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.procedure_code {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("procedure_code"));
+                }
             }
             if let Some(value) = &self.triggering_message {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("triggering_message"));
+                }
             }
             if let Some(value) = &self.procedure_criticality {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("procedure_criticality"));
+                }
             }
             if let Some(value) = &self.i_es_criticality_diagnostics {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_es_criticality_diagnostics"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -18821,11 +19321,19 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.i_ecriticality.encode(writer)?;
-            self.i_e_id.encode(writer)?;
-            self.type_of_error.encode(writer)?;
+            if let Err(error) = self.i_ecriticality.encode(writer) {
+                return Err(error.in_field("i_ecriticality"));
+            }
+            if let Err(error) = self.i_e_id.encode(writer) {
+                return Err(error.in_field("i_e_id"));
+            }
+            if let Err(error) = self.type_of_error.encode(writer) {
+                return Err(error.in_field("type_of_error"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -19010,9 +19518,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.d_apsindicator.encode(writer)?;
+            if let Err(error) = self.d_apsindicator.encode(writer) {
+                return Err(error.in_field("d_apsindicator"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -19142,9 +19654,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.dapsresponseindicator.encode(writer)?;
+            if let Err(error) = self.dapsresponseindicator.encode(writer) {
+                return Err(error.in_field("dapsresponseindicator"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -19244,10 +19760,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extension.is_some());
-            self.d_rb_id.encode(writer)?;
-            self.d_apsresponse_info.encode(writer)?;
+            if let Err(error) = self.d_rb_id.encode(writer) {
+                return Err(error.in_field("d_rb_id"));
+            }
+            if let Err(error) = self.d_apsresponse_info.encode(writer) {
+                return Err(error.in_field("d_apsresponse_info"));
+            }
             if let Some(value) = &self.i_e_extension {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extension"));
+                }
             }
             Ok(())
         }
@@ -19384,9 +19906,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.dl_nas_mac.encode(writer)?;
+            if let Err(error) = self.dl_nas_mac.encode(writer) {
+                return Err(error.in_field("dl_nas_mac"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -19695,9 +20221,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extension.is_some());
-            self.d_rbs_subject_to_dldiscarding.encode(writer)?;
+            if let Err(error) = self.d_rbs_subject_to_dldiscarding.encode(writer) {
+                return Err(error.in_field("d_rbs_subject_to_dldiscarding"));
+            }
             if let Some(value) = &self.i_e_extension {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extension"));
+                }
             }
             Ok(())
         }
@@ -20001,9 +20531,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extension.is_some());
-            self.d_l_countvalue.encode(writer)?;
+            if let Err(error) = self.d_l_countvalue.encode(writer) {
+                return Err(error.in_field("d_l_countvalue"));
+            }
             if let Some(value) = &self.i_e_extension {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extension"));
+                }
             }
             Ok(())
         }
@@ -20087,9 +20621,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extension.is_some());
-            self.d_l_countvalue.encode(writer)?;
+            if let Err(error) = self.d_l_countvalue.encode(writer) {
+                return Err(error.in_field("d_l_countvalue"));
+            }
             if let Some(value) = &self.i_e_extension {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extension"));
+                }
             }
             Ok(())
         }
@@ -20289,12 +20827,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.receive_status_of_ul_pdcp_sdus.is_some());
             writer.bit(self.i_e_extension.is_some());
-            self.u_l_countvalue.encode(writer)?;
+            if let Err(error) = self.u_l_countvalue.encode(writer) {
+                return Err(error.in_field("u_l_countvalue"));
+            }
             if let Some(value) = &self.receive_status_of_ul_pdcp_sdus {
-                writer.bit_string(value, 1, 2048)?;
+                if let Err(error) = writer.bit_string(value, 1, 2048) {
+                    return Err(error.in_field("receive_status_of_ul_pdcp_sdus"));
+                }
             }
             if let Some(value) = &self.i_e_extension {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extension"));
+                }
             }
             Ok(())
         }
@@ -20412,12 +20956,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.receive_status_of_ul_pdcp_sdus.is_some());
             writer.bit(self.i_e_extension.is_some());
-            self.u_l_countvalue.encode(writer)?;
+            if let Err(error) = self.u_l_countvalue.encode(writer) {
+                return Err(error.in_field("u_l_countvalue"));
+            }
             if let Some(value) = &self.receive_status_of_ul_pdcp_sdus {
-                writer.bit_string(value, 1, 131072)?;
+                if let Err(error) = writer.bit_string(value, 1, 131072) {
+                    return Err(error.in_field("receive_status_of_ul_pdcp_sdus"));
+                }
             }
             if let Some(value) = &self.i_e_extension {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extension"));
+                }
             }
             Ok(())
         }
@@ -20528,10 +21078,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extension.is_some());
-            self.drb_id.encode(writer)?;
-            self.dl_count.encode(writer)?;
+            if let Err(error) = self.drb_id.encode(writer) {
+                return Err(error.in_field("drb_id"));
+            }
+            if let Err(error) = self.dl_count.encode(writer) {
+                return Err(error.in_field("dl_count"));
+            }
             if let Some(value) = &self.i_e_extension {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extension"));
+                }
             }
             Ok(())
         }
@@ -20678,10 +21234,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extension.is_some());
-            self.d_rb_id.encode(writer)?;
-            self.first_dlcount.encode(writer)?;
+            if let Err(error) = self.d_rb_id.encode(writer) {
+                return Err(error.in_field("d_rb_id"));
+            }
+            if let Err(error) = self.first_dlcount.encode(writer) {
+                return Err(error.in_field("first_dlcount"));
+            }
             if let Some(value) = &self.i_e_extension {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extension"));
+                }
             }
             Ok(())
         }
@@ -20841,11 +21403,19 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extension.is_some());
-            self.d_rb_id.encode(writer)?;
-            self.d_rbstatus_ul.encode(writer)?;
-            self.d_rbstatus_dl.encode(writer)?;
+            if let Err(error) = self.d_rb_id.encode(writer) {
+                return Err(error.in_field("d_rb_id"));
+            }
+            if let Err(error) = self.d_rbstatus_ul.encode(writer) {
+                return Err(error.in_field("d_rbstatus_ul"));
+            }
+            if let Err(error) = self.d_rbstatus_dl.encode(writer) {
+                return Err(error.in_field("d_rbstatus_dl"));
+            }
             if let Some(value) = &self.i_e_extension {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extension"));
+                }
             }
             Ok(())
         }
@@ -20998,10 +21568,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.d_rb_id.encode(writer)?;
-            self.associated_qos_flow_list.encode(writer)?;
+            if let Err(error) = self.d_rb_id.encode(writer) {
+                return Err(error.in_field("d_rb_id"));
+            }
+            if let Err(error) = self.associated_qos_flow_list.encode(writer) {
+                return Err(error.in_field("associated_qos_flow_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -21301,15 +21877,23 @@ pub mod ngap_ies {
             writer.bit(self.d_lforwarding_up_tnlinformation.is_some());
             writer.bit(self.u_lforwarding_up_tnlinformation.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.d_rb_id.encode(writer)?;
+            if let Err(error) = self.d_rb_id.encode(writer) {
+                return Err(error.in_field("d_rb_id"));
+            }
             if let Some(value) = &self.d_lforwarding_up_tnlinformation {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("d_lforwarding_up_tnlinformation"));
+                }
             }
             if let Some(value) = &self.u_lforwarding_up_tnlinformation {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("u_lforwarding_up_tnlinformation"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -21531,10 +22115,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.e_rab_id.encode(writer)?;
-            self.d_lforwarding_up_tnlinformation.encode(writer)?;
+            if let Err(error) = self.e_rab_id.encode(writer) {
+                return Err(error.in_field("e_rab_id"));
+            }
+            if let Err(error) = self.d_lforwarding_up_tnlinformation.encode(writer) {
+                return Err(error.in_field("d_lforwarding_up_tnlinformation"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -21787,23 +22377,39 @@ pub mod ngap_ies {
             writer.bit(self.averaging_window.is_some());
             writer.bit(self.maximum_data_burst_volume.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.priority_level_qos.encode(writer)?;
-            self.packet_delay_budget.encode(writer)?;
-            self.packet_error_rate.encode(writer)?;
+            if let Err(error) = self.priority_level_qos.encode(writer) {
+                return Err(error.in_field("priority_level_qos"));
+            }
+            if let Err(error) = self.packet_delay_budget.encode(writer) {
+                return Err(error.in_field("packet_delay_budget"));
+            }
+            if let Err(error) = self.packet_error_rate.encode(writer) {
+                return Err(error.in_field("packet_error_rate"));
+            }
             if let Some(value) = &self.five_qi {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("five_qi"));
+                }
             }
             if let Some(value) = &self.delay_critical {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("delay_critical"));
+                }
             }
             if let Some(value) = &self.averaging_window {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("averaging_window"));
+                }
             }
             if let Some(value) = &self.maximum_data_burst_volume {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("maximum_data_burst_volume"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -21975,12 +22581,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.d_lforwarding.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.e_rab_id.encode(writer)?;
+            if let Err(error) = self.e_rab_id.encode(writer) {
+                return Err(error.in_field("e_rab_id"));
+            }
             if let Some(value) = &self.d_lforwarding {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("d_lforwarding"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -22421,10 +23033,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extension.is_some());
-            self.qos_flow_identifier.encode(writer)?;
-            self.activation_status.encode(writer)?;
+            if let Err(error) = self.qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("qos_flow_identifier"));
+            }
+            if let Err(error) = self.activation_status.encode(writer) {
+                return Err(error.in_field("activation_status"));
+            }
             if let Some(value) = &self.i_e_extension {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extension"));
+                }
             }
             Ok(())
         }
@@ -22789,10 +23407,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            self.e_ps_tac.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = self.e_ps_tac.encode(writer) {
+                return Err(error.in_field("e_ps_tac"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -22930,10 +23554,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            self.e_utracell_identity.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = self.e_utracell_identity.encode(writer) {
+                return Err(error.in_field("e_utracell_identity"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -23285,12 +23915,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.e_utra_paging_time_window.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.e_utra_paging_e_drx_cycle.encode(writer)?;
+            if let Err(error) = self.e_utra_paging_e_drx_cycle.encode(writer) {
+                return Err(error.in_field("e_utra_paging_e_drx_cycle"));
+            }
             if let Some(value) = &self.e_utra_paging_time_window {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("e_utra_paging_time_window"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -23494,20 +24130,34 @@ pub mod ngap_ies {
             writer.bit(self.e_utran_noof_rrcconnections.is_some());
             writer.bit(self.e_utran_radio_resource_status.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.e_cgi.encode(writer)?;
-            self.e_utran_composite_available_capacity_group
-                .encode(writer)?;
+            if let Err(error) = self.e_cgi.encode(writer) {
+                return Err(error.in_field("e_cgi"));
+            }
+            if let Err(error) = self
+                .e_utran_composite_available_capacity_group
+                .encode(writer)
+            {
+                return Err(error.in_field("e_utran_composite_available_capacity_group"));
+            }
             if let Some(value) = &self.e_utran_number_of_active_ues {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("e_utran_number_of_active_ues"));
+                }
             }
             if let Some(value) = &self.e_utran_noof_rrcconnections {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("e_utran_noof_rrcconnections"));
+                }
             }
             if let Some(value) = &self.e_utran_radio_resource_status {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("e_utran_radio_resource_status"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -23687,9 +24337,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.e_cgi.encode(writer)?;
+            if let Err(error) = self.e_cgi.encode(writer) {
+                return Err(error.in_field("e_cgi"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -23837,10 +24491,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.d_l_composite_available_capacity.encode(writer)?;
-            self.u_l_composite_available_capacity.encode(writer)?;
+            if let Err(error) = self.d_l_composite_available_capacity.encode(writer) {
+                return Err(error.in_field("d_l_composite_available_capacity"));
+            }
+            if let Err(error) = self.u_l_composite_available_capacity.encode(writer) {
+                return Err(error.in_field("u_l_composite_available_capacity"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -24047,20 +24707,38 @@ pub mod ngap_ies {
             writer.bit(self.d_l_scheduling_pdcch_cce_usage.is_some());
             writer.bit(self.u_l_scheduling_pdcch_cce_usage.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            writer.unsigned(u64::from(self.d_l_gbr_prb_usage), 0, 100)?;
-            writer.unsigned(u64::from(self.u_l_gbr_prb_usage), 0, 100)?;
-            writer.unsigned(u64::from(self.d_l_non_gbr_prb_usage), 0, 100)?;
-            writer.unsigned(u64::from(self.u_l_non_gbr_prb_usage), 0, 100)?;
-            writer.unsigned(u64::from(self.d_l_total_prb_usage), 0, 100)?;
-            writer.unsigned(u64::from(self.u_l_total_prb_usage), 0, 100)?;
+            if let Err(error) = writer.unsigned(u64::from(self.d_l_gbr_prb_usage), 0, 100) {
+                return Err(error.in_field("d_l_gbr_prb_usage"));
+            }
+            if let Err(error) = writer.unsigned(u64::from(self.u_l_gbr_prb_usage), 0, 100) {
+                return Err(error.in_field("u_l_gbr_prb_usage"));
+            }
+            if let Err(error) = writer.unsigned(u64::from(self.d_l_non_gbr_prb_usage), 0, 100) {
+                return Err(error.in_field("d_l_non_gbr_prb_usage"));
+            }
+            if let Err(error) = writer.unsigned(u64::from(self.u_l_non_gbr_prb_usage), 0, 100) {
+                return Err(error.in_field("u_l_non_gbr_prb_usage"));
+            }
+            if let Err(error) = writer.unsigned(u64::from(self.d_l_total_prb_usage), 0, 100) {
+                return Err(error.in_field("d_l_total_prb_usage"));
+            }
+            if let Err(error) = writer.unsigned(u64::from(self.u_l_total_prb_usage), 0, 100) {
+                return Err(error.in_field("u_l_total_prb_usage"));
+            }
             if let Some(value) = &self.d_l_scheduling_pdcch_cce_usage {
-                writer.unsigned(u64::from(*value), 0, 100)?;
+                if let Err(error) = writer.unsigned(u64::from(*value), 0, 100) {
+                    return Err(error.in_field("d_l_scheduling_pdcch_cce_usage"));
+                }
             }
             if let Some(value) = &self.u_l_scheduling_pdcch_cce_usage {
-                writer.unsigned(u64::from(*value), 0, 100)?;
+                if let Err(error) = writer.unsigned(u64::from(*value), 0, 100) {
+                    return Err(error.in_field("u_l_scheduling_pdcch_cce_usage"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -24224,9 +24902,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.e_utran_cell_report_list.encode(writer)?;
+            if let Err(error) = self.e_utran_cell_report_list.encode(writer) {
+                return Err(error.in_field("e_utran_cell_report_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -24314,9 +24996,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.e_utran_cell_to_report_list.encode(writer)?;
+            if let Err(error) = self.e_utran_cell_to_report_list.encode(writer) {
+                return Err(error.in_field("e_utran_cell_to_report_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -24527,9 +25213,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.procedure_stage.encode(writer)?;
+            if let Err(error) = self.procedure_stage.encode(writer) {
+                return Err(error.in_field("procedure_stage"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -24718,10 +25408,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.emergency_area_id.encode(writer)?;
-            self.completed_cells_in_eai_eutra.encode(writer)?;
+            if let Err(error) = self.emergency_area_id.encode(writer) {
+                return Err(error.in_field("emergency_area_id"));
+            }
+            if let Err(error) = self.completed_cells_in_eai_eutra.encode(writer) {
+                return Err(error.in_field("completed_cells_in_eai_eutra"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -24877,10 +25573,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.emergency_area_id.encode(writer)?;
-            self.completed_cells_in_eai_nr.encode(writer)?;
+            if let Err(error) = self.emergency_area_id.encode(writer) {
+                return Err(error.in_field("emergency_area_id"));
+            }
+            if let Err(error) = self.completed_cells_in_eai_nr.encode(writer) {
+                return Err(error.in_field("completed_cells_in_eai_nr"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -25034,10 +25736,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.emergency_area_id.encode(writer)?;
-            self.cancelled_cells_in_eai_eutra.encode(writer)?;
+            if let Err(error) = self.emergency_area_id.encode(writer) {
+                return Err(error.in_field("emergency_area_id"));
+            }
+            if let Err(error) = self.cancelled_cells_in_eai_eutra.encode(writer) {
+                return Err(error.in_field("cancelled_cells_in_eai_eutra"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -25193,10 +25901,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.emergency_area_id.encode(writer)?;
-            self.cancelled_cells_in_eai_nr.encode(writer)?;
+            if let Err(error) = self.emergency_area_id.encode(writer) {
+                return Err(error.in_field("emergency_area_id"));
+            }
+            if let Err(error) = self.cancelled_cells_in_eai_nr.encode(writer) {
+                return Err(error.in_field("cancelled_cells_in_eai_nr"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -25391,12 +26105,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.emergency_service_target_cn.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.emergency_fallback_request_indicator.encode(writer)?;
+            if let Err(error) = self.emergency_fallback_request_indicator.encode(writer) {
+                return Err(error.in_field("emergency_fallback_request_indicator"));
+            }
             if let Some(value) = &self.emergency_service_target_cn {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("emergency_service_target_cn"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -25631,10 +26351,16 @@ pub mod ngap_ies {
     impl Encode for EndpointIPAddressAndPort<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(self.i_e_extensions.is_some());
-            self.endpoint_ipaddress.encode(writer)?;
-            self.port_number.encode(writer)?;
+            if let Err(error) = self.endpoint_ipaddress.encode(writer) {
+                return Err(error.in_field("endpoint_ipaddress"));
+            }
+            if let Err(error) = self.port_number.encode(writer) {
+                return Err(error.in_field("port_number"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -25816,10 +26542,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.plmn_identity.encode(writer)?;
-            self.n_id.encode(writer)?;
+            if let Err(error) = self.plmn_identity.encode(writer) {
+                return Err(error.in_field("plmn_identity"));
+            }
+            if let Err(error) = self.n_id.encode(writer) {
+                return Err(error.in_field("n_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -25978,11 +26710,19 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.intersystem_resource_threshold_low.encode(writer)?;
-            self.intersystem_resource_threshold_high.encode(writer)?;
-            self.number_of_measurement_reporting_levels.encode(writer)?;
+            if let Err(error) = self.intersystem_resource_threshold_low.encode(writer) {
+                return Err(error.in_field("intersystem_resource_threshold_low"));
+            }
+            if let Err(error) = self.intersystem_resource_threshold_high.encode(writer) {
+                return Err(error.in_field("intersystem_resource_threshold_high"));
+            }
+            if let Err(error) = self.number_of_measurement_reporting_levels.encode(writer) {
+                return Err(error.in_field("number_of_measurement_reporting_levels"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -26110,11 +26850,19 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.l1_threshold.encode(writer)?;
-            self.hysteresis.encode(writer)?;
-            self.time_to_trigger.encode(writer)?;
+            if let Err(error) = self.l1_threshold.encode(writer) {
+                return Err(error.in_field("l1_threshold"));
+            }
+            if let Err(error) = self.hysteresis.encode(writer) {
+                return Err(error.in_field("hysteresis"));
+            }
+            if let Err(error) = self.time_to_trigger.encode(writer) {
+                return Err(error.in_field("time_to_trigger"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -26499,10 +27247,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.five_qi.encode(writer)?;
-            self.excess_packet_delay_threshold_value.encode(writer)?;
+            if let Err(error) = self.five_qi.encode(writer) {
+                return Err(error.in_field("five_qi"));
+            }
+            if let Err(error) = self.excess_packet_delay_threshold_value.encode(writer) {
+                return Err(error.in_field("excess_packet_delay_threshold_value"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -26849,16 +27603,24 @@ pub mod ngap_ies {
             writer.bit(self.source_of_ueactivity_behaviour_information.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.expected_activity_period {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("expected_activity_period"));
+                }
             }
             if let Some(value) = &self.expected_idle_period {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("expected_idle_period"));
+                }
             }
             if let Some(value) = &self.source_of_ueactivity_behaviour_information {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("source_of_ueactivity_behaviour_information"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -27029,19 +27791,29 @@ pub mod ngap_ies {
             writer.bit(self.expected_uemoving_trajectory.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.expected_ueactivity_behaviour {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("expected_ueactivity_behaviour"));
+                }
             }
             if let Some(value) = &self.expected_hointerval {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("expected_hointerval"));
+                }
             }
             if let Some(value) = &self.expected_uemobility {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("expected_uemobility"));
+                }
             }
             if let Some(value) = &self.expected_uemoving_trajectory {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("expected_uemoving_trajectory"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -27273,12 +28045,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.time_stayed_in_cell.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.n_gran_cgi.encode(writer)?;
+            if let Err(error) = self.n_gran_cgi.encode(writer) {
+                return Err(error.in_field("n_gran_cgi"));
+            }
             if let Some(value) = &self.time_stayed_in_cell {
-                writer.unsigned(u64::from(*value), 0, 4095)?;
+                if let Err(error) = writer.unsigned(u64::from(*value), 0, 4095) {
+                    return Err(error.in_field("time_stayed_in_cell"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -27395,13 +28173,19 @@ pub mod ngap_ies {
             writer.bit(self.a_mfname_utf8_string.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.a_mfname_visible_string {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("a_mfname_visible_string"));
+                }
             }
             if let Some(value) = &self.a_mfname_utf8_string {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("a_mfname_utf8_string"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -27561,13 +28345,19 @@ pub mod ngap_ies {
             writer.bit(self.r_annode_name_utf8_string.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.r_annode_name_visible_string {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("r_annode_name_visible_string"));
+                }
             }
             if let Some(value) = &self.r_annode_name_utf8_string {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("r_annode_name_utf8_string"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -27759,7 +28549,9 @@ pub mod ngap_ies {
             writer.bit_string_extensible(&self.primary_ratrestriction, 8, 8);
             writer.bit_string_extensible(&self.secondary_ratrestriction, 8, 8);
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -28034,9 +28826,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.u_erlfreport_container.encode(writer)?;
+            if let Err(error) = self.u_erlfreport_container.encode(writer) {
+                return Err(error.in_field("u_erlfreport_container"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -28129,9 +28925,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extension.is_some());
-            self.d_rbs_subject_to_early_status_transfer.encode(writer)?;
+            if let Err(error) = self.d_rbs_subject_to_early_status_transfer.encode(writer) {
+                return Err(error.in_field("d_rbs_subject_to_early_status_transfer"));
+            }
             if let Some(value) = &self.i_e_extension {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extension"));
+                }
             }
             Ok(())
         }
@@ -28286,22 +29086,34 @@ pub mod ngap_ies {
             writer.bit(self.five_gpro_se_layer2_remote_ue.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.five_gpro_se_direct_discovery {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("five_gpro_se_direct_discovery"));
+                }
             }
             if let Some(value) = &self.five_gpro_se_direct_communication {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("five_gpro_se_direct_communication"));
+                }
             }
             if let Some(value) = &self.five_gpro_se_layer2_ueto_network_relay {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("five_gpro_se_layer2_ueto_network_relay"));
+                }
             }
             if let Some(value) = &self.five_gpro_se_layer3_ueto_network_relay {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("five_gpro_se_layer3_ueto_network_relay"));
+                }
             }
             if let Some(value) = &self.five_gpro_se_layer2_remote_ue {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("five_gpro_se_layer2_remote_ue"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -28454,12 +29266,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.five_gpro_sepc5_link_aggregate_bit_rates.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.five_gpro_sepc5_qo_sflow_list.encode(writer)?;
+            if let Err(error) = self.five_gpro_sepc5_qo_sflow_list.encode(writer) {
+                return Err(error.in_field("five_gpro_sepc5_qo_sflow_list"));
+            }
             if let Some(value) = &self.five_gpro_sepc5_link_aggregate_bit_rates {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("five_gpro_sepc5_link_aggregate_bit_rates"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -28581,11 +29399,19 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.a_mfset_id.encode(writer)?;
-            self.a_mfpointer.encode(writer)?;
-            self.five_g_tmsi.encode(writer)?;
+            if let Err(error) = self.a_mfset_id.encode(writer) {
+                return Err(error.in_field("a_mfset_id"));
+            }
+            if let Err(error) = self.a_mfpointer.encode(writer) {
+                return Err(error.in_field("a_mfpointer"));
+            }
+            if let Err(error) = self.five_g_tmsi.encode(writer) {
+                return Err(error.in_field("five_g_tmsi"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -29350,10 +30176,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.five_gpro_seguaranteed_flow_bit_rate.encode(writer)?;
-            self.five_gpro_semaximum_flow_bit_rate.encode(writer)?;
+            if let Err(error) = self.five_gpro_seguaranteed_flow_bit_rate.encode(writer) {
+                return Err(error.in_field("five_gpro_seguaranteed_flow_bit_rate"));
+            }
+            if let Err(error) = self.five_gpro_semaximum_flow_bit_rate.encode(writer) {
+                return Err(error.in_field("five_gpro_semaximum_flow_bit_rate"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -29485,15 +30317,23 @@ pub mod ngap_ies {
             writer.bit(self.five_gpro_sepc5_flow_bit_rates.is_some());
             writer.bit(self.five_gpro_serange.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.five_gpro_sep_qi.encode(writer)?;
+            if let Err(error) = self.five_gpro_sep_qi.encode(writer) {
+                return Err(error.in_field("five_gpro_sep_qi"));
+            }
             if let Some(value) = &self.five_gpro_sepc5_flow_bit_rates {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("five_gpro_sepc5_flow_bit_rates"));
+                }
             }
             if let Some(value) = &self.five_gpro_serange {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("five_gpro_serange"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -29739,10 +30579,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            self.forbidden_tacs.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = self.forbidden_tacs.encode(writer) {
+                return Err(error.in_field("forbidden_tacs"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -29875,10 +30721,16 @@ pub mod ngap_ies {
     impl Encode for FromEUTRANtoNGRAN<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(self.i_e_extensions.is_some());
-            self.sourcee_nbid.encode(writer)?;
-            self.target_ngrannode_id.encode(writer)?;
+            if let Err(error) = self.sourcee_nbid.encode(writer) {
+                return Err(error.in_field("sourcee_nbid"));
+            }
+            if let Err(error) = self.target_ngrannode_id.encode(writer) {
+                return Err(error.in_field("target_ngrannode_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -29972,10 +30824,16 @@ pub mod ngap_ies {
     impl Encode for FromNGRANtoEUTRAN<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(self.i_e_extensions.is_some());
-            self.source_ngrannode_id.encode(writer)?;
-            self.targete_nbid.encode(writer)?;
+            if let Err(error) = self.source_ngrannode_id.encode(writer) {
+                return Err(error.in_field("source_ngrannode_id"));
+            }
+            if let Err(error) = self.targete_nbid.encode(writer) {
+                return Err(error.in_field("targete_nbid"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -30178,21 +31036,37 @@ pub mod ngap_ies {
             writer.bit(self.maximum_packet_loss_rate_dl.is_some());
             writer.bit(self.maximum_packet_loss_rate_ul.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.maximum_flow_bit_rate_dl.encode(writer)?;
-            self.maximum_flow_bit_rate_ul.encode(writer)?;
-            self.guaranteed_flow_bit_rate_dl.encode(writer)?;
-            self.guaranteed_flow_bit_rate_ul.encode(writer)?;
+            if let Err(error) = self.maximum_flow_bit_rate_dl.encode(writer) {
+                return Err(error.in_field("maximum_flow_bit_rate_dl"));
+            }
+            if let Err(error) = self.maximum_flow_bit_rate_ul.encode(writer) {
+                return Err(error.in_field("maximum_flow_bit_rate_ul"));
+            }
+            if let Err(error) = self.guaranteed_flow_bit_rate_dl.encode(writer) {
+                return Err(error.in_field("guaranteed_flow_bit_rate_dl"));
+            }
+            if let Err(error) = self.guaranteed_flow_bit_rate_ul.encode(writer) {
+                return Err(error.in_field("guaranteed_flow_bit_rate_ul"));
+            }
             if let Some(value) = &self.notification_control {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("notification_control"));
+                }
             }
             if let Some(value) = &self.maximum_packet_loss_rate_dl {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("maximum_packet_loss_rate_dl"));
+                }
             }
             if let Some(value) = &self.maximum_packet_loss_rate_ul {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("maximum_packet_loss_rate_ul"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -30510,10 +31384,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.transport_layer_address.encode(writer)?;
-            self.g_tp_teid.encode(writer)?;
+            if let Err(error) = self.transport_layer_address.encode(writer) {
+                return Err(error.in_field("transport_layer_address"));
+            }
+            if let Err(error) = self.g_tp_teid.encode(writer) {
+                return Err(error.in_field("g_tp_teid"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -30634,12 +31514,22 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            self.a_mfregion_id.encode(writer)?;
-            self.a_mfset_id.encode(writer)?;
-            self.a_mfpointer.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = self.a_mfregion_id.encode(writer) {
+                return Err(error.in_field("a_mfregion_id"));
+            }
+            if let Err(error) = self.a_mfset_id.encode(writer) {
+                return Err(error.in_field("a_mfset_id"));
+            }
+            if let Err(error) = self.a_mfpointer.encode(writer) {
+                return Err(error.in_field("a_mfpointer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -30790,9 +31680,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.g_uami.encode(writer)?;
+            if let Err(error) = self.g_uami.encode(writer) {
+                return Err(error.in_field("g_uami"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -30975,12 +31869,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.n_tn_plmn_list.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.n_tn_geographical_area.encode(writer)?;
+            if let Err(error) = self.n_tn_geographical_area.encode(writer) {
+                return Err(error.in_field("n_tn_geographical_area"));
+            }
             if let Some(value) = &self.n_tn_plmn_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("n_tn_plmn_list"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -31136,10 +32036,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.global_cable_id.encode(writer)?;
-            self.t_ai.encode(writer)?;
+            if let Err(error) = self.global_cable_id.encode(writer) {
+                return Err(error.in_field("global_cable_id"));
+            }
+            if let Err(error) = self.t_ai.encode(writer) {
+                return Err(error.in_field("t_ai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -31235,10 +32141,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            self.e_nb_id.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = self.e_nb_id.encode(writer) {
+                return Err(error.in_field("e_nb_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -31334,10 +32246,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            self.g_nb_id.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = self.g_nb_id.encode(writer) {
+                return Err(error.in_field("g_nb_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -31438,12 +32356,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.line_type.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.global_line_identity.encode(writer)?;
+            if let Err(error) = self.global_line_identity.encode(writer) {
+                return Err(error.in_field("global_line_identity"));
+            }
             if let Some(value) = &self.line_type {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("line_type"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -31594,10 +32518,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            self.n3_iwf_id.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = self.n3_iwf_id.encode(writer) {
+                return Err(error.in_field("n3_iwf_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -31693,10 +32623,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            self.ng_enb_id.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = self.ng_enb_id.encode(writer) {
+                return Err(error.in_field("ng_enb_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -31915,10 +32851,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            self.t_ngf_id.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = self.t_ngf_id.encode(writer) {
+                return Err(error.in_field("t_ngf_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -32014,10 +32956,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            self.t_wif_id.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = self.t_wif_id.encode(writer) {
+                return Err(error.in_field("t_wif_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -32113,10 +33061,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            self.w_agf_id.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = self.w_agf_id.encode(writer) {
+                return Err(error.in_field("w_agf_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -32262,10 +33216,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.h_fcnode_id.encode(writer)?;
-            self.t_ai.encode(writer)?;
+            if let Err(error) = self.h_fcnode_id.encode(writer) {
+                return Err(error.in_field("h_fcnode_id"));
+            }
+            if let Err(error) = self.t_ai.encode(writer) {
+                return Err(error.in_field("t_ai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -32360,10 +33320,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_r_paging_long_e_drx_information_for_rrc_inactive
-                .encode(writer)?;
+            if let Err(error) = self
+                .n_r_paging_long_e_drx_information_for_rrc_inactive
+                .encode(writer)
+            {
+                return Err(error.in_field("n_r_paging_long_e_drx_information_for_rrc_inactive"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -32505,9 +33471,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.u_ereachability_indication.encode(writer)?;
+            if let Err(error) = self.u_ereachability_indication.encode(writer) {
+                return Err(error.in_field("u_ereachability_indication"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -32747,27 +33717,47 @@ pub mod ngap_ies {
             writer.bit(self.mobility_information.is_some());
             writer.bit(self.u_erlfreport_container.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.handover_report_type.encode(writer)?;
-            self.handover_cause.encode(writer)?;
-            self.sourcecell_cgi.encode(writer)?;
-            self.targetcell_cgi.encode(writer)?;
+            if let Err(error) = self.handover_report_type.encode(writer) {
+                return Err(error.in_field("handover_report_type"));
+            }
+            if let Err(error) = self.handover_cause.encode(writer) {
+                return Err(error.in_field("handover_cause"));
+            }
+            if let Err(error) = self.sourcecell_cgi.encode(writer) {
+                return Err(error.in_field("sourcecell_cgi"));
+            }
+            if let Err(error) = self.targetcell_cgi.encode(writer) {
+                return Err(error.in_field("targetcell_cgi"));
+            }
             if let Some(value) = &self.reestablishmentcell_cgi {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("reestablishmentcell_cgi"));
+                }
             }
             if let Some(value) = &self.sourcecell_c_rnti {
-                writer.bits_sized(*value, 16, 16)?;
+                if let Err(error) = writer.bits_sized(*value, 16, 16) {
+                    return Err(error.in_field("sourcecell_c_rnti"));
+                }
             }
             if let Some(value) = &self.targetcellin_e_utran {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("targetcellin_e_utran"));
+                }
             }
             if let Some(value) = &self.mobility_information {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("mobility_information"));
+                }
             }
             if let Some(value) = &self.u_erlfreport_container {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("u_erlfreport_container"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -32959,16 +33949,24 @@ pub mod ngap_ies {
             writer.bit(self.data_forwarding_response_drblist.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.d_lforwarding_up_tnlinformation {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("d_lforwarding_up_tnlinformation"));
+                }
             }
             if let Some(value) = &self.qos_flow_to_be_forwarded_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("qos_flow_to_be_forwarded_list"));
+                }
             }
             if let Some(value) = &self.data_forwarding_response_drblist {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("data_forwarding_response_drblist"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -33126,9 +34124,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.cause.encode(writer)?;
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -33283,22 +34285,36 @@ pub mod ngap_ies {
             writer.bit(self.qos_flow_failed_to_setup_list.is_some());
             writer.bit(self.data_forwarding_response_drblist.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.d_l_ngu_up_tnlinformation.encode(writer)?;
+            if let Err(error) = self.d_l_ngu_up_tnlinformation.encode(writer) {
+                return Err(error.in_field("d_l_ngu_up_tnlinformation"));
+            }
             if let Some(value) = &self.d_lforwarding_up_tnlinformation {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("d_lforwarding_up_tnlinformation"));
+                }
             }
             if let Some(value) = &self.security_result {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("security_result"));
+                }
             }
-            self.qos_flow_setup_response_list.encode(writer)?;
+            if let Err(error) = self.qos_flow_setup_response_list.encode(writer) {
+                return Err(error.in_field("qos_flow_setup_response_list"));
+            }
             if let Some(value) = &self.qos_flow_failed_to_setup_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("qos_flow_failed_to_setup_list"));
+                }
             }
             if let Some(value) = &self.data_forwarding_response_drblist {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("data_forwarding_response_drblist"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -33443,10 +34459,14 @@ pub mod ngap_ies {
             writer.bit(self.direct_forwarding_path_availability.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.direct_forwarding_path_availability {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("direct_forwarding_path_availability"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -33555,12 +34575,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.criticality_diagnostics.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.cause.encode(writer)?;
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.criticality_diagnostics {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("criticality_diagnostics"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -34150,36 +35176,58 @@ pub mod ngap_ies {
             writer.bit(self.m_dt_location_info.is_some());
             writer.bit(self.sensor_measurement_configuration.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.measurements_to_activate.encode(writer)?;
+            if let Err(error) = self.measurements_to_activate.encode(writer) {
+                return Err(error.in_field("measurements_to_activate"));
+            }
             if let Some(value) = &self.m1_configuration {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m1_configuration"));
+                }
             }
             if let Some(value) = &self.m4_configuration {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m4_configuration"));
+                }
             }
             if let Some(value) = &self.m5_configuration {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m5_configuration"));
+                }
             }
             if let Some(value) = &self.m6_configuration {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m6_configuration"));
+                }
             }
             if let Some(value) = &self.m7_configuration {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m7_configuration"));
+                }
             }
             if let Some(value) = &self.bluetooth_measurement_configuration {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("bluetooth_measurement_configuration"));
+                }
             }
             if let Some(value) = &self.w_lanmeasurement_configuration {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("w_lanmeasurement_configuration"));
+                }
             }
             if let Some(value) = &self.m_dt_location_info {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_dt_location_info"));
+                }
             }
             if let Some(value) = &self.sensor_measurement_configuration {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("sensor_measurement_configuration"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -34472,10 +35520,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.recommended_cells_for_paging.encode(writer)?;
-            self.recommend_rannodes_for_paging.encode(writer)?;
+            if let Err(error) = self.recommended_cells_for_paging.encode(writer) {
+                return Err(error.in_field("recommended_cells_for_paging"));
+            }
+            if let Err(error) = self.recommend_rannodes_for_paging.encode(writer) {
+                return Err(error.in_field("recommend_rannodes_for_paging"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -34752,10 +35806,14 @@ pub mod ngap_ies {
             writer.bit(self.u_erlfreport_container.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.u_erlfreport_container {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("u_erlfreport_container"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -34845,9 +35903,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.handover_report_type.encode(writer)?;
+            if let Err(error) = self.handover_report_type.encode(writer) {
+                return Err(error.in_field("handover_report_type"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -35095,10 +36157,14 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.activated_cell_list.encode(writer)?;
+            if let Err(error) = self.activated_cell_list.encode(writer) {
+                return Err(error.in_field("activated_cell_list"));
+            }
             writer.unsigned_extensible(self.activation_id, 0, 16384);
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -35200,9 +36266,13 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
             writer.unsigned_extensible(self.activation_id, 0, 16384);
-            self.cells_to_activate_list.encode(writer)?;
+            if let Err(error) = self.cells_to_activate_list.encode(writer) {
+                return Err(error.in_field("cells_to_activate_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -35295,9 +36365,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.notification_cell_list.encode(writer)?;
+            if let Err(error) = self.notification_cell_list.encode(writer) {
+                return Err(error.in_field("notification_cell_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -35422,16 +36496,26 @@ pub mod ngap_ies {
             writer.bit(self.reconnect_cell_id.is_some());
             writer.bit(self.u_erlfreport_container.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.sourcecell_id.encode(writer)?;
-            self.targetcell_id.encode(writer)?;
+            if let Err(error) = self.sourcecell_id.encode(writer) {
+                return Err(error.in_field("sourcecell_id"));
+            }
+            if let Err(error) = self.targetcell_id.encode(writer) {
+                return Err(error.in_field("targetcell_id"));
+            }
             if let Some(value) = &self.reconnect_cell_id {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("reconnect_cell_id"));
+                }
             }
             if let Some(value) = &self.u_erlfreport_container {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("u_erlfreport_container"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -35579,9 +36663,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.reportingsystem.encode(writer)?;
+            if let Err(error) = self.reportingsystem.encode(writer) {
+                return Err(error.in_field("reportingsystem"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -35702,9 +36790,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.reporting_system.encode(writer)?;
+            if let Err(error) = self.reporting_system.encode(writer) {
+                return Err(error.in_field("reporting_system"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -35844,11 +36936,19 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.reporting_system.encode(writer)?;
-            self.report_characteristics.encode(writer)?;
-            self.report_type.encode(writer)?;
+            if let Err(error) = self.reporting_system.encode(writer) {
+                return Err(error.in_field("reporting_system"));
+            }
+            if let Err(error) = self.report_characteristics.encode(writer) {
+                return Err(error.in_field("report_characteristics"));
+            }
+            if let Err(error) = self.report_type.encode(writer) {
+                return Err(error.in_field("report_type"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -35993,10 +37093,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.transfer_type.encode(writer)?;
-            self.intersystem_soninformation.encode(writer)?;
+            if let Err(error) = self.transfer_type.encode(writer) {
+                return Err(error.in_field("transfer_type"));
+            }
+            if let Err(error) = self.intersystem_soninformation.encode(writer) {
+                return Err(error.in_field("intersystem_soninformation"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -36635,10 +37741,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.global_rannode_id.encode(writer)?;
-            self.selected_tai.encode(writer)?;
+            if let Err(error) = self.global_rannode_id.encode(writer) {
+                return Err(error.in_field("global_rannode_id"));
+            }
+            if let Err(error) = self.selected_tai.encode(writer) {
+                return Err(error.in_field("selected_tai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -36847,10 +37959,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.globale_nbid.encode(writer)?;
-            self.selected_epstai.encode(writer)?;
+            if let Err(error) = self.globale_nbid.encode(writer) {
+                return Err(error.in_field("globale_nbid"));
+            }
+            if let Err(error) = self.selected_epstai.encode(writer) {
+                return Err(error.in_field("selected_epstai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -37009,12 +38127,22 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.sourcecell_id.encode(writer)?;
-            self.targetcell_id.encode(writer)?;
-            self.early_iratho.encode(writer)?;
-            self.candidate_cell_list.encode(writer)?;
+            if let Err(error) = self.sourcecell_id.encode(writer) {
+                return Err(error.in_field("sourcecell_id"));
+            }
+            if let Err(error) = self.targetcell_id.encode(writer) {
+                return Err(error.in_field("targetcell_id"));
+            }
+            if let Err(error) = self.early_iratho.encode(writer) {
+                return Err(error.in_field("early_iratho"));
+            }
+            if let Err(error) = self.candidate_cell_list.encode(writer) {
+                return Err(error.in_field("candidate_cell_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -37142,13 +38270,21 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.criticality_diagnostics.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.correlation_identifier.encode(writer)?;
-            self.cause.encode(writer)?;
+            if let Err(error) = self.correlation_identifier.encode(writer) {
+                return Err(error.in_field("correlation_identifier"));
+            }
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.criticality_diagnostics {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("criticality_diagnostics"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -37341,16 +38477,26 @@ pub mod ngap_ies {
             writer.bit(self.reader_report_list.is_some());
             writer.bit(self.inventory_complete_indication.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.correlation_identifier.encode(writer)?;
-            self.globalg_nb_id.encode(writer)?;
+            if let Err(error) = self.correlation_identifier.encode(writer) {
+                return Err(error.in_field("correlation_identifier"));
+            }
+            if let Err(error) = self.globalg_nb_id.encode(writer) {
+                return Err(error.in_field("globalg_nb_id"));
+            }
             if let Some(value) = &self.reader_report_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("reader_report_list"));
+                }
             }
             if let Some(value) = &self.inventory_complete_indication {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("inventory_complete_indication"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -37450,7 +38596,9 @@ pub mod ngap_ies {
     impl Encode for InventoryRequestTransfer<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -37540,12 +38688,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.criticality_diagnostics.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.correlation_identifier.encode(writer)?;
+            if let Err(error) = self.correlation_identifier.encode(writer) {
+                return Err(error.in_field("correlation_identifier"));
+            }
             if let Some(value) = &self.criticality_diagnostics {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("criticality_diagnostics"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -37706,10 +38860,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            self.l_ac.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = self.l_ac.encode(writer) {
+                return Err(error.in_field("l_ac"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -37870,9 +39030,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.l_pwusc_nsubgroup_id.encode(writer)?;
+            if let Err(error) = self.l_pwusc_nsubgroup_id.encode(writer) {
+                return Err(error.in_field("l_pwusc_nsubgroup_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -38066,13 +39230,19 @@ pub mod ngap_ies {
             writer.bit(self.aerial_controller_ue.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.aerial_ue {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("aerial_ue"));
+                }
             }
             if let Some(value) = &self.aerial_controller_ue {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("aerial_controller_ue"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -38265,9 +39435,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.u_esidelink_aggregate_maximum_bit_rate.encode(writer)?;
+            if let Err(error) = self.u_esidelink_aggregate_maximum_bit_rate.encode(writer) {
+                return Err(error.in_field("u_esidelink_aggregate_maximum_bit_rate"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -38378,13 +39552,19 @@ pub mod ngap_ies {
             writer.bit(self.pedestrian_ue.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.vehicle_ue {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("vehicle_ue"));
+                }
             }
             if let Some(value) = &self.pedestrian_ue {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("pedestrian_ue"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -38622,9 +39802,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.last_visited_cell_information.encode(writer)?;
+            if let Err(error) = self.last_visited_cell_information.encode(writer) {
+                return Err(error.in_field("last_visited_cell_information"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -38867,17 +40051,29 @@ pub mod ngap_ies {
             writer.bit(self.time_uestayed_in_cell_enhanced_granularity.is_some());
             writer.bit(self.h_ocause_value.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.global_cell_id.encode(writer)?;
-            self.cell_type.encode(writer)?;
-            self.time_uestayed_in_cell.encode(writer)?;
+            if let Err(error) = self.global_cell_id.encode(writer) {
+                return Err(error.in_field("global_cell_id"));
+            }
+            if let Err(error) = self.cell_type.encode(writer) {
+                return Err(error.in_field("cell_type"));
+            }
+            if let Err(error) = self.time_uestayed_in_cell.encode(writer) {
+                return Err(error.in_field("time_uestayed_in_cell"));
+            }
             if let Some(value) = &self.time_uestayed_in_cell_enhanced_granularity {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("time_uestayed_in_cell_enhanced_granularity"));
+                }
             }
             if let Some(value) = &self.h_ocause_value {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("h_ocause_value"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -39011,11 +40207,17 @@ pub mod ngap_ies {
             writer.bit(self.p_scell_id.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.p_scell_id {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("p_scell_id"));
+                }
             }
-            writer.unsigned(u64::from(self.time_stay), 0, 40950)?;
+            if let Err(error) = writer.unsigned(u64::from(self.time_stay), 0, 40950) {
+                return Err(error.in_field("time_stay"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -39414,16 +40616,26 @@ pub mod ngap_ies {
                     .is_some(),
             );
             writer.bit(self.i_e_extensions.is_some());
-            self.event_type.encode(writer)?;
-            self.report_area.encode(writer)?;
+            if let Err(error) = self.event_type.encode(writer) {
+                return Err(error.in_field("event_type"));
+            }
+            if let Err(error) = self.report_area.encode(writer) {
+                return Err(error.in_field("report_area"));
+            }
             if let Some(value) = &self.area_of_interest_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("area_of_interest_list"));
+                }
             }
             if let Some(value) = &self.location_reporting_reference_idto_be_cancelled {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("location_reporting_reference_idto_be_cancelled"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -39619,23 +40831,39 @@ pub mod ngap_ies {
             writer.bit(self.sensor_measurement_configuration.is_some());
             writer.bit(self.area_scope_of_neigh_cells_list.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.logging_interval.encode(writer)?;
-            self.logging_duration.encode(writer)?;
-            self.logged_mdttrigger.encode(writer)?;
+            if let Err(error) = self.logging_interval.encode(writer) {
+                return Err(error.in_field("logging_interval"));
+            }
+            if let Err(error) = self.logging_duration.encode(writer) {
+                return Err(error.in_field("logging_duration"));
+            }
+            if let Err(error) = self.logged_mdttrigger.encode(writer) {
+                return Err(error.in_field("logged_mdttrigger"));
+            }
             if let Some(value) = &self.bluetooth_measurement_configuration {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("bluetooth_measurement_configuration"));
+                }
             }
             if let Some(value) = &self.w_lanmeasurement_configuration {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("w_lanmeasurement_configuration"));
+                }
             }
             if let Some(value) = &self.sensor_measurement_configuration {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("sensor_measurement_configuration"));
+                }
             }
             if let Some(value) = &self.area_scope_of_neigh_cells_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("area_scope_of_neigh_cells_list"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -40017,15 +41245,23 @@ pub mod ngap_ies {
             writer.bit(self.m1threshold_event_a2.is_some());
             writer.bit(self.m1periodic_reporting.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.m1reporting_trigger.encode(writer)?;
+            if let Err(error) = self.m1reporting_trigger.encode(writer) {
+                return Err(error.in_field("m1reporting_trigger"));
+            }
             if let Some(value) = &self.m1threshold_event_a2 {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m1threshold_event_a2"));
+                }
             }
             if let Some(value) = &self.m1periodic_reporting {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m1periodic_reporting"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -40144,10 +41380,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.report_interval.encode(writer)?;
-            self.report_amount.encode(writer)?;
+            if let Err(error) = self.report_interval.encode(writer) {
+                return Err(error.in_field("report_interval"));
+            }
+            if let Err(error) = self.report_amount.encode(writer) {
+                return Err(error.in_field("report_amount"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -40284,9 +41526,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.m1_threshold_type.encode(writer)?;
+            if let Err(error) = self.m1_threshold_type.encode(writer) {
+                return Err(error.in_field("m1_threshold_type"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -40505,10 +41751,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.m4period.encode(writer)?;
-            self.m4_links_to_log.encode(writer)?;
+            if let Err(error) = self.m4period.encode(writer) {
+                return Err(error.in_field("m4period"));
+            }
+            if let Err(error) = self.m4_links_to_log.encode(writer) {
+                return Err(error.in_field("m4_links_to_log"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -40717,10 +41969,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.m5period.encode(writer)?;
-            self.m5_links_to_log.encode(writer)?;
+            if let Err(error) = self.m5period.encode(writer) {
+                return Err(error.in_field("m5period"));
+            }
+            if let Err(error) = self.m5_links_to_log.encode(writer) {
+                return Err(error.in_field("m5_links_to_log"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -40929,10 +42187,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.m6report_interval.encode(writer)?;
-            self.m6_links_to_log.encode(writer)?;
+            if let Err(error) = self.m6report_interval.encode(writer) {
+                return Err(error.in_field("m6report_interval"));
+            }
+            if let Err(error) = self.m6_links_to_log.encode(writer) {
+                return Err(error.in_field("m6_links_to_log"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -41163,10 +42427,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.m7period.encode(writer)?;
-            self.m7_links_to_log.encode(writer)?;
+            if let Err(error) = self.m7period.encode(writer) {
+                return Err(error.in_field("m7period"));
+            }
+            if let Err(error) = self.m7_links_to_log.encode(writer) {
+                return Err(error.in_field("m7_links_to_log"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -41407,19 +42677,31 @@ pub mod ngap_ies {
             writer.bit(self.m_bs_service_area.is_some());
             writer.bit(self.m_bs_mappingand_data_forwarding_request_list.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_session_id.encode(writer)?;
+            if let Err(error) = self.m_bs_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_session_id"));
+            }
             if let Some(value) = &self.m_bs_area_session_id {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_bs_area_session_id"));
+                }
             }
             if let Some(value) = &self.m_bs_service_area {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_bs_service_area"));
+                }
             }
-            self.m_bs_qo_sflows_to_be_setup_list.encode(writer)?;
+            if let Err(error) = self.m_bs_qo_sflows_to_be_setup_list.encode(writer) {
+                return Err(error.in_field("m_bs_qo_sflows_to_be_setup_list"));
+            }
             if let Some(value) = &self.m_bs_mappingand_data_forwarding_request_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_bs_mappingand_data_forwarding_request_list"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -41622,12 +42904,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.m_bs_data_forwarding_response_mrblist.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_session_id.encode(writer)?;
+            if let Err(error) = self.m_bs_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_session_id"));
+            }
             if let Some(value) = &self.m_bs_data_forwarding_response_mrblist {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_bs_data_forwarding_response_mrblist"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -41933,13 +43221,21 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.m_rb_progress_information.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.m_rb_id.encode(writer)?;
-            self.d_l_forwarding_uptnlinformation.encode(writer)?;
+            if let Err(error) = self.m_rb_id.encode(writer) {
+                return Err(error.in_field("m_rb_id"));
+            }
+            if let Err(error) = self.d_l_forwarding_uptnlinformation.encode(writer) {
+                return Err(error.in_field("d_l_forwarding_uptnlinformation"));
+            }
             if let Some(value) = &self.m_rb_progress_information {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_rb_progress_information"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -42137,16 +43433,26 @@ pub mod ngap_ies {
             writer.bit(self.m_bs_area_session_id.is_some());
             writer.bit(self.shared_ngu_unicast_tnlinformation.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_session_id.encode(writer)?;
+            if let Err(error) = self.m_bs_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_session_id"));
+            }
             if let Some(value) = &self.m_bs_area_session_id {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_bs_area_session_id"));
+                }
             }
             if let Some(value) = &self.shared_ngu_unicast_tnlinformation {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("shared_ngu_unicast_tnlinformation"));
+                }
             }
-            self.cause.encode(writer)?;
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -42290,15 +43596,23 @@ pub mod ngap_ies {
             writer.bit(self.m_bs_area_session_id.is_some());
             writer.bit(self.shared_ngu_unicast_tnlinformation.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_session_id.encode(writer)?;
+            if let Err(error) = self.m_bs_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_session_id"));
+            }
             if let Some(value) = &self.m_bs_area_session_id {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_bs_area_session_id"));
+                }
             }
             if let Some(value) = &self.shared_ngu_unicast_tnlinformation {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("shared_ngu_unicast_tnlinformation"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -42470,20 +43784,34 @@ pub mod ngap_ies {
             writer.bit(self.shared_ngu_multicast_tnlinformation.is_some());
             writer.bit(self.m_bs_service_area.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_session_id.encode(writer)?;
+            if let Err(error) = self.m_bs_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_session_id"));
+            }
             if let Some(value) = &self.m_bs_area_session_id {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_bs_area_session_id"));
+                }
             }
             if let Some(value) = &self.shared_ngu_multicast_tnlinformation {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("shared_ngu_multicast_tnlinformation"));
+                }
             }
-            self.m_bs_qo_sflows_to_be_setup_list.encode(writer)?;
-            self.m_bssession_status.encode(writer)?;
+            if let Err(error) = self.m_bs_qo_sflows_to_be_setup_list.encode(writer) {
+                return Err(error.in_field("m_bs_qo_sflows_to_be_setup_list"));
+            }
+            if let Err(error) = self.m_bssession_status.encode(writer) {
+                return Err(error.in_field("m_bssession_status"));
+            }
             if let Some(value) = &self.m_bs_service_area {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_bs_service_area"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -42651,16 +43979,26 @@ pub mod ngap_ies {
             writer.bit(self.m_bs_area_session_id.is_some());
             writer.bit(self.criticality_diagnostics.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_session_id.encode(writer)?;
-            if let Some(value) = &self.m_bs_area_session_id {
-                value.encode(writer)?;
+            if let Err(error) = self.m_bs_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_session_id"));
             }
-            self.cause.encode(writer)?;
+            if let Some(value) = &self.m_bs_area_session_id {
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_bs_area_session_id"));
+                }
+            }
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.criticality_diagnostics {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("criticality_diagnostics"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -42865,13 +44203,21 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.m_rb_progress_information.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.m_rb_id.encode(writer)?;
-            self.m_bs_qo_sflow_list.encode(writer)?;
+            if let Err(error) = self.m_rb_id.encode(writer) {
+                return Err(error.in_field("m_rb_id"));
+            }
+            if let Err(error) = self.m_bs_qo_sflow_list.encode(writer) {
+                return Err(error.in_field("m_bs_qo_sflow_list"));
+            }
             if let Some(value) = &self.m_rb_progress_information {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_rb_progress_information"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -43196,10 +44542,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bsqos_flow_identifier.encode(writer)?;
-            self.m_bsqos_flow_level_qos_parameters.encode(writer)?;
+            if let Err(error) = self.m_bsqos_flow_identifier.encode(writer) {
+                return Err(error.in_field("m_bsqos_flow_identifier"));
+            }
+            if let Err(error) = self.m_bsqos_flow_level_qos_parameters.encode(writer) {
+                return Err(error.in_field("m_bsqos_flow_level_qos_parameters"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -43535,13 +44887,19 @@ pub mod ngap_ies {
             writer.bit(self.m_bs_service_area_tailist.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.m_bs_service_area_cell_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_bs_service_area_cell_list"));
+                }
             }
             if let Some(value) = &self.m_bs_service_area_tailist {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_bs_service_area_tailist"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -43656,10 +45014,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_area_session_id.encode(writer)?;
-            self.m_bs_service_area_information.encode(writer)?;
+            if let Err(error) = self.m_bs_area_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_area_session_id"));
+            }
+            if let Err(error) = self.m_bs_service_area_information.encode(writer) {
+                return Err(error.in_field("m_bs_service_area_information"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -43958,12 +45322,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.n_id.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.t_mgi.encode(writer)?;
+            if let Err(error) = self.t_mgi.encode(writer) {
+                return Err(error.in_field("t_mgi"));
+            }
             if let Some(value) = &self.n_id {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("n_id"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -44174,10 +45544,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_area_session_id.encode(writer)?;
-            self.shared_ngu_multicast_tnlinformation.encode(writer)?;
+            if let Err(error) = self.m_bs_area_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_area_session_id"));
+            }
+            if let Err(error) = self.shared_ngu_multicast_tnlinformation.encode(writer) {
+                return Err(error.in_field("shared_ngu_multicast_tnlinformation"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -44452,12 +45828,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.shared_ngu_unicast_tnlinformation.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_area_session_id.encode(writer)?;
+            if let Err(error) = self.m_bs_area_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_area_session_id"));
+            }
             if let Some(value) = &self.shared_ngu_unicast_tnlinformation {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("shared_ngu_unicast_tnlinformation"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -44706,10 +46088,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_area_session_id.encode(writer)?;
-            self.m_bs_up_failure_indication.encode(writer)?;
+            if let Err(error) = self.m_bs_area_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_area_session_id"));
+            }
+            if let Err(error) = self.m_bs_up_failure_indication.encode(writer) {
+                return Err(error.in_field("m_bs_up_failure_indication"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -44879,13 +46267,21 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.m_bs_area_session_id.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_session_id.encode(writer)?;
-            if let Some(value) = &self.m_bs_area_session_id {
-                value.encode(writer)?;
+            if let Err(error) = self.m_bs_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_session_id"));
             }
-            self.cause.encode(writer)?;
+            if let Some(value) = &self.m_bs_area_session_id {
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_bs_area_session_id"));
+                }
+            }
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -45046,10 +46442,14 @@ pub mod ngap_ies {
             writer.bit(self.m_bs_session_tnlinfo_ngran.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.m_bs_session_tnlinfo_ngran {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_bs_session_tnlinfo_ngran"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -45155,12 +46555,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.criticality_diagnostics.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.cause.encode(writer)?;
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.criticality_diagnostics {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("criticality_diagnostics"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -45233,7 +46639,9 @@ pub mod ngap_ies {
     impl Encode for MBSSessionSetupOrModRequestTransfer<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -45315,10 +46723,14 @@ pub mod ngap_ies {
             writer.bit(self.m_bs_session_tnlinfo_ngran.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.m_bs_session_tnlinfo_ngran {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_bs_session_tnlinfo_ngran"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -45443,15 +46855,23 @@ pub mod ngap_ies {
             writer.bit(self.m_bs_area_session_id.is_some());
             writer.bit(self.associated_mbsqos_flow_setup_request_list.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_session_id.encode(writer)?;
+            if let Err(error) = self.m_bs_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_session_id"));
+            }
             if let Some(value) = &self.m_bs_area_session_id {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_bs_area_session_id"));
+                }
             }
             if let Some(value) = &self.associated_mbsqos_flow_setup_request_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("associated_mbsqos_flow_setup_request_list"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -45624,12 +47044,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.m_bs_area_session_id.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_session_id.encode(writer)?;
+            if let Err(error) = self.m_bs_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_session_id"));
+            }
             if let Some(value) = &self.m_bs_area_session_id {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_bs_area_session_id"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -45831,18 +47257,30 @@ pub mod ngap_ies {
             );
             writer.bit(self.m_bs_qos_flow_to_release_list.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_session_id.encode(writer)?;
+            if let Err(error) = self.m_bs_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_session_id"));
+            }
             if let Some(value) = &self.m_bs_area_session_id {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_bs_area_session_id"));
+                }
             }
             if let Some(value) = &self.associated_mbsqos_flow_setupor_modify_request_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(
+                        error.in_field("associated_mbsqos_flow_setupor_modify_request_list")
+                    );
+                }
             }
             if let Some(value) = &self.m_bs_qos_flow_to_release_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_bs_qos_flow_to_release_list"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -46072,10 +47510,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_session_id.encode(writer)?;
-            self.cause.encode(writer)?;
+            if let Err(error) = self.m_bs_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_session_id"));
+            }
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -46366,13 +47810,19 @@ pub mod ngap_ies {
             writer.bit(self.mdt_config_eutra.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.mdt_config_nr {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("mdt_config_nr"));
+                }
             }
             if let Some(value) = &self.mdt_config_eutra {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("mdt_config_eutra"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -46501,14 +47951,24 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.signalling_based_mdtplmnlist.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.mdt_activation.encode(writer)?;
-            self.area_scope_of_mdt.encode(writer)?;
-            self.m_dtmode.encode(writer)?;
+            if let Err(error) = self.mdt_activation.encode(writer) {
+                return Err(error.in_field("mdt_activation"));
+            }
+            if let Err(error) = self.area_scope_of_mdt.encode(writer) {
+                return Err(error.in_field("area_scope_of_mdt"));
+            }
+            if let Err(error) = self.m_dtmode.encode(writer) {
+                return Err(error.in_field("m_dtmode"));
+            }
             if let Some(value) = &self.signalling_based_mdtplmnlist {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("signalling_based_mdtplmnlist"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -46648,14 +48108,24 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.signalling_based_mdtplmnlist.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.mdt_activation.encode(writer)?;
-            self.area_scope_of_mdt.encode(writer)?;
-            self.m_dtmode_nr.encode(writer)?;
+            if let Err(error) = self.mdt_activation.encode(writer) {
+                return Err(error.in_field("mdt_activation"));
+            }
+            if let Err(error) = self.area_scope_of_mdt.encode(writer) {
+                return Err(error.in_field("area_scope_of_mdt"));
+            }
+            if let Err(error) = self.m_dtmode_nr.encode(writer) {
+                return Err(error.in_field("m_dtmode_nr"));
+            }
             if let Some(value) = &self.signalling_based_mdtplmnlist {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("signalling_based_mdtplmnlist"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -46763,9 +48233,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.m_dt_location_information.encode(writer)?;
+            if let Err(error) = self.m_dt_location_information.encode(writer) {
+                return Err(error.in_field("m_dt_location_information"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -46904,10 +48378,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            writer.octet_string(&self.reference_location, 0, UNBOUNDED)?;
-            writer.unsigned(u64::from(self.distance_radius), 1, 65535)?;
+            if let Err(error) = writer.octet_string(&self.reference_location, 0, UNBOUNDED) {
+                return Err(error.in_field("reference_location"));
+            }
+            if let Err(error) = writer.unsigned(u64::from(self.distance_radius), 1, 65535) {
+                return Err(error.in_field("distance_radius"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -47994,10 +49474,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_rcgi.encode(writer)?;
-            self.t_ai.encode(writer)?;
+            if let Err(error) = self.n_rcgi.encode(writer) {
+                return Err(error.in_field("n_rcgi"));
+            }
+            if let Err(error) = self.t_ai.encode(writer) {
+                return Err(error.in_field("t_ai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -48270,21 +49756,33 @@ pub mod ngap_ies {
             writer.bit(self.forbidden_area_information.is_some());
             writer.bit(self.service_area_information.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.serving_plmn.encode(writer)?;
+            if let Err(error) = self.serving_plmn.encode(writer) {
+                return Err(error.in_field("serving_plmn"));
+            }
             if let Some(value) = &self.equivalent_plmns {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("equivalent_plmns"));
+                }
             }
             if let Some(value) = &self.r_atrestrictions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("r_atrestrictions"));
+                }
             }
             if let Some(value) = &self.forbidden_area_information {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("forbidden_area_information"));
+                }
             }
             if let Some(value) = &self.service_area_information {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("service_area_information"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -48489,15 +49987,23 @@ pub mod ngap_ies {
             writer.bit(self.dl_available_bitrate_report_thresholds.is_some());
             writer.bit(self.ul_available_bitrate_report_thresholds.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.monitoring_request.encode(writer)?;
+            if let Err(error) = self.monitoring_request.encode(writer) {
+                return Err(error.in_field("monitoring_request"));
+            }
             if let Some(value) = &self.dl_available_bitrate_report_thresholds {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("dl_available_bitrate_report_thresholds"));
+                }
             }
             if let Some(value) = &self.ul_available_bitrate_report_thresholds {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("ul_available_bitrate_report_thresholds"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -48607,9 +50113,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_area_tailist.encode(writer)?;
+            if let Err(error) = self.m_bs_area_tailist.encode(writer) {
+                return Err(error.in_field("m_bs_area_tailist"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -48707,12 +50217,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.u_e_paging_list.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.multicast_group_paging_area.encode(writer)?;
+            if let Err(error) = self.multicast_group_paging_area.encode(writer) {
+                return Err(error.in_field("multicast_group_paging_area"));
+            }
             if let Some(value) = &self.u_e_paging_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("u_e_paging_list"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -48858,9 +50374,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_session_id.encode(writer)?;
+            if let Err(error) = self.m_bs_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_session_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -48944,9 +50464,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.m_bs_session_id.encode(writer)?;
+            if let Err(error) = self.m_bs_session_id.encode(writer) {
+                return Err(error.in_field("m_bs_session_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -49009,7 +50533,9 @@ pub mod ngap_ies {
     impl Encode for MulticastSessionUpdateRequestTransfer<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -49172,10 +50698,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            writer.signed(i64::from(self.n6_jitter_lower_bound), -127, 127)?;
-            writer.signed(i64::from(self.n6_jitter_upper_bound), -127, 127)?;
+            if let Err(error) = writer.signed(i64::from(self.n6_jitter_lower_bound), -127, 127) {
+                return Err(error.in_field("n6_jitter_lower_bound"));
+            }
+            if let Err(error) = writer.signed(i64::from(self.n6_jitter_upper_bound), -127, 127) {
+                return Err(error.in_field("n6_jitter_upper_bound"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -49584,12 +51116,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.n_b_io_t_paging_time_window.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.n_b_io_t_paging_e_drxcycle.encode(writer)?;
+            if let Err(error) = self.n_b_io_t_paging_e_drxcycle.encode(writer) {
+                return Err(error.in_field("n_b_io_t_paging_e_drxcycle"));
+            }
             if let Some(value) = &self.n_b_io_t_paging_time_window {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("n_b_io_t_paging_time_window"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -49780,9 +51318,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.ngap_protocol_ie_id.encode(writer)?;
+            if let Err(error) = self.ngap_protocol_ie_id.encode(writer) {
+                return Err(error.in_field("ngap_protocol_ie_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -50033,11 +51575,19 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.ngap_protocol_ie_id.encode(writer)?;
-            self.ngap_protocol_iesupport_info.encode(writer)?;
-            self.ngap_protocol_iepresence_info.encode(writer)?;
+            if let Err(error) = self.ngap_protocol_ie_id.encode(writer) {
+                return Err(error.in_field("ngap_protocol_ie_id"));
+            }
+            if let Err(error) = self.ngap_protocol_iesupport_info.encode(writer) {
+                return Err(error.in_field("ngap_protocol_iesupport_info"));
+            }
+            if let Err(error) = self.ngap_protocol_iepresence_info.encode(writer) {
+                return Err(error.in_field("ngap_protocol_iepresence_info"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -50350,20 +51900,34 @@ pub mod ngap_ies {
             writer.bit(self.n_gran_noof_rrcconnections.is_some());
             writer.bit(self.n_gran_radio_resource_status.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.n_gran_cgi.encode(writer)?;
-            self.n_gran_composite_available_capacity_group
-                .encode(writer)?;
+            if let Err(error) = self.n_gran_cgi.encode(writer) {
+                return Err(error.in_field("n_gran_cgi"));
+            }
+            if let Err(error) = self
+                .n_gran_composite_available_capacity_group
+                .encode(writer)
+            {
+                return Err(error.in_field("n_gran_composite_available_capacity_group"));
+            }
             if let Some(value) = &self.n_gran_number_of_active_ues {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("n_gran_number_of_active_ues"));
+                }
             }
             if let Some(value) = &self.n_gran_noof_rrcconnections {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("n_gran_noof_rrcconnections"));
+                }
             }
             if let Some(value) = &self.n_gran_radio_resource_status {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("n_gran_radio_resource_status"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -50543,9 +52107,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_gran_cgi.encode(writer)?;
+            if let Err(error) = self.n_gran_cgi.encode(writer) {
+                return Err(error.in_field("n_gran_cgi"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -50787,14 +52355,38 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            writer.unsigned(u64::from(self.d_l_gbr_prb_usage_for_mimo), 0, 100)?;
-            writer.unsigned(u64::from(self.u_l_gbr_prb_usage_for_mimo), 0, 100)?;
-            writer.unsigned(u64::from(self.d_l_non_gbr_prb_usage_for_mimo), 0, 100)?;
-            writer.unsigned(u64::from(self.u_l_non_gbr_prb_usage_for_mimo), 0, 100)?;
-            writer.unsigned(u64::from(self.d_l_total_prb_usage_for_mimo), 0, 100)?;
-            writer.unsigned(u64::from(self.u_l_total_prb_usage_for_mimo), 0, 100)?;
+            if let Err(error) = writer.unsigned(u64::from(self.d_l_gbr_prb_usage_for_mimo), 0, 100)
+            {
+                return Err(error.in_field("d_l_gbr_prb_usage_for_mimo"));
+            }
+            if let Err(error) = writer.unsigned(u64::from(self.u_l_gbr_prb_usage_for_mimo), 0, 100)
+            {
+                return Err(error.in_field("u_l_gbr_prb_usage_for_mimo"));
+            }
+            if let Err(error) =
+                writer.unsigned(u64::from(self.d_l_non_gbr_prb_usage_for_mimo), 0, 100)
+            {
+                return Err(error.in_field("d_l_non_gbr_prb_usage_for_mimo"));
+            }
+            if let Err(error) =
+                writer.unsigned(u64::from(self.u_l_non_gbr_prb_usage_for_mimo), 0, 100)
+            {
+                return Err(error.in_field("u_l_non_gbr_prb_usage_for_mimo"));
+            }
+            if let Err(error) =
+                writer.unsigned(u64::from(self.d_l_total_prb_usage_for_mimo), 0, 100)
+            {
+                return Err(error.in_field("d_l_total_prb_usage_for_mimo"));
+            }
+            if let Err(error) =
+                writer.unsigned(u64::from(self.u_l_total_prb_usage_for_mimo), 0, 100)
+            {
+                return Err(error.in_field("u_l_total_prb_usage_for_mimo"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -50936,9 +52528,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_gran_cell_report_list.encode(writer)?;
+            if let Err(error) = self.n_gran_cell_report_list.encode(writer) {
+                return Err(error.in_field("n_gran_cell_report_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -51026,9 +52622,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_gran_cell_to_report_list.encode(writer)?;
+            if let Err(error) = self.n_gran_cell_to_report_list.encode(writer) {
+                return Err(error.in_field("n_gran_cell_to_report_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -51133,13 +52733,18 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(self.t_nlassociation_transport_layer_address_amf.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.t_nlassociation_transport_layer_address
-                .encode(writer)?;
+            if let Err(error) = self.t_nlassociation_transport_layer_address.encode(writer) {
+                return Err(error.in_field("t_nlassociation_transport_layer_address"));
+            }
             if let Some(value) = &self.t_nlassociation_transport_layer_address_amf {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("t_nlassociation_transport_layer_address_amf"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -51847,13 +53452,19 @@ pub mod ngap_ies {
             writer.bit(self.aerial_controller_ue.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.aerial_ue {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("aerial_ue"));
+                }
             }
             if let Some(value) = &self.aerial_controller_ue {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("aerial_controller_ue"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -51963,10 +53574,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            self.n_rcell_identity.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = self.n_rcell_identity.encode(writer) {
+                return Err(error.in_field("n_rcell_identity"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -52265,12 +53882,19 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_r_paging_long_e_drx_cycle_for_rrc_inactive
-                .encode(writer)?;
-            self.n_r_paging_time_window_for_rrc_inactive
-                .encode(writer)?;
+            if let Err(error) = self
+                .n_r_paging_long_e_drx_cycle_for_rrc_inactive
+                .encode(writer)
+            {
+                return Err(error.in_field("n_r_paging_long_e_drx_cycle_for_rrc_inactive"));
+            }
+            if let Err(error) = self.n_r_paging_time_window_for_rrc_inactive.encode(writer) {
+                return Err(error.in_field("n_r_paging_time_window_for_rrc_inactive"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -52688,12 +54312,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.n_r_paging_time_window.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.n_r_paging_e_drx_cycle.encode(writer)?;
+            if let Err(error) = self.n_r_paging_e_drx_cycle.encode(writer) {
+                return Err(error.in_field("n_r_paging_e_drx_cycle"));
+            }
             if let Some(value) = &self.n_r_paging_time_window {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("n_r_paging_time_window"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -52956,9 +54586,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extension.is_some());
-            self.nr_frequency_band.encode(writer)?;
+            if let Err(error) = self.nr_frequency_band.encode(writer) {
+                return Err(error.in_field("nr_frequency_band"));
+            }
             if let Some(value) = &self.i_e_extension {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extension"));
+                }
             }
             Ok(())
         }
@@ -53051,10 +54685,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extension.is_some());
-            self.nr_arfcn.encode(writer)?;
-            self.frequency_band_list.encode(writer)?;
+            if let Err(error) = self.nr_arfcn.encode(writer) {
+                return Err(error.in_field("nr_arfcn"));
+            }
+            if let Err(error) = self.frequency_band_list.encode(writer) {
+                return Err(error.in_field("frequency_band_list"));
+            }
             if let Some(value) = &self.i_e_extension {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extension"));
+                }
             }
             Ok(())
         }
@@ -53216,13 +54856,21 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.u_elocation_derived_tacin_nrntn.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.serving_plmn.encode(writer)?;
-            self.t_aclist_in_nrntn.encode(writer)?;
+            if let Err(error) = self.serving_plmn.encode(writer) {
+                return Err(error.in_field("serving_plmn"));
+            }
+            if let Err(error) = self.t_aclist_in_nrntn.encode(writer) {
+                return Err(error.in_field("t_aclist_in_nrntn"));
+            }
             if let Some(value) = &self.u_elocation_derived_tacin_nrntn {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("u_elocation_derived_tacin_nrntn"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -53425,9 +55073,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.u_esidelink_aggregate_maximum_bit_rate.encode(writer)?;
+            if let Err(error) = self.u_esidelink_aggregate_maximum_bit_rate.encode(writer) {
+                return Err(error.in_field("u_esidelink_aggregate_maximum_bit_rate"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -53538,13 +55190,19 @@ pub mod ngap_ies {
             writer.bit(self.pedestrian_ue.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.vehicle_ue {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("vehicle_ue"));
+                }
             }
             if let Some(value) = &self.pedestrian_ue {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("pedestrian_ue"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -53964,9 +55622,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.network_slice_listfor_mdt.encode(writer)?;
+            if let Err(error) = self.network_slice_listfor_mdt.encode(writer) {
+                return Err(error.in_field("network_slice_listfor_mdt"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -54063,10 +55725,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.plmn_id.encode(writer)?;
-            self.slice_mdtlist.encode(writer)?;
+            if let Err(error) = self.plmn_id.encode(writer) {
+                return Err(error.in_field("plmn_id"));
+            }
+            if let Err(error) = self.slice_mdtlist.encode(writer) {
+                return Err(error.in_field("slice_mdtlist"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -54520,18 +56188,28 @@ pub mod ngap_ies {
             writer.bit(self.averaging_window.is_some());
             writer.bit(self.maximum_data_burst_volume.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.five_qi.encode(writer)?;
+            if let Err(error) = self.five_qi.encode(writer) {
+                return Err(error.in_field("five_qi"));
+            }
             if let Some(value) = &self.priority_level_qos {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("priority_level_qos"));
+                }
             }
             if let Some(value) = &self.averaging_window {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("averaging_window"));
+                }
             }
             if let Some(value) = &self.maximum_data_burst_volume {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("maximum_data_burst_volume"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -54797,10 +56475,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_gran_cgi.encode(writer)?;
-            self.notify_flag.encode(writer)?;
+            if let Err(error) = self.n_gran_cgi.encode(writer) {
+                return Err(error.in_field("n_gran_cgi"));
+            }
+            if let Err(error) = self.notify_flag.encode(writer) {
+                return Err(error.in_field("notify_flag"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -55355,15 +57039,23 @@ pub mod ngap_ies {
             writer.bit(self.slice_overload_response.is_some());
             writer.bit(self.slice_traffic_load_reduction_indication.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.slice_overload_list.encode(writer)?;
+            if let Err(error) = self.slice_overload_list.encode(writer) {
+                return Err(error.in_field("slice_overload_list"));
+            }
             if let Some(value) = &self.slice_overload_response {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("slice_overload_response"));
+                }
             }
             if let Some(value) = &self.slice_traffic_load_reduction_indication {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("slice_traffic_load_reduction_indication"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -55531,10 +57223,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.guaranteed_flow_bit_rate.encode(writer)?;
-            self.maximum_flow_bit_rate.encode(writer)?;
+            if let Err(error) = self.guaranteed_flow_bit_rate.encode(writer) {
+                return Err(error.in_field("guaranteed_flow_bit_rate"));
+            }
+            if let Err(error) = self.maximum_flow_bit_rate.encode(writer) {
+                return Err(error.in_field("maximum_flow_bit_rate"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -55659,15 +57357,23 @@ pub mod ngap_ies {
             writer.bit(self.pc5_flow_bit_rates.is_some());
             writer.bit(self.range.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.p_qi.encode(writer)?;
+            if let Err(error) = self.p_qi.encode(writer) {
+                return Err(error.in_field("p_qi"));
+            }
             if let Some(value) = &self.pc5_flow_bit_rates {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("pc5_flow_bit_rates"));
+                }
             }
             if let Some(value) = &self.range {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("range"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -55826,12 +57532,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.pc5_link_aggregate_bit_rates.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.pc5_qo_sflow_list.encode(writer)?;
+            if let Err(error) = self.pc5_qo_sflow_list.encode(writer) {
+                return Err(error.in_field("pc5_qo_sflow_list"));
+            }
             if let Some(value) = &self.pc5_link_aggregate_bit_rates {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("pc5_link_aggregate_bit_rates"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -55987,12 +57699,22 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_aggregate_maximum_bit_rate_dl
-                .encode(writer)?;
-            self.p_dusession_aggregate_maximum_bit_rate_ul
-                .encode(writer)?;
+            if let Err(error) = self
+                .p_dusession_aggregate_maximum_bit_rate_dl
+                .encode(writer)
+            {
+                return Err(error.in_field("p_dusession_aggregate_maximum_bit_rate_dl"));
+            }
+            if let Err(error) = self
+                .p_dusession_aggregate_maximum_bit_rate_ul
+                .encode(writer)
+            {
+                return Err(error.in_field("p_dusession_aggregate_maximum_bit_rate_ul"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -56106,10 +57828,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            self.paging_policy_differentiation_list.encode(writer)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = self.paging_policy_differentiation_list.encode(writer) {
+                return Err(error.in_field("paging_policy_differentiation_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -56339,9 +58067,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -56468,10 +58200,18 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(&self.handover_request_acknowledge_transfer, 0, UNBOUNDED)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) =
+                writer.octet_string(&self.handover_request_acknowledge_transfer, 0, UNBOUNDED)
+            {
+                return Err(error.in_field("handover_request_acknowledge_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -56636,14 +58376,22 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.p_dusession_resource_modify_indication_unsuccessful_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(
+                    error.in_field("p_dusession_resource_modify_indication_unsuccessful_transfer")
+                );
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -56756,14 +58504,20 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.p_dusession_resource_modify_unsuccessful_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("p_dusession_resource_modify_unsuccessful_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -56980,10 +58734,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            self.cause.encode(writer)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -57079,10 +58839,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            self.cause.encode(writer)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -57294,14 +59060,20 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.p_dusession_resource_setup_unsuccessful_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("p_dusession_resource_setup_unsuccessful_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -57414,14 +59186,20 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.p_dusession_resource_setup_unsuccessful_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("p_dusession_resource_setup_unsuccessful_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -57534,14 +59312,20 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.handover_resource_allocation_unsuccessful_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("handover_resource_allocation_unsuccessful_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -57653,14 +59437,20 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.path_switch_request_setup_failed_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("path_switch_request_setup_failed_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -57773,14 +59563,20 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.p_dusession_resource_setup_unsuccessful_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("p_dusession_resource_setup_unsuccessful_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -58162,10 +59958,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(&self.handover_command_transfer, 0, UNBOUNDED)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(&self.handover_command_transfer, 0, UNBOUNDED) {
+                return Err(error.in_field("handover_command_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -58335,13 +60137,21 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.d_rbs_to_qos_flows_mapping_list.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            self.qos_flow_information_list.encode(writer)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = self.qos_flow_information_list.encode(writer) {
+                return Err(error.in_field("qos_flow_information_list"));
+            }
             if let Some(value) = &self.d_rbs_to_qos_flows_mapping_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("d_rbs_to_qos_flows_mapping_list"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -58504,9 +60314,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -58590,9 +60404,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -58685,10 +60503,17 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(&self.handover_required_transfer, 0, UNBOUNDED)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(&self.handover_required_transfer, 0, UNBOUNDED)
+            {
+                return Err(error.in_field("handover_required_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -58974,16 +60799,26 @@ pub mod ngap_ies {
             writer.bit(self.additional_ng_uuptnlinformation.is_some());
             writer.bit(self.qos_flow_failed_to_modify_list.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_flow_modify_confirm_list.encode(writer)?;
-            self.u_lngu_up_tnlinformation.encode(writer)?;
+            if let Err(error) = self.qos_flow_modify_confirm_list.encode(writer) {
+                return Err(error.in_field("qos_flow_modify_confirm_list"));
+            }
+            if let Err(error) = self.u_lngu_up_tnlinformation.encode(writer) {
+                return Err(error.in_field("u_lngu_up_tnlinformation"));
+            }
             if let Some(value) = &self.additional_ng_uuptnlinformation {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("additional_ng_uuptnlinformation"));
+                }
             }
             if let Some(value) = &self.qos_flow_failed_to_modify_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("qos_flow_failed_to_modify_list"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -59123,12 +60958,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.additional_dlqos_flow_per_tnlinformation.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.d_lqos_flow_per_tnlinformation.encode(writer)?;
+            if let Err(error) = self.d_lqos_flow_per_tnlinformation.encode(writer) {
+                return Err(error.in_field("d_lqos_flow_per_tnlinformation"));
+            }
             if let Some(value) = &self.additional_dlqos_flow_per_tnlinformation {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("additional_dlqos_flow_per_tnlinformation"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -59232,9 +61073,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.cause.encode(writer)?;
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -59332,14 +61177,20 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.p_dusession_resource_modify_confirm_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("p_dusession_resource_modify_confirm_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -59452,14 +61303,20 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.p_dusession_resource_modify_indication_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("p_dusession_resource_modify_indication_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -59585,17 +61442,25 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.n_as_pdu.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            if let Some(value) = &self.n_as_pdu {
-                value.encode(writer)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
             }
-            writer.octet_string(
+            if let Some(value) = &self.n_as_pdu {
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("n_as_pdu"));
+                }
+            }
+            if let Err(error) = writer.octet_string(
                 &self.p_dusession_resource_modify_request_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("p_dusession_resource_modify_request_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -59714,14 +61579,20 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.p_dusession_resource_modify_response_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("p_dusession_resource_modify_response_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -60018,7 +61889,9 @@ pub mod ngap_ies {
     impl Encode for PDUSessionResourceModifyRequestTransfer<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -60170,22 +62043,34 @@ pub mod ngap_ies {
             writer.bit(self.qos_flow_failed_to_add_or_modify_list.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.d_l_ngu_up_tnlinformation {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("d_l_ngu_up_tnlinformation"));
+                }
             }
             if let Some(value) = &self.u_l_ngu_up_tnlinformation {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("u_l_ngu_up_tnlinformation"));
+                }
             }
             if let Some(value) = &self.qos_flow_add_or_modify_response_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("qos_flow_add_or_modify_response_list"));
+                }
             }
             if let Some(value) = &self.additional_dlqos_flow_per_tnlinformation {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("additional_dlqos_flow_per_tnlinformation"));
+                }
             }
             if let Some(value) = &self.qos_flow_failed_to_add_or_modify_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("qos_flow_failed_to_add_or_modify_list"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -60337,12 +62222,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.criticality_diagnostics.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.cause.encode(writer)?;
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.criticality_diagnostics {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("criticality_diagnostics"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -60447,10 +62338,18 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(&self.p_dusession_resource_notify_transfer, 0, UNBOUNDED)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) =
+                writer.octet_string(&self.p_dusession_resource_notify_transfer, 0, UNBOUNDED)
+            {
+                return Err(error.in_field("p_dusession_resource_notify_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -60597,9 +62496,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.cause.encode(writer)?;
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -60703,13 +62606,19 @@ pub mod ngap_ies {
             writer.bit(self.qos_flow_released_list.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.qos_flow_notify_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("qos_flow_notify_list"));
+                }
             }
             if let Some(value) = &self.qos_flow_released_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("qos_flow_released_list"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -60811,9 +62720,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.cause.encode(writer)?;
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -60883,7 +62796,9 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -60976,14 +62891,20 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.p_dusession_resource_notify_released_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("p_dusession_resource_notify_released_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -61095,14 +63016,20 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.path_switch_request_unsuccessful_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("path_switch_request_unsuccessful_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -61214,14 +63141,20 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.path_switch_request_unsuccessful_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("path_switch_request_unsuccessful_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -61334,14 +63267,20 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.p_dusession_resource_release_response_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("p_dusession_resource_release_response_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -61670,10 +63609,18 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(&self.u_econtext_resume_request_transfer, 0, UNBOUNDED)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) =
+                writer.octet_string(&self.u_econtext_resume_request_transfer, 0, UNBOUNDED)
+            {
+                return Err(error.in_field("u_econtext_resume_request_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -61782,10 +63729,18 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(&self.u_econtext_resume_response_transfer, 0, UNBOUNDED)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) =
+                writer.octet_string(&self.u_econtext_resume_response_transfer, 0, UNBOUNDED)
+            {
+                return Err(error.in_field("u_econtext_resume_response_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -62004,10 +63959,18 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(&self.secondary_ratdata_usage_report_transfer, 0, UNBOUNDED)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) =
+                writer.octet_string(&self.secondary_ratdata_usage_report_transfer, 0, UNBOUNDED)
+            {
+                return Err(error.in_field("secondary_ratdata_usage_report_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -62197,18 +64160,28 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.n_as_pdu.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            if let Some(value) = &self.n_as_pdu {
-                value.encode(writer)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
             }
-            self.s_nssai.encode(writer)?;
-            writer.octet_string(
+            if let Some(value) = &self.n_as_pdu {
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("n_as_pdu"));
+                }
+            }
+            if let Err(error) = self.s_nssai.encode(writer) {
+                return Err(error.in_field("s_nssai"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.p_dusession_resource_setup_request_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("p_dusession_resource_setup_request_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -62331,14 +64304,20 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.p_dusession_resource_setup_response_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("p_dusession_resource_setup_response_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -62454,11 +64433,19 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            self.s_nssai.encode(writer)?;
-            writer.octet_string(&self.handover_request_transfer, 0, UNBOUNDED)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = self.s_nssai.encode(writer) {
+                return Err(error.in_field("s_nssai"));
+            }
+            if let Err(error) = writer.octet_string(&self.handover_request_transfer, 0, UNBOUNDED) {
+                return Err(error.in_field("handover_request_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -62597,18 +64584,28 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.p_dusession_nas_pdu.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            if let Some(value) = &self.p_dusession_nas_pdu {
-                value.encode(writer)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
             }
-            self.s_nssai.encode(writer)?;
-            writer.octet_string(
+            if let Some(value) = &self.p_dusession_nas_pdu {
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("p_dusession_nas_pdu"));
+                }
+            }
+            if let Err(error) = self.s_nssai.encode(writer) {
+                return Err(error.in_field("s_nssai"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.p_dusession_resource_setup_request_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("p_dusession_resource_setup_request_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -62733,14 +64730,20 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.p_dusession_resource_setup_response_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("p_dusession_resource_setup_response_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -63080,7 +65083,9 @@ pub mod ngap_ies {
     impl Encode for PDUSessionResourceSetupRequestTransfer<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -63202,18 +65207,28 @@ pub mod ngap_ies {
             writer.bit(self.security_result.is_some());
             writer.bit(self.qos_flow_failed_to_setup_list.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.d_lqos_flow_per_tnlinformation.encode(writer)?;
+            if let Err(error) = self.d_lqos_flow_per_tnlinformation.encode(writer) {
+                return Err(error.in_field("d_lqos_flow_per_tnlinformation"));
+            }
             if let Some(value) = &self.additional_dlqos_flow_per_tnlinformation {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("additional_dlqos_flow_per_tnlinformation"));
+                }
             }
             if let Some(value) = &self.security_result {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("security_result"));
+                }
             }
             if let Some(value) = &self.qos_flow_failed_to_setup_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("qos_flow_failed_to_setup_list"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -63350,12 +65365,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.criticality_diagnostics.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.cause.encode(writer)?;
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.criticality_diagnostics {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("criticality_diagnostics"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -63460,10 +65481,18 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(&self.u_econtext_suspend_request_transfer, 0, UNBOUNDED)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) =
+                writer.octet_string(&self.u_econtext_suspend_request_transfer, 0, UNBOUNDED)
+            {
+                return Err(error.in_field("u_econtext_suspend_request_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -63629,10 +65658,18 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(&self.path_switch_request_acknowledge_transfer, 0, UNBOUNDED)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) =
+                writer.octet_string(&self.path_switch_request_acknowledge_transfer, 0, UNBOUNDED)
+            {
+                return Err(error.in_field("path_switch_request_acknowledge_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -63790,10 +65827,18 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(&self.path_switch_request_transfer, 0, UNBOUNDED)?;
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) =
+                writer.octet_string(&self.path_switch_request_transfer, 0, UNBOUNDED)
+            {
+                return Err(error.in_field("path_switch_request_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -63956,14 +66001,20 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.handover_preparation_unsuccessful_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("handover_preparation_unsuccessful_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -64075,14 +66126,20 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_id.encode(writer)?;
-            writer.octet_string(
+            if let Err(error) = self.p_dusession_id.encode(writer) {
+                return Err(error.in_field("p_dusession_id"));
+            }
+            if let Err(error) = writer.octet_string(
                 &self.p_dusession_resource_release_command_transfer,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("p_dusession_resource_release_command_transfer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -64404,10 +66461,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.r_attype.encode(writer)?;
-            self.p_dusession_timed_report_list.encode(writer)?;
+            if let Err(error) = self.r_attype.encode(writer) {
+                return Err(error.in_field("r_attype"));
+            }
+            if let Err(error) = self.p_dusession_timed_report_list.encode(writer) {
+                return Err(error.in_field("p_dusession_timed_report_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -64629,16 +66692,24 @@ pub mod ngap_ies {
             writer.bit(self.pdu_set_integrated_handling_information.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.pdu_set_delay_budget {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("pdu_set_delay_budget"));
+                }
             }
             if let Some(value) = &self.pdu_set_error_rate {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("pdu_set_error_rate"));
+                }
             }
             if let Some(value) = &self.pdu_set_integrated_handling_information {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("pdu_set_integrated_handling_information"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -64780,13 +66851,19 @@ pub mod ngap_ies {
             writer.bit(self.dl_pduset_qo_sinformation.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.ul_pduset_qo_sinformation {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("ul_pduset_qo_sinformation"));
+                }
             }
             if let Some(value) = &self.dl_pduset_qo_sinformation {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("dl_pduset_qo_sinformation"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -64892,9 +66969,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.c_nsubgroup_id.encode(writer)?;
+            if let Err(error) = self.c_nsubgroup_id.encode(writer) {
+                return Err(error.in_field("c_nsubgroup_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -64978,9 +67059,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.plmn_listfor_qmc.encode(writer)?;
+            if let Err(error) = self.plmn_listfor_qmc.encode(writer) {
+                return Err(error.in_field("plmn_listfor_qmc"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -65177,10 +67262,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            self.slice_support_list.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = self.slice_support_list.encode(writer) {
+                return Err(error.in_field("slice_support_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -65319,9 +67410,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.c_aglistfor_mdt.encode(writer)?;
+            if let Err(error) = self.c_aglistfor_mdt.encode(writer) {
+                return Err(error.in_field("c_aglistfor_mdt"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -65405,9 +67500,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.allowed_pni_npi_list.encode(writer)?;
+            if let Err(error) = self.allowed_pni_npi_list.encode(writer) {
+                return Err(error.in_field("allowed_pni_npi_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -65491,9 +67590,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.c_aglistfor_mdt.encode(writer)?;
+            if let Err(error) = self.c_aglistfor_mdt.encode(writer) {
+                return Err(error.in_field("c_aglistfor_mdt"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -65734,7 +67837,9 @@ pub mod ngap_ies {
             writer.unsigned_extensible(self.p_erscalar, 0, 9);
             writer.unsigned_extensible(self.p_erexponent, 0, 9);
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -65866,10 +67971,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.e_utra_cgi.encode(writer)?;
-            self.coverage_enhancement_level.encode(writer)?;
+            if let Err(error) = self.e_utra_cgi.encode(writer) {
+                return Err(error.in_field("e_utra_cgi"));
+            }
+            if let Err(error) = self.coverage_enhancement_level.encode(writer) {
+                return Err(error.in_field("coverage_enhancement_level"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -66019,13 +68130,21 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.next_paging_area_scope.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.paging_attempt_count.encode(writer)?;
-            self.intended_number_of_paging_attempts.encode(writer)?;
+            if let Err(error) = self.paging_attempt_count.encode(writer) {
+                return Err(error.in_field("paging_attempt_count"));
+            }
+            if let Err(error) = self.intended_number_of_paging_attempts.encode(writer) {
+                return Err(error.in_field("intended_number_of_paging_attempts"));
+            }
             if let Some(value) = &self.next_paging_area_scope {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("next_paging_area_scope"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -66305,9 +68424,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_dusession_for_paging_list.encode(writer)?;
+            if let Err(error) = self.p_dusession_for_paging_list.encode(writer) {
+                return Err(error.in_field("p_dusession_for_paging_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -66459,22 +68582,32 @@ pub mod ngap_ies {
             writer.bit(self.dl_data_size.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.qos_flow_identifier {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("qos_flow_identifier"));
+                }
             }
             if let Some(value) = &self.paging_policy_indicator {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("paging_policy_indicator"));
+                }
             }
             if let Some(value) = &self.allocation_and_retention_priority {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("allocation_and_retention_priority"));
+                }
             }
             if let Some(value) = &self.five_qi {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("five_qi"));
+                }
             }
             if let Some(value) = &self.dl_data_size {
                 writer.unsigned_extensible(*value, 0, 96000);
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -66961,9 +69094,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.s_nssai.encode(writer)?;
+            if let Err(error) = self.s_nssai.encode(writer) {
+                return Err(error.in_field("s_nssai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -67069,13 +69206,19 @@ pub mod ngap_ies {
             writer.bit(self.security_indication.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.u_l_ngu_up_tnlinformation {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("u_l_ngu_up_tnlinformation"));
+                }
             }
             if let Some(value) = &self.security_indication {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("security_indication"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -67181,9 +69324,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.cause.encode(writer)?;
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -67306,16 +69453,26 @@ pub mod ngap_ies {
             writer.bit(self.d_l_ngu_tnlinformation_reused.is_some());
             writer.bit(self.user_plane_security_information.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.d_l_ngu_up_tnlinformation.encode(writer)?;
+            if let Err(error) = self.d_l_ngu_up_tnlinformation.encode(writer) {
+                return Err(error.in_field("d_l_ngu_up_tnlinformation"));
+            }
             if let Some(value) = &self.d_l_ngu_tnlinformation_reused {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("d_l_ngu_tnlinformation_reused"));
+                }
             }
             if let Some(value) = &self.user_plane_security_information {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("user_plane_security_information"));
+                }
             }
-            self.qos_flow_accepted_list.encode(writer)?;
+            if let Err(error) = self.qos_flow_accepted_list.encode(writer) {
+                return Err(error.in_field("qos_flow_accepted_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -67434,9 +69591,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.cause.encode(writer)?;
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -67605,9 +69766,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.reporting_periodicity.encode(writer)?;
+            if let Err(error) = self.reporting_periodicity.encode(writer) {
+                return Err(error.in_field("reporting_periodicity"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -67733,10 +69898,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.periodicity_lower_bound.encode(writer)?;
-            self.periodicity_upper_bound.encode(writer)?;
+            if let Err(error) = self.periodicity_lower_bound.encode(writer) {
+                return Err(error.in_field("periodicity_lower_bound"));
+            }
+            if let Err(error) = self.periodicity_upper_bound.encode(writer) {
+                return Err(error.in_field("periodicity_upper_bound"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -67836,9 +70007,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.allowed_periodicity_list.encode(writer)?;
+            if let Err(error) = self.allowed_periodicity_list.encode(writer) {
+                return Err(error.in_field("allowed_periodicity_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -68359,9 +70534,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.u_eapp_layer_meas_info_list.encode(writer)?;
+            if let Err(error) = self.u_eapp_layer_meas_info_list.encode(writer) {
+                return Err(error.in_field("u_eapp_layer_meas_info_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -68449,9 +70628,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.qo_ereference_list.encode(writer)?;
+            if let Err(error) = self.qo_ereference_list.encode(writer) {
+                return Err(error.in_field("qo_ereference_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -68647,13 +70830,19 @@ pub mod ngap_ies {
             writer.bit(self.r_vqo_ereporting_path.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.qo_ereporting_path {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("qo_ereporting_path"));
+                }
             }
             if let Some(value) = &self.r_vqo_ereporting_path {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("r_vqo_ereporting_path"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -68922,15 +71111,23 @@ pub mod ngap_ies {
             writer.bit(self.t_sctraffic_characteristics_feedback.is_some());
             writer.bit(self.a_npacket_delay_budget_ul.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_flow_identifier.encode(writer)?;
+            if let Err(error) = self.qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("qos_flow_identifier"));
+            }
             if let Some(value) = &self.t_sctraffic_characteristics_feedback {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("t_sctraffic_characteristics_feedback"));
+                }
             }
             if let Some(value) = &self.a_npacket_delay_budget_ul {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("a_npacket_delay_budget_ul"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -69159,11 +71356,19 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_flow_identifier.encode(writer)?;
-            self.r_attype.encode(writer)?;
-            self.qo_sflows_timed_report_list.encode(writer)?;
+            if let Err(error) = self.qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("qos_flow_identifier"));
+            }
+            if let Err(error) = self.r_attype.encode(writer) {
+                return Err(error.in_field("r_attype"));
+            }
+            if let Err(error) = self.qo_sflows_timed_report_list.encode(writer) {
+                return Err(error.in_field("qo_sflows_timed_report_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -69413,9 +71618,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_flow_identifier.encode(writer)?;
+            if let Err(error) = self.qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("qos_flow_identifier"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -69578,15 +71787,23 @@ pub mod ngap_ies {
             writer.bit(self.qos_flow_level_qos_parameters.is_some());
             writer.bit(self.e_rab_id.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_flow_identifier.encode(writer)?;
+            if let Err(error) = self.qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("qos_flow_identifier"));
+            }
             if let Some(value) = &self.qos_flow_level_qos_parameters {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("qos_flow_level_qos_parameters"));
+                }
             }
             if let Some(value) = &self.e_rab_id {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("e_rab_id"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -69744,9 +71961,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_flow_identifier.encode(writer)?;
+            if let Err(error) = self.qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("qos_flow_identifier"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -69895,12 +72116,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.downlink_tlcontainer.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_flow_identifier.encode(writer)?;
+            if let Err(error) = self.qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("qos_flow_identifier"));
+            }
             if let Some(value) = &self.downlink_tlcontainer {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("downlink_tlcontainer"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -70009,12 +72236,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.uplink_tlcontainer.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_flow_identifier.encode(writer)?;
+            if let Err(error) = self.qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("qos_flow_identifier"));
+            }
             if let Some(value) = &self.uplink_tlcontainer {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("uplink_tlcontainer"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -70253,18 +72486,28 @@ pub mod ngap_ies {
             writer.bit(self.c_npacket_delay_budget_dl.is_some());
             writer.bit(self.c_npacket_delay_budget_ul.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_flow_identifier.encode(writer)?;
+            if let Err(error) = self.qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("qos_flow_identifier"));
+            }
             if let Some(value) = &self.update_feedback {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("update_feedback"));
+                }
             }
             if let Some(value) = &self.c_npacket_delay_budget_dl {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("c_npacket_delay_budget_dl"));
+                }
             }
             if let Some(value) = &self.c_npacket_delay_budget_ul {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("c_npacket_delay_budget_ul"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -70476,12 +72719,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.d_lforwarding.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_flow_identifier.encode(writer)?;
+            if let Err(error) = self.qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("qos_flow_identifier"));
+            }
             if let Some(value) = &self.d_lforwarding {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("d_lforwarding"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -70637,12 +72886,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.data_forwarding_accepted.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_flow_identifier.encode(writer)?;
+            if let Err(error) = self.qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("qos_flow_identifier"));
+            }
             if let Some(value) = &self.data_forwarding_accepted {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("data_forwarding_accepted"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -70796,19 +73051,31 @@ pub mod ngap_ies {
             writer.bit(self.reflective_qos_attribute.is_some());
             writer.bit(self.additional_qos_flow_information.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_characteristics.encode(writer)?;
-            self.allocation_and_retention_priority.encode(writer)?;
+            if let Err(error) = self.qos_characteristics.encode(writer) {
+                return Err(error.in_field("qos_characteristics"));
+            }
+            if let Err(error) = self.allocation_and_retention_priority.encode(writer) {
+                return Err(error.in_field("allocation_and_retention_priority"));
+            }
             if let Some(value) = &self.g_br_qos_information {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("g_br_qos_information"));
+                }
             }
             if let Some(value) = &self.reflective_qos_attribute {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("reflective_qos_attribute"));
+                }
             }
             if let Some(value) = &self.additional_qos_flow_information {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("additional_qos_flow_information"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -71036,9 +73303,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_flow_identifier.encode(writer)?;
+            if let Err(error) = self.qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("qos_flow_identifier"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -71180,10 +73451,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_flow_identifier.encode(writer)?;
-            self.notification_cause.encode(writer)?;
+            if let Err(error) = self.qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("qos_flow_identifier"));
+            }
+            if let Err(error) = self.notification_cause.encode(writer) {
+                return Err(error.in_field("notification_cause"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -71338,12 +73615,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.alternative_qo_spara_set_list.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_flow_identifier.encode(writer)?;
+            if let Err(error) = self.qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("qos_flow_identifier"));
+            }
             if let Some(value) = &self.alternative_qo_spara_set_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("alternative_qo_spara_set_list"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -71501,10 +73784,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.u_ptransport_layer_information.encode(writer)?;
-            self.associated_qos_flow_list.encode(writer)?;
+            if let Err(error) = self.u_ptransport_layer_information.encode(writer) {
+                return Err(error.in_field("u_ptransport_layer_information"));
+            }
+            if let Err(error) = self.associated_qos_flow_list.encode(writer) {
+                return Err(error.in_field("associated_qos_flow_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -71606,9 +73895,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_flow_per_tnlinformation.encode(writer)?;
+            if let Err(error) = self.qos_flow_per_tnlinformation.encode(writer) {
+                return Err(error.in_field("qos_flow_per_tnlinformation"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -71768,13 +74061,21 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.e_rab_id.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_flow_identifier.encode(writer)?;
-            self.qos_flow_level_qos_parameters.encode(writer)?;
+            if let Err(error) = self.qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("qos_flow_identifier"));
+            }
+            if let Err(error) = self.qos_flow_level_qos_parameters.encode(writer) {
+                return Err(error.in_field("qos_flow_level_qos_parameters"));
+            }
             if let Some(value) = &self.e_rab_id {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("e_rab_id"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -71928,9 +74229,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_flow_identifier.encode(writer)?;
+            if let Err(error) = self.qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("qos_flow_identifier"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -72072,10 +74377,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.qos_flow_identifier.encode(writer)?;
-            self.cause.encode(writer)?;
+            if let Err(error) = self.qos_flow_identifier.encode(writer) {
+                return Err(error.in_field("qos_flow_identifier"));
+            }
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -72646,9 +74957,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.d_rbs_subject_to_status_transfer_list.encode(writer)?;
+            if let Err(error) = self.d_rbs_subject_to_status_transfer_list.encode(writer) {
+                return Err(error.in_field("d_rbs_subject_to_status_transfer_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -72737,9 +75052,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_rcgi.encode(writer)?;
+            if let Err(error) = self.n_rcgi.encode(writer) {
+                return Err(error.in_field("n_rcgi"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -73087,25 +75406,39 @@ pub mod ngap_ies {
             writer.bit(self.parent_time_source.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.synchronisation_state {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("synchronisation_state"));
+                }
             }
             if let Some(value) = &self.traceableto_utc {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("traceableto_utc"));
+                }
             }
             if let Some(value) = &self.traceableto_gnss {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("traceableto_gnss"));
+                }
             }
             if let Some(value) = &self.clock_frequency_stability {
-                writer.bits_sized(*value, 16, 16)?;
+                if let Err(error) = writer.bits_sized(*value, 16, 16) {
+                    return Err(error.in_field("clock_frequency_stability"));
+                }
             }
             if let Some(value) = &self.clock_accuracy {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("clock_accuracy"));
+                }
             }
             if let Some(value) = &self.parent_time_source {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("parent_time_source"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -73365,12 +75698,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.periodicity_range.is_some());
             writer.bit(self.i_e_extension.is_some());
-            self.burst_arrival_time_window.encode(writer)?;
+            if let Err(error) = self.burst_arrival_time_window.encode(writer) {
+                return Err(error.in_field("burst_arrival_time_window"));
+            }
             if let Some(value) = &self.periodicity_range {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("periodicity_range"));
+                }
             }
             if let Some(value) = &self.i_e_extension {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extension"));
+                }
             }
             Ok(())
         }
@@ -73511,9 +75850,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extension.is_some());
-            self.capability_for_batadaptation.encode(writer)?;
+            if let Err(error) = self.capability_for_batadaptation.encode(writer) {
+                return Err(error.in_field("capability_for_batadaptation"));
+            }
             if let Some(value) = &self.i_e_extension {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extension"));
+                }
             }
             Ok(())
         }
@@ -73764,10 +76107,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            self.r_atrestriction_information.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = self.r_atrestriction_information.encode(writer) {
+                return Err(error.in_field("r_atrestriction_information"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -73964,10 +76313,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.targetg_nbset_id.encode(writer)?;
-            self.r_im_rsdetection.encode(writer)?;
+            if let Err(error) = self.targetg_nbset_id.encode(writer) {
+                return Err(error.in_field("targetg_nbset_id"));
+            }
+            if let Err(error) = self.r_im_rsdetection.encode(writer) {
+                return Err(error.in_field("r_im_rsdetection"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -74076,11 +76431,19 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.target_rannode_id_rim.encode(writer)?;
-            self.source_rannode_id.encode(writer)?;
-            self.r_iminformation.encode(writer)?;
+            if let Err(error) = self.target_rannode_id_rim.encode(writer) {
+                return Err(error.in_field("target_rannode_id_rim"));
+            }
+            if let Err(error) = self.source_rannode_id.encode(writer) {
+                return Err(error.in_field("source_rannode_id"));
+            }
+            if let Err(error) = self.r_iminformation.encode(writer) {
+                return Err(error.in_field("r_iminformation"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -74491,10 +76854,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.guaranteed_flow_bit_rate.encode(writer)?;
-            self.maximum_flow_bit_rate.encode(writer)?;
+            if let Err(error) = self.guaranteed_flow_bit_rate.encode(writer) {
+                return Err(error.in_field("guaranteed_flow_bit_rate"));
+            }
+            if let Err(error) = self.maximum_flow_bit_rate.encode(writer) {
+                return Err(error.in_field("maximum_flow_bit_rate"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -74619,15 +76988,23 @@ pub mod ngap_ies {
             writer.bit(self.r_sppflow_bit_rates.is_some());
             writer.bit(self.range.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.p_qi.encode(writer)?;
+            if let Err(error) = self.p_qi.encode(writer) {
+                return Err(error.in_field("p_qi"));
+            }
             if let Some(value) = &self.r_sppflow_bit_rates {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("r_sppflow_bit_rates"));
+                }
             }
             if let Some(value) = &self.range {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("range"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -74850,12 +77227,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.time_stayed_in_cell.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.n_gran_cgi.encode(writer)?;
+            if let Err(error) = self.n_gran_cgi.encode(writer) {
+                return Err(error.in_field("n_gran_cgi"));
+            }
             if let Some(value) = &self.time_stayed_in_cell {
-                writer.unsigned(u64::from(*value), 0, 4095)?;
+                if let Err(error) = writer.unsigned(u64::from(*value), 0, 4095) {
+                    return Err(error.in_field("time_stayed_in_cell"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -74999,9 +77382,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.recommended_cell_list.encode(writer)?;
+            if let Err(error) = self.recommended_cell_list.encode(writer) {
+                return Err(error.in_field("recommended_cell_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -75086,9 +77473,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.a_mfpaging_target.encode(writer)?;
+            if let Err(error) = self.a_mfpaging_target.encode(writer) {
+                return Err(error.in_field("a_mfpaging_target"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -75221,9 +77612,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.recommended_rannode_list.encode(writer)?;
+            if let Err(error) = self.recommended_rannode_list.encode(writer) {
+                return Err(error.in_field("recommended_rannode_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -75393,9 +77788,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.r_sn.encode(writer)?;
+            if let Err(error) = self.r_sn.encode(writer) {
+                return Err(error.in_field("r_sn"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -76296,9 +78695,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.s_nssai.encode(writer)?;
+            if let Err(error) = self.s_nssai.encode(writer) {
+                return Err(error.in_field("s_nssai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -76382,9 +78785,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -76788,12 +79195,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.s_d.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.s_st.encode(writer)?;
+            if let Err(error) = self.s_st.encode(writer) {
+                return Err(error.in_field("s_st"));
+            }
             if let Some(value) = &self.s_d {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("s_d"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -77067,12 +79480,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.r_spplink_aggregate_bit_rates.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.r_sppqo_sflow_list.encode(writer)?;
+            if let Err(error) = self.r_sppqo_sflow_list.encode(writer) {
+                return Err(error.in_field("r_sppqo_sflow_list"));
+            }
             if let Some(value) = &self.r_spplink_aggregate_bit_rates {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("r_spplink_aggregate_bit_rates"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -77191,12 +79610,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.s_lpositioning_ranging_qo_sparameters.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.s_lpositioning_ranging_authorized.encode(writer)?;
+            if let Err(error) = self.s_lpositioning_ranging_authorized.encode(writer) {
+                return Err(error.in_field("s_lpositioning_ranging_authorized"));
+            }
             if let Some(value) = &self.s_lpositioning_ranging_qo_sparameters {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("s_lpositioning_ranging_qo_sparameters"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -77300,9 +79725,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.s_npnlistfor_mdt.encode(writer)?;
+            if let Err(error) = self.s_npnlistfor_mdt.encode(writer) {
+                return Err(error.in_field("s_npnlistfor_mdt"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -77386,9 +79815,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.s_npncell_id_listfor_mdt.encode(writer)?;
+            if let Err(error) = self.s_npncell_id_listfor_mdt.encode(writer) {
+                return Err(error.in_field("s_npncell_id_listfor_mdt"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -77476,9 +79909,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.serving_nid.encode(writer)?;
+            if let Err(error) = self.serving_nid.encode(writer) {
+                return Err(error.in_field("serving_nid"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -77562,9 +79999,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.s_npntailistfor_mdt.encode(writer)?;
+            if let Err(error) = self.s_npntailistfor_mdt.encode(writer) {
+                return Err(error.in_field("s_npntailistfor_mdt"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -77706,10 +80147,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_r_cgi.encode(writer)?;
-            self.n_id.encode(writer)?;
+            if let Err(error) = self.n_r_cgi.encode(writer) {
+                return Err(error.in_field("n_r_cgi"));
+            }
+            if let Err(error) = self.n_id.encode(writer) {
+                return Err(error.in_field("n_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -77854,10 +80301,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            self.n_id.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = self.n_id.encode(writer) {
+                return Err(error.in_field("n_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -78002,10 +80455,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.t_ai.encode(writer)?;
-            self.n_id.encode(writer)?;
+            if let Err(error) = self.t_ai.encode(writer) {
+                return Err(error.in_field("t_ai"));
+            }
+            if let Err(error) = self.n_id.encode(writer) {
+                return Err(error.in_field("n_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -78126,14 +80585,24 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.xn_tnlconfiguration_info.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.target_rannode_id_son.encode(writer)?;
-            self.source_rannode_id.encode(writer)?;
-            self.s_oninformation.encode(writer)?;
+            if let Err(error) = self.target_rannode_id_son.encode(writer) {
+                return Err(error.in_field("target_rannode_id_son"));
+            }
+            if let Err(error) = self.source_rannode_id.encode(writer) {
+                return Err(error.in_field("source_rannode_id"));
+            }
+            if let Err(error) = self.s_oninformation.encode(writer) {
+                return Err(error.in_field("s_oninformation"));
+            }
             if let Some(value) = &self.xn_tnlconfiguration_info {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("xn_tnlconfiguration_info"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -78360,10 +80829,14 @@ pub mod ngap_ies {
             writer.bit(self.xn_tnlconfiguration_info.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.xn_tnlconfiguration_info {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("xn_tnlconfiguration_info"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -78732,7 +81205,9 @@ pub mod ngap_ies {
             writer.bit(self.timeof_day_end.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.dayof_week {
-                writer.bits_sized(*value, 7, 7)?;
+                if let Err(error) = writer.bits_sized(*value, 7, 7) {
+                    return Err(error.in_field("dayof_week"));
+                }
             }
             if let Some(value) = &self.timeof_day_start {
                 writer.unsigned_extensible(*value, 0, 86399);
@@ -78741,7 +81216,9 @@ pub mod ngap_ies {
                 writer.unsigned_extensible(*value, 0, 86399);
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -78867,10 +81344,14 @@ pub mod ngap_ies {
             writer.bit(self.secondary_ratusage_information.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.secondary_ratusage_information {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("secondary_ratusage_information"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -78985,13 +81466,19 @@ pub mod ngap_ies {
             writer.bit(self.qos_flows_usage_report_list.is_some());
             writer.bit(self.i_e_extension.is_some());
             if let Some(value) = &self.p_dusession_usage_report {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("p_dusession_usage_report"));
+                }
             }
             if let Some(value) = &self.qos_flows_usage_report_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("qos_flows_usage_report_list"));
+                }
             }
             if let Some(value) = &self.i_e_extension {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extension"));
+                }
             }
             Ok(())
         }
@@ -79106,10 +81593,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.next_hop_chaining_count.encode(writer)?;
-            self.next_hop_nh.encode(writer)?;
+            if let Err(error) = self.next_hop_chaining_count.encode(writer) {
+                return Err(error.in_field("next_hop_chaining_count"));
+            }
+            if let Err(error) = self.next_hop_nh.encode(writer) {
+                return Err(error.in_field("next_hop_nh"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -79233,13 +81726,21 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.maximum_integrity_protected_data_rate_ul.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.integrity_protection_indication.encode(writer)?;
-            self.confidentiality_protection_indication.encode(writer)?;
+            if let Err(error) = self.integrity_protection_indication.encode(writer) {
+                return Err(error.in_field("integrity_protection_indication"));
+            }
+            if let Err(error) = self.confidentiality_protection_indication.encode(writer) {
+                return Err(error.in_field("confidentiality_protection_indication"));
+            }
             if let Some(value) = &self.maximum_integrity_protected_data_rate_ul {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("maximum_integrity_protected_data_rate_ul"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -79411,10 +81912,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.integrity_protection_result.encode(writer)?;
-            self.confidentiality_protection_result.encode(writer)?;
+            if let Err(error) = self.integrity_protection_result.encode(writer) {
+                return Err(error.in_field("integrity_protection_result"));
+            }
+            if let Err(error) = self.confidentiality_protection_result.encode(writer) {
+                return Err(error.in_field("confidentiality_protection_result"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -79558,9 +82065,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.sensor_name_config.encode(writer)?;
+            if let Err(error) = self.sensor_name_config.encode(writer) {
+                return Err(error.in_field("sensor_name_config"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -79709,12 +82220,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.sensor_meas_config_name_list.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.sensor_meas_config.encode(writer)?;
+            if let Err(error) = self.sensor_meas_config.encode(writer) {
+                return Err(error.in_field("sensor_meas_config"));
+            }
             if let Some(value) = &self.sensor_meas_config_name_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("sensor_meas_config_name_list"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -80135,12 +82652,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.backup_amfname.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.g_uami.encode(writer)?;
+            if let Err(error) = self.g_uami.encode(writer) {
+                return Err(error.in_field("g_uami"));
+            }
             if let Some(value) = &self.backup_amfname {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("backup_amfname"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -80356,15 +82879,23 @@ pub mod ngap_ies {
             writer.bit(self.allowed_tacs.is_some());
             writer.bit(self.not_allowed_tacs.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
             if let Some(value) = &self.allowed_tacs {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("allowed_tacs"));
+                }
             }
             if let Some(value) = &self.not_allowed_tacs {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("not_allowed_tacs"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -80566,11 +83097,19 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.i_p_multicast_address.encode(writer)?;
-            self.i_p_source_address.encode(writer)?;
-            self.g_tp_teid.encode(writer)?;
+            if let Err(error) = self.i_p_multicast_address.encode(writer) {
+                return Err(error.in_field("i_p_multicast_address"));
+            }
+            if let Err(error) = self.i_p_source_address.encode(writer) {
+                return Err(error.in_field("i_p_source_address"));
+            }
+            if let Err(error) = self.g_tp_teid.encode(writer) {
+                return Err(error.in_field("g_tp_teid"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -80670,9 +83209,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.s_nssai.encode(writer)?;
+            if let Err(error) = self.s_nssai.encode(writer) {
+                return Err(error.in_field("s_nssai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -80805,9 +83348,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.s_nssai.encode(writer)?;
+            if let Err(error) = self.s_nssai.encode(writer) {
+                return Err(error.in_field("s_nssai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -80940,9 +83487,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.s_nssai.encode(writer)?;
+            if let Err(error) = self.s_nssai.encode(writer) {
+                return Err(error.in_field("s_nssai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -81124,9 +83675,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.s_nssai.encode(writer)?;
+            if let Err(error) = self.s_nssai.encode(writer) {
+                return Err(error.in_field("s_nssai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -81274,20 +83829,34 @@ pub mod ngap_ies {
             writer.bit(self.e_rabinformation_list.is_some());
             writer.bit(self.index_to_rfsp.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.r_rccontainer.encode(writer)?;
+            if let Err(error) = self.r_rccontainer.encode(writer) {
+                return Err(error.in_field("r_rccontainer"));
+            }
             if let Some(value) = &self.p_dusession_resource_information_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("p_dusession_resource_information_list"));
+                }
             }
             if let Some(value) = &self.e_rabinformation_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("e_rabinformation_list"));
+                }
             }
-            self.target_cell_id.encode(writer)?;
+            if let Err(error) = self.target_cell_id.encode(writer) {
+                return Err(error.in_field("target_cell_id"));
+            }
             if let Some(value) = &self.index_to_rfsp {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("index_to_rfsp"));
+                }
             }
-            self.u_ehistory_information.encode(writer)?;
+            if let Err(error) = self.u_ehistory_information.encode(writer) {
+                return Err(error.in_field("u_ehistory_information"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -81548,10 +84117,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.global_rannode_id.encode(writer)?;
-            self.selected_tai.encode(writer)?;
+            if let Err(error) = self.global_rannode_id.encode(writer) {
+                return Err(error.in_field("global_rannode_id"));
+            }
+            if let Err(error) = self.selected_tai.encode(writer) {
+                return Err(error.in_field("selected_tai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -81675,16 +84250,24 @@ pub mod ngap_ies {
             writer.bit(self.rejected_nssaiin_ta.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.configured_nssai {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("configured_nssai"));
+                }
             }
             if let Some(value) = &self.rejected_nssaiin_plmn {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("rejected_nssaiin_plmn"));
+                }
             }
             if let Some(value) = &self.rejected_nssaiin_ta {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("rejected_nssaiin_ta"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -81847,9 +84430,15 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            writer.octet_string(&self.successful_horeport_container, 0, UNBOUNDED)?;
+            if let Err(error) =
+                writer.octet_string(&self.successful_horeport_container, 0, UNBOUNDED)
+            {
+                return Err(error.in_field("successful_horeport_container"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -82029,13 +84618,17 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            writer.octet_string(
+            if let Err(error) = writer.octet_string(
                 &self.successful_pscell_change_report_container,
                 0,
                 UNBOUNDED,
-            )?;
+            ) {
+                return Err(error.in_field("successful_pscell_change_report_container"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -82186,10 +84779,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.t_ac.encode(writer)?;
-            self.broadcast_plmnlist.encode(writer)?;
+            if let Err(error) = self.t_ac.encode(writer) {
+                return Err(error.in_field("t_ac"));
+            }
+            if let Err(error) = self.broadcast_plmnlist.encode(writer) {
+                return Err(error.in_field("broadcast_plmnlist"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -82568,9 +85167,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.t_alistfor_mdt.encode(writer)?;
+            if let Err(error) = self.t_alistfor_mdt.encode(writer) {
+                return Err(error.in_field("t_alistfor_mdt"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -82654,9 +85257,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.t_alistfor_qmc.encode(writer)?;
+            if let Err(error) = self.t_alistfor_qmc.encode(writer) {
+                return Err(error.in_field("t_alistfor_qmc"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -82837,10 +85444,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            self.t_ac.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = self.t_ac.encode(writer) {
+                return Err(error.in_field("t_ac"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -82927,9 +85540,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.t_ailistfor_mdt.encode(writer)?;
+            if let Err(error) = self.t_ailistfor_mdt.encode(writer) {
+                return Err(error.in_field("t_ailistfor_mdt"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -83013,9 +85630,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.t_ailistfor_qmc.encode(writer)?;
+            if let Err(error) = self.t_ailistfor_qmc.encode(writer) {
+                return Err(error.in_field("t_ailistfor_qmc"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -83157,10 +85778,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.t_ai.encode(writer)?;
-            self.completed_cells_in_tai_eutra.encode(writer)?;
+            if let Err(error) = self.t_ai.encode(writer) {
+                return Err(error.in_field("t_ai"));
+            }
+            if let Err(error) = self.completed_cells_in_tai_eutra.encode(writer) {
+                return Err(error.in_field("completed_cells_in_tai_eutra"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -83312,10 +85939,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.t_ai.encode(writer)?;
-            self.completed_cells_in_tai_nr.encode(writer)?;
+            if let Err(error) = self.t_ai.encode(writer) {
+                return Err(error.in_field("t_ai"));
+            }
+            if let Err(error) = self.completed_cells_in_tai_nr.encode(writer) {
+                return Err(error.in_field("completed_cells_in_tai_nr"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -83465,10 +86098,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.t_ai.encode(writer)?;
-            self.cancelled_cells_in_tai_eutra.encode(writer)?;
+            if let Err(error) = self.t_ai.encode(writer) {
+                return Err(error.in_field("t_ai"));
+            }
+            if let Err(error) = self.cancelled_cells_in_tai_eutra.encode(writer) {
+                return Err(error.in_field("cancelled_cells_in_tai_eutra"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -83620,10 +86259,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.t_ai.encode(writer)?;
-            self.cancelled_cells_in_tai_nr.encode(writer)?;
+            if let Err(error) = self.t_ai.encode(writer) {
+                return Err(error.in_field("t_ai"));
+            }
+            if let Err(error) = self.cancelled_cells_in_tai_nr.encode(writer) {
+                return Err(error.in_field("cancelled_cells_in_tai_nr"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -83761,9 +86406,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.t_ai.encode(writer)?;
+            if let Err(error) = self.t_ai.encode(writer) {
+                return Err(error.in_field("t_ai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -83893,9 +86542,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.t_ai.encode(writer)?;
+            if let Err(error) = self.t_ai.encode(writer) {
+                return Err(error.in_field("t_ai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -84172,9 +86825,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.t_ai.encode(writer)?;
+            if let Err(error) = self.t_ai.encode(writer) {
+                return Err(error.in_field("t_ai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -84316,10 +86973,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_sag_id.encode(writer)?;
-            self.n_sagslice_support_list.encode(writer)?;
+            if let Err(error) = self.n_sag_id.encode(writer) {
+                return Err(error.in_field("n_sag_id"));
+            }
+            if let Err(error) = self.n_sagslice_support_list.encode(writer) {
+                return Err(error.in_field("n_sagslice_support_list"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -84813,10 +87476,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.t_nlassociation_address.encode(writer)?;
-            self.cause.encode(writer)?;
+            if let Err(error) = self.t_nlassociation_address.encode(writer) {
+                return Err(error.in_field("t_nlassociation_address"));
+            }
+            if let Err(error) = self.cause.encode(writer) {
+                return Err(error.in_field("cause"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -85015,12 +87684,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.burst_arrival_time.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.periodicity.encode(writer)?;
+            if let Err(error) = self.periodicity.encode(writer) {
+                return Err(error.in_field("periodicity"));
+            }
             if let Some(value) = &self.burst_arrival_time {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("burst_arrival_time"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -85129,10 +87804,14 @@ pub mod ngap_ies {
             writer.bit(self.i_e_extensions.is_some());
             writer.signed_extensible(self.burst_arrival_time_offset, -640000, 640000);
             if let Some(value) = &self.adjusted_periodicity {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("adjusted_periodicity"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -85260,13 +87939,19 @@ pub mod ngap_ies {
             writer.bit(self.t_scassistance_information_ul.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.t_scassistance_information_dl {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("t_scassistance_information_dl"));
+                }
             }
             if let Some(value) = &self.t_scassistance_information_ul {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("t_scassistance_information_ul"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -85396,13 +88081,19 @@ pub mod ngap_ies {
             writer.bit(self.t_scfeedback_information_ul.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.t_scfeedback_information_dl {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("t_scfeedback_information_dl"));
+                }
             }
             if let Some(value) = &self.t_scfeedback_information_ul {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("t_scfeedback_information_ul"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -85657,11 +88348,19 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.p_lmnidentity.encode(writer)?;
-            writer.bits_sized(self.home_enb_id, 28, 28)?;
-            self.selected_eps_tai.encode(writer)?;
+            if let Err(error) = self.p_lmnidentity.encode(writer) {
+                return Err(error.in_field("p_lmnidentity"));
+            }
+            if let Err(error) = writer.bits_sized(self.home_enb_id, 28, 28) {
+                return Err(error.in_field("home_enb_id"));
+            }
+            if let Err(error) = self.selected_eps_tai.encode(writer) {
+                return Err(error.in_field("selected_eps_tai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -85868,10 +88567,14 @@ pub mod ngap_ies {
             writer.bit(self.cell_caginformation.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.cell_caginformation {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("cell_caginformation"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -85961,9 +88664,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.r_rccontainer.encode(writer)?;
+            if let Err(error) = self.r_rccontainer.encode(writer) {
+                return Err(error.in_field("r_rccontainer"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -86096,9 +88803,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.s_nssai.encode(writer)?;
+            if let Err(error) = self.s_nssai.encode(writer) {
+                return Err(error.in_field("s_nssai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -86191,10 +88902,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.target_nssai.encode(writer)?;
-            self.index_to_rfsp.encode(writer)?;
+            if let Err(error) = self.target_nssai.encode(writer) {
+                return Err(error.in_field("target_nssai"));
+            }
+            if let Err(error) = self.index_to_rfsp.encode(writer) {
+                return Err(error.in_field("index_to_rfsp"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -86291,10 +89008,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.global_rannode_id.encode(writer)?;
-            self.selected_tai.encode(writer)?;
+            if let Err(error) = self.global_rannode_id.encode(writer) {
+                return Err(error.in_field("global_rannode_id"));
+            }
+            if let Err(error) = self.selected_tai.encode(writer) {
+                return Err(error.in_field("selected_tai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -86391,10 +89114,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.global_rannode_id.encode(writer)?;
-            self.selected_tai.encode(writer)?;
+            if let Err(error) = self.global_rannode_id.encode(writer) {
+                return Err(error.in_field("global_rannode_id"));
+            }
+            if let Err(error) = self.selected_tai.encode(writer) {
+                return Err(error.in_field("selected_tai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -86491,10 +89220,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.global_rannode_id.encode(writer)?;
-            self.selected_tai.encode(writer)?;
+            if let Err(error) = self.global_rannode_id.encode(writer) {
+                return Err(error.in_field("global_rannode_id"));
+            }
+            if let Err(error) = self.selected_tai.encode(writer) {
+                return Err(error.in_field("selected_tai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -86605,13 +89340,21 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.extended_rnc_id.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.l_ai.encode(writer)?;
-            self.r_nc_id.encode(writer)?;
+            if let Err(error) = self.l_ai.encode(writer) {
+                return Err(error.in_field("l_ai"));
+            }
+            if let Err(error) = self.r_nc_id.encode(writer) {
+                return Err(error.in_field("r_nc_id"));
+            }
             if let Some(value) = &self.extended_rnc_id {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("extended_rnc_id"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -86764,10 +89507,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.global_enb_id.encode(writer)?;
-            self.selected_eps_tai.encode(writer)?;
+            if let Err(error) = self.global_enb_id.encode(writer) {
+                return Err(error.in_field("global_enb_id"));
+            }
+            if let Err(error) = self.selected_eps_tai.encode(writer) {
+                return Err(error.in_field("selected_eps_tai"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -87022,10 +89771,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.h_owindow_start.encode(writer)?;
-            self.h_owindow_duration.encode(writer)?;
+            if let Err(error) = self.h_owindow_start.encode(writer) {
+                return Err(error.in_field("h_owindow_start"));
+            }
+            if let Err(error) = self.h_owindow_duration.encode(writer) {
+                return Err(error.in_field("h_owindow_duration"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -87252,12 +90007,16 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.u_utime_sync_error_budget.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.time_distribution_indication.encode(writer)?;
+            if let Err(error) = self.time_distribution_indication.encode(writer) {
+                return Err(error.in_field("time_distribution_indication"));
+            }
             if let Some(value) = &self.u_utime_sync_error_budget {
                 writer.unsigned_extensible(*value, 1, 1000000);
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -87632,13 +90391,21 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.u_erlfreport_container.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.sourcecell_id.encode(writer)?;
-            self.failurecell_id.encode(writer)?;
+            if let Err(error) = self.sourcecell_id.encode(writer) {
+                return Err(error.in_field("sourcecell_id"));
+            }
+            if let Err(error) = self.failurecell_id.encode(writer) {
+                return Err(error.in_field("failurecell_id"));
+            }
             if let Some(value) = &self.u_erlfreport_container {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("u_erlfreport_container"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -87771,12 +90538,22 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_grantrace_id.encode(writer)?;
-            self.interfaces_to_trace.encode(writer)?;
-            self.trace_depth.encode(writer)?;
-            self.trace_collection_entity_ipaddress.encode(writer)?;
+            if let Err(error) = self.n_grantrace_id.encode(writer) {
+                return Err(error.in_field("n_grantrace_id"));
+            }
+            if let Err(error) = self.interfaces_to_trace.encode(writer) {
+                return Err(error.in_field("interfaces_to_trace"));
+            }
+            if let Err(error) = self.trace_depth.encode(writer) {
+                return Err(error.in_field("trace_depth"));
+            }
+            if let Err(error) = self.trace_collection_entity_ipaddress.encode(writer) {
+                return Err(error.in_field("trace_collection_entity_ipaddress"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -88349,25 +91126,37 @@ pub mod ngap_ies {
             writer.bit(self.battery_indication.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.periodic_communication_indicator {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("periodic_communication_indicator"));
+                }
             }
             if let Some(value) = &self.periodic_time {
                 writer.unsigned_extensible(*value, 1, 3600);
             }
             if let Some(value) = &self.scheduled_communication_time {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("scheduled_communication_time"));
+                }
             }
             if let Some(value) = &self.stationary_indication {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("stationary_indication"));
+                }
             }
             if let Some(value) = &self.traffic_profile {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("traffic_profile"));
+                }
             }
             if let Some(value) = &self.battery_indication {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("battery_indication"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -88530,10 +91319,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.a_mf_ue_ngap_id.encode(writer)?;
-            self.r_an_ue_ngap_id.encode(writer)?;
+            if let Err(error) = self.a_mf_ue_ngap_id.encode(writer) {
+                return Err(error.in_field("a_mf_ue_ngap_id"));
+            }
+            if let Err(error) = self.r_an_ue_ngap_id.encode(writer) {
+                return Err(error.in_field("r_an_ue_ngap_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -88737,12 +91532,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.paging_drx.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.u_eidentity_index_value.encode(writer)?;
+            if let Err(error) = self.u_eidentity_index_value.encode(writer) {
+                return Err(error.in_field("u_eidentity_index_value"));
+            }
             if let Some(value) = &self.paging_drx {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("paging_drx"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -88950,13 +91751,19 @@ pub mod ngap_ies {
             writer.bit(self.r_an_ue_ngap_id.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.a_mf_ue_ngap_id {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("a_mf_ue_ngap_id"));
+                }
             }
             if let Some(value) = &self.r_an_ue_ngap_id {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("r_an_ue_ngap_id"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -89134,10 +91941,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.u_eaggregate_maximum_bit_rate_dl.encode(writer)?;
-            self.u_eaggregate_maximum_bit_rate_ul.encode(writer)?;
+            if let Err(error) = self.u_eaggregate_maximum_bit_rate_dl.encode(writer) {
+                return Err(error.in_field("u_eaggregate_maximum_bit_rate_dl"));
+            }
+            if let Err(error) = self.u_eaggregate_maximum_bit_rate_ul.encode(writer) {
+                return Err(error.in_field("u_eaggregate_maximum_bit_rate_ul"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -89404,32 +92217,52 @@ pub mod ngap_ies {
             writer.bit(self.m_dt_alignment_info.is_some());
             writer.bit(self.available_ranvisible_qo_emetrics.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.qo_ereference.encode(writer)?;
-            self.service_type.encode(writer)?;
-            if let Some(value) = &self.area_scope_of_qmc {
-                value.encode(writer)?;
+            if let Err(error) = self.qo_ereference.encode(writer) {
+                return Err(error.in_field("qo_ereference"));
             }
-            self.meas_coll_entity_ipaddress.encode(writer)?;
+            if let Err(error) = self.service_type.encode(writer) {
+                return Err(error.in_field("service_type"));
+            }
+            if let Some(value) = &self.area_scope_of_qmc {
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("area_scope_of_qmc"));
+                }
+            }
+            if let Err(error) = self.meas_coll_entity_ipaddress.encode(writer) {
+                return Err(error.in_field("meas_coll_entity_ipaddress"));
+            }
             if let Some(value) = &self.qo_emeasurement_status {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("qo_emeasurement_status"));
+                }
             }
             if let Some(value) = &self.container_for_app_layer_meas_config {
-                writer.octet_string(value, 1, 8000)?;
+                if let Err(error) = writer.octet_string(value, 1, 8000) {
+                    return Err(error.in_field("container_for_app_layer_meas_config"));
+                }
             }
             if let Some(value) = &self.meas_config_app_layer_id {
                 writer.unsigned_extensible(*value, 0, 15);
             }
             if let Some(value) = &self.slice_support_list_qmc {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("slice_support_list_qmc"));
+                }
             }
             if let Some(value) = &self.m_dt_alignment_info {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("m_dt_alignment_info"));
+                }
             }
             if let Some(value) = &self.available_ranvisible_qo_emetrics {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("available_ranvisible_qo_emetrics"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -89601,9 +92434,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.u_eapp_layer_meas_config_info.encode(writer)?;
+            if let Err(error) = self.u_eapp_layer_meas_config_info.encode(writer) {
+                return Err(error.in_field("u_eapp_layer_meas_config_info"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -89832,10 +92669,14 @@ pub mod ngap_ies {
             writer.bit(self.qos_flow_failed_to_resume_list.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.qos_flow_failed_to_resume_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("qos_flow_failed_to_resume_list"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -89934,10 +92775,14 @@ pub mod ngap_ies {
             writer.bit(self.qos_flow_failed_to_resume_list.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.qos_flow_failed_to_resume_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("qos_flow_failed_to_resume_list"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -90034,10 +92879,14 @@ pub mod ngap_ies {
             writer.bit(self.suspend_indicator.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.suspend_indicator {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("suspend_indicator"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -90467,10 +93316,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.location_reporting_reference_id.encode(writer)?;
-            self.u_epresence.encode(writer)?;
+            if let Err(error) = self.location_reporting_reference_id.encode(writer) {
+                return Err(error.in_field("location_reporting_reference_id"));
+            }
+            if let Err(error) = self.u_epresence.encode(writer) {
+                return Err(error.in_field("u_epresence"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -90787,13 +93642,19 @@ pub mod ngap_ies {
             writer.bit(self.u_eradio_capability_for_paging_of_eutra.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.u_eradio_capability_for_paging_of_nr {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("u_eradio_capability_for_paging_of_nr"));
+                }
             }
             if let Some(value) = &self.u_eradio_capability_for_paging_of_eutra {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("u_eradio_capability_for_paging_of_eutra"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -91176,12 +94037,22 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_rencryption_algorithms.encode(writer)?;
-            self.n_rintegrity_protection_algorithms.encode(writer)?;
-            self.e_utraencryption_algorithms.encode(writer)?;
-            self.e_utraintegrity_protection_algorithms.encode(writer)?;
+            if let Err(error) = self.n_rencryption_algorithms.encode(writer) {
+                return Err(error.in_field("n_rencryption_algorithms"));
+            }
+            if let Err(error) = self.n_rintegrity_protection_algorithms.encode(writer) {
+                return Err(error.in_field("n_rintegrity_protection_algorithms"));
+            }
+            if let Err(error) = self.e_utraencryption_algorithms.encode(writer) {
+                return Err(error.in_field("e_utraencryption_algorithms"));
+            }
+            if let Err(error) = self.e_utraintegrity_protection_algorithms.encode(writer) {
+                return Err(error.in_field("e_utraintegrity_protection_algorithms"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -91317,11 +94188,19 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.s_nssai.encode(writer)?;
-            self.u_eslice_maximum_bit_rate_dl.encode(writer)?;
-            self.u_eslice_maximum_bit_rate_ul.encode(writer)?;
+            if let Err(error) = self.s_nssai.encode(writer) {
+                return Err(error.in_field("s_nssai"));
+            }
+            if let Err(error) = self.u_eslice_maximum_bit_rate_dl.encode(writer) {
+                return Err(error.in_field("u_eslice_maximum_bit_rate_dl"));
+            }
+            if let Err(error) = self.u_eslice_maximum_bit_rate_ul.encode(writer) {
+                return Err(error.in_field("u_eslice_maximum_bit_rate_ul"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -91483,10 +94362,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.ul_nas_mac.encode(writer)?;
-            self.ul_nas_count.encode(writer)?;
+            if let Err(error) = self.ul_nas_mac.encode(writer) {
+                return Err(error.in_field("ul_nas_mac"));
+            }
+            if let Err(error) = self.ul_nas_count.encode(writer) {
+                return Err(error.in_field("ul_nas_count"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -91667,10 +94552,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.u_l_ngu_up_tnlinformation.encode(writer)?;
-            self.d_l_ngu_up_tnlinformation.encode(writer)?;
+            if let Err(error) = self.u_l_ngu_up_tnlinformation.encode(writer) {
+                return Err(error.in_field("u_l_ngu_up_tnlinformation"));
+            }
+            if let Err(error) = self.d_l_ngu_up_tnlinformation.encode(writer) {
+                return Err(error.in_field("d_l_ngu_up_tnlinformation"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -91941,9 +94832,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.n_gu_up_tnlinformation.encode(writer)?;
+            if let Err(error) = self.n_gu_up_tnlinformation.encode(writer) {
+                return Err(error.in_field("n_gu_up_tnlinformation"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -92091,10 +94986,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.u_l_ngu_up_tnlinformation.encode(writer)?;
-            self.d_l_ngu_up_tnlinformation.encode(writer)?;
+            if let Err(error) = self.u_l_ngu_up_tnlinformation.encode(writer) {
+                return Err(error.in_field("u_l_ngu_up_tnlinformation"));
+            }
+            if let Err(error) = self.d_l_ngu_up_tnlinformation.encode(writer) {
+                return Err(error.in_field("d_l_ngu_up_tnlinformation"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -92329,15 +95230,23 @@ pub mod ngap_ies {
             writer.bit(self.timer_approach_for_guamiremoval.is_some());
             writer.bit(self.backup_amfname.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.g_uami.encode(writer)?;
+            if let Err(error) = self.g_uami.encode(writer) {
+                return Err(error.in_field("g_uami"));
+            }
             if let Some(value) = &self.timer_approach_for_guamiremoval {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("timer_approach_for_guamiremoval"));
+                }
             }
             if let Some(value) = &self.backup_amfname {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("backup_amfname"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -92700,13 +95609,21 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.time_stamp.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.e_utra_cgi.encode(writer)?;
-            self.t_ai.encode(writer)?;
+            if let Err(error) = self.e_utra_cgi.encode(writer) {
+                return Err(error.in_field("e_utra_cgi"));
+            }
+            if let Err(error) = self.t_ai.encode(writer) {
+                return Err(error.in_field("t_ai"));
+            }
             if let Some(value) = &self.time_stamp {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("time_stamp"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -92809,10 +95726,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.i_paddress.encode(writer)?;
-            self.port_number.encode(writer)?;
+            if let Err(error) = self.i_paddress.encode(writer) {
+                return Err(error.in_field("i_paddress"));
+            }
+            if let Err(error) = self.port_number.encode(writer) {
+                return Err(error.in_field("port_number"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -92913,12 +95836,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.t_ai.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.i_paddress.encode(writer)?;
+            if let Err(error) = self.i_paddress.encode(writer) {
+                return Err(error.in_field("i_paddress"));
+            }
             if let Some(value) = &self.t_ai {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("t_ai"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -93028,13 +95957,21 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.time_stamp.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.n_r_cgi.encode(writer)?;
-            self.t_ai.encode(writer)?;
+            if let Err(error) = self.n_r_cgi.encode(writer) {
+                return Err(error.in_field("n_r_cgi"));
+            }
+            if let Err(error) = self.t_ai.encode(writer) {
+                return Err(error.in_field("t_ai"));
+            }
             if let Some(value) = &self.time_stamp {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("time_stamp"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -93151,13 +96088,21 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.port_number.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.t_nap_id.encode(writer)?;
-            self.i_paddress.encode(writer)?;
+            if let Err(error) = self.t_nap_id.encode(writer) {
+                return Err(error.in_field("t_nap_id"));
+            }
+            if let Err(error) = self.i_paddress.encode(writer) {
+                return Err(error.in_field("i_paddress"));
+            }
             if let Some(value) = &self.port_number {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("port_number"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -93276,13 +96221,21 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.port_number.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.t_wap_id.encode(writer)?;
-            self.i_paddress.encode(writer)?;
+            if let Err(error) = self.t_wap_id.encode(writer) {
+                return Err(error.in_field("t_wap_id"));
+            }
+            if let Err(error) = self.i_paddress.encode(writer) {
+                return Err(error.in_field("i_paddress"));
+            }
             if let Some(value) = &self.port_number {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("port_number"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -93536,11 +96489,19 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.user_plane_failure_type.encode(writer)?;
-            self.u_l_ngu_up_tnlinformation.encode(writer)?;
-            self.d_l_ngu_up_tnlinformation.encode(writer)?;
+            if let Err(error) = self.user_plane_failure_type.encode(writer) {
+                return Err(error.in_field("user_plane_failure_type"));
+            }
+            if let Err(error) = self.u_l_ngu_up_tnlinformation.encode(writer) {
+                return Err(error.in_field("u_l_ngu_up_tnlinformation"));
+            }
+            if let Err(error) = self.d_l_ngu_up_tnlinformation.encode(writer) {
+                return Err(error.in_field("d_l_ngu_up_tnlinformation"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -93756,10 +96717,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.security_result.encode(writer)?;
-            self.security_indication.encode(writer)?;
+            if let Err(error) = self.security_result.encode(writer) {
+                return Err(error.in_field("security_result"));
+            }
+            if let Err(error) = self.security_indication.encode(writer) {
+                return Err(error.in_field("security_indication"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -93921,10 +96888,16 @@ pub mod ngap_ies {
             writer.bit(self.i_e_extensions.is_some());
             writer.octet_array(&self.start_time_stamp);
             writer.octet_array(&self.end_time_stamp);
-            writer.unsigned(self.usage_count_ul, 0, 18446744073709551615)?;
-            writer.unsigned(self.usage_count_dl, 0, 18446744073709551615)?;
+            if let Err(error) = writer.unsigned(self.usage_count_ul, 0, 18446744073709551615) {
+                return Err(error.in_field("usage_count_ul"));
+            }
+            if let Err(error) = writer.unsigned(self.usage_count_dl, 0, 18446744073709551615) {
+                return Err(error.in_field("usage_count_dl"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -94208,9 +97181,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.w_lanname.encode(writer)?;
+            if let Err(error) = self.w_lanname.encode(writer) {
+                return Err(error.in_field("w_lanname"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -94473,18 +97450,28 @@ pub mod ngap_ies {
             writer.bit(self.wlan_rssi.is_some());
             writer.bit(self.wlan_rtt.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.wlan_meas_config.encode(writer)?;
+            if let Err(error) = self.wlan_meas_config.encode(writer) {
+                return Err(error.in_field("wlan_meas_config"));
+            }
             if let Some(value) = &self.wlan_meas_config_name_list {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("wlan_meas_config_name_list"));
+                }
             }
             if let Some(value) = &self.wlan_rssi {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("wlan_rssi"));
+                }
             }
             if let Some(value) = &self.wlan_rtt {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("wlan_rtt"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -94651,9 +97638,13 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            self.paging_probability_information.encode(writer)?;
+            if let Err(error) = self.paging_probability_information.encode(writer) {
+                return Err(error.in_field("paging_probability_information"));
+            }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -95108,13 +98099,19 @@ pub mod ngap_ies {
             writer.bit(self.g_tp_tlas.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.i_psec_tla {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_psec_tla"));
+                }
             }
             if let Some(value) = &self.g_tp_tlas {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("g_tp_tlas"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -95373,12 +98370,18 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.xn_extended_transport_layer_addresses.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            self.xn_transport_layer_addresses.encode(writer)?;
+            if let Err(error) = self.xn_transport_layer_addresses.encode(writer) {
+                return Err(error.in_field("xn_transport_layer_addresses"));
+            }
             if let Some(value) = &self.xn_extended_transport_layer_addresses {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("xn_extended_transport_layer_addresses"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
-                value.encode(writer)?;
+                if let Err(error) = value.encode(writer) {
+                    return Err(error.in_field("i_e_extensions"));
+                }
             }
             Ok(())
         }
@@ -95472,7 +98475,8 @@ pub mod ngap_ies {
     non_snake_case,
     non_upper_case_globals,
     unused,
-    clippy::too_many_arguments
+    clippy::too_many_arguments,
+    clippy::collapsible_if
 )]
 pub mod ngap_pdu_contents {
     use super::*;
@@ -95532,7 +98536,9 @@ pub mod ngap_pdu_contents {
     impl Encode for AIOTSessionReleaseCommand<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -95590,7 +98596,9 @@ pub mod ngap_pdu_contents {
     impl Encode for AIOTSessionReleaseComplete<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -95653,7 +98661,9 @@ pub mod ngap_pdu_contents {
     impl Encode for AIOTSessionReleaseRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -95711,7 +98721,9 @@ pub mod ngap_pdu_contents {
     impl Encode for AMFCPRelocationIndication<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -95774,7 +98786,9 @@ pub mod ngap_pdu_contents {
     impl Encode for AMFConfigurationUpdate<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -95832,7 +98846,9 @@ pub mod ngap_pdu_contents {
     impl Encode for AMFConfigurationUpdateAcknowledge<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -95890,7 +98906,9 @@ pub mod ngap_pdu_contents {
     impl Encode for AMFConfigurationUpdateFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -95953,7 +98971,9 @@ pub mod ngap_pdu_contents {
     impl Encode for AMFStatusIndication<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -96053,7 +99073,9 @@ pub mod ngap_pdu_contents {
     impl Encode for BroadcastSessionModificationFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -96116,7 +99138,9 @@ pub mod ngap_pdu_contents {
     impl Encode for BroadcastSessionModificationRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -96174,7 +99198,9 @@ pub mod ngap_pdu_contents {
     impl Encode for BroadcastSessionModificationResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -96237,7 +99263,9 @@ pub mod ngap_pdu_contents {
     impl Encode for BroadcastSessionReleaseRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -96300,7 +99328,9 @@ pub mod ngap_pdu_contents {
     impl Encode for BroadcastSessionReleaseRequired<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -96358,7 +99388,9 @@ pub mod ngap_pdu_contents {
     impl Encode for BroadcastSessionReleaseResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -96416,7 +99448,9 @@ pub mod ngap_pdu_contents {
     impl Encode for BroadcastSessionSetupFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -96484,7 +99518,9 @@ pub mod ngap_pdu_contents {
     impl Encode for BroadcastSessionSetupRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -96542,7 +99578,9 @@ pub mod ngap_pdu_contents {
     impl Encode for BroadcastSessionSetupResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -96600,7 +99638,9 @@ pub mod ngap_pdu_contents {
     impl Encode for BroadcastSessionTransportFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -96663,7 +99703,9 @@ pub mod ngap_pdu_contents {
     impl Encode for BroadcastSessionTransportRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -96721,7 +99763,9 @@ pub mod ngap_pdu_contents {
     impl Encode for BroadcastSessionTransportResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -96779,7 +99823,9 @@ pub mod ngap_pdu_contents {
     impl Encode for CellTrafficTrace<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -96837,7 +99883,9 @@ pub mod ngap_pdu_contents {
     impl Encode for CommandFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -96900,7 +99948,9 @@ pub mod ngap_pdu_contents {
     impl Encode for CommandRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -96958,7 +100008,9 @@ pub mod ngap_pdu_contents {
     impl Encode for CommandResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -97016,7 +100068,9 @@ pub mod ngap_pdu_contents {
     impl Encode for ConnectionEstablishmentIndication<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -97074,7 +100128,9 @@ pub mod ngap_pdu_contents {
     impl Encode for DeactivateTrace<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -97137,7 +100193,9 @@ pub mod ngap_pdu_contents {
     impl Encode for DistributionReleaseRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -97195,7 +100253,9 @@ pub mod ngap_pdu_contents {
     impl Encode for DistributionReleaseResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -97253,7 +100313,9 @@ pub mod ngap_pdu_contents {
     impl Encode for DistributionSetupFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -97316,7 +100378,9 @@ pub mod ngap_pdu_contents {
     impl Encode for DistributionSetupRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -97374,7 +100438,9 @@ pub mod ngap_pdu_contents {
     impl Encode for DistributionSetupResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -97432,7 +100498,9 @@ pub mod ngap_pdu_contents {
     impl Encode for DownlinkNASTransport<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -97490,7 +100558,9 @@ pub mod ngap_pdu_contents {
     impl Encode for DownlinkNonUEAssociatedNRPPaTransport<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -97548,7 +100618,9 @@ pub mod ngap_pdu_contents {
     impl Encode for DownlinkRANConfigurationTransfer<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -97611,7 +100683,9 @@ pub mod ngap_pdu_contents {
     impl Encode for DownlinkRANEarlyStatusTransfer<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -97674,7 +100748,9 @@ pub mod ngap_pdu_contents {
     impl Encode for DownlinkRANStatusTransfer<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -97732,7 +100808,9 @@ pub mod ngap_pdu_contents {
     impl Encode for DownlinkRIMInformationTransfer<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -97795,7 +100873,9 @@ pub mod ngap_pdu_contents {
     impl Encode for DownlinkUEAssociatedNRPPaTransport<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -97858,7 +100938,9 @@ pub mod ngap_pdu_contents {
     impl Encode for ErrorIndication<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -97921,7 +101003,9 @@ pub mod ngap_pdu_contents {
     impl Encode for HandoverCancel<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -97979,7 +101063,9 @@ pub mod ngap_pdu_contents {
     impl Encode for HandoverCancelAcknowledge<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -98037,7 +101123,9 @@ pub mod ngap_pdu_contents {
     impl Encode for HandoverCommand<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -98095,7 +101183,9 @@ pub mod ngap_pdu_contents {
     impl Encode for HandoverFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -98158,7 +101248,9 @@ pub mod ngap_pdu_contents {
     impl Encode for HandoverNotify<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -98216,7 +101308,9 @@ pub mod ngap_pdu_contents {
     impl Encode for HandoverPreparationFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -98279,7 +101373,9 @@ pub mod ngap_pdu_contents {
     impl Encode for HandoverRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -98337,7 +101433,9 @@ pub mod ngap_pdu_contents {
     impl Encode for HandoverRequestAcknowledge<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -98405,7 +101503,9 @@ pub mod ngap_pdu_contents {
     impl Encode for HandoverRequired<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -98468,7 +101568,9 @@ pub mod ngap_pdu_contents {
     impl Encode for HandoverSuccess<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -98526,7 +101628,9 @@ pub mod ngap_pdu_contents {
     impl Encode for InitialContextSetupFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -98594,7 +101698,9 @@ pub mod ngap_pdu_contents {
     impl Encode for InitialContextSetupRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -98652,7 +101758,9 @@ pub mod ngap_pdu_contents {
     impl Encode for InitialContextSetupResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -98715,7 +101823,9 @@ pub mod ngap_pdu_contents {
     impl Encode for InitialUEMessage<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -98773,7 +101883,9 @@ pub mod ngap_pdu_contents {
     impl Encode for InventoryFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -98835,7 +101947,9 @@ pub mod ngap_pdu_contents {
     impl Encode for InventoryReport<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -98903,7 +102017,9 @@ pub mod ngap_pdu_contents {
     impl Encode for InventoryRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -98961,7 +102077,9 @@ pub mod ngap_pdu_contents {
     impl Encode for InventoryResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -99019,7 +102137,9 @@ pub mod ngap_pdu_contents {
     impl Encode for LocationReport<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -99082,7 +102202,9 @@ pub mod ngap_pdu_contents {
     impl Encode for LocationReportingControl<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -99140,7 +102262,9 @@ pub mod ngap_pdu_contents {
     impl Encode for LocationReportingFailureIndication<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -99198,7 +102322,9 @@ pub mod ngap_pdu_contents {
     impl Encode for MTCommunicationHandlingFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -99261,7 +102387,9 @@ pub mod ngap_pdu_contents {
     impl Encode for MTCommunicationHandlingRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -99319,7 +102447,9 @@ pub mod ngap_pdu_contents {
     impl Encode for MTCommunicationHandlingResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -99382,7 +102512,9 @@ pub mod ngap_pdu_contents {
     impl Encode for MulticastGroupPaging<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -99440,7 +102572,9 @@ pub mod ngap_pdu_contents {
     impl Encode for MulticastSessionActivationFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -99503,7 +102637,9 @@ pub mod ngap_pdu_contents {
     impl Encode for MulticastSessionActivationRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -99561,7 +102697,9 @@ pub mod ngap_pdu_contents {
     impl Encode for MulticastSessionActivationResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -99624,7 +102762,9 @@ pub mod ngap_pdu_contents {
     impl Encode for MulticastSessionDeactivationRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -99682,7 +102822,9 @@ pub mod ngap_pdu_contents {
     impl Encode for MulticastSessionDeactivationResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -99740,7 +102882,9 @@ pub mod ngap_pdu_contents {
     impl Encode for MulticastSessionUpdateFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -99803,7 +102947,9 @@ pub mod ngap_pdu_contents {
     impl Encode for MulticastSessionUpdateRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -99861,7 +103007,9 @@ pub mod ngap_pdu_contents {
     impl Encode for MulticastSessionUpdateResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -99919,7 +103067,9 @@ pub mod ngap_pdu_contents {
     impl Encode for NASNonDeliveryIndication<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -99977,7 +103127,9 @@ pub mod ngap_pdu_contents {
     impl Encode for NGRemovalFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -100045,7 +103197,9 @@ pub mod ngap_pdu_contents {
     impl Encode for NGRemovalRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -100103,7 +103257,9 @@ pub mod ngap_pdu_contents {
     impl Encode for NGRemovalResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -100166,7 +103322,9 @@ pub mod ngap_pdu_contents {
     impl Encode for NGReset<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -100224,7 +103382,9 @@ pub mod ngap_pdu_contents {
     impl Encode for NGResetAcknowledge<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -100282,7 +103442,9 @@ pub mod ngap_pdu_contents {
     impl Encode for NGSetupFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -100345,7 +103507,9 @@ pub mod ngap_pdu_contents {
     impl Encode for NGSetupRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -100403,7 +103567,9 @@ pub mod ngap_pdu_contents {
     impl Encode for NGSetupResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -100461,7 +103627,9 @@ pub mod ngap_pdu_contents {
     impl Encode for OverloadStart<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -100519,7 +103687,9 @@ pub mod ngap_pdu_contents {
     impl Encode for OverloadStop<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -100577,7 +103747,9 @@ pub mod ngap_pdu_contents {
     impl Encode for PDUSessionResourceModifyConfirm<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -100640,7 +103812,9 @@ pub mod ngap_pdu_contents {
     impl Encode for PDUSessionResourceModifyIndication<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -100703,7 +103877,9 @@ pub mod ngap_pdu_contents {
     impl Encode for PDUSessionResourceModifyRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -100761,7 +103937,9 @@ pub mod ngap_pdu_contents {
     impl Encode for PDUSessionResourceModifyResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -100824,7 +104002,9 @@ pub mod ngap_pdu_contents {
     impl Encode for PDUSessionResourceNotify<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -100887,7 +104067,9 @@ pub mod ngap_pdu_contents {
     impl Encode for PDUSessionResourceReleaseCommand<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -100945,7 +104127,9 @@ pub mod ngap_pdu_contents {
     impl Encode for PDUSessionResourceReleaseResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -101013,7 +104197,9 @@ pub mod ngap_pdu_contents {
     impl Encode for PDUSessionResourceSetupRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -101071,7 +104257,9 @@ pub mod ngap_pdu_contents {
     impl Encode for PDUSessionResourceSetupResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -101134,7 +104322,9 @@ pub mod ngap_pdu_contents {
     impl Encode for PWSCancelRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -101192,7 +104382,9 @@ pub mod ngap_pdu_contents {
     impl Encode for PWSCancelResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -101255,7 +104447,9 @@ pub mod ngap_pdu_contents {
     impl Encode for PWSFailureIndication<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -101318,7 +104512,9 @@ pub mod ngap_pdu_contents {
     impl Encode for PWSRestartIndication<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -101381,7 +104577,9 @@ pub mod ngap_pdu_contents {
     impl Encode for Paging<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -101444,7 +104642,9 @@ pub mod ngap_pdu_contents {
     impl Encode for PathSwitchRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -101502,7 +104702,9 @@ pub mod ngap_pdu_contents {
     impl Encode for PathSwitchRequestAcknowledge<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -101560,7 +104762,9 @@ pub mod ngap_pdu_contents {
     impl Encode for PathSwitchRequestFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -101628,8 +104832,12 @@ pub mod ngap_pdu_contents {
     }
     impl Encode for AnonymousPrivateMessagePrivateIEs<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            self.id.encode(writer)?;
-            self.criticality.encode(writer)?;
+            if let Err(error) = self.id.encode(writer) {
+                return Err(error.in_field("id"));
+            }
+            if let Err(error) = self.criticality.encode(writer) {
+                return Err(error.in_field("criticality"));
+            }
             writer.open_type(&self.value);
             Ok(())
         }
@@ -101751,7 +104959,9 @@ pub mod ngap_pdu_contents {
     impl Encode for PrivateMessage<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.private_ies.encode(writer)?;
+            if let Err(error) = self.private_ies.encode(writer) {
+                return Err(error.in_field("private_ies"));
+            }
             Ok(())
         }
     }
@@ -101809,7 +105019,9 @@ pub mod ngap_pdu_contents {
     impl Encode for RANCPRelocationIndication<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -101872,7 +105084,9 @@ pub mod ngap_pdu_contents {
     impl Encode for RANConfigurationUpdate<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -101930,7 +105144,9 @@ pub mod ngap_pdu_contents {
     impl Encode for RANConfigurationUpdateAcknowledge<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -101988,7 +105204,9 @@ pub mod ngap_pdu_contents {
     impl Encode for RANConfigurationUpdateFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -102050,7 +105268,9 @@ pub mod ngap_pdu_contents {
     impl Encode for RANPagingRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -102108,7 +105328,9 @@ pub mod ngap_pdu_contents {
     impl Encode for RRCInactiveTransitionReport<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -102166,7 +105388,9 @@ pub mod ngap_pdu_contents {
     impl Encode for RerouteNASRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -102224,7 +105448,9 @@ pub mod ngap_pdu_contents {
     impl Encode for RetrieveUEInformation<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -102287,7 +105513,9 @@ pub mod ngap_pdu_contents {
     impl Encode for SecondaryRATDataUsageReport<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -102345,7 +105573,9 @@ pub mod ngap_pdu_contents {
     impl Encode for TimingSynchronisationStatusFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -102408,7 +105638,9 @@ pub mod ngap_pdu_contents {
     impl Encode for TimingSynchronisationStatusReport<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -102476,7 +105708,9 @@ pub mod ngap_pdu_contents {
     impl Encode for TimingSynchronisationStatusRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -102534,7 +105768,9 @@ pub mod ngap_pdu_contents {
     impl Encode for TimingSynchronisationStatusResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -102592,7 +105828,9 @@ pub mod ngap_pdu_contents {
     impl Encode for TraceFailureIndication<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -102655,7 +105893,9 @@ pub mod ngap_pdu_contents {
     impl Encode for TraceStart<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -102713,7 +105953,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UEContextModificationFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -102776,7 +106018,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UEContextModificationRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -102834,7 +106078,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UEContextModificationResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -102897,7 +106143,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UEContextReleaseCommand<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -102955,7 +106203,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UEContextReleaseComplete<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -103018,7 +106268,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UEContextReleaseRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -103076,7 +106328,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UEContextResumeFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -103139,7 +106393,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UEContextResumeRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -103197,7 +106453,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UEContextResumeResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -103255,7 +106513,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UEContextSuspendFailure<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -103318,7 +106578,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UEContextSuspendRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -103376,7 +106638,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UEContextSuspendResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -103433,7 +106697,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UEInformationTransfer<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -103496,7 +106762,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UERadioCapabilityCheckRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -103554,7 +106822,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UERadioCapabilityCheckResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -103617,7 +106887,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UERadioCapabilityIDMappingRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -103675,7 +106947,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UERadioCapabilityIDMappingResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -103738,7 +107012,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UERadioCapabilityInfoIndication<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -103801,7 +107077,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UETNLABindingReleaseRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -103859,7 +107137,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UplinkNASTransport<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -103917,7 +107197,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UplinkNonUEAssociatedNRPPaTransport<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -103980,7 +107262,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UplinkRANConfigurationTransfer<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -104043,7 +107327,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UplinkRANEarlyStatusTransfer<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -104106,7 +107392,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UplinkRANStatusTransfer<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -104169,7 +107457,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UplinkRIMInformationTransfer<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -104227,7 +107517,9 @@ pub mod ngap_pdu_contents {
     impl Encode for UplinkUEAssociatedNRPPaTransport<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -104295,7 +107587,9 @@ pub mod ngap_pdu_contents {
     impl Encode for WriteReplaceWarningRequest<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -104353,7 +107647,9 @@ pub mod ngap_pdu_contents {
     impl Encode for WriteReplaceWarningResponse<'_> {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
-            self.protocol_ies.encode(writer)?;
+            if let Err(error) = self.protocol_ies.encode(writer) {
+                return Err(error.in_field("protocol_ies"));
+            }
             Ok(())
         }
     }
@@ -104376,7 +107672,8 @@ pub mod ngap_pdu_contents {
     non_snake_case,
     non_upper_case_globals,
     unused,
-    clippy::too_many_arguments
+    clippy::too_many_arguments,
+    clippy::collapsible_if
 )]
 pub mod ngap_pdu_descriptions {
     use super::*;
@@ -104460,8 +107757,12 @@ pub mod ngap_pdu_descriptions {
     impl Encode for InitiatingMessage<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            self.procedure_code.encode(writer)?;
-            self.criticality.encode(writer)?;
+            if let Err(error) = self.procedure_code.encode(writer) {
+                return Err(error.in_field("procedure_code"));
+            }
+            if let Err(error) = self.criticality.encode(writer) {
+                return Err(error.in_field("criticality"));
+            }
             writer.open_type(&self.value);
             Ok(())
         }
@@ -104674,8 +107975,12 @@ pub mod ngap_pdu_descriptions {
     impl Encode for SuccessfulOutcome<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            self.procedure_code.encode(writer)?;
-            self.criticality.encode(writer)?;
+            if let Err(error) = self.procedure_code.encode(writer) {
+                return Err(error.in_field("procedure_code"));
+            }
+            if let Err(error) = self.criticality.encode(writer) {
+                return Err(error.in_field("criticality"));
+            }
             writer.open_type(&self.value);
             Ok(())
         }
@@ -104771,8 +108076,12 @@ pub mod ngap_pdu_descriptions {
     impl Encode for UnsuccessfulOutcome<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            self.procedure_code.encode(writer)?;
-            self.criticality.encode(writer)?;
+            if let Err(error) = self.procedure_code.encode(writer) {
+                return Err(error.in_field("procedure_code"));
+            }
+            if let Err(error) = self.criticality.encode(writer) {
+                return Err(error.in_field("criticality"));
+            }
             writer.open_type(&self.value);
             Ok(())
         }

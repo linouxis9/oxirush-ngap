@@ -155,6 +155,62 @@ fn a_value_outside_its_constraint_is_an_encode_error() {
 }
 
 #[test]
+fn a_member_that_does_not_encode_is_named_as_one_that_does_not_decode_is() {
+    // The priority level is an INTEGER (1..15), TS 38.413 clause 9.3.1.19.
+    let priority = AllocationAndRetentionPriority::new(
+        PriorityLevelARP(16),
+        PreEmptionCapability::shall_not_trigger_pre_emption,
+        PreEmptionVulnerability::not_pre_emptable,
+        None,
+    );
+    let error = encode_open_type(&priority).unwrap_err();
+    assert_eq!(error.kind(), ErrorKind::Encode);
+    assert_eq!(
+        error.to_string(),
+        "a value of AllocationAndRetentionPriority does not encode: 16 is outside its \
+         constraint (1..15), in its field `priority_level_arp`"
+    );
+    assert_eq!(error.fields().collect::<Vec<_>>(), ["priority_level_arp"]);
+
+    // In a value that holds it, the fields are those on the way to the member.
+    let characteristics = NonDynamic5QIDescriptor::new(FiveQI(9), None, None, None, None);
+    let parameters = QosFlowLevelQosParameters::new(
+        QosCharacteristics::nonDynamic5QI(characteristics),
+        priority,
+        None,
+        None,
+        None,
+        None,
+    );
+    let error = encode_open_type(&parameters).unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        "a value of QosFlowLevelQosParameters does not encode: 16 is outside its constraint \
+         (1..15), in its field `allocation_and_retention_priority.priority_level_arp`"
+    );
+
+    // A list of no item where the type has one at least, in a member that may be
+    // absent: the history of a UE has 1 to 16 cells.
+    let cell =
+        oxirush_ngap::helpers::nr_cgi(oxirush_ngap::helpers::plmn("208", "93").unwrap(), 2, 1);
+    let container = SourceNGRANNodeToTargetNGRANNodeTransparentContainer::new(
+        RRCContainer(vec![0x01].into()),
+        None,
+        None,
+        NGRANCGI::nR_CGI(cell.unwrap()),
+        None,
+        UEHistoryInformation(vec![]),
+        None,
+    );
+    let error = encode_open_type(&container).unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        "a value of SourceNGRANNode-ToTargetNGRANNode-TransparentContainer does not encode: a \
+         size of 0 is outside its constraint (1..16), in its field `u_ehistory_information`"
+    );
+}
+
+#[test]
 fn an_error_is_the_error_of_a_function_of_the_caller() {
     // With `?`, in a function whose error is this one or holds any error.
     fn code(octets: &[u8]) -> Result<u8, Error> {

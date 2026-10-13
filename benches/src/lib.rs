@@ -16,12 +16,14 @@
 */
 
 //! What the benchmarks measure: the inputs, and the operations on each. The
-//! three programs of `benches/` share them:
+//! four programs of `benches/` share them:
 //!
 //! - `codec` times each operation with criterion, and profiles it with
 //!   pprof;
 //! - `allocations` counts the allocations of one call of each;
-//! - `heap` says where the allocations of an operation are made.
+//! - `heap` says where the allocations of an operation are made;
+//! - `scale` gives the time and the memory of each on a message of a
+//!   thousand IEs and more.
 //!
 //! The inputs are the messages of the fixtures of the crate,
 //! `tests/fixtures/messages.tsv`, as one input, and a few messages of the
@@ -31,6 +33,7 @@
 //! the protocol is in `protocol.rs`: the type of a PDU, the messages that it
 //! writes, and the operations that take the type of a message.
 
+pub mod counting;
 mod protocol;
 
 use protocol::codec::inspect;
@@ -200,6 +203,25 @@ pub fn inputs() -> Vec<Input> {
     inputs
 }
 
+/// Inputs of one message each, which has `counts` IEs of one name: what an
+/// operation costs as the IEs of a message grow in number. A container has
+/// 65,535 at most. The path and the edit of such a message are of the value
+/// of its last IE.
+pub fn many_ies(counts: &[usize]) -> Vec<Input> {
+    let input = |count: &usize| {
+        let octets = protocol::many_ies(*count).encode().unwrap();
+        let description = format!("{count} IEs of one name, {} octets", octets.len());
+        let last = format!("{}/{}/value", protocol::ROOT, count - 1);
+        let message = Message::new(octets, Some(&last), Some((&last, json!(2))), None);
+        Input {
+            name: format!("ies-{count}").leak(),
+            description,
+            messages: vec![message],
+        }
+    };
+    counts.iter().map(input).collect()
+}
+
 // ── Operations ──────────────────────────────────────────────────────────────
 
 /// One call of an operation, with what it needs already made. It is called
@@ -272,6 +294,14 @@ fn prepared<'a, C: FnMut() + 'a>(
 }
 
 impl Input {
+    /// The octets of the messages of this input, together.
+    pub fn octets(&self) -> usize {
+        self.messages
+            .iter()
+            .map(|message| message.octets.len())
+            .sum()
+    }
+
     /// The operations on this input, in the order of the reports: those of
     /// the codec, those that take the type of a message, for an input whose
     /// messages have them, and those of the JSON forms.

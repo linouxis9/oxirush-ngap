@@ -1280,8 +1280,8 @@ fn walk(value: &Value, path: &mut String, depth: usize, found: &mut Vec<(String,
                     true => &mut root,
                     false => &mut *path,
                 };
-                for (index, ie) in ies.iter().enumerate() {
-                    step(&ie_segment(ies, index), ie, message, found);
+                for (segment, ie) in ie_segments(ies).iter().zip(ies) {
+                    step(segment, ie, message, found);
                 }
                 // The message of the PDU says that it has no IE.
                 if of_the_pdu && ies.is_empty() {
@@ -1298,17 +1298,24 @@ fn walk(value: &Value, path: &mut String, depth: usize, found: &mut Vec<(String,
     }
 }
 
-/// The segment that selects the IE at `index` of `ies` alone: its name, or its position
-/// when it has no name or its identifier is there twice.
-fn ie_segment(ies: &[Value], index: usize) -> String {
-    let id = entry_id(&ies[index]);
-    let mut names = crate::inspect::ie_names().iter();
-    match names.find(|(known, _)| Some(u64::from(*known)) == id) {
-        Some((_, name)) if ies.iter().filter(|ie| entry_id(ie) == id).count() == 1 => {
-            name.to_string()
-        }
-        _ => index.to_string(),
+/// The segment that selects each IE of `ies` alone: its name, or its position when it
+/// has no name or its identifier is there twice. The list is read once, whatever its
+/// length: the identifiers are counted for all of its IEs, not for each.
+fn ie_segments(ies: &[Value]) -> Vec<String> {
+    let ids: Vec<Option<u64>> = ies.iter().map(entry_id).collect();
+    let mut times: HashMap<u64, usize> = HashMap::new();
+    for id in ids.iter().flatten() {
+        *times.entry(*id).or_default() += 1;
     }
+    let name = |id: u64| {
+        let known = u16::try_from(id).ok().filter(|_| times[&id] == 1)?;
+        crate::check::name(known)
+    };
+    let segment = |(index, id): (usize, &Option<u64>)| match id.and_then(name) {
+        Some(name) => name.to_string(),
+        None => index.to_string(),
+    };
+    ids.iter().enumerate().map(segment).collect()
 }
 
 /// What an edit does at its path.

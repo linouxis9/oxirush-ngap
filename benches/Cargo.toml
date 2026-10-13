@@ -34,6 +34,10 @@ harness = false
 name = "heap"
 harness = false
 
+[[bench]]
+name = "scale"
+harness = false
+
 # Symbols for the profiles.
 [profile.bench]
 debug = true

@@ -13,11 +13,13 @@ use std::path::Path;
 
 /// The shared files, and the FNV-1a digest of each as it was last mirrored.
 const SHARED: &[(&str, u64)] = &[
-    ("benches/benches/allocations.rs", 0x7e9caf0d00bb13de),
+    ("benches/benches/allocations.rs", 0x228fe2c8ba50d435),
     ("benches/benches/codec.rs", 0x904d8a5909d190c1),
     ("benches/benches/heap.rs", 0xffc0849cd2e0625d),
+    ("benches/benches/scale.rs", 0xb584eff01e6248fe),
     ("benches/build_cost.py", 0x16af153b5eb68c84),
-    ("benches/src/lib.rs", 0x67549eb6f8c9549b),
+    ("benches/src/counting.rs", 0x613f75b3dd6a75fd),
+    ("benches/src/lib.rs", 0x59c963921d8a9737),
     ("build/extract_asn1.py", 0xd5c10df676fed9aa),
     ("fuzz/fuzz_targets/decode.rs", 0x45a0d53107995c8a),
     ("fuzz/fuzz_targets/paths.rs", 0x68daa1c78c9c02da),
@@ -29,7 +31,7 @@ const SHARED: &[(&str, u64)] = &[
     ("oracle/src/sized.rs", 0x65f4c1e8ee1593db),
     ("src/check.rs", 0x6a14609dae13ca66),
     ("src/error.rs", 0x4014f8f5f88cb9b8),
-    ("src/inspect_paths.rs", 0x56eb0a31dc507c38),
+    ("src/inspect_paths.rs", 0x4a3d98374f056a4b),
     ("src/message.rs", 0x345b979b1e030e11),
     ("src/oracle_tests.rs", 0xbbd6ab7fea937301),
     ("tests/fixtures/dissect.py", 0xdda0b5e438b19794),

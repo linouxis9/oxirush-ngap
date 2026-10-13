@@ -34,66 +34,11 @@
 //! on every run: an allocator that counts stands in for the system allocator
 //! in this program, which makes no measure of time.
 
+use benches::counting::{Counting, allocations};
 use benches::{filter, inputs, selected};
-use std::alloc::{GlobalAlloc, Layout, System};
-use std::sync::atomic::{AtomicUsize, Ordering::Relaxed};
-
-// ── An allocator that counts ────────────────────────────────────────────────
-
-struct Counting;
-
-static ALLOCATIONS: AtomicUsize = AtomicUsize::new(0);
-static REQUESTED: AtomicUsize = AtomicUsize::new(0);
-static LIVE: AtomicUsize = AtomicUsize::new(0);
-static PEAK: AtomicUsize = AtomicUsize::new(0);
-
-fn allocated(size: usize) {
-    ALLOCATIONS.fetch_add(1, Relaxed);
-    REQUESTED.fetch_add(size, Relaxed);
-    let live = LIVE.fetch_add(size, Relaxed) + size;
-    PEAK.fetch_max(live, Relaxed);
-}
-
-// The system allocator does the work, and is given what this one is given.
-unsafe impl GlobalAlloc for Counting {
-    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        allocated(layout.size());
-        unsafe { System.alloc(layout) }
-    }
-
-    unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
-        allocated(layout.size());
-        unsafe { System.alloc_zeroed(layout) }
-    }
-
-    unsafe fn dealloc(&self, pointer: *mut u8, layout: Layout) {
-        LIVE.fetch_sub(layout.size(), Relaxed);
-        unsafe { System.dealloc(pointer, layout) }
-    }
-
-    unsafe fn realloc(&self, pointer: *mut u8, layout: Layout, size: usize) -> *mut u8 {
-        LIVE.fetch_sub(layout.size(), Relaxed);
-        allocated(size);
-        unsafe { System.realloc(pointer, layout, size) }
-    }
-}
 
 #[global_allocator]
 static ALLOCATOR: Counting = Counting;
-
-/// The allocations of one call of `operation`: how many, the octets they
-/// asked for, and the most that were live beyond what was before the call.
-fn allocations(mut operation: impl FnMut()) -> [usize; 3] {
-    let before = [ALLOCATIONS.load(Relaxed), REQUESTED.load(Relaxed)];
-    let live = LIVE.load(Relaxed);
-    PEAK.store(live, Relaxed);
-    operation();
-    [
-        ALLOCATIONS.load(Relaxed) - before[0],
-        REQUESTED.load(Relaxed) - before[1],
-        PEAK.load(Relaxed) - live,
-    ]
-}
 
 fn main() {
     let filter = filter();

@@ -41,7 +41,7 @@ unexpected_cfgs = { level = "warn", check-cfg = ['cfg(oxirush_ngap_hooks)', 'cfg
 [workspace]
 
 # oxirush-aper 0.1.0 and oxirush-utils 0.1.0 are not on crates.io yet: until they are
-# published, they come from their repositories.
+# published, they come from their repositories, at the revisions of build/revisions.
 [patch.crates-io]
-oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper" }
-oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils" }
+oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "8bfa56d6689c1eba874fc54598970dfdd553074c" }
+oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "b4f61a4c0177216d2f597d28e44ff0f679c58d8a" }

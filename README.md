@@ -119,12 +119,13 @@ numbers, arrays and the types of `oxirush-aper`: `Octets`, `Bits` and
 The errors of the codec are those of the runtime: see [Errors](#errors).
 
 `oxirush-aper` 0.1.0 and `oxirush-utils` 0.1.0 are not on crates.io yet.
-Until they are, a build takes them from their repositories:
+Until they are, a build takes them from their repositories, at the revisions
+that this revision of the crate is tested with:
 
 ```toml
 [patch.crates-io]
-oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper" }
-oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils" }
+oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "8bfa56d6689c1eba874fc54598970dfdd553074c" }
+oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "b4f61a4c0177216d2f597d28e44ff0f679c58d8a" }
 ```
 
 The minimum supported Rust version is 1.88.
@@ -1450,9 +1451,8 @@ python3 build_cost.py +1.88.0 --features inspect       # a clean build: its time
 ```
 
 Until `oxirush-aper` and `oxirush-utils` are on crates.io, `build_cost.py` is
-told where each is, before the other arguments:
-`--config 'patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"'`
-and the same for `oxirush-utils`.
+told where each is, before the other arguments: the `--config` options that
+`UNPUBLISHED` of `.github/workflows/ci.yml` has.
 
 `--profile-time` runs the benchmark under [pprof](https://crates.io/crates/pprof)
 and writes a CPU profile that `go tool pprof` reads; with `PROFILE=flamegraph`
@@ -1510,6 +1510,40 @@ tests but for its bindings and `oracle/tests/allocation.rs`, the test
 `tests/shared_files.rs` holds a digest of each, so that an edit in one crate
 fails its tests until the file is the same in the other and both record the
 new digest.
+
+### Until oxirush-aper and oxirush-utils are published
+
+Neither is on crates.io yet, so the repository takes both from their
+repositories. `build/revisions` records the commit of each, and every place
+that takes one names that commit and no branch: the patch of this page, the
+`UNPUBLISHED` of the two workflows, and the manifests of `benches/`, `fuzz/`
+and `oracle/`. `tests/workspace_member.sh`, `tests/package.sh` and the
+Reproduce workflow, which checks the generator out, read the file.
+`tests/revisions.rs` fails when a place names another commit, so a change of
+`oxirush-aper` or of `oxirush-utils` changes no result here before a commit of
+this repository says so.
+
+To move to another revision, write it in `build/revisions`, run
+`python3 build/pin.py`, which writes it in each place, generate the bindings
+again, and commit the three together.
+
+When `oxirush-aper` 0.1.0 and `oxirush-utils` 0.1.0 are on crates.io, and
+before this crate is published:
+
+1. Delete `[patch.crates-io]` from `benches/Cargo.toml`, `fuzz/Cargo.toml`
+   and `oracle/Cargo.toml`.
+2. Delete `UNPUBLISHED` and each `$UNPUBLISHED` from the two workflows, and
+   what `tests/workspace_member.sh` and `tests/package.sh` write for the two
+   crates when no directory is given for them.
+3. Delete the patch and its paragraph from [Installation](#installation),
+   this section but for its last paragraph, `build/pin.py`,
+   `tests/revisions.rs` and the line of `oxirush-utils` in `build/revisions`.
+4. `cargo publish --dry-run` then builds the package against crates.io
+   alone, and fails while a dependency is not there.
+
+The line of `oxirush-aper` stays in `build/revisions`, with the commit of the
+release: its `generator/` is not published, and the Reproduce workflow checks
+it out at that commit to write the bindings.
 
 ### rasn-compiler and the oracle
 

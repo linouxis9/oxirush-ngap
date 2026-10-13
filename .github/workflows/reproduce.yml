@@ -37,10 +37,12 @@ env:
   # As in the CI workflow: the tests need no debug information.
   CARGO_PROFILE_DEV_DEBUG: 0
   # oxirush-aper 0.1.0 and oxirush-utils 0.1.0 are not on crates.io yet: take
-  # them from their repositories.
+  # them from their repositories, at the revisions of build/revisions.
   UNPUBLISHED: >-
     --config patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"
+    --config patch.crates-io.oxirush-aper.rev="8bfa56d6689c1eba874fc54598970dfdd553074c"
     --config patch.crates-io.oxirush-utils.git="https://github.com/linouxis9/oxirush-utils"
+    --config patch.crates-io.oxirush-utils.rev="b4f61a4c0177216d2f597d28e44ff0f679c58d8a"
 
 jobs:
   reproduce:
@@ -58,9 +60,13 @@ jobs:
             .
             build
       # What the generators of the two protocols share is in the repository of
-      # oxirush-aper, which `build/` takes from a checkout beside this one.
+      # oxirush-aper, which `build/` takes from a checkout beside this one: the
+      # revision that wrote the bindings, which build/revisions records.
       - name: The generator of oxirush-aper, beside this repository
-        run: git clone --depth 1 https://github.com/linouxis9/oxirush-aper ../oxirush-aper
+        run: |
+          git clone https://github.com/linouxis9/oxirush-aper ../oxirush-aper
+          git -C ../oxirush-aper checkout --detach \
+            "$(awk '$1 == "oxirush-aper" { print $2 }' build/revisions)"
       - name: The ASN.1 modules, out of the archive of 3GPP
         run: |
           curl -sS --fail -A "Mozilla/5.0" -o "$RUNNER_TEMP/38413-j40.zip" \

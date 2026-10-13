@@ -2,7 +2,8 @@
 //! check of a message against its object set, the paths of the inspection, what names
 //! a message and its errors, the oracle of the tests and the comparison with it, the
 //! test of the README, the scripts of the vectors and of the ASN.1, the scripts that
-//! make a workspace of the crate and that test its package, the benchmarks and the fuzz
+//! make a workspace of the crate and that test its package, the test and the script of
+//! the revisions of the crates that are not published, the benchmarks and the fuzz
 //! targets. Each crate holds the digest of each file, so that an edit in one fails here
 //! until the file is the same in the other and both record its new digest. This file
 //! is one of them, and the two crates keep it the same too.
@@ -18,10 +19,11 @@ const SHARED: &[(&str, u64)] = &[
     ("benches/benches/codec.rs", 0x904d8a5909d190c1),
     ("benches/benches/heap.rs", 0xffc0849cd2e0625d),
     ("benches/benches/scale.rs", 0xb584eff01e6248fe),
-    ("benches/build_cost.py", 0x0df0a0f93f48d4f1),
+    ("benches/build_cost.py", 0x3ab37d9a89423f0c),
     ("benches/src/counting.rs", 0x613f75b3dd6a75fd),
     ("benches/src/lib.rs", 0x59c963921d8a9737),
     ("build/extract_asn1.py", 0xd5c10df676fed9aa),
+    ("build/pin.py", 0x7c9f2c635006e491),
     ("fuzz/fuzz_targets/decode.rs", 0x45a0d53107995c8a),
     ("fuzz/fuzz_targets/paths.rs", 0x68daa1c78c9c02da),
     ("fuzz/fuzz_targets/view.rs", 0xa0e7481987d00ee0),
@@ -38,9 +40,10 @@ const SHARED: &[(&str, u64)] = &[
     ("src/message.rs", 0x1cdcc3d36746fb8d),
     ("tests/fixtures/dissect.py", 0xdda0b5e438b19794),
     ("tests/fixtures/generate.py", 0x313265374d7367d9),
-    ("tests/package.sh", 0xd977b5551cb20a17),
+    ("tests/package.sh", 0xf01928838141a32f),
     ("tests/readme.rs", 0x8649417b32dae0f4),
-    ("tests/workspace_member.sh", 0x5c5436044558f541),
+    ("tests/revisions.rs", 0x1cfbf3fec493dc4d),
+    ("tests/workspace_member.sh", 0xed255d2d6316a65a),
 ];
 
 /// The 64-bit FNV-1a digest of `octets`, without the carriage returns that a checkout

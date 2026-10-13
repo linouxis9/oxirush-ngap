@@ -9,21 +9,29 @@
 # DIRECTORY, which the script makes, has the package as cargo writes it, unpacked, and
 # what cargo builds of it. The files of the package are those of the working directory,
 # committed or not. oxirush-aper and oxirush-utils come from the directories that APER
-# and UTILS name, and from their repositories without, as neither is on crates.io yet.
+# and UTILS name, and without from their repositories, at the revisions of
+# build/revisions, as neither is on crates.io yet.
 set -eu
 directory=$1
 here=$(cd "$(dirname "$0")/.." && pwd)
 mkdir "$directory"
 directory=$(cd "$directory" && pwd)
-aper='git="https://github.com/linouxis9/oxirush-aper"'
-utils='git="https://github.com/linouxis9/oxirush-utils"'
-if [ -n "${APER:-}" ]; then
-    aper="path=\"$(cd "$APER" && pwd)\""
-fi
-if [ -n "${UTILS:-}" ]; then
-    utils="path=\"$(cd "$UTILS" && pwd)\""
-fi
-set -- --config "patch.crates-io.oxirush-aper.$aper" --config "patch.crates-io.oxirush-utils.$utils"
+# The options of cargo that say where a crate is: a directory, or its repository at
+# the revision that is recorded.
+set --
+for crate in oxirush-aper oxirush-utils; do
+    case "$crate" in
+        oxirush-aper) directory_of=${APER:-} ;;
+        *) directory_of=${UTILS:-} ;;
+    esac
+    if [ -n "$directory_of" ]; then
+        set -- "$@" --config "patch.crates-io.$crate.path=\"$(cd "$directory_of" && pwd)\""
+    else
+        revision=$(awk -v name="$crate" '$1 == name { print $2 }' "$here/build/revisions")
+        set -- "$@" --config "patch.crates-io.$crate.git=\"https://github.com/linouxis9/$crate\""
+        set -- "$@" --config "patch.crates-io.$crate.rev=\"$revision\""
+    fi
+done
 cd "$here"
 cargo package "$@" --no-verify --allow-dirty --target-dir "$directory/target"
 package=$(ls "$directory/target/package/"*.crate)

@@ -10,15 +10,19 @@
 # DIRECTORY, which the script makes, becomes a workspace whose members are this crate
 # and each other CRATE, the directory of one: they are links, and nothing is written
 # into them. A member named oxirush-aper or oxirush-utils is the one of the others.
-# Without one it comes from its repository, as neither is on crates.io yet.
+# Without one it comes from its repository, at the revision of build/revisions, as
+# neither is on crates.io yet.
 set -eu
 directory=$1
 shift
 here=$(cd "$(dirname "$0")/.." && pwd)
 mkdir "$directory"
 members=
-aper='{ git = "https://github.com/linouxis9/oxirush-aper" }'
-utils='{ git = "https://github.com/linouxis9/oxirush-utils" }'
+revision() {
+    awk -v name="$1" '$1 == name { print $2 }' "$here/build/revisions"
+}
+aper="{ git = \"https://github.com/linouxis9/oxirush-aper\", rev = \"$(revision oxirush-aper)\" }"
+utils="{ git = \"https://github.com/linouxis9/oxirush-utils\", rev = \"$(revision oxirush-utils)\" }"
 for crate in "$here" "$@"; do
     crate=$(cd "$crate" && pwd)
     name=$(sed -n 's/^name = "\(.*\)"$/\1/p' "$crate/Cargo.toml" | head -n 1)

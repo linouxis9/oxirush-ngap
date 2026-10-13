@@ -15,10 +15,12 @@ env:
   # faster and in less memory.
   CARGO_PROFILE_DEV_DEBUG: 0
   # oxirush-aper 0.1.0 and oxirush-utils 0.1.0 are not on crates.io yet: take
-  # them from their repositories.
+  # them from their repositories, at the revisions of build/revisions.
   UNPUBLISHED: >-
     --config patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"
+    --config patch.crates-io.oxirush-aper.rev="8bfa56d6689c1eba874fc54598970dfdd553074c"
     --config patch.crates-io.oxirush-utils.git="https://github.com/linouxis9/oxirush-utils"
+    --config patch.crates-io.oxirush-utils.rev="b4f61a4c0177216d2f597d28e44ff0f679c58d8a"
 
 jobs:
   test:

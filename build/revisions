@@ -1,0 +1,11 @@
+# The revision of each repository that this one is built with: the name of a commit.
+#
+# oxirush-aper: its generator/ at this revision wrote the bindings, and the Reproduce
+# workflow checks it out to write them again. Until oxirush-aper 0.1.0 is on crates.io,
+# it is also the runtime that every build of this repository takes.
+# oxirush-utils: until oxirush-utils 0.1.0 is on crates.io, what every build takes.
+#
+# build/pin.py writes them wherever a crate is taken from its repository, and
+# tests/revisions.rs holds each place to them.
+oxirush-aper 8bfa56d6689c1eba874fc54598970dfdd553074c
+oxirush-utils b4f61a4c0177216d2f597d28e44ff0f679c58d8a

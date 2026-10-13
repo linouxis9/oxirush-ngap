@@ -110916,6 +110916,12 @@ pub use crate::registry::NgapPduKind;
 impl NGAPPDU<'static> {
     /// The PDU that `bytes` are, in aligned PER: the octets of one PDU, whole, and no
     /// octet after it. The PDU owns the octets of its message, which are copied once.
+    ///
+    /// The envelope is read, and the octets of the message are not looked into: what
+    /// does not decode in them is an error of `decode_value`, of `protocol_ies` and of
+    /// `check`. The crate has no limit on the octets of a PDU, and a call on a PDU takes
+    /// time and memory in proportion to them: the caller bounds what it reads from a
+    /// peer.
     pub fn decode(bytes: &[u8]) -> Result<Self, crate::Error> {
         match NGAPPDU::usual(bytes) {
             Some((alternative, code, criticality, message)) => Ok(Self::of_alternative(

@@ -888,6 +888,15 @@ macro_rules! __ngap_ie_syntax {
 /// the criticality, which the caller reads in `protocol_ies`. A call with `lax`
 /// fields alone has no error, and its function need not return a `Result`.
 ///
+/// A character string is checked when it is decoded: a name with a character that a
+/// PrintableString does not have, as `_` or `@`, does not decode, where a decoder
+/// that does not check its alphabet reads it. Such a name is an error for an `opt`
+/// field and `None` for a `lax` one.
+///
+/// A field has the type of the IE, or the type of the one value that the IE is a name
+/// for, as a number for an identifier. After `=>` comes an expression of the value of
+/// the IE, which the field is then.
+///
 /// When the message has the IE twice, the field is the last one, which is the one
 /// that `with_ngap_ie_mut!` changes. Any of them that does not decode is the error of a `req`
 /// and of an `opt` field, and a `lax` field is `None` when the last one does not

@@ -189,6 +189,11 @@ without debug information.
 | `protocol_ies()`, `set_protocol_ies(ies)` | The IEs of its message, whatever the message is, and the same PDU with other IEs: [below](#the-ies-of-any-message) |
 | `check()` | How it deviates from the object set of its message, a `Vec<Deviation>`: [below](#check-a-message-against-its-object-set) |
 
+`decode` reads the envelope of a PDU: its direction, its procedure code, its
+criticality, and the octets of its message, which it does not look into.
+`decode_value`, `protocol_ies` and `check` read the message, and what does not
+decode there is their error.
+
 The kind of a PDU says which message to decode:
 
 ```rust
@@ -221,6 +226,36 @@ println!("{}", receive(&failure).unwrap());
 a release request with 3 IEs
 Unsuccessful_NGSetup is not handled here
 ```
+
+### What a call costs
+
+Each call takes time and memory in proportion to the octets that it is given.
+The crate has no limit on them, and the specification has none: the caller
+bounds what a peer can make it spend by the size of what it reads from SCTP.
+The messages that the open-source cores sent in the lab runs are 238 octets
+at most, and the longest valid message among the vectors, an NG SETUP RESPONSE with the longest list of slices,
+is 106,555 octets.
+
+Measured on a message of 65,535 IEs of two octets each, 393 KB, which is the
+most IEs that a message has and the most memory for an octet:
+
+| Call | Memory at most, for each octet of the PDU | On that message |
+|------|-------------------------------------------|-----------------|
+| `decode`, `decode_borrowed` | 1.3 octets; none for `decode_borrowed` of a message of less than 16384 octets | 0.03 ms |
+| `protocol_ies`, `decode_value` | 9 | 0.4 ms |
+| `check` | 22 | 3.9 ms |
+| `to_view`, `to_tree`, `from_tree` | 125 | 88 to 117 ms, 49 MB |
+| `from_view`, `with_view` | 240 | 154 to 156 ms, 94 MB |
+| `inspect::paths` | 52 | 72 ms |
+| `inspect::set`, `remove`, `insert` | 125: an edit is made on a copy of the view | 44 ms |
+
+A typed value takes what its type holds, which is more than its octets: the longest
+list of connections of an NG RESET, 65,536 items in 32 KB, is 4.7 MB as its type.
+
+A message that a network sends costs less for an octet: `to_view` of a paging
+of 140 octets takes 27 KB, and of a handover of 4 KB, 40 KB. `cargo bench
+--bench scale`, in `benches/`, measures the table, and `--bench allocations`
+the memory of each call on the messages of the fixtures.
 
 ### Keep a value after its PDU
 
@@ -358,7 +393,9 @@ fn handle(request: &UEContextReleaseRequest) -> Result<(), Error> {
 
 A field is `req`, `opt` or `lax`, its name and its type, then the IE with a
 name for its decoded value. After `=>` comes what the field keeps of that
-value; without it, the field is the `.0` of the generated newtype.
+value. Without it, the field is the value itself when it has the type of the
+IE, and the one value that the IE is a name for when it has the type of that
+value: `u64` for an identifier that is a number.
 
 | Field | Is | When the IE is not in the message | When it is there and does not decode |
 |-------|----|-----------------------------------|--------------------------------------|
@@ -380,6 +417,13 @@ with the criticality `ignore`, and go on so; with `notify` it also reports the
 IE, and with `reject` it rejects the procedure. The macro does not look at the
 criticality of an IE: the caller reads it in `protocol_ies`, and takes with
 `lax` what it may ignore.
+
+A character string is checked when it is decoded. A name with a character
+that a PrintableString does not have, as `_` or `@` in a RAN node name, does not
+decode, where a decoder that does not check its alphabet reads it: a peer may
+send one for years unnoticed. Such a name is an error for an `opt` field and
+`None` for a `lax` one, and a node that is not to refuse gNBs for their names
+reads them with `lax`.
 
 ```rust
 use oxirush_ngap::{extract_ngap_ies, ngap::*};

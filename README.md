@@ -247,7 +247,7 @@ most IEs that a message has and the most memory for an octet:
 | `to_view`, `to_tree`, `from_tree` | 125 | 88 to 117 ms, 49 MB |
 | `from_view`, `with_view` | 240 | 154 to 156 ms, 94 MB |
 | `inspect::paths` | 52 | 72 ms |
-| `inspect::set`, `remove`, `insert` | 125: an edit is made on a copy of the view | 44 ms |
+| `inspect::set`, `remove`, `insert`, `open` | None for the view, which is edited in its place: a copy of each entry of a list that the path goes into | 0.01 ms |
 
 A typed value takes what its type holds, which is more than its octets: the longest
 list of connections of an NG RESET, 65,536 items in 32 KB, is 4.7 MB as its type.
@@ -1179,7 +1179,7 @@ headings that the rows link to.
 | `value`, `decoded` | May be left out of a path. A segment is first a member of the IE or of the transfer itself: `/ngap/Cause/*` is the members of the IE. If a value has a member with one of those names, write `value` before it. Only a bit string whose size varies has such a member, its own `value`, so its path ends in `value/value`. |
 | [Names] | Letters and digits, whatever their case and whatever is between them, for the root, the IEs, the members of a value, the messages and the values of an `ENUMERATED`: `/NGAP/ran_ue_ngap_id` is `/ngap/RAN-UE-NGAP-ID`. |
 | [What is not there] | An IE that the message does not have, an `OPTIONAL` member that is absent and another alternative of a `CHOICE` select nothing. A name that the type cannot have is an error, which lists the members of the value, then those of its IE or transfer. |
-| [Edits] | `set` writes a member by its ASN.1 name, or an alternative of a `CHOICE` in place of the one that is there. `null` or `remove` takes an optional member out, and `insert` adds before the entry that the path selects, or at `-`. An edit that selects nothing is an error, and the view is as it was. |
+| [Edits] | `set` writes a member by its ASN.1 name, or an alternative of a `CHOICE` in place of the one that is there. `null` or `remove` takes an optional member out, and `insert` adds before the entry that the path selects, or at `-`. An edit that selects nothing is an error, and the view is as it was. An edit changes the view in its place: it copies the entries of a list that its path goes into, and not the view. |
 | Octets | What is not edited keeps the octets received. An edit is refused when the value around it does not encode back to them, as with an addition of a later release. The value of an IE or of a transfer is not taken out: the IE is removed, or its `octets` are set. |
 | An IE that is written in a view | `{"id", "criticality", "value"}`, or `octets` in place of `value`. The `id` is a number or a name, and the value has the type of the IE whatever JSON it is. |
 | A transfer that is written | Its decoded value, alone or as `decoded`, or its octets, in hexadecimal or as `octets`. |

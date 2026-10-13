@@ -1364,10 +1364,8 @@ pub(crate) fn open_with(
     decode: &dyn Fn(Value, &str) -> Value,
 ) -> Result<(), Error> {
     let (parts, named) = resolve(path)?;
-    let mut opened = view.clone();
-    let shape = pdu(&opened);
-    apply(&mut opened, shape, &parts, &Edit::Open(decode), named, path)?;
-    *view = opened;
+    let shape = pdu(view);
+    apply(view, shape, &parts, &Edit::Open(decode), named, path)?;
     Ok(())
 }
 
@@ -1407,14 +1405,13 @@ fn edit(view: &mut Value, path: &str, mut operation: Edit) -> Result<(), Error> 
     {
         written_ie(ie)?;
     }
-    let mut edited = view.clone();
-    let shape = pdu(&edited);
-    if apply(&mut edited, shape, &parts, &operation, named, path)? == 0 {
+    let shape = pdu(view);
+    // An edit that changes nothing has changed nothing: the view is as it was.
+    if apply(view, shape, &parts, &operation, named, path)? == 0 {
         return Err(Error::nothing_selected(format!(
             "IE edit selected no field: {path}"
         )));
     }
-    *view = edited;
     Ok(())
 }
 
@@ -1438,8 +1435,36 @@ fn mark(entry: &mut Map<String, Value>, member: &str) {
     }
 }
 
+/// What an edit did to an entry of a list, to take it back.
+enum Done {
+    /// The entry at this position was this value.
+    Was(usize, Value),
+    /// The entry that was at this position was taken out.
+    Removed(usize, Value),
+    /// An entry was added at this position.
+    Added(usize),
+}
+
+/// Take back what an edit did to the entries of `array`, from the last.
+fn undo(array: &mut Vec<Value>, done: Vec<Done>) {
+    for done in done.into_iter().rev() {
+        match done {
+            Done::Was(index, value) => array[index] = value,
+            Done::Removed(index, value) => array.insert(index, value),
+            Done::Added(index) => {
+                array.remove(index);
+            }
+        }
+    }
+}
+
 /// Apply `operation` at `parts` under `view`, a value of `shape`; the number of places
-/// that it changed.
+/// that it changed. An edit that fails leaves `view` as it was.
+///
+/// The view is edited in its place, and no copy of it is made: an edit changes a value
+/// where nothing can fail any more, but under the entries of a list, of which a later
+/// one may refuse the path after an earlier one took the edit. Each entry that the path
+/// goes into is copied before, and put back when the edit fails.
 fn apply(
     view: &mut Value,
     shape: Shape,
@@ -1460,7 +1485,14 @@ fn apply(
         && let Some(carried) = members(shape, None)
         && let Some((name, ..)) = member(&carried, part)
     {
+        // What follows may refuse the path: the octets are then as they were.
+        let octets = view.clone();
         *view = json!({*name: decode(view.take(), name)});
+        let changed = apply(view, shape, parts, operation, named, path);
+        if changed.is_err() {
+            *view = octets;
+        }
+        return changed;
     }
     let members = members(shape, view.as_object());
     // The IEs of a message that the view contains are edited in its place.
@@ -1638,6 +1670,7 @@ fn apply(
         )));
     }
     let mut changed = 0;
+    let mut done = Vec::new();
     for index in indexes.into_iter().rev() {
         if index >= array.len() {
             continue;
@@ -1646,23 +1679,36 @@ fn apply(
         let rest = past_its_name(&array[index], element(shape), rest, named);
         if rest.is_empty() {
             match operation {
-                Edit::Set(value) => array[index] = value.clone(),
-                Edit::Remove => {
-                    array.remove(index);
+                Edit::Set(value) => {
+                    let was = std::mem::replace(&mut array[index], value.clone());
+                    done.push(Done::Was(index, was));
                 }
-                Edit::Insert(value) => array.insert(index, value.clone()),
+                Edit::Remove => done.push(Done::Removed(index, array.remove(index))),
+                Edit::Insert(value) => {
+                    array.insert(index, value.clone());
+                    done.push(Done::Added(index));
+                }
                 Edit::Open(_) => continue,
             }
             changed += 1;
         } else {
-            changed += apply(
-                &mut array[index],
-                element(shape),
-                rest,
-                operation,
-                named,
-                path,
-            )?;
+            let was = array[index].clone();
+            let entry = &mut array[index];
+            match apply(entry, element(shape), rest, operation, named, path) {
+                Ok(here) => {
+                    changed += here;
+                    // An entry that took nothing of the edit is as it was, but for
+                    // octets that were opened in it.
+                    if here > 0 || matches!(operation, Edit::Open(_)) {
+                        done.push(Done::Was(index, was));
+                    }
+                }
+                Err(error) => {
+                    array[index] = was;
+                    undo(array, done);
+                    return Err(error);
+                }
+            }
         }
     }
     Ok(changed)

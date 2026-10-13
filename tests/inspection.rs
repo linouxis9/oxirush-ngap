@@ -1979,6 +1979,51 @@ fn a_member_that_is_absent_selects_nothing_and_one_that_its_type_has_not_is_an_e
 }
 
 #[test]
+fn an_edit_that_fails_after_it_changed_an_ie_leaves_the_view_as_it_was() {
+    use serde_json::json;
+    // UL-NGU-UP-TNLInformation is IE 139, a CHOICE that has no `radioNetwork`, and Cause
+    // IE 15, which has it.
+    let tunnel = json!({"gTPTunnel": {"transportLayerAddress": "10.0.0.1", "gTP-TEID": 7}});
+    let mut view = sent(&[
+        json!({"id": 139, "criticality": "ignore", "value": tunnel}),
+        json!({"id": 15, "criticality": "ignore", "value": {"radioNetwork": "user-inactivity"}}),
+    ])
+    .unwrap();
+    let before = view.clone();
+    // The entries that `*` selects are edited from the last: the cause takes the edit,
+    // and the tunnel, before it, refuses the path.
+    let everywhere = "/ngap/*/value/radioNetwork";
+    let error = inspect::set(&mut view, everywhere, json!("unspecified"))
+        .unwrap_err()
+        .to_string();
+    assert!(
+        error.contains("is not a member of UPTransportLayerInformation"),
+        "{error}"
+    );
+    assert_eq!(view, before);
+    assert!(inspect::remove(&mut view, everywhere).is_err());
+    assert_eq!(view, before);
+    // The cause alone takes it.
+    inspect::set(
+        &mut view,
+        "/ngap/Cause/value/radioNetwork",
+        json!("unspecified"),
+    )
+    .unwrap();
+    let cause = inspect::select(&view, "/ngap/Cause/value/radioNetwork").unwrap();
+    assert_eq!(cause, [&json!("unspecified")]);
+    // An entry that is taken out before another refuses the path is put back where it
+    // was: `0` then names the tunnel again.
+    let mut view = before.clone();
+    let both = view["message"]["protocolIEs"].as_array().unwrap().clone();
+    let entries = view["message"]["protocolIEs"].as_array_mut().unwrap();
+    entries.extend(both);
+    let before = view.clone();
+    assert!(inspect::remove(&mut view, "/ngap/*/Cause").is_err());
+    assert_eq!(view, before);
+}
+
+#[test]
 fn an_edit_names_a_member_that_the_type_has_and_keeps_what_it_always_has() {
     use serde_json::{Value, json};
     let mut view = release_request().to_view().unwrap();

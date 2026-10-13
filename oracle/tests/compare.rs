@@ -1,5 +1,22 @@
-//! The crate against the oracle of its tests: the same types with the codec of rasn,
-//! another implementation of aligned PER. Each vector of the fixtures, and what a peer
+/*
+   OxiRush
+   Copyright 2025-2026 Valentin D'Emmanuele
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+
+//! The crate against its oracle: the same types with the codec of rasn, another
+//! implementation of aligned PER. Each vector of the fixtures, and what a peer
 //! may send in its place, is read and written by both, as a PDU, as its message, and
 //! with the `inspect` feature as each IE and each transfer that a view decodes.
 //!
@@ -7,8 +24,22 @@
 //! JSON form, and what one refuses the other refuses. The bindings differ from the
 //! oracle in one thing, which the comparison names where it meets it: they hold an
 //! INTEGER in 64 bits, where rasn holds a number of any size.
+//!
+//! The tests take the type of a PDU, the message of a PDU as its type and each value
+//! that a view decodes from the module `hooks` of the crate, which it has with the
+//! configuration name of its hooks: cargo sets it when it is run from the directory
+//! of this package. This file is the same for oxirush-ngap and oxirush-s1ap, which it
+//! names `codec`.
 
-use crate::registry::{BorrowedPdu, PDU_TYPE, Pdu, message_read_and_written, message_type_name};
+#[cfg(not(any(oxirush_ngap_hooks, oxirush_s1ap_hooks)))]
+compile_error!(
+    "the crate is built without its hooks: run cargo from the directory of the oracle, whose \
+     .cargo/config.toml sets them, or set RUSTFLAGS to the --cfg that this file names"
+);
+
+use codec::hooks::{
+    BorrowedPdu, PDU_TYPE, Pdu, message_octets, message_octets_both_ways, message_read_and_written,
+};
 
 /// The octets that hexadecimal writes.
 fn unhex(text: &str) -> Vec<u8> {
@@ -29,10 +60,10 @@ fn vectors(file: &str) -> Vec<Vec<u8>> {
 /// The vectors of the fixtures: the messages, the vectors with content, the messages
 /// of a later release, and the PDUs that other implementations sent.
 fn fixtures() -> Vec<Vec<u8>> {
-    let mut fixtures = vectors(include_str!("../tests/fixtures/messages.tsv"));
-    fixtures.extend(vectors(include_str!("../tests/fixtures/vectors.tsv")));
-    fixtures.extend(vectors(include_str!("../tests/fixtures/later.tsv")));
-    fixtures.extend(vectors(include_str!("../tests/fixtures/captured.tsv")));
+    let mut fixtures = vectors(include_str!("../../tests/fixtures/messages.tsv"));
+    fixtures.extend(vectors(include_str!("../../tests/fixtures/vectors.tsv")));
+    fixtures.extend(vectors(include_str!("../../tests/fixtures/later.tsv")));
+    fixtures.extend(vectors(include_str!("../../tests/fixtures/captured.tsv")));
     fixtures
 }
 
@@ -67,7 +98,7 @@ fn variants(octets: &[u8], mut read: impl FnMut(&[u8])) {
 /// which is the octets that it writes of the value or why it reads none, is what the
 /// oracle makes of them. Says whether both read a value.
 #[track_caller]
-fn same(name: &str, octets: &[u8], ours: &Result<Vec<u8>, crate::Error>) -> bool {
+fn same(name: &str, octets: &[u8], ours: &Result<Vec<u8>, codec::Error>) -> bool {
     let ours = ours.as_ref().map(Vec::as_slice);
     oracle::same_octets(name, octets, ours.map_err(ToString::to_string))
 }
@@ -79,15 +110,15 @@ fn pdu_and_message(octets: &[u8]) -> (usize, usize) {
     // `decode` and `encode` take a PDU of the usual layout octet by octet. The codec of
     // the type, which they stand for, gives the same PDU, the same error and the same
     // octets, and so does the PDU that borrows.
-    let as_its_type = oxirush_aper::decode::<BorrowedPdu>(octets);
+    let as_its_type = codec::aper::decode::<BorrowedPdu>(octets);
     assert_eq!(as_its_type, pdu, "{octets:02x?}");
     assert_eq!(BorrowedPdu::decode_borrowed(octets), pdu, "{octets:02x?}");
     if let Ok(pdu) = &pdu {
-        assert_eq!(oxirush_aper::encode(pdu), written, "{pdu:?}");
+        assert_eq!(codec::aper::encode(pdu), written, "{pdu:?}");
         // The protocol IEs of its message are put back octet by octet too.
         if let Ok(ies) = pdu.protocol_ies() {
-            let as_its_type = crate::pdu::message_octets_as_its_type(&ies);
-            assert_eq!(crate::pdu::message_octets(&ies), as_its_type, "{pdu:?}");
+            let (octet_by_octet, as_its_type) = message_octets_both_ways(&ies);
+            assert_eq!(octet_by_octet, as_its_type, "{pdu:?}");
         }
     }
     if !same(PDU_TYPE, octets, &written) {
@@ -97,11 +128,10 @@ fn pdu_and_message(octets: &[u8]) -> (usize, usize) {
         return (0, 0);
     };
     // The message as its type, for a procedure that the protocol has in that direction.
-    let Some(name) = message_type_name(pdu.direction(), pdu.procedure_code()) else {
+    let Some((name, message)) = message_read_and_written(&pdu) else {
         return (1, 0);
     };
-    let message = message_read_and_written(&pdu).unwrap();
-    (1, usize::from(same(name, pdu.value(), &message)))
+    (1, usize::from(same(name, message_octets(&pdu), &message)))
 }
 
 #[test]
@@ -124,7 +154,6 @@ fn a_pdu_and_its_message_are_read_and_written_as_the_oracle_reads_and_writes_the
     );
 }
 
-#[cfg(feature = "inspect")]
 mod values {
     use super::*;
     use serde_json::Value;
@@ -137,7 +166,7 @@ mod values {
 
     /// What a view decoded as the type that the bindings name `name` is what the
     /// oracle reads in the same octets: the same JSON form, or no value for both.
-    fn observed(name: &'static str, octets: &[u8], ours: &Result<Value, crate::Error>) {
+    fn observed(name: &'static str, octets: &[u8], ours: &Result<Value, codec::Error>) {
         let ours = ours.as_ref().map_err(ToString::to_string);
         let read = oracle::same_json(name, octets, ours);
         let (compared, both) = COMPARED.get();
@@ -146,7 +175,7 @@ mod values {
 
     #[test]
     fn each_value_of_a_view_is_what_the_oracle_reads() {
-        crate::inspect::OBSERVER.set(Some(observed));
+        codec::hooks::observe(Some(observed));
         let mut views = 0;
         for (at, fixture) in fixtures().iter().enumerate() {
             // A vector has a view, whose values are compared, and which gives its
@@ -166,7 +195,7 @@ mod values {
                 }
             });
         }
-        crate::inspect::OBSERVER.set(None);
+        codec::hooks::observe(None);
         let (compared, read) = COMPARED.get();
         assert!(
             views > 2_000 && compared > 10_000 && read > 6_000,

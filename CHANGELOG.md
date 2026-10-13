@@ -362,19 +362,20 @@ what each type became.
   modules that the bindings are generated from, `build/extract_asn1.py`
   takes them out of the archive that 3GPP publishes, and the generator reads
   no module that has another digest.
-- An oracle for the tests, in `oracle/`: the same types with the codec of
-  rasn 0.29, another implementation of aligned PER, which the generator
-  writes beside the bindings. The tests give each vector, and what a peer may
-  send in its place, to both, and compare what they read and write: the PDU,
-  the message, and with `inspect` each IE and each transfer of a view. The
-  fuzz targets, in `fuzz/`, which CI runs, make the same comparison on the
-  octets that they find. rasn is a dependency of the tests alone.
-  The crate depends on the oracle by path, so a workspace that has the crate
-  as a member has the oracle as a member too: the oracle has no workspace of
-  its own, and is empty without its feature `rasn`, which the tests and the
-  fuzz targets ask for, so that such a workspace, with the feature resolver
-  2 or 3, builds nothing of rasn until it builds the tests of the crate. `tests/workspace_member.sh` makes such a
-  workspace, and CI has cargo load it and clippy and rustdoc accept it.
+- An oracle, in `oracle/`: the same types with the codec of rasn 0.29,
+  another implementation of aligned PER, which the generator writes beside
+  the bindings. Its tests give each vector and each captured PDU, and what a
+  peer may send in its place, to both, and compare what they read and write:
+  the PDU, the message, and with `inspect` each IE and each transfer of a
+  view. The fuzz targets, in `fuzz/`, which CI runs, make the same comparison
+  on the octets that they find. The oracle is a package of its own, which
+  depends on the crate: the crate does not depend on it, and no build and no
+  test of the crate builds rasn. `cd oracle && cargo test` runs the
+  comparison.
+- The tests of the published package pass from the package alone:
+  `tests/package.sh` has cargo make it and runs them there, and CI runs it.
+  `tests/workspace_member.sh` makes a workspace that has the crate as a
+  member, and CI has cargo load it and clippy and rustdoc accept it.
 
 ### Changed
 

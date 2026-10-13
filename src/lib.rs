@@ -184,8 +184,6 @@ mod message;
 // that the generator runs with: a later one breaks some of their long lines otherwise.
 #[rustfmt::skip]
 pub mod ngap;
-#[cfg(test)]
-mod oracle_tests;
 mod pdu;
 #[doc(hidden)]
 pub mod registry;

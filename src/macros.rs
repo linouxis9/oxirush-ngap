@@ -495,23 +495,11 @@ macro_rules! procedures {
         pub(crate) use $crate::ngap::{
             CauseProtocol, Criticality, CriticalityDiagnosticsIEItem, ProtocolIEID, TypeOfError,
         };
-        #[cfg(any(test, oxirush_ngap_hooks))]
-        #[allow(unused_imports)]
-        pub(crate) use $crate::ngap::NGAP_PDU as Pdu;
-        /// A PDU that borrows its message from the octets that it is decoded from.
-        #[cfg(test)]
-        #[allow(unused_imports)]
-        pub(crate) use $crate::ngap::NGAPPDU as BorrowedPdu;
-        /// The name of the type of a PDU in the bindings.
-        #[cfg(any(test, oxirush_ngap_hooks))]
-        #[allow(dead_code)]
-        pub(crate) const PDU_TYPE: &str = "NGAPPDU";
 
-        /// For the fuzz targets and the tests: the name in the bindings of the type of
-        /// the message of a direction and a procedure code, when the protocol has that
-        /// message.
-        #[cfg(any(test, oxirush_ngap_hooks))]
-        #[allow(dead_code)]
+        /// For the fuzz targets and the tests of the oracle: the name in the bindings of
+        /// the type of the message of a direction and a procedure code, when the
+        /// protocol has that message.
+        #[cfg(oxirush_ngap_hooks)]
         pub(crate) fn message_type_name(direction: &str, code: u8) -> Option<&'static str> {
             match (direction, code) {
                 $($(("InitiatingMessage", $code) => {
@@ -527,11 +515,10 @@ macro_rules! procedures {
             }
         }
 
-        /// For the fuzz targets and the tests: the message of a PDU as its type, read
-        /// and written back, when the protocol has a message for the PDU: the octets
-        /// that it encodes to, or why it does not decode.
-        #[cfg(any(test, oxirush_ngap_hooks))]
-        #[allow(dead_code)]
+        /// For the fuzz targets and the tests of the oracle: the message of a PDU as its
+        /// type, read and written back, when the protocol has a message for the PDU: the
+        /// octets that it encodes to, or why it does not decode.
+        #[cfg(oxirush_ngap_hooks)]
         pub(crate) fn message_read_and_written<'a>(
             pdu: &'a $crate::ngap::NGAPPDU<'_>,
         ) -> Option<Result<Vec<u8>, $crate::Error>> {
@@ -639,7 +626,7 @@ pub(crate) use procedures;
 
 /// The name of a type of the bindings, of its path as the registry writes it: without
 /// the modules before it and the lifetime after it.
-#[cfg(any(test, oxirush_ngap_hooks, feature = "inspect"))]
+#[cfg(any(oxirush_ngap_hooks, feature = "inspect"))]
 pub(crate) fn type_name(path: &'static str) -> &'static str {
     let name = path.rsplit(':').next().unwrap_or(path);
     name.split('<').next().unwrap_or(name).trim()

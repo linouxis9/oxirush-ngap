@@ -1,30 +1,47 @@
-# The oracle of the tests of oxirush-ngap: the same types with the codec of rasn,
-# another implementation of aligned PER. A package of its own, which the tests and
-# the fuzz targets of the crate depend on, and no build of the crate: nothing here is
-# published.
+# The oracle of oxirush-ngap: the same types with the codec of rasn, another
+# implementation of aligned PER, and the tests that compare the crate with it. A
+# package of its own, which depends on the crate: the crate does not depend on it, so
+# no build and no test of the crate builds rasn. Nothing here is published.
 [package]
 name = "oxirush-ngap-oracle"
 version = "0.0.0"
 edition = "2024"
+# The Rust that the crate is built with at least: cargo then takes the versions of the
+# dependencies of rasn that this Rust builds.
+rust-version = "1.88"
 publish = false
 license = "Apache-2.0"
 
-# Support of the tests of the crate: it has no test of its own, which are in the
-# tests of the crate, and nothing documents it. It has no workspace of its own either:
-# the crate depends on it by path, so it is a member of each workspace that the crate
-# is a member of.
+# The library is the oracle, which the tests of `tests/` and the fuzz targets of the
+# crate name `oracle`. It has no unit test, and nothing documents it.
 [lib]
+name = "oracle"
 test = false
 doctest = false
 doc = false
 
-[features]
-# The types and their codec, which the tests of the crate and its fuzz targets ask
-# for. Without it the package is empty: a workspace that has the crate as a member
-# builds nothing of rasn until it builds the tests of the crate, as the feature
-# resolver 2 or 3 gives a package no feature that only the tests of another ask for.
-rasn = ["dep:rasn", "dep:serde_json"]
-
 [dependencies]
-rasn = { version = "0.29.0", default-features = false, features = ["bytes"], optional = true }
-serde_json = { version = "1.0.106", optional = true }
+rasn = { version = "0.29.0", default-features = false, features = ["bytes"] }
+serde_json = "1.0.106"
+
+# The crate that the tests compare with the oracle. The tests that the two protocols
+# share name it `codec`.
+[dev-dependencies]
+codec = { package = "oxirush-ngap", path = "..", features = ["inspect"] }
+hex = "0.4"
+
+# The tests take what they need from the inside of the crate through its module
+# `hooks`, which it has with `--cfg oxirush_ngap_hooks`: `.cargo/config.toml` sets it
+# for a cargo that is run from this directory. `tests/compare.rs`, which the two
+# protocols share, names the one of each.
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(oxirush_ngap_hooks)', 'cfg(oxirush_s1ap_hooks)'] }
+
+# Not a member of a workspace that the crate may be in.
+[workspace]
+
+# oxirush-aper 0.1.0 and oxirush-utils 0.1.0 are not on crates.io yet: until they are
+# published, they come from their repositories.
+[patch.crates-io]
+oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper" }
+oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils" }

@@ -1,10 +1,11 @@
 //! The files that oxirush-ngap and oxirush-s1ap have in common, octet for octet: the
 //! check of a message against its object set, the paths of the inspection, what names
 //! a message and its errors, the oracle of the tests and the comparison with it, the
-//! test of the README, the scripts of the vectors and of the ASN.1, the script that
-//! makes a workspace of the crate, the benchmarks and the fuzz targets. Each crate holds the digest of each file, so that an edit in one
-//! fails here until the file is the same in the other and both record its new digest.
-//! This file is one of them, and the two crates keep it the same too.
+//! test of the README, the scripts of the vectors and of the ASN.1, the scripts that
+//! make a workspace of the crate and that test its package, the benchmarks and the fuzz
+//! targets. Each crate holds the digest of each file, so that an edit in one fails here
+//! until the file is the same in the other and both record its new digest. This file
+//! is one of them, and the two crates keep it the same too.
 //!
 //! The codec, its errors, the JSON forms and the generator of the bindings are not
 //! copied: both crates take them from oxirush-aper.
@@ -25,18 +26,19 @@ const SHARED: &[(&str, u64)] = &[
     ("fuzz/fuzz_targets/paths.rs", 0x68daa1c78c9c02da),
     ("fuzz/fuzz_targets/view.rs", 0xa0e7481987d00ee0),
     ("fuzz/seed.sh", 0x45e3d85c62151ab4),
-    ("fuzz/src/lib.rs", 0x18cd62014301c840),
-    ("oracle/src/lib.rs", 0x791a184a7bb58f34),
+    ("fuzz/src/lib.rs", 0xf381badf0f82d147),
+    ("oracle/src/lib.rs", 0x7418ce8b2e48d747),
     ("oracle/src/per.rs", 0xfcdad4b315ccfb9a),
     ("oracle/src/sized.rs", 0x65f4c1e8ee1593db),
+    ("oracle/tests/codec.rs", 0x5ead793cb4ab1fce),
+    ("oracle/tests/compare.rs", 0xecc3a54e4fc7d64a),
     ("src/check.rs", 0x5b98e6d981442def),
     ("src/error.rs", 0x25ef2a01e092bf28),
     ("src/inspect_paths.rs", 0x4a3d98374f056a4b),
     ("src/message.rs", 0x1cdcc3d36746fb8d),
-    ("src/oracle_tests.rs", 0xbbd6ab7fea937301),
     ("tests/fixtures/dissect.py", 0xdda0b5e438b19794),
     ("tests/fixtures/generate.py", 0x313265374d7367d9),
-    ("tests/oracle_codec.rs", 0x5ead793cb4ab1fce),
+    ("tests/package.sh", 0xd977b5551cb20a17),
     ("tests/readme.rs", 0x8649417b32dae0f4),
     ("tests/workspace_member.sh", 0x5c5436044558f541),
 ];

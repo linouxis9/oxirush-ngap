@@ -153,7 +153,7 @@ pub fn view(octets: &[u8]) {
     let Ok(pdu) = Pdu::decode(octets) else {
         return;
     };
-    hooks::observe(observed);
+    hooks::observe(Some(observed));
     let Ok(view) = pdu.to_view() else {
         // A message that does not decode has no view, and no tree.
         assert!(pdu.to_tree().is_err(), "{pdu:?}");

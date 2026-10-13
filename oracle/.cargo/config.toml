@@ -1,0 +1,4 @@
+# The tests of the oracle take what they need from the inside of the crate through its
+# module `hooks`: a cargo that is run from this directory builds the crate with it.
+[build]
+rustflags = ["--cfg", "oxirush_ngap_hooks"]

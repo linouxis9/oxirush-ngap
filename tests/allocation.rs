@@ -4,8 +4,6 @@
 use std::alloc::{GlobalAlloc, Layout, System};
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use oracle::bindings::CellIDCancelledNRItem;
-use oracle::rasn::{self, prelude::*};
 use oxirush_ngap::aper::{Decode, decode};
 use oxirush_ngap::ngap::{
     CellIDCancelledNR, MBSIntendedServiceAreaList, UEAssociatedLogicalNGConnectionList,
@@ -31,12 +29,6 @@ unsafe impl GlobalAlloc for PeakAllocator {
 
 #[global_allocator]
 static ALLOCATOR: PeakAllocator = PeakAllocator;
-
-/// `CellIDCancelledNR` of the oracle, with the list codec that rasn derives for it in
-/// place of the one that the oracle has.
-#[derive(AsnType, Decode)]
-#[rasn(delegate, size("1..=65535"))]
-struct Derived(#[allow(dead_code)] SequenceOf<CellIDCancelledNRItem>);
 
 /// The most memory that is reserved at once while `read` reads octets that are no
 /// value, and refuses them.
@@ -64,16 +56,6 @@ fn a_claimed_list_length_reserves_no_memory() {
         let cells = reserved_as::<CellIDCancelledNR>(&octets);
         assert!(cells < 64 * 1024, "reserved {cells} bytes");
     }
-    // The list codec of rasn reserves for the count that it reads, as far as the
-    // octets after it have bits: the reader of the crate reserves a little, and grows
-    // the list with the elements that it reads.
-    let octets = after(&[0xff, 0xfe]);
-    let derived = reserved(|| rasn::aper::decode::<Derived>(&octets).is_ok());
-    assert!(
-        derived > 1024 * 1024,
-        "the codec of rasn reserved {derived} bytes"
-    );
-
     // The two lists of SIZE(1..65536) have an unconstrained count: 16383 in two
     // octets, and a fragment of 65536.
     for count in [&[0xbf, 0xff][..], &[0xc4]] {

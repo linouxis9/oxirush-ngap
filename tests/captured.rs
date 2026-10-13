@@ -17,11 +17,10 @@
 
 //! The PDUs of `tests/fixtures/captured.tsv`, which other implementations sent:
 //! Open5GS, free5GC and PacketRusher, captured on the wire. Nothing of them was
-//! written or chosen with this crate. Each is read, written back as the octets that
-//! its sender sent, and compared with what the oracle of the tests, the codec of rasn,
-//! makes of it. With `inspect`, each is the same octets through its tree and through
-//! its view, in which every IE is read with its type, and has the name that tshark
-//! gives it.
+//! written or chosen with this crate. Each is read, and written back as the octets
+//! that its sender sent. With `inspect`, each is the same octets through its tree and
+//! through its view, in which every IE is read with its type, and has the name that
+//! tshark gives it. The tests of `oracle/` compare what the codec of rasn makes of each.
 
 use std::collections::BTreeMap;
 
@@ -85,10 +84,6 @@ fn each_captured_pdu_is_read_and_written_as_the_octets_that_its_sender_sent() {
         let borrowed = NGAP_PDU::decode_borrowed(&captured.octets).unwrap();
         assert_eq!(borrowed, pdu, "{name}");
         assert_eq!(borrowed.encode().unwrap(), captured.octets, "{name}");
-
-        // The oracle reads a PDU in the same octets, and writes the same octets.
-        let both = oracle::same_octets("NGAPPDU", &captured.octets, Ok(&captured.octets));
-        assert!(both, "{name}");
 
         // Its IEs, read whatever its message is and put back, are its message.
         let ies = pdu.protocol_ies().unwrap().into_owned();

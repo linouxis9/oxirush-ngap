@@ -1264,17 +1264,15 @@ S1AP.
 |------|---------------|
 | `tests/aper_vectors.rs` | [The vectors](#the-vectors) of `tests/fixtures`, which pycrate 0.8.1 encoded from the ASN.1 of the specification: the 144 messages of `messages.tsv`, one for each message of each procedure with what is mandatory and nothing else, and the 479 vectors of `vectors.tsv`, which have content. Each decodes to its type and encodes to the same octets, and its truncations and one more octet are refused. |
 | `tests/vectors.rs` | With `inspect`, each vector of `vectors.tsv` is read with the type of each IE, each transfer and each container of a handover, and is the same octets when it is written from its view, from its values alone and from its tree. A message of a later release, in `later.tsv`, is read as the same message without the additions that pycrate gave it. The vectors hold each of the 144 messages and each of the 489 IEs that the registry names, those of the extension containers among them: the messages of `messages.tsv` hold 111 of the IEs. |
-| `tests/captured.rs` | [The captured PDUs](#the-captured-pdus) of `tests/fixtures/captured.tsv`: 177 PDUs that the AMF of Open5GS 2.8.0, the AMF of free5GC 4.2.3 and PacketRusher as gNB sent in lab runs, which nothing of this crate wrote or chose. Each is read with the procedure code and the alternative that its first two octets have, and is written as the octets that were sent, by the PDU that borrows them too. The oracle reads and writes the same, and its protocol IEs are put back as the same octets. With `inspect`, the message has the name that tshark gives the frame, every IE and every transfer of its view is read with its type, and the view, its values alone and its tree give the octets back. |
+| `tests/captured.rs` | [The captured PDUs](#the-captured-pdus) of `tests/fixtures/captured.tsv`: 177 PDUs that the AMF of Open5GS 2.8.0, the AMF of free5GC 4.2.3 and PacketRusher as gNB sent in lab runs, which nothing of this crate wrote or chose. Each is read with the procedure code and the alternative that its first two octets have, and is written as the octets that were sent, by the PDU that borrows them too. Its protocol IEs are put back as the same octets. With `inspect`, the message has the name that tshark gives the frame, every IE and every transfer of its view is read with its type, and the view, its values alone and its tree give the octets back. |
 | `tests/aper_round_trip.rs` | The macros, and the encodings that rasn 0.29 has otherwise than X.691: constrained lists, `UTF8String`, long bit strings, and each string with a length of two octets, as pycrate writes it. A number between the ranges of the root of an extensible constraint. |
 | `tests/errors.rs` | The errors of the typed API, each with its kind and its message: a PDU that is decoded as another message, octets that are no PDU, a value outside its constraint in a function and in each macro, an IE that is absent or does not decode, for a `req` and for an `opt` field, and what each helper refuses. With `inspect`, a test for each kind of error of the JSON forms. |
 | `tests/protocol_ies.rs` | The protocol IEs of each of the 144 messages but the private one, and of each vector, are read from its PDU and put back as the same octets. An IE that the protocol does not have and one that is there twice are kept with their criticality, a message that the macros built has the IEs that it was built with, and the private message is an error. |
 | `tests/check.rs` | What `check()` reports: a message without a mandatory IE, with an IE twice, with an IE of another message, with its IEs out of order and with another criticality is each built by the macros, written from a tree, encoded and decoded, and reported as exactly that. Each of the 144 messages of the fixtures and each vector against its object set, which pycrate has from the ASN.1 too. |
 | `tests/unknown_extensions.rs` | The additions of a later release to an extensible `SEQUENCE` are skipped, and what follows them is read. |
-| `tests/allocation.rs` | Decoding reserves memory for the elements that it reads, not for the count that a length determinant claims, in two octets or in a fragment. The list codec that rasn derives, in the place of the one of the oracle, reserves for the count. |
+| `tests/allocation.rs` | Decoding reserves memory for the elements that it reads, not for the count that a length determinant claims, in two octets or in a fragment. |
 | `tests/inspection.rs` | Each of the 144 messages is the same octets through its view, and through its tree where it has IEs to name. Each path of each selects its value, with and without `value` and `decoded`, and is one that `check_path` takes. Edits, written trees, criticalities, the two IEs that have the type of what they extend, and the identifiers of the registry against the constants of the bindings. |
-| `tests/oracle_codec.rs` | The codecs that the oracle has in the place of those that rasn 0.29 derives: the `SEQUENCE`, the list of a size constraint, and the strings whose length takes two octets. Each gives what the derived codec gives where the two are to agree, and the octets of the clause where they are not. |
 | `tests/shared_files.rs` | The files that this crate shares with `oxirush-s1ap` are as they were last mirrored. |
-| The unit tests of `src/oracle_tests.rs` | The crate against the oracle of `oracle/`, which has the same types with the codec of rasn 0.29, another implementation of aligned PER. Each vector and each captured PDU, its truncations, it with one more octet and with each bit of chosen octets changed is given to both, as a PDU and as its message: both read it and write the same octets, or neither reads it. With `inspect`, each IE and each transfer that a view decodes has the JSON form that the JSON Encoding Rules of rasn give it, but for two bit strings that rasn writes otherwise than X.697 has them. The comparison takes one difference: the bindings hold an `INTEGER` in 64 bits. `decode` and `encode` of a PDU and `set_protocol_ies`, which take the usual layout octet by octet, give the PDU, the error and the octets that the codec of the type gives |
 | The unit tests of the paths | No two names that a path takes can be mistaken for each other. No value has a member with the same name as a member of its IE, except the `value` of a bit string. |
 | The Rust blocks of this page | They compile and run as documentation tests, with the `inspect` feature, and `tests/readme.rs` compares what each prints with the output shown under it. |
 
@@ -1283,18 +1281,30 @@ cargo test --all-features
 cargo test
 ```
 
-The tests run in a checkout of the repository: the oracle is its package
-`oracle/`, which the published crate does not have.
+The package that crates.io holds has these tests and the fixtures that they
+read, and they pass from it alone: `tests/package.sh DIRECTORY` has cargo make
+the package, unpacks it and runs its tests there, with every feature and with
+none, and CI runs it.
 
-The crate depends on the oracle by path, so a workspace that has the crate as
-a member has the oracle as a member too. The oracle has no workspace of its
-own, and is empty without its feature `rasn`, which the tests and the fuzz
-targets ask for: `cargo build --workspace` builds nothing of rasn in such a
-workspace, and `cargo test --workspace` builds the oracle for the tests of
-the crate. This is so with the feature resolver 2 or 3. A workspace of
-resolver 1 gives a package the features that the tests of another ask of
-it, and builds the oracle whole in every build. `tests/workspace_member.sh DIRECTORY [CRATE...]` makes a
-workspace of this crate and of the others that it is given, as
+The comparison with another implementation of aligned PER is in a package of
+its own, `oracle/`, which depends on the crate: the crate does not depend on
+it, so no build and no test of the crate builds rasn, and the published crate
+does not have it. Its tests take what they need from the inside of the crate
+through the module `hooks`, which the crate has with
+`--cfg oxirush_ngap_hooks` and not without: `oracle/.cargo/config.toml` sets it
+for a cargo that is run from that directory.
+
+```bash
+cd oracle && cargo test
+```
+
+| Test | What it holds |
+|------|---------------|
+| `oracle/tests/compare.rs` | The crate against the oracle of `oracle/`, which has the same types with the codec of rasn 0.29, another implementation of aligned PER. Each vector and each captured PDU, its truncations, it with one more octet and with each bit of chosen octets changed is given to both, as a PDU and as its message: both read it and write the same octets, or neither reads it. With `inspect`, each IE and each transfer that a view decodes has the JSON form that the JSON Encoding Rules of rasn give it, but for two bit strings that rasn writes otherwise than X.697 has them. The comparison takes one difference: the bindings hold an `INTEGER` in 64 bits. `decode` and `encode` of a PDU and `set_protocol_ies`, which take the usual layout octet by octet, give the PDU, the error and the octets that the codec of the type gives. |
+| `oracle/tests/codec.rs` | The codecs that the oracle has in the place of those that rasn 0.29 derives: the `SEQUENCE`, the list of a size constraint, and the strings whose length takes two octets. Each gives what the derived codec gives where the two are to agree, and the octets of the clause where they are not. |
+| `oracle/tests/allocation.rs` | The list codec that rasn derives, in the place of the one of the oracle, reserves memory for the count that a length determinant claims, where the crate reserves for the elements that it reads. |
+
+`tests/workspace_member.sh DIRECTORY [CRATE...]` makes a workspace of this crate and of the others that it is given, as
 `oxirush-s1ap` and `oxirush-aper`: cargo loads it, clippy accepts every
 target of every member, and rustdoc documents them. CI runs it with the crate
 alone.
@@ -1387,7 +1397,7 @@ deliberately wrong. The subscribers are test values, 208-93 0000000001 to
 0000000008 with the key of the sample configuration of PacketRusher.
 
 `tests/captured.rs` holds each of them, the comparison with the oracle of
-`src/oracle_tests.rs` gives each to both codecs with its truncations and its
+`oracle/tests/compare.rs` gives each to both codecs with its truncations and its
 changed bits, as it does the vectors, and the corpus of the fuzz targets
 starts from them too. `tests/fixtures/dissect.py` gives them to tshark with
 the vectors: Wireshark 4.6.4 reads the procedure, the alternative of the PDU
@@ -1402,8 +1412,8 @@ Downlink NAS Transport.
 
 `fuzz/` has three [cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets,
 a package of its own that is not published. A target does not only look for a
-panic: it gives its octets to the crate and to the oracle of the tests, the
-same types with the codec of rasn, and compares what the two make of them.
+panic: it gives its octets to the crate and to its oracle, the same types
+with the codec of rasn, and compares what the two make of them.
 CI runs each for a minute, from the vectors and the captured PDUs.
 
 | Target | What holds for any octets |
@@ -1458,7 +1468,7 @@ crate has neither the generator nor the ASN.1.
 | `src/ngap.rs` | The bindings: each type of the ASN.1 with its codec on `oxirush-aper`, its conversions and, with `inspect`, its JSON form, then the flat API, the convenience methods and the `Display` implementation |
 | `src/registry.rs` | The list of the procedures and of the IEs, one line for each: its code or its identifier, its names and its types, and for each message of a procedure the IEs of its object set. The names that the macros take, `NgapPduKind` and the names and the types of `inspect` all expand from it, so each is written once |
 | `src/inspect_registry.rs` | What `inspect` alone needs, with the `inspect` feature: among it the list of the types, one line for each `SEQUENCE` and each `CHOICE` with its members, which the paths are read against, and the types that a handover's containers carry, which the generator has from the prose of the specification |
-| `oracle/src/bindings.rs`, `oracle/src/types.rs` | The oracle of the tests, a package of its own that the tests of the crate build, and the crate does not: the same types with the codec of rasn 0.29, and the list of those that the crate decodes by a name or by an identifier |
+| `oracle/src/bindings.rs`, `oracle/src/types.rs` | The oracle, a package of its own that its tests and the fuzz targets build, and the crate does not: the same types with the codec of rasn 0.29, and the list of those that the crate decodes by a name or by an identifier |
 
 For maintainers, `build/` holds the generator, a package of its own whose
 lockfile pins `rasn-compiler`. What the generators of the two protocols share
@@ -1491,12 +1501,11 @@ of pycrate.
 
 oxirush-ngap and oxirush-s1ap share, octet for octet, the code that does not
 depend on the protocol and is not in `oxirush-aper`: `src/check.rs`,
-`src/error.rs`, `src/inspect_paths.rs`, `src/message.rs`,
-`src/oracle_tests.rs`, the oracle but for its bindings, the tests
-`tests/readme.rs` and `tests/oracle_codec.rs`, the scripts
-`build/extract_asn1.py`, `tests/fixtures/generate.py`,
-`tests/fixtures/dissect.py` and `tests/workspace_member.sh`, and the
-benchmarks and the fuzz targets but for their `protocol.rs`.
+`src/error.rs`, `src/inspect_paths.rs`, `src/message.rs`, the oracle and its
+tests but for its bindings and `oracle/tests/allocation.rs`, the test
+`tests/readme.rs`, the scripts `build/extract_asn1.py`,
+`tests/fixtures/generate.py`, `tests/fixtures/dissect.py`,
+`tests/workspace_member.sh` and `tests/package.sh`, and the benchmarks and the fuzz targets but for their `protocol.rs`.
 `tests/shared_files.rs` holds a digest of each, so that an edit in one crate
 fails its tests until the file is the same in the other and both record the
 new digest.
@@ -1511,7 +1520,7 @@ generated types, and the macros give typed construction, extraction and
 mutation.
 
 What `rasn-compiler` resolves is written twice: as the bindings of the crate,
-and as bindings for rasn 0.29, in `oracle/`, which the tests and the fuzz
+and as bindings for rasn 0.29, in `oracle/`, which its tests and the fuzz
 targets build and the crate does not. Both have the same types by
 construction.
 

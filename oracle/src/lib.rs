@@ -33,13 +33,9 @@
 //! [`read`] decodes octets as a type that it is given by name, and gives the JSON form
 //! of the JSON Encoding Rules of rasn and the octets that rasn writes back.
 //! [`same_octets`] and [`same_json`] compare that with what the crate made of the same
-//! octets, and say where the two differ by design: the tests and the fuzz targets call
-//! them. The bindings themselves are in [`bindings`], for a test that needs a value.
-//!
-//! All of it is behind the feature `rasn`, which the tests and the fuzz targets ask
-//! for: without it the package is empty, and builds nothing of rasn.
-
-#![cfg(feature = "rasn")]
+//! octets, and say where the two differ by design: the tests of this package and the
+//! fuzz targets of the crate call them. The bindings themselves are in [`bindings`],
+//! for a test that needs a value.
 
 #[allow(clippy::all, missing_docs)]
 pub mod bindings;

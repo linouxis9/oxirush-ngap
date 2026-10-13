@@ -83,4 +83,25 @@ fn a_claimed_list_length_reserves_no_memory() {
         let areas = reserved_as::<MBSIntendedServiceAreaList>(&octets);
         assert!(areas < 64 * 1024, "reserved {areas} bytes");
     }
+
+    // A fragment of 65536 connections of four bits each, which is the longest list
+    // that the type has, and the memory that this list takes.
+    let fragment = [&[0xc4][..], &[0x00; 32_768]].concat();
+    let longest = [&fragment[..], &[0x00]].concat();
+    let before = CURRENT.load(Ordering::SeqCst);
+    PEAK.store(before, Ordering::SeqCst);
+    let list = decode::<UEAssociatedLogicalNGConnectionList>(&longest).unwrap();
+    let whole = PEAK.load(Ordering::SeqCst) - before;
+    assert_eq!(list.0.len(), 65_536);
+    drop(list);
+    // Sixteen such fragments (X.691 clause 11.9.3.8) are sixteen times too long a
+    // list. It is refused when the length of
+    // its second fragment is read, with no more memory than the longest list takes,
+    // and not after the 524,288 octets of its elements are read.
+    let beyond = [fragment.repeat(16), vec![0x00]].concat();
+    let refused = reserved_as::<UEAssociatedLogicalNGConnectionList>(&beyond);
+    assert!(
+        refused <= whole,
+        "reserved {refused} bytes, and the longest list takes {whole}"
+    );
 }

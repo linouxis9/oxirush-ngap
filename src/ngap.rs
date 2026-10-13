@@ -42633,6 +42633,10 @@ pub mod ngap_ies {
                 let mut list = Vec::new();
                 loop {
                     let (count, more) = reader.length()?;
+                    let size = list.len().saturating_add(count);
+                    if !more || size > 65536 {
+                        Reader::check_size(size, 1, 65536)?;
+                    }
                     for _ in 0..count {
                         list.push(IntendedServiceAreaCoordinates::decode(reader)?);
                     }
@@ -42640,7 +42644,6 @@ pub mod ngap_ies {
                         break;
                     }
                 }
-                Reader::check_size(list.len(), 1, 65536)?;
                 list
             }))
         }
@@ -88723,6 +88726,10 @@ pub mod ngap_ies {
                 let mut list = Vec::new();
                 loop {
                     let (count, more) = reader.length()?;
+                    let size = list.len().saturating_add(count);
+                    if !more || size > 65536 {
+                        Reader::check_size(size, 1, 65536)?;
+                    }
                     for _ in 0..count {
                         list.push(UEAssociatedLogicalNGConnectionItem::decode(reader)?);
                     }
@@ -88730,7 +88737,6 @@ pub mod ngap_ies {
                         break;
                     }
                 }
-                Reader::check_size(list.len(), 1, 65536)?;
                 list
             }))
         }

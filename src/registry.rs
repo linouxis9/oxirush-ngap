@@ -183,8 +183,8 @@ ies! {
     90 "RRCEstablishmentCause" crate::ngap::RRCEstablishmentCause => RRCEstablishmentCause;
     91 "RRCInactiveTransitionReportRequest" crate::ngap::RRCInactiveTransitionReportRequest => RRCInactiveTransitionReportRequest;
     92 "RRCState" crate::ngap::RRCState => RRCState;
-    93 "SecurityContext" crate::ngap::SecurityContext<'a> => SecurityContext;
-    94 "SecurityKey" crate::ngap::SecurityKey<'a> => SecurityKey;
+    93 "SecurityContext" @key crate::ngap::SecurityContext<'a> => SecurityContext;
+    94 "SecurityKey" @key crate::ngap::SecurityKey<'a> => SecurityKey;
     95 "SerialNumber" crate::ngap::SerialNumber => SerialNumber;
     96 "ServedGUAMIList" crate::ngap::ServedGUAMIList<'a> => ServedGUAMIList;
     98 "SONConfigurationTransferDL" crate::ngap::SONConfigurationTransfer<'a> => SONConfigurationTransferDL;

@@ -6,7 +6,7 @@ use oxirush_aper::{Decode, Encode, Octets, Reader, Writer};
 use crate::Error;
 use crate::check::{Deviation, deviations, object_set};
 use crate::ngap::{Criticality, NGAPPDU, ProtocolIEContainer};
-use crate::registry::procedure_criticality;
+use crate::registry::{KEY_IES, procedure_criticality};
 
 /// The protocol IEs of a message, which the ASN.1 has as a SEQUENCE of one container
 /// of protocol IEs, which a later release may add to: the additions are skipped.
@@ -58,6 +58,14 @@ pub(crate) fn message_octets(ies: &ProtocolIEContainer<'_>) -> Result<Vec<u8>, E
         octets.extend_from_slice(value);
     }
     Ok(octets)
+}
+
+/// Whether the message of a direction and a procedure code may hold a key: its object
+/// set has an IE of a type that holds one. `Debug` of its PDU shows the length of the
+/// octets of the message, and not the octets.
+pub(crate) fn holds_key(direction: &str, code: u8) -> bool {
+    let ies = object_set(direction, code).and_then(|set| set.ies);
+    ies.is_some_and(|ies| ies.iter().any(|(id, ..)| KEY_IES.contains(id)))
 }
 
 /// The octets of the message that has these protocol IEs, as the codec of the type

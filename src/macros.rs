@@ -681,7 +681,7 @@ pub(crate) use presence;
 /// borrows is written with the lifetime `'a`, which the macro declares where it names
 /// the type.
 macro_rules! ies {
-    ($($id:literal $($item:ident)? $name:literal
+    ($($id:literal $($item:ident)? $name:literal $(@ $key:ident)?
         $($ie:ty $(, $contents:ty)? $(=> $own:ident $($alias:ident)*)?)?
         $(where [$($extending:ty: $($extended:ident)+),+])?;
     )*) => {
@@ -717,6 +717,10 @@ macro_rules! ies {
 
         /// The identifier of each IE with the name that ASN.1 gives it after `id-`.
         pub(crate) const IE_NAMES: &[(u16, &str)] = &[$(($id, $name),)*];
+
+        /// The identifiers of the IEs whose type holds a key, which the list marks:
+        /// `Debug` shows the length of the octets of such an IE, and not the octets.
+        pub(crate) const KEY_IES: &[u16] = &[$($({ let _ = stringify!($key); $id },)?)*];
 
         /// The criticality that ASN.1 assigns to each IE that a value holds alone, in a
         /// single container, when its object sets give it one.

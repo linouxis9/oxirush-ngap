@@ -353,6 +353,12 @@ what each type became.
 
 ### Changed
 
+- `Debug` prints no octet of a key. A `SecurityKey`, which is K_gNB or the
+  next hop NH, prints as `SecurityKey(256 bits)`, and so in every value that
+  holds one, as a `SecurityContext`. The octets of an IE whose type holds a
+  key, and those of a message whose object set has such an IE, print as their
+  length: `value: 32 octets`. A tree and a view are the data of a message, and
+  have the key.
 - The examples are named after the protocol, `ngap_build_pdu` where it was
   `build_pdu`, and so are their files: a workspace that has oxirush-ngap and
   oxirush-s1ap as members builds the examples of both, which wrote the

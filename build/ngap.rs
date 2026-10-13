@@ -27,6 +27,35 @@ const CARRIED: &[(&str, &str)] = &[
     ),
 ];
 
+/// The keys of the protocol, of which `Debug` prints no octet: the type of a key, K_gNB
+/// or K_eNB and NH, and the types whose open type holds the value of an IE or a message,
+/// each with what says whether that value may hold a key.
+const KEYS: generator::bindings::Keys<'static> = generator::bindings::Keys {
+    types: &["SecurityKey"],
+    holders: &[
+        (
+            "ProtocolIEField",
+            "crate::registry::KEY_IES.contains(&self.id.0)",
+        ),
+        (
+            "ProtocolExtensionField",
+            "crate::registry::KEY_IES.contains(&self.id.0)",
+        ),
+        (
+            "InitiatingMessage",
+            "crate::pdu::holds_key(\"InitiatingMessage\", self.procedure_code.0)",
+        ),
+        (
+            "SuccessfulOutcome",
+            "crate::pdu::holds_key(\"SuccessfulOutcome\", self.procedure_code.0)",
+        ),
+        (
+            "UnsuccessfulOutcome",
+            "crate::pdu::holds_key(\"UnsuccessfulOutcome\", self.procedure_code.0)",
+        ),
+    ],
+};
+
 pub fn generate_ngap() -> Result<()> {
     // The modules that `build/asn1.sha256` records, and no other.
     let mut files = generator::asn1::modules()?;
@@ -79,7 +108,7 @@ fn post_process(path: &Path, asn_files: &[PathBuf]) -> Result<()> {
     );
 
     // The bindings of the crate, on oxirush-aper.
-    let bindings = generator::bindings::bindings(&resolved)?;
+    let bindings = generator::bindings::bindings(&resolved, KEYS)?;
 
     // The oracle of the tests: the same types, with the codec of rasn and the
     // corrections that it needs.
@@ -97,8 +126,13 @@ fn post_process(path: &Path, asn_files: &[PathBuf]) -> Result<()> {
         .collect::<std::io::Result<Vec<_>>>()?
         .join("\n");
     // The procedures and the IEs, once for the macros and for the inspection.
-    let registry =
-        generator::registry::Registry::read("NGAP", &oracle, &asn, bindings.borrowing.clone())?;
+    let registry = generator::registry::Registry::read(
+        "NGAP",
+        &oracle,
+        &asn,
+        bindings.borrowing.clone(),
+        bindings.keys.clone(),
+    )?;
     let list = registry.list()?;
     let inspection = generator::inspection::generate("NGAP", &oracle, &asn, &registry, CARRIED)?;
     // The types that the crate decodes by a name or an identifier: the oracle decodes

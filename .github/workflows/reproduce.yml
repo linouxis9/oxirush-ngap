@@ -45,9 +45,9 @@ env:
 jobs:
   reproduce:
     name: Bindings and vectors
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # The generated files are formatted with the rustfmt of this version.
       - uses: dtolnay/rust-toolchain@1.88.0
         with:

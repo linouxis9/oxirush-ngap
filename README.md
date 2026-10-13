@@ -118,12 +118,13 @@ numbers, arrays and the types of `oxirush-aper`: `Octets`, `Bits` and
 `oxirush_ngap::aper`: a crate that names them needs no dependency of its own.
 The errors of the codec are those of the runtime: see [Errors](#errors).
 
-`oxirush-aper` 0.1.0 is not on crates.io yet. Until it is, a build takes it
-from its repository:
+`oxirush-aper` 0.1.0 and `oxirush-utils` 0.1.0 are not on crates.io yet.
+Until they are, a build takes them from their repositories:
 
 ```toml
 [patch.crates-io]
 oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper" }
+oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils" }
 ```
 
 The minimum supported Rust version is 1.88.
@@ -1391,9 +1392,10 @@ go tool pprof -top target/criterion/to-view/fixtures/profile/profile.pb
 python3 build_cost.py +1.88.0 --features inspect       # a clean build: its time and its memory
 ```
 
-Until `oxirush-aper` is on crates.io, `build_cost.py` is told where it is:
+Until `oxirush-aper` and `oxirush-utils` are on crates.io, `build_cost.py` is
+told where each is, before the other arguments:
 `--config 'patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"'`
-before the other arguments.
+and the same for `oxirush-utils`.
 
 `--profile-time` runs the benchmark under [pprof](https://crates.io/crates/pprof)
 and writes a CPU profile that `go tool pprof` reads; with `PROFILE=flamegraph`

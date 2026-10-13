@@ -18173,7 +18173,20 @@ pub mod ngap_ies {
             Ok(Self::VALUES[reading.enumerated(value, &Self::NAMES)?])
         }
     }
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for ConfiguredNSSAI {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for ConfiguredNSSAI {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "ConfiguredNSSAI({self})")
+        }
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ConfiguredNSSAI(pub [u8; 128]);
     impl From<[u8; 128]> for ConfiguredNSSAI {
         fn from(value: [u8; 128]) -> Self {
@@ -22665,7 +22678,20 @@ pub mod ngap_ies {
             })
         }
     }
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for EPSTAC {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for EPSTAC {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "EPSTAC({self})")
+        }
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct EPSTAC(pub [u8; 2]);
     impl From<[u8; 2]> for EPSTAC {
         fn from(value: [u8; 2]) -> Self {
@@ -24530,7 +24556,20 @@ pub mod ngap_ies {
             })
         }
     }
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for EmergencyAreaID {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for EmergencyAreaID {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "EmergencyAreaID({self})")
+        }
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct EmergencyAreaID(pub [u8; 3]);
     impl From<[u8; 3]> for EmergencyAreaID {
         fn from(value: [u8; 3]) -> Self {
@@ -28582,7 +28621,20 @@ pub mod ngap_ies {
             })
         }
     }
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for FiveGTMSI {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for FiveGTMSI {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "FiveGTMSI({self})")
+        }
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct FiveGTMSI(pub [u8; 4]);
     impl From<[u8; 4]> for FiveGTMSI {
         fn from(value: [u8; 4]) -> Self {
@@ -30347,7 +30399,20 @@ pub mod ngap_ies {
             Ok(Self(reading.bits(value, 22, 22)?))
         }
     }
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for GTPTEID {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for GTPTEID {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "GTPTEID({self})")
+        }
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct GTPTEID(pub [u8; 4]);
     impl From<[u8; 4]> for GTPTEID {
         fn from(value: [u8; 4]) -> Self {
@@ -37527,10 +37592,23 @@ pub mod ngap_ies {
             })
         }
     }
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for LAC {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for LAC {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "LAC({self})")
+        }
+    }
     #[doc = " J"]
     #[doc = " K"]
     #[doc = " L"]
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct LAC(pub [u8; 2]);
     impl From<[u8; 2]> for LAC {
         fn from(value: [u8; 2]) -> Self {
@@ -43722,7 +43800,20 @@ pub mod ngap_ies {
             })?))
         }
     }
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for MBSSessionFSAID {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for MBSSessionFSAID {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "MBSSessionFSAID({self})")
+        }
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MBSSessionFSAID(pub [u8; 3]);
     impl From<[u8; 3]> for MBSSessionFSAID {
         fn from(value: [u8; 3]) -> Self {
@@ -47181,7 +47272,20 @@ pub mod ngap_ies {
             Ok(Self::VALUES[reading.enumerated(value, &Self::NAMES)?])
         }
     }
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for MMSID {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for MMSID {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "MMSID({self})")
+        }
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MMSID(pub [u8; 1]);
     impl From<[u8; 1]> for MMSID {
         fn from(value: [u8; 1]) -> Self {
@@ -51133,7 +51237,20 @@ pub mod ngap_ies {
             })?))
         }
     }
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for NGRANTraceID {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for NGRANTraceID {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "NGRANTraceID({self})")
+        }
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NGRANTraceID(pub [u8; 8]);
     impl From<[u8; 8]> for NGRANTraceID {
         fn from(value: [u8; 8]) -> Self {
@@ -64890,7 +65007,37 @@ pub mod ngap_ies {
             })
         }
     }
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    /// The MCC and the MNC, as `208-93`. Octets that are no PLMN identity print in hexadecimal.
+    impl core::fmt::Display for PLMNIdentity {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            match oxirush_utils::identity::Plmn::from_ap_octets(self.0) {
+                Ok(plmn) => write!(formatter, "{plmn}"),
+                Err(_) => self
+                    .0
+                    .iter()
+                    .try_for_each(|octet| write!(formatter, "{octet:02x}")),
+            }
+        }
+    }
+    /// The PLMN identity of a PLMN, in the order of the application protocols.
+    impl From<oxirush_utils::identity::Plmn> for PLMNIdentity {
+        fn from(plmn: oxirush_utils::identity::Plmn) -> Self {
+            Self(plmn.to_ap_octets())
+        }
+    }
+    /// The PLMN of a PLMN identity: an error for octets that are none.
+    impl TryFrom<PLMNIdentity> for oxirush_utils::identity::Plmn {
+        type Error = oxirush_utils::identity::Error;
+        fn try_from(identity: PLMNIdentity) -> Result<Self, Self::Error> {
+            Self::from_ap_octets(identity.0)
+        }
+    }
+    impl core::fmt::Debug for PLMNIdentity {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "PLMNIdentity({self})")
+        }
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PLMNIdentity(pub [u8; 3]);
     impl From<[u8; 3]> for PLMNIdentity {
         fn from(value: [u8; 3]) -> Self {
@@ -67828,7 +67975,20 @@ pub mod ngap_ies {
             })
         }
     }
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for PortNumber {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for PortNumber {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "PortNumber({self})")
+        }
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PortNumber(pub [u8; 2]);
     impl From<[u8; 2]> for PortNumber {
         fn from(value: [u8; 2]) -> Self {
@@ -68544,7 +68704,20 @@ pub mod ngap_ies {
             })
         }
     }
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for QoEReference {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for QoEReference {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "QoEReference({self})")
+        }
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct QoEReference(pub [u8; 6]);
     impl From<[u8; 6]> for QoEReference {
         fn from(value: [u8; 6]) -> Self {
@@ -75333,7 +75506,20 @@ pub mod ngap_ies {
             Ok(Self::VALUES[reading.enumerated(value, &Self::NAMES)?])
         }
     }
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for RejectedNSSAIinPLMN {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for RejectedNSSAIinPLMN {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "RejectedNSSAIinPLMN({self})")
+        }
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct RejectedNSSAIinPLMN(pub [u8; 32]);
     impl From<[u8; 32]> for RejectedNSSAIinPLMN {
         fn from(value: [u8; 32]) -> Self {
@@ -75365,7 +75551,20 @@ pub mod ngap_ies {
             Ok(Self(reading.octet_array::<32>(value)?))
         }
     }
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for RejectedNSSAIinTA {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for RejectedNSSAIinTA {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "RejectedNSSAIinTA({self})")
+        }
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct RejectedNSSAIinTA(pub [u8; 32]);
     impl From<[u8; 32]> for RejectedNSSAIinTA {
         fn from(value: [u8; 32]) -> Self {
@@ -76709,7 +76908,20 @@ pub mod ngap_ies {
             })?))
         }
     }
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for SD {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for SD {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "SD({self})")
+        }
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct SD(pub [u8; 3]);
     impl From<[u8; 3]> for SD {
         fn from(value: [u8; 3]) -> Self {
@@ -78383,7 +78595,20 @@ pub mod ngap_ies {
             Ok(Self::VALUES[reading.enumerated(value, &Self::NAMES)?])
         }
     }
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for SST {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for SST {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "SST({self})")
+        }
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct SST(pub [u8; 1]);
     impl From<[u8; 1]> for SST {
         fn from(value: [u8; 1]) -> Self {
@@ -82458,8 +82683,21 @@ pub mod ngap_ies {
             })
         }
     }
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for TAC {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for TAC {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "TAC({self})")
+        }
+    }
     #[doc = " T"]
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TAC(pub [u8; 3]);
     impl From<[u8; 3]> for TAC {
         fn from(value: [u8; 3]) -> Self {
@@ -84299,7 +84537,20 @@ pub mod ngap_ies {
             Ok(Self(reading.octets(value)?))
         }
     }
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for TMGI {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for TMGI {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "TMGI({self})")
+        }
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TMGI(pub [u8; 6]);
     impl From<[u8; 6]> for TMGI {
         fn from(value: [u8; 6]) -> Self {
@@ -86840,7 +87091,20 @@ pub mod ngap_ies {
             Ok(Self(reading.unsigned(value, u64::MIN, u64::MAX)?))
         }
     }
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for TimeStamp {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for TimeStamp {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "TimeStamp({self})")
+        }
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TimeStamp(pub [u8; 4]);
     impl From<[u8; 4]> for TimeStamp {
         fn from(value: [u8; 4]) -> Self {
@@ -94677,7 +94941,20 @@ pub mod ngap_ies {
             Ok(Self(reading.octets(value)?))
         }
     }
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for WarningSecurityInfo {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for WarningSecurityInfo {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "WarningSecurityInfo({self})")
+        }
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct WarningSecurityInfo(pub [u8; 50]);
     impl From<[u8; 50]> for WarningSecurityInfo {
         fn from(value: [u8; 50]) -> Self {
@@ -94709,7 +94986,20 @@ pub mod ngap_ies {
             Ok(Self(reading.octet_array::<50>(value)?))
         }
     }
-    #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+    /// The octets, in hexadecimal.
+    impl core::fmt::Display for WarningType {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            self.0
+                .iter()
+                .try_for_each(|octet| write!(formatter, "{octet:02x}"))
+        }
+    }
+    impl core::fmt::Debug for WarningType {
+        fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            write!(formatter, "WarningType({self})")
+        }
+    }
+    #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct WarningType(pub [u8; 2]);
     impl From<[u8; 2]> for WarningType {
         fn from(value: [u8; 2]) -> Self {

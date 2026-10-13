@@ -37,6 +37,7 @@ members = ["."]
 # from its repository.
 [patch.crates-io]
 oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper" }
+oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils" }
 
 [[bin]]
 name = "decode"

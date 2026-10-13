@@ -196,6 +196,10 @@ pub mod registry;
 /// and the error of the crate is its error: a crate that names them takes them from
 /// here, and needs no dependency on `oxirush-aper` of its own.
 pub use oxirush_aper as aper;
+/// The identities of 3GPP networks as values, of the `oxirush-utils` that this crate
+/// is built with: a `PLMNIdentity` converts to and from its `Plmn`, which has the MCC and
+/// the MNC.
+pub use oxirush_utils::identity;
 
 pub use check::Deviation;
 pub use message::Message;

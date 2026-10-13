@@ -17,7 +17,7 @@ const SHARED: &[(&str, u64)] = &[
     ("benches/benches/codec.rs", 0x904d8a5909d190c1),
     ("benches/benches/heap.rs", 0xffc0849cd2e0625d),
     ("benches/benches/scale.rs", 0xb584eff01e6248fe),
-    ("benches/build_cost.py", 0x16af153b5eb68c84),
+    ("benches/build_cost.py", 0x0df0a0f93f48d4f1),
     ("benches/src/counting.rs", 0x613f75b3dd6a75fd),
     ("benches/src/lib.rs", 0x59c963921d8a9737),
     ("build/extract_asn1.py", 0xd5c10df676fed9aa),
@@ -38,7 +38,7 @@ const SHARED: &[(&str, u64)] = &[
     ("tests/fixtures/generate.py", 0x313265374d7367d9),
     ("tests/oracle_codec.rs", 0x5ead793cb4ab1fce),
     ("tests/readme.rs", 0x8649417b32dae0f4),
-    ("tests/workspace_member.sh", 0xd02f1cb822764ad2),
+    ("tests/workspace_member.sh", 0x5c5436044558f541),
 ];
 
 /// The 64-bit FNV-1a digest of `octets`, without the carriage returns that a checkout

@@ -8,6 +8,7 @@
 //! and cuts none short.
 
 use oxirush_aper::{BitString, Bits};
+use oxirush_utils::identity::Plmn;
 
 use crate::Error;
 use crate::ngap::*;
@@ -26,25 +27,12 @@ fn fits(what: &str, value: u64, bits: u32) -> Result<u64, Error> {
 /// the two or three of `mnc`, each a number from 0 to 9. `None` for an MNC of another
 /// length, and for a digit over 9.
 ///
-/// TS 38.413 clause 9.3.3.5 has two digits in each octet, "bits 4 to 1 of octet n encoding
-/// digit 2n-1" and "bits 8 to 5 of octet n encoding digit 2n", of "3 digits from MCC
-/// followed by either a filler digit plus 2 digits from MNC" or "3 digits from MNC",
-/// where the filler is 1111. So octet 2 has the first digit of a three-digit MNC, and
-/// octet 3 its second and its third: 310-410 is `13 40 01`. This is not the order of
-/// TS 24.008, which a NAS message has, where octet 2 has the third digit of the MNC.
+/// The order is that of TS 38.413 clause 9.3.3.5, which `Plmn::to_ap_octets` of oxirush-utils
+/// writes: octet 2 has the first digit of a three-digit MNC, and octet 3 its second
+/// and its third, so that 310-410 is `13 40 01`. This is not the order of TS 24.008,
+/// which a NAS message has, where octet 2 has the third digit of the MNC.
 pub(crate) fn plmn_octets(mcc: [u8; 3], mnc: &[u8]) -> Option<[u8; 3]> {
-    if mcc.iter().chain(mnc).any(|digit| *digit > 9) {
-        return None;
-    }
-    // The six digits of the clause: a filler stands before an MNC of two digits.
-    let [d1, d2, d3] = mcc;
-    let [d4, d5, d6] = match *mnc {
-        [first, second] => [0x0F, first, second],
-        [first, second, third] => [first, second, third],
-        _ => return None,
-    };
-    // Digit 2n-1 in bits 4 to 1 of octet n, and digit 2n in its bits 8 to 5.
-    Some([d2 << 4 | d1, d4 << 4 | d3, d6 << 4 | d5])
+    Some(Plmn::from_digits(mcc, mnc).ok()?.to_ap_octets())
 }
 
 /// The digits of the MCC and those of the MNC in the octets of a PLMN identity, in the
@@ -52,16 +40,8 @@ pub(crate) fn plmn_octets(mcc: [u8; 3], mnc: &[u8]) -> Option<[u8; 3]> {
 /// for octets that are not a PLMN identity: a half octet is no digit, where it is not
 /// the filler before an MNC of two digits.
 pub(crate) fn plmn_digits(octets: [u8; 3]) -> Option<(String, String)> {
-    let [first, second, third] = octets;
-    let mcc = [first & 0x0F, first >> 4, second & 0x0F];
-    let mnc = [second >> 4, third & 0x0F, third >> 4];
-    let mnc = mnc.strip_prefix(&[0x0F]).unwrap_or(&mnc);
-    let digits = |digits: &[u8]| {
-        let digits = digits.iter();
-        let digits = digits.map(|digit| char::from_digit((*digit).into(), 10));
-        digits.collect::<Option<String>>()
-    };
-    Some((digits(&mcc)?, digits(mnc)?))
+    let plmn = Plmn::from_ap_octets(octets).ok()?;
+    Some((plmn.mcc().to_string(), plmn.mnc().to_string()))
 }
 
 /// The digits that `text` is, when it is ASCII digits alone.

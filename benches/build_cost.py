@@ -11,10 +11,12 @@ named. The files that Git tracks are copied to a temporary directory, under
 `TMPDIR`, and built there with a target directory of its own: no workspace
 that the crate is in takes part, and nothing is compiled already. The
 dependencies are fetched before the build is timed, with the `--config KEY=VALUE`
-of the arguments: until oxirush-aper is on crates.io, one says where it is.
+of the arguments: until oxirush-aper and oxirush-utils are on crates.io, one
+for each says where it is.
 
     APER='patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"'
-    python3 benches/build_cost.py --config "$APER" --features inspect
+    UTILS='patch.crates-io.oxirush-utils.git="https://github.com/linouxis9/oxirush-utils"'
+    python3 benches/build_cost.py --config "$APER" --config "$UTILS" --features inspect
 
 The peak is the summed resident memory of cargo and of the compilers that it
 runs, sampled four times a second from `/proc`, so it needs Linux. On a

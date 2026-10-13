@@ -36,8 +36,11 @@ env:
   CARGO_TERM_COLOR: always
   # As in the CI workflow: the tests need no debug information.
   CARGO_PROFILE_DEV_DEBUG: 0
-  # oxirush-aper 0.1.0 is not on crates.io yet: take it from its repository.
-  APER: --config patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"
+  # oxirush-aper 0.1.0 and oxirush-utils 0.1.0 are not on crates.io yet: take
+  # them from their repositories.
+  UNPUBLISHED: >-
+    --config patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"
+    --config patch.crates-io.oxirush-utils.git="https://github.com/linouxis9/oxirush-utils"
 
 jobs:
   reproduce:
@@ -77,6 +80,6 @@ jobs:
           "$RUNNER_TEMP/venv/bin/python" tests/fixtures/generate.py --values "$RUNNER_TEMP/values.jsonl"
           git diff --exit-code -- tests/fixtures
       - name: The values of pycrate, which the crate writes to the octets of pycrate
-        run: cargo test $APER --features inspect --test vectors -- --ignored
+        run: cargo test $UNPUBLISHED --features inspect --test vectors -- --ignored
         env:
           REFERENCE_VALUES: ${{ runner.temp }}/values.jsonl

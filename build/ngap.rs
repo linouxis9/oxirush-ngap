@@ -108,7 +108,7 @@ fn post_process(path: &Path, asn_files: &[PathBuf]) -> Result<()> {
     );
 
     // The bindings of the crate, on oxirush-aper.
-    let bindings = generator::bindings::bindings(&resolved, KEYS)?;
+    let bindings = generator::bindings::bindings(&resolved, KEYS, &["PLMNIdentity"])?;
 
     // The oracle of the tests: the same types, with the codec of rasn and the
     // corrections that it needs.

@@ -621,6 +621,14 @@ impl Form {
                 })?;
                 Ok(Value::String(hex(&octets)))
             }
+            // Without a hyphen it is its three octets: what is neither says both forms,
+            // where the codec would say that it is no octets.
+            Self::Plmn if text.len() != 6 || !text.bytes().all(|b| b.is_ascii_hexdigit()) => {
+                Err(Error::value(format!(
+                    "{text}: a PLMN identity is MCC-MNC, as 208-93, or its three octets in \
+                     hexadecimal"
+                )))
+            }
             Self::Digits if all_digits(text) => {
                 let pairs = bcd(text);
                 let pairs = pairs.chunks(2);

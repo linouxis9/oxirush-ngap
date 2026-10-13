@@ -1566,8 +1566,8 @@ fn a_path_that_names_nothing_is_refused_and_changes_nothing() {
     }
     for (path, reason) in [
         ("/ngap/NoSuchIE/value", "is not an IE of NGAP"),
-        ("/ngap/GUAMI/value", "selected no field"),
-        ("/ngap/7/value", "selected no field"),
+        ("/ngap/GUAMI/value", "an edit changes what is there"),
+        ("/ngap/7/value", "an edit changes what is there"),
     ] {
         let error = inspect::set(&mut view, path, json!(1))
             .unwrap_err()
@@ -1685,7 +1685,7 @@ fn null_takes_an_optional_member_out_and_a_transfer_has_its_octets() {
     let error = inspect::set(&mut edited, &sd, Value::Null)
         .unwrap_err()
         .to_string();
-    assert!(error.contains("selected no field"), "{error}");
+    assert!(error.contains("an edit changes what is there"), "{error}");
     // The octets of a transfer are selected and set as those of an IE are.
     let octets = format!("{transfer}/octets");
     let received = inspect::select(&view, &octets).unwrap()[0].clone();

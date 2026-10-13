@@ -1090,7 +1090,7 @@ fn advance_all<'a>(
         }
         if next.len() > OCCURRENCES {
             return Err(Error::limit(format!(
-                "IE selection exceeds {OCCURRENCES} occurrences"
+                "a path selects {OCCURRENCES} values at most, and {path} selects more"
             )));
         }
     }
@@ -1409,7 +1409,7 @@ fn edit(view: &mut Value, path: &str, mut operation: Edit) -> Result<(), Error> 
     // An edit that changes nothing has changed nothing: the view is as it was.
     if apply(view, shape, &parts, &operation, named, path)? == 0 {
         return Err(Error::nothing_selected(format!(
-            "IE edit selected no field: {path}"
+            "nothing is at {path}: an edit changes what is there"
         )));
     }
     Ok(())
@@ -1666,7 +1666,7 @@ fn apply(
     };
     if indexes.len() > OCCURRENCES {
         return Err(Error::limit(format!(
-            "IE edit selects more than {OCCURRENCES} occurrences"
+            "an edit changes {OCCURRENCES} entries at most, and {path} selects more"
         )));
     }
     let mut changed = 0;

@@ -164,6 +164,8 @@
 //! its IEs are octets until one is read, and the JSON forms of the `inspect` feature
 //! show an IE that does not decode as the octets received, and write them back.
 
+#![forbid(unsafe_code)]
+
 extern crate alloc;
 
 mod check;

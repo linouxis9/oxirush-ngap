@@ -785,6 +785,29 @@ mod inspect_errors {
             plmn.to_string(),
             "20-93: a PLMN identity is MCC-MNC, as 208-93"
         );
+        // Without a hyphen it is its three octets: what is neither says both forms.
+        for neither in ["20893", "2089", "208 93", "20893g"] {
+            let plmn = setup(
+                json!(neither),
+                json!({"gNB-ID": {"value": "000004", "length": 22}}),
+            )
+            .unwrap_err();
+            assert_eq!(plmn.kind(), ErrorKind::Value);
+            assert_eq!(
+                plmn.to_string(),
+                format!(
+                    "{neither}: a PLMN identity is MCC-MNC, as 208-93, or its three octets in \
+                     hexadecimal"
+                )
+            );
+        }
+        assert!(
+            setup(
+                json!("02F839"),
+                json!({"gNB-ID": {"value": "000004", "length": 22}})
+            )
+            .is_ok()
+        );
         let member = setup(json!("208-93"), json!(5)).unwrap_err();
         assert_eq!(member.kind(), ErrorKind::Value);
         assert_eq!(

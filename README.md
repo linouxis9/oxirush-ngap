@@ -1185,6 +1185,7 @@ headings that the rows link to.
 | A transfer that is written | Its decoded value, alone or as `decoded`, or its octets, in hexadecimal or as `octets`. |
 | A tree that is written | The name of the message gives the procedure code, the direction and the criticalities. An IE says its `criticality` where no table has it: when the message does not have it, in a message that a transfer contains, and in an extension container. |
 | What does not decode | An IE or a transfer that is unknown, does not decode or is nested deeper than 64 levels stays octets beside a `_decode_error`, and the rest of the PDU is read. |
+| A procedure that the specification does not have | Its view has the IEs of its message, each read with the type of its identifier, and is edited and sent as any view is. It has no tree: a tree names its message. |
 | [Octets that carry a type] | The container of a handover is written as `{NAME: VALUE}` by the name of its type, and read once [`open`] decoded it in the view. |
 | [`check_path`], [`enumerated_at`] | Read a path against the types of a message of a name, without a view: under `/ngap`, the IE is one of the object set of the message. |
 
@@ -1219,7 +1220,7 @@ The methods and the functions of the JSON forms have these kinds, and two of the
 
 | Kind | When |
 |------|------|
-| `UnknownMessage` | A name of a message, or a direction and a procedure code, that the protocol does not have |
+| `UnknownMessage` | A name of a message that the protocol does not have, and the tree of a PDU whose direction and procedure code the protocol does not have |
 | `UnknownIe` | A name or an identifier of an IE that the protocol does not have, or has no type for where it is: its octets are written in its place |
 | `Path` | A path that is not well formed: no `/` before its first segment, `~` before what is no `0` and no `1`, `@id=` before what is no identifier |
 | `NoSuchMember` | A name that the type at that place cannot have: in a path, a member of a value, an IE of the object set of a message, a name where a list goes by position; in a value that is written, a member that its type does not have |

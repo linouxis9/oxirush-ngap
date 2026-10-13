@@ -400,14 +400,17 @@ pub fn item_criticality(id: u16) -> Option<&'static str> {
     item.map(|(_, criticality)| *criticality)
 }
 
-/// The functions of the type of the message of a direction and a procedure code.
-fn message_type(direction: &str, code: u8) -> Result<Typed, Error> {
+/// The functions of the type of the message of a direction and a procedure code. A
+/// procedure that the specification does not have in that direction has no type of its
+/// own: its message is read and written as what every message of the protocol but the
+/// private one is, a container of protocol IEs and nothing else.
+fn message_type(direction: &str, code: u8) -> Typed {
     let mut messages = registry::MESSAGES.iter();
     let message = messages.find(|(of, procedure, ..)| *procedure == code && *of == direction);
-    let protocol = registry::PROTOCOL;
-    message.map(|(_, _, _, typed, ..)| typed()).ok_or_else(|| {
-        Error::unknown_message(format!("{protocol} has no {direction} of procedure {code}"))
-    })
+    message.map_or_else(
+        || typed!(crate::ngap::ErrorIndication<'a>),
+        |(_, _, _, typed, ..)| typed(),
+    )
 }
 
 /// The value of the type `T` that the octets `raw` are, in its JSON form. `name` is the
@@ -1177,7 +1180,7 @@ impl NGAPPDU<'_> {
         collapse(&mut message, "", 0, message_shape(direction, code))?;
         let raw = if let Some(original) = received {
             let original = unhex(original)?;
-            let typed = message_type(direction, code)?;
+            let typed = message_type(direction, code);
             let decoded = (typed.decode)(&original)?;
             if decoded == message {
                 original
@@ -1190,7 +1193,7 @@ impl NGAPPDU<'_> {
                 (typed.encode)(&message)?
             }
         } else {
-            (message_type(direction, code)?.encode)(&message)?
+            (message_type(direction, code).encode)(&message)?
         };
         let criticality = json::from_value(criticality)?;
         let value = Octets::owned(raw);
@@ -1202,8 +1205,12 @@ impl NGAPPDU<'_> {
     /// The functions of [`inspect`](crate::inspect) read and edit it by paths, and its
     /// documentation says what a view has.
     ///
-    /// An error when the message does not decode, and for a procedure that the
-    /// specification does not have in that direction.
+    /// An error when the message does not decode. A procedure that the specification
+    /// does not have in that direction has a view too: its message is read as a container
+    /// of protocol IEs, which every message of the protocol but the private one is, and
+    /// each IE with the type of its identifier, as
+    /// [`protocol_ies`](Self::protocol_ies) reads them whatever the message is. It has
+    /// no tree, which names its message.
     ///
     /// A view takes up to 125 octets of memory for each octet of the NGAP_PDU, and
     /// [`with_view`](Self::with_view) twice that: 49 MB and 94 MB for a message of 65,535
@@ -1223,7 +1230,7 @@ impl NGAPPDU<'_> {
     pub fn to_view(&self) -> Result<Value, Error> {
         let (direction, code) = (self.direction(), self.procedure_code());
         let raw: &[u8] = self.value();
-        let mut message = (message_type(direction, code)?.decode)(raw)?;
+        let mut message = (message_type(direction, code).decode)(raw)?;
         expand(&mut message, 0, message_shape(direction, code));
         let mut view = Map::new();
         view.insert("procedure_code".into(), code.into());

@@ -1979,6 +1979,54 @@ fn a_member_that_is_absent_selects_nothing_and_one_that_its_type_has_not_is_an_e
 }
 
 #[test]
+fn a_procedure_that_the_specification_does_not_have_has_a_view_of_its_ies() {
+    use oxirush_ngap::ErrorKind;
+    use serde_json::json;
+    // The message of a UE CONTEXT RELEASE REQUEST, under a procedure code that the
+    // specification does not have: the second octet of a PDU.
+    let mut octets = release_request().encode().unwrap();
+    octets[1] = 200;
+    let pdu = NGAP_PDU::decode(&octets).unwrap();
+    assert_eq!(pdu.procedure_code(), 200);
+    let mut view = pdu.to_view().unwrap();
+    assert_eq!(view["procedure_code"], 200);
+    assert_eq!(view["direction"], "InitiatingMessage");
+    // Each IE is read with the type of its identifier, and has its name.
+    let id = inspect::select(&view, "/ngap/RAN-UE-NGAP-ID/value").unwrap();
+    assert_eq!(id, [&json!(7)]);
+    let paths = inspect::paths(&view);
+    assert!(
+        paths.contains(&("/ngap/AMF-UE-NGAP-ID/value".to_string(), json!(1))),
+        "{paths:?}"
+    );
+    // The view is the PDU, and an edit of it is sent under the same procedure code.
+    assert_eq!(pdu.with_view(&view).unwrap(), pdu);
+    assert_eq!(
+        NGAP_PDU::from_view(&view).unwrap().encode().unwrap(),
+        octets
+    );
+    inspect::set(&mut view, "/ngap/RAN-UE-NGAP-ID/value", json!(9)).unwrap();
+    let edited = pdu.with_view(&view).unwrap();
+    assert_eq!(edited.procedure_code(), 200);
+    let again = edited.to_view().unwrap();
+    let id = inspect::select(&again, "/ngap/RAN-UE-NGAP-ID/value").unwrap();
+    assert_eq!(id, [&json!(9)]);
+    // A view that is written by hand, without what a view keeps of what was received.
+    let written = json!({
+        "procedure_code": 200, "direction": "InitiatingMessage", "criticality": "ignore",
+        "message": {"protocolIEs": [{"id": 85, "criticality": "reject", "value": 9}]},
+    });
+    let written = NGAP_PDU::from_view(&written).unwrap();
+    assert_eq!(written.protocol_ies().unwrap().0.len(), 1);
+    // It has no tree, which names its message.
+    assert_eq!(pdu.to_tree().unwrap_err().kind(), ErrorKind::UnknownMessage);
+    // A message that is no container of protocol IEs does not decode, and has no view:
+    // one IE is claimed, and none is there.
+    let pdu = NGAP_PDU::decode(&[0x00, 200, 0x00, 0x03, 0x00, 0x00, 0x01]).unwrap();
+    assert!(pdu.to_view().is_err());
+}
+
+#[test]
 fn an_edit_that_fails_after_it_changed_an_ie_leaves_the_view_as_it_was() {
     use serde_json::json;
     // UL-NGU-UP-TNLInformation is IE 139, a CHOICE that has no `radioNetwork`, and Cause

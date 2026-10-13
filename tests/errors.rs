@@ -550,17 +550,15 @@ mod inspect_errors {
             "\"NoSuchMessage\" is not a message of NGAP"
         );
 
-        // A procedure that the specification does not have, in a PDU and in a view.
-        let error = of_no_procedure().to_view().unwrap_err();
+        // A procedure that the specification does not have has no tree, which names
+        // its message. It has a view, of the IEs of its message.
+        let error = of_no_procedure().to_tree().unwrap_err();
         assert_eq!(error.kind(), ErrorKind::UnknownMessage);
         assert_eq!(
             error.to_string(),
             "NGAP has no InitiatingMessage of procedure 200"
         );
-        assert_eq!(kind(of_no_procedure().to_tree()), ErrorKind::UnknownMessage);
-        let mut view = view();
-        view["procedure_code"] = json!(200);
-        assert_eq!(kind(NGAP_PDU::from_view(&view)), ErrorKind::UnknownMessage);
+        assert!(of_no_procedure().to_view().is_ok());
     }
 
     #[test]

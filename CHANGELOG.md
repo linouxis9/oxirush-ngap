@@ -169,13 +169,27 @@ what each type became.
   the set does not have (`UnexpectedIe`), one that is there twice
   (`RepeatedIe`), one that comes after an IE that the set has after it
   (`OutOfOrder`), a criticality that is not the assigned one
-  (`IeCriticality`) and a mandatory IE that is missing (`MissingIe`), each
-  with the identifier, the name and the position of the IE, and with a
-  sentence as its `Display`. It refuses nothing: a message that deviates is
+  (`IeCriticality`), a mandatory IE that is missing (`MissingIe`) and an IE
+  whose value does not decode as its type (`UndecodableIe`), each with the
+  identifier, the name, the position and the criticality of the IE, and with
+  a sentence as its `Display`. It refuses nothing: a message that deviates is
   built, written from a tree, encoded and decoded as before, for the tests
   that send one. A conditional IE is not reported, as its condition is in
   the prose of TS 38.413, and the IEs that a value holds are not looked at.
   0.4.2 left all of it to the caller.
+- What a receiver answers a message that deviates with, as clause 10 of
+  TS 38.413 has it: `deviation.cause()` is the protocol cause, a transfer
+  syntax error for an IE that does not decode, an abstract syntax error by
+  its criticality for an IE that the message cannot have or that is missing,
+  and a falsely constructed message for an IE that is there twice or in a
+  wrong order. `deviation.diagnostics_item()` is the item of the Criticality
+  Diagnostics, from `deviation.ie()` and `deviation.type_of_error()`.
+- An error of the macros is about an IE, and says which: `error.ie()` has the
+  identifier of the IE that is missing, with the criticality that the object
+  set assigns it, or of the IE that does not decode, with the criticality
+  that it was received with and its position. `Deviation::of(&error)` is the
+  deviation that `check()` reports for it. The macro that extracts stops at
+  the first such IE, and `check()` has them all.
 - `pdu.protocol_ies()` and `pdu.set_protocol_ies(ies)`: the protocol IEs of
   the message of a PDU, whatever the message is, and the same PDU with other
   IEs. The first gives the `ProtocolIEContainer` of the bindings, with each

@@ -6,7 +6,7 @@ use oxirush_aper::{Decode, Encode, Octets, Reader, Writer};
 use crate::Error;
 use crate::check::{Deviation, deviations, object_set};
 use crate::ngap::{Criticality, NGAPPDU, ProtocolIEContainer};
-use crate::registry::{KEY_IES, procedure_criticality};
+use crate::registry::{KEY_IES, decodes, procedure_criticality};
 
 /// The protocol IEs of a message, which the ASN.1 has as a SEQUENCE of one container
 /// of protocol IEs, which a later release may add to: the additions are skipped.
@@ -58,6 +58,27 @@ pub(crate) fn message_octets(ies: &ProtocolIEContainer<'_>) -> Result<Vec<u8>, E
         octets.extend_from_slice(value);
     }
     Ok(octets)
+}
+
+/// The criticality of the bindings is that of oxirush-aper, which an error has.
+impl From<Criticality> for oxirush_aper::Criticality {
+    fn from(criticality: Criticality) -> Self {
+        match criticality {
+            Criticality::reject => Self::Reject,
+            Criticality::ignore => Self::Ignore,
+            Criticality::notify => Self::Notify,
+        }
+    }
+}
+
+impl From<oxirush_aper::Criticality> for Criticality {
+    fn from(criticality: oxirush_aper::Criticality) -> Self {
+        match criticality {
+            oxirush_aper::Criticality::Reject => Self::reject,
+            oxirush_aper::Criticality::Ignore => Self::ignore,
+            oxirush_aper::Criticality::Notify => Self::notify,
+        }
+    }
 }
 
 /// Whether the message of a direction and a procedure code may hold a key: its object
@@ -244,6 +265,7 @@ impl<'a> NGAPPDU<'a> {
     /// | `OutOfOrder` | An IE that comes after one that the object set has after it |
     /// | `IeCriticality` | A criticality of an IE that is not the one that the object set assigns it |
     /// | `MissingIe` | An IE whose presence is mandatory, and that the message does not have |
+    /// | `UndecodableIe` | An IE of the object set whose value does not decode as its type |
     ///
     /// The criticality of the PDU comes first, then what each IE deviates in, in the
     /// order of the message, then the IEs that are missing, in the order of the object
@@ -265,13 +287,19 @@ impl<'a> NGAPPDU<'a> {
     /// let deviations = received.check()?;
     /// assert_eq!(deviations.len(), 2);
     /// assert!(matches!(deviations[0], Deviation::OutOfOrder { id: 10, after: 85, .. }));
-    /// assert_eq!(deviations[1], Deviation::MissingIe { id: 15, name: "Cause" });
+    /// assert!(matches!(deviations[1], Deviation::MissingIe { id: 15, name: "Cause", .. }));
     /// assert_eq!(
     ///     deviations[1].to_string(),
     ///     "Cause (IE 15) is mandatory, and the message does not have it"
     /// );
     /// # Ok::<(), oxirush_ngap::Error>(())
     /// ```
+    ///
+    /// A deviation says what the receiver of the message answers: the cause of
+    /// [`Deviation::cause`], and for the Criticality Diagnostics the item of
+    /// [`Deviation::diagnostics_item`]. The macro that extracts the IEs of a message
+    /// stops at the first IE that is missing or does not decode; `check` has them all,
+    /// and [`Deviation::of`] gives the deviation of the error of that macro.
     ///
     /// It reports, and refuses nothing. The macros build a message whatever its IEs
     /// are, a tree writes one, and the codec encodes and decodes it: a test of what a
@@ -285,8 +313,9 @@ impl<'a> NGAPPDU<'a> {
     ///
     /// - a conditional IE, which is reported neither when it is missing nor when it is
     ///   there: its condition is in the prose of the specification;
-    /// - the values of the IEs, and the IEs that a value holds, in a list, in a transfer
-    ///   or in an extension container;
+    /// - the IEs that a value holds, in a list, in a transfer or in an extension
+    ///   container: the value of an IE of the message is decoded as its type, and what
+    ///   it holds as octets is not;
     /// - the IEs of the private message, which has no object set: the criticality of its
     ///   PDU alone is compared.
     ///
@@ -312,8 +341,18 @@ impl<'a> NGAPPDU<'a> {
         }
         if let Some(set) = message.ies {
             let ies = self.protocol_ies()?;
-            let ies: Vec<_> = ies.0.iter().map(|ie| (ie.id.0, ie.criticality)).collect();
-            deviations(set, &ies, &mut found);
+            let listed: Vec<_> = ies.0.iter().map(|ie| (ie.id.0, ie.criticality)).collect();
+            // Why the value of the IE at a position does not decode, as the macro that
+            // extracts it says it.
+            let undecodable = |position: usize| {
+                let ie = &ies.0[position];
+                let error = decodes(ie.id.0, &ie.value)?.err()?;
+                let (id, criticality) = (ie.id.0, ie.criticality);
+                let error =
+                    crate::error::undecodable_ie(error, message.name, id, criticality, position);
+                Some(error)
+            };
+            deviations(set, &listed, &undecodable, &mut found);
         }
         Ok(found)
     }

@@ -86,6 +86,7 @@ fn a_mandatory_ie_that_is_missing_is_reported() -> Result<(), Error> {
     let missing = Deviation::MissingIe {
         id: 15,
         name: "Cause",
+        criticality: Criticality::ignore,
     };
     assert_eq!(checked(&pdu, tree), [missing]);
     Ok(())
@@ -136,6 +137,7 @@ fn an_ie_of_another_message_is_reported() -> Result<(), Error> {
         id: 107,
         name: Some("TimeToWait"),
         position: 2,
+        criticality: Criticality::ignore,
     };
     assert_eq!(checked(&pdu, tree), [unexpected]);
     Ok(())

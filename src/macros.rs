@@ -289,17 +289,21 @@ impl __Message {
 }
 
 /// For the macro that extracts IEs: the IE `id`, which the field `field` requires, is
-/// not in a message of the type `message`.
+/// not in a message of the type `M`.
 #[doc(hidden)]
-pub fn __missing_ie(message: &str, id: u16, field: &str) -> Error {
-    Error::__missing_ie(message, &crate::error::ie(id), field)
+pub fn __missing_ie<'a, M: Message<'a>>(id: u16, field: &str) -> Error {
+    crate::error::missing_ie::<M>(id, field)
 }
 
-/// For the macros that read an IE: `error` is why the IE `id` of a message of the type
-/// `message` does not decode.
+/// For the macros that read an IE: `error` is why `ie`, at `position` of a message of
+/// the type `M`, does not decode.
 #[doc(hidden)]
-pub fn __undecodable_ie(error: Error, message: &str, id: u16) -> Error {
-    error.__undecodable_ie(message, &crate::error::ie(id))
+pub fn __undecodable_ie<'a, M: Message<'a>>(
+    error: Error,
+    ie: &ProtocolIEField<'_>,
+    position: usize,
+) -> Error {
+    crate::error::undecodable_ie(error, M::NAME, ie.id.0, ie.criticality, position)
 }
 
 /// For the macro that builds a PDU: `M` is the message that the procedure of `P` has
@@ -473,7 +477,9 @@ macro_rules! procedures {
         }
 
         /// The types of the bindings that the code which the two protocols share names.
-        pub(crate) use $crate::ngap::Criticality;
+        pub(crate) use $crate::ngap::{
+            CauseProtocol, Criticality, CriticalityDiagnosticsIEItem, ProtocolIEID, TypeOfError,
+        };
         #[cfg(any(test, fuzzing))]
         #[allow(unused_imports)]
         pub(crate) use $crate::ngap::NGAP_PDU as Pdu;
@@ -718,6 +724,21 @@ macro_rules! ies {
         /// The identifier of each IE with the name that ASN.1 gives it after `id-`.
         pub(crate) const IE_NAMES: &[(u16, &str)] = &[$(($id, $name),)*];
 
+        /// Whether `octets`, the value of the IE `id`, decode as the type that the list
+        /// gives the IE: the error of the codec when they do not, and `None` for an
+        /// identifier that has no one type.
+        pub(crate) fn decodes<'a>(id: u16, octets: &'a [u8]) -> Option<Result<(), $crate::Error>> {
+            match id {
+                $($(
+                    $id => {
+                        let value: Result<$ie, $crate::Error> = $crate::aper::decode(octets);
+                        Some(value.map(drop))
+                    }
+                )?)*
+                _ => None,
+            }
+        }
+
         /// The identifiers of the IEs whose type holds a key, which the list marks:
         /// `Debug` shows the length of the octets of such an IE, and not the octets.
         pub(crate) const KEY_IES: &[u16] = &[$($({ let _ = stringify!($key); $id },)?)*];
@@ -863,7 +884,7 @@ macro_rules! extract_ngap_ies {
             let mut $name: ::core::option::Option<::core::result::Result<$ty, $crate::Error>> =
                 ::core::option::Option::None;
         )+
-        for _ie in &$msg_var.protocol_ies.0 {
+        for (_position, _ie) in $msg_var.protocol_ies.0.iter().enumerate() {
             $(
                 if _ie.id.0 == $crate::__ngap_ie_id!($ie_name) {
                     // `$bind` is out of scope where `$name` is assigned, as
@@ -874,10 +895,8 @@ macro_rules! extract_ngap_ies {
                                 $crate::extract_ngap_ies!(@val $bind $(, $expr)?),
                             ),
                             ::core::result::Result::Err(_error) => ::core::result::Result::Err(
-                                $crate::macros::__undecodable_ie(
-                                    _error,
-                                    stringify!($msg),
-                                    _ie.id.0,
+                                $crate::macros::__undecodable_ie::<$crate::ngap::$msg<'_>>(
+                                    _error, _ie, _position,
                                 ),
                             ),
                         };
@@ -911,8 +930,7 @@ macro_rules! extract_ngap_ies {
             }
             ::core::option::Option::None => {
                 return ::core::result::Result::Err(::core::convert::From::from(
-                    $crate::macros::__missing_ie(
-                        stringify!($msg),
+                    $crate::macros::__missing_ie::<$crate::ngap::$msg<'_>>(
                         $crate::__ngap_ie_id!($ie_name),
                         stringify!($name),
                     ),
@@ -982,7 +1000,9 @@ macro_rules! with_ngap_ie_mut {
                             ::core::option::Option::Some((_index, _value)),
                         ),
                         ::core::result::Result::Err(_error) => ::core::result::Result::Err(
-                            $crate::macros::__undecodable_ie(_error, stringify!($msg), _ie.id.0),
+                            $crate::macros::__undecodable_ie::<$crate::ngap::$msg<'_>>(
+                                _error, _ie, _index,
+                            ),
                         ),
                     };
                 }

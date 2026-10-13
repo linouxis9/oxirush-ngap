@@ -4,7 +4,7 @@
 use oxirush_aper::{Decode, Encode, Octets, Reader, Writer};
 
 use crate::Error;
-use crate::check::{Deviation, deviations, object_set};
+use crate::check::{Deviation, Fault, deviations, object_set};
 use crate::ngap::{Criticality, NGAPPDU, ProtocolIEContainer};
 use crate::registry::{KEY_IES, decodes, procedure_criticality};
 
@@ -266,6 +266,7 @@ impl<'a> NGAPPDU<'a> {
     /// | `IeCriticality` | A criticality of an IE that is not the one that the object set assigns it |
     /// | `MissingIe` | An IE whose presence is mandatory, and that the message does not have |
     /// | `UndecodableIe` | An IE of the object set whose value does not decode as its type |
+    /// | `OutsideRoot` | An IE whose value is of a later version of its type: outside the root of an extensible constraint |
     ///
     /// The criticality of the PDU comes first, then what each IE deviates in, in the
     /// order of the message, then the IEs that are missing, in the order of the object
@@ -342,17 +343,24 @@ impl<'a> NGAPPDU<'a> {
         if let Some(set) = message.ies {
             let ies = self.protocol_ies()?;
             let listed: Vec<_> = ies.0.iter().map(|ie| (ie.id.0, ie.criticality)).collect();
-            // Why the value of the IE at a position does not decode, as the macro that
-            // extracts it says it.
-            let undecodable = |position: usize| {
+            // What is wrong with the value of the IE at a position: why it does not
+            // decode, as the macro that extracts it says it, or what of it is outside
+            // the root of an extensible constraint.
+            let fault = |position: usize| {
                 let ie = &ies.0[position];
-                let error = decodes(ie.id.0, &ie.value)?.err()?;
                 let (id, criticality) = (ie.id.0, ie.criticality);
-                let error =
-                    crate::error::undecodable_ie(error, message.name, id, criticality, position);
-                Some(error)
+                match decodes(id, &ie.value)? {
+                    Ok(outside) => outside.map(Fault::OutsideRoot),
+                    Err(error) => Some(Fault::Undecodable(crate::error::undecodable_ie(
+                        error,
+                        message.name,
+                        id,
+                        criticality,
+                        position,
+                    ))),
+                }
             };
-            deviations(set, &listed, &undecodable, &mut found);
+            deviations(set, &listed, &fault, &mut found);
         }
         Ok(found)
     }

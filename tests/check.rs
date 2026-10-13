@@ -341,16 +341,34 @@ fn the_messages_of_the_fixtures_are_checked_against_their_object_sets() {
 
 /// The vectors with content have the IEs of the object sets as pycrate has them from
 /// the ASN.1: each IE that a set has, in the order of the set and with its criticality.
+/// The vectors that cover the extension of a constraint hold a value outside its root,
+/// which is their one deviation.
 #[test]
 fn the_vectors_with_content_are_checked_against_their_object_sets() {
-    let mut checked = 0;
+    let (mut checked, mut outside) = (0, 0);
     for (name, wire) in vectors(include_str!("fixtures/vectors.tsv")) {
         let pdu = NGAP_PDU::decode(&wire).unwrap();
         let found = pdu
             .check()
             .unwrap_or_else(|error| panic!("{name}: {error}"));
-        assert_eq!(found, [], "{name}");
+        for deviation in &found {
+            assert!(
+                matches!(deviation, Deviation::OutsideRoot { .. }),
+                "{name}: {deviation}"
+            );
+            // An encoding that is strict refuses what the vector holds.
+            assert!(
+                deviation
+                    .to_string()
+                    .contains("outside the root of its constraint")
+            );
+        }
+        outside += found.len();
         checked += 1;
     }
     assert!(checked > 144, "{checked} vectors");
+    assert_eq!(
+        outside, 22,
+        "the IEs of the vectors that are outside a root"
+    );
 }

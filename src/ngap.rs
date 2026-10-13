@@ -1687,7 +1687,9 @@ pub mod ngap_ies {
             writer.bit(self.a2_x_pc5_flow_bit_rates.is_some());
             writer.bit(self.a2_x_range.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            writer.unsigned_extensible(self.a2_x_pqi, 0, 255);
+            if let Err(error) = writer.unsigned_extensible(self.a2_x_pqi, 0, 255) {
+                return Err(error.in_field("a2_x_pqi"));
+            }
             if let Some(value) = &self.a2_x_pc5_flow_bit_rates {
                 if let Err(error) = value.encode(writer) {
                     return Err(error.in_field("a2_x_pc5_flow_bit_rates"));
@@ -1968,7 +1970,7 @@ pub mod ngap_ies {
     impl Encode for AIOTFIdentifier<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string_extensible(&self.0, 16, 36);
+            writer.octet_string_extensible(&self.0, 16, 36)?;
             Ok(())
         }
     }
@@ -2574,7 +2576,11 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            writer.unsigned_extensible(self.estimateof_expected_d2_rmsg_size, 1, 256);
+            if let Err(error) =
+                writer.unsigned_extensible(self.estimateof_expected_d2_rmsg_size, 1, 256)
+            {
+                return Err(error.in_field("estimateof_expected_d2_rmsg_size"));
+            }
             if let Some(value) = &self.i_e_extensions {
                 if let Err(error) = value.encode(writer) {
                     return Err(error.in_field("i_e_extensions"));
@@ -2631,7 +2637,7 @@ pub mod ngap_ies {
     impl Encode for AIoTCorrelationIdentifier {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 65535);
+            writer.unsigned_extensible(self.0, 0, 65535)?;
             Ok(())
         }
     }
@@ -2700,11 +2706,11 @@ pub mod ngap_ies {
             match self {
                 Self::singleDevice(value) => {
                     writer.index(0, 4, false);
-                    writer.bit_string_extensible(value, 1, 1024);
+                    writer.bit_string_extensible(value, 1, 1024)?;
                 }
                 Self::groupDevices(value) => {
                     writer.index(1, 4, false);
-                    writer.bit_string_extensible(value, 1, 1024);
+                    writer.bit_string_extensible(value, 1, 1024)?;
                 }
                 Self::allDevices(value) => {
                     writer.index(2, 4, false);
@@ -3062,12 +3068,18 @@ pub mod ngap_ies {
             writer.bit(self.approximate_noof_target_devices.is_some());
             writer.bit(self.time_interval.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            writer.unsigned_extensible(self.expected_d2_rmsg_size, 1, 256);
+            if let Err(error) = writer.unsigned_extensible(self.expected_d2_rmsg_size, 1, 256) {
+                return Err(error.in_field("expected_d2_rmsg_size"));
+            }
             if let Some(value) = &self.approximate_noof_target_devices {
-                writer.unsigned_extensible(*value, 1, 65535);
+                if let Err(error) = writer.unsigned_extensible(*value, 1, 65535) {
+                    return Err(error.in_field("approximate_noof_target_devices"));
+                }
             }
             if let Some(value) = &self.time_interval {
-                writer.unsigned_extensible(*value, 1, 256);
+                if let Err(error) = writer.unsigned_extensible(*value, 1, 256) {
+                    return Err(error.in_field("time_interval"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
                 if let Err(error) = value.encode(writer) {
@@ -3202,7 +3214,7 @@ pub mod ngap_ies {
     impl Encode for AIoTReaderIndex {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 65535);
+            writer.unsigned_extensible(self.0, 1, 65535)?;
             Ok(())
         }
     }
@@ -3761,7 +3773,7 @@ pub mod ngap_ies {
             match self {
                 Self::a_IoT_RAND_n(value) => {
                     writer.index(0, 2, false);
-                    writer.bit_string_extensible(value, 128, 128);
+                    writer.bit_string_extensible(value, 128, 128)?;
                 }
                 Self::choice_Extensions(value) => {
                     writer.index(1, 2, false);
@@ -7106,7 +7118,7 @@ pub mod ngap_ies {
     impl Encode for AlternativeQoSParaSetIndex {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 8);
+            writer.unsigned_extensible(self.0, 1, 8)?;
             Ok(())
         }
     }
@@ -7398,7 +7410,7 @@ pub mod ngap_ies {
     impl Encode for AlternativeQoSParaSetNotifyIndex {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 8);
+            writer.unsigned_extensible(self.0, 0, 8)?;
             Ok(())
         }
     }
@@ -7430,7 +7442,7 @@ pub mod ngap_ies {
     impl Encode for Altitude {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.signed_extensible(self.0, -420, 10000);
+            writer.signed_extensible(self.0, -420, 10000)?;
             Ok(())
         }
     }
@@ -9125,7 +9137,7 @@ pub mod ngap_ies {
     impl Encode for AssistanceInformationQoEMeas {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 16);
+            writer.unsigned_extensible(self.0, 1, 16)?;
             Ok(())
         }
     }
@@ -10213,7 +10225,7 @@ pub mod ngap_ies {
     impl Encode for AveragingWindow {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 4095);
+            writer.unsigned_extensible(self.0, 0, 4095)?;
             Ok(())
         }
     }
@@ -10641,7 +10653,7 @@ pub mod ngap_ies {
     impl Encode for BitRate {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 4000000000000);
+            writer.unsigned_extensible(self.0, 0, 4000000000000)?;
             Ok(())
         }
     }
@@ -12115,8 +12127,16 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extension.is_some());
-            writer.unsigned_extensible(self.burst_arrival_time_window_start, 0, 640000);
-            writer.unsigned_extensible(self.burst_arrival_time_window_end, 0, 640000);
+            if let Err(error) =
+                writer.unsigned_extensible(self.burst_arrival_time_window_start, 0, 640000)
+            {
+                return Err(error.in_field("burst_arrival_time_window_start"));
+            }
+            if let Err(error) =
+                writer.unsigned_extensible(self.burst_arrival_time_window_end, 0, 640000)
+            {
+                return Err(error.in_field("burst_arrival_time_window_end"));
+            }
             if let Some(value) = &self.i_e_extension {
                 if let Err(error) = value.encode(writer) {
                     return Err(error.in_field("i_e_extension"));
@@ -12906,7 +12926,7 @@ pub mod ngap_ies {
     impl Encode for CNsubgroupID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 7);
+            writer.unsigned_extensible(self.0, 0, 7)?;
             Ok(())
         }
     }
@@ -14296,7 +14316,9 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            writer.unsigned_extensible(self.candidate_pci, 0, 1007);
+            if let Err(error) = writer.unsigned_extensible(self.candidate_pci, 0, 1007) {
+                return Err(error.in_field("candidate_pci"));
+            }
             if let Err(error) = writer.unsigned(u64::from(self.candidate_nrarfcn), 0, 3279165) {
                 return Err(error.in_field("candidate_nrarfcn"));
             }
@@ -16650,11 +16672,11 @@ pub mod ngap_ies {
             match self {
                 Self::clockAccuracyValue(value) => {
                     writer.index(0, 3, false);
-                    writer.unsigned_extensible(*value, 1, 40000000);
+                    writer.unsigned_extensible(*value, 1, 40000000)?;
                 }
                 Self::clockAccuracyIndex(value) => {
                     writer.index(1, 3, false);
-                    writer.unsigned_extensible(*value, 32, 47);
+                    writer.unsigned_extensible(*value, 32, 47)?;
                 }
                 Self::choice_Extensions(value) => {
                     writer.index(2, 3, false);
@@ -16930,7 +16952,9 @@ pub mod ngap_ies {
             writer.bit(self.parent_time_source.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.synchronisation_state {
-                writer.bit_string_extensible(value, 8, 8);
+                if let Err(error) = writer.bit_string_extensible(value, 8, 8) {
+                    return Err(error.in_field("synchronisation_state"));
+                }
             }
             if let Some(value) = &self.traceableto_utc {
                 if let Err(error) = value.encode(writer) {
@@ -16948,10 +16972,14 @@ pub mod ngap_ies {
                 }
             }
             if let Some(value) = &self.clock_accuracy {
-                writer.unsigned_extensible(*value, 1, 40000000);
+                if let Err(error) = writer.unsigned_extensible(*value, 1, 40000000) {
+                    return Err(error.in_field("clock_accuracy"));
+                }
             }
             if let Some(value) = &self.parent_time_source {
-                writer.bit_string_extensible(value, 16, 16);
+                if let Err(error) = writer.bit_string_extensible(value, 16, 16) {
+                    return Err(error.in_field("parent_time_source"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
                 if let Err(error) = value.encode(writer) {
@@ -18467,7 +18495,9 @@ pub mod ngap_ies {
             writer.bit(self.cell_capacity_class_value.is_some());
             writer.bit(self.i_e_extensions.is_some());
             if let Some(value) = &self.cell_capacity_class_value {
-                writer.unsigned_extensible(*value, 1, 100);
+                if let Err(error) = writer.unsigned_extensible(*value, 1, 100) {
+                    return Err(error.in_field("cell_capacity_class_value"));
+                }
             }
             if let Err(error) = writer.unsigned(u64::from(self.capacity_value), 0, 100) {
                 return Err(error.in_field("capacity_value"));
@@ -20361,7 +20391,7 @@ pub mod ngap_ies {
     impl Encode for DRBID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 32);
+            writer.unsigned_extensible(self.0, 1, 32)?;
             Ok(())
         }
     }
@@ -22497,7 +22527,7 @@ pub mod ngap_ies {
     impl Encode for ERABID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 15);
+            writer.unsigned_extensible(self.0, 0, 15)?;
             Ok(())
         }
     }
@@ -24564,7 +24594,7 @@ pub mod ngap_ies {
     impl Encode for EUTRANNumberOfActiveUEs {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 16777215);
+            writer.unsigned_extensible(self.0, 0, 16777215)?;
             Ok(())
         }
     }
@@ -25060,7 +25090,7 @@ pub mod ngap_ies {
     impl Encode for EUTRAencryptionAlgorithms<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.bit_string_extensible(&self.0, 16, 16);
+            writer.bit_string_extensible(&self.0, 16, 16)?;
             Ok(())
         }
     }
@@ -25100,7 +25130,7 @@ pub mod ngap_ies {
     impl Encode for EUTRAintegrityProtectionAlgorithms<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.bit_string_extensible(&self.0, 16, 16);
+            writer.bit_string_extensible(&self.0, 16, 16)?;
             Ok(())
         }
     }
@@ -27395,7 +27425,7 @@ pub mod ngap_ies {
     impl Encode for ExpectedActivityPeriod {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 181);
+            writer.unsigned_extensible(self.0, 1, 181)?;
             Ok(())
         }
     }
@@ -27491,7 +27521,7 @@ pub mod ngap_ies {
     impl Encode for ExpectedIdlePeriod {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 181);
+            writer.unsigned_extensible(self.0, 1, 181)?;
             Ok(())
         }
     }
@@ -28467,7 +28497,7 @@ pub mod ngap_ies {
     impl Encode for ExtendedPacketDelayBudget {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 65535);
+            writer.unsigned_extensible(self.0, 1, 65535)?;
             Ok(())
         }
     }
@@ -28546,8 +28576,12 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            writer.bit_string_extensible(&self.primary_ratrestriction, 8, 8);
-            writer.bit_string_extensible(&self.secondary_ratrestriction, 8, 8);
+            if let Err(error) = writer.bit_string_extensible(&self.primary_ratrestriction, 8, 8) {
+                return Err(error.in_field("primary_ratrestriction"));
+            }
+            if let Err(error) = writer.bit_string_extensible(&self.secondary_ratrestriction, 8, 8) {
+                return Err(error.in_field("secondary_ratrestriction"));
+            }
             if let Some(value) = &self.i_e_extensions {
                 if let Err(error) = value.encode(writer) {
                     return Err(error.in_field("i_e_extensions"));
@@ -30451,7 +30485,7 @@ pub mod ngap_ies {
     impl Encode for FiveQI {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 255);
+            writer.unsigned_extensible(self.0, 0, 255)?;
             Ok(())
         }
     }
@@ -34769,7 +34803,7 @@ pub mod ngap_ies {
     impl Encode for HashedUEIdentityIndexValue<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.bit_string_extensible(&self.0, 13, 13);
+            writer.bit_string_extensible(&self.0, 13, 13)?;
             Ok(())
         }
     }
@@ -35399,7 +35433,7 @@ pub mod ngap_ies {
     impl Encode for IndexToRFSP {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 256);
+            writer.unsigned_extensible(self.0, 1, 256)?;
             Ok(())
         }
     }
@@ -35680,7 +35714,7 @@ pub mod ngap_ies {
     impl Encode for IntendedNumberOfPagingAttempts {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 16);
+            writer.unsigned_extensible(self.0, 1, 16)?;
             Ok(())
         }
     }
@@ -36160,7 +36194,9 @@ pub mod ngap_ies {
             if let Err(error) = self.activated_cell_list.encode(writer) {
                 return Err(error.in_field("activated_cell_list"));
             }
-            writer.unsigned_extensible(self.activation_id, 0, 16384);
+            if let Err(error) = writer.unsigned_extensible(self.activation_id, 0, 16384) {
+                return Err(error.in_field("activation_id"));
+            }
             if let Some(value) = &self.i_e_extensions {
                 if let Err(error) = value.encode(writer) {
                     return Err(error.in_field("i_e_extensions"));
@@ -36265,7 +36301,9 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            writer.unsigned_extensible(self.activation_id, 0, 16384);
+            if let Err(error) = writer.unsigned_extensible(self.activation_id, 0, 16384) {
+                return Err(error.in_field("activation_id"));
+            }
             if let Err(error) = self.cells_to_activate_list.encode(writer) {
                 return Err(error.in_field("cells_to_activate_list"));
             }
@@ -38918,7 +38956,7 @@ pub mod ngap_ies {
     impl Encode for LPWUSCNsubgroupID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 30);
+            writer.unsigned_extensible(self.0, 0, 30)?;
             Ok(())
         }
     }
@@ -40503,7 +40541,7 @@ pub mod ngap_ies {
     impl Encode for LocationReportingReferenceID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 64);
+            writer.unsigned_extensible(self.0, 1, 64)?;
             Ok(())
         }
     }
@@ -42545,7 +42583,7 @@ pub mod ngap_ies {
     impl Encode for M7period {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 60);
+            writer.unsigned_extensible(self.0, 1, 60)?;
             Ok(())
         }
     }
@@ -43034,7 +43072,7 @@ pub mod ngap_ies {
     impl Encode for MBSAreaSessionID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 65535);
+            writer.unsigned_extensible(self.0, 0, 65535)?;
             Ok(())
         }
     }
@@ -48858,7 +48896,7 @@ pub mod ngap_ies {
     impl Encode for MRBID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 512);
+            writer.unsigned_extensible(self.0, 1, 512)?;
             Ok(())
         }
     }
@@ -49044,7 +49082,7 @@ pub mod ngap_ies {
     impl Encode for MaxNrofRSIndexesToReport {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 64);
+            writer.unsigned_extensible(self.0, 1, 64)?;
             Ok(())
         }
     }
@@ -49076,7 +49114,7 @@ pub mod ngap_ies {
     impl Encode for MaximumDataBurstVolume {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 4095);
+            writer.unsigned_extensible(self.0, 0, 4095)?;
             Ok(())
         }
     }
@@ -51248,7 +51286,7 @@ pub mod ngap_ies {
     impl Encode for NBIoTUEPriority {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 255);
+            writer.unsigned_extensible(self.0, 0, 255)?;
             Ok(())
         }
     }
@@ -52208,7 +52246,7 @@ pub mod ngap_ies {
     impl Encode for NGRANNoofRRCConnections {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 65536);
+            writer.unsigned_extensible(self.0, 1, 65536)?;
             Ok(())
         }
     }
@@ -52240,7 +52278,7 @@ pub mod ngap_ies {
     impl Encode for NGRANNumberOfActiveUEs {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 16777215);
+            writer.unsigned_extensible(self.0, 0, 16777215)?;
             Ok(())
         }
     }
@@ -53731,7 +53769,7 @@ pub mod ngap_ies {
     impl Encode for NRPCI {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 1007);
+            writer.unsigned_extensible(self.0, 0, 1007)?;
             Ok(())
         }
     }
@@ -54467,7 +54505,7 @@ pub mod ngap_ies {
     impl Encode for NRFrequencyBand {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 1024);
+            writer.unsigned_extensible(self.0, 1, 1024)?;
             Ok(())
         }
     }
@@ -55266,7 +55304,7 @@ pub mod ngap_ies {
     impl Encode for NRencryptionAlgorithms<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.bit_string_extensible(&self.0, 16, 16);
+            writer.bit_string_extensible(&self.0, 16, 16)?;
             Ok(())
         }
     }
@@ -55306,7 +55344,7 @@ pub mod ngap_ies {
     impl Encode for NRintegrityProtectionAlgorithms<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.bit_string_extensible(&self.0, 16, 16);
+            writer.bit_string_extensible(&self.0, 16, 16)?;
             Ok(())
         }
     }
@@ -55338,7 +55376,7 @@ pub mod ngap_ies {
     impl Encode for NSAGID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 255);
+            writer.unsigned_extensible(self.0, 0, 255)?;
             Ok(())
         }
     }
@@ -55552,7 +55590,7 @@ pub mod ngap_ies {
     impl Encode for NetworkInstance {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 256);
+            writer.unsigned_extensible(self.0, 1, 256)?;
             Ok(())
         }
     }
@@ -58119,7 +58157,7 @@ pub mod ngap_ies {
     impl Encode for PDUSessionPairID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 255);
+            writer.unsigned_extensible(self.0, 0, 255)?;
             Ok(())
         }
     }
@@ -67755,7 +67793,7 @@ pub mod ngap_ies {
     impl Encode for PacketDelayBudget {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 1023);
+            writer.unsigned_extensible(self.0, 0, 1023)?;
             Ok(())
         }
     }
@@ -67834,8 +67872,12 @@ pub mod ngap_ies {
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             writer.bit(false);
             writer.bit(self.i_e_extensions.is_some());
-            writer.unsigned_extensible(self.p_erscalar, 0, 9);
-            writer.unsigned_extensible(self.p_erexponent, 0, 9);
+            if let Err(error) = writer.unsigned_extensible(self.p_erscalar, 0, 9) {
+                return Err(error.in_field("p_erscalar"));
+            }
+            if let Err(error) = writer.unsigned_extensible(self.p_erexponent, 0, 9) {
+                return Err(error.in_field("p_erexponent"));
+            }
             if let Some(value) = &self.i_e_extensions {
                 if let Err(error) = value.encode(writer) {
                     return Err(error.in_field("i_e_extensions"));
@@ -67892,7 +67934,7 @@ pub mod ngap_ies {
     impl Encode for PacketLossRate {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 1000);
+            writer.unsigned_extensible(self.0, 0, 1000)?;
             Ok(())
         }
     }
@@ -68036,7 +68078,7 @@ pub mod ngap_ies {
     impl Encode for PagingAttemptCount {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 16);
+            writer.unsigned_extensible(self.0, 1, 16)?;
             Ok(())
         }
     }
@@ -68602,7 +68644,9 @@ pub mod ngap_ies {
                 }
             }
             if let Some(value) = &self.dl_data_size {
-                writer.unsigned_extensible(*value, 0, 96000);
+                if let Err(error) = writer.unsigned_extensible(*value, 0, 96000) {
+                    return Err(error.in_field("dl_data_size"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
                 if let Err(error) = value.encode(writer) {
@@ -68751,7 +68795,7 @@ pub mod ngap_ies {
     impl Encode for PagingPolicyIndicator {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 7);
+            writer.unsigned_extensible(self.0, 0, 7)?;
             Ok(())
         }
     }
@@ -69819,7 +69863,7 @@ pub mod ngap_ies {
     impl Encode for Periodicity {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 640000);
+            writer.unsigned_extensible(self.0, 0, 640000)?;
             Ok(())
         }
     }
@@ -70338,7 +70382,7 @@ pub mod ngap_ies {
     impl Encode for PriorityLevelQos {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 127);
+            writer.unsigned_extensible(self.0, 1, 127)?;
             Ok(())
         }
     }
@@ -72635,7 +72679,7 @@ pub mod ngap_ies {
     impl Encode for QosFlowIdentifier {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 63);
+            writer.unsigned_extensible(self.0, 0, 63)?;
             Ok(())
         }
     }
@@ -74436,7 +74480,7 @@ pub mod ngap_ies {
     impl Encode for QosMonitoringReportingFrequency {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 1800);
+            writer.unsigned_extensible(self.0, 1, 1800)?;
             Ok(())
         }
     }
@@ -75979,7 +76023,7 @@ pub mod ngap_ies {
     impl Encode for RATRestrictionInformation<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.bit_string_extensible(&self.0, 8, 8);
+            writer.bit_string_extensible(&self.0, 8, 8)?;
             Ok(())
         }
     }
@@ -78576,7 +78620,7 @@ pub mod ngap_ies {
     impl Encode for ReportingThreshold {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 4000000000);
+            writer.unsigned_extensible(self.0, 0, 4000000000)?;
             Ok(())
         }
     }
@@ -81210,10 +81254,14 @@ pub mod ngap_ies {
                 }
             }
             if let Some(value) = &self.timeof_day_start {
-                writer.unsigned_extensible(*value, 0, 86399);
+                if let Err(error) = writer.unsigned_extensible(*value, 0, 86399) {
+                    return Err(error.in_field("timeof_day_start"));
+                }
             }
             if let Some(value) = &self.timeof_day_end {
-                writer.unsigned_extensible(*value, 0, 86399);
+                if let Err(error) = writer.unsigned_extensible(*value, 0, 86399) {
+                    return Err(error.in_field("timeof_day_end"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
                 if let Err(error) = value.encode(writer) {
@@ -84971,7 +85019,7 @@ pub mod ngap_ies {
     impl Encode for SurvivalTime {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 1920000);
+            writer.unsigned_extensible(self.0, 0, 1920000)?;
             Ok(())
         }
     }
@@ -87339,7 +87387,7 @@ pub mod ngap_ies {
             match self {
                 Self::tNGF_ID(value) => {
                     writer.index(0, 2, false);
-                    writer.bit_string_extensible(value, 32, 32);
+                    writer.bit_string_extensible(value, 32, 32)?;
                 }
                 Self::choice_Extensions(value) => {
                     writer.index(1, 2, false);
@@ -87802,7 +87850,11 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.adjusted_periodicity.is_some());
             writer.bit(self.i_e_extensions.is_some());
-            writer.signed_extensible(self.burst_arrival_time_offset, -640000, 640000);
+            if let Err(error) =
+                writer.signed_extensible(self.burst_arrival_time_offset, -640000, 640000)
+            {
+                return Err(error.in_field("burst_arrival_time_offset"));
+            }
             if let Some(value) = &self.adjusted_periodicity {
                 if let Err(error) = value.encode(writer) {
                     return Err(error.in_field("adjusted_periodicity"));
@@ -88236,7 +88288,7 @@ pub mod ngap_ies {
             match self {
                 Self::tWIF_ID(value) => {
                     writer.index(0, 2, false);
-                    writer.bit_string_extensible(value, 32, 32);
+                    writer.bit_string_extensible(value, 32, 32)?;
                 }
                 Self::choice_Extensions(value) => {
                     writer.index(1, 2, false);
@@ -89833,7 +89885,7 @@ pub mod ngap_ies {
     impl Encode for TimeSinceFailure {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 172800);
+            writer.unsigned_extensible(self.0, 0, 172800)?;
             Ok(())
         }
     }
@@ -90011,7 +90063,9 @@ pub mod ngap_ies {
                 return Err(error.in_field("time_distribution_indication"));
             }
             if let Some(value) = &self.u_utime_sync_error_budget {
-                writer.unsigned_extensible(*value, 1, 1000000);
+                if let Err(error) = writer.unsigned_extensible(*value, 1, 1000000) {
+                    return Err(error.in_field("u_utime_sync_error_budget"));
+                }
             }
             if let Some(value) = &self.i_e_extensions {
                 if let Err(error) = value.encode(writer) {
@@ -90733,7 +90787,7 @@ pub mod ngap_ies {
     impl Encode for TransportLayerAddress<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.bit_string_extensible(&self.0, 1, 160);
+            writer.bit_string_extensible(&self.0, 1, 160)?;
             Ok(())
         }
     }
@@ -91131,7 +91185,9 @@ pub mod ngap_ies {
                 }
             }
             if let Some(value) = &self.periodic_time {
-                writer.unsigned_extensible(*value, 1, 3600);
+                if let Err(error) = writer.unsigned_extensible(*value, 1, 3600) {
+                    return Err(error.in_field("periodic_time"));
+                }
             }
             if let Some(value) = &self.scheduled_communication_time {
                 if let Err(error) = value.encode(writer) {
@@ -92242,7 +92298,9 @@ pub mod ngap_ies {
                 }
             }
             if let Some(value) = &self.meas_config_app_layer_id {
-                writer.unsigned_extensible(*value, 0, 15);
+                if let Err(error) = writer.unsigned_extensible(*value, 0, 15) {
+                    return Err(error.in_field("meas_config_app_layer_id"));
+                }
             }
             if let Some(value) = &self.slice_support_list_qmc {
                 if let Err(error) = value.encode(writer) {
@@ -95372,7 +95430,7 @@ pub mod ngap_ies {
     impl Encode for UpdateFeedback<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.bit_string_extensible(&self.0, 8, 8);
+            writer.bit_string_extensible(&self.0, 8, 8)?;
             Ok(())
         }
     }
@@ -97045,7 +97103,7 @@ pub mod ngap_ies {
             match self {
                 Self::w_AGF_ID(value) => {
                     writer.index(0, 2, false);
-                    writer.bit_string_extensible(value, 16, 16);
+                    writer.bit_string_extensible(value, 16, 16)?;
                 }
                 Self::choice_Extensions(value) => {
                     writer.index(1, 2, false);

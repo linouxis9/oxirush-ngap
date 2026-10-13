@@ -726,13 +726,18 @@ macro_rules! ies {
 
         /// Whether `octets`, the value of the IE `id`, decode as the type that the list
         /// gives the IE: the error of the codec when they do not, and `None` for an
-        /// identifier that has no one type.
-        pub(crate) fn decodes<'a>(id: u16, octets: &'a [u8]) -> Option<Result<(), $crate::Error>> {
+        /// identifier that has no one type. A value that decodes may be outside the
+        /// root of an extensible constraint of its type: it then has the error of an
+        /// encoding that refuses it.
+        pub(crate) fn decodes<'a>(
+            id: u16,
+            octets: &'a [u8],
+        ) -> Option<Result<Option<$crate::Error>, $crate::Error>> {
             match id {
                 $($(
                     $id => {
                         let value: Result<$ie, $crate::Error> = $crate::aper::decode(octets);
-                        Some(value.map(drop))
+                        Some(value.map(|value| $crate::aper::encode_strict(&value).err()))
                     }
                 )?)*
                 _ => None,

@@ -298,6 +298,66 @@ fn each_deviation_has_the_cause_of_its_clause() -> Result<(), Error> {
     Ok(())
 }
 
+/// TS 38.413 clause 9.3.3.21: an AMF name is a PrintableString (SIZE (1..150, ...)). A
+/// name of no character encodes, as a value of a later version of the type, which a
+/// sender of this version does not send. Clause 10.3.1 has a receiver handle a value
+/// that its version does not define as an IE that it does not comprehend.
+#[test]
+fn a_value_outside_the_root_of_an_extensible_constraint_is_reported() -> Result<(), Error> {
+    // It encodes, and an encoding that is strict refuses it.
+    let none = AMFName("".into());
+    assert_eq!(aper::encode(&none)?, [0x80, 0x00]);
+    let refused = aper::encode_strict(&none).unwrap_err();
+    assert_eq!(refused.kind(), ErrorKind::Encode);
+    assert_eq!(
+        refused.to_string(),
+        "a value of AMFName does not encode: a size of 0 is outside the root of its \
+         constraint (1..150, ...)"
+    );
+
+    // An NG SETUP RESPONSE with that name is built as any other, and `check` says it.
+    let response = |name: &'static str| {
+        let network = plmn("208", "93")?;
+        let served =
+            ServedGUAMIItem::new(oxirush_ngap::helpers::guami(network, 1, 1, 0)?, None, None);
+        let slices = SliceSupportList(vec![SliceSupportItem::new(s_nssai(1, None), None)]);
+        let supported = PLMNSupportItem::new(network, slices, None);
+        build_ngap!(SuccessfulOutcome, NGSetup, REJECT, NGSetupResponse,
+            REJECT AMFName(AMFName(name.into())),
+            REJECT ServedGUAMIList(ServedGUAMIList(vec![served])),
+            IGNORE RelativeAMFCapacity(RelativeAMFCapacity(255)),
+            REJECT PLMNSupportList(PLMNSupportList(vec![supported])),
+        )
+    };
+    assert_eq!(response("amf-1")?.check()?, []);
+    let deviations = response("")?.check()?;
+    assert!(matches!(
+        deviations[..],
+        [Deviation::OutsideRoot {
+            id: 1,
+            name: "AMFName",
+            position: 0,
+            criticality: Criticality::reject,
+            ..
+        }]
+    ));
+    assert_eq!(
+        deviations[0].to_string(),
+        "AMFName (IE 1), at position 0, has a value of a later version of its type: a size \
+         of 0 is outside the root of its constraint (1..150, ...)"
+    );
+    assert_eq!(deviations[0].ie(), Some((1, Criticality::reject)));
+    assert_eq!(
+        deviations[0].type_of_error(),
+        Some(TypeOfError::not_understood)
+    );
+    assert_eq!(
+        deviations[0].cause(),
+        Some(CauseProtocol::abstract_syntax_error_reject)
+    );
+    Ok(())
+}
+
 /// Where the UE is: an NR cell and its tracking area.
 fn location() -> Result<UserLocationInformation<'static>, Error> {
     let network = plmn("208", "93")?;

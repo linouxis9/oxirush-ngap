@@ -122,6 +122,23 @@ pub enum Deviation {
         /// The criticality that the object set assigns it.
         criticality: Criticality,
     },
+    /// An IE whose value is one of a later version of its type: a number or a size
+    /// outside the root of a constraint that has an extension marker, as a name of no
+    /// character where the type has `SIZE (1..150, ...)`. It decodes, a sender of this
+    /// version of the specification does not send it, and a receiver of this version
+    /// does not comprehend it.
+    OutsideRoot {
+        /// The identifier of the IE.
+        id: u16,
+        /// Its name.
+        name: &'static str,
+        /// Its position in the message.
+        position: usize,
+        /// The criticality that the IE has.
+        criticality: Criticality,
+        /// What is outside its root: the error of an encoding that refuses it.
+        error: Error,
+    },
     /// An IE of the message whose value does not decode as its type: its octets end
     /// before the value does, go on after it, or hold a value outside a constraint.
     UndecodableIe {
@@ -157,6 +174,9 @@ impl Deviation {
             | Self::MissingIe {
                 id, criticality, ..
             }
+            | Self::OutsideRoot {
+                id, criticality, ..
+            }
             | Self::UndecodableIe {
                 id, criticality, ..
             } => Some((*id, *criticality)),
@@ -165,12 +185,13 @@ impl Deviation {
     }
 
     /// How the Criticality Diagnostics of an answer say what is wrong with the IE:
-    /// `not_understood` for an IE that the message cannot have and for one whose
-    /// value does not decode, and `missing` for one that is. `None` for a deviation
-    /// that is no fault of one IE which a receiver reports so.
+    /// `not_understood` for an IE that the message cannot have, for one whose value
+    /// does not decode and for one whose value is of a later version of its type, and
+    /// `missing` for one that is. `None` for a deviation that is no fault of one IE
+    /// which a receiver reports so.
     pub fn type_of_error(&self) -> Option<TypeOfError> {
         match self {
-            Self::UnexpectedIe { .. } | Self::UndecodableIe { .. } => {
+            Self::UnexpectedIe { .. } | Self::UndecodableIe { .. } | Self::OutsideRoot { .. } => {
                 Some(TypeOfError::not_understood)
             }
             Self::MissingIe { .. } => Some(TypeOfError::missing),
@@ -202,8 +223,9 @@ impl Deviation {
     ///
     /// - `transfer_syntax_error` for an IE whose value does not decode;
     /// - `abstract_syntax_error_reject` and `abstract_syntax_error_ignore_and_notify`
-    ///   for an IE that the message cannot have, by the criticality that it has, and
-    ///   for an IE that is missing, by the criticality that the object set assigns it;
+    ///   for an IE that the message cannot have and for one whose value is of a later
+    ///   version of its type, by the criticality that it has, and for an IE that is
+    ///   missing, by the criticality that the object set assigns it;
     /// - `abstract_syntax_error_falsely_constructed_message` for an IE that is there
     ///   twice or in a wrong order.
     ///
@@ -218,9 +240,9 @@ impl Deviation {
         };
         match self {
             Self::UndecodableIe { .. } => Some(CauseProtocol::transfer_syntax_error),
-            Self::UnexpectedIe { criticality, .. } | Self::MissingIe { criticality, .. } => {
-                by_criticality(criticality)
-            }
+            Self::UnexpectedIe { criticality, .. }
+            | Self::MissingIe { criticality, .. }
+            | Self::OutsideRoot { criticality, .. } => by_criticality(criticality),
             Self::RepeatedIe { .. } | Self::OutOfOrder { .. } => {
                 Some(CauseProtocol::abstract_syntax_error_falsely_constructed_message)
             }
@@ -325,19 +347,40 @@ impl fmt::Display for Deviation {
                 "{name} (IE {id}), at position {position}, does not decode: {}",
                 error.reason()
             ),
+            Self::OutsideRoot {
+                id,
+                name,
+                position,
+                error,
+                ..
+            } => write!(
+                formatter,
+                "{name} (IE {id}), at position {position}, has a value of a later version \
+                 of its type: {}",
+                error.reason()
+            ),
         }
     }
+}
+
+/// What is wrong with the value of an IE, against the type that the registry gives it.
+pub(crate) enum Fault {
+    /// The octets do not decode: why, as the macro that extracts the IE says it.
+    Undecodable(Error),
+    /// The value is outside the root of an extensible constraint: the error of an
+    /// encoding that refuses it.
+    OutsideRoot(Error),
 }
 
 /// Add to `found` how `ies`, the IEs of a message in their order, each as its identifier
 /// and its criticality, deviate from `set`, the IEs of the object set of that message:
 /// those of the IEs in the order of the message, then the mandatory IEs that are
-/// missing in the order of the set. `undecodable` says why the value of the IE at a
-/// position does not decode as its type, for an IE of the set whose value does not.
+/// missing in the order of the set. `fault` says what is wrong with the value of the IE
+/// at a position, for an IE of the set whose value is not one of its type.
 pub(crate) fn deviations(
     set: &[(u16, Criticality, bool)],
     ies: &[(u16, Criticality)],
-    undecodable: &dyn Fn(usize) -> Option<Error>,
+    fault: &dyn Fn(usize) -> Option<Fault>,
     found: &mut Vec<Deviation>,
 ) {
     // Where the message has each IE of the set first, and the IE that the set has last
@@ -390,14 +433,22 @@ pub(crate) fn deviations(
                 assigned,
             });
         }
-        if let Some(error) = undecodable(position) {
-            found.push(Deviation::UndecodableIe {
+        match fault(position) {
+            Some(Fault::Undecodable(error)) => found.push(Deviation::UndecodableIe {
                 id,
                 name: name(),
                 position,
                 criticality,
                 error,
-            });
+            }),
+            Some(Fault::OutsideRoot(error)) => found.push(Deviation::OutsideRoot {
+                id,
+                name: name(),
+                position,
+                criticality,
+                error,
+            }),
+            None => {}
         }
     }
     for ((id, criticality, mandatory), first) in set.iter().zip(first) {

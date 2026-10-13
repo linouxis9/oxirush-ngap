@@ -389,6 +389,13 @@ macro_rules! procedures {
                 const PROCEDURE_CODE: u8 = $code;
                 const __OF_PROTOCOL_IES: bool =
                     $crate::macros::of_protocol_ies!($([$($initiating_ie),*])?);
+                fn __decode_owned(octets: &[u8]) -> Result<Self, $crate::Error> {
+                    // The same type, of the octets that are read here.
+                    fn read<'a>(octets: &'a [u8]) -> Result<$initiating_type, $crate::Error> {
+                        $crate::aper::decode(octets)
+                    }
+                    read(octets).map(|message| message.into_owned())
+                }
             }
         )?)*
         $($(
@@ -398,6 +405,13 @@ macro_rules! procedures {
                 const PROCEDURE_CODE: u8 = $code;
                 const __OF_PROTOCOL_IES: bool =
                     $crate::macros::of_protocol_ies!($([$($successful_ie),*])?);
+                fn __decode_owned(octets: &[u8]) -> Result<Self, $crate::Error> {
+                    // The same type, of the octets that are read here.
+                    fn read<'a>(octets: &'a [u8]) -> Result<$successful_type, $crate::Error> {
+                        $crate::aper::decode(octets)
+                    }
+                    read(octets).map(|message| message.into_owned())
+                }
             }
         )?)*
         $($(
@@ -407,6 +421,13 @@ macro_rules! procedures {
                 const PROCEDURE_CODE: u8 = $code;
                 const __OF_PROTOCOL_IES: bool =
                     $crate::macros::of_protocol_ies!($([$($unsuccessful_ie),*])?);
+                fn __decode_owned(octets: &[u8]) -> Result<Self, $crate::Error> {
+                    // The same type, of the octets that are read here.
+                    fn read<'a>(octets: &'a [u8]) -> Result<$unsuccessful_type, $crate::Error> {
+                        $crate::aper::decode(octets)
+                    }
+                    read(octets).map(|message| message.into_owned())
+                }
             }
         )?)*
 

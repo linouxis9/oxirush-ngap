@@ -104473,17 +104473,23 @@ impl NGAPPDU<'static> {
     /// borrowed from `bytes`: nothing is copied, and the PDU, a `NGAPPDU<'_>`, lives as
     /// long as they do. `into_owned()` gives the PDU that `decode` gives.
     ///
+    /// [`message`](Self::message) gives the message of the PDU, which borrows from
+    /// `bytes` as the PDU does and is kept after it: a function that is given octets
+    /// returns their message.
+    ///
     /// ```
     /// use oxirush_ngap::ngap::*;
     ///
     /// // A UE CONTEXT RELEASE REQUEST, read where it was received
     /// let received = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
     /// let pdu = NGAP_PDU::decode_borrowed(&received)?;
-    /// let request: UEContextReleaseRequest = pdu.decode_value()?;
-    /// assert_eq!(request.protocol_ies.0.len(), 3);
     ///
-    /// // Kept after `received` is gone
+    /// // Its message borrows from `received` too, and not from the PDU
+    /// let request: UEContextReleaseRequest = pdu.message()?;
+    ///
+    /// // A PDU that is kept after `received` is gone
     /// let kept: NGAP_PDU = pdu.into_owned();
+    /// assert_eq!(request.protocol_ies.0.len(), 3);
     /// # let _ = kept;
     /// # Ok::<(), oxirush_ngap::Error>(())
     /// ```
@@ -104596,8 +104602,8 @@ impl<'a> NGAPPDU<'a> {
     }
     /// The message that this PDU holds, as its type `T`. What the message holds of
     /// octets is borrowed from the PDU: the PDU is a variable of its own, which the
-    /// message does not outlive, and `into_owned()` of the message gives one that is
-    /// kept after it.
+    /// message does not outlive. [`message`](Self::message) gives one that is kept
+    /// after the PDU, without a copy when the PDU itself borrows its octets.
     ///
     /// `T` is the type of the message that `kind()` says. For the type of another
     /// message the error has the kind `WrongMessage`, as the octets of one message
@@ -104633,6 +104639,42 @@ impl<'a> NGAPPDU<'a> {
             return Err(crate::error::wrong_message(T::NAME, direction, code));
         }
         oxirush_aper::decode(self.value())
+    }
+    /// The message that this PDU holds, as its type `T`, which is kept after the PDU:
+    /// it lives as long as the octets that the PDU was decoded from.
+    ///
+    /// The message of a PDU that borrows its octets, as `decode_borrowed` gives it,
+    /// borrows from them too. Nothing is copied, and a function returns the message:
+    ///
+    /// ```
+    /// use oxirush_ngap::{Error, ngap::*};
+    ///
+    /// // The message borrows from `received`, and the PDU is gone
+    /// fn read(received: &[u8]) -> Result<UEContextReleaseRequest<'_>, Error> {
+    ///     NGAP_PDU::decode_borrowed(received)?.message()
+    /// }
+    ///
+    /// let received = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
+    /// assert_eq!(read(&received)?.protocol_ies.0.len(), 3);
+    /// # Ok::<(), oxirush_ngap::Error>(())
+    /// ```
+    ///
+    /// The message of a PDU that owns its octets, as `decode` gives it, owns its own:
+    /// the value of each IE is copied, as `into_owned()` of the message copies it.
+    /// `decode_value` borrows from the PDU instead, and copies nothing. A PDU whose
+    /// message came in fragments, which one of 16384 octets or more does, owns its
+    /// octets however it was decoded.
+    ///
+    /// The errors are those of `decode_value`.
+    pub fn message<T: crate::Message<'a>>(&self) -> Result<T, crate::Error> {
+        let (direction, code) = (self.direction(), self.procedure_code());
+        if (direction, code) != (T::DIRECTION, T::PROCEDURE_CODE) {
+            return Err(crate::error::wrong_message(T::NAME, direction, code));
+        }
+        match self.value().as_borrowed() {
+            Some(octets) => oxirush_aper::decode(octets),
+            None => T::__decode_owned(self.value()),
+        }
     }
     /// Return the procedure code of this PDU.
     pub fn procedure_code(&self) -> u8 {

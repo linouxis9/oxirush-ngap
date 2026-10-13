@@ -22,6 +22,10 @@ pub trait Message<'a>: Decode<'a> + Encode + sealed::Sealed {
     /// the private one is.
     #[doc(hidden)]
     const __OF_PROTOCOL_IES: bool;
+    /// The message that `octets` hold, which borrows nothing from them: what it holds
+    /// of octets is copied.
+    #[doc(hidden)]
+    fn __decode_owned(octets: &[u8]) -> Result<Self, oxirush_aper::Error>;
 }
 
 pub(crate) mod sealed {

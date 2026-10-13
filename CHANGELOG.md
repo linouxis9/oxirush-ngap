@@ -233,7 +233,10 @@ what each type became.
 - `NGAP_PDU::decode_borrowed(&octets)`: the PDU that borrows its message from
   the octets, for a caller that reads a PDU where it was received. It copies
   nothing, where `NGAP_PDU::decode` copies the message once to own it, and
-  `into_owned()` gives the PDU that `decode` gives. `pdu.encode_into(&mut
+  `into_owned()` gives the PDU that `decode` gives. `pdu.message::<T>()`
+  gives the message of a PDU with the lifetime of what the PDU borrows from,
+  so that a function which is given octets returns their message, where the
+  message of `decode_value` lives as long as the PDU. `pdu.encode_into(&mut
   octets)` appends the octets of a PDU to a buffer that is kept.
 - `oxirush_ngap::aper`, the `oxirush-aper` that the crate is built with, and
   at the root of the crate `Octets`, `Bits`, `BitString`, `AsnType`, `Decode`

@@ -184,6 +184,7 @@ without debug information.
 | `direction()` | `"InitiatingMessage"`, `"SuccessfulOutcome"` or `"UnsuccessfulOutcome"`; `is_initiating()`, `is_successful()` and `is_unsuccessful()` say which |
 | `kind()` | An `NgapPduKind`: one variant for each message, and `Other` for a procedure that the specification does not have in that direction |
 | `decode_value()` | The message, as its type, which the caller names. It borrows from the PDU. The type of another message is an error of the kind `WrongMessage`, and a type that is no message does not compile |
+| `message()` | The same message, which is kept after the PDU: it borrows what the PDU borrows, so a function that is given octets returns the message of `decode_borrowed`, and it owns what the PDU owns |
 | `protocol_ies()`, `set_protocol_ies(ies)` | The IEs of its message, whatever the message is, and the same PDU with other IEs: [below](#the-ies-of-any-message) |
 | `check()` | How it deviates from the object set of its message, a `Vec<Deviation>`: [below](#check-a-message-against-its-object-set) |
 

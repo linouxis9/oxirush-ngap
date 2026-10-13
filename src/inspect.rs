@@ -433,7 +433,7 @@ where
 {
     let typed: T = json::from_value(value)?;
     // A value that is read and does not encode is outside a constraint of its type.
-    oxirush_aper::encode(&typed).map_err(|error| error.__outside_its_type(T::NAME))
+    oxirush_aper::encode(&typed).map_err(|error| error.outside_its_type(T::NAME))
 }
 
 #[cfg(any(test, fuzzing))]

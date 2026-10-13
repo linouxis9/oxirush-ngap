@@ -30,7 +30,7 @@ const SHARED: &[(&str, u64)] = &[
     ("oracle/src/per.rs", 0xfcdad4b315ccfb9a),
     ("oracle/src/sized.rs", 0x65f4c1e8ee1593db),
     ("src/check.rs", 0xf6930063fb9c5794),
-    ("src/error.rs", 0xe9ca7c1e9d77bcfa),
+    ("src/error.rs", 0x25ef2a01e092bf28),
     ("src/inspect_paths.rs", 0x4a3d98374f056a4b),
     ("src/message.rs", 0xb07dd3400014873d),
     ("src/oracle_tests.rs", 0xbbd6ab7fea937301),

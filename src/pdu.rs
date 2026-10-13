@@ -115,7 +115,7 @@ impl<'a> NGAPPDU<'a> {
     /// of protocol IEs.
     fn message_of_protocol_ies(&self) -> Result<Option<&'static str>, Error> {
         match object_set(self.direction(), self.procedure_code()) {
-            Some(set) if set.ies.is_none() => Err(Error::__no_protocol_ies(set.name)),
+            Some(set) if set.ies.is_none() => Err(Error::no_protocol_ies(set.name)),
             set => Ok(set.map(|set| set.name)),
         }
     }
@@ -162,9 +162,9 @@ impl<'a> NGAPPDU<'a> {
         let name = self.message_of_protocol_ies()?;
         if self.value().is_empty() {
             let none = Error::new(crate::ErrorKind::Decode, "there are no octets");
-            return Err(none.__of_message(name));
+            return Err(none.of_message(name));
         }
-        message_ies(self.value()).map_err(|error| error.__of_message(name))
+        message_ies(self.value()).map_err(|error| error.of_message(name))
     }
 
     /// Make `protocol_ies` the protocol IEs of the message of this PDU: the PDU keeps
@@ -202,7 +202,7 @@ impl<'a> NGAPPDU<'a> {
         self.message_of_protocol_ies()?;
         let count = protocol_ies.0.len();
         let octets = message_octets(&protocol_ies);
-        let value = Octets::owned(octets.map_err(|error| error.__of_protocol_ies(count))?);
+        let value = Octets::owned(octets.map_err(|error| error.of_protocol_ies(count))?);
         match self {
             Self::initiatingMessage(message) => message.value = value,
             Self::successfulOutcome(message) => message.value = value,
@@ -327,7 +327,7 @@ impl<'a> NGAPPDU<'a> {
     pub fn check(&self) -> Result<Vec<Deviation>, Error> {
         let (direction, code) = (self.direction(), self.procedure_code());
         let Some(message) = object_set(direction, code) else {
-            return Err(Error::__no_message_of(direction, code));
+            return Err(Error::no_message_of(direction, code));
         };
         let mut found = Vec::new();
         let criticality = self.criticality();

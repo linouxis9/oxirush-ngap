@@ -10,14 +10,14 @@ use crate::{Error, Message};
 /// that ASN.1 names `expected`.
 pub(crate) fn wrong_message(expected: &str, direction: &str, code: u8) -> Error {
     let held = crate::registry::message_name(direction, code);
-    Error::__wrong_message(expected, held, direction, code)
+    Error::wrong_message(expected, held, direction, code)
 }
 
 /// The IE `id`, which the field `field` requires, is not in a message of the type `M`.
 /// The error is about that IE, with the criticality that the object set of the message
 /// assigns it.
 pub(crate) fn missing_ie<'a, M: Message<'a>>(id: u16, field: &str) -> Error {
-    let error = Error::__missing_ie(M::NAME, &ie(id), field);
+    let error = Error::missing_ie(M::NAME, &ie(id), field);
     let set = crate::check::object_set(M::DIRECTION, M::PROCEDURE_CODE);
     let ies = set.and_then(|set| set.ies).unwrap_or_default();
     match ies.iter().find(|(known, ..)| *known == id) {
@@ -38,7 +38,7 @@ pub(crate) fn undecodable_ie(
     position: usize,
 ) -> Error {
     let about = ErrorIe::new(id, criticality.into(), Some(position));
-    error.__undecodable_ie(message, &ie(id)).about_ie(about)
+    error.undecodable_ie(message, &ie(id)).about_ie(about)
 }
 
 /// The IE of an identifier, as a message names it: the name that ASN.1 gives it after

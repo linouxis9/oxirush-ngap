@@ -278,7 +278,7 @@ impl __Message {
                     "a size of {} is outside its constraint (0..65535)",
                     self.count
                 ));
-            return Err(size.__of_protocol_ies(self.count));
+            return Err(size.of_protocol_ies(self.count));
         };
         self.octets[1..3].copy_from_slice(&count.to_be_bytes());
         let value = Octets::owned(self.octets);

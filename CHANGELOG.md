@@ -395,6 +395,15 @@ what each type became.
 
 ### Changed
 
+- A `SEQUENCE` is a struct without `#[non_exhaustive]`, which a literal
+  builds: a member that a later version adds changes its `new` too, so the
+  attribute kept no caller from breaking. An extensible `CHOICE` and
+  `ENUMERATED` keep it.
+- The crate, oxirush-s1ap and oxirush-aper are released in step, as the
+  crate re-exports the runtime and its `Error`, `Octets`, `Bits` and
+  `BitString`: a breaking release of the runtime is one of both protocol
+  crates. The README says what a program with two versions of the runtime
+  gets.
 - An identity prints as it is read, and whole. A `PLMNIdentity` prints as its MCC
   and its MNC, `PLMNIdentity(208-93)`, where it printed three numbers, and
   converts to and from the `Plmn` of `oxirush-utils`, which the crate has as

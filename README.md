@@ -118,6 +118,13 @@ numbers, arrays and the types of `oxirush-aper`: `Octets`, `Bits` and
 `oxirush_ngap::aper`: a crate that names them needs no dependency of its own.
 The errors of the codec are those of the runtime: see [Errors](#errors).
 
+The crate, oxirush-s1ap and `oxirush-aper` are released in step: each version
+of the crate names one version of the runtime, and a breaking release of the
+runtime is one of both protocol crates, which come out with it. A program that
+also depends on another version of `oxirush-aper` has two `Error` and two
+`Octets` types, which do not convert into each other: it names the runtime as
+`oxirush_ngap::aper`.
+
 `oxirush-aper` 0.1.0 and `oxirush-utils` 0.1.0 are not on crates.io yet.
 Until they are, a build takes them from their repositories, at the revisions
 that this revision of the crate is tested with:
@@ -289,6 +296,13 @@ otherwise than their others, with their names, as `parentTImeSource`. The
 generator writes `build/fields.tsv` in this repository: each field of each
 type, with the name that rasn-compiler gives it, which the fields had before
 this rule and have in 0.4.2 for every field of a type that 0.4.2 has but two, the `targetRANNodeID-RIM` of `RIMInformationTransfer` and the `targetRANNodeID-SON` of `SONConfigurationTransfer`. The JSON forms keep the identifiers of ASN.1.
+
+A `SEQUENCE` is a struct that a literal builds, and its `new` takes the
+members in their order. An extensible `CHOICE` or `ENUMERATED` is
+`#[non_exhaustive]`: a later version of the specification adds alternatives
+and values to it, which a `match` leaves room for with a `_` arm. A member
+that a later version adds to a `SEQUENCE` changes its struct and its `new`,
+and comes with a breaking release of the crate.
 
 ### Keep a value after its PDU
 

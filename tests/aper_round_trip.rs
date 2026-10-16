@@ -568,3 +568,16 @@ fn a_value_keeps_its_extension_container_after_its_octets() {
     assert!(!extensions.0[0].extension_value.is_borrowed());
     assert_eq!(kept, sent);
 }
+
+/// A SEQUENCE is a struct that a literal builds outside the crate, with the
+/// members that `new` takes in their order.
+#[test]
+fn a_sequence_is_built_by_a_literal() {
+    let (plmn_identity, tac) = (PLMNIdentity([0x02, 0xf8, 0x39]), TAC([0x00, 0x00, 0x01]));
+    let literal = TAI {
+        plmn_identity,
+        tac,
+        ie_extensions: None,
+    };
+    assert_eq!(literal, TAI::new(plmn_identity, tac, None));
+}

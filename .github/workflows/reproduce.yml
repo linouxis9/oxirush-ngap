@@ -40,7 +40,7 @@ env:
   # them from their repositories, at the revisions of build/revisions.
   UNPUBLISHED: >-
     --config patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"
-    --config patch.crates-io.oxirush-aper.rev="257024c63284b34c3dcb4579193e581e405cc474"
+    --config patch.crates-io.oxirush-aper.rev="27a8b099699c939d4094e8767e836876be588040"
     --config patch.crates-io.oxirush-utils.git="https://github.com/linouxis9/oxirush-utils"
     --config patch.crates-io.oxirush-utils.rev="b4f61a4c0177216d2f597d28e44ff0f679c58d8a"
 

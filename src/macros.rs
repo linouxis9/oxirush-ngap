@@ -730,16 +730,26 @@ macro_rules! ies {
         /// gives the IE: the error of the codec when they do not, and `None` for an
         /// identifier that has no one type. A value that decodes may be outside the
         /// root of an extensible constraint of its type: it then has the error of an
-        /// encoding that refuses it.
+        /// encoding that refuses it. And it has what of its encoding is in another
+        /// form than the one that X.691 gives it.
+        #[allow(clippy::type_complexity)]
         pub(crate) fn decodes<'a>(
             id: u16,
             octets: &'a [u8],
-        ) -> Option<Result<Option<$crate::Error>, $crate::Error>> {
+        ) -> Option<Result<(Option<$crate::Error>, $crate::aper::Faults), $crate::Error>> {
             match id {
                 $($(
                     $id => {
-                        let value: Result<$ie, $crate::Error> = $crate::aper::decode(octets);
-                        Some(value.map(|value| $crate::aper::encode_strict(&value).err()))
+                        let value: Result<($ie, _), $crate::Error> =
+                            $crate::aper::decode_with_faults(octets);
+                        // A reader that notes reads what one that does not reads.
+                        debug_assert_eq!(
+                            value.as_ref().map(|(value, _)| value),
+                            $crate::aper::decode::<$ie>(octets).as_ref()
+                        );
+                        Some(value.map(|(value, faults)| {
+                            ($crate::aper::encode_strict(&value).err(), faults)
+                        }))
                     }
                 )?)*
                 _ => None,

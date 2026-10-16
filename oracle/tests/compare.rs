@@ -162,6 +162,98 @@ fn the_additions_that_the_clauses_give_no_encoding_for_are_refused_by_both() {
     }
 }
 
+/// The identifier of a UE that a node gives it: a whole number of a range above 64K,
+/// by the name that each protocol gives its type. 42 is one octet after the number of
+/// its octets, which the octets start with: three bits in NGAP and two in S1AP.
+#[cfg(oxirush_ngap_hooks)]
+mod ue_id {
+    pub type Id = codec::hooks::bindings::AMFUENGAPID;
+    pub const NAME: &str = "AMFUENGAPID";
+    pub const IN_TWO_OCTETS: &[u8] = &[0x20, 0x00, 0x2a];
+}
+#[cfg(oxirush_s1ap_hooks)]
+mod ue_id {
+    pub type Id = codec::hooks::bindings::MMEUES1APID;
+    pub const NAME: &str = "MMEUES1APID";
+    pub const IN_TWO_OCTETS: &[u8] = &[0x40, 0x00, 0x2a];
+}
+
+#[test]
+fn a_value_in_another_form_than_the_canonical_one_is_read_by_both_and_noted_here() {
+    use codec::aper::{Decode, Encode, Fault, decode_strict, decode_with_faults, encode};
+    use codec::hooks::bindings::{NASPDU, RRCEstablishmentCause};
+
+    // `canonical` is the encoding that the clause of X.691 gives a value, and `other`
+    // the same value in the other form: both codecs read both, and write the canonical
+    // one. The crate notes the fault of the other form, and refuses it when it is
+    // asked to be strict.
+    fn both<'a, T: Decode<'a> + Encode + PartialEq + core::fmt::Debug>(
+        name: &str,
+        canonical: &'a [u8],
+        other: &'a [u8],
+        fault: Fault,
+    ) {
+        let (value, none) = decode_with_faults::<T>(canonical).unwrap();
+        assert!(none.is_empty(), "{name}: {none:?}");
+        assert_eq!(encode(&value).unwrap(), canonical, "{name}");
+        assert!(
+            oracle::same_octets(name, canonical, Ok(canonical)),
+            "{name}"
+        );
+        let (same, faults) = decode_with_faults::<T>(other).unwrap();
+        assert_eq!(same, value, "{name}");
+        let noted: Vec<Fault> = faults.iter().map(|noted| noted.fault).collect();
+        assert_eq!(noted, [fault], "{name}");
+        assert!(
+            oracle::same_octets(name, other, Ok(canonical)),
+            "{name}: {fault}"
+        );
+        assert_eq!(decode_strict::<T>(canonical).unwrap(), value, "{name}");
+        assert!(decode_strict::<T>(other).is_err(), "{name}: {fault}");
+    }
+
+    // §11.9.3.6: a length of 127 or less is one octet. A NAS-PDU of one octet.
+    both::<NASPDU>(
+        "NASPDU",
+        &[0x01, 0xaa],
+        &[0x80, 0x01, 0xaa],
+        Fault::LengthInTwoOctets,
+    );
+    // §11.9.3.8.1: a fragment before another is the largest. A NAS-PDU of 32768 octets
+    // in one fragment of twice 16K, and in two of 16K.
+    let one = [&[0xc2][..], &[0x5a; 32768], &[0x00]].concat();
+    let two = [
+        &[0xc1][..],
+        &[0x5a; 16384],
+        &[0xc1],
+        &[0x5a; 16384],
+        &[0x00],
+    ]
+    .concat();
+    both::<NASPDU>("NASPDU", &one, &two, Fault::SmallFragment);
+    // §11.6.1: a normally small number of 63 or less is six bits after a zero bit. The
+    // first value that RRCEstablishmentCause has after its extension marker: the
+    // extension bit, then the index 0.
+    let name = "RRCEstablishmentCause";
+    both::<RRCEstablishmentCause>(
+        name,
+        &[0x80],
+        &[0xc0, 0x01, 0x00],
+        Fault::SmallNumberAsLarge,
+    );
+    // §11.3.6: a whole number is in the least octets that hold it. The identifier 42 in
+    // one octet, and in two.
+    both::<ue_id::Id>(
+        ue_id::NAME,
+        &[0x00, 0x2a],
+        ue_id::IN_TWO_OCTETS,
+        Fault::LongNumber,
+    );
+    // §11.1.4: padding bits are zero. The same identifier, with a one bit before its
+    // octet.
+    both::<ue_id::Id>(ue_id::NAME, &[0x00, 0x2a], &[0x01, 0x2a], Fault::Padding);
+}
+
 #[test]
 fn a_pdu_and_its_message_are_read_and_written_as_the_oracle_reads_and_writes_them() {
     let (mut pdus, mut messages, mut refused) = (0, 0, 0);

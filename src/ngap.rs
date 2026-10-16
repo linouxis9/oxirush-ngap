@@ -45182,8 +45182,8 @@ pub mod ngap_ies {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
             Ok(Self({
                 let mut list = Vec::new();
+                let (mut count, mut more) = reader.length()?;
                 loop {
-                    let (count, more) = reader.length()?;
                     let size = list.len().saturating_add(count);
                     if !more || size > 65536 {
                         Reader::check_size(size, 1, 65536)?;
@@ -45194,6 +45194,7 @@ pub mod ngap_ies {
                     if !more {
                         break;
                     }
+                    (count, more) = reader.length_after(count)?;
                 }
                 list
             }))
@@ -94435,8 +94436,8 @@ pub mod ngap_ies {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
             Ok(Self({
                 let mut list = Vec::new();
+                let (mut count, mut more) = reader.length()?;
                 loop {
-                    let (count, more) = reader.length()?;
                     let size = list.len().saturating_add(count);
                     if !more || size > 65536 {
                         Reader::check_size(size, 1, 65536)?;
@@ -94447,6 +94448,7 @@ pub mod ngap_ies {
                     if !more {
                         break;
                     }
+                    (count, more) = reader.length_after(count)?;
                 }
                 list
             }))

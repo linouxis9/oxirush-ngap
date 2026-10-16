@@ -188,6 +188,12 @@ what each type became.
   where the type has `SIZE (1..150, ...)`, is written as an extension, which
   is right for a test and no value for an AMF to send. `check()` reports it
   as `Deviation::OutsideRoot`, and `aper::encode_strict` refuses it.
+- A value that is whole in another form than the one that ITU-T X.691 gives
+  it, as a length of 127 or less in two octets or padding bits that are not
+  zero, is read, as the encoder of a peer may write it. `check()` reports it
+  as `Deviation::NotCanonical`, with the `Fault` of `oxirush-aper`, its clause
+  and its bit, `aper::decode_with_faults` gives the same for any octets, and
+  `aper::decode_strict` refuses it.
 - What a receiver answers a message that deviates with, as clause 10 of
   TS 38.413 has it: `deviation.cause()` is the protocol cause, a transfer
   syntax error for an IE that does not decode, an abstract syntax error by

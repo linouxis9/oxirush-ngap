@@ -8,6 +8,7 @@ use crate::registry::{
     TypeOfError,
 };
 use crate::{Error, ErrorKind};
+use oxirush_aper::{Fault, Faults};
 
 /// What the registry has of a message: the direction and the procedure code of its PDU,
 /// the name that ASN.1 gives it, and the IEs of its object set in the order of the set,
@@ -41,7 +42,9 @@ pub(crate) fn name(id: u16) -> Option<&'static str> {
 /// The check compares the criticality of the PDU with the one that the specification
 /// assigns to its procedure, and the IEs of its message with the object set that the
 /// ASN.1 gives the message: which IEs the message has, in which order, with which
-/// criticality, and whether the value of each decodes as its type. An IE is told by
+/// criticality, and whether the value of each decodes as its type. It also says what
+/// of the message and of these values is written in another form than the one that
+/// ITU-T X.691 gives it. An IE is told by
 /// its identifier, by the name that ASN.1 gives it after `id-` and by its position in
 /// the message, which starts at 0, and `Display` says each deviation in a sentence.
 ///
@@ -154,6 +157,22 @@ pub enum Deviation {
         /// the IE returns.
         error: Error,
     },
+    /// An encoding that ITU-T X.691 gives one form for, in another: a value that is
+    /// whole, which a sender by the clause writes otherwise, as a length of 127 or less
+    /// in two octets or padding bits that are not zero. It is read, and a receiver
+    /// answers nothing for it: a tool that tests a peer says that the encoder of the
+    /// peer is not canonical.
+    NotCanonical {
+        /// The IE in whose value it is, as its identifier, its name and its position
+        /// in the message. `None` for what is around the values: the container of the
+        /// message, and the identifier, the criticality and the length of each IE.
+        ie: Option<(u16, &'static str, usize)>,
+        /// What is in another form, which has the clause that gives its form.
+        fault: Fault,
+        /// The bit at which it is: of the value of the IE, or of the octets of the
+        /// message.
+        bit: usize,
+    },
 }
 
 impl Deviation {
@@ -180,7 +199,7 @@ impl Deviation {
             | Self::UndecodableIe {
                 id, criticality, ..
             } => Some((*id, *criticality)),
-            Self::RepeatedIe { .. } | Self::OutOfOrder { .. } => None,
+            Self::RepeatedIe { .. } | Self::OutOfOrder { .. } | Self::NotCanonical { .. } => None,
         }
     }
 
@@ -230,8 +249,8 @@ impl Deviation {
     ///   twice or in a wrong order.
     ///
     /// `None` where the receiver goes on: for an IE of the criticality `ignore` that
-    /// it does not comprehend or that is missing, and for a criticality that is not
-    /// the assigned one.
+    /// it does not comprehend or that is missing, for a criticality that is not the
+    /// assigned one, and for an encoding that is not the canonical one.
     pub fn cause(&self) -> Option<CauseProtocol> {
         let by_criticality = |criticality: &Criticality| match criticality {
             Criticality::reject => Some(CauseProtocol::abstract_syntax_error_reject),
@@ -246,7 +265,9 @@ impl Deviation {
             Self::RepeatedIe { .. } | Self::OutOfOrder { .. } => {
                 Some(CauseProtocol::abstract_syntax_error_falsely_constructed_message)
             }
-            Self::PduCriticality { .. } | Self::IeCriticality { .. } => None,
+            Self::PduCriticality { .. }
+            | Self::IeCriticality { .. }
+            | Self::NotCanonical { .. } => None,
         }
     }
 
@@ -359,12 +380,29 @@ impl fmt::Display for Deviation {
                  of its type: {}",
                 error.reason()
             ),
+            Self::NotCanonical {
+                ie: Some((id, name, position)),
+                fault,
+                bit,
+            } => write!(
+                formatter,
+                "the value of {name} (IE {id}), at position {position}, is not written as \
+                 its sender is to write it: at bit {bit}, {fault}"
+            ),
+            Self::NotCanonical {
+                ie: None,
+                fault,
+                bit,
+            } => write!(
+                formatter,
+                "the message is not written as its sender is to write it: at bit {bit}, {fault}"
+            ),
         }
     }
 }
 
 /// What is wrong with the value of an IE, against the type that the registry gives it.
-pub(crate) enum Fault {
+pub(crate) enum Wrong {
     /// The octets do not decode: why, as the macro that extracts the IE says it.
     Undecodable(Error),
     /// The value is outside the root of an extensible constraint: the error of an
@@ -375,12 +413,13 @@ pub(crate) enum Fault {
 /// Add to `found` how `ies`, the IEs of a message in their order, each as its identifier
 /// and its criticality, deviate from `set`, the IEs of the object set of that message:
 /// those of the IEs in the order of the message, then the mandatory IEs that are
-/// missing in the order of the set. `fault` says what is wrong with the value of the IE
-/// at a position, for an IE of the set whose value is not one of its type.
+/// missing in the order of the set. `value` says what is wrong with the value of the IE
+/// at a position, for an IE of the set whose value is not one of its type, and what of
+/// its encoding is in another form than the one of X.691.
 pub(crate) fn deviations(
     set: &[(u16, Criticality, bool)],
     ies: &[(u16, Criticality)],
-    fault: &dyn Fn(usize) -> Option<Fault>,
+    value: &dyn Fn(usize) -> (Option<Wrong>, Faults),
     found: &mut Vec<Deviation>,
 ) {
     // Where the message has each IE of the set first, and the IE that the set has last
@@ -433,15 +472,16 @@ pub(crate) fn deviations(
                 assigned,
             });
         }
-        match fault(position) {
-            Some(Fault::Undecodable(error)) => found.push(Deviation::UndecodableIe {
+        let (wrong, faults) = value(position);
+        match wrong {
+            Some(Wrong::Undecodable(error)) => found.push(Deviation::UndecodableIe {
                 id,
                 name: name(),
                 position,
                 criticality,
                 error,
             }),
-            Some(Fault::OutsideRoot(error)) => found.push(Deviation::OutsideRoot {
+            Some(Wrong::OutsideRoot(error)) => found.push(Deviation::OutsideRoot {
                 id,
                 name: name(),
                 position,
@@ -450,6 +490,11 @@ pub(crate) fn deviations(
             }),
             None => {}
         }
+        found.extend(faults.iter().map(|noted| Deviation::NotCanonical {
+            ie: Some((id, name(), position)),
+            fault: noted.fault,
+            bit: noted.bit,
+        }));
     }
     for ((id, criticality, mandatory), first) in set.iter().zip(first) {
         if *mandatory && first.is_none() {
@@ -505,7 +550,7 @@ mod tests {
     /// What a message of these IEs deviates in, when the value of each decodes.
     fn found(ies: &[(u16, Criticality)]) -> Vec<Deviation> {
         let mut found = Vec::new();
-        deviations(&set(), ies, &|_| None, &mut found);
+        deviations(&set(), ies, &|_| (None, Faults::default()), &mut found);
         found
     }
 

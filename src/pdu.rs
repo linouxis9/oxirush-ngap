@@ -1,10 +1,10 @@
 //! The protocol IEs of the message of a PDU, whatever the message: read, put back, and
 //! compared with the object set that the ASN.1 gives the message.
 
-use oxirush_aper::{Decode, Encode, Octets, Reader, Writer};
+use oxirush_aper::{Decode, Encode, Faults, Octets, Reader, Writer};
 
 use crate::Error;
-use crate::check::{Deviation, Fault, deviations, object_set};
+use crate::check::{Deviation, Wrong, deviations, object_set};
 use crate::ngap::{Criticality, NGAPPDU, ProtocolIEContainer};
 use crate::registry::{KEY_IES, decodes, procedure_criticality};
 
@@ -22,6 +22,21 @@ fn message_ies<'a>(octets: &'a [u8]) -> Result<ProtocolIEContainer<'a>, Error> {
     }
     reader.finish()?;
     Ok(ies)
+}
+
+/// What of the message is in another form than the one that X.691 gives it, around the
+/// values of its IEs, which are not read here: the faults of a reader that notes them.
+/// The message is read as its type reads it, by the codec of a message that is a
+/// container of protocol IEs and nothing else: the function above is then the one
+/// place of this file that reads the container, as it was.
+fn message_faults(octets: &[u8]) -> Faults {
+    let read = oxirush_aper::decode_with_faults::<crate::ngap::ErrorIndication>(octets);
+    // A reader that notes reads what one that does not reads.
+    debug_assert_eq!(
+        read.as_ref().map(|(message, _)| &message.protocol_ies).ok(),
+        message_ies(octets).as_ref().ok()
+    );
+    read.map_or_else(|_| Faults::default(), |(_, faults)| faults)
 }
 
 /// The octets of the message that has these protocol IEs, written octet by octet: the
@@ -310,6 +325,13 @@ impl<'a> NGAPPDU<'a> {
     /// specification assigns it (10.3.5), and with IEs in a wrong order or with too many
     /// occurrences, which reject the procedure (10.3.6).
     ///
+    /// It also reports what is written in another form than the one that ITU-T X.691
+    /// gives it, as [`Deviation::NotCanonical`]: in the message around its IEs, and in
+    /// the value of each IE of the object set. Such a value is whole, and the encoder of
+    /// a peer may write it: a receiver reads it and answers nothing for it. The octets
+    /// before the message, which are the PDU itself, were read when the PDU was decoded:
+    /// `aper::decode_with_faults` of the PDU that borrows has their faults.
+    ///
     /// What it does not look at:
     ///
     /// - a conditional IE, which is reported neither when it is missing nor when it is
@@ -342,25 +364,37 @@ impl<'a> NGAPPDU<'a> {
         }
         if let Some(set) = message.ies {
             let ies = self.protocol_ies()?;
+            // What of the message itself is in another form than the one of X.691.
+            let faults = message_faults(self.value());
+            found.extend(faults.iter().map(|noted| Deviation::NotCanonical {
+                ie: None,
+                fault: noted.fault,
+                bit: noted.bit,
+            }));
             let listed: Vec<_> = ies.0.iter().map(|ie| (ie.id.0, ie.criticality)).collect();
             // What is wrong with the value of the IE at a position: why it does not
             // decode, as the macro that extracts it says it, or what of it is outside
-            // the root of an extensible constraint.
-            let fault = |position: usize| {
+            // the root of an extensible constraint. And what of its encoding is in
+            // another form than the one of X.691.
+            let value = |position: usize| {
                 let ie = &ies.0[position];
                 let (id, criticality) = (ie.id.0, ie.criticality);
-                match decodes(id, &ie.value)? {
-                    Ok(outside) => outside.map(Fault::OutsideRoot),
-                    Err(error) => Some(Fault::Undecodable(crate::error::undecodable_ie(
-                        error,
-                        message.name,
-                        id,
-                        criticality,
-                        position,
-                    ))),
+                match decodes(id, &ie.value) {
+                    None => (None, Faults::default()),
+                    Some(Ok((outside, faults))) => (outside.map(Wrong::OutsideRoot), faults),
+                    Some(Err(error)) => {
+                        let error = crate::error::undecodable_ie(
+                            error,
+                            message.name,
+                            id,
+                            criticality,
+                            position,
+                        );
+                        (Some(Wrong::Undecodable(error)), Faults::default())
+                    }
                 }
             };
-            deviations(set, &listed, &fault, &mut found);
+            deviations(set, &listed, &value, &mut found);
         }
         Ok(found)
     }

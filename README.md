@@ -583,6 +583,9 @@ sentence.
 | `OutOfOrder` | An IE that comes after one that the object set has after it. The IEs that the set does not have are left out of the order |
 | `IeCriticality` | A criticality of an IE that is not the one that the object set assigns it |
 | `MissingIe` | An IE whose presence is mandatory, and that the message does not have |
+| `UndecodableIe` | An IE of the object set whose value does not decode as its type |
+| `OutsideRoot` | An IE whose value is of a later version of its type: a number or a size outside the root of an extensible constraint, which `aper::encode_strict` refuses |
+| `NotCanonical` | A value that is whole in another form than the one that ITU-T X.691 gives it, in the message or in the value of an IE: a `Fault`, with its clause and the bit at which it is |
 
 Clause 10.3 of TS 38.413 says what a receiver does. An IE that it does not
 comprehend is handled by the criticality that the IE carries (10.3.4), a
@@ -590,10 +593,20 @@ missing IE by the criticality that the specification assigns it (10.3.5),
 and IEs in a wrong order or with too many occurrences reject the procedure
 (10.3.6).
 
+A value in another form than the canonical one is read all the same, as the
+encoder of a peer may write it: a length of 127 or less in two octets, a
+fragment that is not the largest, a small number in the form of a larger
+one, a whole number in more octets than it needs, padding bits that are not
+zero. A receiver answers nothing for it, and a tool that tests a peer says
+that its encoder is not canonical. `aper::decode_with_faults` gives the same
+for the octets of a PDU, which `check()` does not have, and
+`aper::decode_strict` refuses them.
+
 `check()` does not report a conditional IE, missing or present: its
-condition is prose. It looks at the IEs of the message itself, not at their
-values or at the IEs inside a value. The private message has no object set,
-so only the criticality of its PDU is compared, and a procedure that the
+condition is prose. It decodes the value of each IE of the message as its
+type, and not what that value holds as octets: the IEs of a list, of a
+transfer or of an extension container. The private message has no object
+set, so only the criticality of its PDU is compared, and a procedure that the
 specification does not have in that direction is an error of the kind
 `UnknownMessage`.
 

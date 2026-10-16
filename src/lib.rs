@@ -204,7 +204,9 @@ pub use oxirush_utils::identity;
 pub use check::Deviation;
 pub use message::Message;
 pub use ngap::NgapPduKind;
-pub use oxirush_aper::{AsnType, BitString, Bits, Decode, Encode, Error, ErrorKind, Octets};
+pub use oxirush_aper::{
+    AsnType, BitString, Bits, Decode, Encode, Error, ErrorKind, Fault, Faults, Octets,
+};
 
 /// The examples of the README, which the documentation tests compile and run.
 #[cfg(all(doctest, feature = "inspect"))]

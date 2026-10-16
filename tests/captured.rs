@@ -91,6 +91,17 @@ fn each_captured_pdu_is_read_and_written_as_the_octets_that_its_sender_sent() {
         again.set_protocol_ies(ies).unwrap();
         assert_eq!(again.encode().unwrap(), captured.octets, "{name}");
 
+        // Its sender wrote it by the clauses of X.691: the PDU, its message and the
+        // value of each IE have each their one form. No implementation of the captures
+        // is evidence for an encoding that a reader takes in another form.
+        let strict = oxirush_ngap::aper::decode_strict::<NGAPPDU>(&captured.octets);
+        assert_eq!(strict.as_ref(), Ok(&pdu), "{name}");
+        let deviations = pdu.check().unwrap();
+        let other = |deviation: &&oxirush_ngap::Deviation| {
+            matches!(deviation, oxirush_ngap::Deviation::NotCanonical { .. })
+        };
+        assert_eq!(deviations.iter().find(other), None, "{name}");
+
         let sender = captured.source.split(' ').next().unwrap();
         *senders.entry(sender).or_default() += 1;
     }

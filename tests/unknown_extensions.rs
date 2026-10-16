@@ -12,7 +12,7 @@ fn unknown_sequence_addition_preserves_the_following_item() {
         value
             .0
             .iter()
-            .map(|item| item.s_nssai.s_st.0[0])
+            .map(|item| item.s_nssai.sst.0[0])
             .collect::<Vec<_>>(),
         [1, 2],
     );

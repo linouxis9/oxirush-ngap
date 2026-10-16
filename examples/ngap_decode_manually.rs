@@ -133,7 +133,7 @@ fn main() {
 
                         println!("Served GUAMIs:  {} entries", list.0.len());
                         for item in &list.0 {
-                            let plmn = &item.g_uami.p_lmnidentity.0;
+                            let plmn = &item.guami.plmn_identity.0;
                             let plmn_hex: String =
                                 plmn.iter().map(|b| format!("{b:02x}")).collect();
                             println!("  PLMN: {plmn_hex}");
@@ -146,7 +146,7 @@ fn main() {
 
                         println!("PLMN Support:   {} entries", list.0.len());
                         for item in &list.0 {
-                            let plmn = &item.p_lmnidentity.0;
+                            let plmn = &item.plmn_identity.0;
                             let plmn_hex: String =
                                 plmn.iter().map(|b| format!("{b:02x}")).collect();
                             let slices = item.slice_support_list.0.len();

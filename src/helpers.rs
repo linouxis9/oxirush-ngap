@@ -247,7 +247,7 @@ mod tests {
         // octet-aligned after the PLMN (X.691 (02/2021) §16.10).
         let cgi = nr_cgi(plmn, 0xab_cdef, 0x123).unwrap();
         assert_eq!(
-            cgi.n_rcell_identity.0,
+            cgi.nr_cell_identity.0,
             Bits::new(0xa_bcde_f123, 36).unwrap()
         );
         assert_eq!(
@@ -255,7 +255,7 @@ mod tests {
             [0x00, 0x02, 0xf8, 0x39, 0xab, 0xcd, 0xef, 0x12, 0x30]
         );
         let gnb = global_gnb_id(plmn, 0xab_cdef).unwrap();
-        let GNBID::gNB_ID(bits) = gnb.g_nb_id else {
+        let GNBID::gNB_ID(bits) = gnb.gnb_id else {
             panic!("expected gNB ID");
         };
         assert_eq!(bits, Bits::new(0xab_cdef, 24).unwrap());
@@ -273,15 +273,15 @@ mod tests {
         // and the one after it.
         let amf = guami(network(), 0xff, 1023, 63).unwrap();
         assert_eq!(
-            (amf.a_mfregion_id.0.value(), amf.a_mfregion_id.0.len()),
+            (amf.amf_region_id.0.value(), amf.amf_region_id.0.len()),
             (0xff, 8)
         );
         assert_eq!(
-            (amf.a_mfset_id.0.value(), amf.a_mfset_id.0.len()),
+            (amf.amf_set_id.0.value(), amf.amf_set_id.0.len()),
             (1023, 10)
         );
         assert_eq!(
-            (amf.a_mfpointer.0.value(), amf.a_mfpointer.0.len()),
+            (amf.amf_pointer.0.value(), amf.amf_pointer.0.len()),
             (63, 6)
         );
         assert_eq!(
@@ -316,21 +316,21 @@ mod tests {
         let capabilities = ue_security_capabilities(0xC0, 0x40);
         let leading = |bits: &BitString| (0..3).map(|at| bits.get(at).unwrap()).collect::<Vec<_>>();
         assert_eq!(
-            leading(&capabilities.n_rencryption_algorithms.0),
+            leading(&capabilities.nr_encryption_algorithms.0),
             [true, true, false]
         );
         assert_eq!(
-            leading(&capabilities.n_rintegrity_protection_algorithms.0),
+            leading(&capabilities.nr_integrity_protection_algorithms.0),
             [false, true, false]
         );
         // Sixteen bits each, of which the last eight are not set.
-        assert_eq!(capabilities.n_rencryption_algorithms.0.len(), 16);
+        assert_eq!(capabilities.nr_encryption_algorithms.0.len(), 16);
         assert_eq!(
-            capabilities.n_rencryption_algorithms.0.as_octets(),
+            capabilities.nr_encryption_algorithms.0.as_octets(),
             [0xC0, 0x00]
         );
         assert_eq!(
-            capabilities.e_utraencryption_algorithms.0.as_octets(),
+            capabilities.eutra_encryption_algorithms.0.as_octets(),
             [0, 0]
         );
     }

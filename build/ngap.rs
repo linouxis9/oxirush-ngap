@@ -162,6 +162,8 @@ fn post_process(path: &Path, asn_files: &[PathBuf]) -> Result<()> {
     fs::write("src/registry.rs", list)?;
     fs::write("src/inspect_registry.rs", inspection)?;
     fs::write(path, oracle).context("write the bindings of the oracle")?;
+    // The name of each field, and the one that it had before the rule of the generator.
+    fs::write("build/fields.tsv", &bindings.fields)?;
     let mut text = bindings.text;
     text.push_str(&support(&bindings.borrowing)?);
     fs::write(BINDINGS, text).context("write the NGAP bindings")

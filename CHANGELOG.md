@@ -13,6 +13,13 @@ what each type became.
 
 ### Breaking changes relative to 0.4.2
 
+- A field has the words of the ASN.1 identifier of its member: `p_lmnidentity`
+  is `plmn_identity`, `t_ac` is `tac`, `i_e_extensions` is `ie_extensions`,
+  `n_rcell_identity` is `nr_cell_identity`, `g_nb_id` is `gnb_id`,
+  `a_mfregion_id` is `amf_region_id`, `g_tp_teid` is `gtp_teid`. The README
+  says the rule, and `build/fields.tsv` of the repository has each field with
+  its name in 0.4.2, for a replacement by name. The JSON forms are as
+  they were.
 - The crate no longer depends on `rasn`, and `oxirush_ngap::rasn` is not
   there. The bindings implement `AsnType`, `Decode` and `Encode` of
   `oxirush-aper`, which the crate re-exports as `oxirush_ngap::aper`, and no

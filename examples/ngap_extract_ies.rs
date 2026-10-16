@@ -49,8 +49,8 @@ fn handle_handover_required(pdu: &NGAP_PDU) -> Result<Vec<String>, Error> {
         opt cause_str: String = Cause(cause) => format!("{cause:?}"),
 
         opt target: String = TargetID(target_value) => match target_value {
-            TargetID::targetRANNodeID(value) => match value.global_rannode_id {
-                GlobalRANNodeID::globalGNB_ID(gnb) => match plmn_from(&gnb.p_lmnidentity) {
+            TargetID::targetRANNodeID(value) => match value.global_ran_node_id {
+                GlobalRANNodeID::globalGNB_ID(gnb) => match plmn_from(&gnb.plmn_identity) {
                     Some((mcc, mnc)) => format!("target gNB in PLMN {mcc}-{mnc}"),
                     None => "target gNB without a PLMN identity".to_string(),
                 },
@@ -86,7 +86,7 @@ fn handle_initial_context_setup(pdu: &NGAP_PDU) -> Result<Vec<String>, Error> {
             PDUSessionResourceSetupListCxtReq(list) => list,
 
         opt ambr_dl: String = UEAggregateMaximumBitRate(ambr) =>
-            ambr.u_eaggregate_maximum_bit_rate_dl.0.to_string(),
+            ambr.ue_aggregate_maximum_bit_rate_dl.0.to_string(),
     );
 
     let session_count = sessions.as_ref().map_or(0, |list| list.0.len());
@@ -219,5 +219,5 @@ fn handover_required_sessions() -> PDUSessionResourceListHORqd<'static> {
 fn nested_nas_len(list: &PDUSessionResourceSetupListCxtReq) -> Option<usize> {
     list.0
         .iter()
-        .find_map(|item| item.n_as_pdu.as_ref().map(|nas| nas.0.len()))
+        .find_map(|item| item.nas_pdu.as_ref().map(|nas| nas.0.len()))
 }

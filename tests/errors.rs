@@ -206,7 +206,7 @@ fn a_member_that_does_not_encode_is_named_as_one_that_does_not_decode_is() {
     assert_eq!(
         error.to_string(),
         "a value of SourceNGRANNode-ToTargetNGRANNode-TransparentContainer does not encode: a \
-         size of 0 is outside its constraint (1..16), in its field `u_ehistory_information`"
+         size of 0 is outside its constraint (1..16), in its field `ue_history_information`"
     );
 }
 
@@ -499,7 +499,7 @@ fn an_argument_that_a_helper_does_not_take_is_an_error_and_no_panic() {
 
     // A TAC is three octets (clause 9.3.3.10), which the type of the argument says.
     let area = tai(network(), [0, 0, 1]);
-    assert_eq!(area.t_ac.0[..], [0, 0, 1]);
+    assert_eq!(area.tac.0[..], [0, 0, 1]);
 }
 
 /// The errors of the `inspect` feature: a test for each kind, as a caller matches on it.

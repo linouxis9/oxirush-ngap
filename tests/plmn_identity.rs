@@ -122,7 +122,7 @@ fn the_identities_of_a_paging_are_those_that_tshark_reads() -> Result<(), Error>
     let identities = areas
         .0
         .iter()
-        .map(|area| plmn_from(&area.t_ai.p_lmnidentity));
+        .map(|area| plmn_from(&area.tai.plmn_identity));
     assert_eq!(identities.collect::<Option<Vec<_>>>(), Some(read));
 
     // And write the octets of the message for them.
@@ -219,7 +219,7 @@ fn the_notation_of_a_plmn_identity_has_the_octets_of_the_clause() {
         let edited = NGAP_PDU::from_view(&view).unwrap();
         let paging: Paging = edited.decode_value().unwrap();
         let areas: TAIListForPaging = decode_open_type(&paging.protocol_ies.0[1].value).unwrap();
-        assert_eq!(&areas.0[0].t_ai.p_lmnidentity.0[..], octets, "{mcc}-{mnc}");
+        assert_eq!(&areas.0[0].tai.plmn_identity.0[..], octets, "{mcc}-{mnc}");
         let shown = edited.to_view().unwrap();
         let shown = inspect::select(&shown, first).unwrap();
         assert_eq!(shown, [&json!(format!("{mcc}-{mnc}"))]);

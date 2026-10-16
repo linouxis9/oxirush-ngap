@@ -134,7 +134,7 @@ fn editing_a_known_ie_cannot_drop_unknown_sequence_additions() {
     // come from the independent unknown_extensions fixture, inside PLMNSupportList.
     let raw = hex::decode("0002f839000180080801000010").unwrap();
     let list: PLMNSupportList = decode_open_type(&raw).unwrap();
-    assert_eq!(list.0[0].slice_support_list.0[1].s_nssai.s_st.0[0], 2);
+    assert_eq!(list.0[0].slice_support_list.0[1].s_nssai.sst.0[0], 2);
     let response = NGSetupResponse::new(ProtocolIEContainer(vec![ProtocolIEField::new(
         ProtocolIEID(80),
         Criticality::reject,
@@ -825,7 +825,7 @@ fn the_container_of_a_handover_is_written_and_selected_by_the_type_that_it_carri
         decode_open_type(&message.protocol_ies.0[2].value).unwrap();
     let carried: SourceNGRANNodeToTargetNGRANNodeTransparentContainer =
         oxirush_ngap::aper::decode(&octets.0).unwrap();
-    assert_eq!(carried.r_rccontainer.0, [1, 2]);
+    assert_eq!(carried.rrc_container.0, [1, 2]);
     assert_eq!(oxirush_ngap::aper::encode(&carried).unwrap(), octets.0);
     // Nothing says what the octets carry: a view and a tree have them as they are.
     let mut view = pdu.to_view().unwrap();
@@ -2504,7 +2504,7 @@ fn an_integer_of_two_to_the_63_or_more_is_a_number() {
     assert_eq!(
         error.to_string(),
         "these octets do not decode as UEAggregateMaximumBitRate: the number does not fit in \
-         64 bits, in its field `u_eaggregate_maximum_bit_rate_dl`"
+         64 bits, in its field `ue_aggregate_maximum_bit_rate_dl`"
     );
     let mut pdu = modification(1, 16);
     let mut ies = pdu.protocol_ies().unwrap().into_owned();

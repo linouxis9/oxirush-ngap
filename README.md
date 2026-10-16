@@ -124,7 +124,7 @@ that this revision of the crate is tested with:
 
 ```toml
 [patch.crates-io]
-oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "6071368a2306df4b24a30ddadc80624ee065652e" }
+oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "517165ba860eee4a19b780461be9141b8a342df9" }
 oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "b4f61a4c0177216d2f597d28e44ff0f679c58d8a" }
 ```
 

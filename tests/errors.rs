@@ -311,7 +311,7 @@ fn spoiled_request() -> UEContextReleaseRequest<'static> {
 /// What a receiver reads in a request when it takes the cause if it can.
 fn id_and_cause<'a>(
     request: &'a UEContextReleaseRequest<'a>,
-) -> Result<(u64, Option<Cause<'a>>), Error> {
+) -> Result<(u64, Option<Cause>), Error> {
     extract_ngap_ies!(request, UEContextReleaseRequest,
         req id: u64 = AMF_UE_NGAP_ID(id),
         lax cause: Cause = Cause(cause) => cause,
@@ -320,23 +320,21 @@ fn id_and_cause<'a>(
 }
 
 /// A call with `lax` fields alone has no error: its function returns no `Result`.
-fn cause_if_read<'a>(request: &'a UEContextReleaseRequest<'a>) -> Option<Cause<'a>> {
+fn cause_if_read<'a>(request: &'a UEContextReleaseRequest<'a>) -> Option<Cause> {
     extract_ngap_ies!(request, UEContextReleaseRequest,
         lax cause: Cause = Cause(cause) => cause,
     );
     cause
 }
 
-fn optional_cause<'a>(
-    request: &'a UEContextReleaseRequest<'a>,
-) -> Result<Option<Cause<'a>>, Error> {
+fn optional_cause<'a>(request: &'a UEContextReleaseRequest<'a>) -> Result<Option<Cause>, Error> {
     extract_ngap_ies!(request, UEContextReleaseRequest,
         opt cause: Cause = Cause(cause) => cause,
     );
     Ok(cause)
 }
 
-fn required_cause<'a>(request: &'a UEContextReleaseRequest<'a>) -> Result<Cause<'a>, Error> {
+fn required_cause<'a>(request: &'a UEContextReleaseRequest<'a>) -> Result<Cause, Error> {
     extract_ngap_ies!(request, UEContextReleaseRequest,
         req cause: Cause = Cause(cause) => cause,
     );

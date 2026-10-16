@@ -45,9 +45,12 @@ what each type became.
 - A type that holds octets, a long bit string, a character string or an open
   type has a lifetime, as `NASPDU<'a>`, and so has each type that holds one of
   them, which is every message: a value that is decoded borrows from the
-  octets that it was decoded from, and copies none. `NGAP_PDU` is the PDU that
-  owns its octets, `NGAPPDU<'static>`, and `NGAP_PDU::decode` gives it as
-  before. What changes for code that compiled:
+  octets that it was decoded from, and copies none. The extension container of
+  a value, which a peer seldom sends, is copied instead: it owns its octets,
+  so that a type that holds no others has no lifetime, as `TAI`, `NRCGI`,
+  `GUAMI` and `Cause`. 477 of the 1,352 types of the bindings have one.
+  `NGAP_PDU` is the PDU that owns its octets, `NGAPPDU<'static>`, and
+  `NGAP_PDU::decode` gives it as before. What changes for code that compiled:
   - a function that returns or keeps a value of the bindings writes its
     lifetime: `-> NASPDU<'static>` for a value that it built or that it made
     with `into_owned()`, which every type that borrows has, and

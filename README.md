@@ -294,8 +294,22 @@ this rule and have in 0.4.2 for every field of a type that 0.4.2 has but two, th
 
 A value that is decoded borrows the octets that it holds: a type that holds
 octets has a lifetime, as `NASPDU<'a>`, and one that holds none, as `Cause`,
-has not. `into_owned()` gives the same value with the lifetime `'static`,
-which is the type to write in a struct.
+`TAI`, `NRCGI` or `GUAMI`, has not and is kept as it is. The extension
+container of a value, which a peer seldom sends, owns its octets, so that it
+gives the value no lifetime. `into_owned()` gives a value that borrows with
+the lifetime `'static`, which is the type to write in a struct.
+
+```rust
+use oxirush_ngap::ngap::{Cause, GUAMI, NRCGI, TAI};
+
+// What holds no octets of its own is kept as it is decoded
+struct Cell {
+    tai: TAI,
+    cgi: NRCGI,
+    guami: GUAMI,
+    last_cause: Option<Cause>,
+}
+```
 
 ```rust
 use oxirush_ngap::{Error, build_ngap, extract_ngap_ies, ngap::*};
@@ -332,6 +346,13 @@ fn main() -> Result<(), Error> {
 ```text
 UE 7: a NAS-PDU of 3 octets
 ```
+
+A function that is given octets returns the message that borrows them:
+`NGAP_PDU::decode_borrowed(octets)?.message()`. The message of `decode_value`
+borrows from the PDU, and a function does not return it when the PDU is one
+of its variables (E0515). What another task receives, by a channel or by
+`spawn`, is `'static`: an `NGAP_PDU`, which owns its octets, or a value of
+`into_owned()`.
 
 A message may be held across an `.await`. The future of this handler owns
 the buffer, the PDU borrows from the buffer, the message from the PDU and the
@@ -462,7 +483,7 @@ reads them with `lax`.
 use oxirush_ngap::{extract_ngap_ies, ngap::*};
 
 // The cause of a request, when it has one that is read
-fn cause<'a>(request: &'a UEContextReleaseRequest<'a>) -> Option<Cause<'a>> {
+fn cause(request: &UEContextReleaseRequest<'_>) -> Option<Cause> {
     extract_ngap_ies!(request, UEContextReleaseRequest,
         lax cause: Cause = Cause(value) => value,
     );
@@ -1537,7 +1558,7 @@ rustfmt --edition 2024 src/ngap.rs src/registry.rs src/inspect_registry.rs \
 
 `rasn-compiler` finds rustfmt through `CARGO`. Commit the five files after
 regenerating them, and do not edit them by hand. They were last regenerated
-on 2026-10-12, with the generator of that revision and the rustfmt of Rust
+on 2026-10-16, with the generator of that revision and the rustfmt of Rust
 1.88: they came out as they are committed, octet for octet. The `Reproduce`
 workflow does it again from the archive of 3GPP when the generator, the
 bindings or the vectors change, and on demand: it extracts the modules, runs

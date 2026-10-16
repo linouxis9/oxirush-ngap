@@ -96,7 +96,7 @@ pub fn guami(
     region_id: u8,
     set_id: u16,
     pointer: u8,
-) -> Result<GUAMI<'static>, Error> {
+) -> Result<GUAMI, Error> {
     let set_id = fits("the AMF Set ID", set_id.into(), 10)?;
     let pointer = fits("the AMF Pointer", pointer.into(), 6)?;
     Ok(GUAMI::new(
@@ -109,7 +109,7 @@ pub fn guami(
 }
 
 /// Build a 5G Tracking Area Identity: a PLMN and the three octets of a TAC.
-pub fn tai(plmn_identity: PLMNIdentity, tac: [u8; 3]) -> TAI<'static> {
+pub fn tai(plmn_identity: PLMNIdentity, tac: [u8; 3]) -> TAI {
     TAI::new(plmn_identity, TAC(tac), None)
 }
 
@@ -118,11 +118,7 @@ pub fn tai(plmn_identity: PLMNIdentity, tac: [u8; 3]) -> TAI<'static> {
 /// An error of the kind `Argument` for a gNB ID that does not fit in 24 bits and for a
 /// cell that does not fit in the 12 bits that follow it in the 36 of an NR Cell
 /// Identity (TS 38.413 clause 9.3.1.7).
-pub fn nr_cgi(
-    plmn_identity: PLMNIdentity,
-    gnb_id: u32,
-    cell_id: u16,
-) -> Result<NRCGI<'static>, Error> {
+pub fn nr_cgi(plmn_identity: PLMNIdentity, gnb_id: u32, cell_id: u16) -> Result<NRCGI, Error> {
     let gnb_id = fits("the gNB ID", gnb_id.into(), 24)?;
     let cell_id = fits("the cell of the gNB", cell_id.into(), 12)?;
     let nci = (gnb_id << 12) | cell_id;
@@ -136,10 +132,7 @@ pub fn nr_cgi(
 /// Build a `GlobalGNBID` for a 24-bit gNB identifier.
 ///
 /// An error of the kind `Argument` for a gNB ID that does not fit in 24 bits.
-pub fn global_gnb_id(
-    plmn_identity: PLMNIdentity,
-    gnb_id: u32,
-) -> Result<GlobalGNBID<'static>, Error> {
+pub fn global_gnb_id(plmn_identity: PLMNIdentity, gnb_id: u32) -> Result<GlobalGNBID, Error> {
     let gnb_id = fits("the gNB ID", gnb_id.into(), 24)?;
     Ok(GlobalGNBID::new(
         plmn_identity,
@@ -149,7 +142,7 @@ pub fn global_gnb_id(
 }
 
 /// Build Single Network Slice Selection Assistance Information.
-pub fn s_nssai(sst: u8, sd: Option<[u8; 3]>) -> SNSSAI<'static> {
+pub fn s_nssai(sst: u8, sd: Option<[u8; 3]>) -> SNSSAI {
     SNSSAI::new(SST([sst]), sd.map(SD), None)
 }
 

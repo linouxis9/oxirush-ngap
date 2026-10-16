@@ -141,7 +141,7 @@ fn the_additions_that_the_clauses_give_no_encoding_for_are_refused_by_both() {
     // version. The first is what a differential run against the codec of rasn found:
     // the crate and the oracle read it as a value without additions.
     let name = "ULCPSecurityInformation";
-    type Value<'a> = codec::hooks::bindings::ULCPSecurityInformation<'a>;
+    type Value = codec::hooks::bindings::ULCPSecurityInformation;
     for (octets, read) in [
         // A bitmap of no bit, in the form of more than 64 bits (X.691 §19.8).
         (&[0x80, 0x02, 0x01, 0x00][..], false),

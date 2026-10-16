@@ -1,6 +1,6 @@
 use oxirush_ngap::aper::{Decode, Encode, decode, encode};
 use oxirush_ngap::ngap::*;
-use oxirush_ngap::{BitString, Bits, Error, ErrorKind, build_ngap, extract_ngap_ies};
+use oxirush_ngap::{BitString, Bits, Error, ErrorKind, Octets, build_ngap, extract_ngap_ies};
 
 #[test]
 fn public_macros_round_trip_typed_open_message() -> Result<(), Error> {
@@ -462,15 +462,14 @@ fn an_empty_open_type_value_is_one_zero_octet() {
 /// two reads what the other writes.
 #[test]
 fn a_number_between_the_ranges_of_an_extensible_root_is_written_in_the_root() {
-    let period = |value: u8| -> ExpectedUEActivityBehaviour<'static> {
+    let period = |value: u8| -> ExpectedUEActivityBehaviour {
         let period = ExpectedActivityPeriod(u64::from(value));
         ExpectedUEActivityBehaviour::new(Some(period), None, None, None)
     };
     let written = |value| hex::encode(encode(&period(value)).unwrap());
     let read = |octets: &str| {
         let octets = hex::decode(octets).unwrap();
-        let read = decode::<ExpectedUEActivityBehaviour>(&octets).unwrap();
-        read.into_owned()
+        decode::<ExpectedUEActivityBehaviour>(&octets).unwrap()
     };
 
     // The extension bit of the SEQUENCE, a bit for each of its four members, the
@@ -544,4 +543,28 @@ fn a_string_with_a_length_of_two_octets_is_written_as_pycrate_writes_it() {
         config.container_for_app_layer_meas_config.unwrap().len(),
         300
     );
+}
+
+/// The extension container of a value owns its octets, which a peer seldom
+/// sends: a TAI that has one has no lifetime, outlives the octets that it is
+/// decoded from, and keeps the container.
+#[test]
+fn a_value_keeps_its_extension_container_after_its_octets() {
+    let sent = TAI::new(
+        PLMNIdentity([0x02, 0xf8, 0x39]),
+        TAC([0x00, 0x00, 0x01]),
+        Some(ProtocolExtensionContainer(vec![
+            ProtocolExtensionField::new(
+                ProtocolExtensionID(1),
+                Criticality::ignore,
+                Octets::from(vec![0x00]),
+            ),
+        ])),
+    );
+    let octets = encode(&sent).unwrap();
+    let kept: TAI = decode(&octets).unwrap();
+    drop(octets);
+    let extensions = kept.ie_extensions.as_ref().unwrap();
+    assert!(!extensions.0[0].extension_value.is_borrowed());
+    assert_eq!(kept, sent);
 }

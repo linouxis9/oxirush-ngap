@@ -86,7 +86,7 @@ fn networks(printed: &str) -> Vec<(String, String)> {
 }
 
 /// The tracking areas that [`PAGING`] is for, built with the helpers.
-fn tracking_areas() -> TAIListForPaging<'static> {
+fn tracking_areas() -> TAIListForPaging {
     let areas = [("208", "93", [0, 0, 1]), ("310", "410", [0, 0, 2])];
     let items = areas
         .map(|(mcc, mnc, tac)| TAIListForPagingItem::new(tai(plmn(mcc, mnc).unwrap(), tac), None));

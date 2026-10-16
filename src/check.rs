@@ -225,7 +225,7 @@ impl Deviation {
     /// The specification has a receiver report the IEs that it does not comprehend
     /// and those that are missing when their criticality is `reject` or `notify`, and
     /// ignore the others: the criticality of the item says which it is.
-    pub fn diagnostics_item(&self) -> Option<CriticalityDiagnosticsIEItem<'static>> {
+    pub fn diagnostics_item(&self) -> Option<CriticalityDiagnosticsIEItem> {
         let (id, criticality) = self.ie()?;
         let type_of_error = self.type_of_error()?;
         let id = ProtocolIEID(id);

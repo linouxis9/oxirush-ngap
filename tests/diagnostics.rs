@@ -19,7 +19,7 @@ use oxirush_ngap::{Deviation, Error, ErrorKind, build_ngap, extract_ngap_ies};
 const SUPPORTED_TA_LIST: u16 = 102;
 const DEFAULT_PAGING_DRX: u16 = 21;
 
-fn areas() -> Result<SupportedTAList<'static>, Error> {
+fn areas() -> Result<SupportedTAList, Error> {
     let slices = SliceSupportList(vec![SliceSupportItem::new(s_nssai(1, None), None)]);
     let networks = BroadcastPLMNList(vec![BroadcastPLMNItem::new(
         plmn("208", "93")?,
@@ -75,9 +75,7 @@ fn accept(request: &NGSetupRequest) -> Result<usize, Error> {
 }
 
 /// The Criticality Diagnostics of an NG SETUP REQUEST, with these items.
-fn diagnostics(
-    items: Vec<CriticalityDiagnosticsIEItem<'static>>,
-) -> CriticalityDiagnostics<'static> {
+fn diagnostics(items: Vec<CriticalityDiagnosticsIEItem>) -> CriticalityDiagnostics {
     CriticalityDiagnostics::new(
         Some(ProcedureCode(21)),
         Some(TriggeringMessage::initiating_message),
@@ -100,16 +98,14 @@ fn failure(pdu: &NGAP_PDU) -> Result<NGAP_PDU, Error> {
 }
 
 /// The cause and the Criticality Diagnostics of a failure, as its receiver reads them.
-fn answered(
-    failure: &NGAP_PDU,
-) -> Result<(Cause<'static>, CriticalityDiagnostics<'static>), Error> {
+fn answered(failure: &NGAP_PDU) -> Result<(Cause, CriticalityDiagnostics), Error> {
     let received = NGAP_PDU::decode(&failure.encode()?)?;
     let message: NGSetupFailure = received.decode_value()?;
     extract_ngap_ies!(message, NGSetupFailure,
         req cause: Cause = Cause(cause) => cause,
         req diagnostics: CriticalityDiagnostics = CriticalityDiagnostics(diagnostics) => diagnostics,
     );
-    Ok((cause.into_owned(), diagnostics.into_owned()))
+    Ok((cause, diagnostics))
 }
 
 #[test]

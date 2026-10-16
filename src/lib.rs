@@ -52,7 +52,9 @@
 //! A value that is decoded borrows the octets that it holds from what it was decoded
 //! from: the NAS-PDU of a message is a slice of the PDU, and nothing is copied. A type
 //! that holds octets has a lifetime for that, as `InitialUEMessage<'a>` and
-//! `NASPDU<'a>`. A type that holds none, as `Cause`, has no lifetime.
+//! `NASPDU<'a>`. A type that holds none, as `Cause`, `TAI`, `NRCGI` or `GUAMI`, has no
+//! lifetime. The extension container of a value owns its octets, as a peer seldom sends
+//! one, so that it gives the value no lifetime.
 //!
 //! | To | Write |
 //! | --- | --- |

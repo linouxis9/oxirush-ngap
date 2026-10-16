@@ -26,16 +26,16 @@ fn unknown_sequence_addition_preserves_the_following_item() {
 /// An S-NSSAI, then a number of one octet: what follows the additions of a value is
 /// read where they end.
 #[derive(Debug, PartialEq)]
-struct FollowingSNSSAI<'a> {
-    value: SNSSAI<'a>,
+struct FollowingSNSSAI {
+    value: SNSSAI,
     following: u8,
 }
 
-impl AsnType for FollowingSNSSAI<'_> {
+impl AsnType for FollowingSNSSAI {
     const NAME: &'static str = "FollowingSNSSAI";
 }
 
-impl<'a> Decode<'a> for FollowingSNSSAI<'a> {
+impl<'a> Decode<'a> for FollowingSNSSAI {
     fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
         Ok(Self {
             value: SNSSAI::decode(reader)?,

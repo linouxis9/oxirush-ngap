@@ -33,7 +33,7 @@ fn checked(pdu: &NGAP_PDU, tree: &str) -> Vec<Deviation> {
     deviations
 }
 
-fn cause() -> Cause<'static> {
+fn cause() -> Cause {
     Cause::radioNetwork(CauseRadioNetwork::user_inactivity)
 }
 

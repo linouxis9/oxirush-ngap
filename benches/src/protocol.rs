@@ -188,10 +188,10 @@ fn initial_context_setup_request() -> Written {
         typed: typed!(InitiatingMessage InitialContextSetup REJECT InitialContextSetupRequest {
             REJECT AMF_UE_NGAP_ID: AMFUENGAPID,
             REJECT RAN_UE_NGAP_ID: RANUENGAPID,
-            REJECT UEAggregateMaximumBitRate: UEAggregateMaximumBitRate<'a>,
-            REJECT GUAMI: GUAMI<'a>,
+            REJECT UEAggregateMaximumBitRate: UEAggregateMaximumBitRate,
+            REJECT GUAMI: GUAMI,
             REJECT PDUSessionResourceSetupListCxtReq: PDUSessionResourceSetupListCxtReq<'a>,
-            REJECT AllowedNSSAI: AllowedNSSAI<'a>,
+            REJECT AllowedNSSAI: AllowedNSSAI,
             REJECT UESecurityCapabilities: UESecurityCapabilities<'a>,
             REJECT SecurityKey: SecurityKey<'a>,
             IGNORE MobilityRestrictionList: MobilityRestrictionList<'a>,
@@ -235,7 +235,7 @@ fn pdu_session_resource_setup_request() -> Written {
                 REJECT AMF_UE_NGAP_ID: AMFUENGAPID,
                 REJECT RAN_UE_NGAP_ID: RANUENGAPID,
                 REJECT PDUSessionResourceSetupListSUReq: PDUSessionResourceSetupListSUReq<'a>,
-                IGNORE UEAggregateMaximumBitRate: UEAggregateMaximumBitRate<'a>,
+                IGNORE UEAggregateMaximumBitRate: UEAggregateMaximumBitRate,
             }
         ),
     }
@@ -298,8 +298,8 @@ fn handover_required() -> Written {
             REJECT AMF_UE_NGAP_ID: AMFUENGAPID,
             REJECT RAN_UE_NGAP_ID: RANUENGAPID,
             REJECT HandoverType: HandoverType,
-            IGNORE Cause: Cause<'a>,
-            REJECT TargetID: TargetID<'a>,
+            IGNORE Cause: Cause,
+            REJECT TargetID: TargetID,
             IGNORE DirectForwardingPathAvailability: DirectForwardingPathAvailability,
             REJECT PDUSessionResourceListHORqd: PDUSessionResourceListHORqd<'a>,
             REJECT SourceToTarget_TransparentContainer: SourceToTargetTransparentContainer<'a>,
@@ -325,9 +325,9 @@ fn paging() -> Written {
         path: "/ngap/TAIListForPaging/15/tAI/tAC",
         edit: ("/ngap/TAIListForPaging/15/tAI/tAC", json!(17)),
         typed: typed!(InitiatingMessage Paging IGNORE Paging {
-            IGNORE UEPagingIdentity: UEPagingIdentity<'a>,
+            IGNORE UEPagingIdentity: UEPagingIdentity,
             IGNORE PagingDRX: PagingDRX,
-            IGNORE TAIListForPaging: TAIListForPaging<'a>,
+            IGNORE TAIListForPaging: TAIListForPaging,
             IGNORE PagingPriority: PagingPriority,
         }),
     }

@@ -252,6 +252,22 @@ fn a_value_in_another_form_than_the_canonical_one_is_read_by_both_and_noted_here
     // §11.1.4: padding bits are zero. The same identifier, with a one bit before its
     // octet.
     both::<ue_id::Id>(ue_id::NAME, &[0x00, 0x2a], &[0x01, 0x2a], Fault::Padding);
+
+    // X.690 §8.19.2: an arc of an object identifier is the fewest octets that hold it.
+    // {1 2 840}, and the same with 840 after an octet that holds nothing. No type that
+    // both read by its name has an object identifier alone: the field is read by each.
+    use oracle::rasn::types::ObjectIdentifier;
+    let arcs = |octets: &[u8]| {
+        let mut reader = codec::aper::Reader::noting(octets);
+        let read = reader.object_identifier().unwrap().arcs().to_vec();
+        let faults: Vec<Fault> = reader.faults().iter().map(|noted| noted.fault).collect();
+        let theirs = oracle::rasn::aper::decode::<ObjectIdentifier>(octets).unwrap();
+        let theirs: Vec<u32> = theirs.iter().copied().collect();
+        assert_eq!(read, theirs, "{octets:02x?}");
+        faults
+    };
+    assert_eq!(arcs(&[3, 0x2a, 0x86, 0x48]), []);
+    assert_eq!(arcs(&[4, 0x2a, 0x80, 0x86, 0x48]), [Fault::LongArc]);
 }
 
 #[test]

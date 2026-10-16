@@ -48,5 +48,5 @@ debug = true
 # oxirush-aper 0.1.0 and oxirush-utils 0.1.0 are not on crates.io yet: until they are
 # published, they come from their repositories, at the revisions of build/revisions.
 [patch.crates-io]
-oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "8bfa56d6689c1eba874fc54598970dfdd553074c" }
+oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "6071368a2306df4b24a30ddadc80624ee065652e" }
 oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "b4f61a4c0177216d2f597d28e44ff0f679c58d8a" }

@@ -1161,6 +1161,9 @@ the edits and of the values, and the kinds of the errors of the JSON forms.
 - Keep what a later release added to a value that is decoded as its type and
   encoded again: a PDU keeps the octets of its IEs until one is decoded, and
   a tree and a view keep them.
+- Write the JSON Encoding Rules (ITU-T X.697): a tree is the JSON of the
+  crate, by the names of the specification, which the tests compare with the
+  JER of rasn through a function that the documentation hides.
 - Look into an RRC container, or into the container of a handover for
   another system than NG-RAN: they stay octets.
 - The crate has no limit on the octets of a PDU, and each call takes time and

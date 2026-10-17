@@ -121,19 +121,23 @@ use std::cell::RefCell;
 
 thread_local!(static PRINTED: RefCell<String> = const { RefCell::new(String::new()) });
 
-// What a block prints is kept, to be compared with what the README shows.
+// What a block prints is kept, to be compared with what the README shows. The line
+// is written before it is kept, so that `?` in what is printed returns from the block.
+macro_rules! print {
+    ($($argument:tt)*) => {{
+        let text = format!($($argument)*);
+        PRINTED.with(|printed| printed.borrow_mut().push_str(&text))
+    }};
+}
+
 macro_rules! println {
     () => {
-        PRINTED.with(|printed| printed.borrow_mut().push('\n'))
+        print!("\n")
     };
-    ($($argument:tt)*) => {
-        PRINTED.with(|printed| {
-            let line = format!($($argument)*);
-            let mut printed = printed.borrow_mut();
-            printed.push_str(&line);
-            printed.push('\n');
-        })
-    };
+    ($($argument:tt)*) => {{
+        let line = format!($($argument)*);
+        print!("{line}\n")
+    }};
 }
 
 /// What `block` prints.

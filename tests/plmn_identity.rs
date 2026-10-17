@@ -226,6 +226,108 @@ fn the_notation_of_a_plmn_identity_has_the_octets_of_the_clause() {
     }
 }
 
+/// The review of the release candidate found a PLMN identity written as its six digits
+/// read in a tree and through serde as three octets in hexadecimal, another network
+/// (`"310410"` as 134-001), and a TAC `"123456"` as 1193046. A string of decimal digits
+/// is refused there with the two values that it could be, and octets whose hexadecimal
+/// has no letter are written after `0x`.
+#[cfg(feature = "inspect")]
+#[test]
+fn digits_that_could_be_a_plmn_identity_or_its_octets_are_refused() {
+    use oxirush_ngap::tree;
+
+    let guami = |plmn: &str| {
+        let tree = tree!({"message": "InitialContextSetupRequest", "ies": [{"GUAMI": {
+            "pLMNIdentity": plmn, "aMFRegionID": 1, "aMFSetID": 1, "aMFPointer": 0,
+        }}]});
+        NGAP_PDU::from_tree(&tree)
+            .map(|pdu| pdu.to_tree()["ies"][0]["GUAMI"]["pLMNIdentity"].clone())
+    };
+    for (written, read) in [
+        ("310-410", "310-410"),
+        ("0x134001", "310-410"),
+        ("02f839", "208-93"),
+    ] {
+        assert_eq!(guami(written).unwrap(), read, "{written}");
+    }
+    for (digits, other) in [
+        ("310410", "134-001"),
+        ("001001", "000-110"),
+        ("208093", "020-839"),
+    ] {
+        let (mcc, mnc) = digits.split_at(3);
+        assert_eq!(
+            guami(digits).unwrap_err().to_string(),
+            format!(
+                "this is not a value of GUAMI: {digits} is read in two ways, as the PLMN \
+                 identity {mcc}-{mnc} and as the octets 0x{digits}, which are {other}: write \
+                 \"{mcc}-{mnc}\" or \"0x{digits}\", at pLMNIdentity"
+            )
+        );
+    }
+    let tac = |tac: tree::Value| {
+        let location = tree!({"userLocationInformationNR": {
+            "nR-CGI": {"pLMNIdentity": "208-93", "nRCellIdentity": 1},
+            "tAI": {"pLMNIdentity": "208-93", "tAC": tac},
+        }});
+        let tree =
+            tree!({"message": "InitialUEMessage", "ies": [{"UserLocationInformation": location}]});
+        let pdu = NGAP_PDU::from_tree(&tree)?;
+        Ok::<_, Error>(
+            pdu.to_tree()["ies"][0]["UserLocationInformation"]["userLocationInformationNR"]["tAI"]
+                ["tAC"]
+                .clone(),
+        )
+    };
+    assert_eq!(tac(tree!(1)).unwrap(), 1);
+    assert_eq!(tac(tree!("0x000001")).unwrap(), 1);
+    assert_eq!(tac(tree!("00000a")).unwrap(), 10);
+    let at = "at userLocationInformationNR/tAI/tAC";
+    assert_eq!(
+        tac(tree!("123456")).unwrap_err().to_string(),
+        format!(
+            "this is not a value of UserLocationInformation: \"123456\" is read in two ways, as \
+             the number 123456 and as the octets 0x123456, which are the number 1193046: write \
+             the number without quotes, 123456 or 1193046, {at}"
+        )
+    );
+    assert!(
+        tac(tree!("000001"))
+            .unwrap_err()
+            .to_string()
+            .contains("0x000001")
+    );
+    assert_eq!(
+        tac(tree!("1")).unwrap_err().to_string(),
+        format!(
+            "this is not a value of UserLocationInformation: \"1\" is a number in quotes: write \
+             1 without quotes, {at}"
+        )
+    );
+}
+
+/// The same refusals through serde, which reads a PDU as its tree.
+#[cfg(feature = "serde")]
+#[test]
+fn digits_that_could_be_a_plmn_identity_or_its_octets_are_refused_by_serde() {
+    let text = r#"{"message": "InitialContextSetupRequest", "ies": [{"GUAMI": {"pLMNIdentity": "310410", "aMFRegionID": 1, "aMFSetID": 1, "aMFPointer": 0}}]}"#;
+    let error = serde_json::from_str::<NGAP_PDU>(text)
+        .unwrap_err()
+        .to_string();
+    assert!(
+        error.contains("310-410") && error.contains("0x310410"),
+        "{error}"
+    );
+    let yaml = "message: InitialContextSetupRequest\nies:\n- GUAMI: {pLMNIdentity: '001001', aMFRegionID: 1, aMFSetID: 1, aMFPointer: 0}\n";
+    let error = serde_yaml::from_str::<NGAP_PDU>(yaml)
+        .unwrap_err()
+        .to_string();
+    assert!(
+        error.contains("001-001") && error.contains("0x001001"),
+        "{error}"
+    );
+}
+
 /// Run tshark on [`PAGING`], and on the same message with the octets of the order of a
 /// NAS message: it prints the networks that the tests above have from its recorded
 /// output.

@@ -33,29 +33,27 @@
 //! Arguments:
 //! - `$direction` — `InitiatingMessage`, `SuccessfulOutcome`, or `UnsuccessfulOutcome`
 //! - `$proc` — procedure name, used to derive its ASN.1 procedure code
-//! - `$outer_crit` — outer criticality: `REJECT`, `IGNORE`, or `NOTIFY`
+//! - `$outer_crit` — outer criticality: `REJECT`, `IGNORE`, or `NOTIFY`, or none
 //! - `$msg` — message struct name, such as `UEContextReleaseRequest`
-//! - IEs — `$ie_crit $ie_name($ie_value)`, with the IE ID derived from its name
+//! - IEs — `$ie_crit $ie_name($ie_value)`, with the IE ID derived from its name, and
+//!   `$ie_crit` as the outer criticality
 //!
-//! An IE that is written without its criticality does not compile, and the error says
-//! which IE it is. Neither does a PDU without its own:
+//! A criticality that is left out is the one that the specification assigns: that of
+//! the procedure for the PDU, which is [`Message::CRITICALITY`](crate::Message) of its
+//! message, and that of the object set of the message for an IE. An IE that the set does
+//! not have has none, and is an error of the kind `Argument`.
 //!
-//! ```compile_fail
-//! use oxirush_ngap::{build_ngap, ngap::*};
-//!
-//! let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-//!     IGNORE, UEContextReleaseRequest,
-//!     AMF_UE_NGAP_ID(1u64),
-//! );
 //! ```
+//! use oxirush_ngap::{Message, build_ngap, ngap::*};
 //!
-//! ```compile_fail
-//! use oxirush_ngap::{build_ngap, ngap::*};
-//!
-//! let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-//!     UEContextReleaseRequest,
-//!     REJECT AMF_UE_NGAP_ID(1u64),
-//! );
+//! let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest, UEContextReleaseRequest,
+//!     AMF_UE_NGAP_ID(1u64),
+//!     RAN_UE_NGAP_ID(7u32),
+//!     Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
+//! )?;
+//! assert_eq!(pdu.criticality(), UEContextReleaseRequest::CRITICALITY);
+//! assert!(pdu.check()?.is_empty());
+//! # Ok::<(), oxirush_ngap::Error>(())
 //! ```
 //!
 //! ## `build_ngap_ie!` — build one Protocol IE entry
@@ -72,10 +70,21 @@
 //! # Ok::<(), oxirush_ngap::Error>(())
 //! ```
 //!
+//! Without its criticality the IE has the one that the object set of the message assigns
+//! it. An IE that goes in no message has its criticality written:
+//!
+//! ```
+//! use oxirush_ngap::{build_ngap_ie, ngap::*};
+//!
+//! let ie = build_ngap_ie!(UEContextReleaseRequest, AMF_UE_NGAP_ID(1u64))?;
+//! assert_eq!(ie.criticality, Criticality::reject);
+//! # Ok::<(), oxirush_ngap::Error>(())
+//! ```
+//!
 //! ```compile_fail
 //! use oxirush_ngap::{build_ngap_ie, ngap::*};
 //!
-//! let ie = build_ngap_ie!(UEContextReleaseRequest, AMF_UE_NGAP_ID(1u64));
+//! let ie = build_ngap_ie!(AMF_UE_NGAP_ID(1u64));
 //! ```
 //!
 //! An IE name is its ASN.1 identifier without `id-` and with `_` for `-`. The
@@ -217,6 +226,30 @@ pub fn __ie<T: Encode>(
     })
 }
 
+/// The criticality that the object set of `M` assigns to the IE `id`, which the macros
+/// name `name`: an error of the kind `Argument` for one that the set does not have.
+fn assigned<'a, M: __Ies<'a>>(id: u16, name: &str) -> Result<Criticality, Error> {
+    M::__assigned(id).map(Criticality::from).ok_or_else(|| {
+        let why = format!(
+            "{name} is no IE of the object set of {}, which assigns it no criticality: write \
+             its criticality",
+            M::NAME
+        );
+        Error::new(crate::ErrorKind::Argument, why)
+    })
+}
+
+/// For the macro that builds one IE of a message without its criticality: the IE `id`
+/// with the criticality that the object set of `M` assigns to it.
+#[doc(hidden)]
+pub fn __assigned_ie<'a, M: __Ies<'a>, T: Encode>(
+    id: u16,
+    name: &str,
+    value: &T,
+) -> Result<ProtocolIEField<'static>, Error> {
+    __ie(id, assigned::<M>(id, name)?, value)
+}
+
 /// For the macro that builds a PDU: the message that is being written, a container of
 /// protocol IEs. Each IE is written into the octets of the message, with its value in
 /// its open type, so that a PDU is built without octets for each IE.
@@ -265,6 +298,20 @@ impl __Message {
                 self.octets.truncate(start);
                 self.error = Some(error.encoding(T::NAME));
             }
+        }
+    }
+
+    /// One more IE, of the criticality that the object set of the message `M` assigns
+    /// to it: an error of the kind `Argument` for an IE, which the macros name `name`,
+    /// that the set does not have.
+    #[doc(hidden)]
+    pub fn ie_assigned<'a, M: __Ies<'a>, T: Encode>(&mut self, id: u16, name: &str, value: &T) {
+        if self.error.is_some() {
+            return;
+        }
+        match assigned::<M>(id, name) {
+            Ok(criticality) => self.ie(id, criticality, value),
+            Err(error) => self.error = Some(error),
         }
     }
 
@@ -407,6 +454,12 @@ macro_rules! procedures {
             impl<'a> $crate::Message<'a> for $initiating_type {
                 const DIRECTION: &'static str = "InitiatingMessage";
                 const PROCEDURE_CODE: u8 = $code;
+                // The class of an elementary procedure has `ignore` by default.
+                const CRITICALITY: crate::registry::Criticality =
+                    match crate::registry::procedure_criticality($code) {
+                        Some(criticality) => criticality,
+                        None => crate::registry::Criticality::ignore,
+                    };
                 const __OF_PROTOCOL_IES: bool =
                     $crate::macros::of_protocol_ies!($([$($initiating_ie),*])?);
                 fn __decode_owned(octets: &[u8]) -> Result<Self, $crate::Error> {
@@ -423,6 +476,12 @@ macro_rules! procedures {
             impl<'a> $crate::Message<'a> for $successful_type {
                 const DIRECTION: &'static str = "SuccessfulOutcome";
                 const PROCEDURE_CODE: u8 = $code;
+                // The class of an elementary procedure has `ignore` by default.
+                const CRITICALITY: crate::registry::Criticality =
+                    match crate::registry::procedure_criticality($code) {
+                        Some(criticality) => criticality,
+                        None => crate::registry::Criticality::ignore,
+                    };
                 const __OF_PROTOCOL_IES: bool =
                     $crate::macros::of_protocol_ies!($([$($successful_ie),*])?);
                 fn __decode_owned(octets: &[u8]) -> Result<Self, $crate::Error> {
@@ -439,6 +498,12 @@ macro_rules! procedures {
             impl<'a> $crate::Message<'a> for $unsuccessful_type {
                 const DIRECTION: &'static str = "UnsuccessfulOutcome";
                 const PROCEDURE_CODE: u8 = $code;
+                // The class of an elementary procedure has `ignore` by default.
+                const CRITICALITY: crate::registry::Criticality =
+                    match crate::registry::procedure_criticality($code) {
+                        Some(criticality) => criticality,
+                        None => crate::registry::Criticality::ignore,
+                    };
                 const __OF_PROTOCOL_IES: bool =
                     $crate::macros::of_protocol_ies!($([$($unsuccessful_ie),*])?);
                 fn __decode_owned(octets: &[u8]) -> Result<Self, $crate::Error> {
@@ -540,7 +605,7 @@ macro_rules! procedures {
         }
 
         /// The criticality that ASN.1 assigns to the procedure of a code.
-        pub(crate) fn procedure_criticality(code: u8) -> Option<Criticality> {
+        pub(crate) const fn procedure_criticality(code: u8) -> Option<Criticality> {
             match code {
                 $($($code => Some(Criticality::$criticality),)?)*
                 _ => None,
@@ -851,21 +916,18 @@ macro_rules! __ngap_proc_code {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __ngap_ie_syntax {
-    // An IE that has its criticality: the fault is in one that follows.
+    // An IE that is written so: the fault is in one that follows.
     ($criticality:ident $name:ident ($($value:tt)*) $(, $($rest:tt)*)?) => {
         $crate::__ngap_ie_syntax!($($($rest)*)?)
     };
-    ($name:ident ($($value:tt)*) $($rest:tt)*) => {
-        compile_error!(concat!(
-            "the criticality of the IE ",
-            stringify!($name),
-            " is missing: write REJECT, IGNORE or NOTIFY before its name",
-        ))
+    ($name:ident ($($value:tt)*) $(, $($rest:tt)*)?) => {
+        $crate::__ngap_ie_syntax!($($($rest)*)?)
     };
     ($($other:tt)*) => {
         compile_error!(
             "each IE is written `CRITICALITY Name(value)`, with REJECT, IGNORE or NOTIFY \
-             as its criticality and a comma after it"
+             as its criticality, or `Name(value)` for the one that its message assigns it, \
+             and a comma after it"
         )
     };
 }
@@ -1163,15 +1225,41 @@ macro_rules! with_ngap_ie_mut {
 /// Build a complete `NGAP_PDU` from a direction, procedure, message, and IEs.
 ///
 /// Gives a `Result<NGAP_PDU, Error>`: a value that does not encode into its open type,
-/// such as an integer outside its constraint, is an error of the kind `Encode`. A call
-/// that leaves out a criticality does not compile, and the error says which one.
+/// such as an integer outside its constraint, is an error of the kind `Encode`. A
+/// criticality that a call leaves out is the one that the specification assigns: that of
+/// the procedure for the PDU, and that of the object set of the message for an IE, which
+/// an IE that the set does not have has not: an error of the kind `Argument`.
 #[macro_export]
 macro_rules! build_ngap {
-    ($direction:ident, $proc:ident,
-     $outer_crit:ident, $msg:ident,
-     $($ie_crit:ident $ie_name:ident ($($ie_value:tt)+)),*
-     $(,)?
-    ) => {
+    ($direction:ident, $proc:ident, REJECT, $msg:ident $(, $($ies:tt)*)?) => {
+        $crate::__build_ngap!($direction, $proc,
+            $crate::__ngap_criticality!(REJECT), $msg, $($($ies)*)?)
+    };
+    ($direction:ident, $proc:ident, IGNORE, $msg:ident $(, $($ies:tt)*)?) => {
+        $crate::__build_ngap!($direction, $proc,
+            $crate::__ngap_criticality!(IGNORE), $msg, $($($ies)*)?)
+    };
+    ($direction:ident, $proc:ident, NOTIFY, $msg:ident $(, $($ies:tt)*)?) => {
+        $crate::__build_ngap!($direction, $proc,
+            $crate::__ngap_criticality!(NOTIFY), $msg, $($($ies)*)?)
+    };
+    // The criticality of the PDU is that of its procedure.
+    ($direction:ident, $proc:ident, $msg:ident $(, $($ies:tt)*)?) => {
+        $crate::__build_ngap!($direction, $proc,
+            <$crate::ngap::$msg<'static> as $crate::Message<'static>>::CRITICALITY,
+            $msg, $($($ies)*)?)
+    };
+    // What is not written so, which says what is wrong.
+    ($($other:tt)*) => {
+        $crate::__build_ngap_mistake!($($other)*)
+    };
+}
+
+/// What `build_ngap!` does once the criticality of the PDU is an expression.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __build_ngap {
+    ($direction:ident, $proc:ident, $outer:expr, $msg:ident, $($ies:tt)*) => {
         {
             // The message is the one that the procedure has in that direction, and a
             // container of protocol IEs.
@@ -1182,21 +1270,53 @@ macro_rules! build_ngap {
             );
             #[allow(unused_mut)]
             let mut _message = $crate::macros::__Message::new();
-            $(
-                _message.ie(
-                    $crate::__ngap_ie_id!($ie_name),
-                    $crate::__ngap_criticality!($ie_crit),
-                    &$crate::registry::ies::$ie_name::value(($($ie_value)+)),
-                );
-            )*
-            _message.pdu::<$crate::ngap::$msg<'static>>(
-                $crate::__ngap_criticality!($outer_crit),
-            )
+            $crate::__ngap_ies!(_message, $msg, $($ies)*);
+            _message.pdu::<$crate::ngap::$msg<'static>>($outer)
         }
     };
-    // What is not written so, which says what is wrong.
-    ($($other:tt)*) => {
-        $crate::__build_ngap_mistake!($($other)*)
+}
+
+/// The IEs of a call of `build_ngap!`, one after the other, into the message that is
+/// written: each with its criticality, or with the one that the object set assigns it.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __ngap_ies {
+    ($message:ident, $msg:ident $(,)?) => {};
+    ($message:ident, $msg:ident, REJECT $ie_name:ident ($($ie_value:tt)+) $(, $($rest:tt)*)?) => {
+        $crate::__ngap_ie!($message, $crate::__ngap_criticality!(REJECT), $ie_name ($($ie_value)+));
+        $crate::__ngap_ies!($message, $msg, $($($rest)*)?);
+    };
+    ($message:ident, $msg:ident, IGNORE $ie_name:ident ($($ie_value:tt)+) $(, $($rest:tt)*)?) => {
+        $crate::__ngap_ie!($message, $crate::__ngap_criticality!(IGNORE), $ie_name ($($ie_value)+));
+        $crate::__ngap_ies!($message, $msg, $($($rest)*)?);
+    };
+    ($message:ident, $msg:ident, NOTIFY $ie_name:ident ($($ie_value:tt)+) $(, $($rest:tt)*)?) => {
+        $crate::__ngap_ie!($message, $crate::__ngap_criticality!(NOTIFY), $ie_name ($($ie_value)+));
+        $crate::__ngap_ies!($message, $msg, $($($rest)*)?);
+    };
+    ($message:ident, $msg:ident, $ie_name:ident ($($ie_value:tt)+) $(, $($rest:tt)*)?) => {
+        $message.ie_assigned::<$crate::ngap::$msg<'static>, _>(
+            $crate::__ngap_ie_id!($ie_name),
+            stringify!($ie_name),
+            &$crate::registry::ies::$ie_name::value(($($ie_value)+)),
+        );
+        $crate::__ngap_ies!($message, $msg, $($($rest)*)?);
+    };
+    ($message:ident, $msg:ident, $($other:tt)*) => {
+        $crate::__ngap_ie_syntax!($($other)*)
+    };
+}
+
+/// One IE of a call of `build_ngap!` with its criticality.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __ngap_ie {
+    ($message:ident, $criticality:expr, $ie_name:ident ($($ie_value:tt)+)) => {
+        $message.ie(
+            $crate::__ngap_ie_id!($ie_name),
+            $criticality,
+            &$crate::registry::ies::$ie_name::value(($($ie_value)+)),
+        )
     };
 }
 
@@ -1204,20 +1324,6 @@ macro_rules! build_ngap {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __build_ngap_mistake {
-    // The criticality of the PDU is left out: the message follows the procedure.
-    ($direction:ident, $proc:ident, $msg:ident,
-     $($ie_crit:ident $ie_name:ident ($($ie_value:tt)+)),*
-     $(,)?
-    ) => {
-        compile_error!(concat!(
-            "the criticality of the PDU is missing: write REJECT, IGNORE or NOTIFY before ",
-            stringify!($msg),
-        ))
-    };
-    // An IE is not written as its criticality, its name and its value.
-    ($direction:ident, $proc:ident, $outer_crit:ident, $msg:ident, $($ies:tt)*) => {
-        $crate::__ngap_ie_syntax!($($ies)*)
-    };
     ($($other:tt)*) => {
         compile_error!(
             "build_ngap! takes the direction, the procedure, the criticality of the PDU, \
@@ -1270,6 +1376,15 @@ macro_rules! build_ngap_ie {
         $crate::macros::__message_of_protocol_ies::<$crate::ngap::$msg<'_>>();
         $crate::build_ngap_ie!($criticality $ie_name ($($value)+))
     }};
+    // The criticality that the object set of the message assigns to the IE.
+    ($msg:ident, $ie_name:ident ($($value:tt)+)) => {{
+        $crate::macros::__message_of_protocol_ies::<$crate::ngap::$msg<'_>>();
+        $crate::macros::__assigned_ie::<$crate::ngap::$msg<'_>, _>(
+            $crate::__ngap_ie_id!($ie_name),
+            stringify!($ie_name),
+            &$crate::registry::ies::$ie_name::value(($($value)+)),
+        )
+    }};
     // An IE that is in no message: an item of a list of single containers.
     ($criticality:ident $ie_name:ident ($($value:tt)+)) => {
         $crate::macros::__ie(
@@ -1288,11 +1403,12 @@ macro_rules! build_ngap_ie {
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __build_ngap_ie_mistake {
-    ($msg:ident, $ie_name:ident ($($value:tt)+)) => {
+    ($ie_name:ident ($($value:tt)+)) => {
         compile_error!(concat!(
             "the criticality of the IE ",
             stringify!($ie_name),
-            " is missing: write REJECT, IGNORE or NOTIFY before its name",
+            " is missing: an IE that goes in no message has it written, as REJECT, IGNORE \
+             or NOTIFY before its name",
         ))
     };
     ($($other:tt)*) => {

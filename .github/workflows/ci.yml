@@ -18,9 +18,9 @@ env:
   # them from their repositories, at the revisions of build/revisions.
   UNPUBLISHED: >-
     --config patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"
-    --config patch.crates-io.oxirush-aper.rev="59832487ec3235247732ac38d02dc78789ae4485"
+    --config patch.crates-io.oxirush-aper.rev="cf9cf1ada0d74ac0a23f3ecd823d40acd5f96f24"
     --config patch.crates-io.oxirush-utils.git="https://github.com/linouxis9/oxirush-utils"
-    --config patch.crates-io.oxirush-utils.rev="0617bcb831fec1e9a7a41f7c370a4f624868073e"
+    --config patch.crates-io.oxirush-utils.rev="eb1c453cd08dc3d0b712f53d4273595793cb9106"
 
 jobs:
   test:
@@ -166,7 +166,11 @@ jobs:
         with:
           workspaces: fuzz
       - run: cargo install cargo-fuzz --locked
-      # Each corpus starts from the vectors of tests/fixtures.
+      # Each corpus starts from the PDUs of tests/fixtures, and from each under a procedure
+      # code that the specification does not have. A minute for each target is then enough
+      # for what a corpus of the PDUs shows: the fault that the review of the release
+      # candidate found under an unknown procedure (tests/fixtures/null_paths.tsv), which
+      # 30 minutes from the PDUs alone did not show, shows in 9 seconds from them.
       - run: ./fuzz/seed.sh
       - run: cargo fuzz run decode -- -max_total_time=60 -max_len=4096
       - run: cargo fuzz run view -- -max_total_time=60 -max_len=4096

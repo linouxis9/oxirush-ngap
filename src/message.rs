@@ -24,6 +24,10 @@ pub trait Message<'a>: Decode<'a> + Encode + sealed::Sealed {
     const DIRECTION: &'static str;
     /// The code of its procedure.
     const PROCEDURE_CODE: u8;
+    /// The criticality that the specification assigns to its procedure, which the PDU
+    /// that holds it has: what `of_message` is given for it, and what the macro that
+    /// builds a PDU gives one whose criticality it is not given.
+    const CRITICALITY: crate::registry::Criticality;
     /// Whether the message is a container of protocol IEs, which every message but
     /// the private one is.
     #[doc(hidden)]

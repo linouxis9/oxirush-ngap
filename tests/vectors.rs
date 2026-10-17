@@ -14,6 +14,7 @@ const MESSAGES: &str = include_str!("fixtures/messages.tsv");
 const VECTORS: &str = include_str!("fixtures/vectors.tsv");
 const LATER: &str = include_str!("fixtures/later.tsv");
 const NULL_PATHS: &str = include_str!("fixtures/null_paths.tsv");
+const FUZZED: &str = include_str!("fixtures/fuzzed.tsv");
 
 /// The IEs whose octets carry a type of TS 38.413 between two NG-RAN nodes, each with
 /// the name of that type: the vectors have a value of it there.
@@ -206,14 +207,21 @@ fn the_additions_of_a_later_release_are_skipped_as_pycrate_writes_them() {
 /// alternative of the type NULL, as `{"noReporting": null}`, was read as absent, so that
 /// `paths()` did not list it and `select()` selected nothing. `null_paths.tsv` has the 44
 /// paths of the vectors that it found: each is listed and selects `null`, and `null` set
-/// there is that alternative again.
+/// there is that alternative again. The review of the release candidate found 43 more in
+/// the same vectors under a procedure code that the specification does not have, which
+/// `select()` did not take.
 #[test]
 fn each_alternative_of_the_type_null_is_listed_and_selected() {
     let wires: BTreeMap<_, _> = vectors(VECTORS).collect();
     let mut count = 0;
     for line in NULL_PATHS.lines().filter(|line| !line.starts_with('#')) {
-        let (name, path) = line.split_once('\t').unwrap();
-        let pdu = NGAP_PDU::decode(&wires[name]).unwrap();
+        let mut fields = line.split('\t');
+        let (name, path) = (fields.next().unwrap(), fields.next().unwrap());
+        let mut octets = wires[name].clone();
+        if let Some(code) = fields.next() {
+            octets[1] = code.parse().unwrap();
+        }
+        let pdu = NGAP_PDU::decode(&octets).unwrap();
         let mut view = pdu.to_view().unwrap();
         assert_eq!(
             inspect::select(&view, path),
@@ -229,7 +237,7 @@ fn each_alternative_of_the_type_null_is_listed_and_selected() {
         assert_eq!(pdu.with_view(&view).unwrap(), pdu, "{name} {path}");
         count += 1;
     }
-    assert_eq!(count, 44);
+    assert_eq!(count, 44 + 43);
 }
 
 /// The values of the vectors as the reference has them: `tests/fixtures/generate.py
@@ -262,4 +270,33 @@ fn a_pdu_written_from_the_values_of_the_reference_is_the_octets_of_the_reference
         failures.len(),
         failures.join("\n")
     );
+}
+
+/// The PDUs that a fuzzer found a fault with hold to the properties of the fuzz target
+/// `view`: the review of the release candidate found a PDU of a procedure that the
+/// specification does not have, whose paths listed a value that `select()` did not take.
+/// Each gives its tree and its view back, and each path that its view lists selects its
+/// value.
+#[test]
+fn the_pdus_that_a_fuzzer_found_a_fault_with_hold_to_the_properties_of_its_target() {
+    let mut count = 0;
+    for (name, octets) in vectors(FUZZED) {
+        let pdu = NGAP_PDU::decode(&octets).unwrap();
+        assert_eq!(
+            NGAP_PDU::from_tree(&pdu.to_tree()).as_ref(),
+            Ok(&pdu),
+            "{name}"
+        );
+        let view = pdu.to_view().unwrap();
+        assert_eq!(pdu.with_view(&view).as_ref(), Ok(&pdu), "{name}");
+        for (path, value) in inspect::paths(&view) {
+            assert_eq!(
+                inspect::select(&view, &path),
+                Ok(vec![&value]),
+                "{name} {path}"
+            );
+        }
+        count += 1;
+    }
+    assert_eq!(count, 1);
 }

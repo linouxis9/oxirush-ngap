@@ -82,3 +82,63 @@ fn a_message_in_fragments_is_read_through_a_pdu_that_borrows() -> Result<(), Err
     assert_eq!(message, pdu.decode_value::<InitialUEMessage>()?);
     Ok(())
 }
+
+/// The review of the release candidate found that a caller had to look up every
+/// criticality by hand: `Message::CRITICALITY` is the one of its procedure, and the macros
+/// give a PDU and an IE whose criticality a call leaves out the one that the
+/// specification assigns.
+#[test]
+fn a_criticality_that_a_call_leaves_out_is_the_one_that_is_assigned() -> Result<(), Error> {
+    use oxirush_ngap::{Message, build_ngap, build_ngap_ie};
+
+    assert_eq!(UEContextReleaseRequest::CRITICALITY, Criticality::ignore);
+    assert_eq!(NGSetupRequest::CRITICALITY, Criticality::reject);
+    let written = build_ngap!(InitiatingMessage, UEContextReleaseRequest, IGNORE,
+        UEContextReleaseRequest,
+        REJECT AMF_UE_NGAP_ID(42u64),
+        REJECT RAN_UE_NGAP_ID(7u32),
+        IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
+    )?;
+    let assigned = build_ngap!(
+        InitiatingMessage,
+        UEContextReleaseRequest,
+        UEContextReleaseRequest,
+        AMF_UE_NGAP_ID(42u64),
+        RAN_UE_NGAP_ID(7u32),
+        Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
+    )?;
+    assert_eq!(assigned, written);
+    assert!(assigned.check()?.is_empty());
+    // Some written and some left out, in any order.
+    let mixed = build_ngap!(InitiatingMessage, UEContextReleaseRequest, IGNORE,
+        UEContextReleaseRequest,
+        AMF_UE_NGAP_ID(42u64),
+        REJECT RAN_UE_NGAP_ID(7u32),
+        Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
+    )?;
+    assert_eq!(mixed, written);
+    let message: UEContextReleaseRequest = assigned.decode_value()?;
+    let again = NGAP_PDU::of_message(&message, UEContextReleaseRequest::CRITICALITY)?;
+    assert_eq!(again, written);
+    // An IE that the object set of the message does not have is assigned none.
+    let error = build_ngap!(
+        InitiatingMessage,
+        NGSetup,
+        NGSetupRequest,
+        AMF_UE_NGAP_ID(1u64),
+    )
+    .unwrap_err();
+    assert_eq!(error.kind(), ErrorKind::Argument);
+    assert!(
+        error
+            .to_string()
+            .contains("no IE of the object set of NGSetupRequest"),
+        "{error}"
+    );
+    // One IE, of its message.
+    let ie = build_ngap_ie!(NGSetupRequest, DefaultPagingDRX(PagingDRX::v128))?;
+    assert_eq!(ie.criticality, Criticality::ignore);
+    let error = build_ngap_ie!(NGSetupRequest, AMF_UE_NGAP_ID(1u64)).unwrap_err();
+    assert_eq!(error.kind(), ErrorKind::Argument);
+    Ok(())
+}

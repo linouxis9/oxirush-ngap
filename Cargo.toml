@@ -2,14 +2,16 @@
 name = "oxirush-ngap"
 version = "0.5.0"
 edition = "2024"
-description = "5G NGAP (NG Application Protocol) APER codec — auto-generated from 3GPP ASN.1 definitions"
+description = "A Rust codec for NGAP, the NG Application Protocol between an NG-RAN node and an AMF (3GPP TS 38.413): types generated from the ASN.1 of the specification, aligned PER, and macros that build a message and read its IEs by name"
 license = "Apache-2.0"
 repository = "https://github.com/linouxis9/oxirush-ngap"
 authors = ["Valentin D'Emmanuele"]
 rust-version = "1.88"
-keywords = ["5g", "ngap", "3gpp", "asn1", "aper"]
+keywords = ["5g", "ngap", "3gpp", "asn1", "telecom"]
 categories = ["network-programming", "encoding", "parser-implementations"]
 readme = "README.md"
+# `benches/` is a package of its own, whose files are no benchmark of the crate.
+autobenches = false
 include = [
     "src/**/*.rs",
     "examples/**/*.rs",
@@ -35,14 +37,17 @@ all-features = true
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(oxirush_ngap_hooks)'] }
 
 [dependencies]
-oxirush-aper = "0.1.0"
+# One version exactly: the crate builds on the module `inspect` of oxirush-aper, which is
+# hidden and changes with the two protocol crates, which are released with it in step.
+oxirush-aper = "=0.1.0"
 oxirush-utils = "0.1.0"
 serde_core = { version = "1.0.220", optional = true, default-features = false, features = ["alloc"] }
 
 [dev-dependencies]
 hex = "0.4"
-# JSON as text, for the tests of `serde`.
+# JSON as text, and YAML, another format that describes itself, for the tests of `serde`.
 serde_json = "1.0.154"
+serde_yaml = "0.9"
 
 [[example]]
 name = "ngap_build_pdu"

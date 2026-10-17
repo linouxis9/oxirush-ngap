@@ -134,3 +134,42 @@ fn a_tree_and_a_view_have_the_key() -> Result<(), Error> {
     }
     Ok(())
 }
+
+/// The review of the release candidate found 16 octets of a K_gNB in the error of a tree
+/// that wrote the key in another form than its own: what is written in the place of a
+/// key, or of a next hop, is not shown in a refusal, which still says why.
+#[cfg(feature = "inspect")]
+#[test]
+fn a_refusal_of_a_key_shows_nothing_of_what_is_written() {
+    use oxirush_ngap::tree;
+
+    let key = "5a".repeat(32);
+    let wrong = |value: tree::Value| {
+        let tree =
+            tree!({"message": "InitialContextSetupRequest", "ies": [{"SecurityKey": value}]});
+        NGAP_PDU::from_tree(&tree).unwrap_err().to_string()
+    };
+    for (written, why) in [
+        (
+            tree!({"key": key.clone()}),
+            "a bit string of 256 bits is expected, in hexadecimal, and a secret value is written",
+        ),
+        (
+            tree!(format!("{key}5")),
+            "a secret value is not hexadecimal, two digits for each octet",
+        ),
+        (
+            tree!(key[..62].to_string()),
+            "31 octets are written for a bit string of 256 bits, which has 32",
+        ),
+    ] {
+        let error = wrong(written);
+        assert!(has_no_key(&error), "{error}");
+        assert!(error.contains(why), "{error}");
+    }
+    let next_hop =
+        tree!({"SecurityContext": {"nextHopChainingCount": 1, "nextHopNH": [key.clone()]}});
+    let tree = tree!({"message": "InitialContextSetupRequest", "ies": [next_hop]});
+    let error = NGAP_PDU::from_tree(&tree).unwrap_err().to_string();
+    assert!(has_no_key(&error), "{error}");
+}

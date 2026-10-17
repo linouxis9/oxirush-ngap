@@ -93,6 +93,12 @@ The line of `oxirush-aper` stays in `build/revisions`, with the commit of the
 release: its `generator/` is not published, and the Reproduce workflow checks
 it out at that commit to write the bindings.
 
+`oxirush-aper`, oxirush-ngap and oxirush-s1ap are released in step. Both
+protocol crates depend on one version of `oxirush-aper` exactly (`=0.1.0` in
+`Cargo.toml`): they build on its module `inspect`, which is hidden from its
+documentation and changes with them, so a release of `oxirush-aper` comes with
+a release of each, which takes that version.
+
 ### rasn-compiler and the oracle
 
 `rasn-compiler` runs in its stable mode, which leaves an open type opaque:

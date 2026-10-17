@@ -680,9 +680,12 @@ impl NGAPPDU<'_> {
     /// [`protocol_ies`](Self::protocol_ies) reads them whatever the message is. Its tree
     /// has its procedure code and its direction in the place of the name of a message.
     ///
-    /// A view takes up to 94 octets of memory for each octet of the NGAP_PDU, and
-    /// [`with_view`](Self::with_view) 122: 37 MB and 48 MB for a message of 65,535
-    /// IEs, 393 KB. The crate has no limit on the octets of a NGAP_PDU: the caller bounds them.
+    /// A view takes up to 143 octets of memory for each octet of the NGAP_PDU, and
+    /// [`with_view`](Self::with_view) 177: those of a message of 65,535 IEs of an
+    /// identifier that the crate does not know, each of no octet, 262 KB, which takes 37
+    /// MB and 46 MB. IEs that decode take less for each octet: 94 and 120 octets for
+    /// 65,535 AMF UE NGAP IDs. The crate has no limit on the octets of a NGAP_PDU: the
+    /// caller bounds them.
     ///
     /// ```
     /// use oxirush_ngap::{inspect, ngap::NGAP_PDU};

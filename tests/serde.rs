@@ -125,11 +125,13 @@ fn a_type_of_the_bindings_is_serialized_as_the_tree_of_a_pdu_shows_it() {
         written(&guami),
         tree!({"pLMNIdentity": "208-93", "aMFRegionID": 1, "aMFSetID": 1, "aMFPointer": 0})
     );
-    // The form of the ASN.1 type is read too, in either case.
+    // The form of the ASN.1 type is read too, in either case, after 0x where its
+    // hexadecimal is digits alone, which would be read as a number too.
     assert_eq!(
-        read::<SNSSAI>(&tree!({"sST": "01", "sD": "0000AB"})).unwrap(),
+        read::<SNSSAI>(&tree!({"sST": "0x01", "sD": "0000AB"})).unwrap(),
         slice
     );
+    assert!(read::<SNSSAI>(&tree!({"sST": "01"})).is_err());
     assert_eq!(read::<PLMNIdentity>(&tree!("02F839")).unwrap(), network);
     // Octets that are no PLMN identity stay octets.
     let other = PLMNIdentity([0xff, 0xff, 0xff]);
@@ -183,4 +185,34 @@ fn a_name_written_twice_is_refused() {
     assert!(twice.parse::<Value>().is_err());
     let twice = r#"{"sST":1,"sST":2}"#;
     assert!(serde_json::from_str::<SNSSAI>(twice).is_err());
+}
+
+/// The review of the release candidate found that YAML reads an unquoted `true` as a
+/// boolean, which was refused for an ENUMERATED that has a value named `true`, as 43
+/// types of NGAP have: it is that name, and is written back quoted.
+#[test]
+fn an_unquoted_true_of_yaml_is_the_name_of_an_enumerated() {
+    let yaml = "message: UEContextReleaseRequest\nies:\n- AMF-UE-NGAP-ID: 1\n- RAN-UE-NGAP-ID: 2\n\
+                - Cause: {nas: normal-release}\n- GW-Context-Release-Indication: true\n";
+    let pdu: NGAP_PDU = serde_yaml::from_str(yaml).unwrap();
+    assert_eq!(
+        pdu.to_tree()["ies"][3],
+        tree!({"GW-Context-Release-Indication": "true"})
+    );
+    let quoted = serde_yaml::from_str::<NGAP_PDU>(&yaml.replace(": true", ": 'true'")).unwrap();
+    assert_eq!(quoted, pdu);
+    assert!(
+        serde_yaml::to_string(&pdu)
+            .unwrap()
+            .contains("GW-Context-Release-Indication: 'true'")
+    );
+    // A type without such a name takes no boolean.
+    let other = yaml.replace("{nas: normal-release}", "{nas: true}");
+    let error = serde_yaml::from_str::<NGAP_PDU>(&other)
+        .unwrap_err()
+        .to_string();
+    assert!(
+        error.contains("a name is expected, and true is written"),
+        "{error}"
+    );
 }

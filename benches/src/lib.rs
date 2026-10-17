@@ -38,7 +38,9 @@ mod protocol;
 
 use protocol::codec::inspect;
 use protocol::codec::{tree, tree::Value};
-use protocol::{Borrowed, Pdu};
+pub use protocol::{
+    Borrowed, Pdu, TheirMessage, TheirPdu, codec, our_pdu, their_message, their_pdu, types,
+};
 use std::hint::black_box;
 
 // ── Inputs ──────────────────────────────────────────────────────────────────

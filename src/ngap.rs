@@ -84489,9 +84489,9 @@ pub mod ngap_ies {
             json::bit_string(&self.0, 256, 256, false)
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self(json::read_bit_string(
-                reading, value, 256, 256, false,
-            )?))
+            Ok(Self(reading.secret(|reading| {
+                json::read_bit_string(reading, value, 256, 256, false)
+            })?))
         }
     }
     #[cfg(feature = "serde")]

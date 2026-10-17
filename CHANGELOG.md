@@ -67,7 +67,10 @@ not source compatible with 0.4.2.
   of that type only where one IE has it, where 0.4.2's `AMFName` built
   id-OldAMF.
   `build_ngap!` takes the message that the procedure has in that direction,
-  and a missing criticality is a compile error that says which.
+  and a criticality that a call leaves out is the one that the specification
+  assigns: that of the procedure for the PDU (`Message::CRITICALITY`), and that
+  of the object set of the message for an IE, which an IE that the set does
+  not have has not, an error of the kind `Argument`.
 - No helper panics, and none cuts a number short. `plmn`, `guami`, `nr_cgi`
   and `global_gnb_id` return a `Result` with an error of the kind
   `Argument`; `nr_cgi` and `global_gnb_id` take the length of the gNB ID,
@@ -89,6 +92,15 @@ not source compatible with 0.4.2.
 - The examples are named after the protocol: `ngap_build_pdu`.
 - The minimum supported Rust version is 1.88: 0.4.2 declared 1.85 and did not
   build with it.
+- The crate depends on one version of `oxirush-aper` exactly, `=0.1.0`: it
+  builds on the module `inspect` of `oxirush-aper`, which is hidden and changes
+  with the two protocol crates, and the three are released in step.
+- The specification renamed types since V16.6.0: `UserLocationInformationN3IWF`
+  is `UserLocationInformationN3IWFWithPortNumber`, beside
+  `UserLocationInformationN3IWFWithoutPortNumber`; `PagingeDRXInformation`,
+  `PagingEDRXCycle` and `PagingTimeWindow` are `EUTRAPagingeDRXInformation`,
+  `EUTRAPagingEDRXCycle` and `EUTRAPagingTimeWindow`, beside those of NR and of
+  NB-IoT.
 
 ### Added
 
@@ -96,7 +108,10 @@ not source compatible with 0.4.2.
   `Deviation`s, refusing nothing. `deviation.cause()` and
   `deviation.diagnostics_item()` give what a receiver answers, as TS 38.413
   clause 10 has it, `pdu.criticality_diagnostics(&deviations)` the whole
-  Criticality Diagnostics IE of the answer, and `error.ie()` the IE of an
+  Criticality Diagnostics IE of an ERROR INDICATION, with the procedure code
+  and the triggering message, `pdu.criticality_diagnostics_for_response(&deviations)`
+  that of a response of the procedure, without them (clause
+  9.3.1.3), `pdu.criticality()`, and `error.ie()` the IE of an
   error of the macros. A value outside the root of an extensible constraint
   and one in another form than the canonical one are reported too, and
   `aper::encode_strict` and `aper::decode_strict` refuse them. A procedure
@@ -146,6 +161,16 @@ not source compatible with 0.4.2.
   rasn 0.29 in `oracle/`, with three fuzz targets, and from the published
   package alone. `build/asn1.sha256` records the digests of the ASN.1 modules
   that the bindings are generated from.
+- `helpers::global_ng_enb_id` and `helpers::eutra_cgi`, of a kind of ng-eNB ID,
+  `NgEnbKind`: macro (20 bits), short macro (18) or long macro (21).
+- In a tree and through serde, a string of decimal digits is never read as
+  octets: a PLMN identity or a number written so (`"310410"`, a TAC
+  `"123456"`) is refused with the two values that it could be, and octets whose
+  hexadecimal has no letter are written after `0x`. A YAML `true` is the name
+  `true` of an ENUMERATED that has it. A member of a tree written twice in two
+  spellings is refused. A refusal of a key shows nothing of what is written,
+  and a misspelled name of an IE or of a message is refused with the nearest
+  names.
 
 ### Changed
 

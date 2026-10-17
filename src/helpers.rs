@@ -166,6 +166,80 @@ pub fn global_gnb_id(
     ))
 }
 
+/// The kinds of ng-eNB ID of TS 38.413 clause 9.3.1.8, each of the bits that it has: the
+/// leftmost bits of the 28 of the E-UTRA Cell Identity of each cell that the ng-eNB
+/// serves.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum NgEnbKind {
+    /// A macro ng-eNB ID, of 20 bits, which leaves 8 bits for the cell.
+    Macro,
+    /// A short macro ng-eNB ID, of 18 bits, which leaves 10 bits for the cell.
+    ShortMacro,
+    /// A long macro ng-eNB ID, of 21 bits, which leaves 7 bits for the cell.
+    LongMacro,
+}
+
+impl NgEnbKind {
+    /// The bits of an ng-eNB ID of this kind.
+    pub const fn bits(self) -> u32 {
+        match self {
+            Self::Macro => 20,
+            Self::ShortMacro => 18,
+            Self::LongMacro => 21,
+        }
+    }
+
+    fn name(self) -> &'static str {
+        match self {
+            Self::Macro => "the macro ng-eNB ID",
+            Self::ShortMacro => "the short macro ng-eNB ID",
+            Self::LongMacro => "the long macro ng-eNB ID",
+        }
+    }
+}
+
+/// Build a `GlobalNgENBID` for an ng-eNB ID of a kind (TS 38.413 clause 9.3.1.8).
+///
+/// An error of the kind `Argument` for an ng-eNB ID that does not fit in the bits of its
+/// kind.
+pub fn global_ng_enb_id(
+    plmn_identity: PLMNIdentity,
+    kind: NgEnbKind,
+    ng_enb_id: u32,
+) -> Result<GlobalNgENBID, Error> {
+    let bits = kind.bits();
+    let id = Bits::low(fits(kind.name(), ng_enb_id.into(), bits)?, bits as usize);
+    let id = match kind {
+        NgEnbKind::Macro => NgENBID::macroNgENB_ID(id),
+        NgEnbKind::ShortMacro => NgENBID::shortMacroNgENB_ID(id),
+        NgEnbKind::LongMacro => NgENBID::longMacroNgENB_ID(id),
+    };
+    Ok(GlobalNgENBID::new(plmn_identity, id, None))
+}
+
+/// Build an E-UTRA Cell Global Identifier from an ng-eNB ID of a kind and the cell that
+/// the rest of the 28 bits of the E-UTRA Cell Identity hold: the ng-eNB ID is its
+/// leftmost bits (TS 38.413 clauses 9.3.1.8 and 9.3.1.9).
+///
+/// An error of the kind `Argument` for an ng-eNB ID that does not fit in the bits of its
+/// kind, and for a cell that does not fit in the bits after it.
+pub fn eutra_cgi(
+    plmn_identity: PLMNIdentity,
+    kind: NgEnbKind,
+    ng_enb_id: u32,
+    cell_id: u16,
+) -> Result<EUTRACGI, Error> {
+    let bits = kind.bits();
+    let ng_enb_id = fits(kind.name(), ng_enb_id.into(), bits)?;
+    let cell_id = fits("the cell of the ng-eNB", cell_id.into(), 28 - bits)?;
+    let eci = (ng_enb_id << (28 - bits)) | cell_id;
+    Ok(EUTRACGI::new(
+        plmn_identity,
+        EUTRACellIdentity(Bits::low(eci, 28)),
+        None,
+    ))
+}
+
 /// Build Single Network Slice Selection Assistance Information.
 pub fn s_nssai(sst: u8, sd: Option<[u8; 3]>) -> SNSSAI {
     SNSSAI::new(SST([sst]), sd.map(SD), None)
@@ -240,6 +314,42 @@ mod tests {
         assert_eq!(plmn_octets([2, 0, 8], &[9, 3]), Some([0x02, 0xF8, 0x39]));
         assert_eq!(plmn_octets([2, 0, 8], &[9]), None);
         assert_eq!(plmn_octets([2, 0, 10], &[9, 3]), None);
+    }
+
+    /// Each kind of ng-eNB ID of TS 38.413 clause 9.3.1.8 has its bits, the leftmost of
+    /// the E-UTRA Cell Identity, and the cell the rest of the 28.
+    #[test]
+    fn each_kind_of_ng_enb_id_has_its_bits_and_the_cell_the_rest() {
+        let network = plmn("208", "93").unwrap();
+        for (kind, bits) in [
+            (NgEnbKind::Macro, 20),
+            (NgEnbKind::ShortMacro, 18),
+            (NgEnbKind::LongMacro, 21),
+        ] {
+            assert_eq!(kind.bits(), bits);
+            let most = (1u32 << bits) - 1;
+            let global = global_ng_enb_id(network, kind, most).unwrap();
+            let id = match global.ng_enb_id {
+                NgENBID::macroNgENB_ID(id) => (NgEnbKind::Macro, id),
+                NgENBID::shortMacroNgENB_ID(id) => (NgEnbKind::ShortMacro, id),
+                NgENBID::longMacroNgENB_ID(id) => (NgEnbKind::LongMacro, id),
+                NgENBID::choice_Extensions(_) => unreachable!(),
+            };
+            assert_eq!(
+                (id.0, id.1.len(), id.1.value()),
+                (kind, bits as usize, u64::from(most))
+            );
+            assert!(global_ng_enb_id(network, kind, most + 1).is_err());
+            // The ng-eNB ID, then the cell.
+            let cell = (1u16 << (28 - bits)) - 1;
+            let cgi = eutra_cgi(network, kind, 1, cell).unwrap();
+            assert_eq!(
+                cgi.eutra_cell_identity.0.value(),
+                (1 << (28 - bits)) | u64::from(cell)
+            );
+            assert!(eutra_cgi(network, kind, 1, cell + 1).is_err());
+            assert!(eutra_cgi(network, kind, most + 1, 0).is_err());
+        }
     }
 
     #[test]

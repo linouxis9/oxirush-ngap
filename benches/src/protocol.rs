@@ -32,6 +32,54 @@ pub type Pdu = ngap::NGAP_PDU;
 /// A PDU that borrows its message from the octets that it is decoded from.
 pub type Borrowed<'a> = ngap::NGAPPDU<'a>;
 
+/// The types of the protocol.
+pub use codec::ngap as types;
+
+/// The PDU of `pdu`, with the octets of another message.
+pub fn our_pdu(pdu: &Pdu, message: codec::Octets<'static>) -> Pdu {
+    use codec::ngap::NGAPPDU;
+    let mut pdu = pdu.clone();
+    match &mut pdu {
+        NGAPPDU::initiatingMessage(pdu) => pdu.value = message,
+        NGAPPDU::successfulOutcome(pdu) => pdu.value = message,
+        NGAPPDU::unsuccessfulOutcome(pdu) => pdu.value = message,
+        _ => {}
+    }
+    pdu
+}
+
+/// A PDU of the rasn bindings of `oracle/`, its message an open type.
+pub type TheirPdu = oracle::bindings::NGAPPDU;
+
+/// A message of the rasn bindings: every message of the protocol but the private one is
+/// a SEQUENCE of its protocol IEs, with an extension marker, which decodes and encodes as
+/// this one.
+pub type TheirMessage = oracle::bindings::InitialUEMessage;
+
+/// The octets of the message of a rasn PDU.
+pub fn their_message(pdu: &TheirPdu) -> &[u8] {
+    use oracle::bindings::NGAPPDU;
+    match pdu {
+        NGAPPDU::initiatingMessage(pdu) => pdu.value.as_bytes(),
+        NGAPPDU::successfulOutcome(pdu) => pdu.value.as_bytes(),
+        NGAPPDU::unsuccessfulOutcome(pdu) => pdu.value.as_bytes(),
+        _ => &[],
+    }
+}
+
+/// The rasn PDU of `pdu`, with the octets of another message.
+pub fn their_pdu(pdu: &TheirPdu, message: oracle::rasn::types::Any) -> TheirPdu {
+    use oracle::bindings::NGAPPDU;
+    let mut pdu = pdu.clone();
+    match &mut pdu {
+        NGAPPDU::initiatingMessage(pdu) => pdu.value = message,
+        NGAPPDU::successfulOutcome(pdu) => pdu.value = message,
+        NGAPPDU::unsuccessfulOutcome(pdu) => pdu.value = message,
+        _ => {}
+    }
+    pdu
+}
+
 /// The fixtures of the crate: a line for each message, with its name and its
 /// octets in hexadecimal.
 pub const FIXTURES: &str = include_str!("../../tests/fixtures/messages.tsv");

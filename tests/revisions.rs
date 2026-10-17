@@ -22,8 +22,9 @@
 //! generator of oxirush-aper at its revision wrote the bindings, which the Reproduce
 //! workflow checks out by this file.
 //!
-//! The published crate has none of these files, and this test reads none there. It is
-//! the same file in oxirush-ngap and in oxirush-s1ap.
+//! The published crate has none of these files but the README: there the test holds the
+//! README to the revisions that it names first. It is the same file in oxirush-ngap and
+//! in oxirush-s1ap.
 
 use std::path::Path;
 
@@ -39,11 +40,30 @@ const PLACES: &[&str] = &[
     "oracle/Cargo.toml",
 ];
 
+/// The revision of each crate that the README takes from its repository first, as
+/// `name revision` lines: what the published crate has of `build/revisions`.
+fn named_in_the_readme(root: &Path) -> String {
+    let readme = std::fs::read_to_string(root.join("README.md")).unwrap();
+    let mut named = String::new();
+    for name in ["oxirush-aper", "oxirush-utils"] {
+        let place = format!("{name}.rev=\"");
+        let at = readme
+            .find(&place)
+            .unwrap_or_else(|| panic!("the README takes no {name}"));
+        let revision = &readme[at + place.len()..];
+        let revision = &revision[..revision.find('"').unwrap()];
+        named.push_str(&format!("{name} {revision}\n"));
+    }
+    named
+}
+
 #[test]
 fn each_place_takes_the_unpublished_crates_at_the_revision_that_is_recorded() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
-    let Ok(recorded) = std::fs::read_to_string(root.join("build/revisions")) else {
-        return;
+    // The published crate has the README alone of these files.
+    let (recorded, places) = match std::fs::read_to_string(root.join("build/revisions")) {
+        Ok(recorded) => (recorded, PLACES),
+        Err(_) => (named_in_the_readme(root), &["README.md"][..]),
     };
     let recorded = recorded.lines().filter(|line| !line.starts_with('#'));
     let recorded: Vec<(&str, &str)> = recorded.filter_map(|l| l.split_once(' ')).collect();
@@ -56,7 +76,7 @@ fn each_place_takes_the_unpublished_crates_at_the_revision_that_is_recorded() {
             .all(|b| matches!(b, b'0'..=b'9' | b'a'..=b'f'));
         assert!(revision.len() == 40 && digits, "{name} {revision}");
     }
-    for place in PLACES {
+    for place in places {
         let text = std::fs::read_to_string(root.join(place)).unwrap();
         let lines: Vec<&str> = text.lines().collect();
         let mut taken = 0;

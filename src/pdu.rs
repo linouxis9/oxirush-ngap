@@ -296,8 +296,10 @@ impl<'a> NGAPPDU<'a> {
         })
     }
 
-    /// The criticality of this PDU.
-    pub(crate) fn criticality(&self) -> Criticality {
+    /// The criticality of this PDU, which the specification assigns to its procedure
+    /// (`Message::CRITICALITY` of its message) in a PDU that is constructed as it has a
+    /// sender construct one.
+    pub fn criticality(&self) -> Criticality {
         match self {
             Self::initiatingMessage(message) => message.criticality,
             Self::successfulOutcome(message) => message.criticality,
@@ -447,27 +449,33 @@ impl<'a> NGAPPDU<'a> {
         Ok(found)
     }
 
-    /// The Criticality Diagnostics IE with which the receiver of this PDU answers it for
-    /// `deviations`, which [`check`](Self::check) gave: the procedure code, the triggering
-    /// message and the procedure criticality of this PDU, as clause 10.3.4.1 of TS 38.413
+    /// The Criticality Diagnostics IE of the ERROR INDICATION with which the receiver of
+    /// this PDU answers it for `deviations`, which [`check`](Self::check) gave: the
+    /// procedure code, the triggering message and the procedure criticality of this PDU,
+    /// which TS 38.413 clause 9.3.1.3 has in an ERROR INDICATION alone, as clause 10.3.4.1
     /// has them for a procedure that the receiver does not comprehend, and the item of
     /// each deviation that has one, as clauses 10.3.4.2 and 10.3.5 have them for an IE,
-    /// 256 at most. No list of IEs where no deviation has an item.
+    /// 256 at most. No list of IEs where no deviation has an item. The response of the
+    /// procedure of this PDU has
+    /// [`criticality_diagnostics_for_response`](Self::criticality_diagnostics_for_response).
     ///
     /// ```
     /// use oxirush_ngap::{build_ngap, ngap::*};
     ///
-    /// // An NG SETUP REQUEST without its Global RAN Node ID, which is mandatory and of
-    /// // the criticality reject
-    /// let pdu = build_ngap!(InitiatingMessage, NGSetup, REJECT, NGSetupRequest,
-    ///     IGNORE DefaultPagingDRX(PagingDRX::v128),
+    /// // A UE CONTEXT RELEASE REQUEST without its RAN UE NGAP ID, which is mandatory and
+    /// // of the criticality reject: the procedure has no response
+    /// let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest, IGNORE,
+    ///     UEContextReleaseRequest,
+    ///     REJECT AMF_UE_NGAP_ID(42u64),
+    ///     IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
     /// )?;
     /// let deviations = pdu.check()?;
     /// let diagnostics = pdu.criticality_diagnostics(&deviations);
-    /// assert_eq!(diagnostics.procedure_code, Some(ProcedureCode(21)));
+    /// assert_eq!(diagnostics.procedure_code, Some(ProcedureCode(42)));
     /// assert_eq!(diagnostics.triggering_message, Some(TriggeringMessage::initiating_message));
+    /// assert_eq!(diagnostics.procedure_criticality, Some(Criticality::ignore));
     /// let items = diagnostics.ies_criticality_diagnostics.unwrap();
-    /// assert_eq!(items.0[0].ie_id, ProtocolIEID(27));
+    /// assert_eq!(items.0[0].ie_id, ProtocolIEID(85));
     /// assert_eq!(items.0[0].type_of_error, TypeOfError::missing);
     /// # Ok::<(), oxirush_ngap::Error>(())
     /// ```
@@ -478,5 +486,35 @@ impl<'a> NGAPPDU<'a> {
             self.criticality(),
             deviations,
         )
+    }
+
+    /// The Criticality Diagnostics IE of the response of the procedure of this PDU, with
+    /// which its receiver answers it for `deviations`: the procedure criticality of this
+    /// PDU and the item of each deviation that has one, without the procedure code and the
+    /// triggering message, which TS 38.413 clause 9.3.1.3 keeps for an ERROR INDICATION.
+    ///
+    /// ```
+    /// use oxirush_ngap::{build_ngap, ngap::*};
+    ///
+    /// // An NG SETUP REQUEST without its Global RAN Node ID, which is mandatory and of
+    /// // the criticality reject: the NG SETUP FAILURE says so
+    /// let pdu = build_ngap!(InitiatingMessage, NGSetup, REJECT, NGSetupRequest,
+    ///     IGNORE DefaultPagingDRX(PagingDRX::v128),
+    /// )?;
+    /// let deviations = pdu.check()?;
+    /// let diagnostics = pdu.criticality_diagnostics_for_response(&deviations);
+    /// assert_eq!(diagnostics.procedure_code, None);
+    /// assert_eq!(diagnostics.triggering_message, None);
+    /// assert_eq!(diagnostics.procedure_criticality, Some(Criticality::reject));
+    /// let items = diagnostics.ies_criticality_diagnostics.unwrap();
+    /// assert_eq!(items.0[0].ie_id, ProtocolIEID(27));
+    /// assert_eq!(items.0[0].type_of_error, TypeOfError::missing);
+    /// # Ok::<(), oxirush_ngap::Error>(())
+    /// ```
+    pub fn criticality_diagnostics_for_response(
+        &self,
+        deviations: &[Deviation],
+    ) -> CriticalityDiagnostics {
+        oxirush_aper::check::criticality_diagnostics_for_response(self.criticality(), deviations)
     }
 }

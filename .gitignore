@@ -4,3 +4,4 @@
 Cargo.lock
 ngap/*.asn
 ngap/*.asn1
+/benches/compare/work/

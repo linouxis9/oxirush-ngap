@@ -510,6 +510,47 @@ mod inspect_errors {
     use oxirush_ngap::{Error, ErrorKind, inspect};
     use oxirush_ngap::{tree, tree::Value};
 
+    /// The review of the release candidate found that a member of a tree written in two
+    /// spellings was read once: the IEs of `IES` were dropped. A member is read however
+    /// it is written, once, as in a value.
+    /// The review of the release candidate found no suggestion for a misspelled name:
+    /// the error says the nearest names of the protocol.
+    #[test]
+    fn a_misspelled_name_is_refused_with_the_nearest_names() {
+        let ie = "\"AMF-UE-NGAP-IDD\" is not an IE of NGAP: the nearest names are AMF-UE-NGAP-ID, AMF-UE-NGAP-ID2 and NewAMF-UE-NGAP-ID";
+        let tree = tree!({"message": "UEContextReleaseRequest", "ies": [{"AMF-UE-NGAP-IDD": 1}]});
+        assert_eq!(NGAP_PDU::from_tree(&tree).unwrap_err().to_string(), ie);
+        let view = release_request().to_view().unwrap();
+        let error = inspect::select(&view, "/ngap/AMF-UE-NGAP-IDD").unwrap_err();
+        assert_eq!(error.to_string(), format!("{ie}, at /ngap/AMF-UE-NGAP-IDD"));
+        let tree = tree!({"message": "UEContextReleaseReq", "ies": []});
+        assert_eq!(
+            NGAP_PDU::from_tree(&tree).unwrap_err().to_string(),
+            "\"UEContextReleaseReq\" is not a message of NGAP: the nearest name is \
+             UEContextReleaseRequest"
+        );
+        // A name that is near none says none.
+        let tree = tree!({"message": "UEContextReleaseRequest", "ies": [{"TimeToTravel": 1}]});
+        let error = NGAP_PDU::from_tree(&tree).unwrap_err().to_string();
+        assert_eq!(error, "\"TimeToTravel\" is not an IE of NGAP");
+    }
+
+    #[test]
+    fn a_member_of_a_tree_written_twice_in_two_spellings_is_refused() {
+        let tree = tree!({
+            "message": "UEContextReleaseRequest",
+            "ies": [{"AMF-UE-NGAP-ID": 1}],
+            "IES": [{"RAN-UE-NGAP-ID": 2}],
+        });
+        let error = NGAP_PDU::from_tree(&tree).unwrap_err();
+        assert_eq!(
+            error.to_string(),
+            "the member \"ies\" of a tree is written twice, as \"ies\" and as \"IES\""
+        );
+        let tree = tree!({"Message": "UEContextReleaseRequest", "message": "x", "ies": []});
+        assert!(NGAP_PDU::from_tree(&tree).is_err());
+    }
+
     /// The view of the UE CONTEXT RELEASE REQUEST.
     fn view() -> Value {
         release_request().to_view().unwrap()
@@ -752,15 +793,13 @@ mod inspect_errors {
             "this is not a value of AMF-UE-NGAP-ID: a number from 0 to 1099511627775 is expected, and \
              \"forty-two\" is written"
         );
-        // The names that it has are listed, and where it is written after them.
+        // The first of the names that it has, with how many more, and where it is
+        // written after them.
         let name = name.to_string();
         let names = "this is not a value of Cause: \"no-such-cause\" is none of its names: \
                      unspecified, txnrelocoverall-expiry, successful-handover, ";
         assert!(name.starts_with(names), "{name}");
-        assert!(
-            name.ends_with(", multiple-AIoT-session-ID-instances, at radioNetwork"),
-            "{name}"
-        );
+        assert!(name.ends_with(", and 57 more, at radioNetwork"), "{name}");
         assert_eq!(
             outside.to_string(),
             "this is not a value of AMF-UE-NGAP-ID: a number from 0 to 1099511627775 is expected, and \
@@ -802,7 +841,21 @@ mod inspect_errors {
              208-93, at globalGNB-ID/pLMNIdentity"
         );
         // Without a hyphen it is its three octets: what is neither says both forms.
-        for neither in ["20893", "2089", "208 93", "20893g"] {
+        for (neither, why) in [
+            ("20893", "a PLMN identity is MCC-MNC: write \"208-93\""),
+            (
+                "2089",
+                "a PLMN identity is MCC-MNC, as 208-93, or its three octets in hexadecimal",
+            ),
+            (
+                "208 93",
+                "a PLMN identity is MCC-MNC, as 208-93, or its three octets in hexadecimal",
+            ),
+            (
+                "20893g",
+                "a PLMN identity is MCC-MNC, as 208-93, or its three octets in hexadecimal",
+            ),
+        ] {
             let plmn = setup(
                 tree!(neither),
                 tree!({"gNB-ID": {"value": "000004", "length": 22}}),
@@ -812,8 +865,7 @@ mod inspect_errors {
             assert_eq!(
                 plmn.to_string(),
                 format!(
-                    "this is not a value of GlobalRANNodeID: {neither}: a PLMN identity is \
-                     MCC-MNC, as 208-93, or its three octets in hexadecimal, at \
+                    "this is not a value of GlobalRANNodeID: {neither}: {why}, at \
                      globalGNB-ID/pLMNIdentity"
                 )
             );

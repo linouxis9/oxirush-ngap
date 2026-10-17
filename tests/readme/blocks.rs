@@ -6,19 +6,23 @@ use std::cell::RefCell;
 
 thread_local!(static PRINTED: RefCell<String> = const { RefCell::new(String::new()) });
 
-// What a block prints is kept, to be compared with what the README shows.
+// What a block prints is kept, to be compared with what the README shows. The line
+// is written before it is kept, so that `?` in what is printed returns from the block.
+macro_rules! print {
+    ($($argument:tt)*) => {{
+        let text = format!($($argument)*);
+        PRINTED.with(|printed| printed.borrow_mut().push_str(&text))
+    }};
+}
+
 macro_rules! println {
     () => {
-        PRINTED.with(|printed| printed.borrow_mut().push('\n'))
+        print!("\n")
     };
-    ($($argument:tt)*) => {
-        PRINTED.with(|printed| {
-            let line = format!($($argument)*);
-            let mut printed = printed.borrow_mut();
-            printed.push_str(&line);
-            printed.push('\n');
-        })
-    };
+    ($($argument:tt)*) => {{
+        let line = format!($($argument)*);
+        print!("{line}\n")
+    }};
 }
 
 /// What `block` prints.
@@ -57,6 +61,7 @@ pub const BLOCKS: &[fn()] = &[
     block_26,
     block_27,
     block_28,
+    block_29,
 ];
 
 /// The Rust block 1 of README.md.
@@ -239,6 +244,34 @@ fn block_6() {
 
 /// The Rust block 7 of README.md.
 fn block_7() {
+    use oxirush_ngap::{Message, build_ngap, ngap::*};
+
+    fn main() -> Result<(), oxirush_ngap::Error> {
+        // The criticality of the procedure, and those of the object set of the message
+        let pdu = build_ngap!(InitiatingMessage, InitialUEMessage, InitialUEMessage,
+            RAN_UE_NGAP_ID(7u32),
+            NAS_PDU(vec![0x7e, 0x00, 0x41]),
+        )?;
+        println!("{:?} {}", pdu.criticality(), hex::encode(pdu.encode()?));
+
+        // The PDU of a message that is at hand
+        let message: InitialUEMessage = pdu.decode_value()?;
+        let again = NGAP_PDU::of_message(&message, InitialUEMessage::CRITICALITY)?;
+        println!("{}", again == pdu);
+
+        // An IE that the object set of the message does not have is assigned none
+        let error = build_ngap!(InitiatingMessage, InitialUEMessage, InitialUEMessage,
+            TimeToWait(TimeToWait::v5s),
+        );
+        println!("{}", error.unwrap_err());
+        Ok(())
+    }
+
+    main().unwrap();
+}
+
+/// The Rust block 8 of README.md.
+fn block_8() {
     use oxirush_ngap::{Error, extract_ngap_ies, ngap::*};
 
     fn handle(request: &UEContextReleaseRequest) -> Result<(), Error> {
@@ -253,8 +286,8 @@ fn block_7() {
     }
 }
 
-/// The Rust block 8 of README.md.
-fn block_8() {
+/// The Rust block 9 of README.md.
+fn block_9() {
     use oxirush_ngap::{extract_ngap_ies, ngap::*};
 
     // The cause of a request, when it has one that is read
@@ -275,8 +308,8 @@ fn block_8() {
     }
 }
 
-/// The Rust block 9 of README.md.
-fn block_9() {
+/// The Rust block 10 of README.md.
+fn block_10() {
     use oxirush_ngap::{build_ngap_ie, ngap::*, with_ngap_ie_mut};
 
     // A message with one IE, which is built alone
@@ -291,8 +324,8 @@ fn block_9() {
     assert_eq!(updated, Ok(true));
 }
 
-/// The Rust block 10 of README.md.
-fn block_10() {
+/// The Rust block 11 of README.md.
+fn block_11() {
     use oxirush_ngap::{build_ngap_ie, ngap::*};
 
     fn main() -> Result<(), oxirush_ngap::Error> {
@@ -320,8 +353,8 @@ fn block_10() {
     main().unwrap();
 }
 
-/// The Rust block 11 of README.md.
-fn block_11() {
+/// The Rust block 12 of README.md.
+fn block_12() {
     use oxirush_ngap::{build_ngap_ie, extract_ngap_ies, ngap::*};
 
     fn main() -> Result<(), oxirush_ngap::Error> {
@@ -353,8 +386,8 @@ fn block_11() {
     main().unwrap();
 }
 
-/// The Rust block 12 of README.md.
-fn block_12() {
+/// The Rust block 13 of README.md.
+fn block_13() {
     use oxirush_ngap::{build_ngap, ngap::*};
 
     fn main() -> Result<(), oxirush_ngap::Error> {
@@ -382,8 +415,8 @@ fn block_12() {
     main().unwrap();
 }
 
-/// The Rust block 13 of README.md.
-fn block_13() {
+/// The Rust block 14 of README.md.
+fn block_14() {
     use oxirush_ngap::{Deviation, build_ngap, ngap::*};
 
     fn main() -> Result<(), oxirush_ngap::Error> {
@@ -398,7 +431,7 @@ fn block_13() {
         let cause = deviations.iter().find_map(Deviation::cause).unwrap();
         let failure = build_ngap!(UnsuccessfulOutcome, NGSetup, REJECT, NGSetupFailure,
             IGNORE Cause(Cause::protocol(cause)),
-            IGNORE CriticalityDiagnostics(received.criticality_diagnostics(&deviations)),
+            IGNORE CriticalityDiagnostics(received.criticality_diagnostics_for_response(&deviations)),
         )?;
         for deviation in &deviations {
             println!("{deviation}");
@@ -411,8 +444,8 @@ fn block_13() {
     main().unwrap();
 }
 
-/// The Rust block 14 of README.md.
-fn block_14() {
+/// The Rust block 15 of README.md.
+fn block_15() {
     use oxirush_ngap::helpers::*;
 
     // A PLMN from its MCC and its MNC, and what is identified within it
@@ -421,6 +454,8 @@ fn block_14() {
     let tracking_area = tai(network, [0x00, 0x00, 0x01]); // TAC
     let cell = nr_cgi(network, 0x123456, 24, 1).unwrap(); // gNB of 24 bits, cell
     let gnb = global_gnb_id(network, 0x123456, 24).unwrap();
+    let ng_enb = global_ng_enb_id(network, NgEnbKind::Macro, 0x12345).unwrap();
+    let lte_cell = eutra_cgi(network, NgEnbKind::Macro, 0x12345, 7).unwrap(); // ng-eNB, cell
 
     // A bit string from octets, and the NR algorithms of a UE: the first
     // octet of its encryption bitmap, then of its integrity bitmap
@@ -432,8 +467,8 @@ fn block_14() {
     println!("{}", guami(network, 1, 1024, 0).unwrap_err());
 }
 
-/// The Rust block 15 of README.md.
-fn block_15() {
+/// The Rust block 16 of README.md.
+fn block_16() {
     use oxirush_ngap::{ErrorKind, ngap::*};
 
     // A UE CONTEXT RELEASE REQUEST is not decoded as an NG SETUP REQUEST
@@ -449,8 +484,8 @@ fn block_15() {
     println!("{short}");
 }
 
-/// The Rust block 16 of README.md.
-fn block_16() {
+/// The Rust block 17 of README.md.
+fn block_17() {
     use oxirush_ngap::ngap::NGAP_PDU;
 
     // UE CONTEXT RELEASE REQUEST
@@ -463,8 +498,8 @@ fn block_16() {
     println!("{}", view["message"]["protocolIEs"][2]);
 }
 
-/// The Rust block 17 of README.md.
-fn block_17() {
+/// The Rust block 18 of README.md.
+fn block_18() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use oxirush_ngap::tree;
 
@@ -494,8 +529,8 @@ fn block_17() {
     }
 }
 
-/// The Rust block 18 of README.md.
-fn block_18() {
+/// The Rust block 19 of README.md.
+fn block_19() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use oxirush_ngap::tree;
 
@@ -519,8 +554,8 @@ fn block_18() {
     println!("{}", wrong.unwrap_err());
 }
 
-/// The Rust block 19 of README.md.
-fn block_19() {
+/// The Rust block 20 of README.md.
+fn block_20() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use oxirush_ngap::tree;
 
@@ -543,8 +578,8 @@ fn block_19() {
     println!("{}", edited.to_tree()["ies"]);
 }
 
-/// The Rust block 20 of README.md.
-fn block_20() {
+/// The Rust block 21 of README.md.
+fn block_21() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use oxirush_ngap::tree;
 
@@ -569,8 +604,8 @@ fn block_20() {
     println!("{}", tree!(inspect::select(&view, "/ngap/*/criticality").unwrap()));
 }
 
-/// The Rust block 21 of README.md.
-fn block_21() {
+/// The Rust block 22 of README.md.
+fn block_22() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use oxirush_ngap::tree;
 
@@ -592,8 +627,8 @@ fn block_21() {
     println!("{}", edited.to_tree());
 }
 
-/// The Rust block 22 of README.md.
-fn block_22() {
+/// The Rust block 23 of README.md.
+fn block_23() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use oxirush_ngap::tree;
 
@@ -624,8 +659,8 @@ fn block_22() {
     }
 }
 
-/// The Rust block 23 of README.md.
-fn block_23() {
+/// The Rust block 24 of README.md.
+fn block_24() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use oxirush_ngap::{tree, tree::Value};
 
@@ -658,8 +693,8 @@ fn block_23() {
     println!("{}", edited.to_tree());
 }
 
-/// The Rust block 24 of README.md.
-fn block_24() {
+/// The Rust block 25 of README.md.
+fn block_25() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use oxirush_ngap::tree;
 
@@ -701,8 +736,8 @@ fn block_24() {
     println!("{}", edited.to_tree()["ies"][2]);
 }
 
-/// The Rust block 25 of README.md.
-fn block_25() {
+/// The Rust block 26 of README.md.
+fn block_26() {
     use oxirush_ngap::inspect;
 
     // The names that the value at a path can have, as the specification spells them
@@ -714,8 +749,8 @@ fn block_25() {
     assert_eq!(choice, Ok(None));
 }
 
-/// The Rust block 26 of README.md.
-fn block_26() {
+/// The Rust block 27 of README.md.
+fn block_27() {
     use oxirush_ngap::inspect;
 
     // Whether a path can select anything in a message of a name, without a view
@@ -729,8 +764,8 @@ fn block_26() {
     }
 }
 
-/// The Rust block 27 of README.md.
-fn block_27() {
+/// The Rust block 28 of README.md.
+fn block_28() {
     use oxirush_ngap::{ErrorKind, inspect, ngap::NGAP_PDU};
     use oxirush_ngap::tree;
 
@@ -771,8 +806,8 @@ fn block_27() {
     println!("{}", edited.to_tree()["ies"][2]);
 }
 
-/// The Rust block 28 of README.md.
-fn block_28() {
+/// The Rust block 29 of README.md.
+fn block_29() {
     use oxirush_ngap::ngap::{NGAP_PDU, SNSSAI, SST};
 
     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();

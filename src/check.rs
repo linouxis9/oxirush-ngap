@@ -74,6 +74,8 @@ impl Diagnostics for Ngap {
             ProtocolCause::AbstractSyntaxErrorFalselyConstructedMessage => {
                 CauseProtocol::abstract_syntax_error_falsely_constructed_message
             }
+            // A cause that a later version of oxirush-aper gives.
+            _ => CauseProtocol::unspecified,
         }
     }
 
@@ -86,19 +88,18 @@ impl Diagnostics for Ngap {
     }
 
     fn criticality_diagnostics(
-        procedure_code: u8,
-        direction: &str,
+        triggering: Option<(u8, &str)>,
         criticality: Criticality,
         items: Option<Vec<CriticalityDiagnosticsIEItem>>,
     ) -> CriticalityDiagnostics {
-        let triggering = match direction {
+        let message = |direction: &str| match direction {
             "SuccessfulOutcome" => TriggeringMessage::successful_outcome,
             "UnsuccessfulOutcome" => TriggeringMessage::unsuccessful_outcome,
             _ => TriggeringMessage::initiating_message,
         };
         CriticalityDiagnostics::new(
-            Some(ProcedureCode(procedure_code)),
-            Some(triggering),
+            triggering.map(|(code, _)| ProcedureCode(code)),
+            triggering.map(|(_, direction)| message(direction)),
             Some(criticality),
             items.map(CriticalityDiagnosticsIEList),
             None,

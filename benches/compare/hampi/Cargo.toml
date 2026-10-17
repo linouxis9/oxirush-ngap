@@ -1,0 +1,26 @@
+# hampi (asn1-compiler and asn1-codecs 0.7.2) on the PDUs of `compare.py`, from the ASN.1
+# of the specification, which its build script compiles: a package of its own, with the
+# versions of hampi pinned. This file is the same in oxirush-ngap and oxirush-s1ap.
+[package]
+name = "oxirush-compare-hampi"
+version = "0.0.0"
+edition = "2021"
+publish = false
+license = "Apache-2.0"
+
+[dependencies]
+asn1-codecs = "=0.7.2"
+asn1_codecs_derive = "=0.7.2"
+bitvec = { version = "1.0", features = ["serde"] }
+serde = { version = "1", features = ["derive"] }
+log = "0.4"
+hex = "0.4"
+
+[build-dependencies]
+asn1-compiler = "=0.7.2"
+
+[profile.release]
+debug = 0
+
+# Not a member of a workspace that the crate may be in.
+[workspace]

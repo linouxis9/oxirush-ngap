@@ -182,8 +182,9 @@ pub fn view(octets: &[u8]) {
         assert_eq!(second.as_ref(), Ok(&first), "{view}");
     }
 
-    // Each path that the view has selects its value.
-    for (path, value) in inspect::paths(&view).into_iter().take(64) {
+    // Each path that the view has selects its value: every one, as an alternative of the
+    // type NULL deep in a message is among the last that are listed.
+    for (path, value) in inspect::paths(&view) {
         assert_eq!(inspect::select(&view, &path), Ok(vec![&value]), "{path}");
     }
 }

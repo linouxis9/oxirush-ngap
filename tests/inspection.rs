@@ -1157,15 +1157,24 @@ fn well_known_values_are_shown_and_taken_as_they_are_usually_written() {
         ie(&mut view, 27)["_raw_value"]
     );
 
-    // As JER writes them, which is what a view had before.
+    // As JER writes them, which is what a view had before, after 0x where they are
+    // digits alone.
     let area = &mut ie(&mut view, 102)["value"][0];
-    area["tAC"] = tree!("000007");
+    area["tAC"] = tree!("0x000007");
     area["broadcastPLMNList"][0]["pLMNIdentity"] = tree!("00f110");
     *area.pointer_mut(slice).unwrap() = tree!("2a");
     assert_eq!(
         NGAP_PDU::from_view(&view).unwrap().encode().unwrap(),
         edited.encode().unwrap()
     );
+    // Digits alone are read in two ways, and refused with both.
+    ie(&mut view, 102)["value"][0]["tAC"] = tree!("000007");
+    let error = NGAP_PDU::from_view(&view).unwrap_err().to_string();
+    assert!(
+        error.contains("the number 000007") && error.contains("the number 7"),
+        "{error}"
+    );
+    ie(&mut view, 102)["value"][0]["tAC"] = tree!("0x000007");
 
     // Neither form, and a number that the type has no room for.
     for (member, refused) in [

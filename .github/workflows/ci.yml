@@ -18,9 +18,9 @@ env:
   # them from their repositories, at the revisions of build/revisions.
   UNPUBLISHED: >-
     --config patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"
-    --config patch.crates-io.oxirush-aper.rev="27a8b099699c939d4094e8767e836876be588040"
+    --config patch.crates-io.oxirush-aper.rev="5e74f2f82c1dbb3540bebe9e867e310a5fb08f21"
     --config patch.crates-io.oxirush-utils.git="https://github.com/linouxis9/oxirush-utils"
-    --config patch.crates-io.oxirush-utils.rev="b4f61a4c0177216d2f597d28e44ff0f679c58d8a"
+    --config patch.crates-io.oxirush-utils.rev="6d2ff3142ed8ffa4089774fc843db4a528cae4fc"
 
 jobs:
   test:

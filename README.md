@@ -97,7 +97,7 @@ oxirush-ngap = "0.5"
 # Until oxirush-aper 0.1.0 and oxirush-utils 0.1.0 are on crates.io, at the
 # revisions that this revision of the crate is tested with
 [patch.crates-io]
-oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "e1b9077b2b882b113a25207db612b4d30d357af6" }
+oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "7b7ba5b46501d0b2a67fa88f6b15427b1fa6248b" }
 oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "5c47d25abdddf234d4e4bc95b6f77c41f9372bdc" }
 ```
 

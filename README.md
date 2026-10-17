@@ -101,8 +101,8 @@ others at the revisions that it is tested with:
 oxirush-ngap = { git = "https://github.com/linouxis9/oxirush-ngap", features = ["inspect"] }
 
 [patch.crates-io]
-oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "217506968f8da73e96b9b7aeedb533832322c3e8" }
-oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "6b492da612f8050924d7f19b590c3fa77d2e3646" }
+oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "59832487ec3235247732ac38d02dc78789ae4485" }
+oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "0617bcb831fec1e9a7a41f7c370a4f624868073e" }
 ```
 
 | Feature | Adds |
@@ -1124,9 +1124,9 @@ at the revisions that `build/revisions` pins with `--config`, as CI does:
 ```bash
 cargo test --all-features \
   --config 'patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"' \
-  --config 'patch.crates-io.oxirush-aper.rev="217506968f8da73e96b9b7aeedb533832322c3e8"' \
+  --config 'patch.crates-io.oxirush-aper.rev="59832487ec3235247732ac38d02dc78789ae4485"' \
   --config 'patch.crates-io.oxirush-utils.git="https://github.com/linouxis9/oxirush-utils"' \
-  --config 'patch.crates-io.oxirush-utils.rev="6b492da612f8050924d7f19b590c3fa77d2e3646"'
+  --config 'patch.crates-io.oxirush-utils.rev="0617bcb831fec1e9a7a41f7c370a4f624868073e"'
 cd oracle && cargo test   # against the codec of rasn
 ```
 

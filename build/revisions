@@ -7,5 +7,5 @@
 #
 # build/pin.py writes them wherever a crate is taken from its repository, and
 # tests/revisions.rs holds each place to them.
-oxirush-aper 217506968f8da73e96b9b7aeedb533832322c3e8
-oxirush-utils 6b492da612f8050924d7f19b590c3fa77d2e3646
+oxirush-aper 59832487ec3235247732ac38d02dc78789ae4485
+oxirush-utils 0617bcb831fec1e9a7a41f7c370a4f624868073e

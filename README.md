@@ -136,8 +136,8 @@ that this revision of the crate is tested with:
 
 ```toml
 [patch.crates-io]
-oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "110c82dd1f0774c9aade5b0c65ba3e1c4c963888" }
-oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "6d2ff3142ed8ffa4089774fc843db4a528cae4fc" }
+oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "e1b9077b2b882b113a25207db612b4d30d357af6" }
+oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "5c47d25abdddf234d4e4bc95b6f77c41f9372bdc" }
 ```
 
 The minimum supported Rust version is 1.88.

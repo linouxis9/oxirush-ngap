@@ -5,8 +5,8 @@
 //! cargo run --example ngap_inspect --features inspect
 //! ```
 
+use oxirush_ngap::tree;
 use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-use serde_json::json;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // NG SETUP REQUEST: GlobalRANNodeID, SupportedTAList and DefaultPagingDRX.
@@ -28,20 +28,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let area = "/ngap/SupportedTAList/value/0";
     let tac = format!("{area}/tAC");
     let plmn = format!("{area}/broadcastPLMNList/0/pLMNIdentity");
-    assert_eq!(inspect::select(&view, &tac)?, [&json!(0x60b72f)]);
-    assert_eq!(inspect::select(&view, &plmn)?, [&json!("208-93")]);
+    assert_eq!(inspect::select(&view, &tac)?, [&tree!(0x60b72f)]);
+    assert_eq!(inspect::select(&view, &plmn)?, [&tree!("208-93")]);
 
     // Edit an IE through its typed value. The other IEs keep the octets received.
-    inspect::set(&mut view, &tac, json!(7))?;
-    inspect::set(&mut view, &plmn, json!("001-01"))?;
+    inspect::set(&mut view, &tac, tree!(7))?;
+    inspect::set(&mut view, &plmn, tree!("001-01"))?;
 
     // Add an IE at the end: its `value` has the type of the identifier, here a
     // PrintableString.
-    let name = json!({"id": "RANNodeName", "criticality": "ignore", "value": "gnb-1"});
+    let name = tree!({"id": "RANNodeName", "criticality": "ignore", "value": "gnb-1"});
     inspect::insert(&mut view, "/ngap/-", name)?;
 
     // Add given octets as an IE, before the paging DRX: its `octets`, without `value`.
-    let unknown = json!({"id": 60000, "criticality": "ignore", "octets": "C0FFEE"});
+    let unknown = tree!({"id": 60000, "criticality": "ignore", "octets": "C0FFEE"});
     inspect::insert(&mut view, "/ngap/DefaultPagingDRX", unknown)?;
 
     // Encode the view again.
@@ -51,7 +51,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // The IE that was not edited is the octets that were received.
     let view = edited.to_view()?;
     let node = inspect::select(&view, "/ngap/GlobalRANNodeID/octets")?;
-    assert_eq!(node, [&json!("0002F83900000000")]);
+    assert_eq!(node, [&tree!("0002F83900000000")]);
 
     Ok(())
 }

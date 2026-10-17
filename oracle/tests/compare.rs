@@ -292,7 +292,7 @@ fn a_pdu_and_its_message_are_read_and_written_as_the_oracle_reads_and_writes_the
 
 mod values {
     use super::*;
-    use serde_json::Value;
+    use codec::tree::Value;
     use std::cell::Cell;
 
     thread_local! {
@@ -303,8 +303,8 @@ mod values {
     /// What a view decoded as the type that the bindings name `name` is what the
     /// oracle reads in the same octets: the same JSON form, or no value for both.
     fn observed(name: &'static str, octets: &[u8], ours: &Result<Value, codec::Error>) {
-        let ours = ours.as_ref().map_err(ToString::to_string);
-        let read = oracle::same_json(name, octets, ours);
+        let ours = ours.as_ref().map(serde_json::Value::from);
+        let read = oracle::same_json(name, octets, ours.as_ref().map_err(ToString::to_string));
         let (compared, both) = COMPARED.get();
         COMPARED.set((compared + 1, both + usize::from(read)));
     }

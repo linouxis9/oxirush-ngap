@@ -128,7 +128,7 @@ fn a_tree_and_a_view_have_the_key() -> Result<(), Error> {
         REJECT SecurityKey(SecurityKey::from(KGNB)),
     )?;
     let key = "5a".repeat(32);
-    for written in [pdu.to_tree()?, pdu.to_view()?] {
+    for written in [pdu.to_tree(), pdu.to_view()?] {
         let written = written.to_string().to_ascii_lowercase();
         assert!(written.contains(&key), "{written}");
     }

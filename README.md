@@ -56,19 +56,19 @@ the names of the specification:
 
 ```rust
 use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-use serde_json::json;
+use oxirush_ngap::tree;
 
 // The same message as a tree: its name and its IEs by name
 let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
 let pdu = NGAP_PDU::decode(&bytes).unwrap();
-println!("{}", pdu.to_tree().unwrap());
+println!("{}", pdu.to_tree());
 
 // Its view is edited at a path, and is a PDU again
 let mut view = pdu.to_view().unwrap();
-let lost = json!("radio-connection-with-ue-lost");
+let lost = tree!("radio-connection-with-ue-lost");
 inspect::set(&mut view, "/ngap/Cause/radioNetwork", lost).unwrap();
 let edited = pdu.with_view(&view).unwrap();
-println!("{}", edited.to_tree().unwrap());
+println!("{}", edited.to_tree());
 
 // Its octets are those that the typed example built
 let octets = hex::encode(edited.encode().unwrap());
@@ -80,11 +80,8 @@ assert_eq!(octets, "002a4015000003000a0002002a005500020007000f40020540");
 {"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":7},{"Cause":{"radioNetwork":"radio-connection-with-ue-lost"}}]}
 ```
 
-This page describes 0.5.0, which is not released: it needs `oxirush-aper` and
-`oxirush-utils`, which are not on crates.io yet, from the repositories that
-[Installation](#installation) names.
-[`oxirush-s1ap`](https://crates.io/crates/oxirush-s1ap) is the same crate for
-S1AP, TS 36.413.
+This page describes 0.5.0, which is not released yet:
+[Installation](#installation) says how to build it.
 
 ## Installation
 
@@ -93,35 +90,29 @@ S1AP, TS 36.413.
 oxirush-ngap = "0.5"
 # With the JSON forms:
 # oxirush-ngap = { version = "0.5", features = ["inspect"] }
+```
 
-# Until oxirush-aper 0.1.0 and oxirush-utils 0.1.0 are on crates.io, at the
-# revisions that this revision of the crate is tested with
+Until 0.5.0 is on crates.io, with `oxirush-aper` 0.1.0 and `oxirush-utils`
+0.1.0 that it takes, a program takes the crate from its repository and the two
+others at the revisions that it is tested with:
+
+```toml
+[dependencies]
+oxirush-ngap = { git = "https://github.com/linouxis9/oxirush-ngap", features = ["inspect"] }
+
 [patch.crates-io]
-oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "7b7ba5b46501d0b2a67fa88f6b15427b1fa6248b" }
-oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "5c47d25abdddf234d4e4bc95b6f77c41f9372bdc" }
+oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "217506968f8da73e96b9b7aeedb533832322c3e8" }
+oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "6b492da612f8050924d7f19b590c3fa77d2e3646" }
 ```
 
 | Feature | Adds |
 |---------|------|
-| `inspect` | A PDU as a `serde_json::Value`: its tree, its view and the paths of its values. It turns on `serde_json/preserve_order` for the whole build, which keeps the members of a tree in the order of the specification |
+| `inspect` | A PDU as JSON, a `oxirush_ngap::tree::Value`: its tree, its view and the paths of its values, with the members in the order of the specification |
 | `serde` | `Serialize` and `Deserialize` for every type of the bindings, through its tree. It turns on `inspect` |
 
-The minimum supported Rust version is 1.88. A clean `cargo build -j 5` of
-the crate and its dependencies on Rust 1.88, on five cores of an x86-64
-Linux machine that runs other work:
-
-| Build | Time | Peak memory |
-|-------|------|-------------|
-| No feature | 18 s | 1.3 GiB |
-| `inspect` | 31 s | 1.9 GiB |
-| `serde` | 28 s | 1.9 GiB |
-| `inspect`, `--release` | 37 s | 1.5 GiB |
-
-The crate, oxirush-s1ap and `oxirush-aper` are released in step: a breaking
-release of `oxirush-aper` is one of both protocol crates. The values of the
-bindings are types of `oxirush-aper`, such as `Octets`, `Bits`, `BitString`
-and `Error`: a program names them from the crate, or from
-`oxirush_ngap::aper`, so that it has one version of each.
+The minimum supported Rust version is 1.88. The values of the bindings are
+types of `oxirush-aper`, as `Octets`, `Bits` and `Error`: a program names them
+through `oxirush_ngap::aper`, so that it has one version of each.
 
 ## Typed API
 
@@ -172,27 +163,10 @@ and `check` read the message, and what does not decode there is their error.
 | `check()` | How it deviates from the object set of its message |
 
 The crate has no limit on the octets of a PDU, and each call takes time and
-memory in proportion to them: the caller bounds what a peer can make it spend
-by what it reads from SCTP. The messages that the cores sent in the lab runs
-are 238 octets at most, and the longest of the vectors, which have the longest
-lists of the specification, 106,555: a receiver that reads at most 128 KiB for
-a PDU takes them all. On a message of 65,535 IEs, 393 KB, the most memory for
-an octet:
-
-| Call | Memory at most, for an octet of the PDU | On that message |
-|------|-----------------------------------------|-----------------|
-| `decode`, `decode_borrowed` | 1.3; none for `decode_borrowed` below 16384 octets | 0.02 ms |
-| `protocol_ies` | 5.3 | 0.5 ms |
-| `check` | 22 | 8 ms |
-| `to_view`, `to_tree` | 162 | 138 to 201 ms, 64 MB |
-| `from_tree` | 90 | 128 ms, 36 MB |
-| `from_view`, `with_view` | 238 | 176 to 181 ms, 94 MB |
-| `inspect::paths` | 78 | 53 ms |
-| `inspect::set`, `remove`, `insert`, `open` | None: the view is edited in its place | 0.02 ms |
-
-A typed value takes what its type holds: the longest list of connections of
-an NG RESET, 65,536 items in 32 KB, is 4.7 MB as its type. `cargo bench
---bench scale`, in `benches/`, measures the table.
+memory in proportion to them, a view up to 94 octets for an octet
+([`to_view`]): a receiver bounds what a peer makes it spend by what it reads
+from SCTP. 128 KiB takes every message that the cores sent in the lab runs,
+238 octets at most, and every vector, 106,555 at most.
 
 ### Keep a value after its PDU
 
@@ -250,9 +224,8 @@ fn main() -> Result<(), Error> {
 UE 7: a NAS-PDU of 3 octets
 ```
 
-A function that is given octets returns the message that borrows them,
-`NGAP_PDU::decode_borrowed(octets)?.message()`; one whose PDU is a variable of
-its own returns an owned value (E0515). A message may be held across an
+To return a message that borrows the caller's buffer, use
+`decode_borrowed(octets)?.message()`. A message may be held across an
 `.await`, and every value of the bindings is `Send`:
 
 ```rust
@@ -299,14 +272,15 @@ a NAS-PDU of 3 octets
 
 ### Build a PDU
 
-`build_ngap!` takes the direction, the procedure, the criticality of the PDU,
-the type of the message, then each IE as `CRITICALITY Name(value)`, as in the
-first example. The name of an IE is its ASN.1 identifier without `id-` and
-with `_` for `-`: `id-AMF-UE-NGAP-ID` is `AMF_UE_NGAP_ID`. A name that the
-crate does not have, a message that the procedure does not have in that
-direction and a missing criticality do not compile. The macro gives a
-`Result`: a value that does not encode, as an integer outside its
-constraint, is an error.
+The name of an IE is its ASN.1 identifier without `id-` and with `_` for `-`:
+`id-AMF-UE-NGAP-ID` is `AMF_UE_NGAP_ID`. The name of a type is the one that
+ASN.1 gives it without its hyphens, with a capital after each: the IE
+`FiveG_S_TMSI` has the type `FiveGSTMSI`, and `NGRAN_CGI` `NGRANCGI`. A name
+that the crate does not have, a message that the procedure does not have in
+that direction and a missing criticality do not compile. `build_ngap!` gives a
+`Result`: a value that does not encode, as an integer outside its constraint,
+is an error. `NGAP_PDU::of_message(&message, criticality)` is the PDU of a
+message that is at hand.
 
 The macros write the criticalities that they are given. `check()` reports
 one that is not the one that TS 38.413 assigns, and [`from_tree()`] writes
@@ -389,9 +363,10 @@ assert_eq!(updated, Ok(true));
 ```
 
 `with_ngap_ie_mut!` gives `Ok(false)` for an IE that is not in the message;
-`=> expression` in place of `= value` changes the decoded value and says
-whether it did. Where an IE is in a message twice, it and
-`extract_ngap_ies!` take the last one.
+`IE(value) => { … }` in place of `= value` changes the decoded value, mutable
+and its own, in a block that says whether it did: its documentation has an
+example. Where an IE is in a message twice, it and `extract_ngap_ies!` take
+the last one.
 
 ### The IEs of any message
 
@@ -426,9 +401,9 @@ fn main() -> Result<(), oxirush_ngap::Error> {
 NGSetup 4015000d000002000f400188006b400120
 ```
 
-Every message but the private one is a container of protocol IEs: these
-give them in the order of the message, an IE that it cannot have or has
-twice among them, and `set_protocol_ies` checks nothing.
+`protocol_ies()` gives the IEs of any message but the private one in their
+order, including those that the message cannot have or has twice, and
+`set_protocol_ies` writes any list without checking it.
 
 ### A transfer and a handover container, typed
 
@@ -523,6 +498,7 @@ Cause (IE 15) is mandatory, and the message does not have it
 | `UndecodableIe` | An IE whose value does not decode as its type |
 | `OutsideRoot` | A value of a later version of its type, outside the root of an extensible constraint |
 | `NotCanonical` | A value that is whole in another form than the one that ITU-T X.691 gives it: a `Fault`, with its clause and its bit |
+| `UnknownProcedure` | A procedure that the specification does not have in the direction of the PDU, as one that a later release adds |
 
 `check()` decodes the value of each IE, not the IEs that a value holds as
 octets, and does not judge a conditional IE: its condition is prose.
@@ -531,8 +507,8 @@ octets, and does not judge a conditional IE: its condition is prose.
 
 Clause 10 of TS 38.413 has what the receiver of a message that deviates
 answers: `cause()` of a deviation is the protocol cause, and
-`diagnostics_item()` the item of the Criticality Diagnostics, for an IE of
-the criticality `reject` or `notify`.
+`criticality_diagnostics()` of the PDU the Criticality Diagnostics IE, with an
+item for each IE of the criticality `reject` or `notify`.
 
 ```rust
 use oxirush_ngap::{Deviation, build_ngap, ngap::*};
@@ -542,17 +518,14 @@ fn main() -> Result<(), oxirush_ngap::Error> {
     let request = build_ngap!(InitiatingMessage, NGSetup, REJECT, NGSetupRequest,
         IGNORE DefaultPagingDRX(PagingDRX::v128),
     )?;
-    let deviations = NGAP_PDU::decode(&request.encode()?)?.check()?;
+    let received = NGAP_PDU::decode(&request.encode()?)?;
+    let deviations = received.check()?;
 
     // Clause 10.3.5: the procedure is rejected, and the missing IEs are reported
     let cause = deviations.iter().find_map(Deviation::cause).unwrap();
-    let items: Vec<_> = deviations.iter().filter_map(Deviation::diagnostics_item).collect();
-    let diagnostics = CriticalityDiagnosticsIEList(items);
     let failure = build_ngap!(UnsuccessfulOutcome, NGSetup, REJECT, NGSetupFailure,
         IGNORE Cause(Cause::protocol(cause)),
-        IGNORE CriticalityDiagnostics(CriticalityDiagnostics::new(
-            None, None, None, Some(diagnostics), None,
-        )),
+        IGNORE CriticalityDiagnostics(received.criticality_diagnostics(&deviations)),
     )?;
     for deviation in &deviations {
         println!("{deviation}");
@@ -566,7 +539,7 @@ fn main() -> Result<(), oxirush_ngap::Error> {
 ```text
 GlobalRANNodeID (IE 27) is mandatory, and the message does not have it
 SupportedTAList (IE 102) is mandatory, and the message does not have it
-40150015000002000f40016200134009080100001b40006640
+40150017000002000f4001620013400b7815000100001b40006640
 ```
 
 ### Identities and capabilities
@@ -578,8 +551,8 @@ use oxirush_ngap::helpers::*;
 let network = plmn("208", "93").unwrap();
 let amf = guami(network, 1, 1, 0).unwrap(); // region, set, pointer
 let tracking_area = tai(network, [0x00, 0x00, 0x01]); // TAC
-let cell = nr_cgi(network, 0x123456, 1).unwrap(); // gNB, cell
-let gnb = global_gnb_id(network, 0x123456).unwrap();
+let cell = nr_cgi(network, 0x123456, 24, 1).unwrap(); // gNB of 24 bits, cell
+let gnb = global_gnb_id(network, 0x123456, 24).unwrap();
 
 // A bit string from octets, and the NR algorithms of a UE: the first
 // octet of its encryption bitmap, then of its integrity bitmap
@@ -598,8 +571,8 @@ the AMF Set ID 1024 does not fit in 10 bits
 
 A PLMN identity has its digits in the order of TS 38.413 clause 9.3.3.5:
 `plmn("310", "410")` is the octets `13 40 01`, where a NAS message has
-`13 00 14`. `plmn_from` reads the MCC and the MNC of a PLMN identity. No
-helper panics, and none cuts a number short.
+`13 00 14`. `plmn_from` reads the MCC and the MNC of a PLMN identity, and a
+gNB ID has the length that it is given, 22 to 32 bits (clause 9.3.1.6).
 
 ### Errors
 
@@ -633,18 +606,19 @@ kinds; `error.ie()` names the IE of an error of the macros.
 A field has the words of the identifier that ASN.1 gives its member, in lower
 case with `_` between them: `pLMNIdentity` is `plmn_identity`, `tAC` is
 `tac`, `iE-Extensions` is `ie_extensions`, `nRCellIdentity` is
-`nr_cell_identity`, `gNB-ID` is `gnb_id`, `gTP-TEID` is `gtp_teid`. The
-documentation of the crate has the rules, and `build/fields.tsv` of the
-repository each field with its name in 0.4.2. A `SEQUENCE` is a struct that a
+`nr_cell_identity`, `gNB-ID` is `gnb_id`, `gTP-TEID` is `gtp_teid`, as the
+documentation of the crate has the rules. A `SEQUENCE` is a struct that a
 literal builds, and its `new` takes the members in their order; an extensible
 `CHOICE` or `ENUMERATED` is `#[non_exhaustive]`.
 
 ## JSON: trees, views and paths
 
-With the `inspect` feature a PDU is a `serde_json::Value` in two forms: a
-tree, the name of its message and its IEs by name, in which a message is
-shown and written, and a view, which keeps what was received and is read and
-edited by paths with the functions of the [`inspect`] module.
+With the `inspect` feature a PDU is JSON, a `oxirush_ngap::tree::Value`, in two
+forms: a tree, the name of its message and its IEs by name, in which a message
+is shown and written, and a view, which keeps what was received and is read
+and edited by paths with the functions of the [`inspect`] module. Every PDU
+that decodes has a tree, which is the same PDU again: an IE whose value has
+no place for what a later release added is its octets there.
 
 ```rust
 use oxirush_ngap::ngap::NGAP_PDU;
@@ -654,7 +628,7 @@ let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").un
 let pdu = NGAP_PDU::decode(&bytes).unwrap();
 
 // Its tree, then its third IE as the view has it
-println!("{}", pdu.to_tree().unwrap());
+println!("{}", pdu.to_tree());
 let view = pdu.to_view().unwrap();
 println!("{}", view["message"]["protocolIEs"][2]);
 ```
@@ -668,7 +642,7 @@ println!("{}", view["message"]["protocolIEs"][2]);
 
 ```rust
 use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-use serde_json::json;
+use oxirush_ngap::tree;
 
 let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
 let pdu = NGAP_PDU::decode(&bytes).unwrap();
@@ -676,14 +650,14 @@ let view = pdu.to_view().unwrap();
 
 // `/ngap` is the IEs of the message, and an IE goes by its name
 let select = |path| inspect::select(&view, path).unwrap();
-assert_eq!(select("/ngap/RAN-UE-NGAP-ID/value"), [&json!(7)]);
-assert_eq!(select("/ngap/Cause/radioNetwork"), [&json!("user-inactivity")]);
-assert_eq!(select("/ngap/Cause/octets"), [&json!("0500")]);
+assert_eq!(select("/ngap/RAN-UE-NGAP-ID/value"), [&tree!(7)]);
+assert_eq!(select("/ngap/Cause/radioNetwork"), [&tree!("user-inactivity")]);
+assert_eq!(select("/ngap/Cause/octets"), [&tree!("0500")]);
 
 // By its position, by its name whatever its case and its separators, by its
 // identifier, and each IE with `*`
 assert_eq!(select("/ngap/1/value"), select("/NGAP/ran_ue_ngap_id/value"));
-assert_eq!(select("/ngap/@id=85/value"), [&json!(7)]);
+assert_eq!(select("/ngap/@id=85/value"), [&tree!(7)]);
 assert_eq!(select("/ngap/*/criticality").len(), 3);
 
 // Nothing where the message could have a value and has none
@@ -715,25 +689,25 @@ for (path, value) in inspect::paths(&view) {
 
 ```rust
 use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-use serde_json::json;
+use oxirush_ngap::tree;
 
 let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
 let pdu = NGAP_PDU::decode(&bytes).unwrap();
 let mut view = pdu.to_view().unwrap();
 
 // A value, and another alternative of a CHOICE in place of the one that is there
-inspect::set(&mut view, "/ngap/RAN-UE-NGAP-ID/value", json!(9)).unwrap();
-inspect::set(&mut view, "/ngap/Cause/nas", json!("Normal Release")).unwrap();
+inspect::set(&mut view, "/ngap/RAN-UE-NGAP-ID/value", tree!(9)).unwrap();
+inspect::set(&mut view, "/ngap/Cause/nas", tree!("Normal Release")).unwrap();
 let edited = pdu.with_view(&view).unwrap();
-println!("{}", edited.to_tree().unwrap());
+println!("{}", edited.to_tree());
 
 // What was not edited is the octets that were received
 let after = edited.to_view().unwrap();
 let octets = inspect::select(&after, "/ngap/AMF-UE-NGAP-ID/octets").unwrap();
-assert_eq!(octets, [&json!("002a")]);
+assert_eq!(octets, [&tree!("002a")]);
 
 // A name that the type does not have is refused, and the view is as it was
-let wrong = inspect::set(&mut view, "/ngap/Cause/radioNetwrok", json!("unspecified"));
+let wrong = inspect::set(&mut view, "/ngap/Cause/radioNetwrok", tree!("unspecified"));
 println!("{}", wrong.unwrap_err());
 ```
 
@@ -746,25 +720,25 @@ println!("{}", wrong.unwrap_err());
 
 ```rust
 use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-use serde_json::json;
+use oxirush_ngap::tree;
 
 let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
 let pdu = NGAP_PDU::decode(&bytes).unwrap();
 let mut view = pdu.to_view().unwrap();
 
 // An IE is added at the end, by its name and its typed value
-let name = json!({"id": "RANNodeName", "criticality": "ignore", "value": "gnb-1"});
+let name = tree!({"id": "RANNodeName", "criticality": "ignore", "value": "gnb-1"});
 inspect::insert(&mut view, "/ngap/-", name).unwrap();
 
 // Before another IE, by its number and its octets
-let unknown = json!({"id": 60000, "criticality": "ignore", "octets": "c0ffee"});
+let unknown = tree!({"id": 60000, "criticality": "ignore", "octets": "c0ffee"});
 inspect::insert(&mut view, "/ngap/Cause", unknown).unwrap();
 
 // An IE is taken out by its name
 inspect::remove(&mut view, "/ngap/AMF-UE-NGAP-ID").unwrap();
 
 let edited = pdu.with_view(&view).unwrap();
-println!("{}", edited.to_tree().unwrap()["ies"]);
+println!("{}", edited.to_tree()["ies"]);
 ```
 
 ```json
@@ -775,10 +749,10 @@ println!("{}", edited.to_tree().unwrap()["ies"]);
 
 ```rust
 use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-use serde_json::json;
+use oxirush_ngap::tree;
 
 // A tree: the name of the message, whatever its case and its separators, then its IEs
-let request = json!({
+let request = tree!({
     "message": "ue context release request",
     "ies": [
         {"AMF-UE-NGAP-ID": 42},
@@ -795,7 +769,7 @@ println!("{}", hex::encode(pdu.encode().unwrap()));
 // The name gave the direction, the procedure code and the criticalities
 let view = pdu.to_view().unwrap();
 println!("{} {} {}", view["direction"], view["procedure_code"], view["criticality"]);
-println!("{}", json!(inspect::select(&view, "/ngap/*/criticality").unwrap()));
+println!("{}", tree!(inspect::select(&view, "/ngap/*/criticality").unwrap()));
 ```
 
 ```text
@@ -808,10 +782,10 @@ println!("{}", json!(inspect::select(&view, "/ngap/*/criticality").unwrap()));
 
 ```rust
 use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-use serde_json::json;
+use oxirush_ngap::tree;
 
 // `{"octets": "…"}` in place of a value is the octets of the IE, whatever they are
-let request = json!({"message": "UEContextReleaseRequest", "ies": [
+let request = tree!({"message": "UEContextReleaseRequest", "ies": [
     {"AMF-UE-NGAP-ID": 42},
     {"65000": {"octets": "c0ffee"}, "criticality": "reject"},
 ]});
@@ -823,9 +797,9 @@ let mut view = pdu.to_view().unwrap();
 println!("{}", view["message"]["protocolIEs"][1]);
 
 // In a view, the `octets` of an IE are set in place of its value
-inspect::set(&mut view, "/ngap/AMF-UE-NGAP-ID/octets", json!("00ff")).unwrap();
+inspect::set(&mut view, "/ngap/AMF-UE-NGAP-ID/octets", tree!("00ff")).unwrap();
 let edited = pdu.with_view(&view).unwrap();
-println!("{}", edited.to_tree().unwrap());
+println!("{}", edited.to_tree());
 ```
 
 ```text
@@ -838,10 +812,10 @@ println!("{}", edited.to_tree().unwrap());
 
 ```rust
 use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-use serde_json::json;
+use oxirush_ngap::tree;
 
 // A message that has one IE twice
-let twice = json!({"message": "UEContextReleaseRequest", "ies": [
+let twice = tree!({"message": "UEContextReleaseRequest", "ies": [
     {"AMF-UE-NGAP-ID": 1},
     {"RAN-UE-NGAP-ID": 7},
     {"AMF-UE-NGAP-ID": 2},
@@ -851,10 +825,10 @@ let mut view = pdu.to_view().unwrap();
 
 // The name selects both, in the order of the message
 let both = inspect::select(&view, "/ngap/AMF-UE-NGAP-ID/value").unwrap();
-assert_eq!(both, [&json!(1), &json!(2)]);
+assert_eq!(both, [&tree!(1), &tree!(2)]);
 
 // Each has its position, which is how `paths` names it, and its name may follow
-inspect::set(&mut view, "/ngap/2/AMF-UE-NGAP-ID/value", json!(3)).unwrap();
+inspect::set(&mut view, "/ngap/2/AMF-UE-NGAP-ID/value", tree!(3)).unwrap();
 
 // After a position, the name of another IE is an error that says which IE is there
 println!("{}", inspect::select(&view, "/ngap/2/RAN-UE-NGAP-ID/value").unwrap_err());
@@ -878,10 +852,10 @@ this IE is AMF-UE-NGAP-ID, not RAN-UE-NGAP-ID: "RAN-UE-NGAP-ID" is not a member 
 
 ```rust
 use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-use serde_json::{Value, json};
+use oxirush_ngap::{tree, tree::Value};
 
 // A message whose one IE is a list of two items
-let request = json!({"message": "InitialContextSetupRequest", "ies": [
+let request = tree!({"message": "InitialContextSetupRequest", "ies": [
     {"AllowedNSSAI": [{"s-NSSAI": {"sST": 1}}, {"s-NSSAI": {"sST": 2, "sD": "000001"}}]},
 ]});
 let pdu = NGAP_PDU::from_tree(&request).unwrap();
@@ -892,21 +866,21 @@ let select = |view, path| -> Vec<Value> {
     let selected = inspect::select(view, path).unwrap();
     selected.into_iter().cloned().collect()
 };
-assert_eq!(select(&view, "/ngap/AllowedNSSAI/1/s-NSSAI/sD"), [json!("000001")]);
-assert_eq!(select(&view, "/ngap/AllowedNSSAI/value/*/s-NSSAI/sST"), [json!(1), json!(2)]);
+assert_eq!(select(&view, "/ngap/AllowedNSSAI/1/s-NSSAI/sD"), [tree!("000001")]);
+assert_eq!(select(&view, "/ngap/AllowedNSSAI/value/*/s-NSSAI/sST"), [tree!(1), tree!(2)]);
 
 // An optional member that an item does not have selects nothing
 assert!(select(&view, "/ngap/AllowedNSSAI/0/s-NSSAI/sD").is_empty());
 
 // An item is added at the end, and one is taken out
-inspect::insert(&mut view, "/ngap/AllowedNSSAI/-", json!({"s-NSSAI": {"sST": 3}})).unwrap();
+inspect::insert(&mut view, "/ngap/AllowedNSSAI/-", tree!({"s-NSSAI": {"sST": 3}})).unwrap();
 inspect::remove(&mut view, "/ngap/AllowedNSSAI/0").unwrap();
 
 // `null` takes an optional member out
 inspect::set(&mut view, "/ngap/AllowedNSSAI/0/s-NSSAI/sD", Value::Null).unwrap();
 
 let edited = pdu.with_view(&view).unwrap();
-println!("{}", edited.to_tree().unwrap());
+println!("{}", edited.to_tree());
 ```
 
 ```json
@@ -920,10 +894,10 @@ its decoded value alone.
 
 ```rust
 use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-use serde_json::json;
+use oxirush_ngap::tree;
 
 // A message with a transfer, written as the message that it contains
-let request = json!({"message": "PDUSessionResourceSetupRequest", "ies": [
+let request = tree!({"message": "PDUSessionResourceSetupRequest", "ies": [
     {"AMF-UE-NGAP-ID": 42},
     {"RAN-UE-NGAP-ID": 7},
     {"PDUSessionResourceSetupListSUReq": [{
@@ -943,7 +917,7 @@ println!("{}", inspect::select(&view, transfer).unwrap()[0]);
 
 // The IEs of the message that it contains go by name in its place
 let kind = format!("{transfer}/PDUSessionType/value");
-assert_eq!(inspect::select(&view, &kind).unwrap(), [&json!("ipv4")]);
+assert_eq!(inspect::select(&view, &kind).unwrap(), [&tree!("ipv4")]);
 
 // The same value by the path that says `value` and `decoded`
 let long = "/ngap/PDUSessionResourceSetupListSUReq/value/0\
@@ -955,9 +929,9 @@ let joined = format!("{transfer}/protocolIEs/0/PDUSessionType/value");
 assert_eq!(inspect::select(&view, &joined), inspect::select(&view, &kind));
 
 // An edit of the message that it contains is encoded into the transfer
-inspect::set(&mut view, &kind, json!("ipv6")).unwrap();
+inspect::set(&mut view, &kind, tree!("ipv6")).unwrap();
 let edited = pdu.with_view(&view).unwrap();
-println!("{}", edited.to_tree().unwrap()["ies"][2]);
+println!("{}", edited.to_tree()["ies"][2]);
 ```
 
 ```json
@@ -1022,11 +996,11 @@ octets, and the one that writes or reads them names the type.
 
 ```rust
 use oxirush_ngap::{ErrorKind, inspect, ngap::NGAP_PDU};
-use serde_json::json;
+use oxirush_ngap::tree;
 
 // Written: the name of the type with its value, in place of the octets
 let name = "SourceNGRANNode-ToTargetNGRANNode-TransparentContainer";
-let required = json!({"message": "HandoverRequired", "ies": [
+let required = tree!({"message": "HandoverRequired", "ies": [
     {"AMF-UE-NGAP-ID": 42},
     {"RAN-UE-NGAP-ID": 7},
     {"SourceToTarget-TransparentContainer": {name: {
@@ -1038,7 +1012,7 @@ let required = json!({"message": "HandoverRequired", "ies": [
 
 // A tree shows the octets that the container was encoded as
 let pdu = NGAP_PDU::from_tree(&required).unwrap();
-println!("{}", pdu.to_tree().unwrap()["ies"][2]);
+println!("{}", pdu.to_tree()["ies"][2]);
 
 // Read: a path goes through the name of the type
 let mut view = pdu.to_view().unwrap();
@@ -1049,16 +1023,16 @@ assert_eq!(inspect::check_path("HandoverRequired", &cell), Ok(()));
 // The path is an error until `open` has decoded the octets, and selects the value after that
 assert_eq!(inspect::select(&view, &cell).unwrap_err().kind(), ErrorKind::NotOpened);
 inspect::open(&mut view, &cell).unwrap();
-assert_eq!(inspect::select(&view, &cell).unwrap(), [&json!(4660)]);
+assert_eq!(inspect::select(&view, &cell).unwrap(), [&tree!(4660)]);
 
 // What the octets carry, decoded
 let decoded = format!("{container}/decoded");
 println!("{}", inspect::select(&view, &decoded).unwrap()[0]);
 
 // An edit goes into it, and what is not edited is sent as it was received
-inspect::set(&mut view, &cell, json!(7)).unwrap();
+inspect::set(&mut view, &cell, tree!(7)).unwrap();
 let edited = pdu.with_view(&view).unwrap();
-println!("{}", edited.to_tree().unwrap()["ies"][2]);
+println!("{}", edited.to_tree()["ies"][2]);
 ```
 
 ```text
@@ -1071,7 +1045,7 @@ println!("{}", edited.to_tree().unwrap()["ies"][2]);
 
 With the `serde` feature, a PDU is serialized as its tree and deserialized
 from one, in any format that serde has, and each other type of the bindings
-in the form of its ASN.1 type.
+as the tree of a PDU shows it.
 
 ```rust
 use oxirush_ngap::ngap::{NGAP_PDU, SNSSAI, SST};
@@ -1082,19 +1056,19 @@ let text = serde_json::to_string(&pdu).unwrap();
 let read: NGAP_PDU = serde_json::from_str(&text).unwrap();
 assert_eq!(read.encode().unwrap(), bytes);
 
-// A value alone has the form of its type: an SST is its octet
+// A value alone has the form that a tree shows it in: an SST is a number
 let slice = SNSSAI::new(SST([1]), None, None);
 println!("{}", serde_json::to_string(&slice).unwrap());
 ```
 
 ```text
-{"sST":"01"}
+{"sST":1}
 ```
 
 ### Values
 
-A tree and a view show the values of some types as they are usually
-written, and take them so or in the form of their ASN.1 type.
+A tree, a view and a value alone show the values of some types as they are
+usually written, and take them so or in the form of their ASN.1 type.
 
 | Type | Notation |
 |------|----------|
@@ -1130,7 +1104,8 @@ cargo run --example ngap_inspect --features inspect
 - Judge a conditional IE: `check()` reports what the object sets say, and a
   condition is prose.
 - Keep what a later release added to a value that is decoded as its type and
-  encoded again: a PDU keeps the octets of its IEs until one is decoded.
+  encoded again: a PDU keeps the octets of its IEs until one is decoded, and
+  a tree and a view keep them.
 - Look into an RRC container, or into the container of a handover for
   another system than NG-RAN: they stay octets.
 
@@ -1143,31 +1118,27 @@ cargo run --example ngap_inspect --features inspect
 
 ## Tests
 
+In a clone of the repository, cargo takes `oxirush-aper` and `oxirush-utils`
+at the revisions that `build/revisions` pins with `--config`, as CI does:
+
 ```bash
-cargo test --all-features
-cargo test
+cargo test --all-features \
+  --config 'patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"' \
+  --config 'patch.crates-io.oxirush-aper.rev="217506968f8da73e96b9b7aeedb533832322c3e8"' \
+  --config 'patch.crates-io.oxirush-utils.git="https://github.com/linouxis9/oxirush-utils"' \
+  --config 'patch.crates-io.oxirush-utils.rev="6b492da612f8050924d7f19b590c3fa77d2e3646"'
 cd oracle && cargo test   # against the codec of rasn
 ```
 
-| Test | What it holds |
-|------|---------------|
-| `aper_vectors` | The 144 messages and the 479 vectors that pycrate 0.8.1 encoded from the ASN.1: each decodes to its type and encodes to the same octets, and a truncation or one more octet is refused |
-| `vectors` | With `inspect`, each vector through its view, its values alone and its tree, with every IE, transfer and container read with its type |
-| `captured` | 177 PDUs that the AMF of Open5GS 2.8.0, the AMF of free5GC 4.2.3 and PacketRusher as gNB sent in lab runs, read and written back as the same octets |
-| `aper_round_trip`, `unknown_extensions`, `allocation` | The macros, the encodings that pycrate and rasn write otherwise than X.691, the additions of a later release, and memory reserved for what is read, not for a count that a length claims |
-| `message`, `protocol_ies`, `check`, `diagnostics` | The lifetimes of a message, the IEs of any message, what `check()` reports and what a receiver answers |
-| `errors`, `keys`, `readable`, `plmn_identity` | The errors with their kinds and words, `Debug` that prints no key, how an identity prints, and the octets of a PLMN identity, which tshark reads as the same network |
-| `inspection`, `many_ies`, `serde` | The JSON forms of each message, a message of 65,535 IEs, and serde |
-| `readme`, `shared_files`, `revisions` | The output of each block of this page, the files shared with oxirush-s1ap, and the pinned revisions |
-| `oracle/tests/` | Each vector and each captured PDU, cut, lengthened and with changed bits, read by the crate and by rasn 0.29 as the same value, or by neither |
-
-The package that crates.io holds has these tests and their fixtures, and
-`tests/package.sh` runs them from the package alone. The vectors are
-pycrate's and the captured PDUs come from two open-source cores and one
-open-source simulator: 18 of the 144 messages were seen on a wire, and no PDU
-of a commercial RAN or core is among them, so what such equipment sends that
-these did not is untested. [CONTRIBUTING.md](CONTRIBUTING.md) says how the
-vectors were made and the PDUs captured.
+The tests read the 144 messages and the 479 vectors that pycrate 0.8.1
+encoded from the ASN.1, and 177 PDUs that the AMFs of Open5GS 2.8.0 and
+free5GC 4.2.3 and PacketRusher as gNB sent in lab runs, through the codec,
+the views and the trees; `oracle/` compares each, cut, lengthened and with
+changed bits, with the codec of rasn 0.29, and `tests/package.sh` runs the
+tests from the package alone. 18 of the 144 messages were seen on a wire, and
+no PDU of a commercial RAN or core is among them: what such equipment sends
+that these did not is untested. [CONTRIBUTING.md](CONTRIBUTING.md) says how
+the vectors were made and the PDUs captured.
 
 ## Fuzzing
 
@@ -1194,6 +1165,36 @@ cargo bench --bench allocations
 python3 build_cost.py +1.88.0 --features inspect
 ```
 
+## Performance
+
+A clean `cargo build -j 5` of the crate and its dependencies on Rust 1.88, on
+five cores of an x86-64 Linux machine that runs other work:
+
+| Build | Time | Peak memory |
+|-------|------|-------------|
+| No feature | 16 s | 1.3 GiB |
+| `inspect` | 26 s | 2.0 GiB |
+| `serde` | 27 s | 2.0 GiB |
+| `inspect`, `--release` | 37 s | 1.6 GiB |
+
+On a message of 65,535 IEs, 393 KB, `decode` takes 0.02 ms, `check` 8 ms,
+`to_view` 85 ms and 37 MB, `with_view` 133 ms and 48 MB, `inspect::paths`
+39 ms, and an edit at a path 0.02 ms; `inspect::open` decodes the 8,000
+containers of a HANDOVER REQUIRED of 168 KB in 45 ms. `cargo bench --bench
+scale`, in `benches/`, measures them.
+
+## OxiRush crates
+
+[oxirush-s1ap](https://github.com/linouxis9/oxirush-s1ap) (S1AP, the same crate for TS 36.413) ·
+[oxirush-aper](https://github.com/linouxis9/oxirush-aper) (aligned PER) ·
+[oxirush-utils](https://github.com/linouxis9/oxirush-utils) (identities and
+trees) ·
+[oxirush-nas](https://github.com/linouxis9/oxirush-nas) (NAS) ·
+[oxirush-security](https://github.com/linouxis9/oxirush-security) (NAS keys
+and algorithms) ·
+[oxirush-gtp-u](https://github.com/linouxis9/oxirush-gtp-u) (user plane) ·
+[oxirush-sctp](https://github.com/linouxis9/oxirush-sctp) (transport)
+
 ## Contributing
 
 The bindings are generated: [CONTRIBUTING.md](CONTRIBUTING.md) says how, and
@@ -1209,3 +1210,4 @@ Licensed under the Apache License, Version 2.0. See [LICENSE](https://github.com
 
 [`inspect`]: https://docs.rs/oxirush-ngap/0.5.0/oxirush_ngap/inspect/index.html
 [`from_tree()`]: https://docs.rs/oxirush-ngap/0.5.0/oxirush_ngap/ngap/ngap_pdu_descriptions/enum.NGAPPDU.html#method.from_tree
+[`to_view`]: https://docs.rs/oxirush-ngap/0.5.0/oxirush_ngap/ngap/ngap_pdu_descriptions/enum.NGAPPDU.html#method.to_view

@@ -5,7 +5,7 @@ use oxirush_aper::{Decode, Encode, Faults, Octets, Reader, Writer};
 
 use crate::Error;
 use crate::check::{Deviation, Wrong, deviations, object_set};
-use crate::ngap::{Criticality, NGAPPDU, ProtocolIEContainer};
+use crate::ngap::{Criticality, CriticalityDiagnostics, NGAPPDU, ProtocolIEContainer};
 use crate::registry::{KEY_IES, decodes, procedure_criticality};
 
 /// The protocol IEs of a message, which the ASN.1 has as a SEQUENCE of one container
@@ -226,6 +226,43 @@ impl<'a> NGAPPDU<'a> {
         Ok(())
     }
 
+    /// The PDU that holds `message`: of the direction and the procedure code of the
+    /// message, and of the criticality `criticality`, which is that of its procedure for
+    /// a PDU as TS 38.413 clause 9.4.1 has a sender construct it. The message is encoded
+    /// as it is, whatever its IEs are, as `build_ngap!` builds one from its IEs.
+    ///
+    /// ```
+    /// use oxirush_ngap::{build_ngap, ngap::*};
+    ///
+    /// // A message that is at hand, as one that a test changed after it was decoded
+    /// let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
+    ///     IGNORE, UEContextReleaseRequest,
+    ///     REJECT AMF_UE_NGAP_ID(1u64),
+    ///     REJECT RAN_UE_NGAP_ID(7u32),
+    ///     IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
+    /// )?;
+    /// let mut message: UEContextReleaseRequest = pdu.decode_value()?;
+    /// message.protocol_ies.0.swap(0, 1);
+    ///
+    /// let again = NGAP_PDU::of_message(&message, Criticality::ignore)?;
+    /// assert_eq!(again.procedure_name(), "UEContextReleaseRequest");
+    /// assert_eq!(again.decode_value::<UEContextReleaseRequest>()?, message);
+    /// # Ok::<(), oxirush_ngap::Error>(())
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// A message that does not encode: a value outside a constraint of its type.
+    pub fn of_message<'m, M: crate::Message<'m>>(
+        message: &M,
+        criticality: Criticality,
+    ) -> Result<NGAPPDU<'static>, Error> {
+        let octets = Octets::owned(oxirush_aper::encode(message)?);
+        let pdu = NGAPPDU::of(M::DIRECTION, M::PROCEDURE_CODE, criticality, octets);
+        // The direction of a message is one of the three.
+        pdu.ok_or_else(|| Error::new(crate::ErrorKind::Encode, "a message has no direction"))
+    }
+
     /// The PDU of a direction, as `direction()` says it, with the code of its procedure,
     /// its criticality and the octets of the open type that holds its message; `None`
     /// for what is no direction.
@@ -282,6 +319,8 @@ impl<'a> NGAPPDU<'a> {
     /// | `MissingIe` | An IE whose presence is mandatory, and that the message does not have |
     /// | `UndecodableIe` | An IE of the object set whose value does not decode as its type |
     /// | `OutsideRoot` | An IE whose value is of a later version of its type: outside the root of an extensible constraint |
+    /// | `NotCanonical` | What is written in another form than the one that ITU-T X.691 gives it |
+    /// | `UnknownProcedure` | A procedure that the specification does not have in the direction of the PDU |
     ///
     /// The criticality of the PDU comes first, then what each IE deviates in, in the
     /// order of the message, then the IEs that are missing, in the order of the object
@@ -313,9 +352,11 @@ impl<'a> NGAPPDU<'a> {
     ///
     /// A deviation says what the receiver of the message answers: the cause of
     /// [`Deviation::cause`], and for the Criticality Diagnostics the item of
-    /// [`Deviation::diagnostics_item`]. The macro that extracts the IEs of a message
-    /// stops at the first IE that is missing or does not decode; `check` has them all,
-    /// and [`Deviation::of`] gives the deviation of the error of that macro.
+    /// [`Deviation::diagnostics_item`], which
+    /// [`criticality_diagnostics`](Self::criticality_diagnostics) gathers into the IE of
+    /// the answer. The macro that extracts the IEs of a message stops at the first IE
+    /// that is missing or does not decode; `check` has them all, and [`Deviation::of`]
+    /// gives the deviation of the error of that macro.
     ///
     /// It reports, and refuses nothing. The macros build a message whatever its IEs
     /// are, a tree writes one, and the codec encodes and decodes it: a test of what a
@@ -340,17 +381,24 @@ impl<'a> NGAPPDU<'a> {
     ///   container: the value of an IE of the message is decoded as its type, and what
     ///   it holds as octets is not;
     /// - the IEs of the private message, which has no object set: the criticality of its
-    ///   PDU alone is compared.
+    ///   PDU alone is compared;
+    /// - the message of a procedure that the specification does not have in that
+    ///   direction, as one that a later release adds: it is the one deviation
+    ///   `UnknownProcedure`, which a receiver answers by the criticality of the PDU
+    ///   (clause 10.3.4.1).
     ///
     /// # Errors
     ///
-    /// An error of the kind `UnknownMessage` for a procedure that the specification does
-    /// not have in that direction, which has no object set, and one of the kind `Decode`
-    /// when the octets of the message are not a container of protocol IEs.
+    /// An error of the kind `Decode` when the octets of the message are not a container
+    /// of protocol IEs.
     pub fn check(&self) -> Result<Vec<Deviation>, Error> {
         let (direction, code) = (self.direction(), self.procedure_code());
         let Some(message) = object_set(direction, code) else {
-            return Err(Error::no_message_of(direction, code));
+            return Ok(vec![Deviation::UnknownProcedure {
+                procedure_code: code,
+                direction,
+                criticality: self.criticality(),
+            }]);
         };
         let mut found = Vec::new();
         let criticality = self.criticality();
@@ -397,5 +445,38 @@ impl<'a> NGAPPDU<'a> {
             deviations(set, &listed, &value, &mut found);
         }
         Ok(found)
+    }
+
+    /// The Criticality Diagnostics IE with which the receiver of this PDU answers it for
+    /// `deviations`, which [`check`](Self::check) gave: the procedure code, the triggering
+    /// message and the procedure criticality of this PDU, as clause 10.3.4.1 of TS 38.413
+    /// has them for a procedure that the receiver does not comprehend, and the item of
+    /// each deviation that has one, as clauses 10.3.4.2 and 10.3.5 have them for an IE,
+    /// 256 at most. No list of IEs where no deviation has an item.
+    ///
+    /// ```
+    /// use oxirush_ngap::{build_ngap, ngap::*};
+    ///
+    /// // An NG SETUP REQUEST without its Global RAN Node ID, which is mandatory and of
+    /// // the criticality reject
+    /// let pdu = build_ngap!(InitiatingMessage, NGSetup, REJECT, NGSetupRequest,
+    ///     IGNORE DefaultPagingDRX(PagingDRX::v128),
+    /// )?;
+    /// let deviations = pdu.check()?;
+    /// let diagnostics = pdu.criticality_diagnostics(&deviations);
+    /// assert_eq!(diagnostics.procedure_code, Some(ProcedureCode(21)));
+    /// assert_eq!(diagnostics.triggering_message, Some(TriggeringMessage::initiating_message));
+    /// let items = diagnostics.ies_criticality_diagnostics.unwrap();
+    /// assert_eq!(items.0[0].ie_id, ProtocolIEID(27));
+    /// assert_eq!(items.0[0].type_of_error, TypeOfError::missing);
+    /// # Ok::<(), oxirush_ngap::Error>(())
+    /// ```
+    pub fn criticality_diagnostics(&self, deviations: &[Deviation]) -> CriticalityDiagnostics {
+        oxirush_aper::check::criticality_diagnostics(
+            self.procedure_code(),
+            self.direction(),
+            self.criticality(),
+            deviations,
+        )
     }
 }

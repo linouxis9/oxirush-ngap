@@ -22,9 +22,9 @@
 
 #![cfg(feature = "inspect")]
 
+use oxirush_ngap::inspect;
 use oxirush_ngap::ngap::*;
-use oxirush_ngap::{ErrorKind, inspect};
-use serde_json::{Value, json};
+use oxirush_ngap::{tree, tree::Value};
 use std::sync::mpsc;
 use std::time::Duration;
 
@@ -75,7 +75,7 @@ fn each_call_on_the_most_ies_of_one_name_is_done_within_a_bound() {
     );
 
     let written = pdu.clone();
-    let tree = within("to_tree", move || written.to_tree().unwrap());
+    let tree = within("to_tree", move || written.to_tree());
     assert_eq!(tree["ies"].as_array().unwrap().len(), MOST);
 
     let listed = view.clone();
@@ -84,22 +84,24 @@ fn each_call_on_the_most_ies_of_one_name_is_done_within_a_bound() {
     let last = format!("/ngap/{}/value", MOST - 1);
     // Three values of the PDU, and three of each IE.
     assert_eq!(paths.len(), 3 + 3 * MOST);
-    assert!(paths.contains(&(last.clone(), json!(1))));
+    assert!(paths.contains(&(last.clone(), tree!(1))));
 
     let (selected, path) = (view.clone(), last.clone());
     let one = within("select", move || {
         inspect::select(&selected, &path).map(|values| values.len())
     });
     assert_eq!(one.unwrap(), 1);
+    // A path selects every IE of a message, which has 65,535 at most (the review of the
+    // move of the paths to oxirush-utils: it selected 4,096).
     let selected = view.clone();
     let all = within("select by name", move || {
         inspect::select(&selected, "/ngap/AMF-UE-NGAP-ID/value").map(|values| values.len())
     });
-    assert_eq!(all.unwrap_err().kind(), ErrorKind::Limit);
+    assert_eq!(all.unwrap(), MOST);
 
     let (mut edited, path) = (view.clone(), last);
     let edited = within("set", move || {
-        inspect::set(&mut edited, &path, json!(2)).map(|()| edited)
+        inspect::set(&mut edited, &path, tree!(2)).map(|()| edited)
     })
     .unwrap();
     let (unedited, same) = (pdu.clone(), view.clone());
@@ -119,4 +121,39 @@ fn the_paths_of_ies_without_a_name_are_listed_within_the_bound_too() {
     let view = within("to_view", move || pdu.to_view().unwrap());
     let paths: Vec<(String, Value)> = within("paths", move || inspect::paths(&view));
     assert!(paths.len() >= MOST);
+}
+
+/// The fourth finding of the review of the move of the paths to oxirush-utils: `open`
+/// took the path again from the view for each value that it opened, ten seconds for the
+/// 4,096 containers of a HANDOVER REQUIRED. It opens those of a segment in one walk, by
+/// the name of the IE and with `*`, which takes the IEs that have the name of the type
+/// and leaves the others.
+#[test]
+fn open_on_the_containers_of_a_handover_is_done_within_a_bound() {
+    const CONTAINERS: usize = 8192;
+    let name = "SourceNGRANNode-ToTargetNGRANNode-TransparentContainer";
+    let container = tree!({name: {
+        "rRCContainer": "0102",
+        "targetCell-ID": {"nR-CGI": {"pLMNIdentity": "208-93", "nRCellIdentity": 4660}},
+        "uEHistoryInformation": [{"lastVisitedCellInformation": {"eUTRANCell": "00"}}],
+    }});
+    let mut ies = vec![tree!({"AMF-UE-NGAP-ID": 42}), tree!({"RAN-UE-NGAP-ID": 7})];
+    let containers =
+        (0..CONTAINERS).map(|_| tree!({"SourceToTarget-TransparentContainer": &container}));
+    ies.extend(containers);
+    let required = tree!({"message": "HandoverRequired", "ies": ies});
+    let pdu = NGAP_PDU::from_tree(&required).unwrap();
+    let view = within("to_view", move || pdu.to_view().unwrap());
+    let cell = format!(
+        "/ngap/SourceToTarget-TransparentContainer/{name}/targetCell-ID/nR-CGI/nRCellIdentity"
+    );
+    for path in [cell.clone(), format!("/ngap/*/{name}/targetCell-ID")] {
+        let mut opened = view.clone();
+        let opened = within("open", move || {
+            inspect::open(&mut opened, &path).unwrap();
+            opened
+        });
+        let cells = inspect::select(&opened, &cell).unwrap();
+        assert_eq!(cells, vec![&tree!(4660); CONTAINERS]);
+    }
 }

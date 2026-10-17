@@ -24,7 +24,7 @@ pub use oxirush_ngap as codec;
 use crate::{Typed, Written, done};
 use codec::ngap;
 use codec::{Error, build_ngap, extract_ngap_ies};
-use serde_json::{Value, json};
+use oxirush_ngap::{tree, tree::Value};
 
 /// A PDU of the protocol, which owns its octets.
 pub type Pdu = ngap::NGAP_PDU;
@@ -105,7 +105,7 @@ fn octets(length: usize) -> String {
 
 /// A QoS flow of a standardized 5QI.
 fn qos_flow(identifier: u8, five_qi: u8) -> Value {
-    json!({
+    tree!({
         "qosFlowIdentifier": identifier,
         "qosFlowLevelQosParameters": {
             "qosCharacteristics": {"nonDynamic5QI": {"fiveQI": five_qi}},
@@ -121,7 +121,7 @@ fn qos_flow(identifier: u8, five_qi: u8) -> Value {
 /// A PDU SESSION RESOURCE SETUP REQUEST TRANSFER: the bit rates of the
 /// session, the tunnel of its UPF, its type and two QoS flows.
 fn setup_request_transfer(session: u8) -> Value {
-    json!({"protocolIEs": [
+    tree!({"protocolIEs": [
         {"PDUSessionAggregateMaximumBitRate": {
             "pDUSessionAggregateMaximumBitRateDL": 1_000_000_000,
             "pDUSessionAggregateMaximumBitRateUL": 500_000_000,
@@ -137,7 +137,7 @@ fn setup_request_transfer(session: u8) -> Value {
 
 /// The bit rates of a UE.
 fn ue_bit_rates() -> Value {
-    json!({
+    tree!({
         "uEAggregateMaximumBitRateDL": 2_000_000_000,
         "uEAggregateMaximumBitRateUL": 1_000_000_000,
     })
@@ -147,13 +147,13 @@ fn ue_bit_rates() -> Value {
 /// capability of the UE and a NAS-PDU of 1,500 octets.
 fn initial_context_setup_request() -> Written {
     let session = |id: u8| {
-        json!({
+        tree!({
             "pDUSessionID": id,
             "s-NSSAI": {"sST": 1, "sD": "000001"},
             "pDUSessionResourceSetupRequestTransfer": setup_request_transfer(id),
         })
     };
-    let tree = json!({"message": "InitialContextSetupRequest", "ies": [
+    let tree = tree!({"message": "InitialContextSetupRequest", "ies": [
         {"AMF-UE-NGAP-ID": 1_099_511_627_775u64},
         {"RAN-UE-NGAP-ID": 4_000_000_000u32},
         {"UEAggregateMaximumBitRate": ue_bit_rates()},
@@ -183,7 +183,7 @@ fn initial_context_setup_request() -> Written {
             "/ngap/PDUSessionResourceSetupListCxtReq/1/pDUSessionResourceSetupRequestTransfer\
              /QosFlowSetupRequestList/1/qosFlowLevelQosParameters\
              /allocationAndRetentionPriority/priorityLevelARP",
-            json!(3),
+            tree!(3),
         ),
         typed: typed!(InitiatingMessage InitialContextSetup REJECT InitialContextSetupRequest {
             REJECT AMF_UE_NGAP_ID: AMFUENGAPID,
@@ -206,14 +206,14 @@ fn initial_context_setup_request() -> Written {
 /// its NAS-PDU and its transfer.
 fn pdu_session_resource_setup_request() -> Written {
     let session = |id: u8| {
-        json!({
+        tree!({
             "pDUSessionID": id,
             "pDUSessionNAS-PDU": octets(96),
             "s-NSSAI": {"sST": 1, "sD": "000001"},
             "pDUSessionResourceSetupRequestTransfer": setup_request_transfer(id),
         })
     };
-    let tree = json!({"message": "PDUSessionResourceSetupRequest", "ies": [
+    let tree = tree!({"message": "PDUSessionResourceSetupRequest", "ies": [
         {"AMF-UE-NGAP-ID": 1_099_511_627_775u64},
         {"RAN-UE-NGAP-ID": 4_000_000_000u32},
         {"PDUSessionResourceSetupListSUReq": (1..=8).map(session).collect::<Vec<_>>()},
@@ -228,7 +228,7 @@ fn pdu_session_resource_setup_request() -> Written {
         edit: (
             "/ngap/PDUSessionResourceSetupListSUReq/7/pDUSessionResourceSetupRequestTransfer\
              /UL-NGU-UP-TNLInformation/gTPTunnel/gTP-TEID",
-            json!(0x0200_0008),
+            tree!(0x0200_0008),
         ),
         typed: typed!(
             InitiatingMessage PDUSessionResourceSetup REJECT PDUSessionResourceSetupRequest {
@@ -249,8 +249,8 @@ const RRC_CONTAINER: usize = 3_964;
 /// transparent container of 4,000 octets, most of which is its RRC container.
 fn handover_required() -> Written {
     let cell =
-        |identity: u64| json!({"nR-CGI": {"pLMNIdentity": "208-93", "nRCellIdentity": identity}});
-    let container = json!({"SourceNGRANNode-ToTargetNGRANNode-TransparentContainer": {
+        |identity: u64| tree!({"nR-CGI": {"pLMNIdentity": "208-93", "nRCellIdentity": identity}});
+    let container = tree!({"SourceNGRANNode-ToTargetNGRANNode-TransparentContainer": {
         "rRCContainer": octets(RRC_CONTAINER),
         "pDUSessionResourceInformationList": [
             {"pDUSessionID": 1, "qosFlowInformationList": [
@@ -267,7 +267,7 @@ fn handover_required() -> Written {
             "timeUEStayedInCell": 600,
         }}}],
     }});
-    let tree = json!({"message": "HandoverRequired", "ies": [
+    let tree = tree!({"message": "HandoverRequired", "ies": [
         {"AMF-UE-NGAP-ID": 1_099_511_627_775u64},
         {"RAN-UE-NGAP-ID": 4_000_000_000u32},
         {"HandoverType": "intra5gs"},
@@ -293,7 +293,7 @@ fn handover_required() -> Written {
         what: "HANDOVER REQUIRED with a transparent container of 4,000 octets",
         tree,
         path: "/ngap/TargetID/targetRANNodeID/selectedTAI/tAC",
-        edit: ("/ngap/TargetID/targetRANNodeID/selectedTAI/tAC", json!(2)),
+        edit: ("/ngap/TargetID/targetRANNodeID/selectedTAI/tAC", tree!(2)),
         typed: typed!(InitiatingMessage HandoverPreparation REJECT HandoverRequired {
             REJECT AMF_UE_NGAP_ID: AMFUENGAPID,
             REJECT RAN_UE_NGAP_ID: RANUENGAPID,
@@ -309,8 +309,8 @@ fn handover_required() -> Written {
 
 /// A PAGING for sixteen tracking areas.
 fn paging() -> Written {
-    let area = |tac: u32| json!({"tAI": {"pLMNIdentity": "208-93", "tAC": tac}});
-    let tree = json!({"message": "Paging", "ies": [
+    let area = |tac: u32| tree!({"tAI": {"pLMNIdentity": "208-93", "tAC": tac}});
+    let tree = tree!({"message": "Paging", "ies": [
         {"UEPagingIdentity": {"fiveG-S-TMSI": {
             "aMFSetID": 1, "aMFPointer": 0, "fiveG-TMSI": 3_661_752_294u32,
         }}},
@@ -323,7 +323,7 @@ fn paging() -> Written {
         what: "PAGING for 16 tracking areas",
         tree,
         path: "/ngap/TAIListForPaging/15/tAI/tAC",
-        edit: ("/ngap/TAIListForPaging/15/tAI/tAC", json!(17)),
+        edit: ("/ngap/TAIListForPaging/15/tAI/tAC", tree!(17)),
         typed: typed!(InitiatingMessage Paging IGNORE Paging {
             IGNORE UEPagingIdentity: UEPagingIdentity,
             IGNORE PagingDRX: PagingDRX,

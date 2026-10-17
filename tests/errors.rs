@@ -192,7 +192,7 @@ fn a_member_that_does_not_encode_is_named_as_one_that_does_not_decode_is() {
     // A list of no item where the type has one at least, in a member that may be
     // absent: the history of a UE has 1 to 16 cells.
     let cell =
-        oxirush_ngap::helpers::nr_cgi(oxirush_ngap::helpers::plmn("208", "93").unwrap(), 2, 1);
+        oxirush_ngap::helpers::nr_cgi(oxirush_ngap::helpers::plmn("208", "93").unwrap(), 2, 24, 1);
     let container = SourceNGRANNodeToTargetNGRANNodeTransparentContainer::new(
         RRCContainer(vec![0x01].into()),
         None,
@@ -475,15 +475,16 @@ fn an_argument_that_a_helper_does_not_take_is_an_error_and_no_panic() {
         oxirush_ngap::Bits::new(1, 65).unwrap_err(),
     ];
     // What was cut short: an AMF Set ID over 10 bits and an AMF Pointer over 6
-    // (TS 38.413 clauses 9.3.3.12 and 9.3.3.19), a gNB ID over the 24 bits that the
-    // helpers give it, a cell over the 12 bits that follow them in an NR Cell Identity
-    // of 36 (clause 9.3.1.7), and a number over the width of its bit string.
+    // (TS 38.413 clauses 9.3.3.12 and 9.3.3.19), a gNB ID over the bits that it is given,
+    // 22 to 32 (clause 9.3.1.6), a cell over the bits that follow them in an NR Cell
+    // Identity of 36 (clause 9.3.1.7), and a number over the width of its bit string.
     let cut_short = [
         guami(network(), 1, 2000, 0).unwrap_err(),
         guami(network(), 1, 1, 70).unwrap_err(),
-        global_gnb_id(network(), 0x1ff_ffff).unwrap_err(),
-        nr_cgi(network(), 0x1ff_ffff, 1).unwrap_err(),
-        nr_cgi(network(), 1, 0x1000).unwrap_err(),
+        global_gnb_id(network(), 0x1ff_ffff, 24).unwrap_err(),
+        global_gnb_id(network(), 1, 33).unwrap_err(),
+        nr_cgi(network(), 0x1ff_ffff, 24, 1).unwrap_err(),
+        nr_cgi(network(), 1, 24, 0x1000).unwrap_err(),
         oxirush_ngap::Bits::new(0x100, 8).unwrap_err(),
     ];
     for error in panicked.iter().chain(&cut_short) {
@@ -507,7 +508,7 @@ mod inspect_errors {
     use oxirush_ngap::Octets;
     use oxirush_ngap::ngap::*;
     use oxirush_ngap::{Error, ErrorKind, inspect};
-    use serde_json::{Value, json};
+    use oxirush_ngap::{tree, tree::Value};
 
     /// The view of the UE CONTEXT RELEASE REQUEST.
     fn view() -> Value {
@@ -521,7 +522,7 @@ mod inspect_errors {
 
     /// The PDU of a tree: a release request with these IEs.
     fn written(ies: Value) -> Result<NGAP_PDU, Error> {
-        NGAP_PDU::from_tree(&json!({"message": "UEContextReleaseRequest", "ies": ies}))
+        NGAP_PDU::from_tree(&tree!({"message": "UEContextReleaseRequest", "ies": ies}))
     }
 
     /// A release request whose procedure code is one that the specification does not have.
@@ -540,7 +541,7 @@ mod inspect_errors {
         assert_eq!(kind(checked), ErrorKind::UnknownMessage);
         let names = inspect::enumerated_at("NoSuchMessage", "/ngap/Cause");
         assert_eq!(kind(names), ErrorKind::UnknownMessage);
-        let tree = json!({"message": "NoSuchMessage", "ies": []});
+        let tree = tree!({"message": "NoSuchMessage", "ies": []});
         let error = NGAP_PDU::from_tree(&tree).unwrap_err();
         assert_eq!(error.kind(), ErrorKind::UnknownMessage);
         assert_eq!(
@@ -548,15 +549,24 @@ mod inspect_errors {
             "\"NoSuchMessage\" is not a message of NGAP"
         );
 
-        // A procedure that the specification does not have has no tree, which names
-        // its message. It has a view, of the IEs of its message.
-        let error = of_no_procedure().to_tree().unwrap_err();
-        assert_eq!(error.kind(), ErrorKind::UnknownMessage);
+        // A procedure that the specification does not have has a tree by its procedure
+        // code and its direction, and a view, of the IEs of its message.
+        let tree = of_no_procedure().to_tree();
         assert_eq!(
-            error.to_string(),
-            "NGAP has no InitiatingMessage of procedure 200"
+            (&tree["procedure_code"], &tree["direction"]),
+            (&tree!(200), &tree!("InitiatingMessage"))
         );
         assert!(of_no_procedure().to_view().is_ok());
+        // Its code is no name of a message, and a message of the protocol is written by
+        // its name alone.
+        let by_code = tree!({"procedure_code": 42, "direction": "InitiatingMessage", "ies": []});
+        let error = NGAP_PDU::from_tree(&by_code).unwrap_err();
+        assert_eq!(error.kind(), ErrorKind::Form);
+        assert_eq!(
+            error.to_string(),
+            "the InitiatingMessage of procedure 42 is UEContextReleaseRequest: it is \
+             written as {\"message\": \"UEContextReleaseRequest\"}"
+        );
     }
 
     #[test]
@@ -571,10 +581,10 @@ mod inspect_errors {
             "\"NoSuchIe\" is not an IE of NGAP, at /ngap/NoSuchIe/value"
         );
         assert_eq!(
-            kind(written(json!([{"NoSuchIe": 1}]))),
+            kind(written(tree!([{"NoSuchIe": 1}]))),
             ErrorKind::UnknownIe
         );
-        let entry = json!({"id": "NoSuchIe", "criticality": "ignore", "value": 1});
+        let entry = tree!({"id": "NoSuchIe", "criticality": "ignore", "value": 1});
         assert_eq!(
             kind(inspect::insert(&mut view, "/ngap/-", entry)),
             ErrorKind::UnknownIe
@@ -582,13 +592,13 @@ mod inspect_errors {
 
         // An identifier that has no type is written by its octets: its value has no
         // type to be encoded as.
-        let error = written(json!([{"60000": 1, "criticality": "ignore"}])).unwrap_err();
+        let error = written(tree!([{"60000": 1, "criticality": "ignore"}])).unwrap_err();
         assert_eq!(error.kind(), ErrorKind::UnknownIe);
         assert_eq!(
             error.to_string(),
             "NGAP IE 60000 is unknown: give its octets as _raw_value, without value"
         );
-        let octets = json!([{"60000": {"octets": "c0ffee"}, "criticality": "ignore"}]);
+        let octets = tree!([{"60000": {"octets": "c0ffee"}, "criticality": "ignore"}]);
         assert!(written(octets).is_ok());
     }
 
@@ -646,14 +656,14 @@ mod inspect_errors {
         }
         // An edit at such a path, and the view is as it was.
         let before = view.clone();
-        let edit = inspect::set(&mut view, "/ngap/Cause/radioNetwrok", json!(1));
+        let edit = inspect::set(&mut view, "/ngap/Cause/radioNetwrok", tree!(1));
         assert_eq!(kind(edit), ErrorKind::NoSuchMember);
         assert_eq!(view, before);
         // An IE that the object set of the message does not have, without a view.
         let checked = inspect::check_path("UEContextReleaseRequest", "/ngap/GUAMI");
         assert_eq!(kind(checked), ErrorKind::NoSuchMember);
         // A member that the type of a written value does not have.
-        let error = NGAP_PDU::from_tree(&json!({"message": "InitialContextSetupRequest", "ies": [
+        let error = NGAP_PDU::from_tree(&tree!({"message": "InitialContextSetupRequest", "ies": [
             {"AllowedNSSAI": [{"s-NSSAI": {"sST": 1, "other": 2}}]},
         ]}))
         .unwrap_err();
@@ -673,7 +683,7 @@ mod inspect_errors {
         // its last IE: a selection has nothing there, and an edit says so.
         for path in ["/ngap/PDUSessionResourceListCxtRelReq/value", "/ngap/7"] {
             assert_eq!(inspect::select(&view, path), Ok(vec![]), "{path}");
-            let edit = inspect::set(&mut view, path, json!(1));
+            let edit = inspect::set(&mut view, path, tree!(1));
             assert_eq!(kind(edit), ErrorKind::NothingSelected, "{path}");
         }
         let removed = inspect::remove(&mut view, "/ngap/PDUSessionResourceListCxtRelReq");
@@ -684,7 +694,7 @@ mod inspect_errors {
     #[test]
     fn octets_that_carry_a_type_are_not_opened_until_they_are() {
         let name = "SourceNGRANNode-ToTargetNGRANNode-TransparentContainer";
-        let required = json!({"message": "HandoverRequired", "ies": [
+        let required = tree!({"message": "HandoverRequired", "ies": [
             {"SourceToTarget-TransparentContainer": {name: {
                 "rRCContainer": "0102",
                 "targetCell-ID": {"nR-CGI": {"pLMNIdentity": "208-93", "nRCellIdentity": 4660}},
@@ -699,22 +709,22 @@ mod inspect_errors {
 
         let error = inspect::select(&view, &cell).unwrap_err();
         assert_eq!(error.kind(), ErrorKind::NotOpened);
-        let edit = inspect::set(&mut view, &cell, json!(7));
+        let edit = inspect::set(&mut view, &cell, tree!(7));
         assert_eq!(kind(edit), ErrorKind::NotOpened);
 
         // The kind says what to do about it.
         inspect::open(&mut view, &cell).unwrap();
-        assert_eq!(inspect::select(&view, &cell), Ok(vec![&json!(4660)]));
+        assert_eq!(inspect::select(&view, &cell), Ok(vec![&tree!(4660)]));
     }
 
     #[test]
     fn a_path_into_what_did_not_decode_says_so() {
         // An IE whose identifier has no type keeps its octets in a view.
-        let unknown = json!([{"65000": {"octets": "c0ffee"}, "criticality": "ignore"}]);
+        let unknown = tree!([{"65000": {"octets": "c0ffee"}, "criticality": "ignore"}]);
         let view = written(unknown).unwrap().to_view().unwrap();
         assert_eq!(
             inspect::select(&view, "/ngap/@id=65000/octets"),
-            Ok(vec![&json!("c0ffee")])
+            Ok(vec![&tree!("c0ffee")])
         );
         let error = inspect::select(&view, "/ngap/@id=65000/value/member").unwrap_err();
         assert_eq!(error.kind(), ErrorKind::UndecodableIe);
@@ -729,10 +739,10 @@ mod inspect_errors {
         // A string where the type has a number, a name that the ENUMERATED does not
         // have, a number outside the constraint of its type, and octets that are no
         // hexadecimal.
-        let string = written(json!([{"AMF-UE-NGAP-ID": "forty-two"}])).unwrap_err();
-        let name = written(json!([{"Cause": {"radioNetwork": "no-such-cause"}}])).unwrap_err();
-        let outside = written(json!([{"AMF-UE-NGAP-ID": 1u64 << 40}])).unwrap_err();
-        let octets = written(json!([{"AMF-UE-NGAP-ID": {"octets": "zz"}}])).unwrap_err();
+        let string = written(tree!([{"AMF-UE-NGAP-ID": "forty-two"}])).unwrap_err();
+        let name = written(tree!([{"Cause": {"radioNetwork": "no-such-cause"}}])).unwrap_err();
+        let outside = written(tree!([{"AMF-UE-NGAP-ID": 1u64 << 40}])).unwrap_err();
+        let octets = written(tree!([{"AMF-UE-NGAP-ID": {"octets": "zz"}}])).unwrap_err();
         for error in [&string, &name, &outside, &octets] {
             assert_eq!(error.kind(), ErrorKind::Value, "{error}");
             assert!(!error.to_string().contains("Codec"), "{error}");
@@ -766,7 +776,7 @@ mod inspect_errors {
         // a PLMN identity that is none, and a number where the type has a CHOICE.
         let setup = |plmn: Value, gnb: Value| {
             NGAP_PDU::from_tree(
-                &json!({"message": "NGSetupRequest", "ies": [{"GlobalRANNodeID": {"globalGNB-ID": {
+                &tree!({"message": "NGSetupRequest", "ies": [{"GlobalRANNodeID": {"globalGNB-ID": {
                     "pLMNIdentity": plmn,
                     "gNB-ID": gnb,
                 }}}]}),
@@ -774,45 +784,48 @@ mod inspect_errors {
         };
         assert!(
             setup(
-                json!("208-93"),
-                json!({"gNB-ID": {"value": "000004", "length": 22}})
+                tree!("208-93"),
+                tree!({"gNB-ID": {"value": "000004", "length": 22}})
             )
             .is_ok()
         );
         let plmn = setup(
-            json!("20-93"),
-            json!({"gNB-ID": {"value": "000004", "length": 22}}),
+            tree!("20-93"),
+            tree!({"gNB-ID": {"value": "000004", "length": 22}}),
         )
         .unwrap_err();
         assert_eq!(plmn.kind(), ErrorKind::Value);
+        // The type of the value and the place of the fault are said, as for every value.
         assert_eq!(
             plmn.to_string(),
-            "20-93: a PLMN identity is MCC-MNC, as 208-93"
+            "this is not a value of GlobalRANNodeID: 20-93: a PLMN identity is MCC-MNC, as \
+             208-93, at globalGNB-ID/pLMNIdentity"
         );
         // Without a hyphen it is its three octets: what is neither says both forms.
         for neither in ["20893", "2089", "208 93", "20893g"] {
             let plmn = setup(
-                json!(neither),
-                json!({"gNB-ID": {"value": "000004", "length": 22}}),
+                tree!(neither),
+                tree!({"gNB-ID": {"value": "000004", "length": 22}}),
             )
             .unwrap_err();
             assert_eq!(plmn.kind(), ErrorKind::Value);
             assert_eq!(
                 plmn.to_string(),
                 format!(
-                    "{neither}: a PLMN identity is MCC-MNC, as 208-93, or its three octets in \
-                     hexadecimal"
+                    "this is not a value of GlobalRANNodeID: {neither}: a PLMN identity is \
+                     MCC-MNC, as 208-93, or its three octets in hexadecimal, at \
+                     globalGNB-ID/pLMNIdentity"
                 )
             );
         }
         assert!(
             setup(
-                json!("02f839"),
-                json!({"gNB-ID": {"value": "000004", "length": 22}})
+                tree!("02f839"),
+                tree!({"gNB-ID": {"value": "000004", "length": 22}})
             )
             .is_ok()
         );
-        let member = setup(json!("208-93"), json!(5)).unwrap_err();
+        let member = setup(tree!("208-93"), tree!(5)).unwrap_err();
         assert_eq!(member.kind(), ErrorKind::Value);
         assert_eq!(
             member.to_string(),
@@ -828,12 +841,12 @@ mod inspect_errors {
         // an IE that the message does not have says its criticality.
         let message = "UEContextReleaseRequest";
         for tree in [
-            json!([]),
-            json!({"ies": []}),
-            json!({"message": message}),
-            json!({"message": message, "ies": [], "other": 1}),
-            json!({"message": message, "ies": [{"a": 1, "b": 2}]}),
-            json!({"message": message, "ies": [{"RANNodeName": "gnb-1"}]}),
+            tree!([]),
+            tree!({"ies": []}),
+            tree!({"message": message}),
+            tree!({"message": message, "ies": [], "other": 1}),
+            tree!({"message": message, "ies": [{"a": 1, "b": 2}]}),
+            tree!({"message": message, "ies": [{"RANNodeName": "gnb-1"}]}),
         ] {
             let error = NGAP_PDU::from_tree(&tree).unwrap_err();
             assert_eq!(error.kind(), ErrorKind::Form, "{tree}: {error}");
@@ -853,13 +866,13 @@ mod inspect_errors {
             view
         };
         for view in [
-            json!(1),
+            tree!(1),
             without("message"),
             without("direction"),
             without("procedure_code"),
-            with("direction", json!("Sideways")),
-            with("procedure_code", json!(256)),
-            with("other", json!(1)),
+            with("direction", tree!("Sideways")),
+            with("procedure_code", tree!(256)),
+            with("other", tree!(1)),
         ] {
             let error = NGAP_PDU::from_view(&view).unwrap_err();
             assert_eq!(error.kind(), ErrorKind::Form, "{error}");
@@ -872,15 +885,15 @@ mod inspect_errors {
         // another direction, and a procedure that the specification does not have.
         let pdu = release_request();
         for (member, value, other) in [
-            ("procedure_code", json!(21), "NGSetupRequest"),
+            ("procedure_code", tree!(21), "NGSetupRequest"),
             (
                 "direction",
-                json!("SuccessfulOutcome"),
+                tree!("SuccessfulOutcome"),
                 "the SuccessfulOutcome of procedure 42",
             ),
             (
                 "procedure_code",
-                json!(200),
+                tree!(200),
                 "the InitiatingMessage of procedure 200",
             ),
         ] {
@@ -896,7 +909,7 @@ mod inspect_errors {
         }
 
         // An IE is written with its value or with its octets.
-        let both = json!({"id": "Cause", "criticality": "ignore", "value": 1, "octets": "00"});
+        let both = tree!({"id": "Cause", "criticality": "ignore", "value": 1, "octets": "00"});
         let insert = inspect::insert(&mut view.clone(), "/ngap/-", both);
         assert_eq!(kind(insert), ErrorKind::Form);
     }
@@ -914,11 +927,11 @@ mod inspect_errors {
             let removed = inspect::remove(&mut view, path);
             assert_eq!(kind(removed), ErrorKind::Edit, "{path}");
         }
-        let inserted = inspect::insert(&mut view, "/ngap/Cause/criticality", json!("reject"));
+        let inserted = inspect::insert(&mut view, "/ngap/Cause/criticality", tree!("reject"));
         assert_eq!(kind(inserted), ErrorKind::Edit);
 
         // The octets of a value that an edit changed are no longer its octets.
-        inspect::set(&mut view, "/ngap/Cause/nas", json!("normal-release")).unwrap();
+        inspect::set(&mut view, "/ngap/Cause/nas", tree!("normal-release")).unwrap();
         let octets = inspect::select(&view, "/ngap/Cause/octets");
         assert_eq!(kind(octets), ErrorKind::Edit);
     }
@@ -933,20 +946,23 @@ mod inspect_errors {
         assert_eq!(kind(inspect::select(&view, &wide)), ErrorKind::Limit);
 
         // A tree that is nested deeper than a tree is read.
-        let mut deep = json!(1);
+        let mut deep = tree!(1);
         for _ in 0..300 {
-            deep = json!([deep]);
+            deep = tree!([deep]);
         }
         assert_eq!(
-            kind(written(json!([{"AMF-UE-NGAP-ID": deep}]))),
+            kind(written(tree!([{"AMF-UE-NGAP-ID": deep}]))),
             ErrorKind::Limit
         );
 
-        // A private message has no list of IEs to show as a tree: its view has it.
+        // A private message has no list of IEs: its tree has its octets, and its view
+        // its value.
         let private =
             NGAP_PDU::decode(&hex::decode("001f400a000000000000000211e8").unwrap()).unwrap();
-        let error = private.to_tree().unwrap_err();
-        assert_eq!(error.kind(), ErrorKind::Limit);
+        assert_eq!(
+            private.to_tree(),
+            tree!({"message": "PrivateMessage", "octets": "000000000000000211e8"})
+        );
         assert!(private.to_view().is_ok());
     }
 
@@ -960,12 +976,16 @@ mod inspect_errors {
         let pdu = NGAP_PDU::initiatingMessage(held);
         let error = pdu.to_view().unwrap_err();
         assert_eq!(error.kind(), ErrorKind::Decode);
-        assert_eq!(kind(pdu.to_tree()), ErrorKind::Decode);
+        // Its tree has the octets of its message, which it sends back.
+        assert_eq!(
+            pdu.to_tree(),
+            tree!({"message": "UEContextReleaseRequest", "octets": "ff"})
+        );
 
         // The octets that a view was received as, replaced by others, and edited.
         let mut view = view();
-        view["_raw_message"] = json!("ff");
-        inspect::set(&mut view, "/ngap/Cause/nas", json!("normal-release")).unwrap();
+        view["_raw_message"] = tree!("ff");
+        inspect::set(&mut view, "/ngap/Cause/nas", tree!("normal-release")).unwrap();
         assert_eq!(kind(NGAP_PDU::from_view(&view)), ErrorKind::Decode);
     }
 }

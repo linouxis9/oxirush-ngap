@@ -49,11 +49,12 @@ pub fn message_read_and_written(
 
 /// What is told of each value that a view decodes.
 #[cfg(feature = "inspect")]
-pub type Observer = fn(&'static str, &[u8], &Result<serde_json::Value, Error>);
+pub type Observer = fn(&'static str, &[u8], &Result<oxirush_aper::json::Value, Error>);
 
 /// From here on, `observer` is told of each value that a view of this thread decodes
 /// as a type of the registry: the name of the type in the bindings, the octets, and
-/// the JSON form of the value, or why the octets are none. `None` ends it.
+/// the value in the form of the JSON Encoding Rules, which the oracle writes, or why
+/// the octets are none. `None` ends it.
 #[cfg(feature = "inspect")]
 pub fn observe(observer: Option<Observer>) {
     crate::inspect::OBSERVER.set(observer);

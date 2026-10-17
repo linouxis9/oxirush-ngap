@@ -386,14 +386,51 @@ fn what_has_no_object_set_is_not_checked_against_one() -> Result<(), Error> {
     let private = NGAP_PDU::initiatingMessage(held.clone());
     assert_eq!(private.check()?, [of_the_pdu]);
 
-    // A procedure that the specification does not have in that direction has none.
+    // The eighth finding of the review of the move of the paths to oxirush-utils: a
+    // procedure that the specification does not have in that direction has no object set,
+    // and is the one deviation, which a receiver answers by the criticality of the PDU (TS
+    // 38.413 clause 10.3.4.1): it rejects the procedure, or ignores it and notifies the
+    // sender, with an Error Indication that has the procedure code, the triggering message
+    // and the procedure criticality, or ignores it.
     held.procedure_code = ProcedureCode(200);
-    let error = NGAP_PDU::initiatingMessage(held).check().unwrap_err();
-    assert_eq!(error.kind(), ErrorKind::UnknownMessage);
+    for (criticality, cause) in [
+        (
+            Criticality::reject,
+            Some(CauseProtocol::abstract_syntax_error_reject),
+        ),
+        (
+            Criticality::notify,
+            Some(CauseProtocol::abstract_syntax_error_ignore_and_notify),
+        ),
+        (Criticality::ignore, None),
+    ] {
+        held.criticality = criticality;
+        let pdu = NGAP_PDU::initiatingMessage(held.clone());
+        let deviations = pdu.check()?;
+        let unknown = Deviation::UnknownProcedure {
+            procedure_code: 200,
+            direction: "InitiatingMessage",
+            criticality,
+        };
+        assert_eq!(deviations, [unknown]);
+        assert_eq!(deviations[0].cause(), cause);
+        assert_eq!(deviations[0].ie(), None);
+        assert_eq!(deviations[0].diagnostics_item(), None);
+        assert_eq!(
+            pdu.criticality_diagnostics(&deviations),
+            CriticalityDiagnostics::new(
+                Some(ProcedureCode(200)),
+                Some(TriggeringMessage::initiating_message),
+                Some(criticality),
+                None,
+                None,
+            )
+        );
+    }
     assert_eq!(
-        error.to_string(),
-        "the specification has no InitiatingMessage of procedure 200, and so no object set \
-         for its IEs"
+        NGAP_PDU::initiatingMessage(held).check()?[0].to_string(),
+        "the InitiatingMessage of procedure 200 is no message of the specification, and \
+         the criticality of the PDU is ignore"
     );
 
     // A message that does not decode is an error, and no deviation.

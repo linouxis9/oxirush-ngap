@@ -33,7 +33,7 @@ fn areas() -> Result<SupportedTAList, Error> {
 
 /// An NG SETUP REQUEST as a gNB sends it, whose last IE is the DefaultPagingDRX.
 fn request() -> Result<Vec<u8>, Error> {
-    let node = GlobalRANNodeID::globalGNB_ID(global_gnb_id(plmn("208", "93")?, 1)?);
+    let node = GlobalRANNodeID::globalGNB_ID(global_gnb_id(plmn("208", "93")?, 1, 24)?);
     build_ngap!(InitiatingMessage, NGSetup, REJECT, NGSetupRequest,
         REJECT GlobalRANNodeID(node),
         IGNORE RANNodeName(RANNodeName("gnb-1".into())),
@@ -45,7 +45,7 @@ fn request() -> Result<Vec<u8>, Error> {
 
 /// The same request without its SupportedTAList.
 fn without_areas() -> Result<Vec<u8>, Error> {
-    let node = GlobalRANNodeID::globalGNB_ID(global_gnb_id(plmn("208", "93")?, 1)?);
+    let node = GlobalRANNodeID::globalGNB_ID(global_gnb_id(plmn("208", "93")?, 1, 24)?);
     build_ngap!(InitiatingMessage, NGSetup, REJECT, NGSetupRequest,
         REJECT GlobalRANNodeID(node),
         IGNORE RANNodeName(RANNodeName("gnb-1".into())),
@@ -439,7 +439,7 @@ fn a_value_outside_the_root_of_an_extensible_constraint_is_reported() -> Result<
 /// Where the UE is: an NR cell and its tracking area.
 fn location() -> Result<UserLocationInformation<'static>, Error> {
     let network = plmn("208", "93")?;
-    let cell = oxirush_ngap::helpers::nr_cgi(network, 1, 1)?;
+    let cell = oxirush_ngap::helpers::nr_cgi(network, 1, 24, 1)?;
     let area = oxirush_ngap::helpers::tai(network, [0, 0, 1]);
     let nr = UserLocationInformationNR::new(cell, area, None, None);
     Ok(UserLocationInformation::userLocationInformationNR(nr))

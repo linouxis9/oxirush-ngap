@@ -35,8 +35,8 @@ members = ["."]
 # oxirush-aper 0.1.0 and oxirush-utils 0.1.0 are not on crates.io yet: until they are
 # published, they come from their repositories, at the revisions of build/revisions.
 [patch.crates-io]
-oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "7b7ba5b46501d0b2a67fa88f6b15427b1fa6248b" }
-oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "5c47d25abdddf234d4e4bc95b6f77c41f9372bdc" }
+oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "217506968f8da73e96b9b7aeedb533832322c3e8" }
+oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "6b492da612f8050924d7f19b590c3fa77d2e3646" }
 
 [[bin]]
 name = "decode"

@@ -102,19 +102,19 @@ fn block_1() {
 /// The Rust block 2 of README.md.
 fn block_2() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-    use serde_json::json;
+    use oxirush_ngap::tree;
 
     // The same message as a tree: its name and its IEs by name
     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
     let pdu = NGAP_PDU::decode(&bytes).unwrap();
-    println!("{}", pdu.to_tree().unwrap());
+    println!("{}", pdu.to_tree());
 
     // Its view is edited at a path, and is a PDU again
     let mut view = pdu.to_view().unwrap();
-    let lost = json!("radio-connection-with-ue-lost");
+    let lost = tree!("radio-connection-with-ue-lost");
     inspect::set(&mut view, "/ngap/Cause/radioNetwork", lost).unwrap();
     let edited = pdu.with_view(&view).unwrap();
-    println!("{}", edited.to_tree().unwrap());
+    println!("{}", edited.to_tree());
 
     // Its octets are those that the typed example built
     let octets = hex::encode(edited.encode().unwrap());
@@ -391,17 +391,14 @@ fn block_13() {
         let request = build_ngap!(InitiatingMessage, NGSetup, REJECT, NGSetupRequest,
             IGNORE DefaultPagingDRX(PagingDRX::v128),
         )?;
-        let deviations = NGAP_PDU::decode(&request.encode()?)?.check()?;
+        let received = NGAP_PDU::decode(&request.encode()?)?;
+        let deviations = received.check()?;
 
         // Clause 10.3.5: the procedure is rejected, and the missing IEs are reported
         let cause = deviations.iter().find_map(Deviation::cause).unwrap();
-        let items: Vec<_> = deviations.iter().filter_map(Deviation::diagnostics_item).collect();
-        let diagnostics = CriticalityDiagnosticsIEList(items);
         let failure = build_ngap!(UnsuccessfulOutcome, NGSetup, REJECT, NGSetupFailure,
             IGNORE Cause(Cause::protocol(cause)),
-            IGNORE CriticalityDiagnostics(CriticalityDiagnostics::new(
-                None, None, None, Some(diagnostics), None,
-            )),
+            IGNORE CriticalityDiagnostics(received.criticality_diagnostics(&deviations)),
         )?;
         for deviation in &deviations {
             println!("{deviation}");
@@ -422,8 +419,8 @@ fn block_14() {
     let network = plmn("208", "93").unwrap();
     let amf = guami(network, 1, 1, 0).unwrap(); // region, set, pointer
     let tracking_area = tai(network, [0x00, 0x00, 0x01]); // TAC
-    let cell = nr_cgi(network, 0x123456, 1).unwrap(); // gNB, cell
-    let gnb = global_gnb_id(network, 0x123456).unwrap();
+    let cell = nr_cgi(network, 0x123456, 24, 1).unwrap(); // gNB of 24 bits, cell
+    let gnb = global_gnb_id(network, 0x123456, 24).unwrap();
 
     // A bit string from octets, and the NR algorithms of a UE: the first
     // octet of its encryption bitmap, then of its integrity bitmap
@@ -461,7 +458,7 @@ fn block_16() {
     let pdu = NGAP_PDU::decode(&bytes).unwrap();
 
     // Its tree, then its third IE as the view has it
-    println!("{}", pdu.to_tree().unwrap());
+    println!("{}", pdu.to_tree());
     let view = pdu.to_view().unwrap();
     println!("{}", view["message"]["protocolIEs"][2]);
 }
@@ -469,7 +466,7 @@ fn block_16() {
 /// The Rust block 17 of README.md.
 fn block_17() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-    use serde_json::json;
+    use oxirush_ngap::tree;
 
     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
     let pdu = NGAP_PDU::decode(&bytes).unwrap();
@@ -477,14 +474,14 @@ fn block_17() {
 
     // `/ngap` is the IEs of the message, and an IE goes by its name
     let select = |path| inspect::select(&view, path).unwrap();
-    assert_eq!(select("/ngap/RAN-UE-NGAP-ID/value"), [&json!(7)]);
-    assert_eq!(select("/ngap/Cause/radioNetwork"), [&json!("user-inactivity")]);
-    assert_eq!(select("/ngap/Cause/octets"), [&json!("0500")]);
+    assert_eq!(select("/ngap/RAN-UE-NGAP-ID/value"), [&tree!(7)]);
+    assert_eq!(select("/ngap/Cause/radioNetwork"), [&tree!("user-inactivity")]);
+    assert_eq!(select("/ngap/Cause/octets"), [&tree!("0500")]);
 
     // By its position, by its name whatever its case and its separators, by its
     // identifier, and each IE with `*`
     assert_eq!(select("/ngap/1/value"), select("/NGAP/ran_ue_ngap_id/value"));
-    assert_eq!(select("/ngap/@id=85/value"), [&json!(7)]);
+    assert_eq!(select("/ngap/@id=85/value"), [&tree!(7)]);
     assert_eq!(select("/ngap/*/criticality").len(), 3);
 
     // Nothing where the message could have a value and has none
@@ -500,59 +497,59 @@ fn block_17() {
 /// The Rust block 18 of README.md.
 fn block_18() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-    use serde_json::json;
+    use oxirush_ngap::tree;
 
     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
     let pdu = NGAP_PDU::decode(&bytes).unwrap();
     let mut view = pdu.to_view().unwrap();
 
     // A value, and another alternative of a CHOICE in place of the one that is there
-    inspect::set(&mut view, "/ngap/RAN-UE-NGAP-ID/value", json!(9)).unwrap();
-    inspect::set(&mut view, "/ngap/Cause/nas", json!("Normal Release")).unwrap();
+    inspect::set(&mut view, "/ngap/RAN-UE-NGAP-ID/value", tree!(9)).unwrap();
+    inspect::set(&mut view, "/ngap/Cause/nas", tree!("Normal Release")).unwrap();
     let edited = pdu.with_view(&view).unwrap();
-    println!("{}", edited.to_tree().unwrap());
+    println!("{}", edited.to_tree());
 
     // What was not edited is the octets that were received
     let after = edited.to_view().unwrap();
     let octets = inspect::select(&after, "/ngap/AMF-UE-NGAP-ID/octets").unwrap();
-    assert_eq!(octets, [&json!("002a")]);
+    assert_eq!(octets, [&tree!("002a")]);
 
     // A name that the type does not have is refused, and the view is as it was
-    let wrong = inspect::set(&mut view, "/ngap/Cause/radioNetwrok", json!("unspecified"));
+    let wrong = inspect::set(&mut view, "/ngap/Cause/radioNetwrok", tree!("unspecified"));
     println!("{}", wrong.unwrap_err());
 }
 
 /// The Rust block 19 of README.md.
 fn block_19() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-    use serde_json::json;
+    use oxirush_ngap::tree;
 
     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
     let pdu = NGAP_PDU::decode(&bytes).unwrap();
     let mut view = pdu.to_view().unwrap();
 
     // An IE is added at the end, by its name and its typed value
-    let name = json!({"id": "RANNodeName", "criticality": "ignore", "value": "gnb-1"});
+    let name = tree!({"id": "RANNodeName", "criticality": "ignore", "value": "gnb-1"});
     inspect::insert(&mut view, "/ngap/-", name).unwrap();
 
     // Before another IE, by its number and its octets
-    let unknown = json!({"id": 60000, "criticality": "ignore", "octets": "c0ffee"});
+    let unknown = tree!({"id": 60000, "criticality": "ignore", "octets": "c0ffee"});
     inspect::insert(&mut view, "/ngap/Cause", unknown).unwrap();
 
     // An IE is taken out by its name
     inspect::remove(&mut view, "/ngap/AMF-UE-NGAP-ID").unwrap();
 
     let edited = pdu.with_view(&view).unwrap();
-    println!("{}", edited.to_tree().unwrap()["ies"]);
+    println!("{}", edited.to_tree()["ies"]);
 }
 
 /// The Rust block 20 of README.md.
 fn block_20() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-    use serde_json::json;
+    use oxirush_ngap::tree;
 
     // A tree: the name of the message, whatever its case and its separators, then its IEs
-    let request = json!({
+    let request = tree!({
         "message": "ue context release request",
         "ies": [
             {"AMF-UE-NGAP-ID": 42},
@@ -569,16 +566,16 @@ fn block_20() {
     // The name gave the direction, the procedure code and the criticalities
     let view = pdu.to_view().unwrap();
     println!("{} {} {}", view["direction"], view["procedure_code"], view["criticality"]);
-    println!("{}", json!(inspect::select(&view, "/ngap/*/criticality").unwrap()));
+    println!("{}", tree!(inspect::select(&view, "/ngap/*/criticality").unwrap()));
 }
 
 /// The Rust block 21 of README.md.
 fn block_21() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-    use serde_json::json;
+    use oxirush_ngap::tree;
 
     // `{"octets": "…"}` in place of a value is the octets of the IE, whatever they are
-    let request = json!({"message": "UEContextReleaseRequest", "ies": [
+    let request = tree!({"message": "UEContextReleaseRequest", "ies": [
         {"AMF-UE-NGAP-ID": 42},
         {"65000": {"octets": "c0ffee"}, "criticality": "reject"},
     ]});
@@ -590,18 +587,18 @@ fn block_21() {
     println!("{}", view["message"]["protocolIEs"][1]);
 
     // In a view, the `octets` of an IE are set in place of its value
-    inspect::set(&mut view, "/ngap/AMF-UE-NGAP-ID/octets", json!("00ff")).unwrap();
+    inspect::set(&mut view, "/ngap/AMF-UE-NGAP-ID/octets", tree!("00ff")).unwrap();
     let edited = pdu.with_view(&view).unwrap();
-    println!("{}", edited.to_tree().unwrap());
+    println!("{}", edited.to_tree());
 }
 
 /// The Rust block 22 of README.md.
 fn block_22() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-    use serde_json::json;
+    use oxirush_ngap::tree;
 
     // A message that has one IE twice
-    let twice = json!({"message": "UEContextReleaseRequest", "ies": [
+    let twice = tree!({"message": "UEContextReleaseRequest", "ies": [
         {"AMF-UE-NGAP-ID": 1},
         {"RAN-UE-NGAP-ID": 7},
         {"AMF-UE-NGAP-ID": 2},
@@ -611,10 +608,10 @@ fn block_22() {
 
     // The name selects both, in the order of the message
     let both = inspect::select(&view, "/ngap/AMF-UE-NGAP-ID/value").unwrap();
-    assert_eq!(both, [&json!(1), &json!(2)]);
+    assert_eq!(both, [&tree!(1), &tree!(2)]);
 
     // Each has its position, which is how `paths` names it, and its name may follow
-    inspect::set(&mut view, "/ngap/2/AMF-UE-NGAP-ID/value", json!(3)).unwrap();
+    inspect::set(&mut view, "/ngap/2/AMF-UE-NGAP-ID/value", tree!(3)).unwrap();
 
     // After a position, the name of another IE is an error that says which IE is there
     println!("{}", inspect::select(&view, "/ngap/2/RAN-UE-NGAP-ID/value").unwrap_err());
@@ -630,10 +627,10 @@ fn block_22() {
 /// The Rust block 23 of README.md.
 fn block_23() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-    use serde_json::{Value, json};
+    use oxirush_ngap::{tree, tree::Value};
 
     // A message whose one IE is a list of two items
-    let request = json!({"message": "InitialContextSetupRequest", "ies": [
+    let request = tree!({"message": "InitialContextSetupRequest", "ies": [
         {"AllowedNSSAI": [{"s-NSSAI": {"sST": 1}}, {"s-NSSAI": {"sST": 2, "sD": "000001"}}]},
     ]});
     let pdu = NGAP_PDU::from_tree(&request).unwrap();
@@ -644,30 +641,30 @@ fn block_23() {
         let selected = inspect::select(view, path).unwrap();
         selected.into_iter().cloned().collect()
     };
-    assert_eq!(select(&view, "/ngap/AllowedNSSAI/1/s-NSSAI/sD"), [json!("000001")]);
-    assert_eq!(select(&view, "/ngap/AllowedNSSAI/value/*/s-NSSAI/sST"), [json!(1), json!(2)]);
+    assert_eq!(select(&view, "/ngap/AllowedNSSAI/1/s-NSSAI/sD"), [tree!("000001")]);
+    assert_eq!(select(&view, "/ngap/AllowedNSSAI/value/*/s-NSSAI/sST"), [tree!(1), tree!(2)]);
 
     // An optional member that an item does not have selects nothing
     assert!(select(&view, "/ngap/AllowedNSSAI/0/s-NSSAI/sD").is_empty());
 
     // An item is added at the end, and one is taken out
-    inspect::insert(&mut view, "/ngap/AllowedNSSAI/-", json!({"s-NSSAI": {"sST": 3}})).unwrap();
+    inspect::insert(&mut view, "/ngap/AllowedNSSAI/-", tree!({"s-NSSAI": {"sST": 3}})).unwrap();
     inspect::remove(&mut view, "/ngap/AllowedNSSAI/0").unwrap();
 
     // `null` takes an optional member out
     inspect::set(&mut view, "/ngap/AllowedNSSAI/0/s-NSSAI/sD", Value::Null).unwrap();
 
     let edited = pdu.with_view(&view).unwrap();
-    println!("{}", edited.to_tree().unwrap());
+    println!("{}", edited.to_tree());
 }
 
 /// The Rust block 24 of README.md.
 fn block_24() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-    use serde_json::json;
+    use oxirush_ngap::tree;
 
     // A message with a transfer, written as the message that it contains
-    let request = json!({"message": "PDUSessionResourceSetupRequest", "ies": [
+    let request = tree!({"message": "PDUSessionResourceSetupRequest", "ies": [
         {"AMF-UE-NGAP-ID": 42},
         {"RAN-UE-NGAP-ID": 7},
         {"PDUSessionResourceSetupListSUReq": [{
@@ -687,7 +684,7 @@ fn block_24() {
 
     // The IEs of the message that it contains go by name in its place
     let kind = format!("{transfer}/PDUSessionType/value");
-    assert_eq!(inspect::select(&view, &kind).unwrap(), [&json!("ipv4")]);
+    assert_eq!(inspect::select(&view, &kind).unwrap(), [&tree!("ipv4")]);
 
     // The same value by the path that says `value` and `decoded`
     let long = "/ngap/PDUSessionResourceSetupListSUReq/value/0\
@@ -699,9 +696,9 @@ fn block_24() {
     assert_eq!(inspect::select(&view, &joined), inspect::select(&view, &kind));
 
     // An edit of the message that it contains is encoded into the transfer
-    inspect::set(&mut view, &kind, json!("ipv6")).unwrap();
+    inspect::set(&mut view, &kind, tree!("ipv6")).unwrap();
     let edited = pdu.with_view(&view).unwrap();
-    println!("{}", edited.to_tree().unwrap()["ies"][2]);
+    println!("{}", edited.to_tree()["ies"][2]);
 }
 
 /// The Rust block 25 of README.md.
@@ -735,11 +732,11 @@ fn block_26() {
 /// The Rust block 27 of README.md.
 fn block_27() {
     use oxirush_ngap::{ErrorKind, inspect, ngap::NGAP_PDU};
-    use serde_json::json;
+    use oxirush_ngap::tree;
 
     // Written: the name of the type with its value, in place of the octets
     let name = "SourceNGRANNode-ToTargetNGRANNode-TransparentContainer";
-    let required = json!({"message": "HandoverRequired", "ies": [
+    let required = tree!({"message": "HandoverRequired", "ies": [
         {"AMF-UE-NGAP-ID": 42},
         {"RAN-UE-NGAP-ID": 7},
         {"SourceToTarget-TransparentContainer": {name: {
@@ -751,7 +748,7 @@ fn block_27() {
 
     // A tree shows the octets that the container was encoded as
     let pdu = NGAP_PDU::from_tree(&required).unwrap();
-    println!("{}", pdu.to_tree().unwrap()["ies"][2]);
+    println!("{}", pdu.to_tree()["ies"][2]);
 
     // Read: a path goes through the name of the type
     let mut view = pdu.to_view().unwrap();
@@ -762,16 +759,16 @@ fn block_27() {
     // The path is an error until `open` has decoded the octets, and selects the value after that
     assert_eq!(inspect::select(&view, &cell).unwrap_err().kind(), ErrorKind::NotOpened);
     inspect::open(&mut view, &cell).unwrap();
-    assert_eq!(inspect::select(&view, &cell).unwrap(), [&json!(4660)]);
+    assert_eq!(inspect::select(&view, &cell).unwrap(), [&tree!(4660)]);
 
     // What the octets carry, decoded
     let decoded = format!("{container}/decoded");
     println!("{}", inspect::select(&view, &decoded).unwrap()[0]);
 
     // An edit goes into it, and what is not edited is sent as it was received
-    inspect::set(&mut view, &cell, json!(7)).unwrap();
+    inspect::set(&mut view, &cell, tree!(7)).unwrap();
     let edited = pdu.with_view(&view).unwrap();
-    println!("{}", edited.to_tree().unwrap()["ies"][2]);
+    println!("{}", edited.to_tree()["ies"][2]);
 }
 
 /// The Rust block 28 of README.md.
@@ -784,7 +781,7 @@ fn block_28() {
     let read: NGAP_PDU = serde_json::from_str(&text).unwrap();
     assert_eq!(read.encode().unwrap(), bytes);
 
-    // A value alone has the form of its type: an SST is its octet
+    // A value alone has the form that a tree shows it in: an SST is a number
     let slice = SNSSAI::new(SST([1]), None, None);
     println!("{}", serde_json::to_string(&slice).unwrap());
 }

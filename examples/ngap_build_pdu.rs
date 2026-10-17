@@ -79,7 +79,7 @@ fn main() -> Result<(), Error> {
     // HandoverPreparation procedure → HandoverRequired message. The target gNB
     // and PDU-session resource list are mandatory NGAP IEs.
 
-    let target_gnb = GlobalRANNodeID::globalGNB_ID(global_gnb_id(network, 0x123456)?);
+    let target_gnb = GlobalRANNodeID::globalGNB_ID(global_gnb_id(network, 0x123456, 24)?);
     let target_area = tai(network, [0x00, 0x00, 0x01]);
     let target = TargetID::targetRANNodeID(TargetRANNodeID::new(target_gnb, target_area, None));
     let cause = Cause::radioNetwork(CauseRadioNetwork::handover_desirable_for_radio_reason);

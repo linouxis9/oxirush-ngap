@@ -117,7 +117,7 @@ fn each_captured_pdu_is_read_and_written_as_the_octets_that_its_sender_sent() {
 mod forms {
     use super::*;
     use oxirush_ngap::inspect;
-    use serde_json::Value;
+    use oxirush_ngap::tree::Value;
 
     /// `value` without what a view keeps of what was received: the members whose name
     /// starts with `_`, at any depth.
@@ -176,7 +176,7 @@ mod forms {
             );
 
             // And so does its tree.
-            let tree = pdu.to_tree().unwrap();
+            let tree = pdu.to_tree();
             let again = NGAP_PDU::from_tree(&tree).unwrap().encode().unwrap();
             assert_eq!(again, captured.octets, "{name}: its tree");
         }

@@ -19,6 +19,7 @@
 
 pub use oxirush_ngap::ngap::NGAP_PDU as Pdu;
 pub use oxirush_ngap::ngap::NGAPPDU as Borrowed;
+pub use oxirush_ngap::tree::Value;
 pub use oxirush_ngap::{Error, ErrorKind, aper, hooks, inspect};
 
 /// The name that the bindings give the type of a PDU.

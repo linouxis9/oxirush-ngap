@@ -8,11 +8,12 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use oxirush_ngap::inspect;
 use oxirush_ngap::ngap::NGAP_PDU;
-use serde_json::Value;
+use oxirush_ngap::tree::Value;
 
 const MESSAGES: &str = include_str!("fixtures/messages.tsv");
 const VECTORS: &str = include_str!("fixtures/vectors.tsv");
 const LATER: &str = include_str!("fixtures/later.tsv");
+const NULL_PATHS: &str = include_str!("fixtures/null_paths.tsv");
 
 /// The IEs whose octets carry a type of TS 38.413 between two NG-RAN nodes, each with
 /// the name of that type: the vectors have a value of it there.
@@ -123,7 +124,7 @@ fn each_vector_is_read_with_its_types_and_written_to_the_same_octets() {
 
         // And so is its tree, for a message that has IEs to name.
         if !name.starts_with("PrivateMessage/") {
-            let tree = pdu.to_tree().unwrap();
+            let tree = pdu.to_tree();
             let again = NGAP_PDU::from_tree(&tree).unwrap().encode().unwrap();
             assert_eq!(Ok(hex::encode(again)), wire, "{name}: its tree");
         }
@@ -199,6 +200,36 @@ fn the_additions_of_a_later_release_are_skipped_as_pycrate_writes_them() {
         assert_eq!(octets(&written(&view)), Ok(known.to_string()), "{name}");
     }
     assert_eq!(count, 9);
+}
+
+/// The first finding of the review of the move of the paths to oxirush-utils: an
+/// alternative of the type NULL, as `{"noReporting": null}`, was read as absent, so that
+/// `paths()` did not list it and `select()` selected nothing. `null_paths.tsv` has the 44
+/// paths of the vectors that it found: each is listed and selects `null`, and `null` set
+/// there is that alternative again.
+#[test]
+fn each_alternative_of_the_type_null_is_listed_and_selected() {
+    let wires: BTreeMap<_, _> = vectors(VECTORS).collect();
+    let mut count = 0;
+    for line in NULL_PATHS.lines().filter(|line| !line.starts_with('#')) {
+        let (name, path) = line.split_once('\t').unwrap();
+        let pdu = NGAP_PDU::decode(&wires[name]).unwrap();
+        let mut view = pdu.to_view().unwrap();
+        assert_eq!(
+            inspect::select(&view, path),
+            Ok(vec![&Value::Null]),
+            "{name} {path}"
+        );
+        let paths = inspect::paths(&view);
+        assert!(
+            paths.contains(&(path.to_string(), Value::Null)),
+            "{name} {path}"
+        );
+        inspect::set(&mut view, path, Value::Null).unwrap();
+        assert_eq!(pdu.with_view(&view).unwrap(), pdu, "{name} {path}");
+        count += 1;
+    }
+    assert_eq!(count, 44);
 }
 
 /// The values of the vectors as the reference has them: `tests/fixtures/generate.py

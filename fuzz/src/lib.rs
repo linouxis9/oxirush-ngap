@@ -35,8 +35,7 @@
 mod protocol;
 
 use protocol::{ANY_MESSAGE, Borrowed, Error, ErrorKind, PDU_TYPE, Pdu, ROOT};
-use protocol::{aper, hooks, inspect};
-use serde_json::Value;
+use protocol::{Value, aper, hooks, inspect};
 
 /// What the crate wrote of a value that it read, or why it read none, for the oracle.
 fn ours(written: &Result<Vec<u8>, Error>) -> Result<&[u8], String> {
@@ -143,6 +142,7 @@ fn undecoded(value: &Value) -> bool {
 /// What a view decoded as the type that the bindings name `name` is what the oracle
 /// reads in the same octets: the same JSON form, or no value for both.
 fn observed(name: &'static str, octets: &[u8], ours: &Result<Value, Error>) {
+    let ours = ours.as_ref().map(serde_json::Value::from);
     oracle::same_json(name, octets, ours.as_ref().map_err(ToString::to_string));
 }
 
@@ -154,9 +154,13 @@ pub fn view(octets: &[u8]) {
         return;
     };
     hooks::observe(Some(observed));
+    // Every PDU has a tree, which is the PDU again: what its typed values have no place
+    // for, and a message that does not decode, are octets in it.
+    let tree = pdu.to_tree();
+    assert_eq!(Pdu::from_tree(&tree).as_ref(), Ok(&pdu), "{tree}");
     let Ok(view) = pdu.to_view() else {
-        // A message that does not decode has no view, and no tree.
-        assert!(pdu.to_tree().is_err(), "{pdu:?}");
+        // A message that does not decode has no view, and its tree has its octets.
+        assert!(tree.get("octets").is_some(), "{tree}");
         return;
     };
 
@@ -176,14 +180,6 @@ pub fn view(octets: &[u8]) {
         };
         let second = Pdu::from_view(&written(&again));
         assert_eq!(second.as_ref(), Ok(&first), "{view}");
-    }
-
-    // A tree is what a message is written from, and the message that is written from
-    // it has the same tree.
-    if let Ok(tree) = pdu.to_tree()
-        && let Ok(first) = Pdu::from_tree(&tree)
-    {
-        assert_eq!(first.to_tree().as_ref(), Ok(&tree), "{pdu:?}");
     }
 
     // Each path that the view has selects its value.

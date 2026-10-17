@@ -41,10 +41,13 @@
 //! what a caller matches on, and its `Display` says what is wrong.
 //!
 //! The codec builds, encodes and decodes a message whatever its IEs are. `check()` of
-//! a PDU reports how they deviate from the object set that the ASN.1 gives the
-//! message, each as a [`Deviation`]: a mandatory IE that is missing, an IE that the
-//! message cannot have or has twice, IEs out of order, and a criticality that is not
-//! the assigned one.
+//! a PDU reports how it deviates from what the ASN.1 assigns its message, each as a
+//! [`Deviation`]: a criticality of the PDU or of an IE that is not the assigned one, an
+//! IE that the message cannot have, has twice or has out of order, a mandatory IE that
+//! is missing, an IE whose value does not decode or is of a later version of its type,
+//! an encoding in another form than the canonical one, and a procedure that the
+//! specification does not have. `criticality_diagnostics()` of the PDU gathers them
+//! into the Criticality Diagnostics IE of the answer.
 //!
 //! # Values that borrow, and values that are kept
 //!
@@ -239,6 +242,12 @@ pub use oxirush_aper as aper;
 /// is built with: a `PLMNIdentity` converts to and from its `Plmn`, which has the MCC and
 /// the MNC.
 pub use oxirush_utils::identity;
+/// The trees of `oxirush-utils`, of the version that this crate is built with: a PDU and
+/// each value of the bindings as JSON whose members keep the order of the specification,
+/// [`tree::Value`], and `tree!`, which writes one in the code as `serde_json::json!` does.
+/// A crate that reads or writes them takes them from here.
+#[cfg(feature = "inspect")]
+pub use oxirush_utils::tree;
 
 pub use check::{Deviation, Ngap};
 pub use message::Message;

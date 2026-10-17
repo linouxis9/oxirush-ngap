@@ -113,15 +113,33 @@ pub fn tai(plmn_identity: PLMNIdentity, tac: [u8; 3]) -> TAI {
     TAI::new(plmn_identity, TAC(tac), None)
 }
 
-/// Build an NR Cell Global Identifier from a 24-bit gNB ID and 12-bit cell ID.
+/// The length of a gNB ID: 22 to 32 bits (TS 38.413 clause 9.3.1.6).
+fn of_a_gnb_id(length: u32) -> Result<u32, Error> {
+    match (22..=32).contains(&length) {
+        true => Ok(length),
+        false => Err(Error::argument(format!(
+            "a gNB ID has 22 to 32 bits, and {length} are given"
+        ))),
+    }
+}
+
+/// Build an NR Cell Global Identifier from a gNB ID of `gnb_length` bits, 22 to 32, and
+/// the cell that the rest of the 36 bits of the NR Cell Identity hold: the gNB ID is
+/// its leftmost bits (TS 38.413 clauses 9.3.1.6 and 9.3.1.7), and a gNB ID of 24 bits
+/// leaves 12 for the cell.
 ///
-/// An error of the kind `Argument` for a gNB ID that does not fit in 24 bits and for a
-/// cell that does not fit in the 12 bits that follow it in the 36 of an NR Cell
-/// Identity (TS 38.413 clause 9.3.1.7).
-pub fn nr_cgi(plmn_identity: PLMNIdentity, gnb_id: u32, cell_id: u16) -> Result<NRCGI, Error> {
-    let gnb_id = fits("the gNB ID", gnb_id.into(), 24)?;
-    let cell_id = fits("the cell of the gNB", cell_id.into(), 12)?;
-    let nci = (gnb_id << 12) | cell_id;
+/// An error of the kind `Argument` for a length outside 22 to 32, for a gNB ID that does
+/// not fit in it, and for a cell that does not fit in the bits after it.
+pub fn nr_cgi(
+    plmn_identity: PLMNIdentity,
+    gnb_id: u32,
+    gnb_length: u32,
+    cell_id: u16,
+) -> Result<NRCGI, Error> {
+    let length = of_a_gnb_id(gnb_length)?;
+    let gnb_id = fits("the gNB ID", gnb_id.into(), length)?;
+    let cell_id = fits("the cell of the gNB", cell_id.into(), 36 - length)?;
+    let nci = (gnb_id << (36 - length)) | cell_id;
     Ok(NRCGI::new(
         plmn_identity,
         NRCellIdentity(Bits::low(nci, 36)),
@@ -129,14 +147,21 @@ pub fn nr_cgi(plmn_identity: PLMNIdentity, gnb_id: u32, cell_id: u16) -> Result<
     ))
 }
 
-/// Build a `GlobalGNBID` for a 24-bit gNB identifier.
+/// Build a `GlobalGNBID` for a gNB ID of `gnb_length` bits, 22 to 32 (TS 38.413 clause
+/// 9.3.1.6).
 ///
-/// An error of the kind `Argument` for a gNB ID that does not fit in 24 bits.
-pub fn global_gnb_id(plmn_identity: PLMNIdentity, gnb_id: u32) -> Result<GlobalGNBID, Error> {
-    let gnb_id = fits("the gNB ID", gnb_id.into(), 24)?;
+/// An error of the kind `Argument` for a length outside 22 to 32, and for a gNB ID that
+/// does not fit in it.
+pub fn global_gnb_id(
+    plmn_identity: PLMNIdentity,
+    gnb_id: u32,
+    gnb_length: u32,
+) -> Result<GlobalGNBID, Error> {
+    let length = of_a_gnb_id(gnb_length)?;
+    let gnb_id = fits("the gNB ID", gnb_id.into(), length)?;
     Ok(GlobalGNBID::new(
         plmn_identity,
-        GNBID::gNB_ID(Bits::low(gnb_id, 24)),
+        GNBID::gNB_ID(Bits::low(gnb_id, length as usize)),
         None,
     ))
 }
@@ -238,7 +263,7 @@ mod tests {
         let plmn = plmn("208", "93").unwrap();
         // The 24-bit gNB ID and the 12-bit cell: a 36-bit NR cell identity,
         // octet-aligned after the PLMN (X.691 (02/2021) §16.10).
-        let cgi = nr_cgi(plmn, 0xab_cdef, 0x123).unwrap();
+        let cgi = nr_cgi(plmn, 0xab_cdef, 24, 0x123).unwrap();
         assert_eq!(
             cgi.nr_cell_identity.0,
             Bits::new(0xa_bcde_f123, 36).unwrap()
@@ -247,11 +272,27 @@ mod tests {
             oxirush_aper::encode(&cgi).unwrap(),
             [0x00, 0x02, 0xf8, 0x39, 0xab, 0xcd, 0xef, 0x12, 0x30]
         );
-        let gnb = global_gnb_id(plmn, 0xab_cdef).unwrap();
+        let gnb = global_gnb_id(plmn, 0xab_cdef, 24).unwrap();
         let GNBID::gNB_ID(bits) = gnb.gnb_id else {
             panic!("expected gNB ID");
         };
         assert_eq!(bits, Bits::new(0xab_cdef, 24).unwrap());
+        // The gNB ID is the leftmost bits whatever its length: 22 leave 14 for the cell,
+        // 32 leave 4.
+        let short = nr_cgi(plmn, 0x3f_ffff, 22, 0x2abc).unwrap();
+        assert_eq!(
+            short.nr_cell_identity.0,
+            Bits::new(0x3f_ffff << 14 | 0x2abc, 36).unwrap()
+        );
+        let long = nr_cgi(plmn, 0xffff_ffff, 32, 0xa).unwrap();
+        assert_eq!(
+            long.nr_cell_identity.0,
+            Bits::new(0xf_ffff_fffa, 36).unwrap()
+        );
+        let GNBID::gNB_ID(bits) = global_gnb_id(plmn, 1, 22).unwrap().gnb_id else {
+            panic!("expected gNB ID");
+        };
+        assert_eq!((bits.value(), bits.len()), (1, 22));
     }
 
     #[test]
@@ -287,20 +328,32 @@ mod tests {
         );
 
         // A gNB ID of 24 bits, alone and before the 12 bits of a cell.
-        assert!(global_gnb_id(network(), 0xff_ffff).is_ok());
+        assert!(global_gnb_id(network(), 0xff_ffff, 24).is_ok());
         assert_eq!(
-            argument(global_gnb_id(network(), 0x100_0000).unwrap_err()),
+            argument(global_gnb_id(network(), 0x100_0000, 24).unwrap_err()),
             "the gNB ID 16777216 does not fit in 24 bits"
         );
-        assert!(nr_cgi(network(), 0xff_ffff, 0xfff).is_ok());
+        assert!(nr_cgi(network(), 0xff_ffff, 24, 0xfff).is_ok());
         assert_eq!(
-            argument(nr_cgi(network(), 0x100_0000, 1).unwrap_err()),
+            argument(nr_cgi(network(), 0x100_0000, 24, 1).unwrap_err()),
             "the gNB ID 16777216 does not fit in 24 bits"
         );
         assert_eq!(
-            argument(nr_cgi(network(), 1, 0x1000).unwrap_err()),
+            argument(nr_cgi(network(), 1, 24, 0x1000).unwrap_err()),
             "the cell of the gNB 4096 does not fit in 12 bits"
         );
+        assert_eq!(
+            argument(nr_cgi(network(), 1, 32, 0x10).unwrap_err()),
+            "the cell of the gNB 16 does not fit in 4 bits"
+        );
+        // A length that a gNB ID does not have.
+        for length in [0, 21, 33] {
+            assert_eq!(
+                argument(global_gnb_id(network(), 1, length).unwrap_err()),
+                format!("a gNB ID has 22 to 32 bits, and {length} are given")
+            );
+            assert!(nr_cgi(network(), 1, length, 1).is_err());
+        }
     }
 
     #[test]

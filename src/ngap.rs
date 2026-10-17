@@ -14,13 +14,11 @@ pub mod ngap_common_data_types {
     use alloc::borrow::Cow;
     use alloc::vec::Vec;
     #[cfg(feature = "inspect")]
-    use oxirush_aper::json::{self, Reading, Refused, Tree};
+    use oxirush_aper::json::{self, Reading, Refused, Tree, Value};
     use oxirush_aper::{
         AsnType, BitString, Bits, Decode, Encode, Error, ObjectIdentifier, Octets, Reader,
         UNBOUNDED, Writer,
     };
-    #[cfg(feature = "inspect")]
-    use serde_json::Value;
     /// `Criticality ::= ENUMERATED`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub enum Criticality {
@@ -389,13 +387,11 @@ pub mod ngap_constants {
     use alloc::borrow::Cow;
     use alloc::vec::Vec;
     #[cfg(feature = "inspect")]
-    use oxirush_aper::json::{self, Reading, Refused, Tree};
+    use oxirush_aper::json::{self, Reading, Refused, Tree, Value};
     use oxirush_aper::{
         AsnType, BitString, Bits, Decode, Encode, Error, ObjectIdentifier, Octets, Reader,
         UNBOUNDED, Writer,
     };
-    #[cfg(feature = "inspect")]
-    use serde_json::Value;
     pub const ID_A2_X_PC5_QO_S_PARAMETERS: ProtocolIEID = ProtocolIEID(378);
     pub const ID_AIOTFIDENTIFIER: ProtocolIEID = ProtocolIEID(467);
     pub const ID_AIOTFNAME: ProtocolIEID = ProtocolIEID(476);
@@ -421,11 +417,6 @@ pub mod ngap_constants {
     pub const ID_AMF_UE_NGAP_ID: ProtocolIEID = ProtocolIEID(10);
     pub const ID_AMF_UE_NGAP_ID2: ProtocolIEID = ProtocolIEID(450);
     pub const ID_AMFCPRELOCATION_INDICATION: ProcedureCode = ProcedureCode(64);
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Elementary Procedures"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     pub const ID_AMFCONFIGURATION_UPDATE: ProcedureCode = ProcedureCode(0);
     pub const ID_AMFNAME: ProtocolIEID = ProtocolIEID(1);
     pub const ID_AMFOVERLOAD_RESPONSE: ProtocolIEID = ProtocolIEID(2);
@@ -454,11 +445,6 @@ pub mod ngap_constants {
     pub const ID_AERIAL_UE_FLIGHT_INFORMATION_REPORTING_CONTROL_LIST: ProtocolIEID =
         ProtocolIEID(494);
     pub const ID_AERIAL_UESUBSCRIPTION_INFORMATION: ProtocolIEID = ProtocolIEID(373);
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " IEs"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     pub const ID_ALLOWED_NSSAI: ProtocolIEID = ProtocolIEID(0);
     pub const ID_ALTERNATIVE_QO_SPARA_SET_LIST: ProtocolIEID = ProtocolIEID(220);
     pub const ID_ASSISTANCE_DATA_FOR_PAGING: ProtocolIEID = ProtocolIEID(11);
@@ -997,20 +983,10 @@ pub mod ngap_constants {
     pub const ID_WRITE_REPLACE_WARNING: ProcedureCode = ProcedureCode(51);
     pub const ID_XR_DEVICE_WITH2_RX: ProtocolIEID = ProtocolIEID(428);
     pub const MAX_NRARFCN: u64 = 3279165;
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Extension constants"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     pub const MAX_PRIVATE_IES: u64 = 65535;
     pub const MAX_PROTOCOL_EXTENSIONS: u64 = 65535;
     pub const MAX_PROTOCOL_IES: u64 = 65535;
     pub const MAXNOOF_AIO_TAREAS: u64 = 256;
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Lists"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     pub const MAXNOOF_ALLOWED_AREAS: u64 = 16;
     pub const MAXNOOF_ALLOWED_CAGSPER_PLMN: u64 = 256;
     pub const MAXNOOF_ALLOWED_S_NSSAIS: u64 = 8;
@@ -1128,13 +1104,11 @@ pub mod ngap_containers {
     use alloc::borrow::Cow;
     use alloc::vec::Vec;
     #[cfg(feature = "inspect")]
-    use oxirush_aper::json::{self, Reading, Refused, Tree};
+    use oxirush_aper::json::{self, Reading, Refused, Tree, Value};
     use oxirush_aper::{
         AsnType, BitString, Bits, Decode, Encode, Error, ObjectIdentifier, Octets, Reader,
         UNBOUNDED, Writer,
     };
-    #[cfg(feature = "inspect")]
-    use serde_json::Value;
     impl core::fmt::Debug for ProtocolIEField<'_> {
         fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
             let holds_key = crate::registry::KEY_IES.contains(&self.id.0);
@@ -1491,13 +1465,11 @@ pub mod ngap_ies {
     use alloc::borrow::Cow;
     use alloc::vec::Vec;
     #[cfg(feature = "inspect")]
-    use oxirush_aper::json::{self, Reading, Refused, Tree};
+    use oxirush_aper::json::{self, Reading, Refused, Tree, Value};
     use oxirush_aper::{
         AsnType, BitString, Bits, Decode, Encode, Error, ObjectIdentifier, Octets, Reader,
         UNBOUNDED, Writer,
     };
-    #[cfg(feature = "inspect")]
-    use serde_json::Value;
     /// `A2X-PC5-FlowBitRates ::= SEQUENCE`, with an extension marker.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct A2XPC5FlowBitRates {
@@ -1614,7 +1586,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(A2XPC5FlowBitRates);
     /// `A2XPC5QoSFlowItemA2XRange ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum A2XPC5QoSFlowItemA2XRange {
@@ -5296,9 +5267,10 @@ pub mod ngap_ies {
     impl Tree for AMFPointer {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::bits(self.0, 6, 6)
+            json::readable(json::Form::Number(6), json::bits(self.0, 6, 6))
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
+            let value = &json::read_readable(reading, json::Form::Number(6), value)?;
             Ok(Self(json::read_bits(reading, value, 6, 6)?))
         }
     }
@@ -5348,9 +5320,10 @@ pub mod ngap_ies {
     impl Tree for AMFRegionID {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::bits(self.0, 8, 8)
+            json::readable(json::Form::Number(8), json::bits(self.0, 8, 8))
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
+            let value = &json::read_readable(reading, json::Form::Number(8), value)?;
             Ok(Self(json::read_bits(reading, value, 8, 8)?))
         }
     }
@@ -5400,16 +5373,16 @@ pub mod ngap_ies {
     impl Tree for AMFSetID {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::bits(self.0, 10, 10)
+            json::readable(json::Form::Number(10), json::bits(self.0, 10, 10))
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
+            let value = &json::read_readable(reading, json::Form::Number(10), value)?;
             Ok(Self(json::read_bits(reading, value, 10, 10)?))
         }
     }
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(AMFSetID);
     /// `AUN3DeviceAccessInfoAUN3DeviceAccess ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum AUN3DeviceAccessInfoAUN3DeviceAccess {
@@ -5456,7 +5429,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(AUN3DeviceAccessInfoAUN3DeviceAccess);
     /// `AUN3DeviceAccessInfoExistingNGConnectionwithSameLocation ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum AUN3DeviceAccessInfoExistingNGConnectionwithSameLocation {
@@ -6056,7 +6028,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(AdditionalDLUPTNLInformationForHOItem<'a>);
     /// `AdditionalDLUPTNLInformationForHOList ::= SEQUENCE (SIZE (1..3)) OF AdditionalDLUPTNLInformationForHOItem`.
-    #[doc = " A"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AdditionalDLUPTNLInformationForHOList<'a>(
         pub Vec<AdditionalDLUPTNLInformationForHOItem<'a>>,
@@ -7009,7 +6980,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(AllowedCAGListPerPLMN);
     /// `AllowedPNINPNItemPNINPNRestricted ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum AllowedPNINPNItemPNINPNRestricted {
@@ -9870,7 +9840,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(AssociatedMBSQosFlowSetuporModifyRequestList);
     /// `AssociatedQosFlowItemQosFlowMappingIndication ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum AssociatedQosFlowItemQosFlowMappingIndication {
@@ -10345,7 +10314,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(AvailableBitrateReportThresholdList);
     /// `AvailableRANVisibleQoEMetricsApplicationLayerBufferLevelList ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum AvailableRANVisibleQoEMetricsApplicationLayerBufferLevelList {
@@ -10392,7 +10360,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(AvailableRANVisibleQoEMetricsApplicationLayerBufferLevelList);
     /// `AvailableRANVisibleQoEMetricsPlayoutDelayForMediaStartup ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum AvailableRANVisibleQoEMetricsPlayoutDelayForMediaStartup {
@@ -10636,7 +10603,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(AveragingWindow);
     /// `BeamMeasurementsReportConfiguration ::= SEQUENCE`, with an extension marker.
-    #[doc = " B"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BeamMeasurementsReportConfiguration {
         pub beam_measurements_report_quantity: Option<BeamMeasurementsReportQuantity>,
@@ -10772,7 +10738,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(BeamMeasurementsReportConfiguration);
     /// `BeamMeasurementsReportQuantityRSRP ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum BeamMeasurementsReportQuantityRSRP {
@@ -10820,7 +10785,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(BeamMeasurementsReportQuantityRSRP);
     /// `BeamMeasurementsReportQuantityRSRQ ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum BeamMeasurementsReportQuantityRSRQ {
@@ -10868,7 +10832,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(BeamMeasurementsReportQuantityRSRQ);
     /// `BeamMeasurementsReportQuantitySINR ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum BeamMeasurementsReportQuantitySINR {
@@ -11280,7 +11243,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(BluetoothMeasConfigNameList<'a>);
     /// `BluetoothMeasurementConfigurationBtRssi ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum BluetoothMeasurementConfigurationBtRssi {
@@ -12654,7 +12616,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(CRNTI);
     /// `CAG-ID ::= BIT STRING (SIZE (32))`.
-    #[doc = " C"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct CAGID(pub Bits);
     impl crate::message::__Field<Bits> for CAGID {
@@ -13155,7 +13116,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(CNTypeRestrictionsForEquivalent);
     /// `CNTypeRestrictionsForEquivalentItemCnType ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum CNTypeRestrictionsForEquivalentItemCnType {
@@ -17190,7 +17150,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(ClockAccuracy);
     /// `ClockQualityAcceptanceCriteriaTraceabletoUTC ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum ClockQualityAcceptanceCriteriaTraceabletoUTC {
@@ -17237,7 +17196,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(ClockQualityAcceptanceCriteriaTraceabletoUTC);
     /// `ClockQualityAcceptanceCriteriaTraceabletoGNSS ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum ClockQualityAcceptanceCriteriaTraceabletoGNSS {
@@ -19980,7 +19938,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(CriticalityDiagnosticsIEList);
     /// `DAPSRequestInfoDAPSIndicator ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum DAPSRequestInfoDAPSIndicator {
@@ -20116,7 +20073,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(DAPSRequestInfo);
     /// `DAPSResponseInfoDapsresponseindicator ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum DAPSResponseInfoDapsresponseindicator {
@@ -22342,7 +22298,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(DRBsToQosFlowsMappingList);
     /// `DataCodingScheme ::= BIT STRING (SIZE (8))`.
-    #[doc = " D"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct DataCodingScheme(pub Bits);
     impl crate::message::__Field<Bits> for DataCodingScheme {
@@ -24093,9 +24048,10 @@ pub mod ngap_ies {
     impl Tree for EPSTAC {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::octets(&self.0)
+            json::readable(json::Form::Number(16), json::octets(&self.0))
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
+            let value = &json::read_readable(reading, json::Form::Number(16), value)?;
             Ok(Self(reading.octet_array::<2>(value)?))
         }
     }
@@ -24786,9 +24742,10 @@ pub mod ngap_ies {
     impl Tree for EUTRACellIdentity {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::bits(self.0, 28, 28)
+            json::readable(json::Form::Number(28), json::bits(self.0, 28, 28))
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
+            let value = &json::read_readable(reading, json::Form::Number(28), value)?;
             Ok(Self(json::read_bits(reading, value, 28, 28)?))
         }
     }
@@ -25895,7 +25852,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(EUTRAintegrityProtectionAlgorithms<'a>);
     /// `EarlyMeasurement ::= ENUMERATED`, with an extension marker.
-    #[doc = " E"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum EarlyMeasurement {
@@ -27748,7 +27704,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(EventL1LoggedMDTConfig);
     /// `EventTriggerOutOfCoverage ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum EventTriggerOutOfCoverage {
@@ -29705,7 +29660,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(ExtendedUEIdentityIndexValue);
     /// `FailureIndication ::= SEQUENCE`, with an extension marker.
-    #[doc = " F"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct FailureIndication<'a> {
         pub ue_rlf_report_container: UERLFReportContainer<'a>,
@@ -30425,9 +30379,10 @@ pub mod ngap_ies {
     impl Tree for FiveGTMSI {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::octets(&self.0)
+            json::readable(json::Form::Number(32), json::octets(&self.0))
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
+            let value = &json::read_readable(reading, json::Form::Number(32), value)?;
             Ok(Self(reading.octet_array::<4>(value)?))
         }
     }
@@ -31912,7 +31867,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(FurtherExtendedUEIdentityIndexValue);
     /// `GBR-QosInformation ::= SEQUENCE`, with an extension marker.
-    #[doc = " G"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct GBRQosInformation {
         pub maximum_flow_bit_rate_dl: BitRate,
@@ -32317,9 +32271,10 @@ pub mod ngap_ies {
     impl Tree for GTPTEID {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::octets(&self.0)
+            json::readable(json::Form::Number(32), json::octets(&self.0))
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
+            let value = &json::read_readable(reading, json::Form::Number(32), value)?;
             Ok(Self(reading.octet_array::<4>(value)?))
         }
     }
@@ -34434,7 +34389,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(HLComActivate);
     /// `HLComDeactivateUEReachabilityIndication ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum HLComDeactivateUEReachabilityIndication {
@@ -34577,7 +34531,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(HLComDeactivate);
     /// `HOReportHandoverReportType ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum HOReportHandoverReportType {
@@ -34928,7 +34881,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(HOReport<'a>);
     /// `HandoverCommandTransfer ::= SEQUENCE`, with an extension marker.
-    #[doc = " H"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct HandoverCommandTransfer<'a> {
         pub dl_forwarding_up_tnl_information: Option<UPTransportLayerInformation<'a>>,
@@ -35940,7 +35892,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(Hysteresis);
     /// `IAB-Authorized ::= ENUMERATED`, with an extension marker.
-    #[doc = " I"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum IABAuthorized {
@@ -37787,43 +37738,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(IntersystemMobilityFailureforVoiceFallback<'a>);
     /// `IntersystemResourceStatusReply ::= SEQUENCE`, with an extension marker.
-    #[doc = " "]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = " Inter System Resource Status Reply"]
-    #[doc = " "]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct IntersystemResourceStatusReply {
         pub reportingsystem: ReportingSystem,
@@ -37912,43 +37826,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(IntersystemResourceStatusReply);
     /// `IntersystemResourceStatusReport ::= SEQUENCE`, with an extension marker.
-    #[doc = " "]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = " Inter System Resource Status Report"]
-    #[doc = " "]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct IntersystemResourceStatusReport {
         pub reporting_system: ResourceStatusReportingSystem,
@@ -38038,43 +37915,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(IntersystemResourceStatusReport);
     /// `IntersystemResourceStatusRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " "]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = " Inter System Resource Status Request"]
-    #[doc = " "]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct IntersystemResourceStatusRequest {
         pub reporting_system: ReportingSystem,
@@ -38458,43 +38298,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(IntersystemSONInformation<'a>);
     /// `IntersystemSONInformationReply ::= CHOICE`.
-    #[doc = " "]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = " INTER SYSTEM SON INFORMATION REPLY"]
-    #[doc = " "]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub enum IntersystemSONInformationReply {
         nGRAN_CellActivation(IntersystemCellActivationReply),
@@ -38592,43 +38395,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(IntersystemSONInformationReply);
     /// `IntersystemSONInformationReport ::= CHOICE`.
-    #[doc = " "]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = " INTER SYSTEM SON INFORMATION REPORT"]
-    #[doc = " "]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub enum IntersystemSONInformationReport<'a> {
         hOReportInformation(InterSystemHOReport<'a>),
@@ -38749,43 +38515,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(IntersystemSONInformationReport<'a>);
     /// `IntersystemSONInformationRequest ::= CHOICE`.
-    #[doc = " "]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = " INTER SYSTEM SON INFORMATION REQUEST"]
-    #[doc = " "]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub enum IntersystemSONInformationRequest {
         nGRAN_CellActivation(IntersystemCellActivationRequest),
@@ -39188,7 +38917,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(IntersystemSONeNBID);
     /// `IntersystemUnnecessaryHOEarlyIRATHO ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum IntersystemUnnecessaryHOEarlyIRATHO {
@@ -39517,7 +39245,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(InventoryFailureTransfer);
     /// `InventoryReportTransferInventoryCompleteIndication ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum InventoryReportTransferInventoryCompleteIndication {
@@ -39949,9 +39676,6 @@ pub mod ngap_ies {
         }
     }
     /// `LAC ::= OCTET STRING (SIZE (2))`.
-    #[doc = " J"]
-    #[doc = " K"]
-    #[doc = " L"]
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct LAC(pub [u8; 2]);
     impl crate::message::__Field<[u8; 2]> for LAC {
@@ -39985,9 +39709,10 @@ pub mod ngap_ies {
     impl Tree for LAC {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::octets(&self.0)
+            json::readable(json::Form::Number(16), json::octets(&self.0))
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
+            let value = &json::read_readable(reading, json::Form::Number(16), value)?;
             Ok(Self(reading.octet_array::<2>(value)?))
         }
     }
@@ -40272,7 +39997,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(LPWUSPSAssistanceInformation);
     /// `LTEA2XServicesAuthorizedAerialUE ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum LTEA2XServicesAuthorizedAerialUE {
@@ -40320,7 +40044,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(LTEA2XServicesAuthorizedAerialUE);
     /// `LTEA2XServicesAuthorizedAerialControllerUE ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum LTEA2XServicesAuthorizedAerialControllerUE {
@@ -50468,7 +50191,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(MRBProgressInformation);
     /// `MaskedIMEISV ::= BIT STRING (SIZE (64))`.
-    #[doc = " M"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MaskedIMEISV(pub Bits);
     impl crate::message::__Field<Bits> for MaskedIMEISV {
@@ -52096,7 +51818,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(MulticastSessionUpdateRequestTransfer<'a>);
     /// `N3IWF-ID ::= CHOICE`.
-    #[doc = " N"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub enum N3IWFID {
         n3IWF_ID(Bits),
@@ -52980,7 +52701,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(NGAPIESupportInformationRequestList);
     /// `NGAPIESupportInformationResponseItemNgapProtocolIESupportInfo ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum NGAPIESupportInformationResponseItemNgapProtocolIESupportInfo {
@@ -53028,7 +52748,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(NGAPIESupportInformationResponseItemNgapProtocolIESupportInfo);
     /// `NGAPIESupportInformationResponseItemNgapProtocolIEPresenceInfo ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum NGAPIESupportInformationResponseItemNgapProtocolIEPresenceInfo {
@@ -54848,7 +54567,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(NPNSupport);
     /// `NRA2XServicesAuthorizedAerialUE ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum NRA2XServicesAuthorizedAerialUE {
@@ -54896,7 +54614,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(NRA2XServicesAuthorizedAerialUE);
     /// `NRA2XServicesAuthorizedAerialControllerUE ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum NRA2XServicesAuthorizedAerialControllerUE {
@@ -56044,9 +55761,10 @@ pub mod ngap_ies {
     impl Tree for NRCellIdentity {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::bits(self.0, 36, 36)
+            json::readable(json::Form::Number(36), json::bits(self.0, 36, 36))
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
+            let value = &json::read_readable(reading, json::Form::Number(36), value)?;
             Ok(Self(json::read_bits(reading, value, 36, 36)?))
         }
     }
@@ -58094,7 +57812,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(NotificationCause);
     /// `NotificationCellItemNotifyFlag ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum NotificationCellItemNotifyFlag {
@@ -58533,7 +58250,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(NumberOfMeasurementReportingLevels);
     /// `OnboardingSupport ::= ENUMERATED`, with an extension marker.
-    #[doc = " O"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum OnboardingSupport {
@@ -68759,7 +68475,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PDUSessionType);
     /// `PDUSessionUsageReportRATType ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum PDUSessionUsageReportRATType {
@@ -68970,7 +68685,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PDUSetbasedHandlingIndicator);
     /// `PDUsetQoSInformationPduSetIntegratedHandlingInformation ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum PDUsetQoSInformationPduSetIntegratedHandlingInformation {
@@ -69564,9 +69278,10 @@ pub mod ngap_ies {
     impl Tree for PLMNIdentity {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::octets(&self.0)
+            json::readable(json::Form::Plmn, json::octets(&self.0))
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
+            let value = &json::read_readable(reading, json::Form::Plmn, value)?;
             Ok(Self(reading.octet_array::<3>(value)?))
         }
     }
@@ -70145,7 +69860,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PWSFailedCellIDList);
     /// `PacketDelayBudget ::= INTEGER (0..1023, ...)`.
-    #[doc = " P"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PacketDelayBudget(pub u64);
     impl crate::message::__Field<u64> for PacketDelayBudget {
@@ -72698,9 +72412,10 @@ pub mod ngap_ies {
     impl Tree for PortNumber {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::octets(&self.0)
+            json::readable(json::Form::Number(16), json::octets(&self.0))
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
+            let value = &json::read_readable(reading, json::Form::Number(16), value)?;
             Ok(Self(reading.octet_array::<2>(value)?))
         }
     }
@@ -73022,7 +72737,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(ProcedureStageChoice<'a>);
     /// `QMCConfigInfo ::= SEQUENCE`, with an extension marker.
-    #[doc = " Q"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QMCConfigInfo<'a> {
         pub ue_app_layer_meas_info_list: UEAppLayerMeasInfoList<'a>,
@@ -73211,7 +72925,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(QMCDeactivation);
     /// `QoERVQoEReportingPathsQoEReportingPath ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum QoERVQoEReportingPathsQoEReportingPath {
@@ -73259,7 +72972,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(QoERVQoEReportingPathsQoEReportingPath);
     /// `QoERVQoEReportingPathsRVQoEReportingPath ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum QoERVQoEReportingPathsRVQoEReportingPath {
@@ -73811,7 +73523,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(QoSFlowTSCList);
     /// `QoSFlowsUsageReportItemRATType ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum QoSFlowsUsageReportItemRATType {
@@ -77870,7 +77581,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(RANTSSCellList);
     /// `RANTimingSynchronisationStatusInfoSynchronisationState ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum RANTimingSynchronisationStatusInfoSynchronisationState {
@@ -77919,7 +77629,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(RANTimingSynchronisationStatusInfoSynchronisationState);
     /// `RANTimingSynchronisationStatusInfoTraceabletoUTC ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum RANTimingSynchronisationStatusInfoTraceabletoUTC {
@@ -77967,7 +77676,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(RANTimingSynchronisationStatusInfoTraceabletoUTC);
     /// `RANTimingSynchronisationStatusInfoTraceabletoGNSS ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum RANTimingSynchronisationStatusInfoTraceabletoGNSS {
@@ -78270,7 +77978,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(RANTimingSynchronisationStatusInfo);
     /// `RANfeedbacktype ::= CHOICE`.
-    #[doc = " R"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub enum RANfeedbacktype<'a> {
         proactive(RANfeedbacktypeProactive<'a>),
@@ -78498,7 +78205,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(RANfeedbacktypeProactive<'a>);
     /// `RANfeedbacktypeReactiveCapabilityForBATAdaptation ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum RANfeedbacktypeReactiveCapabilityForBATAdaptation {
@@ -78999,7 +78705,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(RGLevelWirelineAccessCharacteristics<'a>);
     /// `RIMInformationRIMRSDetection ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum RIMInformationRIMRSDetection {
@@ -84032,16 +83737,16 @@ pub mod ngap_ies {
     impl Tree for SST {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::octets(&self.0)
+            json::readable(json::Form::Number(8), json::octets(&self.0))
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
+            let value = &json::read_readable(reading, json::Form::Number(8), value)?;
             Ok(Self(reading.octet_array::<1>(value)?))
         }
     }
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(SST);
     /// `ScheduledCommunicationTime ::= SEQUENCE`, with an extension marker.
-    #[doc = " S"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ScheduledCommunicationTime {
         pub dayof_week: Option<Bits>,
@@ -85218,7 +84923,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(SensorMeasurementConfiguration);
     /// `SensorNameConfigUncompensatedBarometricConfig ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum SensorNameConfigUncompensatedBarometricConfig {
@@ -85265,7 +84969,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(SensorNameConfigUncompensatedBarometricConfig);
     /// `SensorNameConfigUeSpeedConfig ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum SensorNameConfigUeSpeedConfig {
@@ -85312,7 +85015,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(SensorNameConfigUeSpeedConfig);
     /// `SensorNameConfigUeOrientationConfig ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum SensorNameConfigUeOrientationConfig {
@@ -87473,43 +87175,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(SuccessfulHandoverReportItem<'a>);
     /// `SuccessfulHandoverReportList ::= SEQUENCE (SIZE (1..64)) OF SuccessfulHandoverReportItem`.
-    #[doc = " "]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = " SON Information Report"]
-    #[doc = " "]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
-    #[doc = ""]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SuccessfulHandoverReportList<'a>(pub Vec<SuccessfulHandoverReportItem<'a>>);
     impl<'a> crate::message::__Field<Vec<SuccessfulHandoverReportItem<'a>>>
@@ -88370,7 +88035,6 @@ pub mod ngap_ies {
         }
     }
     /// `TAC ::= OCTET STRING (SIZE (3))`.
-    #[doc = " T"]
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TAC(pub [u8; 3]);
     impl crate::message::__Field<[u8; 3]> for TAC {
@@ -88404,9 +88068,10 @@ pub mod ngap_ies {
     impl Tree for TAC {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::octets(&self.0)
+            json::readable(json::Form::Number(24), json::octets(&self.0))
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
+            let value = &json::read_readable(reading, json::Form::Number(24), value)?;
             Ok(Self(reading.octet_array::<3>(value)?))
         }
     }
@@ -93104,7 +92769,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(TimeStamp);
     /// `TimeSyncAssistanceInfoTimeDistributionIndication ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum TimeSyncAssistanceInfoTimeDistributionIndication {
@@ -94023,9 +93687,10 @@ pub mod ngap_ies {
     impl Tree for TransportLayerAddress<'_> {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::bit_string(&self.0, 1, 160, true)
+            json::readable(json::Form::Address, json::bit_string(&self.0, 1, 160, true))
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
+            let value = &json::read_readable(reading, json::Form::Address, value)?;
             Ok(Self(json::read_bit_string(reading, value, 1, 160, true)?))
         }
     }
@@ -94079,7 +93744,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(TypeOfError);
     /// `UEDifferentiationInfoPeriodicCommunicationIndicator ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum UEDifferentiationInfoPeriodicCommunicationIndicator {
@@ -94127,7 +93791,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UEDifferentiationInfoPeriodicCommunicationIndicator);
     /// `UEDifferentiationInfoStationaryIndication ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum UEDifferentiationInfoStationaryIndication {
@@ -94175,7 +93838,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UEDifferentiationInfoStationaryIndication);
     /// `UEDifferentiationInfoTrafficProfile ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum UEDifferentiationInfoTrafficProfile {
@@ -94229,7 +93891,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UEDifferentiationInfoTrafficProfile);
     /// `UEDifferentiationInfoBatteryIndication ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum UEDifferentiationInfoBatteryIndication {
@@ -95164,7 +94825,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UEAssociatedLogicalNGConnectionList);
     /// `UEAggregateMaximumBitRate ::= SEQUENCE`, with an extension marker.
-    #[doc = " U"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEAggregateMaximumBitRate {
         pub ue_aggregate_maximum_bit_rate_dl: BitRate,
@@ -95282,7 +94942,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UEAggregateMaximumBitRate);
     /// `UEAppLayerMeasConfigInfoQoEMeasurementStatus ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum UEAppLayerMeasConfigInfoQoEMeasurementStatus {
@@ -97823,9 +97482,10 @@ pub mod ngap_ies {
     impl Tree for ULNASCount {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::bits(self.0, 5, 5)
+            json::readable(json::Form::Number(5), json::bits(self.0, 5, 5))
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
+            let value = &json::read_readable(reading, json::Form::Number(5), value)?;
             Ok(Self(json::read_bits(reading, value, 5, 5)?))
         }
     }
@@ -100484,7 +100144,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(VolumeTimedReportItem);
     /// `VolumeTimedReportList ::= SEQUENCE (SIZE (1..2)) OF VolumeTimedReportItem`.
-    #[doc = " V"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct VolumeTimedReportList(pub Vec<VolumeTimedReportItem>);
     impl crate::message::__Field<Vec<VolumeTimedReportItem>> for VolumeTimedReportList {
@@ -100537,7 +100196,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(VolumeTimedReportList);
     /// `W-AGF-ID ::= CHOICE`.
-    #[doc = " W"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub enum WAGFID<'a> {
         w_AGF_ID(BitString<'a>),
@@ -100824,7 +100482,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(WLANMeasConfigNameList<'a>);
     /// `WLANMeasurementConfigurationWlanRssi ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum WLANMeasurementConfigurationWlanRssi {
@@ -100871,7 +100528,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(WLANMeasurementConfigurationWlanRssi);
     /// `WLANMeasurementConfigurationWlanRtt ::= ENUMERATED`, with an extension marker.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     #[non_exhaustive]
     pub enum WLANMeasurementConfigurationWlanRtt {
@@ -101759,7 +101415,6 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(XnExtTLAItem<'a>);
     /// `XnExtTLAs ::= SEQUENCE (SIZE (1..16)) OF XnExtTLAItem`.
-    #[doc = " X"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct XnExtTLAs<'a>(pub Vec<XnExtTLAItem<'a>>);
     impl<'a> crate::message::__Field<Vec<XnExtTLAItem<'a>>> for XnExtTLAs<'a> {
@@ -102134,24 +101789,12 @@ pub mod ngap_pdu_contents {
     use alloc::borrow::Cow;
     use alloc::vec::Vec;
     #[cfg(feature = "inspect")]
-    use oxirush_aper::json::{self, Reading, Refused, Tree};
+    use oxirush_aper::json::{self, Reading, Refused, Tree, Value};
     use oxirush_aper::{
         AsnType, BitString, Bits, Decode, Encode, Error, ObjectIdentifier, Octets, Reader,
         UNBOUNDED, Writer,
     };
-    #[cfg(feature = "inspect")]
-    use serde_json::Value;
     /// `AIOTSessionReleaseCommand ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " A-IoT Session Release Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " AIOT SESSION RELEASE COMMAND"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AIOTSessionReleaseCommand<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -102210,11 +101853,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(AIOTSessionReleaseCommand<'a>);
     /// `AIOTSessionReleaseComplete ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " AIOT SESSION RELEASE COMPLETE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AIOTSessionReleaseComplete<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -102273,16 +101911,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(AIOTSessionReleaseComplete<'a>);
     /// `AIOTSessionReleaseRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " A-IoT Session Release Request Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " AIOT SESSION RELEASE REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AIOTSessionReleaseRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -102341,11 +101969,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(AIOTSessionReleaseRequest<'a>);
     /// `AMFCPRelocationIndication ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " AMF CP Relocation Indication"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AMFCPRelocationIndication<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -102404,16 +102027,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(AMFCPRelocationIndication<'a>);
     /// `AMFConfigurationUpdate ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " AMF Configuration Update Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " AMF CONFIGURATION UPDATE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AMFConfigurationUpdate<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -102472,11 +102085,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(AMFConfigurationUpdate<'a>);
     /// `AMFConfigurationUpdateAcknowledge ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " AMF CONFIGURATION UPDATE ACKNOWLEDGE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AMFConfigurationUpdateAcknowledge<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -102535,11 +102143,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(AMFConfigurationUpdateAcknowledge<'a>);
     /// `AMFConfigurationUpdateFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " AMF CONFIGURATION UPDATE FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AMFConfigurationUpdateFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -102598,16 +102201,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(AMFConfigurationUpdateFailure<'a>);
     /// `AMFStatusIndication ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " AMF Status Indication Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " AMF STATUS INDICATION"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AMFStatusIndication<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -102712,11 +102305,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(AerialUEFlightInformationOngoingReportingFailed);
     /// `BroadcastSessionModificationFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " BROADCAST SESSION MODIFICATION  FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BroadcastSessionModificationFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -102775,16 +102363,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(BroadcastSessionModificationFailure<'a>);
     /// `BroadcastSessionModificationRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Broadcast Session Modification Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " BROADCAST SESSION MODIFICATION REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BroadcastSessionModificationRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -102843,11 +102421,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(BroadcastSessionModificationRequest<'a>);
     /// `BroadcastSessionModificationResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " BROADCAST SESSION MODIFICATION RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BroadcastSessionModificationResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -102906,16 +102479,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(BroadcastSessionModificationResponse<'a>);
     /// `BroadcastSessionReleaseRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Broadcast Session Release Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " BROADCAST SESSION RELEASE REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BroadcastSessionReleaseRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -102974,16 +102537,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(BroadcastSessionReleaseRequest<'a>);
     /// `BroadcastSessionReleaseRequired ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Broadcast Session Release Required Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " BROADCAST SESSION RELEASE REQUIRED"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BroadcastSessionReleaseRequired<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -103042,11 +102595,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(BroadcastSessionReleaseRequired<'a>);
     /// `BroadcastSessionReleaseResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " BROADCAST SESSION RELEASE RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BroadcastSessionReleaseResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -103105,11 +102653,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(BroadcastSessionReleaseResponse<'a>);
     /// `BroadcastSessionSetupFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " BROADCAST SESSION SETUP FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BroadcastSessionSetupFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -103168,21 +102711,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(BroadcastSessionSetupFailure<'a>);
     /// `BroadcastSessionSetupRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " MBS SESSION MANAGEMENT ELEMENTARY PROCEDURES"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Broadcast Session Setup Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " BROADCAST SESSION SETUP REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BroadcastSessionSetupRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -103241,11 +102769,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(BroadcastSessionSetupRequest<'a>);
     /// `BroadcastSessionSetupResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " BROADCAST SESSION SETUP RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BroadcastSessionSetupResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -103304,11 +102827,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(BroadcastSessionSetupResponse<'a>);
     /// `BroadcastSessionTransportFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " BROADCAST SESSION TRANSPORT FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BroadcastSessionTransportFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -103367,16 +102885,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(BroadcastSessionTransportFailure<'a>);
     /// `BroadcastSessionTransportRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Broadcast Session Transport Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " BROADCAST SESSION TRANSPORT REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BroadcastSessionTransportRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -103435,11 +102943,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(BroadcastSessionTransportRequest<'a>);
     /// `BroadcastSessionTransportResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " BROADCAST SESSION TRANSPORT RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BroadcastSessionTransportResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -103498,11 +103001,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(BroadcastSessionTransportResponse<'a>);
     /// `CellTrafficTrace ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " CELL TRAFFIC TRACE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CellTrafficTrace<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -103561,11 +103059,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(CellTrafficTrace<'a>);
     /// `CommandFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " COMMAND FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CommandFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -103624,16 +103117,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(CommandFailure<'a>);
     /// `CommandRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Command Request Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " COMMAND REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CommandRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -103692,11 +103175,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(CommandRequest<'a>);
     /// `CommandResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " COMMAND RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CommandResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -103755,11 +103233,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(CommandResponse<'a>);
     /// `ConnectionEstablishmentIndication ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Connection Establishment Indication"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ConnectionEstablishmentIndication<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -103818,11 +103291,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(ConnectionEstablishmentIndication<'a>);
     /// `DeactivateTrace ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " DEACTIVATE TRACE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DeactivateTrace<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -103881,16 +103349,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(DeactivateTrace<'a>);
     /// `DistributionReleaseRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Distribution Release Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " DISTRIBUTION RELEASE REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DistributionReleaseRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -103949,11 +103407,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(DistributionReleaseRequest<'a>);
     /// `DistributionReleaseResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " DISTRIBUTION RELEASE RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DistributionReleaseResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -104012,11 +103465,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(DistributionReleaseResponse<'a>);
     /// `DistributionSetupFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " DISTRIBUTION SETUP FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DistributionSetupFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -104075,16 +103523,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(DistributionSetupFailure<'a>);
     /// `DistributionSetupRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Distribution Setup Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " DISTRIBUTION SETUP REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DistributionSetupRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -104143,11 +103581,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(DistributionSetupRequest<'a>);
     /// `DistributionSetupResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " DISTRIBUTION SETUP RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DistributionSetupResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -104206,11 +103639,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(DistributionSetupResponse<'a>);
     /// `DownlinkNASTransport ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " DOWNLINK NAS TRANSPORT"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DownlinkNASTransport<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -104269,11 +103697,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(DownlinkNASTransport<'a>);
     /// `DownlinkNonUEAssociatedNRPPaTransport ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " DOWNLINK NON UE ASSOCIATED NRPPA TRANSPORT"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DownlinkNonUEAssociatedNRPPaTransport<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -104332,11 +103755,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(DownlinkNonUEAssociatedNRPPaTransport<'a>);
     /// `DownlinkRANConfigurationTransfer ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " DOWNLINK RAN CONFIGURATION TRANSFER"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DownlinkRANConfigurationTransfer<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -104395,16 +103813,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(DownlinkRANConfigurationTransfer<'a>);
     /// `DownlinkRANEarlyStatusTransfer ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " DOWNLINK RAN EARLY STATUS TRANSFER ELEMENTARY PROCEDURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Downlink RAN Early Status Transfer"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DownlinkRANEarlyStatusTransfer<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -104463,16 +103871,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(DownlinkRANEarlyStatusTransfer<'a>);
     /// `DownlinkRANStatusTransfer ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Downlink RAN Status Transfer Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " DOWNLINK RAN STATUS TRANSFER"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DownlinkRANStatusTransfer<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -104531,11 +103929,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(DownlinkRANStatusTransfer<'a>);
     /// `DownlinkRIMInformationTransfer ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " DOWNLINK RIM INFORMATION TRANSFER"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DownlinkRIMInformationTransfer<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -104594,16 +103987,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(DownlinkRIMInformationTransfer<'a>);
     /// `DownlinkUEAssociatedNRPPaTransport ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " NRPPA TRANSPORT ELEMENTARY PROCEDURES"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " DOWNLINK UE ASSOCIATED NRPPA TRANSPORT"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DownlinkUEAssociatedNRPPaTransport<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -104662,16 +104045,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(DownlinkUEAssociatedNRPPaTransport<'a>);
     /// `ErrorIndication ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Error Indication Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " ERROR INDICATION"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ErrorIndication<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -104730,16 +104103,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(ErrorIndication<'a>);
     /// `HandoverCancel ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Handover Cancellation Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " HANDOVER CANCEL"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct HandoverCancel<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -104798,11 +104161,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(HandoverCancel<'a>);
     /// `HandoverCancelAcknowledge ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " HANDOVER CANCEL ACKNOWLEDGE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct HandoverCancelAcknowledge<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -104861,11 +104219,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(HandoverCancelAcknowledge<'a>);
     /// `HandoverCommand ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " HANDOVER COMMAND"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct HandoverCommand<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -104924,11 +104277,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(HandoverCommand<'a>);
     /// `HandoverFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " HANDOVER FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct HandoverFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -104987,16 +104335,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(HandoverFailure<'a>);
     /// `HandoverNotify ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Handover Notification Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " HANDOVER NOTIFY"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct HandoverNotify<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -105055,11 +104393,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(HandoverNotify<'a>);
     /// `HandoverPreparationFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " HANDOVER PREPARATION FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct HandoverPreparationFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -105118,16 +104451,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(HandoverPreparationFailure<'a>);
     /// `HandoverRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Handover Resource Allocation Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " HANDOVER REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct HandoverRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -105186,11 +104509,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(HandoverRequest<'a>);
     /// `HandoverRequestAcknowledge ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " HANDOVER REQUEST ACKNOWLEDGE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct HandoverRequestAcknowledge<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -105249,21 +104567,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(HandoverRequestAcknowledge<'a>);
     /// `HandoverRequired ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE MOBILITY MANAGEMENT ELEMENTARY PROCEDURES"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Handover Preparation Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " HANDOVER REQUIRED"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct HandoverRequired<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -105322,16 +104625,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(HandoverRequired<'a>);
     /// `HandoverSuccess ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " HANDOVER SUCCESS ELEMENTARY PROCEDURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " HANDOVER SUCCESS"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct HandoverSuccess<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -105390,11 +104683,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(HandoverSuccess<'a>);
     /// `InitialContextSetupFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " INITIAL CONTEXT SETUP FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct InitialContextSetupFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -105453,21 +104741,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(InitialContextSetupFailure<'a>);
     /// `InitialContextSetupRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE CONTEXT MANAGEMENT ELEMENTARY PROCEDURES"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Initial Context Setup Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " INITIAL CONTEXT SETUP REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct InitialContextSetupRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -105526,11 +104799,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(InitialContextSetupRequest<'a>);
     /// `InitialContextSetupResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " INITIAL CONTEXT SETUP RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct InitialContextSetupResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -105589,16 +104857,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(InitialContextSetupResponse<'a>);
     /// `InitialUEMessage ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " NAS TRANSPORT ELEMENTARY PROCEDURES"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " INITIAL UE MESSAGE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct InitialUEMessage<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -105657,11 +104915,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(InitialUEMessage<'a>);
     /// `InventoryFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " INVENTORY FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct InventoryFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -105720,15 +104973,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(InventoryFailure<'a>);
     /// `InventoryReport ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = " Inventory Report procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " INVENTORY REPORT"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct InventoryReport<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -105787,21 +105031,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(InventoryReport<'a>);
     /// `InventoryRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " A-IoT ELEMENTARY PROCEDURES"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Inventory Request Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " INVENTORY REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct InventoryRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -105860,11 +105089,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(InventoryRequest<'a>);
     /// `InventoryResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " INVENTORY RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct InventoryResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -105923,11 +105147,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(InventoryResponse<'a>);
     /// `LocationReport ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " LOCATION REPORT"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct LocationReport<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -105986,16 +105205,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(LocationReport<'a>);
     /// `LocationReportingControl ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " LOCATION REPORTING ELEMENTARY PROCEDURES"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " LOCATION REPORTING CONTROL"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct LocationReportingControl<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -106054,11 +105263,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(LocationReportingControl<'a>);
     /// `LocationReportingFailureIndication ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " LOCATION REPORTING FAILURE INDICATION"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct LocationReportingFailureIndication<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -106117,11 +105321,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(LocationReportingFailureIndication<'a>);
     /// `MTCommunicationHandlingFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " MT COMMUNICATION HANDLING FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MTCommunicationHandlingFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -106180,16 +105379,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(MTCommunicationHandlingFailure<'a>);
     /// `MTCommunicationHandlingRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " MT Communication Handling Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " MT COMMUNICATION HANDLING REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MTCommunicationHandlingRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -106248,11 +105437,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(MTCommunicationHandlingRequest<'a>);
     /// `MTCommunicationHandlingResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " MT COMMUNICATION HANDLING RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MTCommunicationHandlingResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -106311,16 +105495,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(MTCommunicationHandlingResponse<'a>);
     /// `MulticastGroupPaging ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " MULTICAST GROUP PAGING ELEMENTARY PROCEDURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " MULTICAST GROUP PAGING"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MulticastGroupPaging<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -106379,11 +105553,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(MulticastGroupPaging<'a>);
     /// `MulticastSessionActivationFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " MULTICAST SESSION ACTIVATION FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MulticastSessionActivationFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -106442,16 +105611,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(MulticastSessionActivationFailure<'a>);
     /// `MulticastSessionActivationRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Multicast Session Activation Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " MULTICAST SESSION ACTIVATION REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MulticastSessionActivationRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -106510,11 +105669,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(MulticastSessionActivationRequest<'a>);
     /// `MulticastSessionActivationResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " MULTICAST SESSION ACTIVATION RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MulticastSessionActivationResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -106573,16 +105727,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(MulticastSessionActivationResponse<'a>);
     /// `MulticastSessionDeactivationRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Multicast Session Deactivation Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " MULTICAST SESSION DEACTIVATION REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MulticastSessionDeactivationRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -106641,11 +105785,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(MulticastSessionDeactivationRequest<'a>);
     /// `MulticastSessionDeactivationResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " MULTICAST SESSION DEACTIVATION RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MulticastSessionDeactivationResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -106704,11 +105843,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(MulticastSessionDeactivationResponse<'a>);
     /// `MulticastSessionUpdateFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " MULTICAST SESSION UPDATE FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MulticastSessionUpdateFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -106767,16 +105901,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(MulticastSessionUpdateFailure<'a>);
     /// `MulticastSessionUpdateRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Multicast Session Update Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " MULTICAST SESSION UPDATE REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MulticastSessionUpdateRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -106835,11 +105959,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(MulticastSessionUpdateRequest<'a>);
     /// `MulticastSessionUpdateResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " MULTICAST SESSION UPDATE RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MulticastSessionUpdateResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -106898,11 +106017,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(MulticastSessionUpdateResponse<'a>);
     /// `NASNonDeliveryIndication ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " NAS NON DELIVERY INDICATION"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NASNonDeliveryIndication<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -106961,11 +106075,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(NASNonDeliveryIndication<'a>);
     /// `NGRemovalFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " NG REMOVAL FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NGRemovalFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -107024,21 +106133,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(NGRemovalFailure<'a>);
     /// `NGRemovalRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " INTERFACE MANAGEMENT ELEMENTARY PROCEDURES"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " NG Removal Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " NG REMOVAL REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NGRemovalRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -107097,11 +106191,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(NGRemovalRequest<'a>);
     /// `NGRemovalResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " NG REMOVAL RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NGRemovalResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -107160,16 +106249,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(NGRemovalResponse<'a>);
     /// `NGReset ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " NG Reset Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " NG RESET"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NGReset<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -107228,11 +106307,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(NGReset<'a>);
     /// `NGResetAcknowledge ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " NG RESET ACKNOWLEDGE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NGResetAcknowledge<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -107291,11 +106365,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(NGResetAcknowledge<'a>);
     /// `NGSetupFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " NG SETUP FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NGSetupFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -107354,16 +106423,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(NGSetupFailure<'a>);
     /// `NGSetupRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " NG Setup Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " NG SETUP REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NGSetupRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -107422,11 +106481,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(NGSetupRequest<'a>);
     /// `NGSetupResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " NG SETUP RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NGSetupResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -107485,11 +106539,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(NGSetupResponse<'a>);
     /// `OverloadStart ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " OVERLOAD START"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct OverloadStart<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -107548,11 +106597,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(OverloadStart<'a>);
     /// `OverloadStop ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " OVERLOAD STOP"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct OverloadStop<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -107611,11 +106655,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(OverloadStop<'a>);
     /// `PDUSessionResourceModifyConfirm ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PDU SESSION RESOURCE MODIFY CONFIRM"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceModifyConfirm<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -107674,16 +106713,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PDUSessionResourceModifyConfirm<'a>);
     /// `PDUSessionResourceModifyIndication ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PDU Session Resource Modify Indication Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PDU SESSION RESOURCE MODIFY INDICATION"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceModifyIndication<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -107742,16 +106771,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PDUSessionResourceModifyIndication<'a>);
     /// `PDUSessionResourceModifyRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PDU Session Resource Modify Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PDU SESSION RESOURCE MODIFY REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceModifyRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -107810,11 +106829,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PDUSessionResourceModifyRequest<'a>);
     /// `PDUSessionResourceModifyResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PDU SESSION RESOURCE MODIFY RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceModifyResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -107873,16 +106887,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PDUSessionResourceModifyResponse<'a>);
     /// `PDUSessionResourceNotify ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PDU Session Resource Notify Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PDU SESSION RESOURCE NOTIFY"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceNotify<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -107941,16 +106945,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PDUSessionResourceNotify<'a>);
     /// `PDUSessionResourceReleaseCommand ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PDU Session Resource Release Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PDU SESSION RESOURCE RELEASE COMMAND"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceReleaseCommand<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -108009,11 +107003,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PDUSessionResourceReleaseCommand<'a>);
     /// `PDUSessionResourceReleaseResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PDU SESSION RESOURCE RELEASE RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceReleaseResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -108072,21 +107061,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PDUSessionResourceReleaseResponse<'a>);
     /// `PDUSessionResourceSetupRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PDU SESSION MANAGEMENT ELEMENTARY PROCEDURES"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PDU Session Resource Setup Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PDU SESSION RESOURCE SETUP REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceSetupRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -108145,11 +107119,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PDUSessionResourceSetupRequest<'a>);
     /// `PDUSessionResourceSetupResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PDU SESSION RESOURCE SETUP RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceSetupResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -108208,16 +107177,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PDUSessionResourceSetupResponse<'a>);
     /// `PWSCancelRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PWS Cancel Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PWS CANCEL REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PWSCancelRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -108276,11 +107235,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PWSCancelRequest<'a>);
     /// `PWSCancelResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PWS CANCEL RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PWSCancelResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -108339,16 +107293,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PWSCancelResponse<'a>);
     /// `PWSFailureIndication ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PWS Failure Indication Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PWS FAILURE INDICATION"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PWSFailureIndication<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -108407,16 +107351,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PWSFailureIndication<'a>);
     /// `PWSRestartIndication ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PWS Restart Indication Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PWS RESTART INDICATION"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PWSRestartIndication<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -108475,16 +107409,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PWSRestartIndication<'a>);
     /// `Paging ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PAGING ELEMENTARY PROCEDURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PAGING"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct Paging<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -108543,16 +107467,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(Paging<'a>);
     /// `PathSwitchRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Path Switch Request Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PATH SWITCH REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PathSwitchRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -108611,11 +107525,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PathSwitchRequest<'a>);
     /// `PathSwitchRequestAcknowledge ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PATH SWITCH REQUEST ACKNOWLEDGE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PathSwitchRequestAcknowledge<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -108674,11 +107583,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PathSwitchRequestAcknowledge<'a>);
     /// `PathSwitchRequestFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PATH SWITCH REQUEST FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PathSwitchRequestFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -108737,7 +107641,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PathSwitchRequestFailure<'a>);
     /// `SEQUENCE ::= SEQUENCE`.
-    #[doc = " Anonymous SEQUENCE OF member "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AnonymousPrivateMessagePrivateIEs<'a> {
         pub id: PrivateIEID,
@@ -108825,7 +107728,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(AnonymousPrivateMessagePrivateIEs<'a>);
     /// `PrivateMessagePrivateIEs ::= SEQUENCE (SIZE (1..65535)) OF AnonymousPrivateMessagePrivateIEs`.
-    #[doc = " Inner type "]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PrivateMessagePrivateIEs<'a>(pub Vec<AnonymousPrivateMessagePrivateIEs<'a>>);
     impl<'a> crate::message::__Field<Vec<AnonymousPrivateMessagePrivateIEs<'a>>>
@@ -108887,16 +107789,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PrivateMessagePrivateIEs<'a>);
     /// `PrivateMessage ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PRIVATE MESSAGE ELEMENTARY PROCEDURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " PRIVATE MESSAGE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PrivateMessage<'a> {
         pub private_ies: PrivateMessagePrivateIEs<'a>,
@@ -108955,11 +107847,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PrivateMessage<'a>);
     /// `RANCPRelocationIndication ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " RAN CP Relocation Indication"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RANCPRelocationIndication<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -109018,16 +107905,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(RANCPRelocationIndication<'a>);
     /// `RANConfigurationUpdate ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " RAN Configuration Update Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " RAN CONFIGURATION UPDATE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RANConfigurationUpdate<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -109086,11 +107963,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(RANConfigurationUpdate<'a>);
     /// `RANConfigurationUpdateAcknowledge ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " RAN CONFIGURATION UPDATE ACKNOWLEDGE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RANConfigurationUpdateAcknowledge<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -109149,11 +108021,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(RANConfigurationUpdateAcknowledge<'a>);
     /// `RANConfigurationUpdateFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " RAN CONFIGURATION UPDATE FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RANConfigurationUpdateFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -109212,15 +108079,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(RANConfigurationUpdateFailure<'a>);
     /// `RANPagingRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = " RAN Paging Request procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " RAN PAGING REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RANPagingRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -109279,11 +108137,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(RANPagingRequest<'a>);
     /// `RRCInactiveTransitionReport ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " RRC INACTIVE TRANSITION REPORT"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RRCInactiveTransitionReport<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -109342,11 +108195,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(RRCInactiveTransitionReport<'a>);
     /// `RerouteNASRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " REROUTE NAS REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RerouteNASRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -109405,11 +108253,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(RerouteNASRequest<'a>);
     /// `RetrieveUEInformation ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Retrieve UE Information"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RetrieveUEInformation<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -109468,16 +108311,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(RetrieveUEInformation<'a>);
     /// `SecondaryRATDataUsageReport ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " DATA USAGE REPORTING ELEMENTARY PROCEDURES"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " SECONDARY RAT DATA USAGE REPORT"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SecondaryRATDataUsageReport<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -109536,11 +108369,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(SecondaryRATDataUsageReport<'a>);
     /// `TimingSynchronisationStatusFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " TIMING SYNCHRONISATION STATUS FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TimingSynchronisationStatusFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -109599,16 +108427,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(TimingSynchronisationStatusFailure<'a>);
     /// `TimingSynchronisationStatusReport ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Timing Synchronisation Status Reporting Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " TIMING SYNCHRONISATION STATUS REPORT"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TimingSynchronisationStatusReport<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -109667,21 +108485,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(TimingSynchronisationStatusReport<'a>);
     /// `TimingSynchronisationStatusRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " TIMING SYNCHRONISATION STATUS REPORTING ELEMENTARY PROCEDURES"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Timing Synchronisation Status Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " TIMING SYNCHRONISATION STATUS REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TimingSynchronisationStatusRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -109740,11 +108543,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(TimingSynchronisationStatusRequest<'a>);
     /// `TimingSynchronisationStatusResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " TIMING SYNCHRONISATION STATUS RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TimingSynchronisationStatusResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -109803,11 +108601,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(TimingSynchronisationStatusResponse<'a>);
     /// `TraceFailureIndication ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " TRACE FAILURE INDICATION"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TraceFailureIndication<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -109866,16 +108659,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(TraceFailureIndication<'a>);
     /// `TraceStart ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " TRACE ELEMENTARY PROCEDURES"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " TRACE START"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TraceStart<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -109934,11 +108717,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(TraceStart<'a>);
     /// `UEContextModificationFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE CONTEXT MODIFICATION FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEContextModificationFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -109997,16 +108775,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UEContextModificationFailure<'a>);
     /// `UEContextModificationRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE Context Modification Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE CONTEXT MODIFICATION REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEContextModificationRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -110065,11 +108833,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UEContextModificationRequest<'a>);
     /// `UEContextModificationResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE CONTEXT MODIFICATION RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEContextModificationResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -110128,16 +108891,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UEContextModificationResponse<'a>);
     /// `UEContextReleaseCommand ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE Context Release Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE CONTEXT RELEASE COMMAND"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEContextReleaseCommand<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -110196,11 +108949,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UEContextReleaseCommand<'a>);
     /// `UEContextReleaseComplete ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE CONTEXT RELEASE COMPLETE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEContextReleaseComplete<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -110259,16 +109007,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UEContextReleaseComplete<'a>);
     /// `UEContextReleaseRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE Context Release Request Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE CONTEXT RELEASE REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEContextReleaseRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -110327,11 +109065,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UEContextReleaseRequest<'a>);
     /// `UEContextResumeFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE CONTEXT RESUME FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEContextResumeFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -110390,16 +109123,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UEContextResumeFailure<'a>);
     /// `UEContextResumeRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE Context Resume Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE CONTEXT RESUME REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEContextResumeRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -110458,11 +109181,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UEContextResumeRequest<'a>);
     /// `UEContextResumeResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE CONTEXT RESUME RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEContextResumeResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -110521,11 +109239,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UEContextResumeResponse<'a>);
     /// `UEContextSuspendFailure ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE CONTEXT SUSPEND FAILURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEContextSuspendFailure<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -110584,16 +109297,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UEContextSuspendFailure<'a>);
     /// `UEContextSuspendRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE Context Suspend Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE CONTEXT SUSPEND REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEContextSuspendRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -110652,11 +109355,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UEContextSuspendRequest<'a>);
     /// `UEContextSuspendResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE CONTEXT SUSPEND RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEContextSuspendResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -110715,10 +109413,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UEContextSuspendResponse<'a>);
     /// `UEInformationTransfer ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = " UE Information Transfer"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEInformationTransfer<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -110777,16 +109471,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UEInformationTransfer<'a>);
     /// `UERadioCapabilityCheckRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE Radio Capability Check Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE RADIO CAPABILITY CHECK REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UERadioCapabilityCheckRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -110845,11 +109529,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UERadioCapabilityCheckRequest<'a>);
     /// `UERadioCapabilityCheckResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE RADIO CAPABILITY CHECK RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UERadioCapabilityCheckResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -110908,16 +109587,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UERadioCapabilityCheckResponse<'a>);
     /// `UERadioCapabilityIDMappingRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE RADIO CAPABILITY ID MAPPING ELEMENTARY PROCEDURES"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE RADIO CAPABILITY ID MAPPING REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UERadioCapabilityIDMappingRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -110976,11 +109645,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UERadioCapabilityIDMappingRequest<'a>);
     /// `UERadioCapabilityIDMappingResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE RADIO CAPABILITY ID MAPPING RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UERadioCapabilityIDMappingResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -111039,16 +109703,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UERadioCapabilityIDMappingResponse<'a>);
     /// `UERadioCapabilityInfoIndication ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE RADIO CAPABILITY MANAGEMENT ELEMENTARY PROCEDURES"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE RADIO CAPABILITY INFO INDICATION"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UERadioCapabilityInfoIndication<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -111107,16 +109761,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UERadioCapabilityInfoIndication<'a>);
     /// `UETNLABindingReleaseRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE TNLA BINDING ELEMENTARY PROCEDURES"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UE TNLA BINDING RELEASE REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UETNLABindingReleaseRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -111175,11 +109819,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UETNLABindingReleaseRequest<'a>);
     /// `UplinkNASTransport ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UPLINK NAS TRANSPORT"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UplinkNASTransport<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -111238,11 +109877,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UplinkNASTransport<'a>);
     /// `UplinkNonUEAssociatedNRPPaTransport ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UPLINK NON UE ASSOCIATED NRPPA TRANSPORT"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UplinkNonUEAssociatedNRPPaTransport<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -111301,16 +109935,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UplinkNonUEAssociatedNRPPaTransport<'a>);
     /// `UplinkRANConfigurationTransfer ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " CONFIGURATION TRANSFER ELEMENTARY PROCEDURES"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UPLINK RAN CONFIGURATION TRANSFER"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UplinkRANConfigurationTransfer<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -111369,16 +109993,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UplinkRANConfigurationTransfer<'a>);
     /// `UplinkRANEarlyStatusTransfer ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UPLINK RAN EARLY STATUS TRANSFER ELEMENTARY PROCEDURE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Uplink RAN Early Status Transfer"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UplinkRANEarlyStatusTransfer<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -111437,16 +110051,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UplinkRANEarlyStatusTransfer<'a>);
     /// `UplinkRANStatusTransfer ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Uplink RAN Status Transfer Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UPLINK RAN STATUS TRANSFER"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UplinkRANStatusTransfer<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -111505,16 +110109,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UplinkRANStatusTransfer<'a>);
     /// `UplinkRIMInformationTransfer ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " RIM INFORMATION TRANSFER ELEMENTARY PROCEDURES"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UPLINK RIM INFORMATION TRANSFER"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UplinkRIMInformationTransfer<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -111573,11 +110167,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UplinkRIMInformationTransfer<'a>);
     /// `UplinkUEAssociatedNRPPaTransport ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " UPLINK UE ASSOCIATED NRPPA TRANSPORT"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UplinkUEAssociatedNRPPaTransport<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -111636,21 +110225,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UplinkUEAssociatedNRPPaTransport<'a>);
     /// `WriteReplaceWarningRequest ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " WARNING MESSAGE TRANSMISSION ELEMENTARY PROCEDURES"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Write-Replace Warning Elementary Procedure"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " WRITE-REPLACE WARNING REQUEST"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct WriteReplaceWarningRequest<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -111709,11 +110283,6 @@ pub mod ngap_pdu_contents {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(WriteReplaceWarningRequest<'a>);
     /// `WriteReplaceWarningResponse ::= SEQUENCE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " WRITE-REPLACE WARNING RESPONSE"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct WriteReplaceWarningResponse<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -111785,13 +110354,11 @@ pub mod ngap_pdu_descriptions {
     use alloc::borrow::Cow;
     use alloc::vec::Vec;
     #[cfg(feature = "inspect")]
-    use oxirush_aper::json::{self, Reading, Refused, Tree};
+    use oxirush_aper::json::{self, Reading, Refused, Tree, Value};
     use oxirush_aper::{
         AsnType, BitString, Bits, Decode, Encode, Error, ObjectIdentifier, Octets, Reader,
         UNBOUNDED, Writer,
     };
-    #[cfg(feature = "inspect")]
-    use serde_json::Value;
     impl core::fmt::Debug for InitiatingMessage<'_> {
         fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
             let holds_key = crate::pdu::holds_key("InitiatingMessage", self.procedure_code.0);
@@ -111900,11 +110467,6 @@ pub mod ngap_pdu_descriptions {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(InitiatingMessage<'a>);
     /// `NGAP-PDU ::= CHOICE`, with an extension marker.
-    #[doc = " **************************************************************"]
-    #[doc = ""]
-    #[doc = " Interface PDU Definition"]
-    #[doc = ""]
-    #[doc = " **************************************************************"]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     #[non_exhaustive]
     pub enum NGAPPDU<'a> {

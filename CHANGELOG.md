@@ -70,8 +70,10 @@ not source compatible with 0.4.2.
   and a missing criticality is a compile error that says which.
 - No helper panics, and none cuts a number short. `plmn`, `guami`, `nr_cgi`
   and `global_gnb_id` return a `Result` with an error of the kind
-  `Argument`; `tai` takes `[u8; 3]`, `ue_security_capabilities` its two
-  octets, and `plmn_from` returns an `Option`. `int_to_bitvec` and
+  `Argument`; `nr_cgi` and `global_gnb_id` take the length of the gNB ID,
+  22 to 32 bits (TS 38.413 clause 9.3.1.6), where 0.4.2 had 24; `tai` takes
+  `[u8; 3]`, `ue_security_capabilities` its two octets, and `plmn_from`
+  returns an `Option`. `int_to_bitvec` and
   `bytes_to_bitvec` are gone: `Bits::new(value, width)?` and
   `BitString::from(octets)` take their place.
 - An `INTEGER` is held in 64 bits. A larger number, which only an extension
@@ -93,12 +95,16 @@ not source compatible with 0.4.2.
 - `pdu.check()`: how a PDU deviates from the object set of its message, as
   `Deviation`s, refusing nothing. `deviation.cause()` and
   `deviation.diagnostics_item()` give what a receiver answers, as TS 38.413
-  clause 10 has it, and `error.ie()` the IE of an error of the macros. A
-  value outside the root of an extensible constraint and one in another form
-  than the canonical one are reported too, and `aper::encode_strict` and
-  `aper::decode_strict` refuse them.
+  clause 10 has it, `pdu.criticality_diagnostics(&deviations)` the whole
+  Criticality Diagnostics IE of the answer, and `error.ie()` the IE of an
+  error of the macros. A value outside the root of an extensible constraint
+  and one in another form than the canonical one are reported too, and
+  `aper::encode_strict` and `aper::decode_strict` refuse them. A procedure
+  that the specification does not have is the deviation `UnknownProcedure`,
+  which a receiver answers by the criticality of the PDU (clause 10.3.4.1).
 - `pdu.protocol_ies()` and `pdu.set_protocol_ies(ies)`: the IEs of any
-  message.
+  message, and `NGAP_PDU::of_message(&message, criticality)`, the PDU of a
+  message that is at hand.
 - `NGAP_PDU::decode_borrowed`, which copies nothing, `pdu.message()`, which
   lives as long as what the PDU borrows, and `pdu.encode_into(&mut octets)`.
 - A field of `extract_ngap_ies!` of the type of the one value of its IE,
@@ -110,20 +116,31 @@ not source compatible with 0.4.2.
 - `PLMNIdentity` converts to and from the `Plmn` of `oxirush-utils`, which
   the crate has as `oxirush_ngap::identity`.
 - Each type of the bindings says in its documentation what it is in ASN.1:
-  `AMF-UE-NGAP-ID ::= INTEGER (0..1099511627775)`.
-- The `inspect` feature: a PDU as a `serde_json::Value`, as its tree
-  (`to_tree`, `from_tree`) and as its view (`to_view`, `with_view`,
-  `from_view`), with the paths of the values of a view (`select`, `paths`,
-  `set`, `insert`, `remove`, `open`, `check_path`, `enumerated_at`) and
-  what the ASN.1 says of each message (`message_ies`,
+  `AMF-UE-NGAP-ID ::= INTEGER (0..1099511627775)`, and what the comments of the ASN.1 say of it, without the
+  banners of the sections of the modules. The pages of the macros show the
+  forms that a caller writes, with an example of `=>`.
+- The `inspect` feature: a PDU as JSON, the trees of `oxirush-utils`
+  (`oxirush_ngap::tree`), as its tree (`to_tree`, `from_tree`) and as its view
+  (`to_view`, `with_view`, `from_view`), with the paths of the values of a
+  view (`select`, `paths`, `set`, `insert`, `remove`, `open`, `check_path`,
+  `enumerated_at`) and what the ASN.1 says of each message (`message_ies`,
   `message_ie_criticalities`, `item_criticality` and the others). A
   transfer and the container of a handover are read as their types, the
-  usual values as they are written, and what is not edited keeps the octets
-  received. The trees and the paths are those of `oxirush-aper`, which
-  oxirush-s1ap shares, on `oxirush-utils`: octets in lower case, members in
-  the order of the specification.
+  well-known values as they are usually written, wherever they are, and what
+  is not edited keeps the octets received. Every PDU that decodes has a
+  tree, which is the same PDU again: a procedure that the protocol does not
+  have by its procedure code and its direction, a message that has no list
+  of IEs or does not decode by its octets, and an IE or a transfer whose
+  typed value has no place for what a later release added by its octets. An
+  alternative of the type `NULL` is `{"pLMNWide": null}`, whose `null` a
+  path lists and selects. The trees and the paths are those of
+  `oxirush-aper`, which oxirush-s1ap shares, on `oxirush-utils`: octets in
+  lower case, members in the order of the specification, and the JSON of the
+  program that uses the crate as the program has it.
 - The `serde` feature: `Serialize` and `Deserialize` through the trees, a
-  PDU as the tree of its message.
+  PDU as the tree of its message and each other type as the tree of a PDU
+  shows it, read back in it or in the form of its ASN.1 type. A name that an
+  object has twice is refused.
 - Tests on 144 messages and 479 vectors that pycrate 0.8.1 encoded, on 177
   PDUs that two open-source cores and a simulator sent, against the codec of
   rasn 0.29 in `oracle/`, with three fuzz targets, and from the published

@@ -37,8 +37,8 @@ pub mod counting;
 mod protocol;
 
 use protocol::codec::inspect;
+use protocol::codec::{tree, tree::Value};
 use protocol::{Borrowed, Pdu};
-use serde_json::{Value, json};
 use std::hint::black_box;
 
 // ── Inputs ──────────────────────────────────────────────────────────────────
@@ -103,7 +103,7 @@ impl Message {
         assert_eq!(pdu.encode().unwrap(), octets);
         let name = inspect::message_name(&pdu).unwrap();
         let view = pdu.to_view().unwrap();
-        let tree = pdu.to_tree().unwrap();
+        let tree = pdu.to_tree();
         let path = path.map_or_else(|| deepest(&view), String::from);
         let edit = match edit {
             Some((path, value)) => (path.to_string(), value),
@@ -145,7 +145,7 @@ fn another_criticality(view: &Value) -> (String, Value) {
         Some("reject") => "ignore",
         _ => "reject",
     };
-    (path, json!(other))
+    (path, tree!(other))
 }
 
 /// One or several messages that the operations are measured on.
@@ -212,7 +212,7 @@ pub fn many_ies(counts: &[usize]) -> Vec<Input> {
         let octets = protocol::many_ies(*count).encode().unwrap();
         let description = format!("{count} IEs of one name, {} octets", octets.len());
         let last = format!("{}/{}/value", protocol::ROOT, count - 1);
-        let message = Message::new(octets, Some(&last), Some((&last, json!(2))), None);
+        let message = Message::new(octets, Some(&last), Some((&last, tree!(2))), None);
         Input {
             name: format!("ies-{count}").leak(),
             description,
@@ -346,7 +346,9 @@ impl Input {
 
         operations.extend([
             operation("to-view", count, move |at| done(message(at).pdu.to_view())),
-            operation("to-tree", count, move |at| done(message(at).pdu.to_tree())),
+            operation("to-tree", count, move |at| {
+                drop(black_box(message(at).pdu.to_tree()))
+            }),
             operation("from-tree", count, move |at| {
                 done(Pdu::from_tree(&message(at).tree))
             }),

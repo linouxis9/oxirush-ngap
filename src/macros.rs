@@ -900,6 +900,33 @@ macro_rules! __ngap_ie_syntax {
 /// that `with_ngap_ie_mut!` changes. Any of them that does not decode is the error of a `req`
 /// and of an `opt` field, and a `lax` field is `None` when the last one does not
 /// decode.
+///
+/// ```
+/// use oxirush_ngap::{Error, build_ngap, extract_ngap_ies, ngap::*};
+///
+/// fn released(pdu: &NGAP_PDU) -> Result<(u64, bool, Option<u32>), Error> {
+///     let message: UEContextReleaseRequest = pdu.decode_value()?;
+///     extract_ngap_ies!(message, UEContextReleaseRequest,
+///         // The one value that the IE is a name for
+///         req amf: u64 = AMF_UE_NGAP_ID(id),
+///         // An expression of the value after `=>`, which the field is
+///         req inactive: bool = Cause(cause) =>
+///             cause == Cause::radioNetwork(CauseRadioNetwork::user_inactivity),
+///         // An IE that the message may not have
+///         opt sessions: u32 = PDUSessionResourceListCxtRelReq(list) => list.0.len() as u32,
+///     );
+///     Ok((amf, inactive, sessions))
+/// }
+///
+/// let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
+///     IGNORE, UEContextReleaseRequest,
+///     REJECT AMF_UE_NGAP_ID(1u64),
+///     REJECT RAN_UE_NGAP_ID(7u32),
+///     IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
+/// )?;
+/// assert_eq!(released(&pdu)?, (1, true, None));
+/// # Ok::<(), Error>(())
+/// ```
 #[macro_export]
 macro_rules! extract_ngap_ies {
     ($msg_var:expr, $msg:ident,
@@ -920,7 +947,7 @@ macro_rules! extract_ngap_ies {
                     let _value: ::core::result::Result<$ty, $crate::Error> =
                         match $crate::registry::ies::$ie_name::decode(&_ie.value) {
                             ::core::result::Result::Ok($bind) => ::core::result::Result::Ok(
-                                $crate::extract_ngap_ies!(@val $bind $(, $expr)?),
+                                $crate::__extract_ngap_ie!(@val $bind $(, $expr)?),
                             ),
                             ::core::result::Result::Err(_error) => ::core::result::Result::Err(
                                 $crate::macros::__undecodable_ie::<$crate::ngap::$msg<'_>>(
@@ -928,16 +955,27 @@ macro_rules! extract_ngap_ies {
                                 ),
                             ),
                         };
-                    $name = $crate::extract_ngap_ies!(@last $kind $name, _value);
+                    $name = $crate::__extract_ngap_ie!(@last $kind $name, _value);
                 }
             )+
         }
-        $( $crate::extract_ngap_ies!(@check $kind $name, $msg, $ie_name); )+
+        $( $crate::__extract_ngap_ie!(@check $kind $name, $msg, $ie_name); )+
     };
+}
+
+/// The arms of `extract_ngap_ies!` that its expansion calls: the value of a field, the
+/// last of the IEs of one name, and what a field is after the loop.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __extract_ngap_ie {
     // The value of the IE, or the one value that its type is a name for: what the
     // type of the field says.
-    (@val $bind:ident) => { $crate::macros::__Field::__field($bind) };
-    (@val $_bind:ident, $expr:expr) => { $expr };
+    (@val $bind:ident) => {
+        $crate::macros::__Field::__field($bind)
+    };
+    (@val $_bind:ident, $expr:expr) => {
+        $expr
+    };
     // The last one decides a `lax` field.
     (@last lax $name:ident, $value:ident) => {
         ::core::option::Option::Some($value)
@@ -1008,6 +1046,48 @@ macro_rules! extract_ngap_ies {
 ///
 /// When the message has the IE twice, the last one is changed, which is the one that
 /// `extract_ngap_ies!` reads, and any of them that does not decode is the error.
+///
+/// `= value` gives the one value that the IE is a name for. After `=>` comes a block
+/// that changes the value of the IE, which it has by the name in parentheses, mutable
+/// and its own, and gives whether it changed it, a `bool`: a value of a CHOICE is
+/// matched by `&mut`, so that what the match finds is changed in place.
+///
+/// ```
+/// use oxirush_ngap::{Error, build_ngap, with_ngap_ie_mut, ngap::*};
+///
+/// let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
+///     IGNORE, UEContextReleaseRequest,
+///     REJECT AMF_UE_NGAP_ID(1u64),
+///     REJECT RAN_UE_NGAP_ID(7u32),
+///     IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
+/// )?;
+/// let mut message: UEContextReleaseRequest = pdu.decode_value()?;
+///
+/// // The one value of an IE
+/// assert!(with_ngap_ie_mut!(message, UEContextReleaseRequest, RAN_UE_NGAP_ID(id) = 8)?);
+///
+/// // A block that changes the value where it is, and says whether it did
+/// let changed = with_ngap_ie_mut!(message, UEContextReleaseRequest, Cause(cause) => {
+///     match &mut cause {
+///         Cause::radioNetwork(why) => {
+///             *why = CauseRadioNetwork::unspecified;
+///             true
+///         }
+///         _ => false,
+///     }
+/// })?;
+/// assert!(changed);
+/// assert_eq!(message, {
+///     let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
+///         IGNORE, UEContextReleaseRequest,
+///         REJECT AMF_UE_NGAP_ID(1u64),
+///         REJECT RAN_UE_NGAP_ID(8u32),
+///         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::unspecified)),
+///     )?;
+///     pdu.decode_value::<UEContextReleaseRequest>()?.into_owned()
+/// });
+/// # Ok::<(), Error>(())
+/// ```
 #[macro_export]
 macro_rules! with_ngap_ie_mut {
     ($msg_var:expr, $msg:ident, $ie_name:ident($bind:ident) = $value:expr $(,)?) => {{
@@ -1105,15 +1185,25 @@ macro_rules! build_ngap {
             $(
                 _message.ie(
                     $crate::__ngap_ie_id!($ie_name),
-                    $crate::build_ngap!(@criticality $ie_crit),
+                    $crate::__ngap_criticality!($ie_crit),
                     &$crate::registry::ies::$ie_name::value(($($ie_value)+)),
                 );
             )*
             _message.pdu::<$crate::ngap::$msg<'static>>(
-                $crate::build_ngap!(@criticality $outer_crit),
+                $crate::__ngap_criticality!($outer_crit),
             )
         }
     };
+    // What is not written so, which says what is wrong.
+    ($($other:tt)*) => {
+        $crate::__build_ngap_mistake!($($other)*)
+    };
+}
+
+/// What `build_ngap!` says of a call that is not written as it takes one.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __build_ngap_mistake {
     // The criticality of the PDU is left out: the message follows the procedure.
     ($direction:ident, $proc:ident, $msg:ident,
      $($ie_crit:ident $ie_name:ident ($($ie_value:tt)+)),*
@@ -1128,10 +1218,28 @@ macro_rules! build_ngap {
     ($direction:ident, $proc:ident, $outer_crit:ident, $msg:ident, $($ies:tt)*) => {
         $crate::__ngap_ie_syntax!($($ies)*)
     };
-    (@criticality REJECT) => { $crate::ngap::Criticality::reject };
-    (@criticality IGNORE) => { $crate::ngap::Criticality::ignore };
-    (@criticality NOTIFY) => { $crate::ngap::Criticality::notify };
-    (@criticality $other:tt) => {
+    ($($other:tt)*) => {
+        compile_error!(
+            "build_ngap! takes the direction, the procedure, the criticality of the PDU, \
+             the message, and each IE as `CRITICALITY Name(value)`"
+        )
+    };
+}
+
+/// The criticality that the macros take as `REJECT`, `IGNORE` or `NOTIFY`.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __ngap_criticality {
+    (REJECT) => {
+        $crate::ngap::Criticality::reject
+    };
+    (IGNORE) => {
+        $crate::ngap::Criticality::ignore
+    };
+    (NOTIFY) => {
+        $crate::ngap::Criticality::notify
+    };
+    ($other:tt) => {
         compile_error!(concat!(
             "`",
             stringify!($other),
@@ -1166,16 +1274,32 @@ macro_rules! build_ngap_ie {
     ($criticality:ident $ie_name:ident ($($value:tt)+)) => {
         $crate::macros::__ie(
             $crate::__ngap_ie_id!($ie_name),
-            $crate::build_ngap!(@criticality $criticality),
+            $crate::__ngap_criticality!($criticality),
             &$crate::registry::ies::$ie_name::value(($($value)+)),
         )
     };
+    // What is not written so, which says what is wrong.
+    ($($other:tt)*) => {
+        $crate::__build_ngap_ie_mistake!($($other)*)
+    };
+}
+
+/// What `build_ngap_ie!` says of a call that is not written as it takes one.
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __build_ngap_ie_mistake {
     ($msg:ident, $ie_name:ident ($($value:tt)+)) => {
         compile_error!(concat!(
             "the criticality of the IE ",
             stringify!($ie_name),
             " is missing: write REJECT, IGNORE or NOTIFY before its name",
         ))
+    };
+    ($($other:tt)*) => {
+        compile_error!(
+            "build_ngap_ie! takes the message, then the IE as `CRITICALITY Name(value)`, or \
+             the IE alone for one that is in no message"
+        )
     };
 }
 

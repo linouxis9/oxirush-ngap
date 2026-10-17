@@ -1,0 +1,48 @@
+# The paths of the alternatives of the type NULL in the vectors of vectors.tsv, which the
+# review of the move of the paths to oxirush-utils found that paths() no longer listed and
+# select() no longer selected: each is listed, with null, and selects null.
+# Vector	path
+DownlinkRANConfigurationTransfer/cover-12	/ngap/IntersystemSONConfigurationTransferDL/value/intersystemSONInformation/choice-Extensions/value/resourceStatus/reportingSystem/noReporting
+DownlinkRANConfigurationTransfer/cover-24	/ngap/IntersystemSONConfigurationTransferDL/value/intersystemSONInformation/choice-Extensions/value/resourceStatus/reportingSystem/noReporting
+HandoverRequest/cover-0	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+HandoverRequest/cover-1	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+HandoverRequest/cover-12	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+HandoverRequest/cover-13	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+HandoverRequest/cover-15	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+HandoverRequest/cover-2	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+HandoverRequest/cover-2	/ngap/TraceActivation/value/iE-Extensions/0/extensionValue/mdt-Config-EUTRA/areaScopeOfMDT/pLMNWide
+HandoverRequest/cover-4	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+HandoverRequest/cover-5	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+HandoverRequest/cover-6	/ngap/TraceActivation/value/iE-Extensions/0/extensionValue/mdt-Config-NR/mDTModeNr/loggedMDTNr/loggedMDTTrigger/periodical
+HandoverRequest/cover-7	/ngap/TraceActivation/value/iE-Extensions/0/extensionValue/mdt-Config-NR/mDTModeNr/loggedMDTNr/loggedMDTTrigger/periodical
+HandoverRequest/cover-9	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+InitialContextSetupRequest/cover-0	/ngap/TraceActivation/value/iE-Extensions/0/extensionValue/mdt-Config-NR/mDTModeNr/loggedMDTNr/loggedMDTTrigger/periodical
+InitialContextSetupRequest/cover-1	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+InitialContextSetupRequest/cover-12	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+InitialContextSetupRequest/cover-15	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+InitialContextSetupRequest/cover-2	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+InitialContextSetupRequest/cover-2	/ngap/TraceActivation/value/iE-Extensions/0/extensionValue/mdt-Config-NR/areaScopeOfMDT/pLMNWide
+InitialContextSetupRequest/cover-3	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+InitialContextSetupRequest/cover-5	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+InitialContextSetupRequest/cover-5	/ngap/TraceActivation/value/iE-Extensions/0/extensionValue/mdt-Config-EUTRA/areaScopeOfMDT/pLMNWide
+InitialContextSetupRequest/cover-6	/ngap/TraceActivation/value/iE-Extensions/0/extensionValue/mdt-Config-EUTRA/areaScopeOfMDT/pLMNWide
+InitialContextSetupRequest/cover-9	/ngap/TraceActivation/value/iE-Extensions/0/extensionValue/mdt-Config-EUTRA/areaScopeOfMDT/pLMNWide
+InitialContextSetupRequest/cover-9	/ngap/TraceActivation/value/iE-Extensions/0/extensionValue/mdt-Config-NR/areaScopeOfMDT/pLMNWide
+InventoryRequest/cover-2	/ngap/InventoryRequestTransfer/value/decoded/AIoT-DeviceIdentificationRequested/value/allDevices
+PathSwitchRequestAcknowledge/cover-0	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+PathSwitchRequestAcknowledge/cover-1	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+PathSwitchRequestAcknowledge/cover-4	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+PathSwitchRequestAcknowledge/cover-6	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+TraceStart/cover-0	/ngap/TraceActivation/value/iE-Extensions/0/extensionValue/mdt-Config-EUTRA/areaScopeOfMDT/pLMNWide
+TraceStart/cover-0	/ngap/TraceActivation/value/iE-Extensions/0/extensionValue/mdt-Config-NR/areaScopeOfMDT/pLMNWide
+TraceStart/cover-6	/ngap/TraceActivation/value/iE-Extensions/0/extensionValue/mdt-Config-NR/areaScopeOfMDT/pLMNWide
+TraceStart/cover-7	/ngap/TraceActivation/value/iE-Extensions/0/extensionValue/mdt-Config-EUTRA/areaScopeOfMDT/pLMNWide
+TraceStart/cover-7	/ngap/TraceActivation/value/iE-Extensions/0/extensionValue/mdt-Config-NR/mDTModeNr/loggedMDTNr/loggedMDTTrigger/periodical
+TraceStart/cover-9	/ngap/TraceActivation/value/iE-Extensions/0/extensionValue/mdt-Config-EUTRA/areaScopeOfMDT/pLMNWide
+TraceStart/cover-9	/ngap/TraceActivation/value/iE-Extensions/0/extensionValue/mdt-Config-NR/areaScopeOfMDT/pLMNWide
+UEContextModificationRequest/cover-1	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+UEContextModificationRequest/cover-2	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+UEContextModificationRequest/cover-5	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+UEContextModificationRequest/cover-6	/ngap/TimeSyncAssistanceInfo/value/iE-Extensions/0/extensionValue/clockQualityDetailLevel/clockQualityMetrics
+UplinkRANConfigurationTransfer/cover-5	/ngap/IntersystemSONConfigurationTransferUL/value/intersystemSONInformation/choice-Extensions/value/resourceStatus/reportingSystem/noReporting
+UplinkRANConfigurationTransfer/cover-7	/ngap/IntersystemSONConfigurationTransferUL/value/intersystemSONInformation/choice-Extensions/value/resourceStatus/reportingSystem/noReporting

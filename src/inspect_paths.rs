@@ -7,7 +7,7 @@ use std::sync::LazyLock;
 
 use oxirush_aper::inspect::{self as shared, Protocol};
 pub(crate) use oxirush_aper::inspect::{Kind, Shape, same_name};
-use serde_json::Value;
+use oxirush_aper::json::Value;
 
 use crate::Error;
 // The name of the protocol, the first segment of the paths of the IEs of the message of
@@ -39,8 +39,7 @@ pub(crate) static TABLES: Protocol = Protocol {
     ie_typed: crate::inspect_registry::ie,
     extension_typed: crate::registry::extension,
     ie_contents: crate::inspect_registry::ie_contents,
-    ie_form: crate::inspect_registry::ie_form,
-    member_form: crate::inspect_registry::member_form,
+    type_form: crate::inspect_registry::type_form,
     transfer_fields: TRANSFER_FIELDS,
     transfer_typed: crate::inspect_registry::transfer,
     carried_typed: crate::inspect_registry::carried,
@@ -51,6 +50,9 @@ pub(crate) static TABLES: Protocol = Protocol {
 macro_rules! shape {
     (_) => {
         $crate::inspect_paths::Shape::Plain
+    };
+    (null) => {
+        $crate::inspect_paths::Shape::Null
     };
     (bits) => {
         $crate::inspect_paths::Shape::Bits
@@ -300,7 +302,7 @@ fn listed_ies(message: &str, ies: &Value) -> Result<Value, Error> {
 mod tests {
     use super::*;
     use oxirush_aper::inspect::{EDITED, Member, type_name};
-    use serde_json::json;
+    use oxirush_utils::tree;
 
     /// The member of a view that holds the message of the PDU, and the member of a
     /// message that holds its IEs.
@@ -334,9 +336,12 @@ mod tests {
         fn check(of: &str, shape: Shape) {
             match shape {
                 // A name that the list does not have is that of an ENUMERATED, which
-                // has no members and has its names.
+                // has no members and has its names, or of a well-known type, which has
+                // its readable form.
                 Shape::Named(name) => assert!(
-                    kind_of(name).is_some() || TABLES.enumeration(name).is_some(),
+                    kind_of(name).is_some()
+                        || TABLES.enumeration(name).is_some()
+                        || (TABLES.type_form)(name).is_some(),
                     "{of}: {name}"
                 ),
                 Shape::Transfer(name) if !name.is_empty() => {
@@ -439,7 +444,7 @@ mod tests {
     fn view_of(name: &str, ies: Value) -> Value {
         let mut messages = MESSAGES.iter();
         let (direction, code, ..) = messages.find(|(_, _, known, ..)| *known == name).unwrap();
-        json!({
+        tree!({
             "direction": direction,
             "procedure_code": code,
             "criticality": "reject",
@@ -450,18 +455,18 @@ mod tests {
     #[test]
     fn a_segment_that_names_no_member_of_an_ie_is_taken_in_its_value() {
         let cause = ie_id("Cause").expect("an IE of the protocol");
-        let value = json!({"radioNetwork": "unspecified"});
-        let entry = json!({"id": cause, "criticality": "ignore", "value": value});
-        let mut view = view_of("UEContextReleaseCommand", json!([entry]));
+        let value = tree!({"radioNetwork": "unspecified"});
+        let entry = tree!({"id": cause, "criticality": "ignore", "value": &value});
+        let mut view = view_of("UEContextReleaseCommand", tree!([&entry]));
         let path = |rest: &str| format!("/{ROOT}/Cause/{rest}");
         // The path that leaves `value` out selects what the one that has it selects.
         let short = select(&view, &path("radioNetwork")).unwrap();
-        assert_eq!(short, [&json!("unspecified")]);
+        assert_eq!(short, [&tree!("unspecified")]);
         assert_eq!(short, select(&view, &path("value/radioNetwork")).unwrap());
         assert!(select(&view, &path("nas")).unwrap().is_empty());
         // What the IE has itself comes first, and `*` is each of its members.
         assert_eq!(select(&view, &path("value")).unwrap(), [&value]);
-        assert_eq!(select(&view, &path("id")).unwrap(), [&json!(cause)]);
+        assert_eq!(select(&view, &path("id")).unwrap(), [&tree!(cause)]);
         assert_eq!(select(&view, &path("*")).unwrap().len(), 3);
         // A name that neither has is refused with the members of both, with a view and
         // without one.
@@ -476,13 +481,13 @@ mod tests {
         let deeper = checked("radioNetwork/deeper").unwrap_err().to_string();
         assert!(deeper.contains("which has none") && !deeper.contains("itself"));
         // An edit takes the same path, and marks the value that it changed.
-        view[MESSAGE][IES][0]["_raw_value"] = json!("0000");
-        set(&mut view, &path("nas"), json!("normal-release")).unwrap();
+        view[MESSAGE][IES][0]["_raw_value"] = tree!("0000");
+        set(&mut view, &path("nas"), tree!("normal-release")).unwrap();
         let edited = &view[MESSAGE][IES][0];
-        assert_eq!(edited["value"], json!({"nas": "normal-release"}));
-        assert_eq!(edited[EDITED], json!(true));
+        assert_eq!(edited["value"], tree!({"nas": "normal-release"}));
+        assert_eq!(edited[EDITED], tree!(true));
         let before = view.clone();
-        assert_eq!(set(&mut view, &path("misspelled"), json!(1)), Err(refused));
+        assert_eq!(set(&mut view, &path("misspelled"), tree!(1)), Err(refused));
         let kept = remove(&mut view, &path("nas")).unwrap_err();
         assert_eq!(kept.kind(), crate::ErrorKind::Edit);
         assert!(
@@ -495,15 +500,15 @@ mod tests {
     #[test]
     fn the_name_of_the_ie_that_an_entry_is_stays_on_the_entry() {
         let cause = ie_id("Cause").expect("an IE of the protocol");
-        let value = json!({"radioNetwork": "unspecified"});
-        let entry = json!({"id": cause, "criticality": "ignore", "value": value});
-        let mut view = view_of("UEContextReleaseCommand", json!([entry]));
+        let value = tree!({"radioNetwork": "unspecified"});
+        let entry = tree!({"id": cause, "criticality": "ignore", "value": &value});
+        let mut view = view_of("UEContextReleaseCommand", tree!([&entry]));
         let path = |rest: &str| format!("/{ROOT}/{rest}");
         // After its position, and after its name, which selects it already.
         for named in ["0/Cause", "0/cause", "Cause/Cause", "*/Cause"] {
             assert_eq!(select(&view, &path(named)).unwrap(), [&entry], "{named}");
             let member = select(&view, &path(&format!("{named}/radioNetwork"))).unwrap();
-            assert_eq!(member, [&json!("unspecified")], "{named}");
+            assert_eq!(member, [&tree!("unspecified")], "{named}");
             let whole = select(&view, &path(&format!("{named}/value"))).unwrap();
             assert_eq!(whole, [&value], "{named}");
         }
@@ -522,10 +527,10 @@ mod tests {
         assert!(names("*/Cause/nas").unwrap().is_some());
         // An edit takes the same path, and the entry itself where the path ends with
         // its name.
-        assert_eq!(set(&mut view, &other, json!(1)), Err(refused));
-        set(&mut view, &path("0/Cause/nas"), json!("normal-release")).unwrap();
+        assert_eq!(set(&mut view, &other, tree!(1)), Err(refused));
+        set(&mut view, &path("0/Cause/nas"), tree!("normal-release")).unwrap();
         let edited = select(&view, &path("Cause/value")).unwrap();
-        assert_eq!(edited, [&json!({"nas": "normal-release"})]);
+        assert_eq!(edited, [&tree!({"nas": "normal-release"})]);
         insert(&mut view, &path("0/Cause"), entry.clone()).unwrap();
         assert_eq!(select(&view, &path("*/Cause")).unwrap().len(), 2);
         remove(&mut view, &path("1/Cause")).unwrap();
@@ -654,24 +659,24 @@ mod tests {
     #[test]
     fn the_ies_that_a_value_holds_are_written_by_name_and_read_back() {
         let cause = ie_id("Cause").expect("an IE of the protocol");
-        let value = json!({"radioNetwork": "unspecified"});
+        let value = tree!({"radioNetwork": "unspecified"});
         // The entry of a view, with what it keeps of what was received, and as it is
         // written.
         let entry = |received: bool| {
-            let mut entry = json!({"id": cause, "criticality": "ignore", "value": value});
+            let mut entry = tree!({"id": cause, "criticality": "ignore", "value": &value});
             if received {
-                entry["_raw_value"] = json!("0000");
-                entry["_original_id"] = json!(cause);
+                entry["_raw_value"] = tree!("0000");
+                entry["_original_id"] = tree!(cause);
             }
             entry
         };
         // No table has the criticality of the IEs of a message that is not one of the
         // protocol, as that of a transfer: it is written, and asked for.
-        let shown = named_ies("no message", json!([entry(true)])).unwrap();
-        assert_eq!(shown, json!([{"Cause": value, "criticality": "ignore"}]));
+        let shown = named_ies("no message", tree!([entry(true)])).unwrap();
+        assert_eq!(shown, tree!([{"Cause": &value, "criticality": "ignore"}]));
         let listed = listed_ies("no message", &shown).unwrap();
-        assert_eq!(listed, json!([entry(false)]));
-        let refused = listed_ies("no message", &json!([{"Cause": value}])).unwrap_err();
+        assert_eq!(listed, tree!([entry(false)]));
+        let refused = listed_ies("no message", &tree!([{"Cause": &value}])).unwrap_err();
         assert_eq!(refused.kind(), crate::ErrorKind::Form);
         let text = refused.to_string();
         assert!(text.contains("says its \"criticality\""), "{refused}");
@@ -679,20 +684,20 @@ mod tests {
         assert_eq!(listed_ies("no message", &listed), Ok(listed));
         // One that did not decode has its octets, which are sent as they are.
         let mut undecoded = entry(true);
-        undecoded["value"] = json!("0000");
-        undecoded["_decode_error"] = json!("why");
-        let shown = named_ies("no message", json!([undecoded])).unwrap();
-        let octets = json!({"Cause": {"octets": "0000"}, "criticality": "ignore"});
-        assert_eq!(shown, json!([octets]));
+        undecoded["value"] = tree!("0000");
+        undecoded["_decode_error"] = tree!("why");
+        let shown = named_ies("no message", tree!([undecoded])).unwrap();
+        let octets = tree!({"Cause": {"octets": "0000"}, "criticality": "ignore"});
+        assert_eq!(shown, tree!([octets]));
         let listed = listed_ies("no message", &shown).unwrap();
-        let octets = json!({"id": cause, "criticality": "ignore", "octets": "0000"});
-        assert_eq!(listed, json!([octets]));
+        let octets = tree!({"id": cause, "criticality": "ignore", "octets": "0000"});
+        assert_eq!(listed, tree!([octets]));
         // A tree is not read deeper than a view is encoded.
-        let mut deep = json!(1);
+        let mut deep = tree!(1);
         for _ in 0..258 {
-            deep = json!([deep]);
+            deep = tree!([deep]);
         }
-        let deep = json!([{"Cause": deep, "criticality": "ignore"}]);
+        let deep = tree!([{"Cause": deep, "criticality": "ignore"}]);
         let refused = listed_ies("no message", &deep).unwrap_err();
         assert_eq!(refused.kind(), crate::ErrorKind::Limit);
         assert!(refused.to_string().contains("nests deeper"), "{refused}");
@@ -721,9 +726,9 @@ mod tests {
         // has a segment for each level that is walked, and the value is what is under
         // them, whole.
         const SEGMENTS: usize = 64;
-        let mut deep = json!([{"a": 1}]);
+        let mut deep = tree!([{"a": 1}]);
         for _ in 0..SEGMENTS + 10 {
-            deep = json!([deep]);
+            deep = tree!([deep]);
         }
         let found = paths(&deep);
         assert_eq!(found.len(), 1);
@@ -731,13 +736,13 @@ mod tests {
         assert_eq!(path.matches('/').count(), SEGMENTS);
         assert_eq!(select(&deep, path), Ok(vec![value]));
         // What is not that deep is listed value by value.
-        let mut shallow = json!([{"a": 1}]);
+        let mut shallow = tree!([{"a": 1}]);
         for _ in 0..SEGMENTS - 10 {
-            shallow = json!([shallow]);
+            shallow = tree!([shallow]);
         }
         let found = paths(&shallow);
         assert_eq!(found.len(), 1);
-        assert!(found[0].0.ends_with("/0/a") && found[0].1 == json!(1));
+        assert!(found[0].0.ends_with("/0/a") && found[0].1 == 1);
     }
 
     #[test]

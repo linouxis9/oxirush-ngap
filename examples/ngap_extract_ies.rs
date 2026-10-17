@@ -190,7 +190,7 @@ fn main() -> Result<(), Error> {
 
 fn target_gnb() -> Result<TargetID, Error> {
     let network = plmn("208", "93")?;
-    let gnb = GlobalRANNodeID::globalGNB_ID(global_gnb_id(network, 0x123456)?);
+    let gnb = GlobalRANNodeID::globalGNB_ID(global_gnb_id(network, 0x123456, 24)?);
     let area = tai(network, [0x00, 0x00, 0x01]);
 
     Ok(TargetID::targetRANNodeID(TargetRANNodeID::new(

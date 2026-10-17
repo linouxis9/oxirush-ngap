@@ -159,7 +159,7 @@ fn post_process(path: &Path, asn_files: &[PathBuf]) -> Result<()> {
     }
     oracle_types.push_str("}\n");
     fs::write("oracle/src/types.rs", oracle_types)?;
-    fs::write("src/registry.rs", list)?;
+    fs::write("src/registry.rs", &list)?;
     fs::write("src/inspect_registry.rs", inspection)?;
     fs::write(path, oracle).context("write the bindings of the oracle")?;
     // The name of each field, and the one that it had before the rule of the generator.
@@ -169,6 +169,7 @@ fn post_process(path: &Path, asn_files: &[PathBuf]) -> Result<()> {
     ensure!(bindings.text.matches(serde).count() == 1, "the serde of a PDU");
     let mut text = bindings.text.replacen(serde, "", 1);
     text.push_str(&support(&bindings.borrowing)?);
+    text.push_str(&transfers(&text, &list)?);
     fs::write(BINDINGS, text).context("write the NGAP bindings")
 }
 
@@ -239,6 +240,39 @@ fn oracle_support(generated: &str) -> Result<String> {
             )?;
         }
     }
+    Ok(out)
+}
+
+/// The transfers whose octets hold a container of protocol IEs, which the macros read
+/// and build IEs for as they do for a message: each SEQUENCE whose one member is
+/// `protocolIEs` and that is no message of the registry `list`.
+fn transfers(bindings: &str, list: &str) -> Result<String> {
+    let containers =
+        Regex::new(r"pub struct (\w+)<'a>\s*\{\s*pub protocol_ies:\s*ProtocolIEContainer<'a>,?\s*\}")?;
+    // A message of a procedure, as `"Name" crate::ngap::Type<'a> [IEs]`: an IE has `=>`.
+    let messages = Regex::new(r#""\w+" crate::ngap::(\w+)<'a>( \[|;)"#)?;
+    let messages: BTreeSet<&str> = messages
+        .captures_iter(list)
+        .map(|c| c.get(1).expect("a name").as_str())
+        .collect();
+    let mut out = String::from(
+        "\n// The transfers of protocol IEs, whose IEs the macros read and build.\n",
+    );
+    let mut count = 0;
+    for name in containers.captures_iter(bindings).map(|c| c.get(1).expect("a name").as_str()) {
+        if messages.contains(name) {
+            continue;
+        }
+        count += 1;
+        writeln!(out, "impl crate::message::sealed::Sealed for {name}<'_> {{}}")?;
+        writeln!(
+            out,
+            "impl<'a> crate::message::__Ies<'a> for {name}<'a> {{ \
+             const __OF_PROTOCOL_IES: bool = true; \
+             fn __assigned(_: u16) -> Option<oxirush_aper::Criticality> {{ None }} }}"
+        )?;
+    }
+    ensure!(count > 0, "no transfer of protocol IEs");
     Ok(out)
 }
 

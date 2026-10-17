@@ -234,3 +234,57 @@ fn an_ie_is_built_with_the_name_of_its_message_or_without_one() -> Result<(), Er
     assert_eq!(alone.value, [0x00, 0x2a]);
     Ok(())
 }
+
+/// A transfer of protocol IEs, as the one that an item of a PDU SESSION RESOURCE SETUP
+/// REQUEST holds as octets, is read, changed and built by the macros as a message is.
+#[test]
+fn the_ies_of_a_transfer_are_read_changed_and_built_by_the_macros() -> Result<(), Error> {
+    use oxirush_ngap::{extract_ngap_ies, with_ngap_ie_mut};
+
+    let mut transfer = PDUSessionResourceSetupRequestTransfer::new(ProtocolIEContainer(vec![
+        build_ngap_ie!(PDUSessionResourceSetupRequestTransfer,
+            REJECT PDUSessionType(PDUSessionType::ipv4))?,
+    ]));
+    let octets = encode_open_type(&transfer)?;
+    assert_eq!(hex::encode(&octets), "0000010086000100");
+
+    // Read from its octets, by name
+    let read: PDUSessionResourceSetupRequestTransfer = decode_open_type(&octets)?;
+    let kind = || -> Result<PDUSessionType, Error> {
+        extract_ngap_ies!(read, PDUSessionResourceSetupRequestTransfer,
+            req kind: PDUSessionType = PDUSessionType(kind) => kind,
+        );
+        Ok(kind)
+    };
+    assert_eq!(kind()?, PDUSessionType::ipv4);
+
+    // Changed in its place
+    let changed = with_ngap_ie_mut!(transfer, PDUSessionResourceSetupRequestTransfer,
+        PDUSessionType(kind) => { kind = PDUSessionType::ipv6; true }
+    );
+    assert_eq!(changed, Ok(true));
+    assert_eq!(
+        hex::encode(encode_open_type(&transfer)?),
+        "0000010086000110"
+    );
+
+    // An IE that it does not have names the transfer; the tables have no object set of
+    // a transfer, so the error tells of no criticality
+    let missing = || -> Result<(), Error> {
+        extract_ngap_ies!(read, PDUSessionResourceSetupRequestTransfer,
+            req _rate: PDUSessionAggregateMaximumBitRate =
+                PDUSessionAggregateMaximumBitRate(rate) => rate,
+        );
+        Ok(())
+    };
+    let error = missing().unwrap_err();
+    assert_eq!(error.kind(), ErrorKind::MissingIe);
+    assert!(
+        error
+            .to_string()
+            .contains("PDUSessionResourceSetupRequestTransfer"),
+        "{error}"
+    );
+    assert_eq!(error.ie(), None);
+    Ok(())
+}

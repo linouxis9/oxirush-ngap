@@ -57,7 +57,40 @@ impl<T> __Field<T> for T {
     }
 }
 
+/// A type whose value is a container of protocol IEs, whose IEs the macros read, change
+/// and build: the type of a message, or of a transfer whose octets hold such a
+/// container, as `PDUSessionResourceSetupRequestTransfer` of NGAP. The generator
+/// implements it for the transfers, and every message has it.
+#[diagnostic::on_unimplemented(
+    message = "`{Self}` is no container of protocol IEs",
+    label = "the type of a message, or of a transfer of protocol IEs, is expected here",
+    note = "the macros take the type of a message, as `UEContextReleaseRequest`, or of a \
+            transfer of protocol IEs; an IE of a list of single containers is built without \
+            the name of a type"
+)]
+#[doc(hidden)]
+pub trait __Ies<'a>: Decode<'a> + Encode + sealed::Sealed {
+    /// Whether the type is a container of protocol IEs: every message but the private
+    /// one is, and every transfer of this trait.
+    const __OF_PROTOCOL_IES: bool;
+    /// The criticality that the object set of the type assigns to the IE `id`: `None`
+    /// for an IE that the set does not have, and for a transfer, whose object set the
+    /// tables of the crate do not have.
+    fn __assigned(id: u16) -> Option<oxirush_aper::Criticality>;
+}
+
+impl<'a, M: Message<'a>> __Ies<'a> for M {
+    const __OF_PROTOCOL_IES: bool = M::__OF_PROTOCOL_IES;
+
+    fn __assigned(id: u16) -> Option<oxirush_aper::Criticality> {
+        let ies = crate::check::object_set(M::DIRECTION, M::PROCEDURE_CODE)?.ies?;
+        let found = ies.iter().find(|(known, ..)| *known == id);
+        found.map(|(_, assigned, _)| (*assigned).into())
+    }
+}
+
 pub(crate) mod sealed {
-    /// A type of the registry: no other type is a message.
+    /// A type of the registry, or a transfer of protocol IEs: no other type is a
+    /// message or a container of IEs.
     pub trait Sealed {}
 }

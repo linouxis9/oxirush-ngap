@@ -199,7 +199,7 @@ use crate::{Error, Message};
 
 /// For the macro that extracts IEs: what a field is given of the value of an IE.
 #[doc(hidden)]
-pub use crate::message::__Field;
+pub use crate::message::{__Field, __Ies};
 
 /// For the macro that builds an IE: one entry of the IEs of a message, which is the
 /// identifier of an IE, its criticality and its value in an open type, or why the
@@ -293,16 +293,16 @@ impl __Message {
 }
 
 /// For the macro that extracts IEs: the IE `id`, which the field `field` requires, is
-/// not in a message of the type `M`.
+/// not in a message, or a transfer, of the type `M`.
 #[doc(hidden)]
-pub fn __missing_ie<'a, M: Message<'a>>(id: u16, field: &str) -> Error {
+pub fn __missing_ie<'a, M: __Ies<'a>>(id: u16, field: &str) -> Error {
     crate::error::missing_ie::<M>(id, field)
 }
 
-/// For the macros that read an IE: `error` is why `ie`, at `position` of a message of
-/// the type `M`, does not decode.
+/// For the macros that read an IE: `error` is why `ie`, at `position` of a message, or
+/// a transfer, of the type `M`, does not decode.
 #[doc(hidden)]
-pub fn __undecodable_ie<'a, M: Message<'a>>(
+pub fn __undecodable_ie<'a, M: __Ies<'a>>(
     error: Error,
     ie: &ProtocolIEField<'_>,
     position: usize,
@@ -310,12 +310,13 @@ pub fn __undecodable_ie<'a, M: Message<'a>>(
     crate::error::undecodable_ie(error, M::NAME, ie.id.0, ie.criticality, position)
 }
 
-/// For the macro that builds one IE: `M` is a message, and a container of protocol IEs.
+/// For the macro that builds one IE: `M` is a message, or a transfer, and a container
+/// of protocol IEs.
 #[doc(hidden)]
-pub fn __message_of_protocol_ies<'a, M: Message<'a>>() {
+pub fn __message_of_protocol_ies<'a, M: __Ies<'a>>() {
     const {
         assert!(
-            M::__OF_PROTOCOL_IES,
+            <M as __Ies<'a>>::__OF_PROTOCOL_IES,
             "the message has private IEs, and no container of protocol IEs"
         )
     };
@@ -869,7 +870,8 @@ macro_rules! __ngap_ie_syntax {
     };
 }
 
-/// Extract typed NGAP protocol IEs into `req`, `opt` and `lax` fields.
+/// Extract typed NGAP protocol IEs into `req`, `opt` and `lax` fields, from a message or
+/// from a transfer of protocol IEs, as `PDUSessionResourceSetupRequestTransfer`.
 ///
 /// | The IE | A `req` field | An `opt` field | A `lax` field |
 /// |--------|---------------|----------------|---------------|
@@ -996,7 +998,8 @@ macro_rules! extract_ngap_ies {
     };
 }
 
-/// Locate, decode, mutate, and re-encode one NGAP protocol IE.
+/// Locate, decode, mutate, and re-encode one NGAP protocol IE, of a message or of a
+/// transfer of protocol IEs.
 ///
 /// Gives a `Result<bool, Error>`: what the expression says, `Ok(false)` when the IE is
 /// not in the message, and an error when the IE does not decode (`UndecodableIe`) or
@@ -1139,7 +1142,8 @@ macro_rules! build_ngap {
 
 /// Build one NGAP protocol IE entry. Every message takes the same
 /// `ProtocolIEField`: the name before the comma says where the IE goes, and is the
-/// type of a message.
+/// type of a message, or of a transfer of protocol IEs, as
+/// `PDUSessionResourceSetupRequestTransfer`.
 ///
 /// An IE that goes in no message is built without that name. Such is the alternative
 /// that a later version added to a CHOICE, which is one IE in a single container, as

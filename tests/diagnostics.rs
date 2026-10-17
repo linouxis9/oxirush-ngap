@@ -2,11 +2,12 @@
 //! Criticality Diagnostics of TS 38.413 clause 10, from what `check` reports of the
 //! message, and from the error of the macro that extracts its IEs.
 //!
-//! Clause 10.2 has an IE whose value does not decode as a transfer syntax error.
-//! Clause 10.3.4 has the receiver act on an IE that it does not comprehend by the
-//! criticality that the IE was received with, and clause 10.3.5 on a missing IE by
-//! the criticality that the specification assigns it. The Criticality Diagnostics name
-//! each IE with that criticality, its identifier and the type of the error.
+//! Clause 10.2 has an IE whose value does not decode as a transfer syntax error, which
+//! an error indication tells. Clause 10.3.4 has the receiver act on an IE that it does
+//! not comprehend by the criticality that the IE was received with, and clause 10.3.5 on
+//! a missing IE by the criticality that the specification assigns it. The Criticality
+//! Diagnostics name each IE of the criticality `reject` or `notify` with that
+//! criticality, its identifier and the type of the error.
 
 use oxirush_ngap::aper::{self, ErrorIe};
 use oxirush_ngap::helpers::{global_gnb_id, plmn, s_nssai};
@@ -74,26 +75,54 @@ fn accept(request: &NGSetupRequest) -> Result<usize, Error> {
     Ok(areas.0.len())
 }
 
-/// The Criticality Diagnostics of an NG SETUP REQUEST, with these items.
-fn diagnostics(items: Vec<CriticalityDiagnosticsIEItem>) -> CriticalityDiagnostics {
-    CriticalityDiagnostics::new(
-        Some(ProcedureCode(21)),
-        Some(TriggeringMessage::initiating_message),
-        Some(Criticality::reject),
-        Some(CriticalityDiagnosticsIEList(items)),
-        None,
-    )
+/// The Criticality Diagnostics that answer an NG SETUP REQUEST, with these items. In the
+/// NG SETUP FAILURE, the response of the procedure, they have the IEs alone; in an
+/// ERROR INDICATION also the procedure, the message and its criticality (TS 38.413
+/// clause 9.3.1.3). They have no list without an item, as the list has one at least.
+fn diagnostics(
+    indication: bool,
+    items: Vec<CriticalityDiagnosticsIEItem>,
+) -> CriticalityDiagnostics {
+    let items = (!items.is_empty()).then_some(CriticalityDiagnosticsIEList(items));
+    match indication {
+        true => CriticalityDiagnostics::new(
+            Some(ProcedureCode(21)),
+            Some(TriggeringMessage::initiating_message),
+            Some(Criticality::reject),
+            items,
+            None,
+        ),
+        false => CriticalityDiagnostics::new(None, None, None, items, None),
+    }
 }
 
-/// The NG SETUP FAILURE that answers a request which deviates: the cause of its first
-/// deviation that has one, and the Criticality Diagnostics of its IEs.
-fn failure(pdu: &NGAP_PDU) -> Result<NGAP_PDU, Error> {
+/// The cause of the first deviation of a request that has one, and the items of the
+/// Criticality Diagnostics of its IEs.
+fn reported(pdu: &NGAP_PDU) -> Result<(Cause, Vec<CriticalityDiagnosticsIEItem>), Error> {
     let deviations = pdu.check()?;
     let cause = deviations.iter().find_map(Deviation::cause);
     let items = deviations.iter().filter_map(Deviation::diagnostics_item);
+    let cause = Cause::protocol(cause.unwrap_or(CauseProtocol::unspecified));
+    Ok((cause, items.collect()))
+}
+
+/// The NG SETUP FAILURE that rejects a request which deviates, as clauses 10.3.4.2,
+/// 10.3.5 and 10.3.6 have the procedure rejected.
+fn failure(pdu: &NGAP_PDU) -> Result<NGAP_PDU, Error> {
+    let (cause, items) = reported(pdu)?;
     build_ngap!(UnsuccessfulOutcome, NGSetup, REJECT, NGSetupFailure,
-        IGNORE Cause(Cause::protocol(cause.unwrap_or(CauseProtocol::unspecified))),
-        IGNORE CriticalityDiagnostics(diagnostics(items.collect())),
+        IGNORE Cause(cause),
+        IGNORE CriticalityDiagnostics(diagnostics(false, items)),
+    )
+}
+
+/// The ERROR INDICATION that answers a request with a transfer syntax error, as clause
+/// 10.2 has it.
+fn indication(pdu: &NGAP_PDU) -> Result<NGAP_PDU, Error> {
+    let (cause, items) = reported(pdu)?;
+    build_ngap!(InitiatingMessage, ErrorIndication, IGNORE, ErrorIndication,
+        IGNORE Cause(cause),
+        IGNORE CriticalityDiagnostics(diagnostics(true, items)),
     )
 }
 
@@ -102,6 +131,18 @@ fn answered(failure: &NGAP_PDU) -> Result<(Cause, CriticalityDiagnostics), Error
     let received = NGAP_PDU::decode(&failure.encode()?)?;
     let message: NGSetupFailure = received.decode_value()?;
     extract_ngap_ies!(message, NGSetupFailure,
+        req cause: Cause = Cause(cause) => cause,
+        req diagnostics: CriticalityDiagnostics = CriticalityDiagnostics(diagnostics) => diagnostics,
+    );
+    Ok((cause, diagnostics))
+}
+
+/// The cause and the Criticality Diagnostics of an error indication, as its receiver
+/// reads them.
+fn indicated(indication: &NGAP_PDU) -> Result<(Cause, CriticalityDiagnostics), Error> {
+    let received = NGAP_PDU::decode(&indication.encode()?)?;
+    let message: ErrorIndication = received.decode_value()?;
+    extract_ngap_ies!(message, ErrorIndication,
         req cause: Cause = Cause(cause) => cause,
         req diagnostics: CriticalityDiagnostics = CriticalityDiagnostics(diagnostics) => diagnostics,
     );
@@ -147,7 +188,10 @@ fn the_error_of_a_missing_ie_has_the_criticality_that_is_assigned() -> Result<()
     );
     assert_eq!(missing.diagnostics_item(), Some(item.clone()));
     let cause = Cause::protocol(CauseProtocol::abstract_syntax_error_reject);
-    assert_eq!(answered(&failure(&pdu)?)?, (cause, diagnostics(vec![item])));
+    assert_eq!(
+        answered(&failure(&pdu)?)?,
+        (cause, diagnostics(false, vec![item]))
+    );
     Ok(())
 }
 
@@ -185,7 +229,8 @@ fn the_error_of_an_ie_that_does_not_decode_has_the_criticality_that_was_received
          value does"
     );
 
-    // Clause 10.2: a transfer syntax error. The failure names the IE.
+    // Clause 10.2: a transfer syntax error, which an error indication tells. The IE was
+    // received as `ignore`, which no item of the diagnostics has.
     assert_eq!(
         undecodable.cause(),
         Some(CauseProtocol::transfer_syntax_error)
@@ -194,14 +239,50 @@ fn the_error_of_an_ie_that_does_not_decode_has_the_criticality_that_was_received
         undecodable.type_of_error(),
         Some(TypeOfError::not_understood)
     );
+    assert_eq!(undecodable.diagnostics_item(), None);
+    let cause = Cause::protocol(CauseProtocol::transfer_syntax_error);
+    assert_eq!(
+        indicated(&indication(&pdu)?)?,
+        (cause, diagnostics(true, vec![]))
+    );
+    Ok(())
+}
+
+/// TS 38.413 clause 9.3.1.3: the criticality of an item of the Criticality Diagnostics
+/// is never `ignore` ("The value 'ignore' is not applicable"), as clauses 10.3.4.2 and
+/// 10.3.5 have a receiver report the IEs of the criticalities `reject` and `notify`.
+#[test]
+fn an_ie_of_the_criticality_ignore_is_in_no_item_of_the_diagnostics() -> Result<(), Error> {
+    // Received as `ignore`, and not decoded.
+    let deviations = NGAP_PDU::decode(&spoiled()?)?.check()?;
+    assert!(matches!(
+        deviations[..],
+        [Deviation::UndecodableIe {
+            criticality: Criticality::ignore,
+            ..
+        }]
+    ));
+    assert_eq!(deviations[0].diagnostics_item(), None);
+    // Missing, where the object set assigns `ignore`.
+    let missing = Deviation::MissingIe {
+        id: DEFAULT_PAGING_DRX,
+        name: "DefaultPagingDRX",
+        criticality: Criticality::ignore,
+    };
+    assert_eq!(missing.diagnostics_item(), None);
+    // The same IE missing as `reject` has its item.
+    let reject = Deviation::MissingIe {
+        id: DEFAULT_PAGING_DRX,
+        name: "DefaultPagingDRX",
+        criticality: Criticality::reject,
+    };
     let item = CriticalityDiagnosticsIEItem::new(
-        Criticality::ignore,
+        Criticality::reject,
         ProtocolIEID(DEFAULT_PAGING_DRX),
-        TypeOfError::not_understood,
+        TypeOfError::missing,
         None,
     );
-    let cause = Cause::protocol(CauseProtocol::transfer_syntax_error);
-    assert_eq!(answered(&failure(&pdu)?)?, (cause, diagnostics(vec![item])));
+    assert_eq!(reject.diagnostics_item(), Some(item));
     Ok(())
 }
 
@@ -233,12 +314,18 @@ fn check_reports_every_ie_that_is_missing_or_does_not_decode() -> Result<(), Err
             Some(TypeOfError::missing)
         ]
     );
+    // The items: the missing IE, which is `reject`, and not the one that does not
+    // decode, which was received as `ignore`.
     let items: Vec<_> = (deviations.iter())
         .filter_map(Deviation::diagnostics_item)
         .collect();
-    assert_eq!(items.len(), 2);
-    let cause = Cause::protocol(CauseProtocol::transfer_syntax_error);
-    assert_eq!(answered(&failure(&pdu)?)?, (cause, diagnostics(items)));
+    let missing = CriticalityDiagnosticsIEItem::new(
+        Criticality::reject,
+        ProtocolIEID(SUPPORTED_TA_LIST),
+        TypeOfError::missing,
+        None,
+    );
+    assert_eq!(items, [missing]);
     Ok(())
 }
 
@@ -284,13 +371,8 @@ fn each_deviation_has_the_cause_of_its_clause() -> Result<(), Error> {
             None,
         )
     };
-    assert_eq!(
-        items,
-        [
-            item(60_000, Criticality::notify),
-            item(60_001, Criticality::ignore)
-        ]
-    );
+    // The IE received as `ignore` has none.
+    assert_eq!(items, [item(60_000, Criticality::notify)]);
     Ok(())
 }
 

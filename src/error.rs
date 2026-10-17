@@ -3,8 +3,9 @@
 
 use oxirush_aper::ErrorIe;
 
+use crate::Error;
+use crate::message::__Ies;
 use crate::registry::Criticality;
-use crate::{Error, Message};
 
 /// A PDU of the message of `direction` and `code`, which is decoded as the message
 /// that ASN.1 names `expected`.
@@ -13,16 +14,14 @@ pub(crate) fn wrong_message(expected: &str, direction: &str, code: u8) -> Error 
     Error::wrong_message(expected, held, direction, code)
 }
 
-/// The IE `id`, which the field `field` requires, is not in a message of the type `M`.
-/// The error is about that IE, with the criticality that the object set of the message
-/// assigns it.
-pub(crate) fn missing_ie<'a, M: Message<'a>>(id: u16, field: &str) -> Error {
+/// The IE `id`, which the field `field` requires, is not in a message, or a transfer,
+/// of the type `M`. The error is about that IE, with the criticality that the object set
+/// of the message assigns it.
+pub(crate) fn missing_ie<'a, M: __Ies<'a>>(id: u16, field: &str) -> Error {
     let error = Error::missing_ie(M::NAME, &ie(id), field);
-    let set = crate::check::object_set(M::DIRECTION, M::PROCEDURE_CODE);
-    let ies = set.and_then(|set| set.ies).unwrap_or_default();
-    match ies.iter().find(|(known, ..)| *known == id) {
-        Some((_, assigned, _)) => error.about_ie(ErrorIe::new(id, (*assigned).into(), None)),
-        // An IE that the object set of the message does not have.
+    match M::__assigned(id) {
+        Some(assigned) => error.about_ie(ErrorIe::new(id, assigned, None)),
+        // An IE that the object set of the message does not have, or of a transfer.
         None => error,
     }
 }

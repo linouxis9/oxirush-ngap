@@ -15,13 +15,7 @@
    limitations under the License.
 */
 
-//! NGAP (NG Application Protocol) APER codec for 5G, per 3GPP TS 38.413.
-//!
-//! All protocol types in [`ngap`] are generated from the official 3GPP ASN.1
-//! modules and checked into the crate as Rust source: `rasn-compiler` parses and
-//! resolves the modules, and the generator of the crate writes each type with its
-//! codec on [`oxirush-aper`](https://crates.io/crates/oxirush-aper), the aligned PER
-//! runtime of the family.
+//! A codec for NGAP, the NG Application Protocol of 3GPP TS 38.413, in aligned PER.
 //!
 //! ```
 //! use oxirush_ngap::{build_ngap, ngap::*};
@@ -37,6 +31,11 @@
 //! assert_eq!(decoded.procedure_name(), "UEContextReleaseRequest");
 //! # Ok::<(), oxirush_ngap::Error>(())
 //! ```
+//!
+//! The types of [`ngap`] are generated from the ASN.1 modules of the specification and
+//! checked in: `rasn-compiler` resolves the modules, and the generator of the crate
+//! writes each type with its codec on [`oxirush-aper`](https://github.com/linouxis9/oxirush-aper).
+//! The README has the examples, task by task.
 //!
 //! Every function and macro that can fail returns an [`Error`]: its [`ErrorKind`] is
 //! what a caller matches on, and its `Display` says what is wrong.
@@ -136,6 +135,44 @@
 //! # Ok::<(), Error>(())
 //! ```
 //!
+//! # The names of the fields
+//!
+//! A field has the words of the identifier that ASN.1 gives its member, in lower case
+//! with `_` between them, as a reader of the specification says them: `pLMNIdentity` is
+//! `plmn_identity`, `tAC` is `tac`, `iE-Extensions` is `ie_extensions`, `nRCellIdentity`
+//! is `nr_cell_identity`, `gNB-ID` is `gnb_id`, `aMFRegionID` is `amf_region_id`.
+//!
+//! 1. A hyphen ends a word, and so does a lower-case letter or a digit before a
+//!    capital: `procedureCode` is `procedure_code`.
+//! 2. The first letter of an identifier belongs to the capitals after it: the
+//!    identifier starts in lower case whatever its first word is.
+//! 3. Capitals in a row are an abbreviation, and the last of them starts a word when a
+//!    lower-case letter follows. When the capitals without it are no abbreviation of
+//!    the list and the capitals with it are one, they end the abbreviation:
+//!    `pLMNidentity` is `plmn_identity` too. An `s` after them is their plural:
+//!    `protocolIEs` is `protocol_ies`.
+//! 4. Capitals that are several abbreviations of the list are these:
+//!    `uERLFReportContainer` is `ue_rlf_report_container`.
+//! 5. An abbreviation that the specifications write with a lower-case letter is one
+//!    word wherever it is: `a2X`, `AIoT`, `IoT`, `QoS`, `QoE`, `ProSe`, `eNB`, `gNB`,
+//!    `IPsec`, `IPv4`, `IPv6`, `NRPPa`, `LPPa`, `n3IWF`, `eDRX`, `eCGI`.
+//!    `globalgNB-ID` is `global_gnb_id`.
+//! 6. `fiveG` and `fiveGS` are `five_g` and `five_gs`, and `5GS` is one word.
+//!
+//! The list of the abbreviations is `ABBREVIATIONS` of `generator/src/names.rs` in
+//! oxirush-aper, with the identifiers that the specifications write otherwise than
+//! their others, as `parentTImeSource`. `build/fields.tsv` of the repository has each
+//! field of each type with the name that rasn-compiler gives it, which the fields had
+//! before this rule and have in 0.4.2 for every field of a type that 0.4.2 has but two,
+//! the `targetRANNodeID-RIM` of `RIMInformationTransfer` and the `targetRANNodeID-SON`
+//! of `SONConfigurationTransfer`. The JSON forms keep the identifiers of ASN.1.
+//!
+//! A `SEQUENCE` is a struct that a literal builds, and its `new` takes the members in
+//! their order. An extensible `CHOICE` or `ENUMERATED` is `#[non_exhaustive]`: a later
+//! version of the specification adds alternatives and values to it, which a `match`
+//! leaves room for with a `_` arm. A member that a later version adds to a `SEQUENCE`
+//! changes its struct and its `new`, and comes with a breaking release of the crate.
+//!
 //! # The types of the values
 //!
 //! | ASN.1 | Rust |
@@ -211,7 +248,7 @@ pub use oxirush_aper::{
 };
 
 /// The examples of the README, which the documentation tests compile and run.
-#[cfg(all(doctest, feature = "inspect"))]
+#[cfg(all(doctest, feature = "serde"))]
 #[doc = include_str!("../README.md")]
 struct Readme;
 

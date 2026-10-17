@@ -8,6 +8,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use oxirush_ngap::inspect;
 use oxirush_ngap::ngap::NGAP_PDU;
+use oxirush_ngap::tree;
 use oxirush_ngap::tree::Value;
 
 const MESSAGES: &str = include_str!("fixtures/messages.tsv");
@@ -240,6 +241,57 @@ fn each_alternative_of_the_type_null_is_listed_and_selected() {
     assert_eq!(count, 44 + 43);
 }
 
+/// The view of an NG SETUP REQUEST whose values are written in the JSON Encoding Rules of
+/// ITU-T X.697, as pycrate writes them, or as a view has them.
+fn setup_request(ies: Value) -> Value {
+    tree!({
+        "procedure_code": 21,
+        "direction": "InitiatingMessage",
+        "criticality": "reject",
+        "message": {"protocolIEs": ies},
+    })
+}
+
+/// The review of the release candidate is right that a string of decimal digits is never
+/// read as octets in a view, where it is a number or a PLMN identity; in the JSON Encoding
+/// Rules it is octets, and the values of the reference are written in them:
+/// `__view_of_jer` reads them as a view has them, and `from_view` refuses them as they are.
+#[test]
+fn a_view_in_the_json_encoding_rules_is_read_as_its_octets() {
+    let jer = setup_request(tree!([
+        {"id": 27, "criticality": "reject", "value": {"globalGNB-ID": {
+            "pLMNIdentity": "02F839",
+            "gNB-ID": {"gNB-ID": {"value": "000004", "length": 22}},
+        }}},
+        {"id": 102, "criticality": "reject", "value": [{
+            "tAC": "000001",
+            "broadcastPLMNList": [{
+                "pLMNIdentity": "02F839",
+                "tAISliceSupportList": [{"s-NSSAI": {"sST": "01"}}],
+            }],
+        }]},
+        {"id": 21, "criticality": "ignore", "value": "v128"},
+    ]));
+    let readable = setup_request(tree!([
+        {"id": 27, "criticality": "reject", "value": {"globalGNB-ID": {
+            "pLMNIdentity": "208-93",
+            "gNB-ID": {"gNB-ID": {"value": "000004", "length": 22}},
+        }}},
+        {"id": 102, "criticality": "reject", "value": [{
+            "tAC": 1,
+            "broadcastPLMNList": [{
+                "pLMNIdentity": "208-93",
+                "tAISliceSupportList": [{"s-NSSAI": {"sST": 1}}],
+            }],
+        }]},
+        {"id": 21, "criticality": "ignore", "value": "v128"},
+    ]));
+    let error = NGAP_PDU::from_view(&jer).unwrap_err().to_string();
+    assert!(error.contains(r#""000001" is read in two ways"#), "{error}");
+    let read = NGAP_PDU::from_view(&inspect::__view_of_jer(&jer).unwrap()).unwrap();
+    assert_eq!(read, NGAP_PDU::from_view(&readable).unwrap());
+}
+
 /// The values of the vectors as the reference has them: `generate.py --values FILE` of
 /// oxirush-aper writes each as a view, in the JSON encoding of ASN.1, and
 /// `REFERENCE_VALUES` is that file. A PDU that is written from the view of a vector is
@@ -257,6 +309,8 @@ fn a_pdu_written_from_the_values_of_the_reference_is_the_octets_of_the_reference
         let (name, view) = line.split_once('\t').unwrap();
         let view: Value = serde_json::from_str(view).unwrap();
         count += 1;
+        // The values are written in the JSON Encoding Rules, which a view reads so.
+        let view = inspect::__view_of_jer(&view).unwrap();
         match octets(&view) {
             Ok(written) if written == hex::encode(&wires[name]) => {}
             Ok(_) => failures.push(format!("{name}: other octets")),

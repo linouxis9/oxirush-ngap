@@ -35,7 +35,7 @@ jobs:
   # The job is the one that oxirush-ngap and oxirush-s1ap share, in the repository of
   # oxirush-aper, at the revision that build/revisions records.
   reproduce:
-    uses: linouxis9/oxirush-aper/.github/workflows/protocol-reproduce.yml@03c85cc8502f39df07f746df483d9e9608e1d1ff
+    uses: linouxis9/oxirush-aper/.github/workflows/protocol-reproduce.yml@65d0e0935f62d999e1d8b8c82bd997a433abfd09
     with:
       protocol: ngap
       archive: 38_series/38.413/38413-j40.zip

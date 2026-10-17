@@ -108,7 +108,7 @@ others at the revisions that it is tested with:
 oxirush-ngap = { git = "https://github.com/linouxis9/oxirush-ngap", features = ["inspect"] }
 
 [patch.crates-io]
-oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "03c85cc8502f39df07f746df483d9e9608e1d1ff" }
+oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "65d0e0935f62d999e1d8b8c82bd997a433abfd09" }
 oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "eb1c453cd08dc3d0b712f53d4273595793cb9106" }
 ```
 
@@ -117,7 +117,7 @@ In a clone of the repository, cargo takes them with `--config`, as CI does:
 ```bash
 cargo test --all-features \
   --config 'patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"' \
-  --config 'patch.crates-io.oxirush-aper.rev="03c85cc8502f39df07f746df483d9e9608e1d1ff"' \
+  --config 'patch.crates-io.oxirush-aper.rev="65d0e0935f62d999e1d8b8c82bd997a433abfd09"' \
   --config 'patch.crates-io.oxirush-utils.git="https://github.com/linouxis9/oxirush-utils"' \
   --config 'patch.crates-io.oxirush-utils.rev="eb1c453cd08dc3d0b712f53d4273595793cb9106"'
 ```
@@ -1161,9 +1161,10 @@ the edits and of the values, and the kinds of the errors of the JSON forms.
 - Keep what a later release added to a value that is decoded as its type and
   encoded again: a PDU keeps the octets of its IEs until one is decoded, and
   a tree and a view keep them.
-- Write the JSON Encoding Rules (ITU-T X.697): a tree is the JSON of the
-  crate, by the names of the specification, which the tests compare with the
-  JER of rasn through a function that the documentation hides.
+- Write or read the JSON Encoding Rules (ITU-T X.697): a tree is the JSON of
+  the crate, by the names of the specification. The tests compare it with the
+  JER of rasn, and read the values of pycrate in those rules, through
+  functions that the documentation hides.
 - Look into an RRC container, or into the container of a handover for
   another system than NG-RAN: they stay octets.
 - The crate has no limit on the octets of a PDU, and each call takes time and

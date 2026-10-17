@@ -178,9 +178,11 @@ Three readings of the vectors do not depend on each other:
   It reads a message of `later.tsv` as the message without the additions.
 - pycrate has the value of each vector, and `generate.py --values FILE` writes
   them in the JSON encoding of ASN.1. An ignored test of `tests/vectors.rs`
-  writes a PDU from each, and its octets are those of the vector, for each of
-  the 479: the crate gives each name and each number of the reference the bits
-  that the reference gave it.
+  reads each as a view with `inspect::__view_of_jer`, where a string of
+  decimal digits is octets as those rules have them, and writes a PDU from it,
+  and its octets are those of the vector, for each of the 479: the crate gives
+  each name and each number of the reference the bits that the reference gave
+  it.
 - `dissect.py`, beside `generate.py`, gives each vector to tshark, which must read
   the procedure, the alternative of the PDU, the IEs of the message and the
   size that a vector is made for. Wireshark 4.6.4 reads them as the vectors

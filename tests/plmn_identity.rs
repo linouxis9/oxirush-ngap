@@ -179,11 +179,11 @@ fn octets_that_are_no_plmn_identity_are_shown_as_octets() {
         let pdu = NGAP_PDU::decode(&wire).unwrap();
         let view = pdu.to_view().unwrap();
         let shown = inspect::select(&view, "/ngap/TAIListForPaging/1/tAI/pLMNIdentity").unwrap();
-        assert_eq!(shown, [&json!(octets.to_uppercase())]);
+        assert_eq!(shown, [&json!(octets)]);
         let tree = pdu.to_tree().unwrap();
         assert_eq!(
             tree["ies"][1]["TAIListForPaging"][1]["tAI"]["pLMNIdentity"],
-            octets.to_uppercase()
+            octets
         );
         assert_eq!(NGAP_PDU::from_view(&view).unwrap().encode().unwrap(), wire);
         assert_eq!(NGAP_PDU::from_tree(&tree).unwrap().encode().unwrap(), wire);

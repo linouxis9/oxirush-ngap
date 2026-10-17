@@ -10,7 +10,10 @@
 //! | Back to a PDU | [`from_tree`]: a message written from the tree alone | [`with_view`]: this PDU, edited; [`from_view`]: the PDU of any view |
 //!
 //! The tree of a PDU is the name of its message and its IEs by name. The view of a PDU
-//! keeps what was received, and the rest of this page is about it.
+//! keeps what was received, and the rest of this page is about it. With the feature
+//! `serde`, a PDU is serialized as its tree in every format of serde, and each other
+//! type of the bindings as its value in the form of its ASN.1 type, which
+//! [`oxirush_aper::json`] describes.
 //!
 //! [`to_view`] returns `procedure_code`, `direction`, `criticality` and `message`: the
 //! message in JSON, each value in the form of its ASN.1 type, which [Values](#values)
@@ -77,7 +80,7 @@
 //! Beside a `value`, `_raw_value` is what the value is compared with, as `_raw_message` is
 //! for the message, so changing one alone sends nothing else. A member that the ASN.1 type
 //! does not have is refused, and so is one beside the `decoded` value of a transfer.
-//! Hexadecimal is taken in either case.
+//! Hexadecimal is written in lower case and taken in either.
 //!
 //! # Paths
 //!
@@ -320,7 +323,7 @@ pub use crate::inspect_paths::{check_path, enumerated_at, insert, paths, remove,
 use crate::inspect_registry as registry;
 use crate::ngap::{NGAP_PDU, NGAPPDU};
 use oxirush_aper::inspect::{self as shared, Parts};
-use oxirush_aper::json::{self, Json};
+use oxirush_aper::json::{self, Tree};
 use oxirush_aper::{AsnType, Decode, Encode, Octets};
 
 /// The identifier and the name of each IE that an object set of the ASN.1 has, those of
@@ -409,10 +412,10 @@ pub(crate) fn any_message() -> Typed {
 /// name of the type in the bindings.
 pub(crate) fn decode_typed<'a, T>(name: &'static str, raw: &'a [u8]) -> Result<Value, Error>
 where
-    T: Decode<'a> + Json,
+    T: Decode<'a> + Tree,
 {
     let read: Result<T, Error> = oxirush_aper::decode(raw);
-    let shown = read.map(|value| value.to_json());
+    let shown = read.map(|value| value.to_tree());
     #[cfg(oxirush_ngap_hooks)]
     if let Some(observer) = OBSERVER.get() {
         observer(name, raw, &shown);
@@ -424,11 +427,11 @@ where
 /// The octets of the value of the type `T` that `value` writes in its JSON form.
 pub(crate) fn encode_typed<T>(value: &Value) -> Result<Vec<u8>, Error>
 where
-    T: Encode + Json + AsnType,
+    T: Encode + Tree + AsnType,
 {
     let typed: T = json::from_value(value)?;
     // A value that is read and does not encode is outside a constraint of its type.
-    oxirush_aper::encode(&typed).map_err(|error| error.outside_its_type(T::NAME))
+    oxirush_aper::encode(&typed).map_err(|error| error.outside_its_type(<T as AsnType>::NAME))
 }
 
 #[cfg(oxirush_ngap_hooks)]
@@ -711,5 +714,28 @@ impl NGAPPDU<'_> {
         let (direction, code) = (self.direction(), self.procedure_code());
         shared::of_the_pdu(&TABLES, view, direction, code)?;
         NGAP_PDU::from_view(view)
+    }
+}
+
+/// With the feature `serde`, a PDU is serialized as its tree, which
+/// [`to_tree`](NGAPPDU::to_tree) gives: a PDU that has none, as one of a procedure that
+/// the protocol does not have in its direction, is an error of the format.
+#[cfg(feature = "serde")]
+impl serde_core::Serialize for NGAPPDU<'_> {
+    fn serialize<S: serde_core::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        use serde_core::ser::Error as _;
+        let tree = self.to_tree().map_err(S::Error::custom)?;
+        serde_core::Serialize::serialize(&tree, serializer)
+    }
+}
+
+/// With the feature `serde`, a PDU is deserialized from its tree, as
+/// [`from_tree`](NGAPPDU::from_tree) reads it.
+#[cfg(feature = "serde")]
+impl<'de> serde_core::Deserialize<'de> for NGAPPDU<'_> {
+    fn deserialize<D: serde_core::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        use serde_core::de::Error as _;
+        let tree = <Value as serde_core::Deserialize>::deserialize(deserializer)?;
+        NGAP_PDU::from_tree(&tree).map_err(D::Error::custom)
     }
 }

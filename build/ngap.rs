@@ -164,7 +164,10 @@ fn post_process(path: &Path, asn_files: &[PathBuf]) -> Result<()> {
     fs::write(path, oracle).context("write the bindings of the oracle")?;
     // The name of each field, and the one that it had before the rule of the generator.
     fs::write("build/fields.tsv", &bindings.fields)?;
-    let mut text = bindings.text;
+    // A PDU is serialized as the tree of its message, which `inspect.rs` writes.
+    let serde = "#[cfg(feature = \"serde\")]\noxirush_utils::impl_serde!(NGAPPDU<'a>);\n";
+    ensure!(bindings.text.matches(serde).count() == 1, "the serde of a PDU");
+    let mut text = bindings.text.replacen(serde, "", 1);
     text.push_str(&support(&bindings.borrowing)?);
     fs::write(BINDINGS, text).context("write the NGAP bindings")
 }

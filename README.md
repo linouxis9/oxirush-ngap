@@ -103,13 +103,14 @@ and its README has the sections of this one.
 ```toml
 [dependencies]
 oxirush-ngap = "0.5"
-# With the optional feature:
+# With the optional features:
 # oxirush-ngap = { version = "0.5", features = ["inspect"] }
 ```
 
 | Feature | Adds | Through |
 |---------|------|---------|
 | `inspect` | A PDU as a `serde_json::Value`: its tree, in which a message is shown and written as its name and its IEs, its view and the paths of its values | `serde_json` |
+| `serde` | `Serialize` and `Deserialize` for every type of the bindings, through its tree: a PDU as its tree, and each other type in the form of its ASN.1 type. It turns on `inspect` | `serde_core` |
 
 No feature is on by default. With `inspect`, the members of a view and of a
 tree are in the order of the specification, through
@@ -896,7 +897,7 @@ println!("{}", edited.to_tree().unwrap());
 // What was not edited is the octets that were received
 let after = edited.to_view().unwrap();
 let octets = inspect::select(&after, "/ngap/AMF-UE-NGAP-ID/octets").unwrap();
-assert_eq!(octets, [&json!("002A")]);
+assert_eq!(octets, [&json!("002a")]);
 
 // A name that the type does not have is refused, and the view is as it was
 let wrong = inspect::set(&mut view, "/ngap/Cause/radioNetwrok", json!("unspecified"));
@@ -934,7 +935,7 @@ println!("{}", edited.to_tree().unwrap()["ies"]);
 ```
 
 ```json
-[{"RAN-UE-NGAP-ID":7},{"60000":{"octets":"C0FFEE"},"criticality":"ignore"},{"Cause":{"radioNetwork":"user-inactivity"}},{"RANNodeName":"gnb-1","criticality":"ignore"}]
+[{"RAN-UE-NGAP-ID":7},{"60000":{"octets":"c0ffee"},"criticality":"ignore"},{"Cause":{"radioNetwork":"user-inactivity"}},{"RANNodeName":"gnb-1","criticality":"ignore"}]
 ```
 
 ### Write a message from its name and its IEs
@@ -996,8 +997,8 @@ println!("{}", edited.to_tree().unwrap());
 
 ```text
 002a4010000002000a0002002afde80003c0ffee
-{"id":65000,"criticality":"reject","value":"C0FFEE","_decode_error":"NGAP IE 65000 is unknown","_raw_value":"C0FFEE","_original_id":65000}
-{"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":255},{"65000":{"octets":"C0FFEE"},"criticality":"reject"}]}
+{"id":65000,"criticality":"reject","value":"c0ffee","_decode_error":"NGAP IE 65000 is unknown","_raw_value":"c0ffee","_original_id":65000}
+{"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":255},{"65000":{"octets":"c0ffee"},"criticality":"reject"}]}
 ```
 
 ### A repeated IE
@@ -1243,9 +1244,9 @@ println!("{}", edited.to_tree().unwrap()["ies"][2]);
 ```
 
 ```text
-{"SourceToTarget-TransparentContainer":"000201020002F8390000012340080100"}
+{"SourceToTarget-TransparentContainer":"000201020002f8390000012340080100"}
 {"rRCContainer":"0102","targetCell-ID":{"nR-CGI":{"pLMNIdentity":"208-93","nRCellIdentity":4660}},"uEHistoryInformation":[{"lastVisitedCellInformation":{"eUTRANCell":"00"}}]}
-{"SourceToTarget-TransparentContainer":"000201020002F8390000000070080100"}
+{"SourceToTarget-TransparentContainer":"000201020002f8390000000070080100"}
 ```
 
 The `rRCContainer` stays octets: it is a message of RRC.
@@ -1287,14 +1288,14 @@ written, and take them so.
 | `ENUMERATED` | the name of the value, read in any case |
 | `INTEGER` | a number, which 64 bits hold, as the bindings hold it |
 | a bit string whose size varies, as the identifier of a gNB | `{"value": "000004", "length": 22}`: the octets that hold it, in hexadecimal, and its length in bits |
-| a bit string of another size than the one that its type gives beside an extension marker, as an algorithm mask of 24 bits | `{"value": "C00000", "length": 24}`, where a mask of the 16 bits of its type is `"C000"` |
-| the other strings: an SD, keys and algorithm masks, the NAS-PDU and the other containers | hexadecimal, read in either case |
+| a bit string of another size than the one that its type gives beside an extension marker, as an algorithm mask of 24 bits | `{"value": "c00000", "length": 24}`, where a mask of the 16 bits of its type is `"c000"` |
+| the other strings: an SD, keys and algorithm masks, the NAS-PDU and the other containers | hexadecimal, written in lower case and read in either |
 
 Each is also read in the form of its ASN.1 type, and a value that does not
 fit its notation, such as a transport layer address of another length, stays
 in that form: the documentation of the [`inspect`] module lists the form of
 each type under [Values]. The octets of a bit string start with its first
-bit: `"C000"` is the first two bits of sixteen, and `"000004"` the number 1
+bit: `"c000"` is the first two bits of sixteen, and `"000004"` the number 1
 in 22 bits.
 
 ### Errors of the JSON forms

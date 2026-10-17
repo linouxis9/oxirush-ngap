@@ -660,7 +660,8 @@ mod inspect_errors {
         assert_eq!(error.kind(), ErrorKind::NoSuchMember);
         assert_eq!(
             error.to_string(),
-            "this is not a value of AllowedNSSAI, at 0/s-NSSAI: \"other\" is not a member that its type has"
+            "this is not a value of AllowedNSSAI: \"other\" is not a member that its type has: it has \
+             sST, sD, iE-Extensions, at 0/s-NSSAI"
         );
     }
 
@@ -713,7 +714,7 @@ mod inspect_errors {
         let view = written(unknown).unwrap().to_view().unwrap();
         assert_eq!(
             inspect::select(&view, "/ngap/@id=65000/octets"),
-            Ok(vec![&json!("C0FFEE")])
+            Ok(vec![&json!("c0ffee")])
         );
         let error = inspect::select(&view, "/ngap/@id=65000/value/member").unwrap_err();
         assert_eq!(error.kind(), ErrorKind::UndecodableIe);
@@ -738,21 +739,27 @@ mod inspect_errors {
         }
         assert_eq!(
             string.to_string(),
-            "this is not a value of AMF-UE-NGAP-ID: a number is expected, and \"forty-two\" is written"
+            "this is not a value of AMF-UE-NGAP-ID: a number from 0 to 1099511627775 is expected, and \
+             \"forty-two\" is written"
         );
-        assert_eq!(
-            name.to_string(),
-            "this is not a value of Cause, at radioNetwork: \"no-such-cause\" is no value of the \
-             ENUMERATED"
+        // The names that it has are listed, and where it is written after them.
+        let name = name.to_string();
+        let names = "this is not a value of Cause: \"no-such-cause\" is none of its names: \
+                     unspecified, txnrelocoverall-expiry, successful-handover, ";
+        assert!(name.starts_with(names), "{name}");
+        assert!(
+            name.ends_with(", multiple-AIoT-session-ID-instances, at radioNetwork"),
+            "{name}"
         );
         assert_eq!(
             outside.to_string(),
-            "this is not a value of AMF-UE-NGAP-ID: 1099511627776 is outside its constraint (0..1099511627775)"
+            "this is not a value of AMF-UE-NGAP-ID: a number from 0 to 1099511627775 is expected, and \
+             1099511627776 is written"
         );
         assert_eq!(
             octets.to_string(),
-            "this is not a value of UEContextReleaseRequest, at protocolIEs/0/value: octets in \
-             hexadecimal, two digits for each, are expected, and \"zz\" is written"
+            "this is not a value of UEContextReleaseRequest: octets in hexadecimal, two digits for \
+             each, are expected, and \"zz\" is written, at protocolIEs/0/value"
         );
 
         // A value of a member, by the names that ASN.1 gives the members on the way:
@@ -800,7 +807,7 @@ mod inspect_errors {
         }
         assert!(
             setup(
-                json!("02F839"),
+                json!("02f839"),
                 json!({"gNB-ID": {"value": "000004", "length": 22}})
             )
             .is_ok()
@@ -809,8 +816,8 @@ mod inspect_errors {
         assert_eq!(member.kind(), ErrorKind::Value);
         assert_eq!(
             member.to_string(),
-            "this is not a value of GlobalRANNodeID, at globalGNB-ID/gNB-ID: an object with one \
-             member is expected, the name of an alternative with its value, and 5 is written"
+            "this is not a value of GlobalRANNodeID: an object with one member, the name of an \
+             alternative with its value, is expected, and 5 is written, at globalGNB-ID/gNB-ID"
         );
         assert!(std::error::Error::source(&member).is_none());
     }

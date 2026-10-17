@@ -22,6 +22,8 @@ include = [
 
 [features]
 inspect = ["dep:serde_json", "oxirush-aper/inspect"]
+# `Serialize` and `Deserialize` for every type of the bindings, through its tree.
+serde = ["inspect", "oxirush-utils/serde", "dep:serde_core"]
 
 [package.metadata.docs.rs]
 all-features = true
@@ -35,7 +37,8 @@ unexpected_cfgs = { level = "warn", check-cfg = ['cfg(oxirush_ngap_hooks)'] }
 [dependencies]
 oxirush-aper = "0.1.0"
 oxirush-utils = "0.1.0"
-serde_json = { version = "1.0.106", optional = true }
+serde_json = { version = "1.0.154", optional = true }
+serde_core = { version = "1.0.220", optional = true, default-features = false, features = ["alloc"] }
 
 [dev-dependencies]
 hex = "0.4"

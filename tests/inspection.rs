@@ -182,7 +182,7 @@ fn the_octets_of_an_ie_are_replaced_or_added_as_its_raw_value_without_value() {
     );
     assert_eq!(
         view.pointer("/message/protocolIEs/2/value"),
-        Some(&serde_json::json!("C0FFEE"))
+        Some(&serde_json::json!("c0ffee"))
     );
 }
 
@@ -244,7 +244,7 @@ fn a_new_ie_whose_value_is_a_string_is_typed_too() {
     // An ENUMERATED by its name and an OCTET STRING by its octets, not the
     // octets of their open types.
     ies.push(serde_json::json!({"id": 90, "criticality": "ignore", "value": "mo-Signalling"}));
-    ies.push(serde_json::json!({"id": 38, "criticality": "reject", "value": "7E00"}));
+    ies.push(serde_json::json!({"id": 38, "criticality": "reject", "value": "7e00"}));
     assert_eq!(
         NGAP_PDU::from_view(&view).unwrap().encode().unwrap(),
         typed.encode().unwrap()
@@ -271,7 +271,7 @@ fn an_ie_that_does_not_decode_is_edited_as_its_octets() {
     ));
     let mut view = pdu.to_view().unwrap();
     let path = "/message/protocolIEs/0/value";
-    assert_eq!(view.pointer(path), Some(&serde_json::json!("C0FFEE")));
+    assert_eq!(view.pointer(path), Some(&serde_json::json!("c0ffee")));
     assert!(view["message"]["protocolIEs"][0]["_decode_error"].is_string());
     assert_eq!(
         NGAP_PDU::from_view(&view).unwrap().encode().unwrap(),
@@ -281,7 +281,7 @@ fn an_ie_that_does_not_decode_is_edited_as_its_octets() {
     let edited = NGAP_PDU::from_view(&view).unwrap();
     assert_eq!(
         edited.to_view().unwrap().pointer(path),
-        Some(&serde_json::json!("DECAFBAD"))
+        Some(&serde_json::json!("decafbad"))
     );
     // Its type is unknown, so a typed value has no encoding.
     *view.pointer_mut(path).unwrap() = serde_json::json!(5);
@@ -640,16 +640,16 @@ fn a_message_is_shown_and_written_by_name_to_any_depth() {
     // A transfer that does not decode has its octets, and so has an IE that contains a
     // type when its octets are not of that type.
     let mut undecoded = request.clone();
-    *undecoded.pointer_mut(transfer).unwrap() = json!({"octets": "FF"});
+    *undecoded.pointer_mut(transfer).unwrap() = json!({"octets": "ff"});
     let pdu = NGAP_PDU::from_tree(&undecoded).unwrap();
     assert_eq!(pdu.to_tree().unwrap(), undecoded);
     let release = json!({
         "message": "DistributionReleaseRequest",
-        "ies": [{"MBS-DistributionReleaseRequestTransfer": "FF"}],
+        "ies": [{"MBS-DistributionReleaseRequestTransfer": "ff"}],
     });
     let pdu = NGAP_PDU::from_tree(&release).unwrap();
     let shown = pdu.to_tree().unwrap();
-    let octets = json!({"MBS-DistributionReleaseRequestTransfer": {"octets": "01FF"}});
+    let octets = json!({"MBS-DistributionReleaseRequestTransfer": {"octets": "01ff"}});
     assert_eq!(shown["ies"][0], octets);
     assert_eq!(written(&shown).unwrap(), pdu.encode().unwrap());
     // What is in the place of an IE and is none is refused.
@@ -787,14 +787,14 @@ fn the_value_of_an_ie_and_of_a_transfer_may_be_left_out_of_a_path() {
     assert_eq!(edited, before);
     // A member of a value that is named as one of its IE is that of the IE: the `value`
     // of a bit string whose size varies is reached after `value`.
-    let address = json!({"value": "0A0000", "length": 24});
+    let address = json!({"value": "0a0000", "length": 24});
     let entry =
         json!({"id": "TraceCollectionEntityIPAddress", "criticality": "ignore", "value": address});
     let view = sent(&[entry]).unwrap();
     let ie = "/ngap/TraceCollectionEntityIPAddress";
     let select = |path: &str| inspect::select(&view, &format!("{ie}/{path}")).unwrap();
     assert_eq!(select("value"), [&address]);
-    assert_eq!(select("value/value"), [&json!("0A0000")]);
+    assert_eq!(select("value/value"), [&json!("0a0000")]);
     assert_eq!(select("length"), [&json!(24)]);
     assert_eq!(select("value/length"), [&json!(24)]);
 }
@@ -830,7 +830,7 @@ fn the_container_of_a_handover_is_written_and_selected_by_the_type_that_it_carri
     // Nothing says what the octets carry: a view and a tree have them as they are.
     let mut view = pdu.to_view().unwrap();
     let ie = "/ngap/SourceToTarget-TransparentContainer";
-    let hexadecimal = json!(hex::encode_upper(&octets.0));
+    let hexadecimal = json!(hex::encode(&octets.0));
     let value = inspect::select(&view, &format!("{ie}/value")).unwrap();
     assert_eq!(value, [&hexadecimal]);
     let shown = pdu.to_tree().unwrap();
@@ -914,7 +914,7 @@ fn the_container_of_a_handover_is_written_and_selected_by_the_type_that_it_carri
     );
     // Octets that are not of the type say so where they are selected, and are sent
     // as they came.
-    let other = NGAP_PDU::from_tree(&required(json!("FF"))).unwrap();
+    let other = NGAP_PDU::from_tree(&required(json!("ff"))).unwrap();
     let mut view = other.to_view().unwrap();
     inspect::open(&mut view, &cell).unwrap();
     let error = inspect::select(&view, &cell).unwrap_err().to_string();
@@ -1152,8 +1152,8 @@ fn well_known_values_are_shown_and_taken_as_they_are_usually_written() {
     // As JER writes them, which is what a view had before.
     let area = &mut ie(&mut view, 102)["value"][0];
     area["tAC"] = json!("000007");
-    area["broadcastPLMNList"][0]["pLMNIdentity"] = json!("00F110");
-    *area.pointer_mut(slice).unwrap() = json!("2A");
+    area["broadcastPLMNList"][0]["pLMNIdentity"] = json!("00f110");
+    *area.pointer_mut(slice).unwrap() = json!("2a");
     assert_eq!(
         NGAP_PDU::from_view(&view).unwrap().encode().unwrap(),
         edited.encode().unwrap()
@@ -1197,7 +1197,7 @@ fn the_parts_of_a_guami_are_numbers_of_their_bits() {
     let expected = encode_open_type(&expected).unwrap();
     assert_eq!(
         ie(&mut shown, 28)["_raw_value"],
-        json!(hex::encode_upper(&expected))
+        json!(hex::encode(&expected))
     );
     assert_eq!(ie(&mut shown, 28)["value"]["aMFSetID"], json!(0x3FF));
     // The AMF Set ID has ten bits.
@@ -1223,15 +1223,15 @@ fn a_tunnel_endpoint_is_an_ip_address_and_a_number() {
     assert_eq!(ie(&mut shown, 139)["value"], tunnel);
     assert_eq!(
         ie(&mut shown, 139)["_raw_value"],
-        json!(hex::encode_upper(&expected))
+        json!(hex::encode(&expected))
     );
     // TraceCollectionEntityIPAddress is IE 109, a TransportLayerAddress itself.
     for (address, octets) in [
-        ("10.0.0.1", "0A000001"),
-        ("2001:db8::1", "20010DB8000000000000000000000001"),
+        ("10.0.0.1", "0a000001"),
+        ("2001:db8::1", "20010db8000000000000000000000001"),
         (
             "10.0.0.1,2001:db8::1",
-            "0A00000120010DB8000000000000000000000001",
+            "0a00000120010db8000000000000000000000001",
         ),
     ] {
         let mut shown = added(109, json!(address)).unwrap();
@@ -1245,7 +1245,7 @@ fn a_tunnel_endpoint_is_an_ip_address_and_a_number() {
         );
     }
     // An address of another length is neither: it stays as JER has it.
-    let other = json!({"value": "0A0000", "length": 24});
+    let other = json!({"value": "0a0000", "length": 24});
     let mut shown = added(109, other.clone()).unwrap();
     assert_eq!(ie(&mut shown, 109)["value"], other);
     for refused in ["10.0.0", "2001:db8::1,10.0.0.1", "10.0.0.1,10.0.0.2"] {
@@ -1470,7 +1470,7 @@ fn ies_are_added_taken_out_and_given_their_octets_at_a_path() {
     let name = json!({"id": "RANNodeName", "criticality": "ignore", "value": "gnb-1"});
     inspect::insert(&mut view, "/ngap/-", name).unwrap();
     // Given octets as an IE, before the cause.
-    let unknown = json!({"id": 60000, "criticality": "ignore", "octets": "C0FFEE"});
+    let unknown = json!({"id": 60000, "criticality": "ignore", "octets": "c0ffee"});
     inspect::insert(&mut view, "/ngap/Cause", unknown).unwrap();
     inspect::remove(&mut view, "/ngap/AMF-UE-NGAP-ID").unwrap();
     inspect::set(&mut view, "/ngap/RAN-UE-NGAP-ID/octets", json!("400102")).unwrap();
@@ -1482,7 +1482,7 @@ fn ies_are_added_taken_out_and_given_their_octets_at_a_path() {
     let select = |path: &str| inspect::select(&view, path).unwrap();
     assert_eq!(select("/ngap/RAN-UE-NGAP-ID/value"), [&json!(258)]);
     assert_eq!(select("/ngap/RANNodeName/value"), [&json!("gnb-1")]);
-    assert_eq!(select("/ngap/@id=60000/octets"), [&json!("C0FFEE")]);
+    assert_eq!(select("/ngap/@id=60000/octets"), [&json!("c0ffee")]);
     // An IE that the message does not have is nothing, not an error.
     assert!(select("/ngap/AMF-UE-NGAP-ID/value").is_empty());
 }
@@ -2523,7 +2523,7 @@ fn an_integer_of_two_to_the_63_or_more_is_a_number() {
 
     let view = NGAP_PDU::decode(&wire).unwrap().to_view().unwrap();
     let entry = &view["message"]["protocolIEs"][2];
-    assert_eq!(entry["_raw_value"], json!(hex::encode_upper(&beyond)));
+    assert_eq!(entry["_raw_value"], json!(hex::encode(&beyond)));
     assert_eq!(entry["value"], entry["_raw_value"]);
     let why = entry["_decode_error"].as_str().unwrap();
     assert!(why.contains("the number does not fit in 64 bits"), "{why}");
@@ -2551,16 +2551,17 @@ fn an_integer_of_two_to_the_63_or_more_is_a_number() {
         assert_eq!(
             error.to_string(),
             format!(
-                "this is not a value of UEAggregateMaximumBitRate, at \
-                 uEAggregateMaximumBitRateDL: a number is expected, and \"{digits}\" is written"
+                "this is not a value of UEAggregateMaximumBitRate: a number from 0 to \
+                 18446744073709551615 is expected, and \"{digits}\" is written, at \
+                 uEAggregateMaximumBitRateDL"
             )
         );
     }
     let negative = NGAP_PDU::from_tree(&written(json!(-1))).unwrap_err();
     assert_eq!(
         negative.to_string(),
-        "this is not a value of UEAggregateMaximumBitRate, at uEAggregateMaximumBitRateDL: -1 \
-         is outside its constraint (0..18446744073709551615)"
+        "this is not a value of UEAggregateMaximumBitRate: a number from 0 to \
+         18446744073709551615 is expected, and -1 is written, at uEAggregateMaximumBitRateDL"
     );
 }
 
@@ -2579,7 +2580,7 @@ fn a_bit_string_of_another_size_than_its_type_gives_has_its_length() {
     let mut view = modification(1, 16).to_view().unwrap();
     assert_eq!(
         inspect::select(&view, &algorithms).unwrap(),
-        [&json!("C000")]
+        [&json!("c000")]
     );
     inspect::set(&mut view, &algorithms, json!("8000")).unwrap();
     let edited = NGAP_PDU::from_view(&view).unwrap().to_view().unwrap();
@@ -2595,7 +2596,7 @@ fn a_bit_string_of_another_size_than_its_type_gives_has_its_length() {
         let mut view = NGAP_PDU::decode(&wire).unwrap().to_view().unwrap();
         let entry = &view["message"]["protocolIEs"][3];
         assert!(entry.get("_decode_error").is_none(), "{entry}");
-        let shown = json!({"value": "C00000", "length": bits});
+        let shown = json!({"value": "c00000", "length": bits});
         assert_eq!(inspect::select(&view, &algorithms).unwrap(), [&shown]);
 
         // Its two members have paths, which a message is checked against.
@@ -2614,13 +2615,13 @@ fn a_bit_string_of_another_size_than_its_type_gives_has_its_length() {
         assert_eq!(NGAP_PDU::from_view(&view).unwrap().encode().unwrap(), wire);
 
         // Edited to the size of the type, it is what the bindings encode for that.
-        inspect::set(&mut view, &algorithms, json!("C000")).unwrap();
+        inspect::set(&mut view, &algorithms, json!("c000")).unwrap();
         assert_eq!(NGAP_PDU::from_view(&view).unwrap(), modification(1, 16));
     }
 
     // From the size of the type to another one, by the whole value and by its length.
     let mut view = modification(1, 16).to_view().unwrap();
-    let longer = json!({"value": "C00000", "length": 24});
+    let longer = json!({"value": "c00000", "length": 24});
     inspect::set(&mut view, &algorithms, longer).unwrap();
     assert_eq!(NGAP_PDU::from_view(&view).unwrap(), modification(1, 24));
     inspect::set(&mut view, &format!("{algorithms}/length"), json!(20)).unwrap();
@@ -2634,21 +2635,21 @@ fn a_bit_string_of_another_size_than_its_type_gives_has_its_length() {
             {"RAN-UE-NGAP-ID": 1},
             {"UESecurityCapabilities": {
                 "nRencryptionAlgorithms": algorithms,
-                "nRintegrityProtectionAlgorithms": "C000",
-                "eUTRAencryptionAlgorithms": "C000",
-                "eUTRAintegrityProtectionAlgorithms": "C000",
+                "nRintegrityProtectionAlgorithms": "c000",
+                "eUTRAencryptionAlgorithms": "c000",
+                "eUTRAintegrityProtectionAlgorithms": "c000",
             }},
         ]}))
     };
-    assert!(written(json!("C000")).is_ok());
-    let error = written(json!("C00000")).unwrap_err();
+    assert!(written(json!("c000")).is_ok());
+    let error = written(json!("c00000")).unwrap_err();
     assert_eq!(error.kind(), oxirush_ngap::ErrorKind::Value);
     assert_eq!(
         error.to_string(),
-        "this is not a value of UESecurityCapabilities, at nRencryptionAlgorithms: 3 octets are \
-         written for a bit string of 16 bits, which has 2"
+        "this is not a value of UESecurityCapabilities: 3 octets are written for a bit string \
+         of 16 bits, which has 2, at nRencryptionAlgorithms"
     );
-    assert!(written(json!({"value": "C000", "length": 20})).is_err());
+    assert!(written(json!({"value": "c000", "length": 20})).is_err());
 }
 
 /// What a PDU that is written from `tree` has for the IE of the extension container at
@@ -2857,7 +2858,7 @@ fn the_additional_information_of_qos_flows_has_the_type_of_what_it_extends() {
         &format!("{command_transfer}/QosFlowAdditionalInfoList"),
         "0/downlinkTLContainer",
         (json!("0102"), command(&[1, 2])),
-        (json!("0A0B0C"), command(&[10, 11, 12])),
+        (json!("0a0b0c"), command(&[10, 11, 12])),
     );
 
     // Of the transfer of a release response.
@@ -2880,7 +2881,7 @@ fn the_additional_information_of_qos_flows_has_the_type_of_what_it_extends() {
         &format!("{response_transfer}/0"),
         "0/uplinkTLContainer",
         (json!("0102"), response(&[1, 2])),
-        (json!("0A0B0C"), response(&[10, 11, 12])),
+        (json!("0a0b0c"), response(&[10, 11, 12])),
     );
 
     // Each has the members of its type, written and at a path, and not those of the other.

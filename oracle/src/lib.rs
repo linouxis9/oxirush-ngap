@@ -137,13 +137,13 @@ fn same_but_for_a_length(ours: &Value, theirs: &Value) -> bool {
         let whole = length.div_ceil(8) == octets.len() as u64 / 2;
         (members.len() == 2 && whole).then(|| octets.to_string())
     };
+    // Octets: the crate writes hexadecimal in lower case, and rasn in upper case.
+    let same_octets = |members: &Map<String, Value>, octets: &str| {
+        with_length(members).is_some_and(|written| written.eq_ignore_ascii_case(octets))
+    };
     match (ours, theirs) {
-        (Value::String(octets), Value::Object(members)) => {
-            with_length(members).as_ref() == Some(octets)
-        }
-        (Value::Object(members), Value::String(octets)) => {
-            with_length(members).as_ref() == Some(octets)
-        }
+        (Value::String(octets), Value::Object(members)) => same_octets(members, octets),
+        (Value::Object(members), Value::String(octets)) => same_octets(members, octets),
         (Value::Object(ours), Value::Object(theirs)) => {
             let same = |(name, value)| {
                 let other = theirs.get::<String>(name);
@@ -155,6 +155,11 @@ fn same_but_for_a_length(ours: &Value, theirs: &Value) -> bool {
             let mut pairs = ours.iter().zip(theirs);
             ours.len() == theirs.len()
                 && pairs.all(|(ours, theirs)| same_but_for_a_length(ours, theirs))
+        }
+        (Value::String(ours), Value::String(theirs))
+            if ours.bytes().all(|digit| digit.is_ascii_hexdigit()) =>
+        {
+            ours.eq_ignore_ascii_case(theirs)
         }
         _ => ours == theirs,
     }

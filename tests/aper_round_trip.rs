@@ -486,7 +486,7 @@ fn a_number_between_the_ranges_of_an_extensible_root_is_written_in_the_root() {
 }
 
 /// The octets of a string of a size that a vector is made for, as
-/// `tests/fixtures/generate.py` fills it.
+/// `generate.py` of oxirush-aper fills it.
 fn pattern(octets: usize) -> String {
     (0..octets).map(|at| format!("{:02x}", at % 251)).collect()
 }

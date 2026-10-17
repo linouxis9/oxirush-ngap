@@ -377,29 +377,39 @@ fn a_lax_field_is_the_ie_if_it_decodes_and_none_otherwise() {
 }
 
 #[test]
-fn the_last_of_an_ie_that_is_there_twice_decides_a_lax_field() {
+fn the_first_of_an_ie_that_is_there_twice_decides_each_field() {
     let inactivity = Cause::radioNetwork(CauseRadioNetwork::user_inactivity);
     let pdu = release_request();
     let received: UEContextReleaseRequest = pdu.decode_value().unwrap();
     let read = received.protocol_ies.0[2].clone();
     let unread = spoiled_request().protocol_ies.0[2].clone();
 
-    // The last one does not decode: the field is `None`, though the first one decodes.
-    let last_unread = request(vec![read.clone(), unread.clone()]);
-    assert_eq!(cause_if_read(&last_unread), None);
+    // The first one decodes: each field has it, and the second one is not decoded.
+    let first_read = request(vec![read.clone(), unread.clone()]);
+    assert_eq!(cause_if_read(&first_read), Some(inactivity.clone()));
+    assert_eq!(
+        optional_cause(&first_read).unwrap(),
+        Some(inactivity.clone())
+    );
+    assert_eq!(required_cause(&first_read).unwrap(), inactivity);
 
-    // The last one decodes: the field has it, whatever came before it.
-    let last_read = request(vec![unread, read]);
-    assert_eq!(cause_if_read(&last_read), Some(inactivity));
+    // The first one does not decode: a `lax` field is `None`, and it is the error of an
+    // `opt` and of a `req` field, whatever comes after it.
+    let first_unread = request(vec![unread, read]);
+    assert_eq!(cause_if_read(&first_unread), None);
+    let optional = optional_cause(&first_unread).unwrap_err();
+    assert_eq!(optional.kind(), ErrorKind::UndecodableIe);
+    let required = required_cause(&first_unread).unwrap_err();
+    assert_eq!(required.kind(), ErrorKind::UndecodableIe);
 
-    // One that does not decode is an error for an `opt` and for a `req` field,
-    // wherever it is.
-    for request in [&last_unread, &last_read] {
-        let optional = optional_cause(request).unwrap_err();
-        assert_eq!(optional.kind(), ErrorKind::UndecodableIe);
-        let required = required_cause(request).unwrap_err();
-        assert_eq!(required.kind(), ErrorKind::UndecodableIe);
-    }
+    // `check` reports the second one, and `ies` gives both.
+    let both: Vec<_> = first_read.ies::<oxirush_ngap::ie::Cause>().collect();
+    assert_eq!(both.len(), 2);
+    assert_eq!(both[0], Ok(inactivity));
+    assert_eq!(
+        both[1].as_ref().unwrap_err().kind(),
+        ErrorKind::UndecodableIe
+    );
 }
 
 #[test]

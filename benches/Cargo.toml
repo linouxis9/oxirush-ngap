@@ -1,16 +1,21 @@
 # The benchmarks and the profilers of oxirush-ngap. A package of its own, so
-# that the crate keeps its two dependencies: nothing here is published.
+# that the crate keeps its two dependencies: nothing here is published. Its
+# programs are those of `protocols/benches/` of oxirush-aper, in the checkout
+# beside this repository, which oxirush-ngap and oxirush-s1ap share: what is
+# of the protocol is in `src/protocol.rs`, `src/readers.rs` and
+# `compare/pdus.tsv` here, which they include.
 [package]
 name = "oxirush-ngap-benches"
 version = "0.0.0"
 edition = "2024"
 publish = false
 license = "Apache-2.0"
+build = "../../oxirush-aper/protocols/benches/build.rs"
 
-# The inputs and the operations, which the three programs share. The name is
-# the same in oxirush-ngap and oxirush-s1ap, whose programs are the same files.
+# The inputs and the operations, which the programs share.
 [lib]
 name = "benches"
+path = "../../oxirush-aper/protocols/benches/src/lib.rs"
 
 [dependencies]
 oxirush-ngap = { path = "..", features = ["inspect"] }
@@ -19,6 +24,11 @@ serde_json = "1"
 # rasn 0.29, in the bindings of the oracle, for the comparison of `compare`.
 oracle = { package = "oxirush-ngap-oracle", path = "../oracle" }
 
+[features]
+# The readers of IEs of the crate, which `readers` compares with `decode_value` and the
+# macro on the message: without it, the program builds with a crate that has none.
+readers = []
+
 [dev-dependencies]
 criterion = { version = "0.5", default-features = false }
 pprof = { version = "0.15", features = ["criterion", "protobuf-codec", "flamegraph"] }
@@ -26,19 +36,35 @@ dhat = "0.3"
 
 [[bench]]
 name = "codec"
+path = "../../oxirush-aper/protocols/benches/benches/codec.rs"
 harness = false
 
 [[bench]]
 name = "allocations"
+path = "../../oxirush-aper/protocols/benches/benches/allocations.rs"
 harness = false
 
 [[bench]]
 name = "heap"
+path = "../../oxirush-aper/protocols/benches/benches/heap.rs"
 harness = false
 
 [[bench]]
 name = "scale"
+path = "../../oxirush-aper/protocols/benches/benches/scale.rs"
 harness = false
+
+[[bin]]
+name = "compare"
+path = "../../oxirush-aper/protocols/benches/src/bin/compare.rs"
+
+[[bin]]
+name = "checks"
+path = "../../oxirush-aper/protocols/benches/src/bin/checks.rs"
+
+[[bin]]
+name = "readers"
+path = "../../oxirush-aper/protocols/benches/src/bin/readers.rs"
 
 # Symbols for the profiles.
 [profile.bench]
@@ -48,7 +74,8 @@ debug = true
 [workspace]
 
 # oxirush-aper 0.1.0 and oxirush-utils 0.1.0 are not on crates.io yet: until they are
-# published, they come from their repositories, at the revisions of build/revisions.
+# published, oxirush-aper is the checkout beside this repository, whose programs these
+# are, and oxirush-utils comes from its repository, at the revision of build/revisions.
 [patch.crates-io]
-oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "cf9cf1ada0d74ac0a23f3ecd823d40acd5f96f24" }
+oxirush-aper = { path = "../../oxirush-aper" }
 oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "eb1c453cd08dc3d0b712f53d4273595793cb9106" }

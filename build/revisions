@@ -1,11 +1,13 @@
 # The revision of each repository that this one is built with: the name of a commit.
 #
 # oxirush-aper: its generator/ at this revision wrote the bindings, and the Reproduce
-# workflow checks it out to write them again. Until oxirush-aper 0.1.0 is on crates.io,
-# it is also the runtime that every build of this repository takes.
+# workflow checks it out to write them again; its protocols/ and its workflows are the
+# tools, the programs and the jobs that oxirush-ngap and oxirush-s1ap share, which are
+# taken from a checkout of it beside this repository. Until oxirush-aper 0.1.0 is on
+# crates.io, it is also the runtime that every build of this repository takes.
 # oxirush-utils: until oxirush-utils 0.1.0 is on crates.io, what every build takes.
 #
-# build/pin.py writes them wherever a crate is taken from its repository, and
-# tests/revisions.rs holds each place to them.
-oxirush-aper cf9cf1ada0d74ac0a23f3ecd823d40acd5f96f24
+# protocols/build/pin.py of oxirush-aper writes them wherever this repository names a
+# revision of one, and with `--check`, which CI runs, holds each place to them.
+oxirush-aper c39d2331388c3adf9bc2393169fc4c02094d5e98
 oxirush-utils eb1c453cd08dc3d0b712f53d4273595793cb9106

@@ -1,5 +1,8 @@
 # The fuzz targets of oxirush-ngap, for cargo-fuzz. A package of its own, which
-# is not published.
+# is not published. Its targets are those of `protocols/fuzz/` of oxirush-aper, in
+# the checkout beside this repository, which oxirush-ngap and oxirush-s1ap share:
+# they name the crate `codec`, and take what is of the protocol from its module
+# `hooks`.
 [package]
 name = "oxirush-ngap-fuzz"
 version = "0.0.0"
@@ -9,16 +12,17 @@ edition = "2024"
 [package.metadata]
 cargo-fuzz = true
 
-# What the targets do, which the three programs call. The name is the same in
-# oxirush-ngap and oxirush-s1ap, whose targets are the same files.
+# What the targets do, which the three programs call.
 [lib]
 name = "targets"
+path = "../../oxirush-aper/protocols/fuzz/src/lib.rs"
 
 [dependencies]
 libfuzzer-sys = "0.4"
 serde_json = "1"
 
-[dependencies.oxirush-ngap]
+[dependencies.codec]
+package = "oxirush-ngap"
 path = ".."
 features = ["inspect"]
 
@@ -33,28 +37,29 @@ path = "../oracle"
 members = ["."]
 
 # oxirush-aper 0.1.0 and oxirush-utils 0.1.0 are not on crates.io yet: until they are
-# published, they come from their repositories, at the revisions of build/revisions.
+# published, oxirush-aper is the checkout beside this repository, whose targets these
+# are, and oxirush-utils comes from its repository, at the revision of build/revisions.
 [patch.crates-io]
-oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "cf9cf1ada0d74ac0a23f3ecd823d40acd5f96f24" }
+oxirush-aper = { path = "../../oxirush-aper" }
 oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "eb1c453cd08dc3d0b712f53d4273595793cb9106" }
 
 [[bin]]
 name = "decode"
-path = "fuzz_targets/decode.rs"
+path = "../../oxirush-aper/protocols/fuzz/fuzz_targets/decode.rs"
 test = false
 doc = false
 bench = false
 
 [[bin]]
 name = "view"
-path = "fuzz_targets/view.rs"
+path = "../../oxirush-aper/protocols/fuzz/fuzz_targets/view.rs"
 test = false
 doc = false
 bench = false
 
 [[bin]]
 name = "paths"
-path = "fuzz_targets/paths.rs"
+path = "../../oxirush-aper/protocols/fuzz/fuzz_targets/paths.rs"
 test = false
 doc = false
 bench = false

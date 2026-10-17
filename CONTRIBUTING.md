@@ -26,13 +26,14 @@ which `build/` takes from a checkout of that repository beside this one. It
 reads the six `.asn` modules in `ngap/`:
 the ASN.1 of clause 9.4 of TS 38.413 V19.4.0, one file per module. Their
 text is 3GPP's, and the repository does not have it. `build/asn1.sha256`
-records the SHA-256 of each module, `build/extract_asn1.py` takes them out
-of the archive that 3GPP publishes and compares them with it, and the
-generator reads no module that has another digest. From the crate directory:
+records the SHA-256 of each module, `build/extract_asn1.py` of oxirush-aper
+takes them out of the archive that 3GPP publishes and compares them with it,
+and the generator reads no module that has another digest. From the crate
+directory, with oxirush-aper beside it:
 
 ```sh
 curl -A "Mozilla/5.0" -O https://www.3gpp.org/ftp/Specs/archive/38_series/38.413/38413-j40.zip
-python3 build/extract_asn1.py 38413-j40.zip
+python3 ../oxirush-aper/protocols/build/extract_asn1.py 38413-j40.zip
 CARGO="$(command -v cargo)" cargo run --locked --manifest-path build/Cargo.toml
 rustfmt --edition 2024 src/ngap.rs src/registry.rs src/inspect_registry.rs \
     oracle/src/bindings.rs oracle/src/types.rs
@@ -48,50 +49,71 @@ the generator and compares what it writes with the committed files, then
 has pycrate write [the vectors](#the-vectors) and the crate write the values
 of pycrate.
 
-oxirush-ngap and oxirush-s1ap share, octet for octet, the code that does not
-depend on the protocol and is not in `oxirush-aper`:
-`src/error.rs`, `src/inspect_paths.rs`, `src/message.rs`, the oracle and its
-tests but for its bindings and `oracle/tests/allocation.rs`, the test
-`tests/readme.rs`, the scripts `build/extract_asn1.py`,
-`tests/fixtures/generate.py`, `tests/fixtures/dissect.py`,
-`tests/workspace_member.sh` and `tests/package.sh`, and the benchmarks and the fuzz targets but for their `protocol.rs`.
-`tests/shared_files.rs` holds a digest of each, so that an edit in one crate
-fails its tests until the file is the same in the other and both record the
-new digest.
+### What oxirush-ngap and oxirush-s1ap share
+
+What the two protocol crates do alike is written once, in
+[oxirush-aper](https://github.com/linouxis9/oxirush-aper): the library code in
+the crate, generic, with what is of the protocol generated from the registry
+of each, and the tools, the programs and the jobs in its repository, which
+this repository takes from a checkout of oxirush-aper beside it, at the
+revision of `build/revisions`, as `build/` takes the generator. A file of
+`protocols/` there has the path that it had here.
+
+| What | Where it lives |
+|------|----------------|
+| The traits of a protocol, the readers `ies::<T>()`, `ie::<T>()` and `items::<L>()`, `check()` and `check_structure()`, the errors that name an IE, and the bodies of the macros, which `src/macros.rs` and `src/pdu.rs` here forward to | `src/protocol/` of oxirush-aper, which the registry of each protocol, `src/registry.rs`, invokes; the paths of `inspect` in `src/inspect/` there |
+| The generator of the bindings, of the registry and of the oracle | `generator/` of oxirush-aper; `build/main.rs` here says what is of NGAP |
+| `extract_asn1.py`, `pin.py` | `protocols/build/` |
+| The README test: `readme.py` writes `tests/readme.rs` from the README | `protocols/tests/readme.py` |
+| `package.sh`, `workspace_member.sh` | `protocols/tests/` |
+| The writer of the vectors and their reading by tshark: `generate.py`, `dissect.py` | `protocols/tests/fixtures/` |
+| The oracle and its tests `codec.rs` and `compare.rs` | `protocols/oracle/`, which `oracle/Cargo.toml` builds with the bindings of `oracle/src/` and `oracle/tests/allocation.rs` here |
+| The fuzz targets and `seed.sh` | `protocols/fuzz/`, which `fuzz/Cargo.toml` builds with the crate, which it names `codec`: its module `hooks` names what is of the protocol |
+| The benchmarks, their programs, `build_cost.py` and the comparison with other implementations | `protocols/benches/`, which `benches/Cargo.toml` builds with `benches/src/protocol.rs`, `benches/src/readers.rs` and `benches/compare/pdus.tsv` here |
+| The jobs of CI and of the Reproduce workflow | `.github/workflows/protocol.yml` and `protocol-reproduce.yml` of oxirush-aper, which the two workflows here call |
+
+A change to a shared piece is a commit of oxirush-aper, which each protocol
+crate takes when `build/revisions` records it.
 
 ### Until oxirush-aper and oxirush-utils are published
 
 Neither is on crates.io yet, so the repository takes both from their
 repositories. `build/revisions` records the commit of each, and every place
-that takes one names that commit and no branch: the patch of the README, the
-`UNPUBLISHED` of the two workflows, and the manifests of `benches/`, `fuzz/`
-and `oracle/`. `tests/workspace_member.sh`, `tests/package.sh` and the
-Reproduce workflow, which checks the generator out, read the file.
-`tests/revisions.rs` fails when a place names another commit, so a change of
-`oxirush-aper` or of `oxirush-utils` changes no result here before a commit of
-this repository says so.
+that names one names that commit and no branch: the patch of the README, the
+workflows of oxirush-aper that the two workflows call, and the patch of
+`oxirush-utils` in the manifests of `benches/`, `fuzz/` and `oracle/`, which
+take `oxirush-aper` from the checkout beside the repository. The jobs, the
+scripts and the Reproduce workflow, which checks oxirush-aper out beside the
+repository, read the file. `python3 ../oxirush-aper/protocols/build/pin.py
+--check`, which CI runs, fails when a place names another commit, so a
+change of `oxirush-aper` or of `oxirush-utils` changes no result here before
+a commit of this repository says so.
 
-To move to another revision, write it in `build/revisions`, run
-`python3 build/pin.py`, which writes it in each place, generate the bindings
-again, and commit the three together.
+To move to another revision, write it in `build/revisions`, check
+oxirush-aper out at it beside this repository, run
+`python3 ../oxirush-aper/protocols/build/pin.py`, which writes it in each
+place, generate the bindings again, and commit the three together.
 
 When `oxirush-aper` 0.1.0 and `oxirush-utils` 0.1.0 are on crates.io, and
 before this crate is published:
 
-1. Delete `[patch.crates-io]` from `benches/Cargo.toml`, `fuzz/Cargo.toml`
-   and `oracle/Cargo.toml`.
-2. Delete `UNPUBLISHED` and each `$UNPUBLISHED` from the two workflows, and
-   what `tests/workspace_member.sh` and `tests/package.sh` write for the two
-   crates when no directory is given for them.
-3. Delete the patch and its lines from the Installation of the README,
-   this section but for its last paragraph, `build/pin.py`,
-   `tests/revisions.rs` and the line of `oxirush-utils` in `build/revisions`.
+1. Delete the line of `oxirush-utils` from `[patch.crates-io]` of
+   `benches/Cargo.toml`, `fuzz/Cargo.toml` and `oracle/Cargo.toml`. The line
+   of `oxirush-aper` stays: those packages build the programs of the
+   checkout beside the repository, with the crate of that checkout.
+2. In oxirush-aper, delete `unpublished` and each `$UNPUBLISHED` from
+   `.github/workflows/protocol.yml`, and what `protocols/tests/package.sh`
+   and `protocols/tests/workspace_member.sh` write for the two crates when no
+   directory is given for them.
+3. Delete the patch and its lines from the Installation of the README, this
+   section but for its last paragraph, and the line of `oxirush-utils` in
+   `build/revisions`.
 4. `cargo publish --dry-run` then builds the package against crates.io
    alone, and fails while a dependency is not there.
 
 The line of `oxirush-aper` stays in `build/revisions`, with the commit of the
-release: its `generator/` is not published, and the Reproduce workflow checks
-it out at that commit to write the bindings.
+release: its `generator/`, its `protocols/` and its workflows are not
+published, and the jobs check it out at that commit.
 
 `oxirush-aper`, oxirush-ngap and oxirush-s1ap are released in step. Both
 protocol crates depend on one version of `oxirush-aper` exactly (`=0.1.0` in
@@ -135,7 +157,8 @@ the vectors, which pycrate wrote and tshark reads, hold for both:
 
 ### The vectors
 
-`tests/fixtures/generate.py` writes the three files of vectors, and with
+`generate.py` of `protocols/tests/fixtures/` of oxirush-aper writes the three
+files of vectors of `tests/fixtures/`, and with
 `--check` it compares them with what is committed. It needs pycrate 0.8.1 and
 the ASN.1 modules of [Generated code](#generated-code), and nothing of this
 crate: pycrate compiles the modules with its own compiler and encodes, with
@@ -158,7 +181,7 @@ Three readings of the vectors do not depend on each other:
   writes a PDU from each, and its octets are those of the vector, for each of
   the 479: the crate gives each name and each number of the reference the bits
   that the reference gave it.
-- `tests/fixtures/dissect.py` gives each vector to tshark, which must read
+- `dissect.py`, beside `generate.py`, gives each vector to tshark, which must read
   the procedure, the alternative of the PDU, the IEs of the message and the
   size that a vector is made for. Wireshark 4.6.4 reads them as the vectors
   have them, and 418 of the 479 vectors without a remark. In the others it
@@ -170,10 +193,10 @@ Three readings of the vectors do not depend on each other:
 
 ```bash
 python3 -m venv venv && venv/bin/pip install pycrate==0.8.1
-venv/bin/python tests/fixtures/generate.py --check
-venv/bin/python tests/fixtures/generate.py --values values.jsonl
+venv/bin/python ../oxirush-aper/protocols/tests/fixtures/generate.py --check
+venv/bin/python ../oxirush-aper/protocols/tests/fixtures/generate.py --values values.jsonl
 REFERENCE_VALUES=values.jsonl cargo test --features inspect --test vectors -- --ignored
-python3 tests/fixtures/dissect.py
+python3 ../oxirush-aper/protocols/tests/fixtures/dissect.py
 ```
 
 `generate.py` repairs two defects of pycrate 0.8.1, which does not write two
@@ -223,7 +246,7 @@ deliberately wrong. The subscribers are test values, 208-93 0000000001 to
 `tests/captured.rs` holds each of them, the comparison with the oracle of
 `oracle/tests/compare.rs` gives each to both codecs with its truncations and its
 changed bits, as it does the vectors, and the corpus of the fuzz targets
-starts from them too. `tests/fixtures/dissect.py` gives them to tshark with
+starts from them too. `dissect.py` gives them to tshark with
 the vectors: Wireshark 4.6.4 reads the procedure, the alternative of the PDU
 and the IEs of each as the file has them, and all 177 without a remark.
 
@@ -248,7 +271,7 @@ CI runs each for a minute, from the vectors and the captured PDUs.
 
 ```bash
 cargo install cargo-fuzz
-./fuzz/seed.sh
+../oxirush-aper/protocols/fuzz/seed.sh
 # What the targets take from the inside of the crate is behind its own name
 export RUSTFLAGS="--cfg oxirush_ngap_hooks"
 cargo +nightly fuzz run decode -- -max_total_time=60 -max_len=4096
@@ -270,9 +293,10 @@ for a cargo that is run from that directory.
 | `oracle/tests/codec.rs` | The codecs that the oracle has in the place of those that rasn 0.29 derives: the `SEQUENCE`, the list of a size constraint, and the strings whose length takes two octets. |
 | `oracle/tests/allocation.rs` | The list codec that rasn derives reserves memory for the count that a length determinant claims, where the crate reserves for the elements that it reads. |
 
-`tests/package.sh DIRECTORY` has cargo make the package, unpacks it and runs
-its tests there, with every feature and with none. `tests/workspace_member.sh
-DIRECTORY [CRATE...]` makes a workspace of this crate and of the others that
+`../oxirush-aper/protocols/tests/package.sh DIRECTORY` has cargo make the
+package, unpacks it and runs its tests there, with every feature and with
+none. `../oxirush-aper/protocols/tests/workspace_member.sh DIRECTORY
+[CRATE...]` makes a workspace of this crate and of the others that
 it is given, as `oxirush-s1ap` and `oxirush-aper`: cargo loads it, clippy
 accepts every target of every member, and rustdoc documents them. CI runs
 both.
@@ -292,7 +316,7 @@ cargo bench --bench allocations                        # the allocations of each
 cargo bench --bench heap -- to-view/fixtures           # where they are made
 cargo bench --bench codec -- --profile-time 10 to-view/fixtures
 go tool pprof -top target/criterion/to-view/fixtures/profile/profile.pb
-python3 build_cost.py +1.88.0 --features inspect       # a clean build: its time and its memory
+cd .. && python3 ../oxirush-aper/protocols/benches/build_cost.py +1.88.0 --features inspect  # a clean build
 ```
 
 Until `oxirush-aper` and `oxirush-utils` are on crates.io, `build_cost.py` is

@@ -1,6 +1,7 @@
 // Auto-generated from ASN.1 by the generator of oxirush-aper; do not edit.
-use crate::macros::{ies, procedures};
-procedures! {
+oxirush_aper::__protocol! { protocol Ngap "NGAP", bindings ngap, pdu NGAPPDU, triggering initiating_message successful_outcome unsuccessful_outcome }
+oxirush_aper::__procedures! {
+    protocol Ngap "NGAP", bindings ngap, pdu NGAPPDU, kind NgapPduKind, hooks oxirush_ngap_hooks;
     0 AMFConfigurationUpdate reject { InitiatingMessage Initiating_AMFConfigurationUpdate "AMFConfigurationUpdate" crate::ngap::AMFConfigurationUpdate<'a> [1 reject optional, 96 reject optional, 86 ignore optional, 80 reject optional, 6 ignore optional, 7 ignore optional, 8 ignore optional, 274 ignore optional]; SuccessfulOutcome Successful_AMFConfigurationUpdate "AMFConfigurationUpdateAcknowledge" crate::ngap::AMFConfigurationUpdateAcknowledge<'a> [5 ignore optional, 4 ignore optional, 19 ignore optional]; UnsuccessfulOutcome Unsuccessful_AMFConfigurationUpdate "AMFConfigurationUpdateFailure" crate::ngap::AMFConfigurationUpdateFailure<'a> [15 ignore mandatory, 107 ignore optional, 19 ignore optional]; }
     1 AMFStatusIndication ignore { InitiatingMessage Initiating_AMFStatusIndication "AMFStatusIndication" crate::ngap::AMFStatusIndication<'a> [120 reject mandatory]; }
     2 CellTrafficTrace ignore { InitiatingMessage Initiating_CellTrafficTrace "CellTrafficTrace" crate::ngap::CellTrafficTrace<'a> [10 reject mandatory, 85 reject mandatory, 44 ignore mandatory, 43 ignore mandatory, 109 ignore mandatory, 256 ignore optional, 257 ignore optional]; }
@@ -89,7 +90,8 @@ procedures! {
     85 AIOTSessionRelease reject { InitiatingMessage Initiating_AIOTSessionRelease "AIOTSessionReleaseCommand" crate::ngap::AIOTSessionReleaseCommand<'a> [467 reject mandatory, 466 reject mandatory, 463 reject mandatory]; SuccessfulOutcome Successful_AIOTSessionRelease "AIOTSessionReleaseComplete" crate::ngap::AIOTSessionReleaseComplete<'a> [467 ignore mandatory, 466 ignore mandatory, 464 ignore mandatory, 19 ignore optional]; }
     86 AIOTSessionReleaseRequest reject { InitiatingMessage Initiating_AIOTSessionReleaseRequest "AIOTSessionReleaseRequest" crate::ngap::AIOTSessionReleaseRequest<'a> [467 reject mandatory, 466 reject mandatory, 465 reject mandatory]; }
 }
-ies! {
+oxirush_aper::__ies! {
+    protocol Ngap "NGAP";
     0 "AllowedNSSAI" crate::ngap::AllowedNSSAI => AllowedNSSAI;
     1 "AMFName" crate::ngap::AMFName<'a> => AMFName;
     2 "AMFOverloadResponse" crate::ngap::OverloadResponse => AMFOverloadResponse OverloadResponse;
@@ -580,3 +582,4 @@ ies! {
     495 "LPWUSDisableIndication" crate::ngap::LPWUSDisableIndication => LPWUSDisableIndication;
     496 "AIoT-SecurityInfo" crate::ngap::AIoTSecurityInfo<'a> => AIoT_SecurityInfo AIoTSecurityInfo;
 }
+oxirush_aper::__lists! {}

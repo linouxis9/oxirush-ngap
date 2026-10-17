@@ -1,7 +1,10 @@
 # The oracle of oxirush-ngap: the same types with the codec of rasn, another
 # implementation of aligned PER, and the tests that compare the crate with it. A
 # package of its own, which depends on the crate: the crate does not depend on it, so
-# no build and no test of the crate builds rasn. Nothing here is published.
+# no build and no test of the crate builds rasn. Nothing here is published. The oracle
+# and its tests are those of `protocols/oracle/` of oxirush-aper, in the checkout beside
+# this repository, which oxirush-ngap and oxirush-s1ap share: what is of the protocol is
+# the bindings of `src/`, which the generator writes, and `tests/allocation.rs`.
 [package]
 name = "oxirush-ngap-oracle"
 version = "0.0.0"
@@ -16,6 +19,7 @@ license = "Apache-2.0"
 # crate name `oracle`. It has no unit test, and nothing documents it.
 [lib]
 name = "oracle"
+path = "../../oxirush-aper/protocols/oracle/src/lib.rs"
 test = false
 doctest = false
 doc = false
@@ -37,11 +41,20 @@ hex = "0.4"
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(oxirush_ngap_hooks)', 'cfg(oxirush_s1ap_hooks)'] }
 
+[[test]]
+name = "codec"
+path = "../../oxirush-aper/protocols/oracle/tests/codec.rs"
+
+[[test]]
+name = "compare"
+path = "../../oxirush-aper/protocols/oracle/tests/compare.rs"
+
 # Not a member of a workspace that the crate may be in.
 [workspace]
 
 # oxirush-aper 0.1.0 and oxirush-utils 0.1.0 are not on crates.io yet: until they are
-# published, they come from their repositories, at the revisions of build/revisions.
+# published, oxirush-aper is the checkout beside this repository, whose oracle this is,
+# and oxirush-utils comes from its repository, at the revision of build/revisions.
 [patch.crates-io]
-oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "cf9cf1ada0d74ac0a23f3ecd823d40acd5f96f24" }
+oxirush-aper = { path = "../../oxirush-aper" }
 oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "eb1c453cd08dc3d0b712f53d4273595793cb9106" }

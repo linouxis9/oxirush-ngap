@@ -15,16 +15,23 @@
    limitations under the License.
 */
 
-//! What the benchmarks have of NGAP: the type of a PDU, four messages of the
-//! size that a network sends, and the operations that take the type of a
-//! message. `lib.rs`, which is the same for oxirush-s1ap, has the rest.
+// What the benchmarks have of NGAP: the type of a PDU, four messages of the
+// size that a network sends, and the operations that take the type of a
+// message. `src/lib.rs` of `protocols/benches/` of oxirush-aper, which
+// oxirush-s1ap takes too, has the rest, the macro `typed!` among it, and
+// includes this file.
 
 pub use oxirush_ngap as codec;
 
-use crate::{Typed, Written, done};
+use crate::{Written, octets};
 use codec::ngap;
-use codec::{Error, build_ngap, extract_ngap_ies};
-use oxirush_ngap::{tree, tree::Value};
+use codec::{tree, tree::Value};
+
+/// The types of the protocol.
+pub use codec::ngap as types;
+
+/// The macros that build a PDU and extract IEs, by the names that `typed!` takes.
+pub use codec::{build_ngap as build, extract_ngap_ies as extract_ies};
 
 /// A PDU of the protocol, which owns its octets.
 pub type Pdu = ngap::NGAP_PDU;
@@ -32,124 +39,11 @@ pub type Pdu = ngap::NGAP_PDU;
 /// A PDU that borrows its message from the octets that it is decoded from.
 pub type Borrowed<'a> = ngap::NGAPPDU<'a>;
 
-/// The types of the protocol.
-pub use codec::ngap as types;
-
-/// The PDU of `pdu`, with the octets of another message.
-pub fn our_pdu(pdu: &Pdu, message: codec::Octets<'static>) -> Pdu {
-    use codec::ngap::NGAPPDU;
-    let mut pdu = pdu.clone();
-    match &mut pdu {
-        NGAPPDU::initiatingMessage(pdu) => pdu.value = message,
-        NGAPPDU::successfulOutcome(pdu) => pdu.value = message,
-        NGAPPDU::unsuccessfulOutcome(pdu) => pdu.value = message,
-        _ => {}
-    }
-    pdu
-}
-
 /// A PDU of the rasn bindings of `oracle/`, its message an open type.
 pub type TheirPdu = oracle::bindings::NGAPPDU;
 
-/// A message of the rasn bindings: every message of the protocol but the private one is
-/// a SEQUENCE of its protocol IEs, with an extension marker, which decodes and encodes as
-/// this one.
-pub type TheirMessage = oracle::bindings::InitialUEMessage;
-
-/// The octets of the message of a rasn PDU.
-pub fn their_message(pdu: &TheirPdu) -> &[u8] {
-    use oracle::bindings::NGAPPDU;
-    match pdu {
-        NGAPPDU::initiatingMessage(pdu) => pdu.value.as_bytes(),
-        NGAPPDU::successfulOutcome(pdu) => pdu.value.as_bytes(),
-        NGAPPDU::unsuccessfulOutcome(pdu) => pdu.value.as_bytes(),
-        _ => &[],
-    }
-}
-
-/// The rasn PDU of `pdu`, with the octets of another message.
-pub fn their_pdu(pdu: &TheirPdu, message: oracle::rasn::types::Any) -> TheirPdu {
-    use oracle::bindings::NGAPPDU;
-    let mut pdu = pdu.clone();
-    match &mut pdu {
-        NGAPPDU::initiatingMessage(pdu) => pdu.value = message,
-        NGAPPDU::successfulOutcome(pdu) => pdu.value = message,
-        NGAPPDU::unsuccessfulOutcome(pdu) => pdu.value = message,
-        _ => {}
-    }
-    pdu
-}
-
-/// The fixtures of the crate: a line for each message, with its name and its
-/// octets in hexadecimal.
-pub const FIXTURES: &str = include_str!("../../tests/fixtures/messages.tsv");
-
 /// The root of the paths of the IEs of a message.
 pub const ROOT: &str = "/ngap";
-
-/// The operations that take the type of a message: its direction, its
-/// procedure, the criticality of its PDU and its type, then each of its IEs
-/// as the macros name it, with its criticality and the type of its value.
-macro_rules! typed {
-    ($direction:ident $procedure:ident $criticality:ident $message:ident {
-        $($ie_criticality:ident $ie:ident: $type:ident $(<$borrows:lifetime>)?,)*
-    }) => {{
-        /// The values of the IEs of the message, in their order. Those that hold
-        /// octets borrow them.
-        type Values<'a> = ($(ngap::$type $(<$borrows>)?,)*);
-
-        #[allow(non_snake_case)]
-        fn read<'a>(message: &'a ngap::$message<'a>) -> Result<Values<'a>, Error> {
-            extract_ngap_ies!(message, $message,
-                $(req $ie: ngap::$type $(<$borrows>)? = $ie(value) => value,)*
-            );
-            Ok(($($ie,)*))
-        }
-
-        /// The same values, which borrow nothing.
-        #[allow(non_snake_case)]
-        fn owned(($($ie,)*): Values<'_>) -> Values<'static> {
-            ($(typed!(@owned $ie $(, $borrows)?),)*)
-        }
-
-        #[allow(non_snake_case)]
-        fn build(($($ie,)*): Values<'_>) -> Result<Pdu, Error> {
-            build_ngap!($direction, $procedure, $criticality, $message,
-                $($ie_criticality $ie($ie),)*
-            )
-        }
-
-        fn message(pdu: &Pdu) -> ngap::$message<'_> {
-            pdu.decode_value().unwrap()
-        }
-
-        Typed {
-            decode_value: |pdu| done(pdu.decode_value::<ngap::$message<'_>>()),
-            extract: |pdu| {
-                let message = message(pdu);
-                Box::new(move || done(read(&message)))
-            },
-            build: |pdu| {
-                let mut values = Some(owned(read(&message(pdu)).unwrap()));
-                Box::new(move || done(build(values.take().unwrap())))
-            },
-            rebuilt: |pdu| build(read(&message(pdu)).unwrap()).unwrap(),
-        }
-    }};
-    (@owned $value:ident) => {
-        $value
-    };
-    (@owned $value:ident, $borrows:lifetime) => {
-        $value.into_owned()
-    };
-}
-
-/// `length` octets in hexadecimal, which are not all the same.
-fn octets(length: usize) -> String {
-    (0..length)
-        .map(|at| format!("{:02X}", (at * 7 + 3) % 251))
-        .collect()
-}
 
 /// A QoS flow of a standardized 5QI.
 fn qos_flow(identifier: u8, five_qi: u8) -> Value {

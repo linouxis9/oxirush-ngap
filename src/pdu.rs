@@ -1,138 +1,32 @@
 //! The protocol IEs of the message of a PDU, whatever the message: read, put back, and
-//! compared with the object set that the ASN.1 gives the message.
+//! compared with the object set that the ASN.1 gives the message. What does it is
+//! `oxirush_aper::protocol`, which the protocols share: here are the methods of the PDU.
 
-use oxirush_aper::{Decode, Encode, Faults, Octets, Reader, Writer};
+use oxirush_aper::protocol::{self, Ie, Pdu, Source};
+use oxirush_aper::{Error, Octets};
 
-use crate::Error;
-use crate::check::{Deviation, Wrong, deviations, object_set};
+use crate::Deviation;
+use crate::Ngap;
 use crate::ngap::{Criticality, CriticalityDiagnostics, NGAPPDU, ProtocolIEContainer};
-use crate::registry::{KEY_IES, decodes, procedure_criticality};
-
-/// The protocol IEs of a message, which the ASN.1 has as a SEQUENCE of one container
-/// of protocol IEs, which a later release may add to: the additions are skipped.
-fn message_ies<'a>(octets: &'a [u8]) -> Result<ProtocolIEContainer<'a>, Error> {
-    let mut reader = Reader::new(octets);
-    let extended = reader.bit()?;
-    let ies = match ProtocolIEContainer::decode(&mut reader) {
-        Ok(ies) => ies,
-        Err(error) => return Err(error.in_field("protocol_ies")),
-    };
-    if extended {
-        reader.skip_additions()?;
-    }
-    reader.finish()?;
-    Ok(ies)
-}
-
-/// What of the message is in another form than the one that X.691 gives it, around the
-/// values of its IEs, which are not read here: the faults of a reader that notes them.
-/// The message is read as its type reads it, by the codec of a message that is a
-/// container of protocol IEs and nothing else: the function above is then the one
-/// place of this file that reads the container, as it was.
-fn message_faults(octets: &[u8]) -> Faults {
-    let read = oxirush_aper::decode_with_faults::<crate::ngap::ErrorIndication>(octets);
-    // A reader that notes reads what one that does not reads.
-    debug_assert_eq!(
-        read.as_ref().map(|(message, _)| &message.protocol_ies).ok(),
-        message_ies(octets).as_ref().ok()
-    );
-    read.map_or_else(|_| Faults::default(), |(_, faults)| faults)
-}
-
-/// The octets of the message that has these protocol IEs, written octet by octet: the
-/// extension bit of the message in an octet, the count of its IEs in two, and for each
-/// IE its identifier in two octets, its criticality in the next, and its value in its
-/// open type. It is what the codec of the type writes, which the tests hold it to.
-pub(crate) fn message_octets(ies: &ProtocolIEContainer<'_>) -> Result<Vec<u8>, Error> {
-    // More IEs than a container has are refused by the codec of the type.
-    let Ok(count) = u16::try_from(ies.0.len()) else {
-        return message_octets_as_its_type(ies);
-    };
-    let values: usize = ies.0.iter().map(|ie| ie.value.len() + 5).sum();
-    let mut octets = Vec::with_capacity(3 + values);
-    octets.push(0);
-    octets.extend_from_slice(&count.to_be_bytes());
-    for ie in &ies.0 {
-        let [high, low] = ie.id.0.to_be_bytes();
-        let criticality = (ie.criticality as u8) << 6;
-        let value: &[u8] = &ie.value;
-        // The length of the value in one octet or in two, as nearly every IE has it.
-        match value.len() {
-            length @ 0..=0x7f => octets.extend_from_slice(&[high, low, criticality, length as u8]),
-            length @ 0x80..=0x3fff => {
-                let [first, second] = (length as u16 | 0x8000).to_be_bytes();
-                octets.extend_from_slice(&[high, low, criticality, first, second]);
-            }
-            // A longer value is in fragments, which the writer of the runtime writes.
-            _ => {
-                octets.extend_from_slice(&[high, low, criticality]);
-                Writer::new(&mut octets).open_type(value);
-                continue;
-            }
-        }
-        octets.extend_from_slice(value);
-    }
-    Ok(octets)
-}
-
-/// The criticality of the bindings is that of oxirush-aper, which an error has.
-impl From<Criticality> for oxirush_aper::Criticality {
-    fn from(criticality: Criticality) -> Self {
-        match criticality {
-            Criticality::reject => Self::Reject,
-            Criticality::ignore => Self::Ignore,
-            Criticality::notify => Self::Notify,
-        }
-    }
-}
-
-impl From<oxirush_aper::Criticality> for Criticality {
-    fn from(criticality: oxirush_aper::Criticality) -> Self {
-        match criticality {
-            oxirush_aper::Criticality::Reject => Self::reject,
-            oxirush_aper::Criticality::Ignore => Self::ignore,
-            oxirush_aper::Criticality::Notify => Self::notify,
-        }
-    }
-}
-
-/// Whether the message of a direction and a procedure code may hold a key: its object
-/// set has an IE of a type that holds one. `Debug` of its PDU shows the length of the
-/// octets of the message, and not the octets.
-pub(crate) fn holds_key(direction: &str, code: u8) -> bool {
-    let ies = object_set(direction, code).and_then(|set| set.ies);
-    ies.is_some_and(|ies| ies.iter().any(|(id, ..)| KEY_IES.contains(id)))
-}
-
-/// The octets of the message that has these protocol IEs, as the codec of the type
-/// writes them.
-pub(crate) fn message_octets_as_its_type(ies: &ProtocolIEContainer<'_>) -> Result<Vec<u8>, Error> {
-    let values: usize = ies.0.iter().map(|ie| ie.value.len() + 5).sum();
-    let mut octets = Vec::with_capacity(3 + values);
-    let mut writer = Writer::new(&mut octets);
-    writer.bit(false);
-    ies.encode(&mut writer)?;
-    Ok(octets)
-}
 
 impl<'a> NGAPPDU<'a> {
     /// The octets of the open type that holds the message of this PDU.
+    #[inline]
     pub(crate) fn value(&self) -> &Octets<'a> {
-        match self {
-            Self::initiatingMessage(message) => &message.value,
-            Self::successfulOutcome(message) => &message.value,
-            Self::unsuccessfulOutcome(message) => &message.value,
-        }
+        <Self as Pdu<'a>>::value(self)
     }
 
-    /// The name that ASN.1 gives the message of this PDU, when the specification has
-    /// its procedure in that direction. An error for a message that has no container
-    /// of protocol IEs.
-    fn message_of_protocol_ies(&self) -> Result<Option<&'static str>, Error> {
-        match object_set(self.direction(), self.procedure_code()) {
-            Some(set) if set.ies.is_none() => Err(Error::no_protocol_ies(set.name)),
-            set => Ok(set.map(|set| set.name)),
-        }
+    /// The PDU of a direction, as `direction()` says it, with the code of its procedure,
+    /// its criticality and the octets of the open type that holds its message; `None`
+    /// for what is no direction.
+    #[cfg(feature = "inspect")]
+    pub(crate) fn of(
+        direction: &str,
+        procedure_code: u8,
+        criticality: Criticality,
+        value: Octets<'a>,
+    ) -> Option<Self> {
+        <Self as Pdu<'a>>::__of(direction, procedure_code, criticality, value)
     }
 
     /// The protocol IEs of the message of this PDU, whatever the message is: the
@@ -174,12 +68,7 @@ impl<'a> NGAPPDU<'a> {
     /// IEs and no container of protocol IEs, and one of the kind `Decode` when the
     /// octets of the message are not a container of protocol IEs.
     pub fn protocol_ies(&self) -> Result<ProtocolIEContainer<'_>, Error> {
-        let name = self.message_of_protocol_ies()?;
-        if self.value().is_empty() {
-            let none = Error::new(crate::ErrorKind::Decode, "there are no octets");
-            return Err(none.of_message(name));
-        }
-        message_ies(self.value()).map_err(|error| error.of_message(name))
+        protocol::protocol_ies(self).map(ProtocolIEContainer)
     }
 
     /// Make `protocol_ies` the protocol IEs of the message of this PDU: the PDU keeps
@@ -214,16 +103,39 @@ impl<'a> NGAPPDU<'a> {
     /// container of protocol IEs, and one of the kind `Encode` for more IEs than a
     /// container has, which is 65535. The PDU is as it was after an error.
     pub fn set_protocol_ies(&mut self, protocol_ies: ProtocolIEContainer<'_>) -> Result<(), Error> {
-        self.message_of_protocol_ies()?;
-        let count = protocol_ies.0.len();
-        let octets = message_octets(&protocol_ies);
-        let value = Octets::owned(octets.map_err(|error| error.of_protocol_ies(count))?);
-        match self {
-            Self::initiatingMessage(message) => message.value = value,
-            Self::successfulOutcome(message) => message.value = value,
-            Self::unsuccessfulOutcome(message) => message.value = value,
-        }
-        Ok(())
+        protocol::set_protocol_ies(self, &protocol_ies.0)
+    }
+
+    /// Every occurrence of the IE `T` in the message of this PDU, in its order, each decoded
+    /// as the type of `T`. The octets of the message are read where they are, without
+    /// `decode_value` and without allocating, and an IE of another identifier is passed
+    /// over and not decoded: a value that does not decode is an error of the kind
+    /// `UndecodableIe`, and octets that are no container of protocol IEs an error of the
+    /// kind `Decode`, which ends the iterator.
+    ///
+    /// An IE that the message has twice is there twice: `check()` reports the second as
+    /// [`Deviation::RepeatedIe`](oxirush_aper::check::Deviation::RepeatedIe), and
+    /// [`ie`](Self::ie) takes the first.
+    #[inline]
+    pub fn ies<T: Ie<Protocol = Ngap>>(&self) -> protocol::Ies<'_, T> {
+        Source::__of_pdu(self).ies::<T>()
+    }
+
+    /// The first occurrence of the IE `T` in the message of this PDU, decoded as the type
+    /// of `T`; `None` when the message does not have it. The octets of the message are read
+    /// up to that IE, and nothing else is decoded: see [`ies`](Self::ies).
+    #[inline]
+    pub fn ie<T: Ie<Protocol = Ngap>>(&self) -> Option<Result<T::Value<'_>, Error>> {
+        self.ies::<T>().next()
+    }
+
+    /// The items of the list `L` in the message of this PDU, a list of single containers,
+    /// each decoded as the IE of its single container, from the first occurrence of `L`:
+    /// the list is walked where it is, and not built. Nothing when the message has no such
+    /// list, which [`ie`](Self::ie) tells.
+    #[inline]
+    pub fn items<L: protocol::List<Protocol = Ngap>>(&self) -> protocol::Items<'_, L> {
+        Source::__of_pdu(self).items::<L>()
     }
 
     /// The PDU that holds `message`: of the direction and the procedure code of the
@@ -253,80 +165,35 @@ impl<'a> NGAPPDU<'a> {
     /// # Errors
     ///
     /// A message that does not encode: a value outside a constraint of its type.
-    pub fn of_message<'m, M: crate::Message<'m>>(
+    pub fn of_message<'m, M: crate::Message<'m, Protocol = Ngap>>(
         message: &M,
         criticality: Criticality,
     ) -> Result<NGAPPDU<'static>, Error> {
-        let octets = Octets::owned(oxirush_aper::encode(message)?);
-        let pdu = NGAPPDU::of(M::DIRECTION, M::PROCEDURE_CODE, criticality, octets);
-        // The direction of a message is one of the three.
-        pdu.ok_or_else(|| Error::new(crate::ErrorKind::Encode, "a message has no direction"))
-    }
-
-    /// The PDU of a direction, as `direction()` says it, with the code of its procedure,
-    /// its criticality and the octets of the open type that holds its message; `None`
-    /// for what is no direction.
-    pub(crate) fn of(
-        direction: &str,
-        procedure_code: u8,
-        criticality: Criticality,
-        value: Octets<'a>,
-    ) -> Option<Self> {
-        use crate::ngap::{
-            InitiatingMessage, ProcedureCode, SuccessfulOutcome, UnsuccessfulOutcome,
-        };
-        let procedure_code = ProcedureCode(procedure_code);
-        Some(match direction {
-            "InitiatingMessage" => Self::initiatingMessage(InitiatingMessage {
-                procedure_code,
-                criticality,
-                value,
-            }),
-            "SuccessfulOutcome" => Self::successfulOutcome(SuccessfulOutcome {
-                procedure_code,
-                criticality,
-                value,
-            }),
-            "UnsuccessfulOutcome" => Self::unsuccessfulOutcome(UnsuccessfulOutcome {
-                procedure_code,
-                criticality,
-                value,
-            }),
-            _ => return None,
-        })
+        protocol::of_message(message, criticality)
     }
 
     /// The criticality of this PDU, which the specification assigns to its procedure
     /// (`Message::CRITICALITY` of its message) in a PDU that is constructed as it has a
     /// sender construct one.
     pub fn criticality(&self) -> Criticality {
-        match self {
-            Self::initiatingMessage(message) => message.criticality,
-            Self::successfulOutcome(message) => message.criticality,
-            Self::unsuccessfulOutcome(message) => message.criticality,
-        }
+        <Self as Pdu<'a>>::criticality(self)
     }
 
     /// How this PDU deviates from what the ASN.1 assigns its message: the criticality of
     /// its procedure, and the object set of its IEs. The list is empty for a PDU that is
     /// constructed as TS 38.413 clause 9.4.1 has a sender construct it.
     ///
-    /// | [`Deviation`] | Is |
-    /// | --- | --- |
-    /// | `PduCriticality` | A criticality of the PDU that is not that of its procedure |
-    /// | `UnexpectedIe` | An IE that the object set of the message does not have |
-    /// | `RepeatedIe` | An IE that the message has already |
-    /// | `OutOfOrder` | An IE that comes after one that the object set has after it |
-    /// | `IeCriticality` | A criticality of an IE that is not the one that the object set assigns it |
-    /// | `MissingIe` | An IE whose presence is mandatory, and that the message does not have |
-    /// | `UndecodableIe` | An IE of the object set whose value does not decode as its type |
-    /// | `OutsideRoot` | An IE whose value is of a later version of its type: outside the root of an extensible constraint |
-    /// | `NotCanonical` | What is written in another form than the one that ITU-T X.691 gives it |
-    /// | `UnknownProcedure` | A procedure that the specification does not have in the direction of the PDU |
+    /// The deviations, and what `check` does not look at, are those of
+    /// [`oxirush_aper::protocol::check`], where each variant of [`Deviation`] is told. A
+    /// deviation says what the receiver of the message answers: the cause of
+    /// [`Deviation::cause`], and for the Criticality Diagnostics the item of
+    /// [`Deviation::diagnostics_item`], which
+    /// [`criticality_diagnostics`](Self::criticality_diagnostics) gathers into the IE of
+    /// the answer. Clause 10.3 of TS 38.413 has what a receiver does.
     ///
-    /// The criticality of the PDU comes first, then what each IE deviates in, in the
-    /// order of the message, then the IEs that are missing, in the order of the object
-    /// set.
+    /// `check` decodes the value of each IE of the object set. A receiver that reads the
+    /// IEs that it needs, which their decoding checks, calls
+    /// [`check_structure`](Self::check_structure), which does not.
     ///
     /// ```
     /// use oxirush_ngap::{Deviation, build_ngap, ngap::*};
@@ -352,101 +219,33 @@ impl<'a> NGAPPDU<'a> {
     /// # Ok::<(), oxirush_ngap::Error>(())
     /// ```
     ///
-    /// A deviation says what the receiver of the message answers: the cause of
-    /// [`Deviation::cause`], and for the Criticality Diagnostics the item of
-    /// [`Deviation::diagnostics_item`], which
-    /// [`criticality_diagnostics`](Self::criticality_diagnostics) gathers into the IE of
-    /// the answer. The macro that extracts the IEs of a message stops at the first IE
-    /// that is missing or does not decode; `check` has them all, and [`Deviation::of`]
-    /// gives the deviation of the error of that macro.
-    ///
-    /// It reports, and refuses nothing. The macros build a message whatever its IEs
-    /// are, a tree writes one, and the codec encodes and decodes it: a test of what a
-    /// peer does with such a message needs to send it. Clause 10.3 of TS 38.413 has what
-    /// a receiver does: with an IE that it does not comprehend, by the criticality that
-    /// the IE has (10.3.4), with one that is missing, by the criticality that the
-    /// specification assigns it (10.3.5), and with IEs in a wrong order or with too many
-    /// occurrences, which reject the procedure (10.3.6).
-    ///
-    /// It also reports what is written in another form than the one that ITU-T X.691
-    /// gives it, as [`Deviation::NotCanonical`]: in the message around its IEs, and in
-    /// the value of each IE of the object set. Such a value is whole, and the encoder of
-    /// a peer may write it: a receiver reads it and answers nothing for it. The octets
-    /// before the message, which are the PDU itself, were read when the PDU was decoded:
-    /// `aper::decode_with_faults` of the PDU that borrows has their faults.
-    ///
-    /// What it does not look at:
-    ///
-    /// - a conditional IE, which is reported neither when it is missing nor when it is
-    ///   there: its condition is in the prose of the specification;
-    /// - the IEs that a value holds, in a list, in a transfer or in an extension
-    ///   container: the value of an IE of the message is decoded as its type, and what
-    ///   it holds as octets is not;
-    /// - the IEs of the private message, which has no object set: the criticality of its
-    ///   PDU alone is compared;
-    /// - the message of a procedure that the specification does not have in that
-    ///   direction, as one that a later release adds: it is the one deviation
-    ///   `UnknownProcedure`, which a receiver answers by the criticality of the PDU
-    ///   (clause 10.3.4.1).
-    ///
     /// # Errors
     ///
     /// An error of the kind `Decode` when the octets of the message are not a container
     /// of protocol IEs.
     pub fn check(&self) -> Result<Vec<Deviation>, Error> {
-        let (direction, code) = (self.direction(), self.procedure_code());
-        let Some(message) = object_set(direction, code) else {
-            return Ok(vec![Deviation::UnknownProcedure {
-                procedure_code: code,
-                direction,
-                criticality: self.criticality(),
-            }]);
-        };
-        let mut found = Vec::new();
-        let criticality = self.criticality();
-        if let Some(assigned) = procedure_criticality(code)
-            && criticality != assigned
-        {
-            found.push(Deviation::PduCriticality {
-                criticality,
-                assigned,
-            });
-        }
-        if let Some(set) = message.ies {
-            let ies = self.protocol_ies()?;
-            // What of the message itself is in another form than the one of X.691.
-            let faults = message_faults(self.value());
-            found.extend(faults.iter().map(|noted| Deviation::NotCanonical {
-                ie: None,
-                fault: noted.fault,
-                bit: noted.bit,
-            }));
-            let listed: Vec<_> = ies.0.iter().map(|ie| (ie.id.0, ie.criticality)).collect();
-            // What is wrong with the value of the IE at a position: why it does not
-            // decode, as the macro that extracts it says it, or what of it is outside
-            // the root of an extensible constraint. And what of its encoding is in
-            // another form than the one of X.691.
-            let value = |position: usize| {
-                let ie = &ies.0[position];
-                let (id, criticality) = (ie.id.0, ie.criticality);
-                match decodes(id, &ie.value) {
-                    None => (None, Faults::default()),
-                    Some(Ok((outside, faults))) => (outside.map(Wrong::OutsideRoot), faults),
-                    Some(Err(error)) => {
-                        let error = crate::error::undecodable_ie(
-                            error,
-                            message.name,
-                            id,
-                            criticality,
-                            position,
-                        );
-                        (Some(Wrong::Undecodable(error)), Faults::default())
-                    }
-                }
-            };
-            deviations(set, &listed, &value, &mut found);
-        }
-        Ok(found)
+        protocol::check(self)
+    }
+
+    /// How this PDU deviates from what the ASN.1 assigns its message, in the container of
+    /// its IEs alone: the criticality of its procedure, and the object set of its IEs, the
+    /// presence, the order, the repetition and the criticality of each, which is what
+    /// clause 10.3 of TS 38.413 has a receiver answer. The values of the IEs are not
+    /// decoded, and what [`check`](Self::check) reports of them is not here:
+    /// `UndecodableIe`, `OutsideRoot` and `NotCanonical`.
+    ///
+    /// A receiver that checks the structure and reads the IEs that it needs, with
+    /// `extract_ngap_ies!` or [`ie`](Self::ie), pays for those IEs alone: the decoding of
+    /// each checks its value, and an IE that does not decode is the error of the kind
+    /// `UndecodableIe` there, which [`Deviation::of`] makes a deviation of. `check`
+    /// decodes every IE of the object set, for a tool that looks at every value.
+    ///
+    /// # Errors
+    ///
+    /// An error of the kind `Decode` when the octets of the message are not a container
+    /// of protocol IEs.
+    pub fn check_structure(&self) -> Result<Vec<Deviation>, Error> {
+        protocol::check_structure(self)
     }
 
     /// The Criticality Diagnostics IE of the ERROR INDICATION with which the receiver of

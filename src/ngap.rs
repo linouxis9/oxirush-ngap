@@ -185,7 +185,7 @@ pub mod ngap_common_data_types {
     /// `ProcedureCode ::= INTEGER (0..255)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ProcedureCode(pub u8);
-    impl crate::message::__Field<u8> for ProcedureCode {
+    impl oxirush_aper::protocol::__Field<u8> for ProcedureCode {
         #[inline]
         fn __field(self) -> u8 {
             self.0
@@ -229,7 +229,7 @@ pub mod ngap_common_data_types {
     /// `ProtocolExtensionID ::= INTEGER (0..65535)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ProtocolExtensionID(pub u16);
-    impl crate::message::__Field<u16> for ProtocolExtensionID {
+    impl oxirush_aper::protocol::__Field<u16> for ProtocolExtensionID {
         #[inline]
         fn __field(self) -> u16 {
             self.0
@@ -275,7 +275,7 @@ pub mod ngap_common_data_types {
     /// `ProtocolIE-ID ::= INTEGER (0..65535)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ProtocolIEID(pub u16);
-    impl crate::message::__Field<u16> for ProtocolIEID {
+    impl oxirush_aper::protocol::__Field<u16> for ProtocolIEID {
         #[inline]
         fn __field(self) -> u16 {
             self.0
@@ -1158,7 +1158,7 @@ pub mod ngap_containers {
         const NAME: &'static str = "ProtocolIE-Field";
     }
     impl<'a> Decode<'a> for ProtocolIEField<'a> {
-        #[inline]
+        #[inline(always)]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
             let id = match ProtocolIEID::decode(reader) {
                 Ok(value) => value,
@@ -1180,7 +1180,7 @@ pub mod ngap_containers {
         }
     }
     impl Encode for ProtocolIEField<'_> {
-        #[inline]
+        #[inline(always)]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
             if let Err(error) = self.id.encode(writer) {
                 return Err(error.in_field("id"));
@@ -1222,7 +1222,7 @@ pub mod ngap_containers {
     #[doc = " `ProtocolIE-Container`: the IEs of a message."]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ProtocolIEContainer<'a>(pub Vec<ProtocolIEField<'a>>);
-    impl<'a> crate::message::__Field<Vec<ProtocolIEField<'a>>> for ProtocolIEContainer<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Vec<ProtocolIEField<'a>>> for ProtocolIEContainer<'a> {
         #[inline]
         fn __field(self) -> Vec<ProtocolIEField<'a>> {
             self.0
@@ -1393,7 +1393,7 @@ pub mod ngap_containers {
     #[doc = " `ProtocolExtensionContainer`: the `iE-Extensions` of a type."]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ProtocolExtensionContainer<'a>(pub Vec<ProtocolExtensionField<'a>>);
-    impl<'a> crate::message::__Field<Vec<ProtocolExtensionField<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<ProtocolExtensionField<'a>>>
         for ProtocolExtensionContainer<'a>
     {
         #[inline]
@@ -1803,7 +1803,7 @@ pub mod ngap_ies {
     /// `A2X-PC5-QoS-Flow-List ::= SEQUENCE (SIZE (1..2048)) OF A2XPC5QoSFlowItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct A2XPC5QoSFlowList(pub Vec<A2XPC5QoSFlowItem>);
-    impl crate::message::__Field<Vec<A2XPC5QoSFlowItem>> for A2XPC5QoSFlowList {
+    impl oxirush_aper::protocol::__Field<Vec<A2XPC5QoSFlowItem>> for A2XPC5QoSFlowList {
         #[inline]
         fn __field(self) -> Vec<A2XPC5QoSFlowItem> {
             self.0
@@ -1981,7 +1981,7 @@ pub mod ngap_ies {
     /// `AIOTFIdentifier ::= OCTET STRING (SIZE (16..36, ...))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AIOTFIdentifier<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for AIOTFIdentifier<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for AIOTFIdentifier<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -2187,7 +2187,7 @@ pub mod ngap_ies {
     /// `AIOTFNameUTF8String ::= UTF8String (SIZE (1..150, ...))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AIOTFNameUTF8String<'a>(pub Cow<'a, str>);
-    impl<'a> crate::message::__Field<Cow<'a, str>> for AIOTFNameUTF8String<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Cow<'a, str>> for AIOTFNameUTF8String<'a> {
         #[inline]
         fn __field(self) -> Cow<'a, str> {
             self.0
@@ -2251,7 +2251,7 @@ pub mod ngap_ies {
     /// `AIOTFNameVisibleString ::= VisibleString (SIZE (1..150, ...))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AIOTFNameVisibleString<'a>(pub Cow<'a, str>);
-    impl<'a> crate::message::__Field<Cow<'a, str>> for AIOTFNameVisibleString<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Cow<'a, str>> for AIOTFNameVisibleString<'a> {
         #[inline]
         fn __field(self) -> Cow<'a, str> {
             self.0
@@ -2703,7 +2703,7 @@ pub mod ngap_ies {
     /// `AIoT-CorrelationIdentifier ::= INTEGER (0..65535, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AIoTCorrelationIdentifier(pub u64);
-    impl crate::message::__Field<u64> for AIoTCorrelationIdentifier {
+    impl oxirush_aper::protocol::__Field<u64> for AIoTCorrelationIdentifier {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -2997,7 +2997,9 @@ pub mod ngap_ies {
     /// `AIoT-DeviceReportList ::= SEQUENCE (SIZE (1..65535)) OF AIoTDeviceReportItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AIoTDeviceReportList<'a>(pub Vec<AIoTDeviceReportItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<AIoTDeviceReportItem<'a>>> for AIoTDeviceReportList<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Vec<AIoTDeviceReportItem<'a>>>
+        for AIoTDeviceReportList<'a>
+    {
         #[inline]
         fn __field(self) -> Vec<AIoTDeviceReportItem<'a>> {
             self.0
@@ -3260,7 +3262,7 @@ pub mod ngap_ies {
     /// `AIoT-NASPDU ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AIoTNASPDU<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for AIoTNASPDU<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for AIoTNASPDU<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -3320,7 +3322,7 @@ pub mod ngap_ies {
     /// `AIoT-ReaderIndex ::= INTEGER (1..65535, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AIoTReaderIndex(pub u64);
-    impl crate::message::__Field<u64> for AIoTReaderIndex {
+    impl oxirush_aper::protocol::__Field<u64> for AIoTReaderIndex {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -3475,7 +3477,9 @@ pub mod ngap_ies {
     /// `AIoT-ReaderReportList ::= SEQUENCE (SIZE (1..65535)) OF AIoTReaderReportItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AIoTReaderReportList<'a>(pub Vec<AIoTReaderReportItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<AIoTReaderReportItem<'a>>> for AIoTReaderReportList<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Vec<AIoTReaderReportItem<'a>>>
+        for AIoTReaderReportList<'a>
+    {
         #[inline]
         fn __field(self) -> Vec<AIoTReaderReportItem<'a>> {
             self.0
@@ -3534,7 +3538,7 @@ pub mod ngap_ies {
     /// `AIoT-RequestedAIoTAreaList ::= SEQUENCE (SIZE (1..256)) OF AIoTAreaID`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AIoTRequestedAIoTAreaList(pub Vec<AIoTAreaID>);
-    impl crate::message::__Field<Vec<AIoTAreaID>> for AIoTRequestedAIoTAreaList {
+    impl oxirush_aper::protocol::__Field<Vec<AIoTAreaID>> for AIoTRequestedAIoTAreaList {
         #[inline]
         fn __field(self) -> Vec<AIoTAreaID> {
             self.0
@@ -3689,7 +3693,7 @@ pub mod ngap_ies {
     /// `AIoT-RequestedReaderList ::= SEQUENCE (SIZE (1..65535)) OF AIoTRequestedReaderItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AIoTRequestedReaderList(pub Vec<AIoTRequestedReaderItem>);
-    impl crate::message::__Field<Vec<AIoTRequestedReaderItem>> for AIoTRequestedReaderList {
+    impl oxirush_aper::protocol::__Field<Vec<AIoTRequestedReaderItem>> for AIoTRequestedReaderList {
         #[inline]
         fn __field(self) -> Vec<AIoTRequestedReaderItem> {
             self.0
@@ -4237,7 +4241,7 @@ pub mod ngap_ies {
     /// `AMF-TNLAssociationSetupList ::= SEQUENCE (SIZE (1..32)) OF AMFTNLAssociationSetupItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AMFTNLAssociationSetupList<'a>(pub Vec<AMFTNLAssociationSetupItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<AMFTNLAssociationSetupItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<AMFTNLAssociationSetupItem<'a>>>
         for AMFTNLAssociationSetupList<'a>
     {
         #[inline]
@@ -4453,7 +4457,7 @@ pub mod ngap_ies {
     /// `AMF-TNLAssociationToAddList ::= SEQUENCE (SIZE (1..32)) OF AMFTNLAssociationToAddItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AMFTNLAssociationToAddList<'a>(pub Vec<AMFTNLAssociationToAddItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<AMFTNLAssociationToAddItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<AMFTNLAssociationToAddItem<'a>>>
         for AMFTNLAssociationToAddList<'a>
     {
         #[inline]
@@ -4615,7 +4619,7 @@ pub mod ngap_ies {
     /// `AMF-TNLAssociationToRemoveList ::= SEQUENCE (SIZE (1..32)) OF AMFTNLAssociationToRemoveItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AMFTNLAssociationToRemoveList<'a>(pub Vec<AMFTNLAssociationToRemoveItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<AMFTNLAssociationToRemoveItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<AMFTNLAssociationToRemoveItem<'a>>>
         for AMFTNLAssociationToRemoveList<'a>
     {
         #[inline]
@@ -4842,7 +4846,7 @@ pub mod ngap_ies {
     /// `AMF-TNLAssociationToUpdateList ::= SEQUENCE (SIZE (1..32)) OF AMFTNLAssociationToUpdateItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AMFTNLAssociationToUpdateList<'a>(pub Vec<AMFTNLAssociationToUpdateItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<AMFTNLAssociationToUpdateItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<AMFTNLAssociationToUpdateItem<'a>>>
         for AMFTNLAssociationToUpdateList<'a>
     {
         #[inline]
@@ -4905,7 +4909,7 @@ pub mod ngap_ies {
     /// `AMF-UE-NGAP-ID ::= INTEGER (0..1099511627775)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AMFUENGAPID(pub u64);
-    impl crate::message::__Field<u64> for AMFUENGAPID {
+    impl oxirush_aper::protocol::__Field<u64> for AMFUENGAPID {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -4947,7 +4951,7 @@ pub mod ngap_ies {
     /// `AMFName ::= PrintableString (SIZE (1..150, ...))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AMFName<'a>(pub Cow<'a, str>);
-    impl<'a> crate::message::__Field<Cow<'a, str>> for AMFName<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Cow<'a, str>> for AMFName<'a> {
         #[inline]
         fn __field(self) -> Cow<'a, str> {
             self.0
@@ -5011,7 +5015,7 @@ pub mod ngap_ies {
     /// `AMFNameUTF8String ::= UTF8String (SIZE (1..150, ...))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AMFNameUTF8String<'a>(pub Cow<'a, str>);
-    impl<'a> crate::message::__Field<Cow<'a, str>> for AMFNameUTF8String<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Cow<'a, str>> for AMFNameUTF8String<'a> {
         #[inline]
         fn __field(self) -> Cow<'a, str> {
             self.0
@@ -5075,7 +5079,7 @@ pub mod ngap_ies {
     /// `AMFNameVisibleString ::= VisibleString (SIZE (1..150, ...))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AMFNameVisibleString<'a>(pub Cow<'a, str>);
-    impl<'a> crate::message::__Field<Cow<'a, str>> for AMFNameVisibleString<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Cow<'a, str>> for AMFNameVisibleString<'a> {
         #[inline]
         fn __field(self) -> Cow<'a, str> {
             self.0
@@ -5226,7 +5230,7 @@ pub mod ngap_ies {
     /// `AMFPointer ::= BIT STRING (SIZE (6))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AMFPointer(pub Bits);
-    impl crate::message::__Field<Bits> for AMFPointer {
+    impl oxirush_aper::protocol::__Field<Bits> for AMFPointer {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -5279,7 +5283,7 @@ pub mod ngap_ies {
     /// `AMFRegionID ::= BIT STRING (SIZE (8))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AMFRegionID(pub Bits);
-    impl crate::message::__Field<Bits> for AMFRegionID {
+    impl oxirush_aper::protocol::__Field<Bits> for AMFRegionID {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -5332,7 +5336,7 @@ pub mod ngap_ies {
     /// `AMFSetID ::= BIT STRING (SIZE (10))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AMFSetID(pub Bits);
-    impl crate::message::__Field<Bits> for AMFSetID {
+    impl oxirush_aper::protocol::__Field<Bits> for AMFSetID {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -5599,7 +5603,7 @@ pub mod ngap_ies {
     /// `ActivatedCellList ::= SEQUENCE (SIZE (1..16384)) OF NGRANCGI`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ActivatedCellList(pub Vec<NGRANCGI>);
-    impl crate::message::__Field<Vec<NGRANCGI>> for ActivatedCellList {
+    impl oxirush_aper::protocol::__Field<Vec<NGRANCGI>> for ActivatedCellList {
         #[inline]
         fn __field(self) -> Vec<NGRANCGI> {
             self.0
@@ -5804,7 +5808,7 @@ pub mod ngap_ies {
     pub struct AdditionalCancelledlocationReportingReferenceIDList(
         pub Vec<AdditionalCancelledlocationReportingReferenceIDItem>,
     );
-    impl crate::message::__Field<Vec<AdditionalCancelledlocationReportingReferenceIDItem>>
+    impl oxirush_aper::protocol::__Field<Vec<AdditionalCancelledlocationReportingReferenceIDItem>>
         for AdditionalCancelledlocationReportingReferenceIDList
     {
         #[inline]
@@ -6032,7 +6036,7 @@ pub mod ngap_ies {
     pub struct AdditionalDLUPTNLInformationForHOList<'a>(
         pub Vec<AdditionalDLUPTNLInformationForHOItem<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<AdditionalDLUPTNLInformationForHOItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<AdditionalDLUPTNLInformationForHOItem<'a>>>
         for AdditionalDLUPTNLInformationForHOList<'a>
     {
         #[inline]
@@ -6616,7 +6620,7 @@ pub mod ngap_ies {
     pub struct AerialUEFlightInformationReportingControlList(
         pub Vec<AerialUEFlightInformationReportingControlItem>,
     );
-    impl crate::message::__Field<Vec<AerialUEFlightInformationReportingControlItem>>
+    impl oxirush_aper::protocol::__Field<Vec<AerialUEFlightInformationReportingControlItem>>
         for AerialUEFlightInformationReportingControlList
     {
         #[inline]
@@ -6930,7 +6934,7 @@ pub mod ngap_ies {
     /// `Allowed-CAG-List-per-PLMN ::= SEQUENCE (SIZE (1..256)) OF CAGID`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AllowedCAGListPerPLMN(pub Vec<CAGID>);
-    impl crate::message::__Field<Vec<CAGID>> for AllowedCAGListPerPLMN {
+    impl oxirush_aper::protocol::__Field<Vec<CAGID>> for AllowedCAGListPerPLMN {
         #[inline]
         fn __field(self) -> Vec<CAGID> {
             self.0
@@ -7158,7 +7162,7 @@ pub mod ngap_ies {
     /// `Allowed-PNI-NPN-List ::= SEQUENCE (SIZE (1..16)) OF AllowedPNINPNItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AllowedPNINPNList(pub Vec<AllowedPNINPNItem>);
-    impl crate::message::__Field<Vec<AllowedPNINPNItem>> for AllowedPNINPNList {
+    impl oxirush_aper::protocol::__Field<Vec<AllowedPNINPNItem>> for AllowedPNINPNList {
         #[inline]
         fn __field(self) -> Vec<AllowedPNINPNItem> {
             self.0
@@ -7210,7 +7214,7 @@ pub mod ngap_ies {
     /// `AllowedNSSAI ::= SEQUENCE (SIZE (1..8)) OF AllowedNSSAIItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AllowedNSSAI(pub Vec<AllowedNSSAIItem>);
-    impl crate::message::__Field<Vec<AllowedNSSAIItem>> for AllowedNSSAI {
+    impl oxirush_aper::protocol::__Field<Vec<AllowedNSSAIItem>> for AllowedNSSAI {
         #[inline]
         fn __field(self) -> Vec<AllowedNSSAIItem> {
             self.0
@@ -7350,7 +7354,7 @@ pub mod ngap_ies {
     /// `AllowedPeriodicityList ::= SEQUENCE (SIZE (1..8)) OF Periodicity`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AllowedPeriodicityList(pub Vec<Periodicity>);
-    impl crate::message::__Field<Vec<Periodicity>> for AllowedPeriodicityList {
+    impl oxirush_aper::protocol::__Field<Vec<Periodicity>> for AllowedPeriodicityList {
         #[inline]
         fn __field(self) -> Vec<Periodicity> {
             self.0
@@ -7402,7 +7406,7 @@ pub mod ngap_ies {
     /// `AllowedTACs ::= SEQUENCE (SIZE (1..16)) OF TAC`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AllowedTACs(pub Vec<TAC>);
-    impl crate::message::__Field<Vec<TAC>> for AllowedTACs {
+    impl oxirush_aper::protocol::__Field<Vec<TAC>> for AllowedTACs {
         #[inline]
         fn __field(self) -> Vec<TAC> {
             self.0
@@ -7454,7 +7458,7 @@ pub mod ngap_ies {
     /// `AlternativeQoSParaSetIndex ::= INTEGER (1..8, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AlternativeQoSParaSetIndex(pub u64);
-    impl crate::message::__Field<u64> for AlternativeQoSParaSetIndex {
+    impl oxirush_aper::protocol::__Field<u64> for AlternativeQoSParaSetIndex {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -7701,7 +7705,7 @@ pub mod ngap_ies {
     /// `AlternativeQoSParaSetList ::= SEQUENCE (SIZE (1..8)) OF AlternativeQoSParaSetItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AlternativeQoSParaSetList(pub Vec<AlternativeQoSParaSetItem>);
-    impl crate::message::__Field<Vec<AlternativeQoSParaSetItem>> for AlternativeQoSParaSetList {
+    impl oxirush_aper::protocol::__Field<Vec<AlternativeQoSParaSetItem>> for AlternativeQoSParaSetList {
         #[inline]
         fn __field(self) -> Vec<AlternativeQoSParaSetItem> {
             self.0
@@ -7753,7 +7757,7 @@ pub mod ngap_ies {
     /// `AlternativeQoSParaSetNotifyIndex ::= INTEGER (0..8, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AlternativeQoSParaSetNotifyIndex(pub u64);
-    impl crate::message::__Field<u64> for AlternativeQoSParaSetNotifyIndex {
+    impl oxirush_aper::protocol::__Field<u64> for AlternativeQoSParaSetNotifyIndex {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -7795,7 +7799,7 @@ pub mod ngap_ies {
     /// `Altitude ::= INTEGER (-420..10000, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct Altitude(pub i64);
-    impl crate::message::__Field<i64> for Altitude {
+    impl oxirush_aper::protocol::__Field<i64> for Altitude {
         #[inline]
         fn __field(self) -> i64 {
             self.0
@@ -8190,7 +8194,7 @@ pub mod ngap_ies {
     /// `AreaOfInterestCellList ::= SEQUENCE (SIZE (1..256)) OF AreaOfInterestCellItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AreaOfInterestCellList(pub Vec<AreaOfInterestCellItem>);
-    impl crate::message::__Field<Vec<AreaOfInterestCellItem>> for AreaOfInterestCellList {
+    impl oxirush_aper::protocol::__Field<Vec<AreaOfInterestCellItem>> for AreaOfInterestCellList {
         #[inline]
         fn __field(self) -> Vec<AreaOfInterestCellItem> {
             self.0
@@ -8356,7 +8360,7 @@ pub mod ngap_ies {
     /// `AreaOfInterestList ::= SEQUENCE (SIZE (1..64)) OF AreaOfInterestItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AreaOfInterestList(pub Vec<AreaOfInterestItem>);
-    impl crate::message::__Field<Vec<AreaOfInterestItem>> for AreaOfInterestList {
+    impl oxirush_aper::protocol::__Field<Vec<AreaOfInterestItem>> for AreaOfInterestList {
         #[inline]
         fn __field(self) -> Vec<AreaOfInterestItem> {
             self.0
@@ -8496,7 +8500,7 @@ pub mod ngap_ies {
     /// `AreaOfInterestRANNodeList ::= SEQUENCE (SIZE (1..64)) OF AreaOfInterestRANNodeItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AreaOfInterestRANNodeList(pub Vec<AreaOfInterestRANNodeItem>);
-    impl crate::message::__Field<Vec<AreaOfInterestRANNodeItem>> for AreaOfInterestRANNodeList {
+    impl oxirush_aper::protocol::__Field<Vec<AreaOfInterestRANNodeItem>> for AreaOfInterestRANNodeList {
         #[inline]
         fn __field(self) -> Vec<AreaOfInterestRANNodeItem> {
             self.0
@@ -8624,7 +8628,7 @@ pub mod ngap_ies {
     /// `AreaOfInterestTAIList ::= SEQUENCE (SIZE (1..16)) OF AreaOfInterestTAIItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AreaOfInterestTAIList(pub Vec<AreaOfInterestTAIItem>);
-    impl crate::message::__Field<Vec<AreaOfInterestTAIItem>> for AreaOfInterestTAIList {
+    impl oxirush_aper::protocol::__Field<Vec<AreaOfInterestTAIItem>> for AreaOfInterestTAIList {
         #[inline]
         fn __field(self) -> Vec<AreaOfInterestTAIItem> {
             self.0
@@ -9040,7 +9044,7 @@ pub mod ngap_ies {
     /// `AreaScopeOfNeighCellsList ::= SEQUENCE (SIZE (1..8)) OF AreaScopeOfNeighCellsItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AreaScopeOfNeighCellsList<'a>(pub Vec<AreaScopeOfNeighCellsItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<AreaScopeOfNeighCellsItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<AreaScopeOfNeighCellsItem<'a>>>
         for AreaScopeOfNeighCellsList<'a>
     {
         #[inline]
@@ -9452,7 +9456,7 @@ pub mod ngap_ies {
     /// `AssistanceInformationQoE-Meas ::= INTEGER (1..16, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AssistanceInformationQoEMeas(pub u64);
-    impl crate::message::__Field<u64> for AssistanceInformationQoEMeas {
+    impl oxirush_aper::protocol::__Field<u64> for AssistanceInformationQoEMeas {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -9611,7 +9615,7 @@ pub mod ngap_ies {
     /// `AssociatedMBSQosFlowSetupRequestList ::= SEQUENCE (SIZE (1..64)) OF AssociatedMBSQosFlowSetupRequestItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AssociatedMBSQosFlowSetupRequestList(pub Vec<AssociatedMBSQosFlowSetupRequestItem>);
-    impl crate::message::__Field<Vec<AssociatedMBSQosFlowSetupRequestItem>>
+    impl oxirush_aper::protocol::__Field<Vec<AssociatedMBSQosFlowSetupRequestItem>>
         for AssociatedMBSQosFlowSetupRequestList
     {
         #[inline]
@@ -9784,7 +9788,7 @@ pub mod ngap_ies {
     pub struct AssociatedMBSQosFlowSetuporModifyRequestList(
         pub Vec<AssociatedMBSQosFlowSetuporModifyRequestItem>,
     );
-    impl crate::message::__Field<Vec<AssociatedMBSQosFlowSetuporModifyRequestItem>>
+    impl oxirush_aper::protocol::__Field<Vec<AssociatedMBSQosFlowSetuporModifyRequestItem>>
         for AssociatedMBSQosFlowSetuporModifyRequestList
     {
         #[inline]
@@ -10016,7 +10020,7 @@ pub mod ngap_ies {
     /// `AssociatedQosFlowList ::= SEQUENCE (SIZE (1..64)) OF AssociatedQosFlowItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AssociatedQosFlowList(pub Vec<AssociatedQosFlowItem>);
-    impl crate::message::__Field<Vec<AssociatedQosFlowItem>> for AssociatedQosFlowList {
+    impl oxirush_aper::protocol::__Field<Vec<AssociatedQosFlowItem>> for AssociatedQosFlowList {
         #[inline]
         fn __field(self) -> Vec<AssociatedQosFlowItem> {
             self.0
@@ -10068,7 +10072,7 @@ pub mod ngap_ies {
     /// `AssociatedSessionID ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AssociatedSessionID<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for AssociatedSessionID<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for AssociatedSessionID<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -10262,7 +10266,7 @@ pub mod ngap_ies {
     /// `AvailableBitrateReportThresholdList ::= SEQUENCE (SIZE (1..8)) OF AvailableBitrateReportThresholdItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct AvailableBitrateReportThresholdList(pub Vec<AvailableBitrateReportThresholdItem>);
-    impl crate::message::__Field<Vec<AvailableBitrateReportThresholdItem>>
+    impl oxirush_aper::protocol::__Field<Vec<AvailableBitrateReportThresholdItem>>
         for AvailableBitrateReportThresholdList
     {
         #[inline]
@@ -10563,7 +10567,7 @@ pub mod ngap_ies {
     /// `AveragingWindow ::= INTEGER (0..4095, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct AveragingWindow(pub u64);
-    impl crate::message::__Field<u64> for AveragingWindow {
+    impl oxirush_aper::protocol::__Field<u64> for AveragingWindow {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -11000,7 +11004,7 @@ pub mod ngap_ies {
     /// `BitRate ::= INTEGER (0..4000000000000, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct BitRate(pub u64);
-    impl crate::message::__Field<u64> for BitRate {
+    impl oxirush_aper::protocol::__Field<u64> for BitRate {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -11184,7 +11188,7 @@ pub mod ngap_ies {
     /// `BluetoothMeasConfigNameList ::= SEQUENCE (SIZE (1..4)) OF BluetoothMeasConfigNameItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BluetoothMeasConfigNameList<'a>(pub Vec<BluetoothMeasConfigNameItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<BluetoothMeasConfigNameItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<BluetoothMeasConfigNameItem<'a>>>
         for BluetoothMeasConfigNameList<'a>
     {
         #[inline]
@@ -11457,7 +11461,7 @@ pub mod ngap_ies {
     /// `BluetoothName ::= OCTET STRING (SIZE (1..248))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BluetoothName<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for BluetoothName<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for BluetoothName<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -11981,7 +11985,7 @@ pub mod ngap_ies {
     /// `BroadcastPLMNList ::= SEQUENCE (SIZE (1..12)) OF BroadcastPLMNItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BroadcastPLMNList(pub Vec<BroadcastPLMNItem>);
-    impl crate::message::__Field<Vec<BroadcastPLMNItem>> for BroadcastPLMNList {
+    impl oxirush_aper::protocol::__Field<Vec<BroadcastPLMNItem>> for BroadcastPLMNList {
         #[inline]
         fn __field(self) -> Vec<BroadcastPLMNItem> {
             self.0
@@ -12376,7 +12380,7 @@ pub mod ngap_ies {
     /// `BurstArrivalTime ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct BurstArrivalTime<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for BurstArrivalTime<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for BurstArrivalTime<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -12566,7 +12570,7 @@ pub mod ngap_ies {
     /// `C-RNTI ::= BIT STRING (SIZE (16))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct CRNTI(pub Bits);
-    impl crate::message::__Field<Bits> for CRNTI {
+    impl oxirush_aper::protocol::__Field<Bits> for CRNTI {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -12618,7 +12622,7 @@ pub mod ngap_ies {
     /// `CAG-ID ::= BIT STRING (SIZE (32))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct CAGID(pub Bits);
-    impl crate::message::__Field<Bits> for CAGID {
+    impl oxirush_aper::protocol::__Field<Bits> for CAGID {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -12670,7 +12674,7 @@ pub mod ngap_ies {
     /// `CAGListforMDT ::= SEQUENCE (SIZE (1..256)) OF CAGListforMDTItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CAGListforMDT(pub Vec<CAGListforMDTItem>);
-    impl crate::message::__Field<Vec<CAGListforMDTItem>> for CAGListforMDT {
+    impl oxirush_aper::protocol::__Field<Vec<CAGListforMDTItem>> for CAGListforMDT {
         #[inline]
         fn __field(self) -> Vec<CAGListforMDTItem> {
             self.0
@@ -13064,7 +13068,7 @@ pub mod ngap_ies {
     /// `CNTypeRestrictionsForEquivalent ::= SEQUENCE (SIZE (1..15)) OF CNTypeRestrictionsForEquivalentItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CNTypeRestrictionsForEquivalent(pub Vec<CNTypeRestrictionsForEquivalentItem>);
-    impl crate::message::__Field<Vec<CNTypeRestrictionsForEquivalentItem>>
+    impl oxirush_aper::protocol::__Field<Vec<CNTypeRestrictionsForEquivalentItem>>
         for CNTypeRestrictionsForEquivalent
     {
         #[inline]
@@ -13317,7 +13321,7 @@ pub mod ngap_ies {
     /// `CNsubgroupID ::= INTEGER (0..7, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct CNsubgroupID(pub u64);
-    impl crate::message::__Field<u64> for CNsubgroupID {
+    impl oxirush_aper::protocol::__Field<u64> for CNsubgroupID {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -13719,7 +13723,9 @@ pub mod ngap_ies {
     /// `CancelledCellsInEAI-EUTRA ::= SEQUENCE (SIZE (1..65535)) OF CancelledCellsInEAIEUTRAItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CancelledCellsInEAIEUTRA(pub Vec<CancelledCellsInEAIEUTRAItem>);
-    impl crate::message::__Field<Vec<CancelledCellsInEAIEUTRAItem>> for CancelledCellsInEAIEUTRA {
+    impl oxirush_aper::protocol::__Field<Vec<CancelledCellsInEAIEUTRAItem>>
+        for CancelledCellsInEAIEUTRA
+    {
         #[inline]
         fn __field(self) -> Vec<CancelledCellsInEAIEUTRAItem> {
             self.0
@@ -13875,7 +13881,7 @@ pub mod ngap_ies {
     /// `CancelledCellsInEAI-NR ::= SEQUENCE (SIZE (1..65535)) OF CancelledCellsInEAINRItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CancelledCellsInEAINR(pub Vec<CancelledCellsInEAINRItem>);
-    impl crate::message::__Field<Vec<CancelledCellsInEAINRItem>> for CancelledCellsInEAINR {
+    impl oxirush_aper::protocol::__Field<Vec<CancelledCellsInEAINRItem>> for CancelledCellsInEAINR {
         #[inline]
         fn __field(self) -> Vec<CancelledCellsInEAINRItem> {
             self.0
@@ -14031,7 +14037,9 @@ pub mod ngap_ies {
     /// `CancelledCellsInTAI-EUTRA ::= SEQUENCE (SIZE (1..65535)) OF CancelledCellsInTAIEUTRAItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CancelledCellsInTAIEUTRA(pub Vec<CancelledCellsInTAIEUTRAItem>);
-    impl crate::message::__Field<Vec<CancelledCellsInTAIEUTRAItem>> for CancelledCellsInTAIEUTRA {
+    impl oxirush_aper::protocol::__Field<Vec<CancelledCellsInTAIEUTRAItem>>
+        for CancelledCellsInTAIEUTRA
+    {
         #[inline]
         fn __field(self) -> Vec<CancelledCellsInTAIEUTRAItem> {
             self.0
@@ -14187,7 +14195,7 @@ pub mod ngap_ies {
     /// `CancelledCellsInTAI-NR ::= SEQUENCE (SIZE (1..65535)) OF CancelledCellsInTAINRItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CancelledCellsInTAINR(pub Vec<CancelledCellsInTAINRItem>);
-    impl crate::message::__Field<Vec<CancelledCellsInTAINRItem>> for CancelledCellsInTAINR {
+    impl oxirush_aper::protocol::__Field<Vec<CancelledCellsInTAINRItem>> for CancelledCellsInTAINR {
         #[inline]
         fn __field(self) -> Vec<CancelledCellsInTAINRItem> {
             self.0
@@ -14610,7 +14618,7 @@ pub mod ngap_ies {
     /// `CandidateCellList ::= SEQUENCE (SIZE (1..32)) OF CandidateCellItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CandidateCellList(pub Vec<CandidateCellItem>);
-    impl crate::message::__Field<Vec<CandidateCellItem>> for CandidateCellList {
+    impl oxirush_aper::protocol::__Field<Vec<CandidateCellItem>> for CandidateCellList {
         #[inline]
         fn __field(self) -> Vec<CandidateCellItem> {
             self.0
@@ -14776,7 +14784,7 @@ pub mod ngap_ies {
     /// `CandidateRelayUE-ID ::= BIT STRING (SIZE (24))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct CandidateRelayUEID(pub Bits);
-    impl crate::message::__Field<Bits> for CandidateRelayUEID {
+    impl oxirush_aper::protocol::__Field<Bits> for CandidateRelayUEID {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -14917,7 +14925,7 @@ pub mod ngap_ies {
     /// `CandidateRelayUEInformationList ::= SEQUENCE (SIZE (1..32)) OF CandidateRelayUEInformationItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CandidateRelayUEInformationList(pub Vec<CandidateRelayUEInformationItem>);
-    impl crate::message::__Field<Vec<CandidateRelayUEInformationItem>>
+    impl oxirush_aper::protocol::__Field<Vec<CandidateRelayUEInformationItem>>
         for CandidateRelayUEInformationList
     {
         #[inline]
@@ -15972,7 +15980,7 @@ pub mod ngap_ies {
     /// `CellCAGList ::= SEQUENCE (SIZE (1..64)) OF CAGID`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CellCAGList(pub Vec<CAGID>);
-    impl crate::message::__Field<Vec<CAGID>> for CellCAGList {
+    impl oxirush_aper::protocol::__Field<Vec<CAGID>> for CellCAGList {
         #[inline]
         fn __field(self) -> Vec<CAGID> {
             self.0
@@ -16024,7 +16032,7 @@ pub mod ngap_ies {
     /// `CellIDBroadcastEUTRA ::= SEQUENCE (SIZE (1..65535)) OF CellIDBroadcastEUTRAItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CellIDBroadcastEUTRA(pub Vec<CellIDBroadcastEUTRAItem>);
-    impl crate::message::__Field<Vec<CellIDBroadcastEUTRAItem>> for CellIDBroadcastEUTRA {
+    impl oxirush_aper::protocol::__Field<Vec<CellIDBroadcastEUTRAItem>> for CellIDBroadcastEUTRA {
         #[inline]
         fn __field(self) -> Vec<CellIDBroadcastEUTRAItem> {
             self.0
@@ -16164,7 +16172,7 @@ pub mod ngap_ies {
     /// `CellIDBroadcastNR ::= SEQUENCE (SIZE (1..65535)) OF CellIDBroadcastNRItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CellIDBroadcastNR(pub Vec<CellIDBroadcastNRItem>);
-    impl crate::message::__Field<Vec<CellIDBroadcastNRItem>> for CellIDBroadcastNR {
+    impl oxirush_aper::protocol::__Field<Vec<CellIDBroadcastNRItem>> for CellIDBroadcastNR {
         #[inline]
         fn __field(self) -> Vec<CellIDBroadcastNRItem> {
             self.0
@@ -16304,7 +16312,7 @@ pub mod ngap_ies {
     /// `CellIDCancelledEUTRA ::= SEQUENCE (SIZE (1..65535)) OF CellIDCancelledEUTRAItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CellIDCancelledEUTRA(pub Vec<CellIDCancelledEUTRAItem>);
-    impl crate::message::__Field<Vec<CellIDCancelledEUTRAItem>> for CellIDCancelledEUTRA {
+    impl oxirush_aper::protocol::__Field<Vec<CellIDCancelledEUTRAItem>> for CellIDCancelledEUTRA {
         #[inline]
         fn __field(self) -> Vec<CellIDCancelledEUTRAItem> {
             self.0
@@ -16460,7 +16468,7 @@ pub mod ngap_ies {
     /// `CellIDCancelledNR ::= SEQUENCE (SIZE (1..65535)) OF CellIDCancelledNRItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CellIDCancelledNR(pub Vec<CellIDCancelledNRItem>);
-    impl crate::message::__Field<Vec<CellIDCancelledNRItem>> for CellIDCancelledNR {
+    impl oxirush_aper::protocol::__Field<Vec<CellIDCancelledNRItem>> for CellIDCancelledNR {
         #[inline]
         fn __field(self) -> Vec<CellIDCancelledNRItem> {
             self.0
@@ -16715,7 +16723,7 @@ pub mod ngap_ies {
     /// `CellIdListforMDT-EUTRA ::= SEQUENCE (SIZE (1..32)) OF EUTRACGI`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CellIdListforMDTEUTRA(pub Vec<EUTRACGI>);
-    impl crate::message::__Field<Vec<EUTRACGI>> for CellIdListforMDTEUTRA {
+    impl oxirush_aper::protocol::__Field<Vec<EUTRACGI>> for CellIdListforMDTEUTRA {
         #[inline]
         fn __field(self) -> Vec<EUTRACGI> {
             self.0
@@ -16767,7 +16775,7 @@ pub mod ngap_ies {
     /// `CellIdListforMDT-NR ::= SEQUENCE (SIZE (1..32)) OF NRCGI`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CellIdListforMDTNR(pub Vec<NRCGI>);
-    impl crate::message::__Field<Vec<NRCGI>> for CellIdListforMDTNR {
+    impl oxirush_aper::protocol::__Field<Vec<NRCGI>> for CellIdListforMDTNR {
         #[inline]
         fn __field(self) -> Vec<NRCGI> {
             self.0
@@ -16819,7 +16827,7 @@ pub mod ngap_ies {
     /// `CellIdListforQMC ::= SEQUENCE (SIZE (1..32)) OF NGRANCGI`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CellIdListforQMC(pub Vec<NGRANCGI>);
-    impl crate::message::__Field<Vec<NGRANCGI>> for CellIdListforQMC {
+    impl oxirush_aper::protocol::__Field<Vec<NGRANCGI>> for CellIdListforQMC {
         #[inline]
         fn __field(self) -> Vec<NGRANCGI> {
             self.0
@@ -17009,7 +17017,7 @@ pub mod ngap_ies {
     /// `CellsToActivateList ::= SEQUENCE (SIZE (1..16384)) OF NGRANCGI`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CellsToActivateList(pub Vec<NGRANCGI>);
-    impl crate::message::__Field<Vec<NGRANCGI>> for CellsToActivateList {
+    impl oxirush_aper::protocol::__Field<Vec<NGRANCGI>> for CellsToActivateList {
         #[inline]
         fn __field(self) -> Vec<NGRANCGI> {
             self.0
@@ -18273,7 +18281,7 @@ pub mod ngap_ies {
     /// `CommonNetworkInstance ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CommonNetworkInstance<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for CommonNetworkInstance<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for CommonNetworkInstance<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -18333,7 +18341,9 @@ pub mod ngap_ies {
     /// `CompletedCellsInEAI-EUTRA ::= SEQUENCE (SIZE (1..65535)) OF CompletedCellsInEAIEUTRAItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CompletedCellsInEAIEUTRA(pub Vec<CompletedCellsInEAIEUTRAItem>);
-    impl crate::message::__Field<Vec<CompletedCellsInEAIEUTRAItem>> for CompletedCellsInEAIEUTRA {
+    impl oxirush_aper::protocol::__Field<Vec<CompletedCellsInEAIEUTRAItem>>
+        for CompletedCellsInEAIEUTRA
+    {
         #[inline]
         fn __field(self) -> Vec<CompletedCellsInEAIEUTRAItem> {
             self.0
@@ -18473,7 +18483,7 @@ pub mod ngap_ies {
     /// `CompletedCellsInEAI-NR ::= SEQUENCE (SIZE (1..65535)) OF CompletedCellsInEAINRItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CompletedCellsInEAINR(pub Vec<CompletedCellsInEAINRItem>);
-    impl crate::message::__Field<Vec<CompletedCellsInEAINRItem>> for CompletedCellsInEAINR {
+    impl oxirush_aper::protocol::__Field<Vec<CompletedCellsInEAINRItem>> for CompletedCellsInEAINR {
         #[inline]
         fn __field(self) -> Vec<CompletedCellsInEAINRItem> {
             self.0
@@ -18613,7 +18623,9 @@ pub mod ngap_ies {
     /// `CompletedCellsInTAI-EUTRA ::= SEQUENCE (SIZE (1..65535)) OF CompletedCellsInTAIEUTRAItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CompletedCellsInTAIEUTRA(pub Vec<CompletedCellsInTAIEUTRAItem>);
-    impl crate::message::__Field<Vec<CompletedCellsInTAIEUTRAItem>> for CompletedCellsInTAIEUTRA {
+    impl oxirush_aper::protocol::__Field<Vec<CompletedCellsInTAIEUTRAItem>>
+        for CompletedCellsInTAIEUTRA
+    {
         #[inline]
         fn __field(self) -> Vec<CompletedCellsInTAIEUTRAItem> {
             self.0
@@ -18753,7 +18765,7 @@ pub mod ngap_ies {
     /// `CompletedCellsInTAI-NR ::= SEQUENCE (SIZE (1..65535)) OF CompletedCellsInTAINRItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CompletedCellsInTAINR(pub Vec<CompletedCellsInTAINRItem>);
-    impl crate::message::__Field<Vec<CompletedCellsInTAINRItem>> for CompletedCellsInTAINR {
+    impl oxirush_aper::protocol::__Field<Vec<CompletedCellsInTAINRItem>> for CompletedCellsInTAINR {
         #[inline]
         fn __field(self) -> Vec<CompletedCellsInTAINRItem> {
             self.0
@@ -19171,7 +19183,7 @@ pub mod ngap_ies {
     /// `ConfiguredNSSAI ::= OCTET STRING (SIZE (128))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ConfiguredNSSAI(pub [u8; 128]);
-    impl crate::message::__Field<[u8; 128]> for ConfiguredNSSAI {
+    impl oxirush_aper::protocol::__Field<[u8; 128]> for ConfiguredNSSAI {
         #[inline]
         fn __field(self) -> [u8; 128] {
             self.0
@@ -19523,7 +19535,7 @@ pub mod ngap_ies {
     /// `CoverageEnhancementLevel ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CoverageEnhancementLevel<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for CoverageEnhancementLevel<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for CoverageEnhancementLevel<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -19888,7 +19900,9 @@ pub mod ngap_ies {
     /// `CriticalityDiagnostics-IE-List ::= SEQUENCE (SIZE (1..256)) OF CriticalityDiagnosticsIEItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct CriticalityDiagnosticsIEList(pub Vec<CriticalityDiagnosticsIEItem>);
-    impl crate::message::__Field<Vec<CriticalityDiagnosticsIEItem>> for CriticalityDiagnosticsIEList {
+    impl oxirush_aper::protocol::__Field<Vec<CriticalityDiagnosticsIEItem>>
+        for CriticalityDiagnosticsIEList
+    {
         #[inline]
         fn __field(self) -> Vec<CriticalityDiagnosticsIEItem> {
             self.0
@@ -20327,7 +20341,9 @@ pub mod ngap_ies {
     /// `DAPSResponseInfoList ::= SEQUENCE (SIZE (1..32)) OF DAPSResponseInfoItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DAPSResponseInfoList<'a>(pub Vec<DAPSResponseInfoItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<DAPSResponseInfoItem<'a>>> for DAPSResponseInfoList<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Vec<DAPSResponseInfoItem<'a>>>
+        for DAPSResponseInfoList<'a>
+    {
         #[inline]
         fn __field(self) -> Vec<DAPSResponseInfoItem<'a>> {
             self.0
@@ -20474,7 +20490,7 @@ pub mod ngap_ies {
     /// `DL-NAS-MAC ::= BIT STRING (SIZE (16))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct DLNASMAC(pub Bits);
-    impl crate::message::__Field<Bits> for DLNASMAC {
+    impl oxirush_aper::protocol::__Field<Bits> for DLNASMAC {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -20910,7 +20926,7 @@ pub mod ngap_ies {
     /// `DRB-ID ::= INTEGER (1..32, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct DRBID(pub u64);
-    impl crate::message::__Field<u64> for DRBID {
+    impl oxirush_aper::protocol::__Field<u64> for DRBID {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -21714,7 +21730,7 @@ pub mod ngap_ies {
     /// `DRBsSubjectToDLDiscarding-List ::= SEQUENCE (SIZE (1..32)) OF DRBsSubjectToDLDiscardingItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DRBsSubjectToDLDiscardingList<'a>(pub Vec<DRBsSubjectToDLDiscardingItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<DRBsSubjectToDLDiscardingItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<DRBsSubjectToDLDiscardingItem<'a>>>
         for DRBsSubjectToDLDiscardingList<'a>
     {
         #[inline]
@@ -21887,7 +21903,7 @@ pub mod ngap_ies {
     pub struct DRBsSubjectToEarlyStatusTransferList<'a>(
         pub Vec<DRBsSubjectToEarlyStatusTransferItem<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<DRBsSubjectToEarlyStatusTransferItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<DRBsSubjectToEarlyStatusTransferItem<'a>>>
         for DRBsSubjectToEarlyStatusTransferList<'a>
     {
         #[inline]
@@ -22078,7 +22094,7 @@ pub mod ngap_ies {
     /// `DRBsSubjectToStatusTransferList ::= SEQUENCE (SIZE (1..32)) OF DRBsSubjectToStatusTransferItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DRBsSubjectToStatusTransferList<'a>(pub Vec<DRBsSubjectToStatusTransferItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<DRBsSubjectToStatusTransferItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<DRBsSubjectToStatusTransferItem<'a>>>
         for DRBsSubjectToStatusTransferList<'a>
     {
         #[inline]
@@ -22248,7 +22264,7 @@ pub mod ngap_ies {
     /// `DRBsToQosFlowsMappingList ::= SEQUENCE (SIZE (1..32)) OF DRBsToQosFlowsMappingItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DRBsToQosFlowsMappingList(pub Vec<DRBsToQosFlowsMappingItem>);
-    impl crate::message::__Field<Vec<DRBsToQosFlowsMappingItem>> for DRBsToQosFlowsMappingList {
+    impl oxirush_aper::protocol::__Field<Vec<DRBsToQosFlowsMappingItem>> for DRBsToQosFlowsMappingList {
         #[inline]
         fn __field(self) -> Vec<DRBsToQosFlowsMappingItem> {
             self.0
@@ -22300,7 +22316,7 @@ pub mod ngap_ies {
     /// `DataCodingScheme ::= BIT STRING (SIZE (8))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct DataCodingScheme(pub Bits);
-    impl crate::message::__Field<Bits> for DataCodingScheme {
+    impl oxirush_aper::protocol::__Field<Bits> for DataCodingScheme {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -22608,7 +22624,7 @@ pub mod ngap_ies {
     /// `DataForwardingResponseDRBList ::= SEQUENCE (SIZE (1..32)) OF DataForwardingResponseDRBItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DataForwardingResponseDRBList<'a>(pub Vec<DataForwardingResponseDRBItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<DataForwardingResponseDRBItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<DataForwardingResponseDRBItem<'a>>>
         for DataForwardingResponseDRBList<'a>
     {
         #[inline]
@@ -22671,7 +22687,7 @@ pub mod ngap_ies {
     /// `DataForwardingResponseERABList ::= SEQUENCE (SIZE (1..256)) OF DataForwardingResponseERABListItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct DataForwardingResponseERABList<'a>(pub Vec<DataForwardingResponseERABListItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<DataForwardingResponseERABListItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<DataForwardingResponseERABListItem<'a>>>
         for DataForwardingResponseERABList<'a>
     {
         #[inline]
@@ -23172,7 +23188,7 @@ pub mod ngap_ies {
     /// `E-RAB-ID ::= INTEGER (0..15, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ERABID(pub u64);
-    impl crate::message::__Field<u64> for ERABID {
+    impl oxirush_aper::protocol::__Field<u64> for ERABID {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -23326,7 +23342,7 @@ pub mod ngap_ies {
     /// `E-RABInformationList ::= SEQUENCE (SIZE (1..256)) OF ERABInformationItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ERABInformationList(pub Vec<ERABInformationItem>);
-    impl crate::message::__Field<Vec<ERABInformationItem>> for ERABInformationList {
+    impl oxirush_aper::protocol::__Field<Vec<ERABInformationItem>> for ERABInformationList {
         #[inline]
         fn __field(self) -> Vec<ERABInformationItem> {
             self.0
@@ -23601,8 +23617,10 @@ pub mod ngap_ies {
     pub struct ECNMarkingorCongestionInformationReportingStatus<'a>(
         pub Vec<ECNMarkingorCongestionInformationReportingStatusItem<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<ECNMarkingorCongestionInformationReportingStatusItem<'a>>>
-        for ECNMarkingorCongestionInformationReportingStatus<'a>
+    impl<'a>
+        oxirush_aper::protocol::__Field<
+            Vec<ECNMarkingorCongestionInformationReportingStatusItem<'a>>,
+        > for ECNMarkingorCongestionInformationReportingStatus<'a>
     {
         #[inline]
         fn __field(self) -> Vec<ECNMarkingorCongestionInformationReportingStatusItem<'a>> {
@@ -23825,7 +23843,7 @@ pub mod ngap_ies {
     /// `EN-DCSONConfigurationTransfer ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ENDCSONConfigurationTransfer<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for ENDCSONConfigurationTransfer<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for ENDCSONConfigurationTransfer<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -24017,7 +24035,7 @@ pub mod ngap_ies {
     /// `EPS-TAC ::= OCTET STRING (SIZE (2))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct EPSTAC(pub [u8; 2]);
-    impl crate::message::__Field<[u8; 2]> for EPSTAC {
+    impl oxirush_aper::protocol::__Field<[u8; 2]> for EPSTAC {
         #[inline]
         fn __field(self) -> [u8; 2] {
             self.0
@@ -24313,7 +24331,7 @@ pub mod ngap_ies {
     /// `EUTRA-CGIList ::= SEQUENCE (SIZE (1..256)) OF EUTRACGI`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EUTRACGIList(pub Vec<EUTRACGI>);
-    impl crate::message::__Field<Vec<EUTRACGI>> for EUTRACGIList {
+    impl oxirush_aper::protocol::__Field<Vec<EUTRACGI>> for EUTRACGIList {
         #[inline]
         fn __field(self) -> Vec<EUTRACGI> {
             self.0
@@ -24365,7 +24383,7 @@ pub mod ngap_ies {
     /// `EUTRA-CGIListForWarning ::= SEQUENCE (SIZE (1..65535)) OF EUTRACGI`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EUTRACGIListForWarning(pub Vec<EUTRACGI>);
-    impl crate::message::__Field<Vec<EUTRACGI>> for EUTRACGIListForWarning {
+    impl oxirush_aper::protocol::__Field<Vec<EUTRACGI>> for EUTRACGIListForWarning {
         #[inline]
         fn __field(self) -> Vec<EUTRACGI> {
             self.0
@@ -24701,7 +24719,7 @@ pub mod ngap_ies {
     /// `EUTRACellIdentity ::= BIT STRING (SIZE (28))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct EUTRACellIdentity(pub Bits);
-    impl crate::message::__Field<Bits> for EUTRACellIdentity {
+    impl oxirush_aper::protocol::__Field<Bits> for EUTRACellIdentity {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -24960,7 +24978,7 @@ pub mod ngap_ies {
     /// `EUTRAN-CellReportList ::= SEQUENCE (SIZE (1..256)) OF EUTRANCellReportItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EUTRANCellReportList(pub Vec<EUTRANCellReportItem>);
-    impl crate::message::__Field<Vec<EUTRANCellReportItem>> for EUTRANCellReportList {
+    impl oxirush_aper::protocol::__Field<Vec<EUTRANCellReportItem>> for EUTRANCellReportList {
         #[inline]
         fn __field(self) -> Vec<EUTRANCellReportItem> {
             self.0
@@ -25100,7 +25118,7 @@ pub mod ngap_ies {
     /// `EUTRAN-CellToReportList ::= SEQUENCE (SIZE (1..256)) OF EUTRANCellToReportItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EUTRANCellToReportList(pub Vec<EUTRANCellToReportItem>);
-    impl crate::message::__Field<Vec<EUTRANCellToReportItem>> for EUTRANCellToReportList {
+    impl oxirush_aper::protocol::__Field<Vec<EUTRANCellToReportItem>> for EUTRANCellToReportList {
         #[inline]
         fn __field(self) -> Vec<EUTRANCellToReportItem> {
             self.0
@@ -25269,7 +25287,7 @@ pub mod ngap_ies {
     /// `EUTRAN-NumberOfActiveUEs ::= INTEGER (0..16777215, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct EUTRANNumberOfActiveUEs(pub u64);
-    impl crate::message::__Field<u64> for EUTRANNumberOfActiveUEs {
+    impl oxirush_aper::protocol::__Field<u64> for EUTRANNumberOfActiveUEs {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -25754,7 +25772,7 @@ pub mod ngap_ies {
     /// `EUTRAencryptionAlgorithms ::= BIT STRING (SIZE (16, ...))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EUTRAencryptionAlgorithms<'a>(pub BitString<'a>);
-    impl<'a> crate::message::__Field<BitString<'a>> for EUTRAencryptionAlgorithms<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<BitString<'a>> for EUTRAencryptionAlgorithms<'a> {
         #[inline]
         fn __field(self) -> BitString<'a> {
             self.0
@@ -25804,7 +25822,7 @@ pub mod ngap_ies {
     /// `EUTRAintegrityProtectionAlgorithms ::= BIT STRING (SIZE (16, ...))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EUTRAintegrityProtectionAlgorithms<'a>(pub BitString<'a>);
-    impl<'a> crate::message::__Field<BitString<'a>> for EUTRAintegrityProtectionAlgorithms<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<BitString<'a>> for EUTRAintegrityProtectionAlgorithms<'a> {
         #[inline]
         fn __field(self) -> BitString<'a> {
             self.0
@@ -26009,7 +26027,7 @@ pub mod ngap_ies {
     /// `EmergencyAreaID ::= OCTET STRING (SIZE (3))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct EmergencyAreaID(pub [u8; 3]);
-    impl crate::message::__Field<[u8; 3]> for EmergencyAreaID {
+    impl oxirush_aper::protocol::__Field<[u8; 3]> for EmergencyAreaID {
         #[inline]
         fn __field(self) -> [u8; 3] {
             self.0
@@ -26051,7 +26069,7 @@ pub mod ngap_ies {
     /// `EmergencyAreaIDBroadcastEUTRA ::= SEQUENCE (SIZE (1..65535)) OF EmergencyAreaIDBroadcastEUTRAItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EmergencyAreaIDBroadcastEUTRA(pub Vec<EmergencyAreaIDBroadcastEUTRAItem>);
-    impl crate::message::__Field<Vec<EmergencyAreaIDBroadcastEUTRAItem>>
+    impl oxirush_aper::protocol::__Field<Vec<EmergencyAreaIDBroadcastEUTRAItem>>
         for EmergencyAreaIDBroadcastEUTRA
     {
         #[inline]
@@ -26218,7 +26236,9 @@ pub mod ngap_ies {
     /// `EmergencyAreaIDBroadcastNR ::= SEQUENCE (SIZE (1..65535)) OF EmergencyAreaIDBroadcastNRItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EmergencyAreaIDBroadcastNR(pub Vec<EmergencyAreaIDBroadcastNRItem>);
-    impl crate::message::__Field<Vec<EmergencyAreaIDBroadcastNRItem>> for EmergencyAreaIDBroadcastNR {
+    impl oxirush_aper::protocol::__Field<Vec<EmergencyAreaIDBroadcastNRItem>>
+        for EmergencyAreaIDBroadcastNR
+    {
         #[inline]
         fn __field(self) -> Vec<EmergencyAreaIDBroadcastNRItem> {
             self.0
@@ -26379,7 +26399,7 @@ pub mod ngap_ies {
     /// `EmergencyAreaIDCancelledEUTRA ::= SEQUENCE (SIZE (1..65535)) OF EmergencyAreaIDCancelledEUTRAItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EmergencyAreaIDCancelledEUTRA(pub Vec<EmergencyAreaIDCancelledEUTRAItem>);
-    impl crate::message::__Field<Vec<EmergencyAreaIDCancelledEUTRAItem>>
+    impl oxirush_aper::protocol::__Field<Vec<EmergencyAreaIDCancelledEUTRAItem>>
         for EmergencyAreaIDCancelledEUTRA
     {
         #[inline]
@@ -26546,7 +26566,9 @@ pub mod ngap_ies {
     /// `EmergencyAreaIDCancelledNR ::= SEQUENCE (SIZE (1..65535)) OF EmergencyAreaIDCancelledNRItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EmergencyAreaIDCancelledNR(pub Vec<EmergencyAreaIDCancelledNRItem>);
-    impl crate::message::__Field<Vec<EmergencyAreaIDCancelledNRItem>> for EmergencyAreaIDCancelledNR {
+    impl oxirush_aper::protocol::__Field<Vec<EmergencyAreaIDCancelledNRItem>>
+        for EmergencyAreaIDCancelledNR
+    {
         #[inline]
         fn __field(self) -> Vec<EmergencyAreaIDCancelledNRItem> {
             self.0
@@ -26707,7 +26729,7 @@ pub mod ngap_ies {
     /// `EmergencyAreaIDList ::= SEQUENCE (SIZE (1..65535)) OF EmergencyAreaID`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EmergencyAreaIDList(pub Vec<EmergencyAreaID>);
-    impl crate::message::__Field<Vec<EmergencyAreaID>> for EmergencyAreaIDList {
+    impl oxirush_aper::protocol::__Field<Vec<EmergencyAreaID>> for EmergencyAreaIDList {
         #[inline]
         fn __field(self) -> Vec<EmergencyAreaID> {
             self.0
@@ -26759,7 +26781,7 @@ pub mod ngap_ies {
     /// `EmergencyAreaIDListForRestart ::= SEQUENCE (SIZE (1..256)) OF EmergencyAreaID`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EmergencyAreaIDListForRestart(pub Vec<EmergencyAreaID>);
-    impl crate::message::__Field<Vec<EmergencyAreaID>> for EmergencyAreaIDListForRestart {
+    impl oxirush_aper::protocol::__Field<Vec<EmergencyAreaID>> for EmergencyAreaIDListForRestart {
         #[inline]
         fn __field(self) -> Vec<EmergencyAreaID> {
             self.0
@@ -27234,7 +27256,7 @@ pub mod ngap_ies {
     /// `EquivalentPLMNs ::= SEQUENCE (SIZE (1..15)) OF PLMNIdentity`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EquivalentPLMNs(pub Vec<PLMNIdentity>);
-    impl crate::message::__Field<Vec<PLMNIdentity>> for EquivalentPLMNs {
+    impl oxirush_aper::protocol::__Field<Vec<PLMNIdentity>> for EquivalentPLMNs {
         #[inline]
         fn __field(self) -> Vec<PLMNIdentity> {
             self.0
@@ -27388,7 +27410,7 @@ pub mod ngap_ies {
     /// `EquivalentSNPNsList ::= SEQUENCE (SIZE (1..15)) OF EquivalentSNPNsItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct EquivalentSNPNsList(pub Vec<EquivalentSNPNsItem>);
-    impl crate::message::__Field<Vec<EquivalentSNPNsItem>> for EquivalentSNPNsList {
+    impl oxirush_aper::protocol::__Field<Vec<EquivalentSNPNsItem>> for EquivalentSNPNsList {
         #[inline]
         fn __field(self) -> Vec<EquivalentSNPNsItem> {
             self.0
@@ -27923,7 +27945,7 @@ pub mod ngap_ies {
     /// `ExcessPacketDelayThresholdConfiguration ::= SEQUENCE (SIZE (1..255)) OF ExcessPacketDelayThresholdItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ExcessPacketDelayThresholdConfiguration(pub Vec<ExcessPacketDelayThresholdItem>);
-    impl crate::message::__Field<Vec<ExcessPacketDelayThresholdItem>>
+    impl oxirush_aper::protocol::__Field<Vec<ExcessPacketDelayThresholdItem>>
         for ExcessPacketDelayThresholdConfiguration
     {
         #[inline]
@@ -28174,7 +28196,7 @@ pub mod ngap_ies {
     /// `ExpectedActivityPeriod ::= INTEGER (1..181, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ExpectedActivityPeriod(pub u64);
-    impl crate::message::__Field<u64> for ExpectedActivityPeriod {
+    impl oxirush_aper::protocol::__Field<u64> for ExpectedActivityPeriod {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -28284,7 +28306,7 @@ pub mod ngap_ies {
     /// `ExpectedIdlePeriod ::= INTEGER (1..181, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ExpectedIdlePeriod(pub u64);
-    impl crate::message::__Field<u64> for ExpectedIdlePeriod {
+    impl oxirush_aper::protocol::__Field<u64> for ExpectedIdlePeriod {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -28739,7 +28761,9 @@ pub mod ngap_ies {
     /// `ExpectedUEMovingTrajectory ::= SEQUENCE (SIZE (1..16)) OF ExpectedUEMovingTrajectoryItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ExpectedUEMovingTrajectory(pub Vec<ExpectedUEMovingTrajectoryItem>);
-    impl crate::message::__Field<Vec<ExpectedUEMovingTrajectoryItem>> for ExpectedUEMovingTrajectory {
+    impl oxirush_aper::protocol::__Field<Vec<ExpectedUEMovingTrajectoryItem>>
+        for ExpectedUEMovingTrajectory
+    {
         #[inline]
         fn __field(self) -> Vec<ExpectedUEMovingTrajectoryItem> {
             self.0
@@ -29050,7 +29074,7 @@ pub mod ngap_ies {
     /// `Extended-ConnectedTime ::= INTEGER (0..255)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ExtendedConnectedTime(pub u8);
-    impl crate::message::__Field<u8> for ExtendedConnectedTime {
+    impl oxirush_aper::protocol::__Field<u8> for ExtendedConnectedTime {
         #[inline]
         fn __field(self) -> u8 {
             self.0
@@ -29242,7 +29266,7 @@ pub mod ngap_ies {
     /// `ExtendedMobilityInformation ::= BIT STRING (SIZE (32))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ExtendedMobilityInformation(pub Bits);
-    impl crate::message::__Field<Bits> for ExtendedMobilityInformation {
+    impl oxirush_aper::protocol::__Field<Bits> for ExtendedMobilityInformation {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -29294,7 +29318,7 @@ pub mod ngap_ies {
     /// `ExtendedPacketDelayBudget ::= INTEGER (1..65535, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ExtendedPacketDelayBudget(pub u64);
-    impl crate::message::__Field<u64> for ExtendedPacketDelayBudget {
+    impl oxirush_aper::protocol::__Field<u64> for ExtendedPacketDelayBudget {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -29465,7 +29489,7 @@ pub mod ngap_ies {
     /// `ExtendedRNC-ID ::= INTEGER (4096..65535)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ExtendedRNCID(pub u16);
-    impl crate::message::__Field<u16> for ExtendedRNCID {
+    impl oxirush_aper::protocol::__Field<u16> for ExtendedRNCID {
         #[inline]
         fn __field(self) -> u16 {
             self.0
@@ -29558,7 +29582,7 @@ pub mod ngap_ies {
     /// `ExtendedSliceSupportList ::= SEQUENCE (SIZE (1..65535)) OF SliceSupportItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ExtendedSliceSupportList(pub Vec<SliceSupportItem>);
-    impl crate::message::__Field<Vec<SliceSupportItem>> for ExtendedSliceSupportList {
+    impl oxirush_aper::protocol::__Field<Vec<SliceSupportItem>> for ExtendedSliceSupportList {
         #[inline]
         fn __field(self) -> Vec<SliceSupportItem> {
             self.0
@@ -29610,7 +29634,7 @@ pub mod ngap_ies {
     /// `ExtendedUEIdentityIndexValue ::= BIT STRING (SIZE (16))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ExtendedUEIdentityIndexValue(pub Bits);
-    impl crate::message::__Field<Bits> for ExtendedUEIdentityIndexValue {
+    impl oxirush_aper::protocol::__Field<Bits> for ExtendedUEIdentityIndexValue {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -30348,7 +30372,7 @@ pub mod ngap_ies {
     /// `FiveG-TMSI ::= OCTET STRING (SIZE (4))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct FiveGTMSI(pub [u8; 4]);
-    impl crate::message::__Field<[u8; 4]> for FiveGTMSI {
+    impl oxirush_aper::protocol::__Field<[u8; 4]> for FiveGTMSI {
         #[inline]
         fn __field(self) -> [u8; 4] {
             self.0
@@ -31314,7 +31338,7 @@ pub mod ngap_ies {
     /// `FiveGProSePC5QoSFlowList ::= SEQUENCE (SIZE (1..2048)) OF FiveGProSePC5QoSFlowItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct FiveGProSePC5QoSFlowList(pub Vec<FiveGProSePC5QoSFlowItem>);
-    impl crate::message::__Field<Vec<FiveGProSePC5QoSFlowItem>> for FiveGProSePC5QoSFlowList {
+    impl oxirush_aper::protocol::__Field<Vec<FiveGProSePC5QoSFlowItem>> for FiveGProSePC5QoSFlowList {
         #[inline]
         fn __field(self) -> Vec<FiveGProSePC5QoSFlowItem> {
             self.0
@@ -31366,7 +31390,7 @@ pub mod ngap_ies {
     /// `FiveQI ::= INTEGER (0..255, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct FiveQI(pub u64);
-    impl crate::message::__Field<u64> for FiveQI {
+    impl oxirush_aper::protocol::__Field<u64> for FiveQI {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -31408,7 +31432,9 @@ pub mod ngap_ies {
     /// `ForbiddenAreaInformation ::= SEQUENCE (SIZE (1..16)) OF ForbiddenAreaInformationItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ForbiddenAreaInformation(pub Vec<ForbiddenAreaInformationItem>);
-    impl crate::message::__Field<Vec<ForbiddenAreaInformationItem>> for ForbiddenAreaInformation {
+    impl oxirush_aper::protocol::__Field<Vec<ForbiddenAreaInformationItem>>
+        for ForbiddenAreaInformation
+    {
         #[inline]
         fn __field(self) -> Vec<ForbiddenAreaInformationItem> {
             self.0
@@ -31563,7 +31589,7 @@ pub mod ngap_ies {
     /// `ForbiddenTACs ::= SEQUENCE (SIZE (1..4096)) OF TAC`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ForbiddenTACs(pub Vec<TAC>);
-    impl crate::message::__Field<Vec<TAC>> for ForbiddenTACs {
+    impl oxirush_aper::protocol::__Field<Vec<TAC>> for ForbiddenTACs {
         #[inline]
         fn __field(self) -> Vec<TAC> {
             self.0
@@ -31817,7 +31843,7 @@ pub mod ngap_ies {
     /// `FurtherExtendedUEIdentityIndexValue ::= BIT STRING (SIZE (20))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct FurtherExtendedUEIdentityIndexValue(pub Bits);
-    impl crate::message::__Field<Bits> for FurtherExtendedUEIdentityIndexValue {
+    impl oxirush_aper::protocol::__Field<Bits> for FurtherExtendedUEIdentityIndexValue {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -32175,7 +32201,7 @@ pub mod ngap_ies {
     /// `GNBSetID ::= BIT STRING (SIZE (22))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct GNBSetID(pub Bits);
-    impl crate::message::__Field<Bits> for GNBSetID {
+    impl oxirush_aper::protocol::__Field<Bits> for GNBSetID {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -32240,7 +32266,7 @@ pub mod ngap_ies {
     /// `GTP-TEID ::= OCTET STRING (SIZE (4))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct GTPTEID(pub [u8; 4]);
-    impl crate::message::__Field<[u8; 4]> for GTPTEID {
+    impl oxirush_aper::protocol::__Field<[u8; 4]> for GTPTEID {
         #[inline]
         fn __field(self) -> [u8; 4] {
             self.0
@@ -32540,7 +32566,7 @@ pub mod ngap_ies {
     /// `GUAMIList ::= SEQUENCE (SIZE (1..1024)) OF GUAMIListItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct GUAMIList(pub Vec<GUAMIListItem>);
-    impl crate::message::__Field<Vec<GUAMIListItem>> for GUAMIList {
+    impl oxirush_aper::protocol::__Field<Vec<GUAMIListItem>> for GUAMIList {
         #[inline]
         fn __field(self) -> Vec<GUAMIListItem> {
             self.0
@@ -32901,7 +32927,7 @@ pub mod ngap_ies {
     /// `GlobalCable-ID ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct GlobalCableID<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for GlobalCableID<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for GlobalCableID<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -33399,7 +33425,7 @@ pub mod ngap_ies {
     /// `GlobalLineIdentity ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct GlobalLineIdentity<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for GlobalLineIdentity<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for GlobalLineIdentity<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -34109,7 +34135,7 @@ pub mod ngap_ies {
     /// `HFCNode-ID ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct HFCNodeID<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for HFCNodeID<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for HFCNodeID<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -35712,7 +35738,7 @@ pub mod ngap_ies {
     /// `HandoverWindowDuration ::= INTEGER (1..6000)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct HandoverWindowDuration(pub u16);
-    impl crate::message::__Field<u16> for HandoverWindowDuration {
+    impl oxirush_aper::protocol::__Field<u16> for HandoverWindowDuration {
         #[inline]
         fn __field(self) -> u16 {
             self.0
@@ -35758,7 +35784,7 @@ pub mod ngap_ies {
     /// `HandoverWindowStart ::= INTEGER (0..549755813887)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct HandoverWindowStart(pub u64);
-    impl crate::message::__Field<u64> for HandoverWindowStart {
+    impl oxirush_aper::protocol::__Field<u64> for HandoverWindowStart {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -35800,7 +35826,7 @@ pub mod ngap_ies {
     /// `HashedUEIdentityIndexValue ::= BIT STRING (SIZE (13, ...))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct HashedUEIdentityIndexValue<'a>(pub BitString<'a>);
-    impl<'a> crate::message::__Field<BitString<'a>> for HashedUEIdentityIndexValue<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<BitString<'a>> for HashedUEIdentityIndexValue<'a> {
         #[inline]
         fn __field(self) -> BitString<'a> {
             self.0
@@ -35850,7 +35876,7 @@ pub mod ngap_ies {
     /// `Hysteresis ::= INTEGER (0..30)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct Hysteresis(pub u8);
-    impl crate::message::__Field<u8> for Hysteresis {
+    impl oxirush_aper::protocol::__Field<u8> for Hysteresis {
         #[inline]
         fn __field(self) -> u8 {
             self.0
@@ -36479,7 +36505,7 @@ pub mod ngap_ies {
     /// `IndexToRFSP ::= INTEGER (1..256, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct IndexToRFSP(pub u64);
-    impl crate::message::__Field<u64> for IndexToRFSP {
+    impl oxirush_aper::protocol::__Field<u64> for IndexToRFSP {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -36780,7 +36806,7 @@ pub mod ngap_ies {
     /// `IntendedNumberOfPagingAttempts ::= INTEGER (1..16, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct IntendedNumberOfPagingAttempts(pub u64);
-    impl crate::message::__Field<u64> for IntendedNumberOfPagingAttempts {
+    impl oxirush_aper::protocol::__Field<u64> for IntendedNumberOfPagingAttempts {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -36822,7 +36848,7 @@ pub mod ngap_ies {
     /// `IntendedServiceAreaCoordinates ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct IntendedServiceAreaCoordinates<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for IntendedServiceAreaCoordinates<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for IntendedServiceAreaCoordinates<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -37206,7 +37232,7 @@ pub mod ngap_ies {
     /// `InterfacesToTrace ::= BIT STRING (SIZE (8))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct InterfacesToTrace(pub Bits);
-    impl crate::message::__Field<Bits> for InterfacesToTrace {
+    impl oxirush_aper::protocol::__Field<Bits> for InterfacesToTrace {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -38045,7 +38071,7 @@ pub mod ngap_ies {
     /// `IntersystemResourceThreshold ::= INTEGER (0..100)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct IntersystemResourceThreshold(pub u8);
-    impl crate::message::__Field<u8> for IntersystemResourceThreshold {
+    impl oxirush_aper::protocol::__Field<u8> for IntersystemResourceThreshold {
         #[inline]
         fn __field(self) -> u8 {
             self.0
@@ -39678,7 +39704,7 @@ pub mod ngap_ies {
     /// `LAC ::= OCTET STRING (SIZE (2))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct LAC(pub [u8; 2]);
-    impl crate::message::__Field<[u8; 2]> for LAC {
+    impl oxirush_aper::protocol::__Field<[u8; 2]> for LAC {
         #[inline]
         fn __field(self) -> [u8; 2] {
             self.0
@@ -39823,7 +39849,7 @@ pub mod ngap_ies {
     /// `LPWUSCNsubgroupID ::= INTEGER (0..30, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct LPWUSCNsubgroupID(pub u64);
-    impl crate::message::__Field<u64> for LPWUSCNsubgroupID {
+    impl oxirush_aper::protocol::__Field<u64> for LPWUSCNsubgroupID {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -40271,7 +40297,7 @@ pub mod ngap_ies {
     /// `LTEUERLFReportContainer ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct LTEUERLFReportContainer<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for LTEUERLFReportContainer<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for LTEUERLFReportContainer<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -40798,7 +40824,7 @@ pub mod ngap_ies {
     /// `LastVisitedEUTRANCellInformation ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct LastVisitedEUTRANCellInformation<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for LastVisitedEUTRANCellInformation<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for LastVisitedEUTRANCellInformation<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -40858,7 +40884,7 @@ pub mod ngap_ies {
     /// `LastVisitedGERANCellInformation ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct LastVisitedGERANCellInformation<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for LastVisitedGERANCellInformation<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for LastVisitedGERANCellInformation<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -41224,7 +41250,7 @@ pub mod ngap_ies {
     /// `LastVisitedPSCellList ::= SEQUENCE (SIZE (1..8)) OF LastVisitedPSCellInformation`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct LastVisitedPSCellList(pub Vec<LastVisitedPSCellInformation>);
-    impl crate::message::__Field<Vec<LastVisitedPSCellInformation>> for LastVisitedPSCellList {
+    impl oxirush_aper::protocol::__Field<Vec<LastVisitedPSCellInformation>> for LastVisitedPSCellList {
         #[inline]
         fn __field(self) -> Vec<LastVisitedPSCellInformation> {
             self.0
@@ -41276,7 +41302,7 @@ pub mod ngap_ies {
     /// `LastVisitedUTRANCellInformation ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct LastVisitedUTRANCellInformation<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for LastVisitedUTRANCellInformation<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for LastVisitedUTRANCellInformation<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -41479,7 +41505,7 @@ pub mod ngap_ies {
     /// `LocationReportingReferenceID ::= INTEGER (1..64, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct LocationReportingReferenceID(pub u64);
-    impl crate::message::__Field<u64> for LocationReportingReferenceID {
+    impl oxirush_aper::protocol::__Field<u64> for LocationReportingReferenceID {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -43531,7 +43557,7 @@ pub mod ngap_ies {
     /// `M7period ::= INTEGER (1..60, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct M7period(pub u64);
-    impl crate::message::__Field<u64> for M7period {
+    impl oxirush_aper::protocol::__Field<u64> for M7period {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -43780,7 +43806,7 @@ pub mod ngap_ies {
     pub struct MBSActiveSessionInformationSourcetoTargetList(
         pub Vec<MBSActiveSessionInformationSourcetoTargetItem>,
     );
-    impl crate::message::__Field<Vec<MBSActiveSessionInformationSourcetoTargetItem>>
+    impl oxirush_aper::protocol::__Field<Vec<MBSActiveSessionInformationSourcetoTargetItem>>
         for MBSActiveSessionInformationSourcetoTargetList
     {
         #[inline]
@@ -43975,7 +44001,7 @@ pub mod ngap_ies {
     pub struct MBSActiveSessionInformationTargettoSourceList<'a>(
         pub Vec<MBSActiveSessionInformationTargettoSourceItem<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<MBSActiveSessionInformationTargettoSourceItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<MBSActiveSessionInformationTargettoSourceItem<'a>>>
         for MBSActiveSessionInformationTargettoSourceList<'a>
     {
         #[inline]
@@ -44042,7 +44068,7 @@ pub mod ngap_ies {
     /// `MBS-AreaSessionID ::= INTEGER (0..65535, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MBSAreaSessionID(pub u64);
-    impl crate::message::__Field<u64> for MBSAreaSessionID {
+    impl oxirush_aper::protocol::__Field<u64> for MBSAreaSessionID {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -44084,7 +44110,7 @@ pub mod ngap_ies {
     /// `MBS-AreaTAIList ::= SEQUENCE (SIZE (1..16)) OF TAI`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSAreaTAIList(pub Vec<TAI>);
-    impl crate::message::__Field<Vec<TAI>> for MBSAreaTAIList {
+    impl oxirush_aper::protocol::__Field<Vec<TAI>> for MBSAreaTAIList {
         #[inline]
         fn __field(self) -> Vec<TAI> {
             self.0
@@ -44336,7 +44362,7 @@ pub mod ngap_ies {
     /// `MBS-DataForwardingResponseMRBList ::= SEQUENCE (SIZE (1..32)) OF MBSDataForwardingResponseMRBItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSDataForwardingResponseMRBList<'a>(pub Vec<MBSDataForwardingResponseMRBItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<MBSDataForwardingResponseMRBItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<MBSDataForwardingResponseMRBItem<'a>>>
         for MBSDataForwardingResponseMRBList<'a>
     {
         #[inline]
@@ -45126,7 +45152,7 @@ pub mod ngap_ies {
     /// `MBS-IntendedServiceAreaList ::= SEQUENCE (SIZE (1..65536)) OF IntendedServiceAreaCoordinates`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSIntendedServiceAreaList<'a>(pub Vec<IntendedServiceAreaCoordinates<'a>>);
-    impl<'a> crate::message::__Field<Vec<IntendedServiceAreaCoordinates<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<IntendedServiceAreaCoordinates<'a>>>
         for MBSIntendedServiceAreaList<'a>
     {
         #[inline]
@@ -45344,7 +45370,7 @@ pub mod ngap_ies {
     pub struct MBSMappingandDataForwardingRequestList(
         pub Vec<MBSMappingandDataForwardingRequestItem>,
     );
-    impl crate::message::__Field<Vec<MBSMappingandDataForwardingRequestItem>>
+    impl oxirush_aper::protocol::__Field<Vec<MBSMappingandDataForwardingRequestItem>>
         for MBSMappingandDataForwardingRequestList
     {
         #[inline]
@@ -45497,7 +45523,7 @@ pub mod ngap_ies {
     /// `MBS-QoSFlowList ::= SEQUENCE (SIZE (1..64)) OF QosFlowIdentifier`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSQoSFlowList(pub Vec<QosFlowIdentifier>);
-    impl crate::message::__Field<Vec<QosFlowIdentifier>> for MBSQoSFlowList {
+    impl oxirush_aper::protocol::__Field<Vec<QosFlowIdentifier>> for MBSQoSFlowList {
         #[inline]
         fn __field(self) -> Vec<QosFlowIdentifier> {
             self.0
@@ -45667,7 +45693,7 @@ pub mod ngap_ies {
     /// `MBS-QoSFlowsToBeSetupList ::= SEQUENCE (SIZE (1..64)) OF MBSQoSFlowsToBeSetupItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSQoSFlowsToBeSetupList(pub Vec<MBSQoSFlowsToBeSetupItem>);
-    impl crate::message::__Field<Vec<MBSQoSFlowsToBeSetupItem>> for MBSQoSFlowsToBeSetupList {
+    impl oxirush_aper::protocol::__Field<Vec<MBSQoSFlowsToBeSetupItem>> for MBSQoSFlowsToBeSetupList {
         #[inline]
         fn __field(self) -> Vec<MBSQoSFlowsToBeSetupItem> {
             self.0
@@ -45818,7 +45844,7 @@ pub mod ngap_ies {
     /// `MBS-ServiceAreaCellList ::= SEQUENCE (SIZE (1..8192)) OF NRCGI`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSServiceAreaCellList(pub Vec<NRCGI>);
-    impl crate::message::__Field<Vec<NRCGI>> for MBSServiceAreaCellList {
+    impl oxirush_aper::protocol::__Field<Vec<NRCGI>> for MBSServiceAreaCellList {
         #[inline]
         fn __field(self) -> Vec<NRCGI> {
             self.0
@@ -46118,7 +46144,9 @@ pub mod ngap_ies {
     /// `MBS-ServiceAreaInformationList ::= SEQUENCE (SIZE (1..256)) OF MBSServiceAreaInformationItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSServiceAreaInformationList(pub Vec<MBSServiceAreaInformationItem>);
-    impl crate::message::__Field<Vec<MBSServiceAreaInformationItem>> for MBSServiceAreaInformationList {
+    impl oxirush_aper::protocol::__Field<Vec<MBSServiceAreaInformationItem>>
+        for MBSServiceAreaInformationList
+    {
         #[inline]
         fn __field(self) -> Vec<MBSServiceAreaInformationItem> {
             self.0
@@ -46170,7 +46198,7 @@ pub mod ngap_ies {
     /// `MBS-ServiceAreaTAIList ::= SEQUENCE (SIZE (1..1024)) OF TAI`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSServiceAreaTAIList(pub Vec<TAI>);
-    impl crate::message::__Field<Vec<TAI>> for MBSServiceAreaTAIList {
+    impl oxirush_aper::protocol::__Field<Vec<TAI>> for MBSServiceAreaTAIList {
         #[inline]
         fn __field(self) -> Vec<TAI> {
             self.0
@@ -46235,7 +46263,7 @@ pub mod ngap_ies {
     /// `MBS-SessionFSAID ::= OCTET STRING (SIZE (3))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MBSSessionFSAID(pub [u8; 3]);
-    impl crate::message::__Field<[u8; 3]> for MBSSessionFSAID {
+    impl oxirush_aper::protocol::__Field<[u8; 3]> for MBSSessionFSAID {
         #[inline]
         fn __field(self) -> [u8; 3] {
             self.0
@@ -46277,7 +46305,7 @@ pub mod ngap_ies {
     /// `MBS-SessionFSAIDList ::= SEQUENCE (SIZE (1..64)) OF MBSSessionFSAID`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSSessionFSAIDList(pub Vec<MBSSessionFSAID>);
-    impl crate::message::__Field<Vec<MBSSessionFSAID>> for MBSSessionFSAIDList {
+    impl oxirush_aper::protocol::__Field<Vec<MBSSessionFSAID>> for MBSSessionFSAIDList {
         #[inline]
         fn __field(self) -> Vec<MBSSessionFSAID> {
             self.0
@@ -46679,7 +46707,7 @@ pub mod ngap_ies {
     /// `MBS-SessionTNLInfo5GCList ::= SEQUENCE (SIZE (1..256)) OF MBSSessionTNLInfo5GCItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSSessionTNLInfo5GCList<'a>(pub Vec<MBSSessionTNLInfo5GCItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<MBSSessionTNLInfo5GCItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<MBSSessionTNLInfo5GCItem<'a>>>
         for MBSSessionTNLInfo5GCList<'a>
     {
         #[inline]
@@ -46987,7 +47015,7 @@ pub mod ngap_ies {
     /// `MBS-SessionTNLInfoNGRANList ::= SEQUENCE (SIZE (1..256)) OF MBSSessionTNLInfoNGRANItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSSessionTNLInfoNGRANList<'a>(pub Vec<MBSSessionTNLInfoNGRANItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<MBSSessionTNLInfoNGRANItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<MBSSessionTNLInfoNGRANItem<'a>>>
         for MBSSessionTNLInfoNGRANList<'a>
     {
         #[inline]
@@ -47260,7 +47288,9 @@ pub mod ngap_ies {
     /// `MBS-UP-FailureIndicationList ::= SEQUENCE (SIZE (1..256)) OF MBSUPFailureIndicationItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSUPFailureIndicationList(pub Vec<MBSUPFailureIndicationItem>);
-    impl crate::message::__Field<Vec<MBSUPFailureIndicationItem>> for MBSUPFailureIndicationList {
+    impl oxirush_aper::protocol::__Field<Vec<MBSUPFailureIndicationItem>>
+        for MBSUPFailureIndicationList
+    {
         #[inline]
         fn __field(self) -> Vec<MBSUPFailureIndicationItem> {
             self.0
@@ -47448,7 +47478,9 @@ pub mod ngap_ies {
     /// `MBSSessionFailedtoSetupList ::= SEQUENCE (SIZE (1..32)) OF MBSSessionFailedtoSetupItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSSessionFailedtoSetupList(pub Vec<MBSSessionFailedtoSetupItem>);
-    impl crate::message::__Field<Vec<MBSSessionFailedtoSetupItem>> for MBSSessionFailedtoSetupList {
+    impl oxirush_aper::protocol::__Field<Vec<MBSSessionFailedtoSetupItem>>
+        for MBSSessionFailedtoSetupList
+    {
         #[inline]
         fn __field(self) -> Vec<MBSSessionFailedtoSetupItem> {
             self.0
@@ -48050,7 +48082,9 @@ pub mod ngap_ies {
     /// `MBSSessionSetupRequestList ::= SEQUENCE (SIZE (1..32)) OF MBSSessionSetupRequestItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSSessionSetupRequestList(pub Vec<MBSSessionSetupRequestItem>);
-    impl crate::message::__Field<Vec<MBSSessionSetupRequestItem>> for MBSSessionSetupRequestList {
+    impl oxirush_aper::protocol::__Field<Vec<MBSSessionSetupRequestItem>>
+        for MBSSessionSetupRequestList
+    {
         #[inline]
         fn __field(self) -> Vec<MBSSessionSetupRequestItem> {
             self.0
@@ -48219,7 +48253,9 @@ pub mod ngap_ies {
     /// `MBSSessionSetupResponseList ::= SEQUENCE (SIZE (1..32)) OF MBSSessionSetupResponseItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSSessionSetupResponseList(pub Vec<MBSSessionSetupResponseItem>);
-    impl crate::message::__Field<Vec<MBSSessionSetupResponseItem>> for MBSSessionSetupResponseList {
+    impl oxirush_aper::protocol::__Field<Vec<MBSSessionSetupResponseItem>>
+        for MBSSessionSetupResponseList
+    {
         #[inline]
         fn __field(self) -> Vec<MBSSessionSetupResponseItem> {
             self.0
@@ -48464,7 +48500,7 @@ pub mod ngap_ies {
     /// `MBSSessionSetuporModifyRequestList ::= SEQUENCE (SIZE (1..32)) OF MBSSessionSetuporModifyRequestItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSSessionSetuporModifyRequestList(pub Vec<MBSSessionSetuporModifyRequestItem>);
-    impl crate::message::__Field<Vec<MBSSessionSetuporModifyRequestItem>>
+    impl oxirush_aper::protocol::__Field<Vec<MBSSessionSetuporModifyRequestItem>>
         for MBSSessionSetuporModifyRequestList
     {
         #[inline]
@@ -48667,7 +48703,7 @@ pub mod ngap_ies {
     /// `MBSSessionToReleaseList ::= SEQUENCE (SIZE (1..32)) OF MBSSessionToReleaseItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MBSSessionToReleaseList(pub Vec<MBSSessionToReleaseItem>);
-    impl crate::message::__Field<Vec<MBSSessionToReleaseItem>> for MBSSessionToReleaseList {
+    impl oxirush_aper::protocol::__Field<Vec<MBSSessionToReleaseItem>> for MBSSessionToReleaseList {
         #[inline]
         fn __field(self) -> Vec<MBSSessionToReleaseItem> {
             self.0
@@ -49402,7 +49438,7 @@ pub mod ngap_ies {
     /// `MDT-Location-Information ::= BIT STRING (SIZE (8))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MDTLocationInformation(pub Bits);
-    impl crate::message::__Field<Bits> for MDTLocationInformation {
+    impl oxirush_aper::protocol::__Field<Bits> for MDTLocationInformation {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -49577,7 +49613,7 @@ pub mod ngap_ies {
     /// `MDT-polygon ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MDTPolygon<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for MDTPolygon<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for MDTPolygon<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -49637,7 +49673,7 @@ pub mod ngap_ies {
     /// `MDTModeEutra ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MDTModeEutra<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for MDTModeEutra<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for MDTModeEutra<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -49799,7 +49835,7 @@ pub mod ngap_ies {
     /// `MDTPLMNList ::= SEQUENCE (SIZE (1..16)) OF PLMNIdentity`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MDTPLMNList(pub Vec<PLMNIdentity>);
-    impl crate::message::__Field<Vec<PLMNIdentity>> for MDTPLMNList {
+    impl oxirush_aper::protocol::__Field<Vec<PLMNIdentity>> for MDTPLMNList {
         #[inline]
         fn __field(self) -> Vec<PLMNIdentity> {
             self.0
@@ -49851,7 +49887,7 @@ pub mod ngap_ies {
     /// `MDTPLMNModificationList ::= SEQUENCE (SIZE (0..16)) OF PLMNIdentity`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MDTPLMNModificationList(pub Vec<PLMNIdentity>);
-    impl crate::message::__Field<Vec<PLMNIdentity>> for MDTPLMNModificationList {
+    impl oxirush_aper::protocol::__Field<Vec<PLMNIdentity>> for MDTPLMNModificationList {
         #[inline]
         fn __field(self) -> Vec<PLMNIdentity> {
             self.0
@@ -49962,7 +49998,7 @@ pub mod ngap_ies {
     /// `MMSID ::= OCTET STRING (SIZE (1))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MMSID(pub [u8; 1]);
-    impl crate::message::__Field<[u8; 1]> for MMSID {
+    impl oxirush_aper::protocol::__Field<[u8; 1]> for MMSID {
         #[inline]
         fn __field(self) -> [u8; 1] {
             self.0
@@ -50050,7 +50086,7 @@ pub mod ngap_ies {
     /// `MRB-ID ::= INTEGER (1..512, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MRBID(pub u64);
-    impl crate::message::__Field<u64> for MRBID {
+    impl oxirush_aper::protocol::__Field<u64> for MRBID {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -50193,7 +50229,7 @@ pub mod ngap_ies {
     /// `MaskedIMEISV ::= BIT STRING (SIZE (64))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MaskedIMEISV(pub Bits);
-    impl crate::message::__Field<Bits> for MaskedIMEISV {
+    impl oxirush_aper::protocol::__Field<Bits> for MaskedIMEISV {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -50245,7 +50281,7 @@ pub mod ngap_ies {
     /// `MaxNrofRS-IndexesToReport ::= INTEGER (1..64, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MaxNrofRSIndexesToReport(pub u64);
-    impl crate::message::__Field<u64> for MaxNrofRSIndexesToReport {
+    impl oxirush_aper::protocol::__Field<u64> for MaxNrofRSIndexesToReport {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -50287,7 +50323,7 @@ pub mod ngap_ies {
     /// `MaximumDataBurstVolume ::= INTEGER (0..4095, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MaximumDataBurstVolume(pub u64);
-    impl crate::message::__Field<u64> for MaximumDataBurstVolume {
+    impl oxirush_aper::protocol::__Field<u64> for MaximumDataBurstVolume {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -50469,7 +50505,7 @@ pub mod ngap_ies {
     /// `MeasurementsToActivate ::= BIT STRING (SIZE (8))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MeasurementsToActivate(pub Bits);
-    impl crate::message::__Field<Bits> for MeasurementsToActivate {
+    impl oxirush_aper::protocol::__Field<Bits> for MeasurementsToActivate {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -50521,7 +50557,7 @@ pub mod ngap_ies {
     /// `MessageIdentifier ::= BIT STRING (SIZE (16))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MessageIdentifier(pub Bits);
-    impl crate::message::__Field<Bits> for MessageIdentifier {
+    impl oxirush_aper::protocol::__Field<Bits> for MessageIdentifier {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -50860,7 +50896,7 @@ pub mod ngap_ies {
     /// `MobilityInformation ::= BIT STRING (SIZE (16))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct MobilityInformation(pub Bits);
-    impl crate::message::__Field<Bits> for MobilityInformation {
+    impl oxirush_aper::protocol::__Field<Bits> for MobilityInformation {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -51534,7 +51570,9 @@ pub mod ngap_ies {
     /// `MulticastGroupPagingAreaList ::= SEQUENCE (SIZE (1..64)) OF MulticastGroupPagingAreaItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct MulticastGroupPagingAreaList(pub Vec<MulticastGroupPagingAreaItem>);
-    impl crate::message::__Field<Vec<MulticastGroupPagingAreaItem>> for MulticastGroupPagingAreaList {
+    impl oxirush_aper::protocol::__Field<Vec<MulticastGroupPagingAreaItem>>
+        for MulticastGroupPagingAreaList
+    {
         #[inline]
         fn __field(self) -> Vec<MulticastGroupPagingAreaItem> {
             self.0
@@ -52007,7 +52045,7 @@ pub mod ngap_ies {
     /// `NAS-PDU ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NASPDU<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for NASPDU<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for NASPDU<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -52067,7 +52105,7 @@ pub mod ngap_ies {
     /// `NASSecurityParametersFromNGRAN ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NASSecurityParametersFromNGRAN<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for NASSecurityParametersFromNGRAN<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for NASSecurityParametersFromNGRAN<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -52519,7 +52557,7 @@ pub mod ngap_ies {
     /// `NB-IoT-UEPriority ::= INTEGER (0..255, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NBIoTUEPriority(pub u64);
-    impl crate::message::__Field<u64> for NBIoTUEPriority {
+    impl oxirush_aper::protocol::__Field<u64> for NBIoTUEPriority {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -52649,7 +52687,7 @@ pub mod ngap_ies {
     /// `NGAPIESupportInformationRequestList ::= SEQUENCE (SIZE (1..32)) OF NGAPIESupportInformationRequestItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NGAPIESupportInformationRequestList(pub Vec<NGAPIESupportInformationRequestItem>);
-    impl crate::message::__Field<Vec<NGAPIESupportInformationRequestItem>>
+    impl oxirush_aper::protocol::__Field<Vec<NGAPIESupportInformationRequestItem>>
         for NGAPIESupportInformationRequestList
     {
         #[inline]
@@ -52941,7 +52979,7 @@ pub mod ngap_ies {
     /// `NGAPIESupportInformationResponseList ::= SEQUENCE (SIZE (1..32)) OF NGAPIESupportInformationResponseItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NGAPIESupportInformationResponseList(pub Vec<NGAPIESupportInformationResponseItem>);
-    impl crate::message::__Field<Vec<NGAPIESupportInformationResponseItem>>
+    impl oxirush_aper::protocol::__Field<Vec<NGAPIESupportInformationResponseItem>>
         for NGAPIESupportInformationResponseList
     {
         #[inline]
@@ -53279,7 +53317,7 @@ pub mod ngap_ies {
     /// `NGRAN-CellReportList ::= SEQUENCE (SIZE (1..256)) OF NGRANCellReportItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NGRANCellReportList(pub Vec<NGRANCellReportItem>);
-    impl crate::message::__Field<Vec<NGRANCellReportItem>> for NGRANCellReportList {
+    impl oxirush_aper::protocol::__Field<Vec<NGRANCellReportItem>> for NGRANCellReportList {
         #[inline]
         fn __field(self) -> Vec<NGRANCellReportItem> {
             self.0
@@ -53419,7 +53457,7 @@ pub mod ngap_ies {
     /// `NGRAN-CellToReportList ::= SEQUENCE (SIZE (1..256)) OF NGRANCellToReportItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NGRANCellToReportList(pub Vec<NGRANCellToReportItem>);
-    impl crate::message::__Field<Vec<NGRANCellToReportItem>> for NGRANCellToReportList {
+    impl oxirush_aper::protocol::__Field<Vec<NGRANCellToReportItem>> for NGRANCellToReportList {
         #[inline]
         fn __field(self) -> Vec<NGRANCellToReportItem> {
             self.0
@@ -53471,7 +53509,7 @@ pub mod ngap_ies {
     /// `NGRAN-NoofRRCConnections ::= INTEGER (1..65536, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NGRANNoofRRCConnections(pub u64);
-    impl crate::message::__Field<u64> for NGRANNoofRRCConnections {
+    impl oxirush_aper::protocol::__Field<u64> for NGRANNoofRRCConnections {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -53513,7 +53551,7 @@ pub mod ngap_ies {
     /// `NGRAN-NumberOfActiveUEs ::= INTEGER (0..16777215, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NGRANNumberOfActiveUEs(pub u64);
-    impl crate::message::__Field<u64> for NGRANNumberOfActiveUEs {
+    impl oxirush_aper::protocol::__Field<u64> for NGRANNumberOfActiveUEs {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -54083,7 +54121,7 @@ pub mod ngap_ies {
     /// `NGRAN-TNLAssociationToRemoveList ::= SEQUENCE (SIZE (1..32)) OF NGRANTNLAssociationToRemoveItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NGRANTNLAssociationToRemoveList<'a>(pub Vec<NGRANTNLAssociationToRemoveItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<NGRANTNLAssociationToRemoveItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<NGRANTNLAssociationToRemoveItem<'a>>>
         for NGRANTNLAssociationToRemoveList<'a>
     {
         #[inline]
@@ -54159,7 +54197,7 @@ pub mod ngap_ies {
     /// `NGRANTraceID ::= OCTET STRING (SIZE (8))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NGRANTraceID(pub [u8; 8]);
-    impl crate::message::__Field<[u8; 8]> for NGRANTraceID {
+    impl oxirush_aper::protocol::__Field<[u8; 8]> for NGRANTraceID {
         #[inline]
         fn __field(self) -> [u8; 8] {
             self.0
@@ -54201,7 +54239,7 @@ pub mod ngap_ies {
     /// `NID ::= BIT STRING (SIZE (44))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NID(pub Bits);
-    impl crate::message::__Field<Bits> for NID {
+    impl oxirush_aper::protocol::__Field<Bits> for NID {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -54898,7 +54936,7 @@ pub mod ngap_ies {
     /// `NR-CGIList ::= SEQUENCE (SIZE (1..16384)) OF NRCGI`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NRCGIList(pub Vec<NRCGI>);
-    impl crate::message::__Field<Vec<NRCGI>> for NRCGIList {
+    impl oxirush_aper::protocol::__Field<Vec<NRCGI>> for NRCGIList {
         #[inline]
         fn __field(self) -> Vec<NRCGI> {
             self.0
@@ -54950,7 +54988,7 @@ pub mod ngap_ies {
     /// `NR-CGIListForWarning ::= SEQUENCE (SIZE (1..65535)) OF NRCGI`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NRCGIListForWarning(pub Vec<NRCGI>);
-    impl crate::message::__Field<Vec<NRCGI>> for NRCGIListForWarning {
+    impl oxirush_aper::protocol::__Field<Vec<NRCGI>> for NRCGIListForWarning {
         #[inline]
         fn __field(self) -> Vec<NRCGI> {
             self.0
@@ -55002,7 +55040,7 @@ pub mod ngap_ies {
     /// `NR-PCI ::= INTEGER (0..1007, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NRPCI(pub u64);
-    impl crate::message::__Field<u64> for NRPCI {
+    impl oxirush_aper::protocol::__Field<u64> for NRPCI {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -55674,7 +55712,7 @@ pub mod ngap_ies {
     /// `NRARFCN ::= INTEGER (0..3279165)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NRARFCN(pub u32);
-    impl crate::message::__Field<u32> for NRARFCN {
+    impl oxirush_aper::protocol::__Field<u32> for NRARFCN {
         #[inline]
         fn __field(self) -> u32 {
             self.0
@@ -55720,7 +55758,7 @@ pub mod ngap_ies {
     /// `NRCellIdentity ::= BIT STRING (SIZE (36))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NRCellIdentity(pub Bits);
-    impl crate::message::__Field<Bits> for NRCellIdentity {
+    impl oxirush_aper::protocol::__Field<Bits> for NRCellIdentity {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -55773,7 +55811,7 @@ pub mod ngap_ies {
     /// `NRFrequencyBand ::= INTEGER (1..1024, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NRFrequencyBand(pub u64);
-    impl crate::message::__Field<u64> for NRFrequencyBand {
+    impl oxirush_aper::protocol::__Field<u64> for NRFrequencyBand {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -55815,7 +55853,7 @@ pub mod ngap_ies {
     /// `NRFrequencyBand-List ::= SEQUENCE (SIZE (1..32)) OF NRFrequencyBandItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NRFrequencyBandList<'a>(pub Vec<NRFrequencyBandItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<NRFrequencyBandItem<'a>>> for NRFrequencyBandList<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Vec<NRFrequencyBandItem<'a>>> for NRFrequencyBandList<'a> {
         #[inline]
         fn __field(self) -> Vec<NRFrequencyBandItem<'a>> {
             self.0
@@ -56077,7 +56115,7 @@ pub mod ngap_ies {
     /// `NRMobilityHistoryReport ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NRMobilityHistoryReport<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for NRMobilityHistoryReport<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for NRMobilityHistoryReport<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -56274,7 +56312,7 @@ pub mod ngap_ies {
     /// `NRPPa-PDU ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NRPPaPDU<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for NRPPaPDU<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for NRPPaPDU<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -56334,7 +56372,7 @@ pub mod ngap_ies {
     /// `NRUERLFReportContainer ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NRUERLFReportContainer<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for NRUERLFReportContainer<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for NRUERLFReportContainer<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -56612,7 +56650,7 @@ pub mod ngap_ies {
     /// `NRencryptionAlgorithms ::= BIT STRING (SIZE (16, ...))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NRencryptionAlgorithms<'a>(pub BitString<'a>);
-    impl<'a> crate::message::__Field<BitString<'a>> for NRencryptionAlgorithms<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<BitString<'a>> for NRencryptionAlgorithms<'a> {
         #[inline]
         fn __field(self) -> BitString<'a> {
             self.0
@@ -56662,7 +56700,7 @@ pub mod ngap_ies {
     /// `NRintegrityProtectionAlgorithms ::= BIT STRING (SIZE (16, ...))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NRintegrityProtectionAlgorithms<'a>(pub BitString<'a>);
-    impl<'a> crate::message::__Field<BitString<'a>> for NRintegrityProtectionAlgorithms<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<BitString<'a>> for NRintegrityProtectionAlgorithms<'a> {
         #[inline]
         fn __field(self) -> BitString<'a> {
             self.0
@@ -56712,7 +56750,7 @@ pub mod ngap_ies {
     /// `NSAG-ID ::= INTEGER (0..255, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NSAGID(pub u64);
-    impl crate::message::__Field<u64> for NSAGID {
+    impl oxirush_aper::protocol::__Field<u64> for NSAGID {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -56846,7 +56884,9 @@ pub mod ngap_ies {
     /// `NTN-Geographical-Area-List ::= SEQUENCE (SIZE (1..8)) OF NTNGeographicalAreaItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NTNGeographicalAreaList<'a>(pub Vec<NTNGeographicalAreaItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<NTNGeographicalAreaItem<'a>>> for NTNGeographicalAreaList<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Vec<NTNGeographicalAreaItem<'a>>>
+        for NTNGeographicalAreaList<'a>
+    {
         #[inline]
         fn __field(self) -> Vec<NTNGeographicalAreaItem<'a>> {
             self.0
@@ -56952,7 +56992,7 @@ pub mod ngap_ies {
     /// `NetworkInstance ::= INTEGER (1..256, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NetworkInstance(pub u64);
-    impl crate::message::__Field<u64> for NetworkInstance {
+    impl oxirush_aper::protocol::__Field<u64> for NetworkInstance {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -57188,7 +57228,7 @@ pub mod ngap_ies {
     /// `NetworkSliceListforMDT ::= SEQUENCE (SIZE (1..16)) OF NetworkSliceItemforMDT`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NetworkSliceListforMDT(pub Vec<NetworkSliceItemforMDT>);
-    impl crate::message::__Field<Vec<NetworkSliceItemforMDT>> for NetworkSliceListforMDT {
+    impl oxirush_aper::protocol::__Field<Vec<NetworkSliceItemforMDT>> for NetworkSliceListforMDT {
         #[inline]
         fn __field(self) -> Vec<NetworkSliceItemforMDT> {
             self.0
@@ -57286,7 +57326,7 @@ pub mod ngap_ies {
     /// `NextHopChainingCount ::= INTEGER (0..7)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NextHopChainingCount(pub u8);
-    impl crate::message::__Field<u8> for NextHopChainingCount {
+    impl oxirush_aper::protocol::__Field<u8> for NextHopChainingCount {
         #[inline]
         fn __field(self) -> u8 {
             self.0
@@ -57703,7 +57743,7 @@ pub mod ngap_ies {
     /// `NotAllowedTACs ::= SEQUENCE (SIZE (1..16)) OF TAC`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NotAllowedTACs(pub Vec<TAC>);
-    impl crate::message::__Field<Vec<TAC>> for NotAllowedTACs {
+    impl oxirush_aper::protocol::__Field<Vec<TAC>> for NotAllowedTACs {
         #[inline]
         fn __field(self) -> Vec<TAC> {
             self.0
@@ -57964,7 +58004,7 @@ pub mod ngap_ies {
     /// `NotificationCellList ::= SEQUENCE (SIZE (1..16384)) OF NotificationCellItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct NotificationCellList(pub Vec<NotificationCellItem>);
-    impl crate::message::__Field<Vec<NotificationCellItem>> for NotificationCellList {
+    impl oxirush_aper::protocol::__Field<Vec<NotificationCellItem>> for NotificationCellList {
         #[inline]
         fn __field(self) -> Vec<NotificationCellItem> {
             self.0
@@ -58108,7 +58148,7 @@ pub mod ngap_ies {
     /// `NumberOfBroadcasts ::= INTEGER (0..65535)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NumberOfBroadcasts(pub u16);
-    impl crate::message::__Field<u16> for NumberOfBroadcasts {
+    impl oxirush_aper::protocol::__Field<u16> for NumberOfBroadcasts {
         #[inline]
         fn __field(self) -> u16 {
             self.0
@@ -58154,7 +58194,7 @@ pub mod ngap_ies {
     /// `NumberOfBroadcastsRequested ::= INTEGER (0..65535)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct NumberOfBroadcastsRequested(pub u16);
-    impl crate::message::__Field<u16> for NumberOfBroadcastsRequested {
+    impl oxirush_aper::protocol::__Field<u16> for NumberOfBroadcastsRequested {
         #[inline]
         fn __field(self) -> u16 {
             self.0
@@ -58583,7 +58623,7 @@ pub mod ngap_ies {
     /// `OverloadStartNSSAIList ::= SEQUENCE (SIZE (1..1024)) OF OverloadStartNSSAIItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct OverloadStartNSSAIList(pub Vec<OverloadStartNSSAIItem>);
-    impl crate::message::__Field<Vec<OverloadStartNSSAIItem>> for OverloadStartNSSAIList {
+    impl oxirush_aper::protocol::__Field<Vec<OverloadStartNSSAIItem>> for OverloadStartNSSAIList {
         #[inline]
         fn __field(self) -> Vec<OverloadStartNSSAIItem> {
             self.0
@@ -58883,7 +58923,7 @@ pub mod ngap_ies {
     /// `PC5QoSFlowList ::= SEQUENCE (SIZE (1..2048)) OF PC5QoSFlowItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PC5QoSFlowList(pub Vec<PC5QoSFlowItem>);
-    impl crate::message::__Field<Vec<PC5QoSFlowItem>> for PC5QoSFlowList {
+    impl oxirush_aper::protocol::__Field<Vec<PC5QoSFlowItem>> for PC5QoSFlowList {
         #[inline]
         fn __field(self) -> Vec<PC5QoSFlowItem> {
             self.0
@@ -59056,7 +59096,7 @@ pub mod ngap_ies {
     /// `PCIListForMDT ::= SEQUENCE (SIZE (1..32)) OF NRPCI`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PCIListForMDT(pub Vec<NRPCI>);
-    impl crate::message::__Field<Vec<NRPCI>> for PCIListForMDT {
+    impl oxirush_aper::protocol::__Field<Vec<NRPCI>> for PCIListForMDT {
         #[inline]
         fn __field(self) -> Vec<NRPCI> {
             self.0
@@ -59349,7 +59389,7 @@ pub mod ngap_ies {
     /// `PDUSessionForPagingList ::= SEQUENCE (SIZE (1..256)) OF PDUSessionForPagingItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionForPagingList(pub Vec<PDUSessionForPagingItem>);
-    impl crate::message::__Field<Vec<PDUSessionForPagingItem>> for PDUSessionForPagingList {
+    impl oxirush_aper::protocol::__Field<Vec<PDUSessionForPagingItem>> for PDUSessionForPagingList {
         #[inline]
         fn __field(self) -> Vec<PDUSessionForPagingItem> {
             self.0
@@ -59401,7 +59441,7 @@ pub mod ngap_ies {
     /// `PDUSessionID ::= INTEGER (0..255)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PDUSessionID(pub u8);
-    impl crate::message::__Field<u8> for PDUSessionID {
+    impl oxirush_aper::protocol::__Field<u8> for PDUSessionID {
         #[inline]
         fn __field(self) -> u8 {
             self.0
@@ -59445,7 +59485,9 @@ pub mod ngap_ies {
     /// `PDUSessionListMTCommHReq ::= SEQUENCE (SIZE (1..256)) OF PDUSessionListMTCommHReqItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionListMTCommHReq(pub Vec<PDUSessionListMTCommHReqItem>);
-    impl crate::message::__Field<Vec<PDUSessionListMTCommHReqItem>> for PDUSessionListMTCommHReq {
+    impl oxirush_aper::protocol::__Field<Vec<PDUSessionListMTCommHReqItem>>
+        for PDUSessionListMTCommHReq
+    {
         #[inline]
         fn __field(self) -> Vec<PDUSessionListMTCommHReqItem> {
             self.0
@@ -59585,7 +59627,7 @@ pub mod ngap_ies {
     /// `PDUSessionPairID ::= INTEGER (0..255, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PDUSessionPairID(pub u64);
-    impl crate::message::__Field<u64> for PDUSessionPairID {
+    impl oxirush_aper::protocol::__Field<u64> for PDUSessionPairID {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -59755,7 +59797,7 @@ pub mod ngap_ies {
     /// `PDUSessionResourceAdmittedList ::= SEQUENCE (SIZE (1..256)) OF PDUSessionResourceAdmittedItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceAdmittedList<'a>(pub Vec<PDUSessionResourceAdmittedItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceAdmittedItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceAdmittedItem<'a>>>
         for PDUSessionResourceAdmittedList<'a>
     {
         #[inline]
@@ -60091,7 +60133,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToModifyListModCfm<'a>(
         pub Vec<PDUSessionResourceFailedToModifyItemModCfm<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceFailedToModifyItemModCfm<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceFailedToModifyItemModCfm<'a>>>
         for PDUSessionResourceFailedToModifyListModCfm<'a>
     {
         #[inline]
@@ -60158,7 +60200,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToModifyListModRes<'a>(
         pub Vec<PDUSessionResourceFailedToModifyItemModRes<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceFailedToModifyItemModRes<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceFailedToModifyItemModRes<'a>>>
         for PDUSessionResourceFailedToModifyListModRes<'a>
     {
         #[inline]
@@ -60429,7 +60471,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToResumeListRESReq(
         pub Vec<PDUSessionResourceFailedToResumeItemRESReq>,
     );
-    impl crate::message::__Field<Vec<PDUSessionResourceFailedToResumeItemRESReq>>
+    impl oxirush_aper::protocol::__Field<Vec<PDUSessionResourceFailedToResumeItemRESReq>>
         for PDUSessionResourceFailedToResumeListRESReq
     {
         #[inline]
@@ -60487,7 +60529,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToResumeListRESRes(
         pub Vec<PDUSessionResourceFailedToResumeItemRESRes>,
     );
-    impl crate::message::__Field<Vec<PDUSessionResourceFailedToResumeItemRESRes>>
+    impl oxirush_aper::protocol::__Field<Vec<PDUSessionResourceFailedToResumeItemRESRes>>
         for PDUSessionResourceFailedToResumeListRESRes
     {
         #[inline]
@@ -61214,7 +61256,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToSetupListCxtFail<'a>(
         pub Vec<PDUSessionResourceFailedToSetupItemCxtFail<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceFailedToSetupItemCxtFail<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceFailedToSetupItemCxtFail<'a>>>
         for PDUSessionResourceFailedToSetupListCxtFail<'a>
     {
         #[inline]
@@ -61281,7 +61323,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToSetupListCxtRes<'a>(
         pub Vec<PDUSessionResourceFailedToSetupItemCxtRes<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceFailedToSetupItemCxtRes<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceFailedToSetupItemCxtRes<'a>>>
         for PDUSessionResourceFailedToSetupListCxtRes<'a>
     {
         #[inline]
@@ -61348,7 +61390,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToSetupListHOAck<'a>(
         pub Vec<PDUSessionResourceFailedToSetupItemHOAck<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceFailedToSetupItemHOAck<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceFailedToSetupItemHOAck<'a>>>
         for PDUSessionResourceFailedToSetupListHOAck<'a>
     {
         #[inline]
@@ -61415,7 +61457,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToSetupListPSReq<'a>(
         pub Vec<PDUSessionResourceFailedToSetupItemPSReq<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceFailedToSetupItemPSReq<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceFailedToSetupItemPSReq<'a>>>
         for PDUSessionResourceFailedToSetupListPSReq<'a>
     {
         #[inline]
@@ -61482,7 +61524,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceFailedToSetupListSURes<'a>(
         pub Vec<PDUSessionResourceFailedToSetupItemSURes<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceFailedToSetupItemSURes<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceFailedToSetupItemSURes<'a>>>
         for PDUSessionResourceFailedToSetupListSURes<'a>
     {
         #[inline]
@@ -61666,7 +61708,7 @@ pub mod ngap_ies {
     /// `PDUSessionResourceHandoverList ::= SEQUENCE (SIZE (1..256)) OF PDUSessionResourceHandoverItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceHandoverList<'a>(pub Vec<PDUSessionResourceHandoverItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceHandoverItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceHandoverItem<'a>>>
         for PDUSessionResourceHandoverList<'a>
     {
         #[inline]
@@ -61870,7 +61912,7 @@ pub mod ngap_ies {
     /// `PDUSessionResourceInformationList ::= SEQUENCE (SIZE (1..256)) OF PDUSessionResourceInformationItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceInformationList(pub Vec<PDUSessionResourceInformationItem>);
-    impl crate::message::__Field<Vec<PDUSessionResourceInformationItem>>
+    impl oxirush_aper::protocol::__Field<Vec<PDUSessionResourceInformationItem>>
         for PDUSessionResourceInformationList
     {
         #[inline]
@@ -62220,7 +62262,7 @@ pub mod ngap_ies {
     /// `PDUSessionResourceListCxtRelCpl ::= SEQUENCE (SIZE (1..256)) OF PDUSessionResourceItemCxtRelCpl`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceListCxtRelCpl(pub Vec<PDUSessionResourceItemCxtRelCpl>);
-    impl crate::message::__Field<Vec<PDUSessionResourceItemCxtRelCpl>>
+    impl oxirush_aper::protocol::__Field<Vec<PDUSessionResourceItemCxtRelCpl>>
         for PDUSessionResourceListCxtRelCpl
     {
         #[inline]
@@ -62274,7 +62316,7 @@ pub mod ngap_ies {
     /// `PDUSessionResourceListCxtRelReq ::= SEQUENCE (SIZE (1..256)) OF PDUSessionResourceItemCxtRelReq`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceListCxtRelReq(pub Vec<PDUSessionResourceItemCxtRelReq>);
-    impl crate::message::__Field<Vec<PDUSessionResourceItemCxtRelReq>>
+    impl oxirush_aper::protocol::__Field<Vec<PDUSessionResourceItemCxtRelReq>>
         for PDUSessionResourceListCxtRelReq
     {
         #[inline]
@@ -62328,7 +62370,7 @@ pub mod ngap_ies {
     /// `PDUSessionResourceListHORqd ::= SEQUENCE (SIZE (1..256)) OF PDUSessionResourceItemHORqd`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceListHORqd<'a>(pub Vec<PDUSessionResourceItemHORqd<'a>>);
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceItemHORqd<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceItemHORqd<'a>>>
         for PDUSessionResourceListHORqd<'a>
     {
         #[inline]
@@ -63363,7 +63405,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceModifyListModCfm<'a>(
         pub Vec<PDUSessionResourceModifyItemModCfm<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceModifyItemModCfm<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceModifyItemModCfm<'a>>>
         for PDUSessionResourceModifyListModCfm<'a>
     {
         #[inline]
@@ -63430,7 +63472,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceModifyListModInd<'a>(
         pub Vec<PDUSessionResourceModifyItemModInd<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceModifyItemModInd<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceModifyItemModInd<'a>>>
         for PDUSessionResourceModifyListModInd<'a>
     {
         #[inline]
@@ -63497,7 +63539,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceModifyListModReq<'a>(
         pub Vec<PDUSessionResourceModifyItemModReq<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceModifyItemModReq<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceModifyItemModReq<'a>>>
         for PDUSessionResourceModifyListModReq<'a>
     {
         #[inline]
@@ -63564,7 +63606,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceModifyListModRes<'a>(
         pub Vec<PDUSessionResourceModifyItemModRes<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceModifyItemModRes<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceModifyItemModRes<'a>>>
         for PDUSessionResourceModifyListModRes<'a>
     {
         #[inline]
@@ -64174,7 +64216,7 @@ pub mod ngap_ies {
     /// `PDUSessionResourceNotifyList ::= SEQUENCE (SIZE (1..256)) OF PDUSessionResourceNotifyItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceNotifyList<'a>(pub Vec<PDUSessionResourceNotifyItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceNotifyItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceNotifyItem<'a>>>
         for PDUSessionResourceNotifyList<'a>
     {
         #[inline]
@@ -65143,7 +65185,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceReleasedListNot<'a>(
         pub Vec<PDUSessionResourceReleasedItemNot<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceReleasedItemNot<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceReleasedItemNot<'a>>>
         for PDUSessionResourceReleasedListNot<'a>
     {
         #[inline]
@@ -65210,7 +65252,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceReleasedListPSAck<'a>(
         pub Vec<PDUSessionResourceReleasedItemPSAck<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceReleasedItemPSAck<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceReleasedItemPSAck<'a>>>
         for PDUSessionResourceReleasedListPSAck<'a>
     {
         #[inline]
@@ -65277,7 +65319,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceReleasedListPSFail<'a>(
         pub Vec<PDUSessionResourceReleasedItemPSFail<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceReleasedItemPSFail<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceReleasedItemPSFail<'a>>>
         for PDUSessionResourceReleasedListPSFail<'a>
     {
         #[inline]
@@ -65344,7 +65386,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceReleasedListRelRes<'a>(
         pub Vec<PDUSessionResourceReleasedItemRelRes<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceReleasedItemRelRes<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceReleasedItemRelRes<'a>>>
         for PDUSessionResourceReleasedListRelRes<'a>
     {
         #[inline]
@@ -65667,7 +65709,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceResumeListRESReq<'a>(
         pub Vec<PDUSessionResourceResumeItemRESReq<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceResumeItemRESReq<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceResumeItemRESReq<'a>>>
         for PDUSessionResourceResumeListRESReq<'a>
     {
         #[inline]
@@ -65734,7 +65776,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceResumeListRESRes<'a>(
         pub Vec<PDUSessionResourceResumeItemRESRes<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceResumeItemRESRes<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceResumeItemRESRes<'a>>>
         for PDUSessionResourceResumeListRESRes<'a>
     {
         #[inline]
@@ -65931,7 +65973,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceSecondaryRATUsageList<'a>(
         pub Vec<PDUSessionResourceSecondaryRATUsageItem<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceSecondaryRATUsageItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceSecondaryRATUsageItem<'a>>>
         for PDUSessionResourceSecondaryRATUsageList<'a>
     {
         #[inline]
@@ -66755,7 +66797,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceSetupListCxtReq<'a>(
         pub Vec<PDUSessionResourceSetupItemCxtReq<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceSetupItemCxtReq<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceSetupItemCxtReq<'a>>>
         for PDUSessionResourceSetupListCxtReq<'a>
     {
         #[inline]
@@ -66822,7 +66864,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceSetupListCxtRes<'a>(
         pub Vec<PDUSessionResourceSetupItemCxtRes<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceSetupItemCxtRes<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceSetupItemCxtRes<'a>>>
         for PDUSessionResourceSetupListCxtRes<'a>
     {
         #[inline]
@@ -66887,7 +66929,7 @@ pub mod ngap_ies {
     /// `PDUSessionResourceSetupListHOReq ::= SEQUENCE (SIZE (1..256)) OF PDUSessionResourceSetupItemHOReq`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceSetupListHOReq<'a>(pub Vec<PDUSessionResourceSetupItemHOReq<'a>>);
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceSetupItemHOReq<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceSetupItemHOReq<'a>>>
         for PDUSessionResourceSetupListHOReq<'a>
     {
         #[inline]
@@ -66950,7 +66992,7 @@ pub mod ngap_ies {
     /// `PDUSessionResourceSetupListSUReq ::= SEQUENCE (SIZE (1..256)) OF PDUSessionResourceSetupItemSUReq`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceSetupListSUReq<'a>(pub Vec<PDUSessionResourceSetupItemSUReq<'a>>);
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceSetupItemSUReq<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceSetupItemSUReq<'a>>>
         for PDUSessionResourceSetupListSUReq<'a>
     {
         #[inline]
@@ -67013,7 +67055,7 @@ pub mod ngap_ies {
     /// `PDUSessionResourceSetupListSURes ::= SEQUENCE (SIZE (1..256)) OF PDUSessionResourceSetupItemSURes`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceSetupListSURes<'a>(pub Vec<PDUSessionResourceSetupItemSURes<'a>>);
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceSetupItemSURes<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceSetupItemSURes<'a>>>
         for PDUSessionResourceSetupListSURes<'a>
     {
         #[inline]
@@ -67574,7 +67616,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceSuspendListSUSReq<'a>(
         pub Vec<PDUSessionResourceSuspendItemSUSReq<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceSuspendItemSUSReq<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceSuspendItemSUSReq<'a>>>
         for PDUSessionResourceSuspendListSUSReq<'a>
     {
         #[inline]
@@ -67769,7 +67811,7 @@ pub mod ngap_ies {
     /// `PDUSessionResourceSwitchedList ::= SEQUENCE (SIZE (1..256)) OF PDUSessionResourceSwitchedItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceSwitchedList<'a>(pub Vec<PDUSessionResourceSwitchedItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceSwitchedItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceSwitchedItem<'a>>>
         for PDUSessionResourceSwitchedList<'a>
     {
         #[inline]
@@ -67955,7 +67997,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceToBeSwitchedDLList<'a>(
         pub Vec<PDUSessionResourceToBeSwitchedDLItem<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceToBeSwitchedDLItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceToBeSwitchedDLItem<'a>>>
         for PDUSessionResourceToBeSwitchedDLList<'a>
     {
         #[inline]
@@ -68288,7 +68330,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceToReleaseListHOCmd<'a>(
         pub Vec<PDUSessionResourceToReleaseItemHOCmd<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceToReleaseItemHOCmd<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceToReleaseItemHOCmd<'a>>>
         for PDUSessionResourceToReleaseListHOCmd<'a>
     {
         #[inline]
@@ -68355,7 +68397,7 @@ pub mod ngap_ies {
     pub struct PDUSessionResourceToReleaseListRelCmd<'a>(
         pub Vec<PDUSessionResourceToReleaseItemRelCmd<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<PDUSessionResourceToReleaseItemRelCmd<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<PDUSessionResourceToReleaseItemRelCmd<'a>>>
         for PDUSessionResourceToReleaseListRelCmd<'a>
     {
         #[inline]
@@ -69247,7 +69289,7 @@ pub mod ngap_ies {
     /// `PLMNIdentity ::= OCTET STRING (SIZE (3))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PLMNIdentity(pub [u8; 3]);
-    impl crate::message::__Field<[u8; 3]> for PLMNIdentity {
+    impl oxirush_aper::protocol::__Field<[u8; 3]> for PLMNIdentity {
         #[inline]
         fn __field(self) -> [u8; 3] {
             self.0
@@ -69290,7 +69332,7 @@ pub mod ngap_ies {
     /// `PLMNListforQMC ::= SEQUENCE (SIZE (1..16)) OF PLMNIdentity`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PLMNListforQMC(pub Vec<PLMNIdentity>);
-    impl crate::message::__Field<Vec<PLMNIdentity>> for PLMNListforQMC {
+    impl oxirush_aper::protocol::__Field<Vec<PLMNIdentity>> for PLMNListforQMC {
         #[inline]
         fn __field(self) -> Vec<PLMNIdentity> {
             self.0
@@ -69447,7 +69489,7 @@ pub mod ngap_ies {
     /// `PLMNSupportList ::= SEQUENCE (SIZE (1..12)) OF PLMNSupportItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PLMNSupportList(pub Vec<PLMNSupportItem>);
-    impl crate::message::__Field<Vec<PLMNSupportItem>> for PLMNSupportList {
+    impl oxirush_aper::protocol::__Field<Vec<PLMNSupportItem>> for PLMNSupportList {
         #[inline]
         fn __field(self) -> Vec<PLMNSupportItem> {
             self.0
@@ -69862,7 +69904,7 @@ pub mod ngap_ies {
     /// `PacketDelayBudget ::= INTEGER (0..1023, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PacketDelayBudget(pub u64);
-    impl crate::message::__Field<u64> for PacketDelayBudget {
+    impl oxirush_aper::protocol::__Field<u64> for PacketDelayBudget {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -70010,7 +70052,7 @@ pub mod ngap_ies {
     /// `PacketLossRate ::= INTEGER (0..1000, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PacketLossRate(pub u64);
-    impl crate::message::__Field<u64> for PacketLossRate {
+    impl oxirush_aper::protocol::__Field<u64> for PacketLossRate {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -70170,7 +70212,7 @@ pub mod ngap_ies {
     /// `PagingAttemptCount ::= INTEGER (1..16, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PagingAttemptCount(pub u64);
-    impl crate::message::__Field<u64> for PagingAttemptCount {
+    impl oxirush_aper::protocol::__Field<u64> for PagingAttemptCount {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -70848,7 +70890,7 @@ pub mod ngap_ies {
     /// `PagingPolicyDifferentiationList ::= SEQUENCE (SIZE (1..64)) OF PagingPolicyDifferentiationItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PagingPolicyDifferentiationList(pub Vec<PagingPolicyDifferentiationItem>);
-    impl crate::message::__Field<Vec<PagingPolicyDifferentiationItem>>
+    impl oxirush_aper::protocol::__Field<Vec<PagingPolicyDifferentiationItem>>
         for PagingPolicyDifferentiationList
     {
         #[inline]
@@ -70902,7 +70944,7 @@ pub mod ngap_ies {
     /// `PagingPolicyIndicator ::= INTEGER (0..7, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PagingPolicyIndicator(pub u64);
-    impl crate::message::__Field<u64> for PagingPolicyIndicator {
+    impl oxirush_aper::protocol::__Field<u64> for PagingPolicyIndicator {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -71180,7 +71222,7 @@ pub mod ngap_ies {
     /// `Partially-Allowed-NSSAI ::= SEQUENCE (SIZE (1..8)) OF PartiallyAllowedNSSAIItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PartiallyAllowedNSSAI(pub Vec<PartiallyAllowedNSSAIItem>);
-    impl crate::message::__Field<Vec<PartiallyAllowedNSSAIItem>> for PartiallyAllowedNSSAI {
+    impl oxirush_aper::protocol::__Field<Vec<PartiallyAllowedNSSAIItem>> for PartiallyAllowedNSSAI {
         #[inline]
         fn __field(self) -> Vec<PartiallyAllowedNSSAIItem> {
             self.0
@@ -71870,7 +71912,7 @@ pub mod ngap_ies {
     /// `PeriodicRegistrationUpdateTimer ::= BIT STRING (SIZE (8))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PeriodicRegistrationUpdateTimer(pub Bits);
-    impl crate::message::__Field<Bits> for PeriodicRegistrationUpdateTimer {
+    impl oxirush_aper::protocol::__Field<Bits> for PeriodicRegistrationUpdateTimer {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -72011,7 +72053,7 @@ pub mod ngap_ies {
     /// `Periodicity ::= INTEGER (0..640000, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct Periodicity(pub u64);
-    impl crate::message::__Field<u64> for Periodicity {
+    impl oxirush_aper::protocol::__Field<u64> for Periodicity {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -72381,7 +72423,7 @@ pub mod ngap_ies {
     /// `PortNumber ::= OCTET STRING (SIZE (2))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PortNumber(pub [u8; 2]);
-    impl crate::message::__Field<[u8; 2]> for PortNumber {
+    impl oxirush_aper::protocol::__Field<[u8; 2]> for PortNumber {
         #[inline]
         fn __field(self) -> [u8; 2] {
             self.0
@@ -72522,7 +72564,7 @@ pub mod ngap_ies {
     /// `PriorityLevelARP ::= INTEGER (1..15)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PriorityLevelARP(pub u8);
-    impl crate::message::__Field<u8> for PriorityLevelARP {
+    impl oxirush_aper::protocol::__Field<u8> for PriorityLevelARP {
         #[inline]
         fn __field(self) -> u8 {
             self.0
@@ -72566,7 +72608,7 @@ pub mod ngap_ies {
     /// `PriorityLevelQos ::= INTEGER (1..127, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct PriorityLevelQos(pub u64);
-    impl crate::message::__Field<u64> for PriorityLevelQos {
+    impl oxirush_aper::protocol::__Field<u64> for PriorityLevelQos {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -73175,7 +73217,7 @@ pub mod ngap_ies {
     /// `QoEReference ::= OCTET STRING (SIZE (6))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct QoEReference(pub [u8; 6]);
-    impl crate::message::__Field<[u8; 6]> for QoEReference {
+    impl oxirush_aper::protocol::__Field<[u8; 6]> for QoEReference {
         #[inline]
         fn __field(self) -> [u8; 6] {
             self.0
@@ -73217,7 +73259,7 @@ pub mod ngap_ies {
     /// `QoEReferenceList ::= SEQUENCE (SIZE (1..16)) OF QoEReference`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QoEReferenceList(pub Vec<QoEReference>);
-    impl crate::message::__Field<Vec<QoEReference>> for QoEReferenceList {
+    impl oxirush_aper::protocol::__Field<Vec<QoEReference>> for QoEReferenceList {
         #[inline]
         fn __field(self) -> Vec<QoEReference> {
             self.0
@@ -73269,7 +73311,7 @@ pub mod ngap_ies {
     /// `QoSFlowList ::= SEQUENCE (SIZE (1..64)) OF QosFlowIdentifier`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QoSFlowList(pub Vec<QosFlowIdentifier>);
-    impl crate::message::__Field<Vec<QosFlowIdentifier>> for QoSFlowList {
+    impl oxirush_aper::protocol::__Field<Vec<QosFlowIdentifier>> for QoSFlowList {
         #[inline]
         fn __field(self) -> Vec<QosFlowIdentifier> {
             self.0
@@ -73473,7 +73515,7 @@ pub mod ngap_ies {
     /// `QoSFlowTSCList ::= SEQUENCE (SIZE (1..64)) OF QoSFlowTSCItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QoSFlowTSCList(pub Vec<QoSFlowTSCItem>);
-    impl crate::message::__Field<Vec<QoSFlowTSCItem>> for QoSFlowTSCList {
+    impl oxirush_aper::protocol::__Field<Vec<QoSFlowTSCItem>> for QoSFlowTSCList {
         #[inline]
         fn __field(self) -> Vec<QoSFlowTSCItem> {
             self.0
@@ -73709,7 +73751,7 @@ pub mod ngap_ies {
     /// `QoSFlowsUsageReportList ::= SEQUENCE (SIZE (1..64)) OF QoSFlowsUsageReportItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QoSFlowsUsageReportList(pub Vec<QoSFlowsUsageReportItem>);
-    impl crate::message::__Field<Vec<QoSFlowsUsageReportItem>> for QoSFlowsUsageReportList {
+    impl oxirush_aper::protocol::__Field<Vec<QoSFlowsUsageReportItem>> for QoSFlowsUsageReportList {
         #[inline]
         fn __field(self) -> Vec<QoSFlowsUsageReportItem> {
             self.0
@@ -73938,7 +73980,7 @@ pub mod ngap_ies {
     /// `QosFlowAcceptedList ::= SEQUENCE (SIZE (1..64)) OF QosFlowAcceptedItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowAcceptedList(pub Vec<QosFlowAcceptedItem>);
-    impl crate::message::__Field<Vec<QosFlowAcceptedItem>> for QosFlowAcceptedList {
+    impl oxirush_aper::protocol::__Field<Vec<QosFlowAcceptedItem>> for QosFlowAcceptedList {
         #[inline]
         fn __field(self) -> Vec<QosFlowAcceptedItem> {
             self.0
@@ -74137,7 +74179,9 @@ pub mod ngap_ies {
     /// `QosFlowAddOrModifyRequestList ::= SEQUENCE (SIZE (1..64)) OF QosFlowAddOrModifyRequestItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowAddOrModifyRequestList(pub Vec<QosFlowAddOrModifyRequestItem>);
-    impl crate::message::__Field<Vec<QosFlowAddOrModifyRequestItem>> for QosFlowAddOrModifyRequestList {
+    impl oxirush_aper::protocol::__Field<Vec<QosFlowAddOrModifyRequestItem>>
+        for QosFlowAddOrModifyRequestList
+    {
         #[inline]
         fn __field(self) -> Vec<QosFlowAddOrModifyRequestItem> {
             self.0
@@ -74277,7 +74321,7 @@ pub mod ngap_ies {
     /// `QosFlowAddOrModifyResponseList ::= SEQUENCE (SIZE (1..64)) OF QosFlowAddOrModifyResponseItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowAddOrModifyResponseList(pub Vec<QosFlowAddOrModifyResponseItem>);
-    impl crate::message::__Field<Vec<QosFlowAddOrModifyResponseItem>>
+    impl oxirush_aper::protocol::__Field<Vec<QosFlowAddOrModifyResponseItem>>
         for QosFlowAddOrModifyResponseList
     {
         #[inline]
@@ -74583,7 +74627,7 @@ pub mod ngap_ies {
     /// `QosFlowAdditionalInfoListRelCom ::= SEQUENCE (SIZE (1..64)) OF QosFlowAdditionalInfoItemRelCom`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowAdditionalInfoListRelCom<'a>(pub Vec<QosFlowAdditionalInfoItemRelCom<'a>>);
-    impl<'a> crate::message::__Field<Vec<QosFlowAdditionalInfoItemRelCom<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<QosFlowAdditionalInfoItemRelCom<'a>>>
         for QosFlowAdditionalInfoListRelCom<'a>
     {
         #[inline]
@@ -74646,7 +74690,7 @@ pub mod ngap_ies {
     /// `QosFlowAdditionalInfoListRelRes ::= SEQUENCE (SIZE (1..64)) OF QosFlowAdditionalInfoItemRelRes`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowAdditionalInfoListRelRes<'a>(pub Vec<QosFlowAdditionalInfoItemRelRes<'a>>);
-    impl<'a> crate::message::__Field<Vec<QosFlowAdditionalInfoItemRelRes<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<QosFlowAdditionalInfoItemRelRes<'a>>>
         for QosFlowAdditionalInfoListRelRes<'a>
     {
         #[inline]
@@ -74895,7 +74939,7 @@ pub mod ngap_ies {
     /// `QosFlowFeedbackList ::= SEQUENCE (SIZE (1..64)) OF QosFlowFeedbackItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowFeedbackList<'a>(pub Vec<QosFlowFeedbackItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<QosFlowFeedbackItem<'a>>> for QosFlowFeedbackList<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Vec<QosFlowFeedbackItem<'a>>> for QosFlowFeedbackList<'a> {
         #[inline]
         fn __field(self) -> Vec<QosFlowFeedbackItem<'a>> {
             self.0
@@ -74954,7 +74998,7 @@ pub mod ngap_ies {
     /// `QosFlowIdentifier ::= INTEGER (0..63, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct QosFlowIdentifier(pub u64);
-    impl crate::message::__Field<u64> for QosFlowIdentifier {
+    impl oxirush_aper::protocol::__Field<u64> for QosFlowIdentifier {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -75111,7 +75155,7 @@ pub mod ngap_ies {
     /// `QosFlowInformationList ::= SEQUENCE (SIZE (1..64)) OF QosFlowInformationItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowInformationList(pub Vec<QosFlowInformationItem>);
-    impl crate::message::__Field<Vec<QosFlowInformationItem>> for QosFlowInformationList {
+    impl oxirush_aper::protocol::__Field<Vec<QosFlowInformationItem>> for QosFlowInformationList {
         #[inline]
         fn __field(self) -> Vec<QosFlowInformationItem> {
             self.0
@@ -75483,7 +75527,7 @@ pub mod ngap_ies {
     /// `QosFlowListWithCause ::= SEQUENCE (SIZE (1..64)) OF QosFlowWithCauseItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowListWithCause(pub Vec<QosFlowWithCauseItem>);
-    impl crate::message::__Field<Vec<QosFlowWithCauseItem>> for QosFlowListWithCause {
+    impl oxirush_aper::protocol::__Field<Vec<QosFlowWithCauseItem>> for QosFlowListWithCause {
         #[inline]
         fn __field(self) -> Vec<QosFlowWithCauseItem> {
             self.0
@@ -75535,7 +75579,9 @@ pub mod ngap_ies {
     /// `QosFlowListWithDataForwarding ::= SEQUENCE (SIZE (1..64)) OF QosFlowItemWithDataForwarding`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowListWithDataForwarding(pub Vec<QosFlowItemWithDataForwarding>);
-    impl crate::message::__Field<Vec<QosFlowItemWithDataForwarding>> for QosFlowListWithDataForwarding {
+    impl oxirush_aper::protocol::__Field<Vec<QosFlowItemWithDataForwarding>>
+        for QosFlowListWithDataForwarding
+    {
         #[inline]
         fn __field(self) -> Vec<QosFlowItemWithDataForwarding> {
             self.0
@@ -75675,7 +75721,7 @@ pub mod ngap_ies {
     /// `QosFlowModifyConfirmList ::= SEQUENCE (SIZE (1..64)) OF QosFlowModifyConfirmItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowModifyConfirmList(pub Vec<QosFlowModifyConfirmItem>);
-    impl crate::message::__Field<Vec<QosFlowModifyConfirmItem>> for QosFlowModifyConfirmList {
+    impl oxirush_aper::protocol::__Field<Vec<QosFlowModifyConfirmItem>> for QosFlowModifyConfirmList {
         #[inline]
         fn __field(self) -> Vec<QosFlowModifyConfirmItem> {
             self.0
@@ -75832,7 +75878,7 @@ pub mod ngap_ies {
     /// `QosFlowNotifyList ::= SEQUENCE (SIZE (1..64)) OF QosFlowNotifyItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowNotifyList(pub Vec<QosFlowNotifyItem>);
-    impl crate::message::__Field<Vec<QosFlowNotifyItem>> for QosFlowNotifyList {
+    impl oxirush_aper::protocol::__Field<Vec<QosFlowNotifyItem>> for QosFlowNotifyList {
         #[inline]
         fn __field(self) -> Vec<QosFlowNotifyItem> {
             self.0
@@ -76006,7 +76052,7 @@ pub mod ngap_ies {
     /// `QosFlowParametersList ::= SEQUENCE (SIZE (1..64)) OF QosFlowParametersItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowParametersList(pub Vec<QosFlowParametersItem>);
-    impl crate::message::__Field<Vec<QosFlowParametersItem>> for QosFlowParametersList {
+    impl oxirush_aper::protocol::__Field<Vec<QosFlowParametersItem>> for QosFlowParametersList {
         #[inline]
         fn __field(self) -> Vec<QosFlowParametersItem> {
             self.0
@@ -76284,7 +76330,7 @@ pub mod ngap_ies {
     /// `QosFlowPerTNLInformationList ::= SEQUENCE (SIZE (1..3)) OF QosFlowPerTNLInformationItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowPerTNLInformationList<'a>(pub Vec<QosFlowPerTNLInformationItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<QosFlowPerTNLInformationItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<QosFlowPerTNLInformationItem<'a>>>
         for QosFlowPerTNLInformationList<'a>
     {
         #[inline]
@@ -76483,7 +76529,7 @@ pub mod ngap_ies {
     /// `QosFlowSetupRequestList ::= SEQUENCE (SIZE (1..64)) OF QosFlowSetupRequestItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowSetupRequestList(pub Vec<QosFlowSetupRequestItem>);
-    impl crate::message::__Field<Vec<QosFlowSetupRequestItem>> for QosFlowSetupRequestList {
+    impl oxirush_aper::protocol::__Field<Vec<QosFlowSetupRequestItem>> for QosFlowSetupRequestList {
         #[inline]
         fn __field(self) -> Vec<QosFlowSetupRequestItem> {
             self.0
@@ -76623,7 +76669,7 @@ pub mod ngap_ies {
     /// `QosFlowToBeForwardedList ::= SEQUENCE (SIZE (1..64)) OF QosFlowToBeForwardedItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct QosFlowToBeForwardedList(pub Vec<QosFlowToBeForwardedItem>);
-    impl crate::message::__Field<Vec<QosFlowToBeForwardedItem>> for QosFlowToBeForwardedList {
+    impl oxirush_aper::protocol::__Field<Vec<QosFlowToBeForwardedItem>> for QosFlowToBeForwardedList {
         #[inline]
         fn __field(self) -> Vec<QosFlowToBeForwardedItem> {
             self.0
@@ -76778,7 +76824,7 @@ pub mod ngap_ies {
     /// `QosMonitoringReportingFrequency ::= INTEGER (1..1800, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct QosMonitoringReportingFrequency(pub u64);
-    impl crate::message::__Field<u64> for QosMonitoringReportingFrequency {
+    impl oxirush_aper::protocol::__Field<u64> for QosMonitoringReportingFrequency {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -76869,7 +76915,7 @@ pub mod ngap_ies {
     /// `RAN-AIOT-Device-NGAP-ID ::= INTEGER (0..4294967295)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct RANAIOTDeviceNGAPID(pub u32);
-    impl crate::message::__Field<u32> for RANAIOTDeviceNGAPID {
+    impl oxirush_aper::protocol::__Field<u32> for RANAIOTDeviceNGAPID {
         #[inline]
         fn __field(self) -> u32 {
             self.0
@@ -77053,7 +77099,7 @@ pub mod ngap_ies {
     /// `RAN-UE-NGAP-ID ::= INTEGER (0..4294967295)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct RANUENGAPID(pub u32);
-    impl crate::message::__Field<u32> for RANUENGAPID {
+    impl oxirush_aper::protocol::__Field<u32> for RANUENGAPID {
         #[inline]
         fn __field(self) -> u32 {
             self.0
@@ -77099,7 +77145,7 @@ pub mod ngap_ies {
     /// `RANNodeName ::= PrintableString (SIZE (1..150, ...))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RANNodeName<'a>(pub Cow<'a, str>);
-    impl<'a> crate::message::__Field<Cow<'a, str>> for RANNodeName<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Cow<'a, str>> for RANNodeName<'a> {
         #[inline]
         fn __field(self) -> Cow<'a, str> {
             self.0
@@ -77163,7 +77209,7 @@ pub mod ngap_ies {
     /// `RANNodeNameUTF8String ::= UTF8String (SIZE (1..150, ...))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RANNodeNameUTF8String<'a>(pub Cow<'a, str>);
-    impl<'a> crate::message::__Field<Cow<'a, str>> for RANNodeNameUTF8String<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Cow<'a, str>> for RANNodeNameUTF8String<'a> {
         #[inline]
         fn __field(self) -> Cow<'a, str> {
             self.0
@@ -77227,7 +77273,7 @@ pub mod ngap_ies {
     /// `RANNodeNameVisibleString ::= VisibleString (SIZE (1..150, ...))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RANNodeNameVisibleString<'a>(pub Cow<'a, str>);
-    impl<'a> crate::message::__Field<Cow<'a, str>> for RANNodeNameVisibleString<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Cow<'a, str>> for RANNodeNameVisibleString<'a> {
         #[inline]
         fn __field(self) -> Cow<'a, str> {
             self.0
@@ -77291,7 +77337,7 @@ pub mod ngap_ies {
     /// `RANPagingPriority ::= INTEGER (1..256)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct RANPagingPriority(pub u16);
-    impl crate::message::__Field<u16> for RANPagingPriority {
+    impl oxirush_aper::protocol::__Field<u16> for RANPagingPriority {
         #[inline]
         fn __field(self) -> u16 {
             self.0
@@ -77531,7 +77577,7 @@ pub mod ngap_ies {
     /// `RANTSSCellList ::= SEQUENCE (SIZE (1..16384)) OF RANTSSCellItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RANTSSCellList(pub Vec<RANTSSCellItem>);
-    impl crate::message::__Field<Vec<RANTSSCellItem>> for RANTSSCellList {
+    impl oxirush_aper::protocol::__Field<Vec<RANTSSCellItem>> for RANTSSCellList {
         #[inline]
         fn __field(self) -> Vec<RANTSSCellItem> {
             self.0
@@ -78420,7 +78466,7 @@ pub mod ngap_ies {
     /// `RATRestrictionInformation ::= BIT STRING (SIZE (8, ...))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RATRestrictionInformation<'a>(pub BitString<'a>);
-    impl<'a> crate::message::__Field<BitString<'a>> for RATRestrictionInformation<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<BitString<'a>> for RATRestrictionInformation<'a> {
         #[inline]
         fn __field(self) -> BitString<'a> {
             self.0
@@ -78470,7 +78516,7 @@ pub mod ngap_ies {
     /// `RATRestrictions ::= SEQUENCE (SIZE (1..16)) OF RATRestrictionsItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RATRestrictions<'a>(pub Vec<RATRestrictionsItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<RATRestrictionsItem<'a>>> for RATRestrictions<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Vec<RATRestrictionsItem<'a>>> for RATRestrictions<'a> {
         #[inline]
         fn __field(self) -> Vec<RATRestrictionsItem<'a>> {
             self.0
@@ -78647,7 +78693,7 @@ pub mod ngap_ies {
     /// `RGLevelWirelineAccessCharacteristics ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RGLevelWirelineAccessCharacteristics<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for RGLevelWirelineAccessCharacteristics<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for RGLevelWirelineAccessCharacteristics<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -78985,7 +79031,7 @@ pub mod ngap_ies {
     /// `RNC-ID ::= INTEGER (0..4095)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct RNCID(pub u16);
-    impl crate::message::__Field<u16> for RNCID {
+    impl oxirush_aper::protocol::__Field<u16> for RNCID {
         #[inline]
         fn __field(self) -> u16 {
             self.0
@@ -79031,7 +79077,7 @@ pub mod ngap_ies {
     /// `RRCContainer ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RRCContainer<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for RRCContainer<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for RRCContainer<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -79574,7 +79620,7 @@ pub mod ngap_ies {
     /// `RSPPQoSFlowList ::= SEQUENCE (SIZE (1..2048)) OF RSPPQoSFlowItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RSPPQoSFlowList(pub Vec<RSPPQoSFlowItem>);
-    impl crate::message::__Field<Vec<RSPPQoSFlowItem>> for RSPPQoSFlowList {
+    impl oxirush_aper::protocol::__Field<Vec<RSPPQoSFlowItem>> for RSPPQoSFlowList {
         #[inline]
         fn __field(self) -> Vec<RSPPQoSFlowItem> {
             self.0
@@ -79809,7 +79855,7 @@ pub mod ngap_ies {
     /// `RecommendedCellList ::= SEQUENCE (SIZE (1..16)) OF RecommendedCellItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RecommendedCellList(pub Vec<RecommendedCellItem>);
-    impl crate::message::__Field<Vec<RecommendedCellItem>> for RecommendedCellList {
+    impl oxirush_aper::protocol::__Field<Vec<RecommendedCellItem>> for RecommendedCellList {
         #[inline]
         fn __field(self) -> Vec<RecommendedCellItem> {
             self.0
@@ -80038,7 +80084,7 @@ pub mod ngap_ies {
     /// `RecommendedRANNodeList ::= SEQUENCE (SIZE (1..16)) OF RecommendedRANNodeItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RecommendedRANNodeList(pub Vec<RecommendedRANNodeItem>);
-    impl crate::message::__Field<Vec<RecommendedRANNodeItem>> for RecommendedRANNodeList {
+    impl oxirush_aper::protocol::__Field<Vec<RecommendedRANNodeItem>> for RecommendedRANNodeList {
         #[inline]
         fn __field(self) -> Vec<RecommendedRANNodeItem> {
             self.0
@@ -80456,7 +80502,7 @@ pub mod ngap_ies {
     /// `RejectedNSSAIinPLMN ::= OCTET STRING (SIZE (32))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct RejectedNSSAIinPLMN(pub [u8; 32]);
-    impl crate::message::__Field<[u8; 32]> for RejectedNSSAIinPLMN {
+    impl oxirush_aper::protocol::__Field<[u8; 32]> for RejectedNSSAIinPLMN {
         #[inline]
         fn __field(self) -> [u8; 32] {
             self.0
@@ -80511,7 +80557,7 @@ pub mod ngap_ies {
     /// `RejectedNSSAIinTA ::= OCTET STRING (SIZE (32))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct RejectedNSSAIinTA(pub [u8; 32]);
-    impl crate::message::__Field<[u8; 32]> for RejectedNSSAIinTA {
+    impl oxirush_aper::protocol::__Field<[u8; 32]> for RejectedNSSAIinTA {
         #[inline]
         fn __field(self) -> [u8; 32] {
             self.0
@@ -80553,7 +80599,7 @@ pub mod ngap_ies {
     /// `RelativeAMFCapacity ::= INTEGER (0..255)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct RelativeAMFCapacity(pub u8);
-    impl crate::message::__Field<u8> for RelativeAMFCapacity {
+    impl oxirush_aper::protocol::__Field<u8> for RelativeAMFCapacity {
         #[inline]
         fn __field(self) -> u8 {
             self.0
@@ -80597,7 +80643,7 @@ pub mod ngap_ies {
     /// `RepetitionPeriod ::= INTEGER (0..131071)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct RepetitionPeriod(pub u32);
-    impl crate::message::__Field<u32> for RepetitionPeriod {
+    impl oxirush_aper::protocol::__Field<u32> for RepetitionPeriod {
         #[inline]
         fn __field(self) -> u32 {
             self.0
@@ -80751,7 +80797,7 @@ pub mod ngap_ies {
     /// `ReportCharacteristics ::= BIT STRING (SIZE (32))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ReportCharacteristics(pub Bits);
-    impl crate::message::__Field<Bits> for ReportCharacteristics {
+    impl oxirush_aper::protocol::__Field<Bits> for ReportCharacteristics {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -81142,7 +81188,7 @@ pub mod ngap_ies {
     /// `ReportingThreshold ::= INTEGER (0..4000000000, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ReportingThreshold(pub u64);
-    impl crate::message::__Field<u64> for ReportingThreshold {
+    impl oxirush_aper::protocol::__Field<u64> for ReportingThreshold {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -81184,7 +81230,7 @@ pub mod ngap_ies {
     /// `RequestedNSSAI ::= SEQUENCE (SIZE (1..8)) OF RequestedNSSAIItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RequestedNSSAI(pub Vec<RequestedNSSAIItem>);
-    impl crate::message::__Field<Vec<RequestedNSSAIItem>> for RequestedNSSAI {
+    impl oxirush_aper::protocol::__Field<Vec<RequestedNSSAIItem>> for RequestedNSSAI {
         #[inline]
         fn __field(self) -> Vec<RequestedNSSAIItem> {
             self.0
@@ -81650,7 +81696,7 @@ pub mod ngap_ies {
     /// `RoutingID ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct RoutingID<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for RoutingID<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for RoutingID<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -81819,7 +81865,7 @@ pub mod ngap_ies {
     /// `SCGActivationTime ::= INTEGER (0..40950)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct SCGActivationTime(pub u16);
-    impl crate::message::__Field<u16> for SCGActivationTime {
+    impl oxirush_aper::protocol::__Field<u16> for SCGActivationTime {
         #[inline]
         fn __field(self) -> u16 {
             self.0
@@ -81865,7 +81911,7 @@ pub mod ngap_ies {
     /// `SCTP-TLAs ::= SEQUENCE (SIZE (1..2)) OF TransportLayerAddress`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SCTPTLAs<'a>(pub Vec<TransportLayerAddress<'a>>);
-    impl<'a> crate::message::__Field<Vec<TransportLayerAddress<'a>>> for SCTPTLAs<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Vec<TransportLayerAddress<'a>>> for SCTPTLAs<'a> {
         #[inline]
         fn __field(self) -> Vec<TransportLayerAddress<'a>> {
             self.0
@@ -81937,7 +81983,7 @@ pub mod ngap_ies {
     /// `SD ::= OCTET STRING (SIZE (3))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct SD(pub [u8; 3]);
-    impl crate::message::__Field<[u8; 3]> for SD {
+    impl oxirush_aper::protocol::__Field<[u8; 3]> for SD {
         #[inline]
         fn __field(self) -> [u8; 3] {
             self.0
@@ -82633,7 +82679,7 @@ pub mod ngap_ies {
     /// `SNPNCellIdListforMDT ::= SEQUENCE (SIZE (1..32)) OF SNPNCellIdListforMDTItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SNPNCellIdListforMDT(pub Vec<SNPNCellIdListforMDTItem>);
-    impl crate::message::__Field<Vec<SNPNCellIdListforMDTItem>> for SNPNCellIdListforMDT {
+    impl oxirush_aper::protocol::__Field<Vec<SNPNCellIdListforMDTItem>> for SNPNCellIdListforMDT {
         #[inline]
         fn __field(self) -> Vec<SNPNCellIdListforMDTItem> {
             self.0
@@ -82787,7 +82833,7 @@ pub mod ngap_ies {
     /// `SNPNListforMDT ::= SEQUENCE (SIZE (1..16)) OF SNPNListforMDTItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SNPNListforMDT(pub Vec<SNPNListforMDTItem>);
-    impl crate::message::__Field<Vec<SNPNListforMDTItem>> for SNPNListforMDT {
+    impl oxirush_aper::protocol::__Field<Vec<SNPNListforMDTItem>> for SNPNListforMDT {
         #[inline]
         fn __field(self) -> Vec<SNPNListforMDTItem> {
             self.0
@@ -82941,7 +82987,7 @@ pub mod ngap_ies {
     /// `SNPNTAIListforMDT ::= SEQUENCE (SIZE (1..8)) OF SNPNTAIListforMDTItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SNPNTAIListforMDT(pub Vec<SNPNTAIListforMDTItem>);
-    impl crate::message::__Field<Vec<SNPNTAIListforMDTItem>> for SNPNTAIListforMDT {
+    impl oxirush_aper::protocol::__Field<Vec<SNPNTAIListforMDTItem>> for SNPNTAIListforMDT {
         #[inline]
         fn __field(self) -> Vec<SNPNTAIListforMDTItem> {
             self.0
@@ -83706,7 +83752,7 @@ pub mod ngap_ies {
     /// `SST ::= OCTET STRING (SIZE (1))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct SST(pub [u8; 1]);
-    impl crate::message::__Field<[u8; 1]> for SST {
+    impl oxirush_aper::protocol::__Field<[u8; 1]> for SST {
         #[inline]
         fn __field(self) -> [u8; 1] {
             self.0
@@ -84442,7 +84488,7 @@ pub mod ngap_ies {
     /// `SecurityKey ::= BIT STRING (SIZE (256))`.
     #[derive(Clone, PartialEq, Eq, Hash)]
     pub struct SecurityKey<'a>(pub BitString<'a>);
-    impl<'a> crate::message::__Field<BitString<'a>> for SecurityKey<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<BitString<'a>> for SecurityKey<'a> {
         #[inline]
         fn __field(self) -> BitString<'a> {
             self.0
@@ -84751,7 +84797,7 @@ pub mod ngap_ies {
     /// `SensorMeasConfigNameList ::= SEQUENCE (SIZE (1..3)) OF SensorMeasConfigNameItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SensorMeasConfigNameList(pub Vec<SensorMeasConfigNameItem>);
-    impl crate::message::__Field<Vec<SensorMeasConfigNameItem>> for SensorMeasConfigNameList {
+    impl oxirush_aper::protocol::__Field<Vec<SensorMeasConfigNameItem>> for SensorMeasConfigNameList {
         #[inline]
         fn __field(self) -> Vec<SensorMeasConfigNameItem> {
             self.0
@@ -85186,7 +85232,7 @@ pub mod ngap_ies {
     /// `SerialNumber ::= BIT STRING (SIZE (16))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct SerialNumber(pub Bits);
-    impl crate::message::__Field<Bits> for SerialNumber {
+    impl oxirush_aper::protocol::__Field<Bits> for SerialNumber {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -85359,7 +85405,7 @@ pub mod ngap_ies {
     /// `ServedGUAMIList ::= SEQUENCE (SIZE (1..256)) OF ServedGUAMIItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ServedGUAMIList<'a>(pub Vec<ServedGUAMIItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<ServedGUAMIItem<'a>>> for ServedGUAMIList<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Vec<ServedGUAMIItem<'a>>> for ServedGUAMIList<'a> {
         #[inline]
         fn __field(self) -> Vec<ServedGUAMIItem<'a>> {
             self.0
@@ -85418,7 +85464,7 @@ pub mod ngap_ies {
     /// `ServiceAreaInformation ::= SEQUENCE (SIZE (1..16)) OF ServiceAreaInformationItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ServiceAreaInformation(pub Vec<ServiceAreaInformationItem>);
-    impl crate::message::__Field<Vec<ServiceAreaInformationItem>> for ServiceAreaInformation {
+    impl oxirush_aper::protocol::__Field<Vec<ServiceAreaInformationItem>> for ServiceAreaInformation {
         #[inline]
         fn __field(self) -> Vec<ServiceAreaInformationItem> {
             self.0
@@ -85662,7 +85708,7 @@ pub mod ngap_ies {
     /// `SgNB-UE-X2AP-ID ::= INTEGER (0..4294967295)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct SgNBUEX2APID(pub u32);
-    impl crate::message::__Field<u32> for SgNBUEX2APID {
+    impl oxirush_aper::protocol::__Field<u32> for SgNBUEX2APID {
         #[inline]
         fn __field(self) -> u32 {
             self.0
@@ -85932,7 +85978,7 @@ pub mod ngap_ies {
     /// `SliceMDTList ::= SEQUENCE (SIZE (1..1024)) OF SliceMDTItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SliceMDTList(pub Vec<SliceMDTItem>);
-    impl crate::message::__Field<Vec<SliceMDTItem>> for SliceMDTList {
+    impl oxirush_aper::protocol::__Field<Vec<SliceMDTItem>> for SliceMDTList {
         #[inline]
         fn __field(self) -> Vec<SliceMDTItem> {
             self.0
@@ -86072,7 +86118,7 @@ pub mod ngap_ies {
     /// `SliceOverloadList ::= SEQUENCE (SIZE (1..1024)) OF SliceOverloadItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SliceOverloadList(pub Vec<SliceOverloadItem>);
-    impl crate::message::__Field<Vec<SliceOverloadItem>> for SliceOverloadList {
+    impl oxirush_aper::protocol::__Field<Vec<SliceOverloadItem>> for SliceOverloadList {
         #[inline]
         fn __field(self) -> Vec<SliceOverloadItem> {
             self.0
@@ -86212,7 +86258,7 @@ pub mod ngap_ies {
     /// `SliceSupportList ::= SEQUENCE (SIZE (1..1024)) OF SliceSupportItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SliceSupportList(pub Vec<SliceSupportItem>);
-    impl crate::message::__Field<Vec<SliceSupportItem>> for SliceSupportList {
+    impl oxirush_aper::protocol::__Field<Vec<SliceSupportItem>> for SliceSupportList {
         #[inline]
         fn __field(self) -> Vec<SliceSupportItem> {
             self.0
@@ -86264,7 +86310,7 @@ pub mod ngap_ies {
     /// `SliceSupportListQMC ::= SEQUENCE (SIZE (1..16)) OF SliceSupportQMCItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SliceSupportListQMC(pub Vec<SliceSupportQMCItem>);
-    impl crate::message::__Field<Vec<SliceSupportQMCItem>> for SliceSupportListQMC {
+    impl oxirush_aper::protocol::__Field<Vec<SliceSupportQMCItem>> for SliceSupportListQMC {
         #[inline]
         fn __field(self) -> Vec<SliceSupportQMCItem> {
             self.0
@@ -87012,7 +87058,7 @@ pub mod ngap_ies {
     /// `SourceToTarget-TransparentContainer ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SourceToTargetTransparentContainer<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for SourceToTargetTransparentContainer<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for SourceToTargetTransparentContainer<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -87177,7 +87223,7 @@ pub mod ngap_ies {
     /// `SuccessfulHandoverReportList ::= SEQUENCE (SIZE (1..64)) OF SuccessfulHandoverReportItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SuccessfulHandoverReportList<'a>(pub Vec<SuccessfulHandoverReportItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<SuccessfulHandoverReportItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<SuccessfulHandoverReportItem<'a>>>
         for SuccessfulHandoverReportList<'a>
     {
         #[inline]
@@ -87352,7 +87398,7 @@ pub mod ngap_ies {
     /// `SuccessfulPSCellChangeReportList ::= SEQUENCE (SIZE (1..64)) OF SuccessfulPSCellChangeReportItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SuccessfulPSCellChangeReportList<'a>(pub Vec<SuccessfulPSCellChangeReportItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<SuccessfulPSCellChangeReportItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<SuccessfulPSCellChangeReportItem<'a>>>
         for SuccessfulPSCellChangeReportList<'a>
     {
         #[inline]
@@ -87517,7 +87563,7 @@ pub mod ngap_ies {
     /// `SupportedTAList ::= SEQUENCE (SIZE (1..256)) OF SupportedTAItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SupportedTAList(pub Vec<SupportedTAItem>);
-    impl crate::message::__Field<Vec<SupportedTAItem>> for SupportedTAList {
+    impl oxirush_aper::protocol::__Field<Vec<SupportedTAItem>> for SupportedTAList {
         #[inline]
         fn __field(self) -> Vec<SupportedTAItem> {
             self.0
@@ -87616,7 +87662,7 @@ pub mod ngap_ies {
     /// `SupportedUETypeList ::= SEQUENCE (SIZE (1..8)) OF SupportedUEType`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct SupportedUETypeList(pub Vec<SupportedUEType>);
-    impl crate::message::__Field<Vec<SupportedUEType>> for SupportedUETypeList {
+    impl oxirush_aper::protocol::__Field<Vec<SupportedUEType>> for SupportedUETypeList {
         #[inline]
         fn __field(self) -> Vec<SupportedUEType> {
             self.0
@@ -87668,7 +87714,7 @@ pub mod ngap_ies {
     /// `SurvivalTime ::= INTEGER (0..1920000, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct SurvivalTime(pub u64);
-    impl crate::message::__Field<u64> for SurvivalTime {
+    impl oxirush_aper::protocol::__Field<u64> for SurvivalTime {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -88037,7 +88083,7 @@ pub mod ngap_ies {
     /// `TAC ::= OCTET STRING (SIZE (3))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TAC(pub [u8; 3]);
-    impl crate::message::__Field<[u8; 3]> for TAC {
+    impl oxirush_aper::protocol::__Field<[u8; 3]> for TAC {
         #[inline]
         fn __field(self) -> [u8; 3] {
             self.0
@@ -88080,7 +88126,7 @@ pub mod ngap_ies {
     /// `TACListInNRNTN ::= SEQUENCE (SIZE (1..12)) OF TAC`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TACListInNRNTN(pub Vec<TAC>);
-    impl crate::message::__Field<Vec<TAC>> for TACListInNRNTN {
+    impl oxirush_aper::protocol::__Field<Vec<TAC>> for TACListInNRNTN {
         #[inline]
         fn __field(self) -> Vec<TAC> {
             self.0
@@ -88410,7 +88456,7 @@ pub mod ngap_ies {
     /// `TAIBroadcastEUTRA ::= SEQUENCE (SIZE (1..65535)) OF TAIBroadcastEUTRAItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAIBroadcastEUTRA(pub Vec<TAIBroadcastEUTRAItem>);
-    impl crate::message::__Field<Vec<TAIBroadcastEUTRAItem>> for TAIBroadcastEUTRA {
+    impl oxirush_aper::protocol::__Field<Vec<TAIBroadcastEUTRAItem>> for TAIBroadcastEUTRA {
         #[inline]
         fn __field(self) -> Vec<TAIBroadcastEUTRAItem> {
             self.0
@@ -88571,7 +88617,7 @@ pub mod ngap_ies {
     /// `TAIBroadcastNR ::= SEQUENCE (SIZE (1..65535)) OF TAIBroadcastNRItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAIBroadcastNR(pub Vec<TAIBroadcastNRItem>);
-    impl crate::message::__Field<Vec<TAIBroadcastNRItem>> for TAIBroadcastNR {
+    impl oxirush_aper::protocol::__Field<Vec<TAIBroadcastNRItem>> for TAIBroadcastNR {
         #[inline]
         fn __field(self) -> Vec<TAIBroadcastNRItem> {
             self.0
@@ -88730,7 +88776,7 @@ pub mod ngap_ies {
     /// `TAICancelledEUTRA ::= SEQUENCE (SIZE (1..65535)) OF TAICancelledEUTRAItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAICancelledEUTRA(pub Vec<TAICancelledEUTRAItem>);
-    impl crate::message::__Field<Vec<TAICancelledEUTRAItem>> for TAICancelledEUTRA {
+    impl oxirush_aper::protocol::__Field<Vec<TAICancelledEUTRAItem>> for TAICancelledEUTRA {
         #[inline]
         fn __field(self) -> Vec<TAICancelledEUTRAItem> {
             self.0
@@ -88891,7 +88937,7 @@ pub mod ngap_ies {
     /// `TAICancelledNR ::= SEQUENCE (SIZE (1..65535)) OF TAICancelledNRItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAICancelledNR(pub Vec<TAICancelledNRItem>);
-    impl crate::message::__Field<Vec<TAICancelledNRItem>> for TAICancelledNR {
+    impl oxirush_aper::protocol::__Field<Vec<TAICancelledNRItem>> for TAICancelledNR {
         #[inline]
         fn __field(self) -> Vec<TAICancelledNRItem> {
             self.0
@@ -89050,7 +89096,7 @@ pub mod ngap_ies {
     /// `TAIListForInactive ::= SEQUENCE (SIZE (1..16)) OF TAIListForInactiveItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAIListForInactive(pub Vec<TAIListForInactiveItem>);
-    impl crate::message::__Field<Vec<TAIListForInactiveItem>> for TAIListForInactive {
+    impl oxirush_aper::protocol::__Field<Vec<TAIListForInactiveItem>> for TAIListForInactive {
         #[inline]
         fn __field(self) -> Vec<TAIListForInactiveItem> {
             self.0
@@ -89178,7 +89224,7 @@ pub mod ngap_ies {
     /// `TAIListForPaging ::= SEQUENCE (SIZE (1..16)) OF TAIListForPagingItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAIListForPaging(pub Vec<TAIListForPagingItem>);
-    impl crate::message::__Field<Vec<TAIListForPagingItem>> for TAIListForPaging {
+    impl oxirush_aper::protocol::__Field<Vec<TAIListForPagingItem>> for TAIListForPaging {
         #[inline]
         fn __field(self) -> Vec<TAIListForPagingItem> {
             self.0
@@ -89306,7 +89352,7 @@ pub mod ngap_ies {
     /// `TAIListForRestart ::= SEQUENCE (SIZE (1..2048)) OF TAI`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAIListForRestart(pub Vec<TAI>);
-    impl crate::message::__Field<Vec<TAI>> for TAIListForRestart {
+    impl oxirush_aper::protocol::__Field<Vec<TAI>> for TAIListForRestart {
         #[inline]
         fn __field(self) -> Vec<TAI> {
             self.0
@@ -89358,7 +89404,7 @@ pub mod ngap_ies {
     /// `TAIListForWarning ::= SEQUENCE (SIZE (1..65535)) OF TAI`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAIListForWarning(pub Vec<TAI>);
-    impl crate::message::__Field<Vec<TAI>> for TAIListForWarning {
+    impl oxirush_aper::protocol::__Field<Vec<TAI>> for TAIListForWarning {
         #[inline]
         fn __field(self) -> Vec<TAI> {
             self.0
@@ -89410,7 +89456,7 @@ pub mod ngap_ies {
     /// `TAIListforMDT ::= SEQUENCE (SIZE (1..8)) OF TAI`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAIListforMDT(pub Vec<TAI>);
-    impl crate::message::__Field<Vec<TAI>> for TAIListforMDT {
+    impl oxirush_aper::protocol::__Field<Vec<TAI>> for TAIListforMDT {
         #[inline]
         fn __field(self) -> Vec<TAI> {
             self.0
@@ -89462,7 +89508,7 @@ pub mod ngap_ies {
     /// `TAIListforQMC ::= SEQUENCE (SIZE (1..8)) OF TAI`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAIListforQMC(pub Vec<TAI>);
-    impl crate::message::__Field<Vec<TAI>> for TAIListforQMC {
+    impl oxirush_aper::protocol::__Field<Vec<TAI>> for TAIListforQMC {
         #[inline]
         fn __field(self) -> Vec<TAI> {
             self.0
@@ -89590,7 +89636,7 @@ pub mod ngap_ies {
     /// `TAIMBSSupportList ::= SEQUENCE (SIZE (1..256)) OF TAIMBSSupportItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAIMBSSupportList(pub Vec<TAIMBSSupportItem>);
-    impl crate::message::__Field<Vec<TAIMBSSupportItem>> for TAIMBSSupportList {
+    impl oxirush_aper::protocol::__Field<Vec<TAIMBSSupportItem>> for TAIMBSSupportList {
         #[inline]
         fn __field(self) -> Vec<TAIMBSSupportItem> {
             self.0
@@ -89749,7 +89795,7 @@ pub mod ngap_ies {
     /// `TAINSAGSupportList ::= SEQUENCE (SIZE (1..256)) OF TAINSAGSupportItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAINSAGSupportList(pub Vec<TAINSAGSupportItem>);
-    impl crate::message::__Field<Vec<TAINSAGSupportItem>> for TAINSAGSupportList {
+    impl oxirush_aper::protocol::__Field<Vec<TAINSAGSupportItem>> for TAINSAGSupportList {
         #[inline]
         fn __field(self) -> Vec<TAINSAGSupportItem> {
             self.0
@@ -89801,7 +89847,7 @@ pub mod ngap_ies {
     /// `TAListforMDT ::= SEQUENCE (SIZE (1..8)) OF TAC`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAListforMDT(pub Vec<TAC>);
-    impl crate::message::__Field<Vec<TAC>> for TAListforMDT {
+    impl oxirush_aper::protocol::__Field<Vec<TAC>> for TAListforMDT {
         #[inline]
         fn __field(self) -> Vec<TAC> {
             self.0
@@ -89853,7 +89899,7 @@ pub mod ngap_ies {
     /// `TAListforQMC ::= SEQUENCE (SIZE (1..8)) OF TAC`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TAListforQMC(pub Vec<TAC>);
-    impl crate::message::__Field<Vec<TAC>> for TAListforQMC {
+    impl oxirush_aper::protocol::__Field<Vec<TAC>> for TAListforQMC {
         #[inline]
         fn __field(self) -> Vec<TAC> {
             self.0
@@ -89905,7 +89951,7 @@ pub mod ngap_ies {
     /// `TLContainer ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TLContainer<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for TLContainer<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for TLContainer<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -89978,7 +90024,7 @@ pub mod ngap_ies {
     /// `TMGI ::= OCTET STRING (SIZE (6))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TMGI(pub [u8; 6]);
-    impl crate::message::__Field<[u8; 6]> for TMGI {
+    impl oxirush_aper::protocol::__Field<[u8; 6]> for TMGI {
         #[inline]
         fn __field(self) -> [u8; 6] {
             self.0
@@ -90020,7 +90066,7 @@ pub mod ngap_ies {
     /// `TNAP-ID ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TNAPID<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for TNAPID<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for TNAPID<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -90165,7 +90211,7 @@ pub mod ngap_ies {
     /// `TNLAddressWeightFactor ::= INTEGER (0..255)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TNLAddressWeightFactor(pub u8);
-    impl crate::message::__Field<u8> for TNLAddressWeightFactor {
+    impl oxirush_aper::protocol::__Field<u8> for TNLAddressWeightFactor {
         #[inline]
         fn __field(self) -> u8 {
             self.0
@@ -90325,7 +90371,7 @@ pub mod ngap_ies {
     /// `TNLAssociationList ::= SEQUENCE (SIZE (1..32)) OF TNLAssociationItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TNLAssociationList<'a>(pub Vec<TNLAssociationItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<TNLAssociationItem<'a>>> for TNLAssociationList<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Vec<TNLAssociationItem<'a>>> for TNLAssociationList<'a> {
         #[inline]
         fn __field(self) -> Vec<TNLAssociationItem<'a>> {
             self.0
@@ -90967,7 +91013,7 @@ pub mod ngap_ies {
     /// `TWAP-ID ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TWAPID<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for TWAPID<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for TWAPID<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -91528,7 +91574,7 @@ pub mod ngap_ies {
     /// `TargetNSSAI ::= SEQUENCE (SIZE (1..8)) OF TargetNSSAIItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TargetNSSAI(pub Vec<TargetNSSAIItem>);
-    impl crate::message::__Field<Vec<TargetNSSAIItem>> for TargetNSSAI {
+    impl oxirush_aper::protocol::__Field<Vec<TargetNSSAIItem>> for TargetNSSAI {
         #[inline]
         fn __field(self) -> Vec<TargetNSSAIItem> {
             self.0
@@ -92207,7 +92253,7 @@ pub mod ngap_ies {
     /// `TargetToSource-TransparentContainer ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TargetToSourceTransparentContainer<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for TargetToSourceTransparentContainer<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for TargetToSourceTransparentContainer<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -92374,7 +92420,9 @@ pub mod ngap_ies {
     #[doc = " The octets of the OCTET STRING are encoded according to the specifications of the target system."]
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TargettoSourceFailureTransparentContainer<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for TargettoSourceFailureTransparentContainer<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>>
+        for TargettoSourceFailureTransparentContainer<'a>
+    {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -92434,7 +92482,7 @@ pub mod ngap_ies {
     /// `Threshold-RSRP ::= INTEGER (0..127)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ThresholdRSRP(pub u8);
-    impl crate::message::__Field<u8> for ThresholdRSRP {
+    impl oxirush_aper::protocol::__Field<u8> for ThresholdRSRP {
         #[inline]
         fn __field(self) -> u8 {
             self.0
@@ -92478,7 +92526,7 @@ pub mod ngap_ies {
     /// `Threshold-RSRQ ::= INTEGER (0..127)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ThresholdRSRQ(pub u8);
-    impl crate::message::__Field<u8> for ThresholdRSRQ {
+    impl oxirush_aper::protocol::__Field<u8> for ThresholdRSRQ {
         #[inline]
         fn __field(self) -> u8 {
             self.0
@@ -92522,7 +92570,7 @@ pub mod ngap_ies {
     /// `Threshold-SINR ::= INTEGER (0..127)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ThresholdSINR(pub u8);
-    impl crate::message::__Field<u8> for ThresholdSINR {
+    impl oxirush_aper::protocol::__Field<u8> for ThresholdSINR {
         #[inline]
         fn __field(self) -> u8 {
             self.0
@@ -92674,7 +92722,7 @@ pub mod ngap_ies {
     /// `TimeSinceFailure ::= INTEGER (0..172800, ...)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TimeSinceFailure(pub u64);
-    impl crate::message::__Field<u64> for TimeSinceFailure {
+    impl oxirush_aper::protocol::__Field<u64> for TimeSinceFailure {
         #[inline]
         fn __field(self) -> u64 {
             self.0
@@ -92729,7 +92777,7 @@ pub mod ngap_ies {
     /// `TimeStamp ::= OCTET STRING (SIZE (4))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TimeStamp(pub [u8; 4]);
-    impl crate::message::__Field<[u8; 4]> for TimeStamp {
+    impl oxirush_aper::protocol::__Field<[u8; 4]> for TimeStamp {
         #[inline]
         fn __field(self) -> [u8; 4] {
             self.0
@@ -93087,7 +93135,7 @@ pub mod ngap_ies {
     /// `TimeUEStayedInCell ::= INTEGER (0..4095)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TimeUEStayedInCell(pub u16);
-    impl crate::message::__Field<u16> for TimeUEStayedInCell {
+    impl oxirush_aper::protocol::__Field<u16> for TimeUEStayedInCell {
         #[inline]
         fn __field(self) -> u16 {
             self.0
@@ -93133,7 +93181,7 @@ pub mod ngap_ies {
     /// `TimeUEStayedInCellEnhancedGranularity ::= INTEGER (0..40950)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TimeUEStayedInCellEnhancedGranularity(pub u16);
-    impl crate::message::__Field<u16> for TimeUEStayedInCellEnhancedGranularity {
+    impl oxirush_aper::protocol::__Field<u16> for TimeUEStayedInCellEnhancedGranularity {
         #[inline]
         fn __field(self) -> u16 {
             self.0
@@ -93604,7 +93652,7 @@ pub mod ngap_ies {
     /// `TrafficLoadReductionIndication ::= INTEGER (1..99)`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct TrafficLoadReductionIndication(pub u8);
-    impl crate::message::__Field<u8> for TrafficLoadReductionIndication {
+    impl oxirush_aper::protocol::__Field<u8> for TrafficLoadReductionIndication {
         #[inline]
         fn __field(self) -> u8 {
             self.0
@@ -93648,7 +93696,7 @@ pub mod ngap_ies {
     /// `TransportLayerAddress ::= BIT STRING (SIZE (1..160, ...))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct TransportLayerAddress<'a>(pub BitString<'a>);
-    impl<'a> crate::message::__Field<BitString<'a>> for TransportLayerAddress<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<BitString<'a>> for TransportLayerAddress<'a> {
         #[inline]
         fn __field(self) -> BitString<'a> {
             self.0
@@ -94532,7 +94580,7 @@ pub mod ngap_ies {
     /// `UE-PagingList ::= SEQUENCE (SIZE (1..4096)) OF UEPagingItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEPagingList(pub Vec<UEPagingItem>);
-    impl crate::message::__Field<Vec<UEPagingItem>> for UEPagingList {
+    impl oxirush_aper::protocol::__Field<Vec<UEPagingItem>> for UEPagingList {
         #[inline]
         fn __field(self) -> Vec<UEPagingItem> {
             self.0
@@ -94755,7 +94803,7 @@ pub mod ngap_ies {
     /// `UE-associatedLogicalNG-connectionList ::= SEQUENCE (SIZE (1..65536)) OF UEAssociatedLogicalNGConnectionItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEAssociatedLogicalNGConnectionList(pub Vec<UEAssociatedLogicalNGConnectionItem>);
-    impl crate::message::__Field<Vec<UEAssociatedLogicalNGConnectionItem>>
+    impl oxirush_aper::protocol::__Field<Vec<UEAssociatedLogicalNGConnectionItem>>
         for UEAssociatedLogicalNGConnectionList
     {
         #[inline]
@@ -95437,7 +95485,9 @@ pub mod ngap_ies {
     /// `UEAppLayerMeasInfoList ::= SEQUENCE (SIZE (1..16)) OF UEAppLayerMeasInfoItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEAppLayerMeasInfoList<'a>(pub Vec<UEAppLayerMeasInfoItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<UEAppLayerMeasInfoItem<'a>>> for UEAppLayerMeasInfoList<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Vec<UEAppLayerMeasInfoItem<'a>>>
+        for UEAppLayerMeasInfoList<'a>
+    {
         #[inline]
         fn __field(self) -> Vec<UEAppLayerMeasInfoItem<'a>> {
             self.0
@@ -95890,7 +95940,9 @@ pub mod ngap_ies {
     /// `UEHistoryInformation ::= SEQUENCE (SIZE (1..16)) OF LastVisitedCellItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEHistoryInformation<'a>(pub Vec<LastVisitedCellItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<LastVisitedCellItem<'a>>> for UEHistoryInformation<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Vec<LastVisitedCellItem<'a>>>
+        for UEHistoryInformation<'a>
+    {
         #[inline]
         fn __field(self) -> Vec<LastVisitedCellItem<'a>> {
             self.0
@@ -96338,7 +96390,7 @@ pub mod ngap_ies {
     /// `UEPresenceInAreaOfInterestList ::= SEQUENCE (SIZE (1..64)) OF UEPresenceInAreaOfInterestItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UEPresenceInAreaOfInterestList(pub Vec<UEPresenceInAreaOfInterestItem>);
-    impl crate::message::__Field<Vec<UEPresenceInAreaOfInterestItem>>
+    impl oxirush_aper::protocol::__Field<Vec<UEPresenceInAreaOfInterestItem>>
         for UEPresenceInAreaOfInterestList
     {
         #[inline]
@@ -96484,7 +96536,7 @@ pub mod ngap_ies {
     /// `UERadioCapability ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UERadioCapability<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for UERadioCapability<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for UERadioCapability<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -96696,7 +96748,7 @@ pub mod ngap_ies {
     /// `UERadioCapabilityForPagingOfEUTRA ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UERadioCapabilityForPagingOfEUTRA<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for UERadioCapabilityForPagingOfEUTRA<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for UERadioCapabilityForPagingOfEUTRA<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -96756,7 +96808,7 @@ pub mod ngap_ies {
     /// `UERadioCapabilityForPagingOfNB-IoT ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UERadioCapabilityForPagingOfNBIoT<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for UERadioCapabilityForPagingOfNBIoT<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for UERadioCapabilityForPagingOfNBIoT<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -96816,7 +96868,7 @@ pub mod ngap_ies {
     /// `UERadioCapabilityForPagingOfNR ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UERadioCapabilityForPagingOfNR<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for UERadioCapabilityForPagingOfNR<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for UERadioCapabilityForPagingOfNR<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -96876,7 +96928,7 @@ pub mod ngap_ies {
     /// `UERadioCapabilityID ::= OCTET STRING`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UERadioCapabilityID<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for UERadioCapabilityID<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for UERadioCapabilityID<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -97286,7 +97338,7 @@ pub mod ngap_ies {
     /// `UESliceMaximumBitRateList ::= SEQUENCE (SIZE (1..8)) OF UESliceMaximumBitRateItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UESliceMaximumBitRateList(pub Vec<UESliceMaximumBitRateItem>);
-    impl crate::message::__Field<Vec<UESliceMaximumBitRateItem>> for UESliceMaximumBitRateList {
+    impl oxirush_aper::protocol::__Field<Vec<UESliceMaximumBitRateItem>> for UESliceMaximumBitRateList {
         #[inline]
         fn __field(self) -> Vec<UESliceMaximumBitRateItem> {
             self.0
@@ -97441,7 +97493,7 @@ pub mod ngap_ies {
     /// `UL-NAS-Count ::= BIT STRING (SIZE (5))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ULNASCount(pub Bits);
-    impl crate::message::__Field<Bits> for ULNASCount {
+    impl oxirush_aper::protocol::__Field<Bits> for ULNASCount {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -97494,7 +97546,7 @@ pub mod ngap_ies {
     /// `UL-NAS-MAC ::= BIT STRING (SIZE (16))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
     pub struct ULNASMAC(pub Bits);
-    impl crate::message::__Field<Bits> for ULNASMAC {
+    impl oxirush_aper::protocol::__Field<Bits> for ULNASMAC {
         #[inline]
         fn __field(self) -> Bits {
             self.0
@@ -97672,7 +97724,9 @@ pub mod ngap_ies {
     /// `UL-NGU-UP-TNLModifyList ::= SEQUENCE (SIZE (1..4)) OF ULNGUUPTNLModifyItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct ULNGUUPTNLModifyList<'a>(pub Vec<ULNGUUPTNLModifyItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<ULNGUUPTNLModifyItem<'a>>> for ULNGUUPTNLModifyList<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Vec<ULNGUUPTNLModifyItem<'a>>>
+        for ULNGUUPTNLModifyList<'a>
+    {
         #[inline]
         fn __field(self) -> Vec<ULNGUUPTNLModifyItem<'a>> {
             self.0
@@ -97959,7 +98013,7 @@ pub mod ngap_ies {
     /// `UPTransportLayerInformationList ::= SEQUENCE (SIZE (1..3)) OF UPTransportLayerInformationItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UPTransportLayerInformationList<'a>(pub Vec<UPTransportLayerInformationItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<UPTransportLayerInformationItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<UPTransportLayerInformationItem<'a>>>
         for UPTransportLayerInformationList<'a>
     {
         #[inline]
@@ -98150,7 +98204,7 @@ pub mod ngap_ies {
     pub struct UPTransportLayerInformationPairList<'a>(
         pub Vec<UPTransportLayerInformationPairItem<'a>>,
     );
-    impl<'a> crate::message::__Field<Vec<UPTransportLayerInformationPairItem<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<UPTransportLayerInformationPairItem<'a>>>
         for UPTransportLayerInformationPairList<'a>
     {
         #[inline]
@@ -98215,7 +98269,7 @@ pub mod ngap_ies {
     /// `URI-address ::= VisibleString`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct URIAddress<'a>(pub Cow<'a, str>);
-    impl<'a> crate::message::__Field<Cow<'a, str>> for URIAddress<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Cow<'a, str>> for URIAddress<'a> {
         #[inline]
         fn __field(self) -> Cow<'a, str> {
             self.0
@@ -98436,7 +98490,9 @@ pub mod ngap_ies {
     /// `UnavailableGUAMIList ::= SEQUENCE (SIZE (1..256)) OF UnavailableGUAMIItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UnavailableGUAMIList<'a>(pub Vec<UnavailableGUAMIItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<UnavailableGUAMIItem<'a>>> for UnavailableGUAMIList<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Vec<UnavailableGUAMIItem<'a>>>
+        for UnavailableGUAMIList<'a>
+    {
         #[inline]
         fn __field(self) -> Vec<UnavailableGUAMIItem<'a>> {
             self.0
@@ -98495,7 +98551,7 @@ pub mod ngap_ies {
     /// `UpdateFeedback ::= BIT STRING (SIZE (8, ...))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UpdateFeedback<'a>(pub BitString<'a>);
-    impl<'a> crate::message::__Field<BitString<'a>> for UpdateFeedback<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<BitString<'a>> for UpdateFeedback<'a> {
         #[inline]
         fn __field(self) -> BitString<'a> {
             self.0
@@ -100146,7 +100202,7 @@ pub mod ngap_ies {
     /// `VolumeTimedReportList ::= SEQUENCE (SIZE (1..2)) OF VolumeTimedReportItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct VolumeTimedReportList(pub Vec<VolumeTimedReportItem>);
-    impl crate::message::__Field<Vec<VolumeTimedReportItem>> for VolumeTimedReportList {
+    impl oxirush_aper::protocol::__Field<Vec<VolumeTimedReportItem>> for VolumeTimedReportList {
         #[inline]
         fn __field(self) -> Vec<VolumeTimedReportItem> {
             self.0
@@ -100425,7 +100481,9 @@ pub mod ngap_ies {
     /// `WLANMeasConfigNameList ::= SEQUENCE (SIZE (1..4)) OF WLANMeasConfigNameItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct WLANMeasConfigNameList<'a>(pub Vec<WLANMeasConfigNameItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<WLANMeasConfigNameItem<'a>>> for WLANMeasConfigNameList<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Vec<WLANMeasConfigNameItem<'a>>>
+        for WLANMeasConfigNameList<'a>
+    {
         #[inline]
         fn __field(self) -> Vec<WLANMeasConfigNameItem<'a>> {
             self.0
@@ -100763,7 +100821,7 @@ pub mod ngap_ies {
     /// `WLANName ::= OCTET STRING (SIZE (1..32))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct WLANName<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for WLANName<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for WLANName<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -100917,7 +100975,7 @@ pub mod ngap_ies {
     /// `WarningAreaCoordinates ::= OCTET STRING (SIZE (1..1024))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct WarningAreaCoordinates<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for WarningAreaCoordinates<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for WarningAreaCoordinates<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -101116,7 +101174,7 @@ pub mod ngap_ies {
     /// `WarningMessageContents ::= OCTET STRING (SIZE (1..9600))`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct WarningMessageContents<'a>(pub Octets<'a>);
-    impl<'a> crate::message::__Field<Octets<'a>> for WarningMessageContents<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Octets<'a>> for WarningMessageContents<'a> {
         #[inline]
         fn __field(self) -> Octets<'a> {
             self.0
@@ -101189,7 +101247,7 @@ pub mod ngap_ies {
     /// `WarningSecurityInfo ::= OCTET STRING (SIZE (50))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct WarningSecurityInfo(pub [u8; 50]);
-    impl crate::message::__Field<[u8; 50]> for WarningSecurityInfo {
+    impl oxirush_aper::protocol::__Field<[u8; 50]> for WarningSecurityInfo {
         #[inline]
         fn __field(self) -> [u8; 50] {
             self.0
@@ -101244,7 +101302,7 @@ pub mod ngap_ies {
     /// `WarningType ::= OCTET STRING (SIZE (2))`.
     #[derive(Clone, PartialEq, Eq, Hash, Copy)]
     pub struct WarningType(pub [u8; 2]);
-    impl crate::message::__Field<[u8; 2]> for WarningType {
+    impl oxirush_aper::protocol::__Field<[u8; 2]> for WarningType {
         #[inline]
         fn __field(self) -> [u8; 2] {
             self.0
@@ -101417,7 +101475,7 @@ pub mod ngap_ies {
     /// `XnExtTLAs ::= SEQUENCE (SIZE (1..16)) OF XnExtTLAItem`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct XnExtTLAs<'a>(pub Vec<XnExtTLAItem<'a>>);
-    impl<'a> crate::message::__Field<Vec<XnExtTLAItem<'a>>> for XnExtTLAs<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Vec<XnExtTLAItem<'a>>> for XnExtTLAs<'a> {
         #[inline]
         fn __field(self) -> Vec<XnExtTLAItem<'a>> {
             self.0
@@ -101476,7 +101534,7 @@ pub mod ngap_ies {
     /// `XnGTP-TLAs ::= SEQUENCE (SIZE (1..16)) OF TransportLayerAddress`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct XnGTPTLAs<'a>(pub Vec<TransportLayerAddress<'a>>);
-    impl<'a> crate::message::__Field<Vec<TransportLayerAddress<'a>>> for XnGTPTLAs<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Vec<TransportLayerAddress<'a>>> for XnGTPTLAs<'a> {
         #[inline]
         fn __field(self) -> Vec<TransportLayerAddress<'a>> {
             self.0
@@ -101535,7 +101593,7 @@ pub mod ngap_ies {
     /// `XnTLAs ::= SEQUENCE (SIZE (1..2)) OF TransportLayerAddress`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct XnTLAs<'a>(pub Vec<TransportLayerAddress<'a>>);
-    impl<'a> crate::message::__Field<Vec<TransportLayerAddress<'a>>> for XnTLAs<'a> {
+    impl<'a> oxirush_aper::protocol::__Field<Vec<TransportLayerAddress<'a>>> for XnTLAs<'a> {
         #[inline]
         fn __field(self) -> Vec<TransportLayerAddress<'a>> {
             self.0
@@ -107730,7 +107788,7 @@ pub mod ngap_pdu_contents {
     /// `PrivateMessagePrivateIEs ::= SEQUENCE (SIZE (1..65535)) OF AnonymousPrivateMessagePrivateIEs`.
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PrivateMessagePrivateIEs<'a>(pub Vec<AnonymousPrivateMessagePrivateIEs<'a>>);
-    impl<'a> crate::message::__Field<Vec<AnonymousPrivateMessagePrivateIEs<'a>>>
+    impl<'a> oxirush_aper::protocol::__Field<Vec<AnonymousPrivateMessagePrivateIEs<'a>>>
         for PrivateMessagePrivateIEs<'a>
     {
         #[inline]
@@ -110361,7 +110419,10 @@ pub mod ngap_pdu_descriptions {
     };
     impl core::fmt::Debug for InitiatingMessage<'_> {
         fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-            let holds_key = crate::pdu::holds_key("InitiatingMessage", self.procedure_code.0);
+            let holds_key = oxirush_aper::protocol::holds_key::<crate::Ngap>(
+                "InitiatingMessage",
+                self.procedure_code.0,
+            );
             let mut shown = formatter.debug_struct("InitiatingMessage");
             shown.field("procedure_code", &self.procedure_code);
             shown.field("criticality", &self.criticality);
@@ -110582,7 +110643,10 @@ pub mod ngap_pdu_descriptions {
     }
     impl core::fmt::Debug for SuccessfulOutcome<'_> {
         fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-            let holds_key = crate::pdu::holds_key("SuccessfulOutcome", self.procedure_code.0);
+            let holds_key = oxirush_aper::protocol::holds_key::<crate::Ngap>(
+                "SuccessfulOutcome",
+                self.procedure_code.0,
+            );
             let mut shown = formatter.debug_struct("SuccessfulOutcome");
             shown.field("procedure_code", &self.procedure_code);
             shown.field("criticality", &self.criticality);
@@ -110689,7 +110753,10 @@ pub mod ngap_pdu_descriptions {
     oxirush_utils::impl_serde!(SuccessfulOutcome<'a>);
     impl core::fmt::Debug for UnsuccessfulOutcome<'_> {
         fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-            let holds_key = crate::pdu::holds_key("UnsuccessfulOutcome", self.procedure_code.0);
+            let holds_key = oxirush_aper::protocol::holds_key::<crate::Ngap>(
+                "UnsuccessfulOutcome",
+                self.procedure_code.0,
+            );
             let mut shown = formatter.debug_struct("UnsuccessfulOutcome");
             shown.field("procedure_code", &self.procedure_code);
             shown.field("criticality", &self.criticality);
@@ -110998,10 +111065,16 @@ impl<'a> NGAPPDU<'a> {
     ///     let _ = pdu.decode_value::<PDUSessionResourceSetupRequestTransfer>();
     /// }
     /// ```
-    pub fn decode_value<'s, T: crate::Message<'s>>(&'s self) -> Result<T, crate::Error> {
+    pub fn decode_value<'s, T: crate::Message<'s, Protocol = crate::Ngap>>(
+        &'s self,
+    ) -> Result<T, crate::Error> {
         let (direction, code) = (self.direction(), self.procedure_code());
         if (direction, code) != (T::DIRECTION, T::PROCEDURE_CODE) {
-            return Err(crate::error::wrong_message(T::NAME, direction, code));
+            return Err(oxirush_aper::protocol::__wrong_message::<crate::Ngap>(
+                T::NAME,
+                direction,
+                code,
+            ));
         }
         oxirush_aper::decode(self.value())
     }
@@ -111031,10 +111104,16 @@ impl<'a> NGAPPDU<'a> {
     /// octets however it was decoded.
     ///
     /// The errors are those of `decode_value`.
-    pub fn message<T: crate::Message<'a>>(&self) -> Result<T, crate::Error> {
+    pub fn message<T: crate::Message<'a, Protocol = crate::Ngap>>(
+        &self,
+    ) -> Result<T, crate::Error> {
         let (direction, code) = (self.direction(), self.procedure_code());
         if (direction, code) != (T::DIRECTION, T::PROCEDURE_CODE) {
-            return Err(crate::error::wrong_message(T::NAME, direction, code));
+            return Err(oxirush_aper::protocol::__wrong_message::<crate::Ngap>(
+                T::NAME,
+                direction,
+                code,
+            ));
         }
         match self.value().as_borrowed() {
             Some(octets) => oxirush_aper::decode(octets),
@@ -111094,52 +111173,4 @@ pub fn decode_open_type<'a, T: Decode<'a>>(value: &'a [u8]) -> Result<T, crate::
 }
 
 // The transfers of protocol IEs, whose IEs the macros read and build.
-impl crate::message::sealed::Sealed for AIOTSessionReleaseCommandTransfer<'_> {}
-impl<'a> crate::message::__Ies<'a> for AIOTSessionReleaseCommandTransfer<'a> {
-    const __OF_PROTOCOL_IES: bool = true;
-    fn __assigned(_: u16) -> Option<oxirush_aper::Criticality> {
-        None
-    }
-}
-impl crate::message::sealed::Sealed for CommandRequestTransfer<'_> {}
-impl<'a> crate::message::__Ies<'a> for CommandRequestTransfer<'a> {
-    const __OF_PROTOCOL_IES: bool = true;
-    fn __assigned(_: u16) -> Option<oxirush_aper::Criticality> {
-        None
-    }
-}
-impl crate::message::sealed::Sealed for InventoryRequestTransfer<'_> {}
-impl<'a> crate::message::__Ies<'a> for InventoryRequestTransfer<'a> {
-    const __OF_PROTOCOL_IES: bool = true;
-    fn __assigned(_: u16) -> Option<oxirush_aper::Criticality> {
-        None
-    }
-}
-impl crate::message::sealed::Sealed for MBSSessionSetupOrModRequestTransfer<'_> {}
-impl<'a> crate::message::__Ies<'a> for MBSSessionSetupOrModRequestTransfer<'a> {
-    const __OF_PROTOCOL_IES: bool = true;
-    fn __assigned(_: u16) -> Option<oxirush_aper::Criticality> {
-        None
-    }
-}
-impl crate::message::sealed::Sealed for MulticastSessionUpdateRequestTransfer<'_> {}
-impl<'a> crate::message::__Ies<'a> for MulticastSessionUpdateRequestTransfer<'a> {
-    const __OF_PROTOCOL_IES: bool = true;
-    fn __assigned(_: u16) -> Option<oxirush_aper::Criticality> {
-        None
-    }
-}
-impl crate::message::sealed::Sealed for PDUSessionResourceModifyRequestTransfer<'_> {}
-impl<'a> crate::message::__Ies<'a> for PDUSessionResourceModifyRequestTransfer<'a> {
-    const __OF_PROTOCOL_IES: bool = true;
-    fn __assigned(_: u16) -> Option<oxirush_aper::Criticality> {
-        None
-    }
-}
-impl crate::message::sealed::Sealed for PDUSessionResourceSetupRequestTransfer<'_> {}
-impl<'a> crate::message::__Ies<'a> for PDUSessionResourceSetupRequestTransfer<'a> {
-    const __OF_PROTOCOL_IES: bool = true;
-    fn __assigned(_: u16) -> Option<oxirush_aper::Criticality> {
-        None
-    }
-}
+oxirush_aper::__transfer!(crate::Ngap, ngap, AIOTSessionReleaseCommandTransfer CommandRequestTransfer InventoryRequestTransfer MBSSessionSetupOrModRequestTransfer MulticastSessionUpdateRequestTransfer PDUSessionResourceModifyRequestTransfer PDUSessionResourceSetupRequestTransfer);

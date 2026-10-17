@@ -1,8 +1,8 @@
 #![cfg(feature = "inspect")]
 //! The vectors of `tests/fixtures/vectors.tsv` through the JSON forms, which read each
 //! IE, each transfer and each IE of a container with its type. pycrate encoded them:
-//! `tests/fixtures/generate.py` says what they hold, and `tests/aper_vectors.rs` has
-//! them as PDUs.
+//! `protocols/tests/fixtures/generate.py` of oxirush-aper says what they hold, and
+//! `tests/aper_vectors.rs` has them as PDUs.
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -240,13 +240,13 @@ fn each_alternative_of_the_type_null_is_listed_and_selected() {
     assert_eq!(count, 44 + 43);
 }
 
-/// The values of the vectors as the reference has them: `tests/fixtures/generate.py
-/// --values FILE` writes each as a view, in the JSON encoding of ASN.1, and
+/// The values of the vectors as the reference has them: `generate.py --values FILE` of
+/// oxirush-aper writes each as a view, in the JSON encoding of ASN.1, and
 /// `REFERENCE_VALUES` is that file. A PDU that is written from the view of a vector is
 /// the octets of the vector: the crate gives each name, each number and each string of
 /// the reference the bits that the reference gave it.
 #[test]
-#[ignore = "needs the values that tests/fixtures/generate.py --values writes"]
+#[ignore = "needs the values that generate.py --values of oxirush-aper writes"]
 fn a_pdu_written_from_the_values_of_the_reference_is_the_octets_of_the_reference() {
     let path = std::env::var("REFERENCE_VALUES").expect("REFERENCE_VALUES is a file");
     let values = std::fs::read_to_string(path).unwrap();

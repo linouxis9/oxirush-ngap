@@ -237,6 +237,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "quote",
+ "rasn-compiler",
  "regex",
  "syn 2.0.98",
 ]
@@ -247,8 +248,6 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "oxirush-aper-generator",
- "rasn-compiler",
- "regex",
 ]
 
 [[package]]

@@ -1,13 +1,12 @@
 // Auto-generated from ASN.1 by the generator of oxirush-aper; do not edit.
-use crate::inspect::{Form, Typed, carried, transfers};
-use crate::inspect_paths::types;
 pub(crate) use crate::registry::{
     IE_NAMES, IE_TYPES, ITEM_CRITICALITIES, MESSAGE_IE_CRITICALITIES, MESSAGES,
     PROCEDURE_CRITICALITIES, ie, ie_contents,
 };
+use oxirush_aper::inspect::Form;
 pub(crate) const PROTOCOL: &str = "NGAP";
 pub(crate) const ROOT: &str = "ngap";
-transfers! {
+oxirush_aper::__transfers! {
     "handoverCommandTransfer" crate::ngap::HandoverCommandTransfer;
     "handoverPreparationUnsuccessfulTransfer" crate::ngap::HandoverPreparationUnsuccessfulTransfer;
     "handoverRequestAcknowledgeTransfer" crate::ngap::HandoverRequestAcknowledgeTransfer;
@@ -36,7 +35,7 @@ transfers! {
     "uEContextResumeResponseTransfer" crate::ngap::UEContextResumeResponseTransfer;
     "uEContextSuspendRequestTransfer" crate::ngap::UEContextSuspendRequestTransfer;
 }
-carried! {
+oxirush_aper::__carried! {
     101 "SourceNGRANNode-ToTargetNGRANNode-TransparentContainer" crate::ngap::SourceNGRANNodeToTargetNGRANNodeTransparentContainer;
     106 "TargetNGRANNode-ToSourceNGRANNode-TransparentContainer" crate::ngap::TargetNGRANNodeToSourceNGRANNodeTransparentContainer;
     262 "TargetNGRANNode-ToSourceNGRANNode-FailureTransparentContainer" crate::ngap::TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainer;
@@ -896,7 +895,7 @@ pub(crate) const ENUMERATIONS: &[(&str, &[&str])] = &[
     ("WLANMeasurementConfigurationWlanRtt", &["true"]),
     ("XrDeviceWith2Rx", &["true"]),
 ];
-types! {
+oxirush_aper::__types! {
     A2XPC5FlowBitRates sequence { "a2X-GuaranteedFlowBitRate": _, "a2X-MaximumFlowBitRate": _, "iE-Extensions"? extensions };
     A2XPC5QoSFlowItem sequence { "a2X-PQI": _, "a2X-PC5-FlowBitRates"? A2XPC5FlowBitRates, "a2X-Range"? A2XPC5QoSFlowItemA2XRange, "iE-Extensions"? extensions };
     A2XPC5QoSFlowList = [A2XPC5QoSFlowItem];

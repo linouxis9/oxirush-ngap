@@ -276,7 +276,7 @@ fn all_procedure_outcomes_round_trip_and_reject_incomplete_encodings() {
 }
 
 /// `vectors.tsv` has each message with content, and vectors that are made for a length
-/// or a size: `tests/fixtures/generate.py` says what each kind holds.
+/// or a size: `generate.py` of oxirush-aper says what each kind holds.
 #[test]
 fn the_vectors_with_content_round_trip_and_reject_incomplete_encodings() {
     let mut names = BTreeSet::new();

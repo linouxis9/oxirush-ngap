@@ -6,17 +6,15 @@ use std::collections::HashMap;
 use std::sync::LazyLock;
 
 use oxirush_aper::inspect::{self as shared, Protocol};
-pub(crate) use oxirush_aper::inspect::{
-    EDITED, Kind, Shape, extended, member_shape, of_a_transfer, same_name,
-};
-use serde_json::{Map, Value};
+pub(crate) use oxirush_aper::inspect::{Kind, Shape, same_name};
+use serde_json::Value;
 
 use crate::Error;
 // The name of the protocol, the first segment of the paths of the IEs of the message of
 // a PDU, and what the ASN.1 says of the messages, the IEs and the types.
 use crate::inspect_registry::{
     CARRIED, ENUMERATIONS, IE_NAMES, IE_TYPES, ITEM_CRITICALITIES, MESSAGE_IE_CRITICALITIES,
-    MESSAGES, PROTOCOL, ROOT, TYPES,
+    MESSAGES, PROCEDURE_CRITICALITIES, PROTOCOL, ROOT, TRANSFER_FIELDS, TYPES,
 };
 // The type that an IE of an extension container has where its identifier alone does not
 // say it: the one that the type which the container extends gives it.
@@ -37,6 +35,16 @@ pub(crate) static TABLES: Protocol = Protocol {
     message_ie_criticalities: MESSAGE_IE_CRITICALITIES,
     ie_id,
     kind_of,
+    procedure_criticalities: PROCEDURE_CRITICALITIES,
+    ie_typed: crate::inspect_registry::ie,
+    extension_typed: crate::registry::extension,
+    ie_contents: crate::inspect_registry::ie_contents,
+    ie_form: crate::inspect_registry::ie_form,
+    member_form: crate::inspect_registry::member_form,
+    transfer_fields: TRANSFER_FIELDS,
+    transfer_typed: crate::inspect_registry::transfer,
+    carried_typed: crate::inspect_registry::carried,
+    any_message: crate::inspect::any_message,
 };
 
 /// The shape that the list of the types writes.
@@ -268,64 +276,30 @@ pub fn insert(view: &mut Value, path: &str, value: Value) -> Result<(), Error> {
     shared::insert(&TABLES, view, path, value)
 }
 
-/// Show, in `view`, the octets that `path` takes as a type that they may carry as what
-/// `decode` makes of them and of the name of that type: see
-/// [`open`](crate::inspect::open), which gives the function that decodes.
-pub(crate) fn open_with(
-    view: &mut Value,
-    path: &str,
-    decode: &dyn Fn(Value, &str) -> Value,
-) -> Result<(), Error> {
-    shared::open(&TABLES, view, path, decode)
-}
-
-/// Write the entry of an IE as a view has it: the name of the IE that its `id` may be
-/// written as becomes its number, and its `octets` what it is sent as in place of a
-/// value.
-pub(crate) fn written_ie(entry: &mut Map<String, Value>) -> Result<(), Error> {
-    shared::written_ie(&TABLES, entry)
-}
-
-/// The members that `entry`, a value of `shape` in a view, can have, each with its
-/// shape.
-pub(crate) fn member_shapes(shape: Shape, entry: &Map<String, Value>) -> shared::Members {
-    TABLES.member_shapes(shape, entry)
-}
-
-/// The shape of each entry of a list of `shape`.
-pub(crate) fn entry_shape(shape: Shape) -> Shape {
+/// The entry shape of a list of `shape`, which the tests of the tables read.
+#[cfg(test)]
+fn entry_shape(shape: Shape) -> Shape {
     TABLES.entry_shape(shape)
 }
 
-/// The shape of the message of a direction and a procedure code in a view, where the
-/// tables have it.
-pub(crate) fn message_shape(direction: &str, code: u8) -> Shape {
-    TABLES.message_shape(direction, code)
-}
-
-/// The shape of octets that carry the type which ASN.1 names `name`, once a view shows
-/// them so: the transfer of that type.
-pub(crate) fn carried_shape(name: &str) -> Shape {
-    TABLES.carried_shape(name)
-}
-
 /// The IEs of the message that ASN.1 names `message`, which a view has as `ies`, as a
-/// tree has them: each as its name with its value, and so are the IEs that a value
-/// holds, to any depth.
-pub(crate) fn named_ies(message: &str, ies: Value) -> Result<Value, Error> {
+/// tree has them, which the tests of the tables read.
+#[cfg(test)]
+fn named_ies(message: &str, ies: Value) -> Result<Value, Error> {
     shared::named_ies(&TABLES, message, ies)
 }
 
 /// The entries that a view has for the IEs of the message that ASN.1 names `message`,
-/// which `ies` has as a tree has them: as [`named_ies`] shows them.
-pub(crate) fn listed_ies(message: &str, ies: &Value) -> Result<Value, Error> {
+/// which `ies` has as a tree has them, which the tests of the tables read.
+#[cfg(test)]
+fn listed_ies(message: &str, ies: &Value) -> Result<Value, Error> {
     shared::listed_ies(&TABLES, message, ies)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use oxirush_aper::inspect::{Member, type_name};
+    use oxirush_aper::inspect::{EDITED, Member, type_name};
     use serde_json::json;
 
     /// The member of a view that holds the message of the PDU, and the member of a

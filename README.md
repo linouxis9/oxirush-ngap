@@ -1585,7 +1585,7 @@ has pycrate write [the vectors](#the-vectors) and the crate write the values
 of pycrate.
 
 oxirush-ngap and oxirush-s1ap share, octet for octet, the code that does not
-depend on the protocol and is not in `oxirush-aper`: `src/check.rs`,
+depend on the protocol and is not in `oxirush-aper`:
 `src/error.rs`, `src/inspect_paths.rs`, `src/message.rs`, the oracle and its
 tests but for its bindings and `oracle/tests/allocation.rs`, the test
 `tests/readme.rs`, the scripts `build/extract_asn1.py`,

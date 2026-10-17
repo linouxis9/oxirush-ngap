@@ -203,7 +203,7 @@ pub use oxirush_aper as aper;
 /// the MNC.
 pub use oxirush_utils::identity;
 
-pub use check::Deviation;
+pub use check::{Deviation, Ngap};
 pub use message::Message;
 pub use ngap::NgapPduKind;
 pub use oxirush_aper::{

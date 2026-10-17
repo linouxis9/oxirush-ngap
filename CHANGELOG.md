@@ -183,11 +183,13 @@ what each type became.
   (`IeCriticality`), a mandatory IE that is missing (`MissingIe`) and an IE
   whose value does not decode as its type (`UndecodableIe`), each with the
   identifier, the name, the position and the criticality of the IE, and with
-  a sentence as its `Display`. It refuses nothing: a message that deviates is
-  built, written from a tree, encoded and decoded as before, for the tests
-  that send one. A conditional IE is not reported, as its condition is in
-  the prose of TS 38.413, and the IEs that a value holds are not looked at.
-  0.4.2 left all of it to the caller.
+  a sentence as its `Display`. It refuses nothing: a message that deviates
+  is built, written from a tree, encoded and decoded as before, for the
+  tests that send one. A conditional IE is not reported, as its condition is
+  in the prose of TS 38.413, and the IEs that a value holds are not looked
+  at. 0.4.2 left all of it to the caller. `Deviation` is
+  `oxirush_aper::check::Deviation<Ngap>`, which oxirush-s1ap shares, in the
+  types of the protocol that `Ngap` gives.
 - A field of `extract_ngap_ies!` has the type of the IE, or the type of the
   one value that the IE is a name for: `req id: u64 = AMF_UE_NGAP_ID(id)` and
   `req cause: Cause = Cause(cause)` both read, without `=>`. Another type is a
@@ -395,11 +397,11 @@ what each type became.
 
 ### Changed
 
-- With the `inspect` feature, the paths of a view are those of
-  `oxirush_aper::inspect`, which oxirush-s1ap shares, on the trees of
-  `oxirush_utils::tree`. The members of a view, of a tree and of `paths` are
-  in the order in which the crate writes them, which is that of the
-  specification, whatever else a build enables: the feature turns on
+- With the `inspect` feature, the views, the trees and the paths of a view
+  are those of `oxirush_aper::inspect`, which oxirush-s1ap shares, on the
+  trees of `oxirush_utils::tree`. The members of a view, of a tree and of
+  `paths` are in the order in which the crate writes them, which is that of
+  the specification, whatever else a build enables: the feature turns on
   `serde_json/preserve_order`, and as cargo unifies features every
   `serde_json::Map` of a program that has it keeps the order in which its
   members were written. An error of a path says the place last, `, at

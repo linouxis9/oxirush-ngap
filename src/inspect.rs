@@ -85,10 +85,10 @@
 //! values at a path, and [`set`], [`remove`] and [`insert`] edit a view at a path:
 //!
 //! ```text
+//! /procedure_code = 42
 //! /ngap/AMF-UE-NGAP-ID/criticality = "reject"
 //! /ngap/AMF-UE-NGAP-ID/value = 1
 //! /ngap/Cause/value/radioNetwork = "user-inactivity"
-//! /procedure_code = 42
 //! ```
 //!
 //! A path is a JSON pointer into the view, where `/ngap` stands for the IEs of the
@@ -312,17 +312,15 @@
 //! [`from_view`]: NGAP_PDU::from_view
 //! [`with_view`]: NGAP_PDU::with_view
 
-use serde_json::{Map, Value, json};
+use serde_json::Value;
 
 use crate::Error;
-use crate::inspect_paths::{
-    EDITED, Shape, carried_shape, entry_shape, extended, listed_ies, member_shape, member_shapes,
-    message_shape, named_ies, of_a_transfer, open_with, same_name, written_ie,
-};
+use crate::inspect_paths::{TABLES, same_name};
 pub use crate::inspect_paths::{check_path, enumerated_at, insert, paths, remove, select, set};
 use crate::inspect_registry as registry;
 use crate::ngap::{NGAP_PDU, NGAPPDU};
-use oxirush_aper::json::{self, Json, hex};
+use oxirush_aper::inspect::{self as shared, Parts};
+use oxirush_aper::json::{self, Json};
 use oxirush_aper::{AsnType, Decode, Encode, Octets};
 
 /// The identifier and the name of each IE that an object set of the ASN.1 has, those of
@@ -400,17 +398,11 @@ pub fn item_criticality(id: u16) -> Option<&'static str> {
     item.map(|(_, criticality)| *criticality)
 }
 
-/// The functions of the type of the message of a direction and a procedure code. A
-/// procedure that the specification does not have in that direction has no type of its
-/// own: its message is read and written as what every message of the protocol but the
-/// private one is, a container of protocol IEs and nothing else.
-fn message_type(direction: &str, code: u8) -> Typed {
-    let mut messages = registry::MESSAGES.iter();
-    let message = messages.find(|(of, procedure, ..)| *procedure == code && *of == direction);
-    message.map_or_else(
-        || typed!(crate::ngap::ErrorIndication<'a>),
-        |(_, _, _, typed, ..)| typed(),
-    )
+/// The functions of the message of a procedure that the specification does not have in
+/// that direction, which is read and written as what every message of the protocol but
+/// the private one is: a container of protocol IEs and nothing else.
+pub(crate) fn any_message() -> Typed {
+    typed!(crate::ngap::ErrorIndication<'a>)
 }
 
 /// The value of the type `T` that the octets `raw` are, in its JSON form. `name` is the
@@ -511,206 +503,8 @@ macro_rules! typed {
 }
 pub(crate) use typed;
 
-/// The octets that `value` writes in hexadecimal.
-fn unhex(value: &Value) -> Result<Vec<u8>, Error> {
-    let octets = value.as_str().and_then(json::unhex);
-    octets.ok_or_else(|| {
-        // The start of what is written says which value it is.
-        let written: String = value.to_string().chars().take(40).collect();
-        Error::value(format!(
-            "{written} is not octets: octets are written in hexadecimal, two digits for each"
-        ))
-    })
-}
-
-/// How a view and a tree show the values of a well-known type, and take them back.
-#[derive(Clone, Copy)]
-pub(crate) enum Form {
-    /// A PLMN identity as its MCC and MNC: `"208-93"`.
-    Plmn,
-    /// The digits of an identity in TBCD, as an IMSI has them. A protocol may have no
-    /// type of this form.
-    #[allow(dead_code)]
-    Digits,
-    /// An identifier or a counter of this many bits, as a number.
-    Number(u32),
-    /// A transport layer address: an IPv4 address, an IPv6 address, or both with a comma.
-    Address,
-}
-
-impl Form {
-    /// The readable form of a value as its ASN.1 type has it; `None` when it has none.
-    fn read(self, jer: &Value) -> Option<Value> {
-        // The decimal digits that these half octets are; none when one of them is no digit.
-        let digits = |digits: &[u8]| {
-            let text = digits
-                .iter()
-                .map(|digit| char::from_digit((*digit).into(), 10));
-            text.collect::<Option<String>>()
-        };
-        match self {
-            Self::Plmn => {
-                // The order of the digits is that of the helpers, which have none for
-                // octets that are no PLMN identity: those stay octets.
-                let octets = <[u8; 3]>::try_from(unhex(jer).ok()?).ok()?;
-                let (mcc, mnc) = crate::helpers::plmn_digits(octets)?;
-                Some(json!(format!("{mcc}-{mnc}")))
-            }
-            Self::Digits => {
-                let octets = unhex(jer).ok()?;
-                let nibbles: Vec<u8> = octets.iter().flat_map(|o| [o & 15, o >> 4]).collect();
-                // A filler takes the place of a last digit that is not there.
-                let nibbles = nibbles.strip_suffix(&[15]).unwrap_or(&nibbles);
-                digits(nibbles).map(Value::from)
-            }
-            Self::Number(bits) => {
-                let (text, octets) = (jer.as_str()?, bits.div_ceil(8));
-                let number = u64::from_str_radix(text, 16).ok()?;
-                (text.len() as u32 == octets * 2).then(|| json!(number >> (octets * 8 - bits)))
-            }
-            Self::Address => {
-                let octets = unhex(jer.get("value")?).ok()?;
-                let v4 = |octets: &[u8]| {
-                    Some(std::net::Ipv4Addr::from(<[u8; 4]>::try_from(octets).ok()?))
-                };
-                let v6 = |octets: &[u8]| {
-                    Some(std::net::Ipv6Addr::from(<[u8; 16]>::try_from(octets).ok()?))
-                };
-                Some(json!(match (jer.get("length")?.as_u64()?, octets.len()) {
-                    (32, 4) => v4(&octets)?.to_string(),
-                    (128, 16) => v6(&octets)?.to_string(),
-                    (160, 20) => format!("{},{}", v4(&octets[..4])?, v6(&octets[4..])?),
-                    _ => return None,
-                }))
-            }
-        }
-    }
-
-    /// The value as its ASN.1 type has it, from its readable form. A value in another
-    /// form is kept as it is: the form of the type is still taken, and the codec refuses
-    /// what is neither.
-    fn write(self, shown: &Value) -> Result<Value, Error> {
-        let number = |bits: u32, number: u64| {
-            if bits < 64 && number >> bits != 0 {
-                return Err(Error::value(format!(
-                    "{number} does not fit in {bits} bits"
-                )));
-            }
-            let octets = bits.div_ceil(8);
-            let width = octets as usize * 2;
-            Ok(json!(format!("{:0width$X}", number << (octets * 8 - bits))))
-        };
-        let Some(text) = shown.as_str() else {
-            return match (self, shown.as_u64()) {
-                (Self::Number(bits), Some(value)) => number(bits, value),
-                _ => Ok(shown.clone()),
-            };
-        };
-        let bcd = |digits: &str| digits.bytes().map(|digit| digit & 15).collect::<Vec<_>>();
-        let all_digits = |text: &str| text.bytes().all(|b| b.is_ascii_digit());
-        match self {
-            Self::Plmn if text.contains('-') => {
-                let (mcc, mnc) = text.split_once('-').unwrap_or_default();
-                // The three digits of an MCC, and the two or three of an MNC.
-                let digits = |digits: &str| all_digits(digits).then(|| bcd(digits));
-                let mcc = digits(mcc).and_then(|mcc| <[u8; 3]>::try_from(mcc).ok());
-                let octets = mcc.zip(digits(mnc));
-                let octets = octets.and_then(|(mcc, mnc)| crate::helpers::plmn_octets(mcc, &mnc));
-                let octets = octets.ok_or_else(|| {
-                    Error::value(format!("{text}: a PLMN identity is MCC-MNC, as 208-93"))
-                })?;
-                Ok(Value::String(hex(&octets)))
-            }
-            // Without a hyphen it is its three octets: what is neither says both forms,
-            // where the codec would say that it is no octets.
-            Self::Plmn if text.len() != 6 || !text.bytes().all(|b| b.is_ascii_hexdigit()) => {
-                Err(Error::value(format!(
-                    "{text}: a PLMN identity is MCC-MNC, as 208-93, or its three octets in \
-                     hexadecimal"
-                )))
-            }
-            Self::Digits if all_digits(text) => {
-                let pairs = bcd(text);
-                let pairs = pairs.chunks(2);
-                let octets = pairs.map(|pair| pair.get(1).copied().unwrap_or(15) << 4 | pair[0]);
-                Ok(Value::String(hex(&octets.collect::<Vec<_>>())))
-            }
-            Self::Number(bits) if text.starts_with("0x") => {
-                let value = u64::from_str_radix(&text[2..], 16).map_err(|error| {
-                    Error::value(format!("{text} is not a number in hexadecimal: {error}"))
-                })?;
-                number(bits, value)
-            }
-            Self::Address if text.contains(['.', ':']) => {
-                let mut octets = Vec::new();
-                for part in text.split(',') {
-                    match (octets.len(), part.trim().parse()) {
-                        (0, Ok(std::net::IpAddr::V4(address))) => octets.extend(address.octets()),
-                        (0 | 4, Ok(std::net::IpAddr::V6(address))) => {
-                            octets.extend(address.octets())
-                        }
-                        _ => {
-                            return Err(Error::value(format!(
-                                "{text}: a transport layer address is an IPv4 address, an IPv6 address, or the two with a comma"
-                            )));
-                        }
-                    }
-                }
-                Ok(json!({"value": hex(&octets), "length": octets.len() * 8}))
-            }
-            _ => Ok(shown.clone()),
-        }
-    }
-}
-
-/// Show `value`, or each value of a list, in the readable form that it has: only a value
-/// that the form gives back as it was.
-fn show(form: Form, value: &mut Value) {
-    match value {
-        Value::Array(values) => values.iter_mut().for_each(|value| show(form, value)),
-        value => {
-            let shown = form.read(value);
-            if let Some(shown) =
-                shown.filter(|shown| form.write(shown).is_ok_and(|jer| jer == *value))
-            {
-                *value = shown;
-            }
-        }
-    }
-}
-
-/// `value`, or each value of a list, as its ASN.1 type has it again.
-fn unshow(form: Form, value: &mut Value) -> Result<(), Error> {
-    match value {
-        Value::Array(values) => values.iter_mut().try_for_each(|value| unshow(form, value)),
-        value => {
-            *value = form.write(value)?;
-            Ok(())
-        }
-    }
-}
-
-/// The value that the octets `raw` contain, beside them, or why they did not decode.
-fn contained(raw: Value, typed: Result<Typed, Error>) -> Value {
-    let decoded = typed.and_then(|typed| (typed.decode)(&unhex(&raw)?));
-    let mut transfer = Map::new();
-    transfer.insert("_raw_transfer".into(), raw);
-    match decoded {
-        Ok(decoded) => transfer.insert("decoded".into(), decoded),
-        Err(error) => transfer.insert("_decode_error".into(), error.to_string().into()),
-    };
-    Value::Object(transfer)
-}
-
-/// The octets `raw` as the transfer that they are when they carry the type that ASN.1
-/// names `name`: its decoded value beside them, or why they are not of that type.
-fn opened(raw: Value, name: &str) -> Value {
-    let typed = registry::carried(name);
-    let carries_none = || Error::no_such_member(format!("octets carry no {name}"));
-    let mut transfer = contained(raw, typed.ok_or_else(carries_none));
-    expand(&mut transfer, 0, carried_shape(name));
-    transfer
-}
+/// How a view and a tree show the values of a well-known type.
+pub(crate) use oxirush_aper::inspect::Form;
 
 /// Decode, in `view`, the octets that `path` takes as a type that they may carry: those
 /// of an IE whose content the specification gives by reference, as the transparent
@@ -729,304 +523,7 @@ fn opened(raw: Value, name: &str) -> Value {
 /// A path that goes through no such name changes nothing. A name that the type of a
 /// value cannot have is an error, and the view is then as it was.
 pub fn open(view: &mut Value, path: &str) -> Result<(), Error> {
-    open_with(view, path, &opened)
-}
-
-/// The octets of the IE `id`, which is written as a type that they may carry: one
-/// member, the name of that type with its value, which is its octets by now.
-fn carried_octets(written: &Value, id: u16) -> Result<Value, Error> {
-    let carried = registry::CARRIED
-        .iter()
-        .filter(|(carrier, ..)| *carrier == id);
-    let names: Vec<_> = carried.map(|(_, name, _)| *name).collect();
-    let mut members = written.as_object().into_iter().flatten();
-    match (members.next(), members.next()) {
-        (Some((name, octets)), None) if names.iter().any(|known| same_name(known, name)) => {
-            Ok(octets.clone())
-        }
-        _ => Err(Error::value(format!(
-            "IE {id} is written as its octets, or as {{NAME: VALUE}} for a type that they carry: {}",
-            names.join(", ")
-        ))),
-    }
-}
-
-/// A view whose direction is none of the three.
-fn no_direction() -> Error {
-    Error::form(
-        "the direction of a view is InitiatingMessage, SuccessfulOutcome or UnsuccessfulOutcome",
-    )
-}
-
-/// How deep in a view an IE or a transfer is still decoded.
-const NESTING: usize = 64;
-
-/// Why what is deeper keeps its octets.
-fn too_deep<T>() -> Result<T, Error> {
-    Err(Error::limit(format!(
-        "inspection nesting exceeds {NESTING}"
-    )))
-}
-
-/// The functions of the type of the IE `id` in a container of `shape`: the type of its
-/// identifier, or the one that the type which an extension container extends gives it.
-fn ie_type(id: u16, shape: Shape) -> Result<Typed, Error> {
-    match crate::registry::extension(id, extended(shape)) {
-        Some(typed) => Ok(typed),
-        None => registry::ie(id),
-    }
-}
-
-/// Decode the IEs and the transfers of `value`, a value of `shape` which is `depth` deep
-/// in its view. What is deeper than [`NESTING`] keeps its octets, with why.
-fn expand(value: &mut Value, depth: usize, shape: Shape) {
-    let deep = depth > NESTING;
-    if let Some(object) = value.as_object_mut() {
-        let field = if object.contains_key("value") {
-            "value"
-        } else {
-            "extensionValue"
-        };
-        if let Some(id) = object
-            .get("id")
-            .and_then(Value::as_u64)
-            .and_then(|v| u16::try_from(v).ok())
-            && let Some(raw) = object.get_mut(field).filter(|v| v.is_string())
-        {
-            let raw = raw.take();
-            let decoded = match deep {
-                true => too_deep(),
-                false => unhex(&raw).and_then(|bytes| (ie_type(id, shape)?.decode)(&bytes)),
-            };
-            match decoded {
-                Ok(decoded) => {
-                    // An OCTET STRING (CONTAINING ...) has the form of a transfer.
-                    let mut decoded = match registry::ie_contents(id) {
-                        Some(contents) => contained(decoded, Ok(contents)),
-                        None => decoded,
-                    };
-                    if let Some(form) = registry::ie_form(id) {
-                        show(form, &mut decoded);
-                    }
-                    object.insert(field.into(), decoded);
-                }
-                // The value stays the octets that it was received as.
-                Err(error) => {
-                    object.insert(field.into(), raw.clone());
-                    object.insert("_decode_error".into(), error.to_string().into());
-                }
-            }
-            object.insert("_raw_value".into(), raw);
-            object.insert("_original_id".into(), id.into());
-            if let Ok(at) = ie_names().binary_search_by_key(&id, |(known, _)| *known) {
-                object.insert("_ie_name".into(), ie_names()[at].1.into());
-            }
-        }
-        // What each member is, once the entry of an IE says what it was decoded as.
-        let members = member_shapes(shape, object);
-        for (key, child) in object {
-            if !key.starts_with('_') {
-                if registry::TRANSFER_FIELDS.contains(&key.as_str()) && child.is_string() {
-                    let typed = match deep {
-                        true => too_deep(),
-                        false => registry::transfer(key),
-                    };
-                    *child = contained(child.take(), typed);
-                }
-                expand(child, depth + 1, member_shape(&members, key));
-                if let Some(form) = registry::member_form(key) {
-                    show(form, child);
-                }
-            }
-        }
-    } else if let Some(array) = value.as_array_mut() {
-        for child in array {
-            expand(child, depth + 1, entry_shape(shape));
-        }
-    }
-}
-
-/// `member` is the name of the member that holds `value`, a value of `shape`, or the
-/// list it is in.
-fn collapse(value: &mut Value, member: &str, depth: usize, shape: Shape) -> Result<(), Error> {
-    // What is decoded at the limit of the inspection has values of its own under it.
-    if depth > 4 * NESTING {
-        return Err(Error::limit(format!(
-            "inspection nesting exceeds {}",
-            4 * NESTING
-        )));
-    }
-    if let Some(object) = value.as_object_mut() {
-        // An IE may be written with its name as `id`, and with its `octets`.
-        written_ie(object)?;
-        let id = object
-            .get("id")
-            .and_then(Value::as_u64)
-            .and_then(|v| u16::try_from(v).ok());
-        let members = member_shapes(shape, object);
-        for (key, child) in object.iter_mut() {
-            if !key.starts_with('_') {
-                collapse(child, key, depth + 1, member_shape(&members, key))?;
-                if let Some(form) = registry::member_form(key) {
-                    unshow(form, child)?;
-                }
-                if let Some(raw) = child.get("_raw_transfer").cloned() {
-                    // Nothing that is written is left out: a transfer has its decoded
-                    // value beside the octets that it was received as, and no other.
-                    let known = ["_raw_transfer", "decoded", "_decode_error", EDITED];
-                    let mut members = child.as_object().into_iter().flatten();
-                    if let Some((other, _)) =
-                        members.find(|(name, _)| !known.contains(&name.as_str()))
-                    {
-                        return Err(Error::no_such_member(format!(
-                            "{key} has no member {other:?}: a transfer has its decoded value"
-                        )));
-                    }
-                    if let Some(edited) = child.get("decoded") {
-                        let bytes = unhex(&raw)?;
-                        // An IE's identifier gives the type of what it contains, and
-                        // the name of a transfer field the type of the transfer.
-                        let transfer = match key.as_str() {
-                            "value" | "extensionValue" => {
-                                id.and_then(registry::ie_contents).ok_or_else(|| {
-                                    Error::form(
-                                        "an IE that contains no type has no decoded value \
-                                         beside its octets",
-                                    )
-                                })?
-                            }
-                            key => match registry::carried(key) {
-                                Some(carried) => carried,
-                                None => registry::transfer(key)?,
-                            },
-                        };
-                        let original = (transfer.decode)(&bytes)?;
-                        if &original == edited {
-                            *child = raw;
-                        } else {
-                            if (transfer.encode)(&original)? != bytes {
-                                return Err(Error::edit(format!(
-                                    "{key} does not encode back to the octets received"
-                                )));
-                            }
-                            *child = Value::String(hex(&(transfer.encode)(edited)?));
-                        }
-                    } else {
-                        *child = raw;
-                    }
-                } else if let Some(members) = child.as_object() {
-                    // What was not received is encoded from the value written.
-                    let transfer = match key.as_str() {
-                        "value" | "extensionValue" => id.and_then(registry::ie_contents),
-                        key if registry::TRANSFER_FIELDS.contains(&key) => {
-                            Some(registry::transfer(key)?)
-                        }
-                        // A type that the octets of an IE may carry, by its name.
-                        key => registry::carried(key),
-                    };
-                    if let Some(transfer) = transfer {
-                        // The decoded value, as the object itself when it has no member
-                        // of a transfer or as its `decoded` member, or the `octets`.
-                        let alone = |member| members.get(member).filter(|_| members.len() == 1);
-                        let wire = if !members.keys().any(|name| of_a_transfer(name)) {
-                            Value::String(hex(&(transfer.encode)(child)?))
-                        } else if let Some(written) = alone("decoded") {
-                            Value::String(hex(&(transfer.encode)(written)?))
-                        } else if let Some(octets) = alone("octets") {
-                            octets.clone()
-                        } else {
-                            return Err(Error::form(format!(
-                                "{key} is written with its decoded value alone, or as its octets"
-                            )));
-                        };
-                        *child = wire;
-                    }
-                }
-            }
-        }
-        let raw = object.remove("_raw_value");
-        let original_id = object.remove("_original_id");
-        let undecoded = object.remove("_decode_error").is_some();
-        object.remove("_ie_name");
-        object.remove(EDITED);
-        if let Some(id) = id {
-            // The value of an IE of an extension container has another name.
-            let field = match member.starts_with("iE-Extension") {
-                true => "extensionValue",
-                false => "value",
-            };
-            // Octets that are written as a type that they may carry.
-            if let Some(written) = object.get_mut(field).filter(|value| value.is_object())
-                && registry::CARRIED.iter().any(|(carrier, ..)| *carrier == id)
-            {
-                *written = carried_octets(written, id)?;
-            }
-            let typed = |id: u16| {
-                let octets = format!("give its octets as _raw_value, without {field}");
-                ie_type(id, shape)
-                    .map_err(|error| error.reworded(|what| format!("{what}: {octets}")))
-            };
-            if !undecoded
-                && let Some(form) = registry::ie_form(id)
-                && let Some(value) = object.get_mut(field)
-            {
-                unshow(form, value)?;
-            }
-            let wire = match (raw, object.get(field)) {
-                // The octets alone are sent as they are.
-                (Some(raw), None) => raw,
-                // The IE was shown as its octets.
-                (_, Some(edited)) if undecoded => {
-                    if !edited.is_string() {
-                        return Err(Error::edit(format!(
-                            "IE {id} did not decode: its value is its octets in hexadecimal"
-                        )));
-                    }
-                    edited.clone()
-                }
-                (Some(raw), Some(edited)) => {
-                    // The identifier that the octets were decoded as, when a view has
-                    // one: without it they are those of the identifier of the entry.
-                    let original_id = match &original_id {
-                        Some(original) => (original.as_u64())
-                            .and_then(|v| u16::try_from(v).ok())
-                            .ok_or_else(|| {
-                            Error::form(
-                                "_original_id is the identifier that the octets were \
-                                     decoded as, a number",
-                            )
-                        })?,
-                        None => id,
-                    };
-                    let bytes = unhex(&raw)?;
-                    let received = ie_type(original_id, shape)?;
-                    let original = (received.decode)(&bytes)?;
-                    if &original == edited && id == original_id {
-                        raw
-                    } else if (received.encode)(&original)? != bytes {
-                        return Err(Error::edit(format!(
-                            "IE {original_id} does not encode back to the octets received; replace its octets instead"
-                        )));
-                    } else {
-                        Value::String(hex(&(typed(id)?.encode)(edited)?))
-                    }
-                }
-                // An IE that was not received.
-                (None, Some(new)) => Value::String(hex(&(typed(id)?.encode)(new)?)),
-                (None, None) => {
-                    return Err(Error::form(format!(
-                        "IE {id} has no {field} and no _raw_value"
-                    )));
-                }
-            };
-            object.insert(field.into(), wire);
-        }
-    } else if let Some(array) = value.as_array_mut() {
-        for child in array {
-            collapse(child, member, depth + 1, entry_shape(shape))?;
-        }
-    }
-    Ok(())
+    shared::open(&TABLES, view, path)
 }
 
 /// The two JSON forms of a PDU, with the `inspect` feature: its tree, the short form in
@@ -1085,24 +582,13 @@ impl NGAPPDU<'_> {
     /// specification does not have in that direction, and for a message without a list of
     /// IEs of the protocol, as a private message.
     pub fn to_tree(&self) -> Result<Value, Error> {
-        let (direction, code) = (self.direction(), self.procedure_code());
-        let name = message_name(self).ok_or_else(|| {
+        if message_name(self).is_none() {
+            let (direction, code) = (self.direction(), self.procedure_code());
             let protocol = registry::PROTOCOL;
-            Error::unknown_message(format!("{protocol} has no {direction} of procedure {code}"))
-        })?;
-        let mut view = self.to_view()?;
-        // The tree is made of the view: its IEs are taken out of it, and not copied.
-        let listed = view.pointer_mut("/message/protocolIEs").map(Value::take);
-        let Some(listed) = listed.filter(Value::is_array) else {
-            return Err(Error::limit(format!("a message {name} has no list of IEs")));
-        };
-        let mut tree = Map::new();
-        tree.insert("message".into(), name.into());
-        tree.insert("ies".into(), named_ies(name, listed)?);
-        if view["criticality"].as_str() != message_criticality(name) {
-            tree.insert("criticality".into(), view["criticality"].clone());
+            let what = format!("{protocol} has no {direction} of procedure {code}");
+            return Err(Error::unknown_message(what));
         }
-        Ok(Value::Object(tree))
+        shared::tree(&TABLES, self.to_view()?)
     }
 
     /// The PDU of a tree: a message written as its name and its IEs by name, as
@@ -1138,63 +624,19 @@ impl NGAPPDU<'_> {
     /// # Ok::<(), oxirush_ngap::Error>(())
     /// ```
     pub fn from_tree(tree: &Value) -> Result<NGAP_PDU, Error> {
-        const FORM: &str = "a tree is {\"message\": NAME, \"ies\": [{NAME: VALUE}, …]}";
-        let form = || Error::form(FORM);
-        let written = tree.as_object().ok_or_else(form)?;
-        if let Some(other) = written
-            .keys()
-            .find(|key| !["message", "ies", "criticality"].contains(&key.as_str()))
-        {
-            return Err(Error::form(format!(
-                "{other:?} is no member of a tree: {FORM}"
-            )));
-        }
-        let name = written.get("message").and_then(Value::as_str);
-        let name = name.ok_or_else(form)?;
-        let (direction, code) = message_named(name)
-            .ok_or_else(|| Error::unknown_message(format!("{name:?} is not a message of NGAP")))?;
-        let assigned = json!(message_criticality(name));
-        let criticality = written.get("criticality").unwrap_or(&assigned);
-        let listed = written.get("ies").filter(|ies| ies.is_array());
-        let mut message = Map::new();
-        message.insert(
-            "protocolIEs".into(),
-            listed_ies(name, listed.ok_or_else(form)?)?,
-        );
-        NGAP_PDU::of_view(direction, code, criticality, Value::Object(message), None)
+        NGAP_PDU::of_parts(shared::tree_parts(&TABLES, tree)?)
     }
 
-    /// The PDU of a direction and a procedure code that has `criticality` and the
-    /// message of a view, `message`, which was received as the octets `received` when
-    /// the view has them.
-    fn of_view(
-        direction: &str,
-        code: u8,
-        criticality: &Value,
-        mut message: Value,
-        received: Option<&Value>,
-    ) -> Result<NGAP_PDU, Error> {
-        collapse(&mut message, "", 0, message_shape(direction, code))?;
-        let raw = if let Some(original) = received {
-            let original = unhex(original)?;
-            let typed = message_type(direction, code);
-            let decoded = (typed.decode)(&original)?;
-            if decoded == message {
-                original
-            } else {
-                if (typed.encode)(&decoded)? != original {
-                    return Err(Error::edit(
-                        "the message does not encode back to the octets received",
-                    ));
-                }
-                (typed.encode)(&message)?
-            }
-        } else {
-            (message_type(direction, code).encode)(&message)?
-        };
-        let criticality = json::from_value(criticality)?;
-        let value = Octets::owned(raw);
-        NGAP_PDU::of(direction, code, criticality, value).ok_or_else(no_direction)
+    /// The PDU of what a view or a tree writes.
+    fn of_parts(parts: Parts) -> Result<NGAP_PDU, Error> {
+        let criticality = json::from_value(&parts.criticality)?;
+        let value = Octets::owned(parts.message);
+        NGAP_PDU::of(parts.direction, parts.code, criticality, value).ok_or_else(|| {
+            Error::form(
+                "the direction of a view is InitiatingMessage, SuccessfulOutcome or \
+                 UnsuccessfulOutcome",
+            )
+        })
     }
 
     /// The view of this PDU: its `procedure_code`, its `direction`, its `criticality` and
@@ -1226,16 +668,8 @@ impl NGAPPDU<'_> {
     /// ```
     pub fn to_view(&self) -> Result<Value, Error> {
         let (direction, code) = (self.direction(), self.procedure_code());
-        let raw: &[u8] = self.value();
-        let mut message = (message_type(direction, code).decode)(raw)?;
-        expand(&mut message, 0, message_shape(direction, code));
-        let mut view = Map::new();
-        view.insert("procedure_code".into(), code.into());
-        view.insert("direction".into(), direction.into());
-        view.insert("criticality".into(), json::to_value(&self.criticality()));
-        view.insert("message".into(), message);
-        view.insert("_raw_message".into(), hex(raw).into());
-        Ok(Value::Object(view))
+        let criticality = json::to_value(&self.criticality());
+        shared::view(&TABLES, direction, code, criticality, self.value())
     }
 
     /// The PDU of a view, as [`to_view`](Self::to_view) gives one and the edits leave
@@ -1245,43 +679,7 @@ impl NGAPPDU<'_> {
     /// [`with_view`](Self::with_view) is this for the view of a PDU that is at hand, and
     /// refuses the view of another message.
     pub fn from_view(view: &Value) -> Result<NGAP_PDU, Error> {
-        const MEMBERS: [&str; 5] = [
-            "procedure_code",
-            "direction",
-            "criticality",
-            "message",
-            "_raw_message",
-        ];
-        const FORM: &str =
-            "a view has its procedure_code, its direction, its criticality and its message";
-        let members = view.as_object().ok_or_else(|| Error::form(FORM))?;
-        if let Some(other) = members.keys().find(|key| !MEMBERS.contains(&key.as_str())) {
-            return Err(Error::form(format!(
-                "{other:?} is no member of a view: {FORM}"
-            )));
-        }
-        let code = view["procedure_code"]
-            .as_u64()
-            .and_then(|c| u8::try_from(c).ok())
-            .ok_or_else(|| Error::form("the procedure_code of a view is a number from 0 to 255"))?;
-        let direction = view["direction"].as_str().ok_or_else(no_direction)?;
-        const DIRECTIONS: [&str; 3] = [
-            "InitiatingMessage",
-            "SuccessfulOutcome",
-            "UnsuccessfulOutcome",
-        ];
-        if !DIRECTIONS.contains(&direction) {
-            return Err(no_direction());
-        }
-        let message = view.get("message").ok_or_else(|| Error::form(FORM))?;
-        let received = view.get("_raw_message");
-        NGAP_PDU::of_view(
-            direction,
-            code,
-            &view["criticality"],
-            message.clone(),
-            received,
-        )
+        NGAP_PDU::of_parts(shared::view_parts(&TABLES, view)?)
     }
 
     /// The PDU of a view of this PDU, as [`to_view`](Self::to_view) gives it and the
@@ -1311,25 +709,7 @@ impl NGAPPDU<'_> {
     /// ```
     pub fn with_view(&self, view: &Value) -> Result<NGAP_PDU, Error> {
         let (direction, code) = (self.direction(), self.procedure_code());
-        let of = (view["direction"].as_str(), view["procedure_code"].as_u64());
-        // A view that does not say which message it is of is refused as any view is.
-        if let (Some(of), Some(procedure)) = of
-            && (of, procedure) != (direction, u64::from(code))
-        {
-            let message = |direction: &str, code: u64| {
-                let known = u8::try_from(code).ok();
-                match known.and_then(|code| crate::registry::message_name(direction, code)) {
-                    Some(name) => name.to_string(),
-                    None => format!("the {direction} of procedure {code}"),
-                }
-            };
-            return Err(Error::form(format!(
-                "this view is of {}, and the PDU is {}: with_view takes a view of the PDU \
-                 itself, and from_view any view",
-                message(of, procedure),
-                message(direction, code.into()),
-            )));
-        }
+        shared::of_the_pdu(&TABLES, view, direction, code)?;
         NGAP_PDU::from_view(view)
     }
 }

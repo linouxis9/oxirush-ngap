@@ -490,10 +490,7 @@ macro_rules! carried {
 pub(crate) use carried;
 
 /// The functions of a type of the registry.
-pub(crate) struct Typed {
-    pub(crate) decode: fn(&[u8]) -> Result<Value, Error>,
-    pub(crate) encode: fn(&Value) -> Result<Vec<u8>, Error>,
-}
+pub(crate) use oxirush_aper::inspect::Typed;
 
 /// The functions of a type of the bindings, which is written with the lifetime `'a`
 /// when it borrows, or without one in a function.
@@ -1212,8 +1209,8 @@ impl NGAPPDU<'_> {
     /// [`protocol_ies`](Self::protocol_ies) reads them whatever the message is. It has
     /// no tree, which names its message.
     ///
-    /// A view takes up to 125 octets of memory for each octet of the NGAP_PDU, and
-    /// [`with_view`](Self::with_view) twice that: 49 MB and 94 MB for a message of 65,535
+    /// A view takes up to 162 octets of memory for each octet of the NGAP_PDU, and
+    /// [`with_view`](Self::with_view) 238: 64 MB and 94 MB for a message of 65,535
     /// IEs, 393 KB. The crate has no limit on the octets of a NGAP_PDU: the caller bounds them.
     ///
     /// ```

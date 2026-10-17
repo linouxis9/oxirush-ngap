@@ -78,8 +78,8 @@ assert_eq!(octets, "002a4015000003000a0002002a005500020007000f40020540");
 ```
 
 ```json
-{"ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":7},{"Cause":{"radioNetwork":"user-inactivity"}}],"message":"UEContextReleaseRequest"}
-{"ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":7},{"Cause":{"radioNetwork":"radio-connection-with-ue-lost"}}],"message":"UEContextReleaseRequest"}
+{"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":7},{"Cause":{"radioNetwork":"user-inactivity"}}]}
+{"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":7},{"Cause":{"radioNetwork":"radio-connection-with-ue-lost"}}]}
 ```
 
 [`oxirush-s1ap`](https://crates.io/crates/oxirush-s1ap) is the same crate for S1AP, TS 36.413,
@@ -111,7 +111,11 @@ oxirush-ngap = "0.5"
 |---------|------|---------|
 | `inspect` | A PDU as a `serde_json::Value`: its tree, in which a message is shown and written as its name and its IEs, its view and the paths of its values | `serde_json` |
 
-No feature is on by default. The examples of this page also use the `hex`
+No feature is on by default. With `inspect`, the members of a view and of a
+tree are in the order of the specification, through
+`serde_json/preserve_order`, which the feature turns on for the whole build:
+cargo unifies features, so every `serde_json::Map` of a program that has it
+keeps the order of insertion. The examples of this page also use the `hex`
 crate, and `serde_json` for JSON. The values of the bindings are native
 numbers, arrays and the types of `oxirush-aper`: `Octets`, `Bits` and
 `BitString`. The crate has them at its root, and the runtime as
@@ -252,16 +256,16 @@ most IEs that a message has and the most memory for an octet:
 | `decode`, `decode_borrowed` | 1.3 octets; none for `decode_borrowed` of a message of less than 16384 octets | 0.03 ms |
 | `protocol_ies`, `decode_value` | 9 | 0.4 ms |
 | `check` | 22 | 3.9 ms |
-| `to_view`, `to_tree`, `from_tree` | 125 | 88 to 117 ms, 49 MB |
-| `from_view`, `with_view` | 240 | 154 to 156 ms, 94 MB |
-| `inspect::paths` | 52 | 72 ms |
-| `inspect::set`, `remove`, `insert`, `open` | None for the view, which is edited in its place: a copy of each entry of a list that the path goes into | 0.01 ms |
+| `to_view`, `to_tree`, `from_tree` | 162 | 133 to 200 ms, 64 MB |
+| `from_view`, `with_view` | 238 | 179 to 213 ms, 94 MB |
+| `inspect::paths` | 78 | 55 ms |
+| `inspect::set`, `remove`, `insert`, `open` | None for the view, which is edited in its place | 0.02 ms |
 
 A typed value takes what its type holds, which is more than its octets: the longest
 list of connections of an NG RESET, 65,536 items in 32 KB, is 4.7 MB as its type.
 
 A message that a network sends costs less for an octet: `to_view` of a paging
-of 140 octets takes 27 KB, and of a handover of 4 KB, 40 KB. `cargo bench
+of 140 octets takes 20 KB, and of a handover of 4 KB, 38 KB. `cargo bench
 --bench scale`, in `benches/`, measures the table, and `--bench allocations`
 the memory of each call on the messages of the fixtures.
 
@@ -819,8 +823,8 @@ println!("{}", view["message"]["protocolIEs"][2]);
 ```
 
 ```json
-{"ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":7},{"Cause":{"radioNetwork":"user-inactivity"}}],"message":"UEContextReleaseRequest"}
-{"_ie_name":"Cause","_original_id":15,"_raw_value":"0500","criticality":"ignore","id":15,"value":{"radioNetwork":"user-inactivity"}}
+{"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":7},{"Cause":{"radioNetwork":"user-inactivity"}}]}
+{"id":15,"criticality":"ignore","value":{"radioNetwork":"user-inactivity"},"_raw_value":"0500","_original_id":15,"_ie_name":"Cause"}
 ```
 
 The JSON of this page is what the Rust above it prints, and the recipes
@@ -859,18 +863,18 @@ for (path, value) in inspect::paths(&view) {
 ```
 
 ```text
-/criticality = "ignore"
-/direction = "InitiatingMessage"
-/ngap/AMF-UE-NGAP-ID/criticality = "reject"
-/ngap/AMF-UE-NGAP-ID/id = 10
-/ngap/AMF-UE-NGAP-ID/value = 42
-/ngap/RAN-UE-NGAP-ID/criticality = "reject"
-/ngap/RAN-UE-NGAP-ID/id = 85
-/ngap/RAN-UE-NGAP-ID/value = 7
-/ngap/Cause/criticality = "ignore"
-/ngap/Cause/id = 15
-/ngap/Cause/value/radioNetwork = "user-inactivity"
 /procedure_code = 42
+/direction = "InitiatingMessage"
+/criticality = "ignore"
+/ngap/AMF-UE-NGAP-ID/id = 10
+/ngap/AMF-UE-NGAP-ID/criticality = "reject"
+/ngap/AMF-UE-NGAP-ID/value = 42
+/ngap/RAN-UE-NGAP-ID/id = 85
+/ngap/RAN-UE-NGAP-ID/criticality = "reject"
+/ngap/RAN-UE-NGAP-ID/value = 7
+/ngap/Cause/id = 15
+/ngap/Cause/criticality = "ignore"
+/ngap/Cause/value/radioNetwork = "user-inactivity"
 ```
 
 ### Change a value
@@ -900,8 +904,8 @@ println!("{}", wrong.unwrap_err());
 ```
 
 ```text
-{"ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":9},{"Cause":{"nas":"normal-release"}}],"message":"UEContextReleaseRequest"}
-"radioNetwrok" is not a member of Cause, which has radioNetwork, transport, nas, protocol, misc, choice-Extensions, at /ngap/Cause/radioNetwrok; an IE itself has id, criticality, value, octets
+{"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":9},{"Cause":{"nas":"normal-release"}}]}
+"radioNetwrok" is not a member of Cause, which has radioNetwork, transport, nas, protocol, misc, choice-Extensions; an IE itself has id, criticality, value, octets, at /ngap/Cause/radioNetwrok
 ```
 
 ### Add or remove an IE
@@ -992,8 +996,8 @@ println!("{}", edited.to_tree().unwrap());
 
 ```text
 002a4010000002000a0002002afde80003c0ffee
-{"_decode_error":"NGAP IE 65000 is unknown","_original_id":65000,"_raw_value":"C0FFEE","criticality":"reject","id":65000,"value":"C0FFEE"}
-{"ies":[{"AMF-UE-NGAP-ID":255},{"65000":{"octets":"C0FFEE"},"criticality":"reject"}],"message":"UEContextReleaseRequest"}
+{"id":65000,"criticality":"reject","value":"C0FFEE","_decode_error":"NGAP IE 65000 is unknown","_raw_value":"C0FFEE","_original_id":65000}
+{"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":255},{"65000":{"octets":"C0FFEE"},"criticality":"reject"}]}
 ```
 
 ### A repeated IE
@@ -1072,7 +1076,7 @@ println!("{}", edited.to_tree().unwrap());
 ```
 
 ```json
-{"ies":[{"AllowedNSSAI":[{"s-NSSAI":{"sST":2}},{"s-NSSAI":{"sST":3}}]}],"message":"InitialContextSetupRequest"}
+{"message":"InitialContextSetupRequest","ies":[{"AllowedNSSAI":[{"s-NSSAI":{"sST":2}},{"s-NSSAI":{"sST":3}}]}]}
 ```
 
 ### A transfer and its members
@@ -1123,8 +1127,8 @@ println!("{}", edited.to_tree().unwrap()["ies"][2]);
 ```
 
 ```json
-{"_raw_transfer":"0000010086000100","decoded":{"protocolIEs":[{"_ie_name":"PDUSessionType","_original_id":134,"_raw_value":"00","criticality":"reject","id":134,"value":"ipv4"}]}}
-{"PDUSessionResourceSetupListSUReq":[{"pDUSessionID":5,"pDUSessionResourceSetupRequestTransfer":{"protocolIEs":[{"PDUSessionType":"ipv6","criticality":"reject"}]},"s-NSSAI":{"sST":1}}]}
+{"_raw_transfer":"0000010086000100","decoded":{"protocolIEs":[{"id":134,"criticality":"reject","value":"ipv4","_raw_value":"00","_original_id":134,"_ie_name":"PDUSessionType"}]}}
+{"PDUSessionResourceSetupListSUReq":[{"pDUSessionID":5,"s-NSSAI":{"sST":1},"pDUSessionResourceSetupRequestTransfer":{"protocolIEs":[{"PDUSessionType":"ipv6","criticality":"reject"}]}}]}
 ```
 
 ### The names of an ENUMERATED
@@ -1165,8 +1169,8 @@ for wrong in ["/ngap/Cause/radioNetwrok", "/ngap/RAN-UE-NGAP-ID/valeu", "/ngap/G
 ```
 
 ```text
-"radioNetwrok" is not a member of Cause, which has radioNetwork, transport, nas, protocol, misc, choice-Extensions, at /ngap/Cause/radioNetwrok; an IE itself has id, criticality, value, octets
-"valeu" is not a member of this value, which has none, at /ngap/RAN-UE-NGAP-ID/valeu; an IE itself has id, criticality, value, octets
+"radioNetwrok" is not a member of Cause, which has radioNetwork, transport, nas, protocol, misc, choice-Extensions; an IE itself has id, criticality, value, octets, at /ngap/Cause/radioNetwrok
+"valeu" is not a member of this value, which has none; an IE itself has id, criticality, value, octets, at /ngap/RAN-UE-NGAP-ID/valeu
 "GUAMI" is not an IE of UEContextReleaseRequest, which has AMF-UE-NGAP-ID, RAN-UE-NGAP-ID, PDUSessionResourceListCxtRelReq, Cause, GW-Context-Release-Indication, at /ngap/GUAMI
 ```
 
@@ -1240,7 +1244,7 @@ println!("{}", edited.to_tree().unwrap()["ies"][2]);
 
 ```text
 {"SourceToTarget-TransparentContainer":"000201020002F8390000012340080100"}
-{"rRCContainer":"0102","targetCell-ID":{"nR-CGI":{"nRCellIdentity":4660,"pLMNIdentity":"208-93"}},"uEHistoryInformation":[{"lastVisitedCellInformation":{"eUTRANCell":"00"}}]}
+{"rRCContainer":"0102","targetCell-ID":{"nR-CGI":{"pLMNIdentity":"208-93","nRCellIdentity":4660}},"uEHistoryInformation":[{"lastVisitedCellInformation":{"eUTRANCell":"00"}}]}
 {"SourceToTarget-TransparentContainer":"000201020002F8390000000070080100"}
 ```
 

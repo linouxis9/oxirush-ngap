@@ -777,7 +777,7 @@ fn the_value_of_an_ie_and_of_a_transfer_may_be_left_out_of_a_path() {
         ] {
             assert!(error.contains(value), "{path}: {error}");
             assert_eq!(
-                own.is_some_and(|own| error.ends_with(own)),
+                own.is_some_and(|own| error.ends_with(&format!("{own}, at {path}"))),
                 own.is_some(),
                 "{error}"
             );
@@ -937,7 +937,10 @@ fn the_container_of_a_handover_is_written_and_selected_by_the_type_that_it_carri
     ] {
         let error = inspect::check_path("HandoverRequired", &path).unwrap_err();
         let text = error.to_string();
-        assert!(text.contains(&format!("which has {name}, at")), "{error}");
+        assert!(
+            text.contains(&format!("which has {name}; an IE itself")),
+            "{error}"
+        );
         assert_eq!(inspect::select(&view, &path), Err(error.clone()), "{path}");
         assert_eq!(inspect::open(&mut view, &path), Err(error), "{path}");
     }
@@ -1310,21 +1313,23 @@ fn the_ies_of_a_message_have_paths_by_their_names() {
     let printed: Vec<_> = (paths.iter())
         .map(|(path, value)| format!("{path} = {value}"))
         .collect();
+    // The members in the order in which the view has them, which is that of the
+    // specification.
     assert_eq!(
         printed,
         [
-            "/criticality = \"ignore\"",
-            "/direction = \"InitiatingMessage\"",
-            "/ngap/AMF-UE-NGAP-ID/criticality = \"reject\"",
-            "/ngap/AMF-UE-NGAP-ID/id = 10",
-            "/ngap/AMF-UE-NGAP-ID/value = 1",
-            "/ngap/RAN-UE-NGAP-ID/criticality = \"reject\"",
-            "/ngap/RAN-UE-NGAP-ID/id = 85",
-            "/ngap/RAN-UE-NGAP-ID/value = 7",
-            "/ngap/Cause/criticality = \"ignore\"",
-            "/ngap/Cause/id = 15",
-            "/ngap/Cause/value/radioNetwork = \"user-inactivity\"",
             "/procedure_code = 42",
+            "/direction = \"InitiatingMessage\"",
+            "/criticality = \"ignore\"",
+            "/ngap/AMF-UE-NGAP-ID/id = 10",
+            "/ngap/AMF-UE-NGAP-ID/criticality = \"reject\"",
+            "/ngap/AMF-UE-NGAP-ID/value = 1",
+            "/ngap/RAN-UE-NGAP-ID/id = 85",
+            "/ngap/RAN-UE-NGAP-ID/criticality = \"reject\"",
+            "/ngap/RAN-UE-NGAP-ID/value = 7",
+            "/ngap/Cause/id = 15",
+            "/ngap/Cause/criticality = \"ignore\"",
+            "/ngap/Cause/value/radioNetwork = \"user-inactivity\"",
         ]
     );
     // A name is taken in any case, and an IE also by its identifier or its position.
@@ -1566,8 +1571,8 @@ fn a_path_that_names_nothing_is_refused_and_changes_nothing() {
     }
     for (path, reason) in [
         ("/ngap/NoSuchIE/value", "is not an IE of NGAP"),
-        ("/ngap/GUAMI/value", "an edit changes what is there"),
-        ("/ngap/7/value", "an edit changes what is there"),
+        ("/ngap/GUAMI/value", "the path selects nothing"),
+        ("/ngap/7/value", "the path selects nothing"),
     ] {
         let error = inspect::set(&mut view, path, json!(1))
             .unwrap_err()
@@ -1685,7 +1690,7 @@ fn null_takes_an_optional_member_out_and_a_transfer_has_its_octets() {
     let error = inspect::set(&mut edited, &sd, Value::Null)
         .unwrap_err()
         .to_string();
-    assert!(error.contains("an edit changes what is there"), "{error}");
+    assert!(error.contains("the path selects nothing"), "{error}");
     // The octets of a transfer are selected and set as those of an IE are.
     let octets = format!("{transfer}/octets");
     let received = inspect::select(&view, &octets).unwrap()[0].clone();
@@ -1736,15 +1741,19 @@ fn what_is_nested_deeper_than_the_inspection_goes_keeps_its_octets() {
     .unwrap();
     let pdu = NGAP_PDU::decode(&pdu.encode().unwrap()).unwrap();
     let view = pdu.to_view().unwrap();
+    // A path has 64 segments at most: the deepest value is listed whole, at a path
+    // that selects it, and holds why the IE at the bottom was not decoded.
     let paths = inspect::paths(&view);
-    let (deepest, why) = (paths.iter())
-        .find(|(path, _)| path.ends_with("/_decode_error"))
-        .expect("an IE that was not decoded");
-    assert!(why.as_str().unwrap().contains("nesting exceeds"), "{why}");
+    let (deepest, value) = (paths.iter())
+        .max_by_key(|(path, _)| path.matches('/').count())
+        .unwrap();
+    assert_eq!(deepest.matches('/').count(), 64, "{deepest}");
     assert!(
         deepest.matches("choice-Extensions").count() > 20,
         "{deepest}"
     );
+    assert_eq!(inspect::select(&view, deepest), Ok(vec![value]));
+    assert!(value.to_string().contains("nesting exceeds"), "{value}");
     // The other IEs are read, and the PDU is sent as it came.
     let ran = inspect::select(&view, "/ngap/RAN-UE-NGAP-ID/value").unwrap();
     assert_eq!(ran, [&serde_json::json!(7)]);
@@ -2264,14 +2273,14 @@ fn a_path_is_checked_against_a_message_without_a_view() {
             "UEContextReleaseRequest",
             "/ngap/Cause/misspelled",
             "is not a member of Cause, which has radioNetwork, transport, nas, protocol, misc, \
-             choice-Extensions, at /ngap/Cause/misspelled; an IE itself has id, criticality, \
-             value, octets",
+             choice-Extensions; an IE itself has id, criticality, value, octets, at \
+             /ngap/Cause/misspelled",
         ),
         (
             "UEContextReleaseRequest",
             "/ngap/RAN-UE-NGAP-ID/valeu",
-            "is not a member of this value, which has none, at /ngap/RAN-UE-NGAP-ID/valeu; an \
-             IE itself has id, criticality, value, octets",
+            "is not a member of this value, which has none; an IE itself has id, criticality, \
+             value, octets, at /ngap/RAN-UE-NGAP-ID/valeu",
         ),
         (
             "UEContextReleaseRequest",

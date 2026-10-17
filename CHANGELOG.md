@@ -395,6 +395,18 @@ what each type became.
 
 ### Changed
 
+- With the `inspect` feature, the paths of a view are those of
+  `oxirush_aper::inspect`, which oxirush-s1ap shares, on the trees of
+  `oxirush_utils::tree`. The members of a view, of a tree and of `paths` are
+  in the order in which the crate writes them, which is that of the
+  specification, whatever else a build enables: the feature turns on
+  `serde_json/preserve_order`, and as cargo unifies features every
+  `serde_json::Map` of a program that has it keeps the order in which its
+  members were written. An error of a path says the place last, `, at
+  /ngap/...`; the empty path is the view itself, as the empty JSON pointer
+  is the document; `paths` lists down to 64 levels, the most segments that a
+  path has; and an edit is done in the place of the view, at each place that
+  its path selects or at none, without a copy of the view.
 - A `SEQUENCE` is a struct without `#[non_exhaustive]`, which a literal
   builds: a member that a later version adds changes its `new` too, so the
   attribute kept no caller from breaking. An extensible `CHOICE` and

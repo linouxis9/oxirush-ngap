@@ -568,7 +568,7 @@ mod inspect_errors {
         assert_eq!(error.kind(), ErrorKind::UnknownIe);
         assert_eq!(
             error.to_string(),
-            "\"NoSuchIe\" is not an IE of NGAP at /ngap/NoSuchIe/value"
+            "\"NoSuchIe\" is not an IE of NGAP, at /ngap/NoSuchIe/value"
         );
         assert_eq!(
             kind(written(json!([{"NoSuchIe": 1}]))),
@@ -599,7 +599,6 @@ mod inspect_errors {
         // `@id=` before what is no identifier of an IE.
         for path in [
             "ngap/Cause",
-            "",
             "/ngap/Cause/~2",
             "/ngap/@id=x",
             "/ngap/@id=70000",
@@ -615,8 +614,10 @@ mod inspect_errors {
         let error = inspect::select(&view, "ngap/Cause").unwrap_err();
         assert_eq!(
             error.to_string(),
-            "\"ngap/Cause\" is no path: a path starts with \"/\", as /ngap/0"
+            "\"ngap/Cause\" is no path: a path starts with \"/\", at ngap/Cause"
         );
+        // The empty path is the view itself, as that of a JSON pointer is the document.
+        assert_eq!(inspect::select(&view, ""), Ok(vec![&view]));
     }
 
     #[test]
@@ -718,7 +719,7 @@ mod inspect_errors {
         assert_eq!(error.kind(), ErrorKind::UndecodableIe);
         assert_eq!(
             error.to_string(),
-            "the IE did not decode at /ngap/@id=65000/value/member"
+            "the IE did not decode, at /ngap/@id=65000/value/member"
         );
     }
 

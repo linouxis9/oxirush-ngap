@@ -36,7 +36,7 @@ const SHARED: &[(&str, u64)] = &[
     ("oracle/tests/compare.rs", 0x2c48dd06c8ab8171),
     ("src/check.rs", 0xa5a9a065895a114c),
     ("src/error.rs", 0x25ef2a01e092bf28),
-    ("src/inspect_paths.rs", 0x1205807881dc5778),
+    ("src/inspect_paths.rs", 0x877b0ad114951e7b),
     ("src/message.rs", 0x1cdcc3d36746fb8d),
     ("tests/fixtures/dissect.py", 0xdda0b5e438b19794),
     ("tests/fixtures/generate.py", 0x313265374d7367d9),

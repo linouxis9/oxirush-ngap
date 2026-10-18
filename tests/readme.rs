@@ -53,57 +53,40 @@ const BLOCKS: &[(fn(), &str)] = &[
     (block_1, r#"UEContextReleaseRequest
 AMF=Some(42) RAN=Some(7) cause=Some(radioNetwork(user_inactivity))
 "#),
-    (block_2, r#"{"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":7},{"Cause":{"radioNetwork":"user-inactivity"}}]}
-{"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":7},{"Cause":{"radioNetwork":"radio-connection-with-ue-lost"}}]}
+    (block_2, r#"NG SETUP REQUEST from gnb-1: 1 tracking area
+NG SETUP RESPONSE 2015002b000004000100070200616d662d3100600008000002f83901004000564001ff005000080002f83900000008
+INITIAL UE MESSAGE of RAN UE 7: NAS-PDU 7e004179000d0102f8390000000000000010022e08a020000000000000
+DOWNLINK NAS TRANSPORT 0004403e000003000a000200010055000200070026002b2a7e0056000200002123553cbe9637a89d218ae64dae47bf35201055f328b43577b9b94a9ffac354dfafb3
+INITIAL CONTEXT SETUP REQUEST, 0 deviations: KgNB c18166e13cfde1dea842c708f6e0b3372b6896664df4e865c0c78bd270852005
 "#),
     (block_3, r#"a release request with 3 IEs
 Unsuccessful_NGSetup is not handled here
 "#),
-    (block_4, r#""#),
-    (block_5, r#"UE 7: a NAS-PDU of 3 octets
-"#),
-    (block_6, r#"a NAS-PDU of 3 octets
-"#),
-    (block_7, r#"ignore 000f401100000200550002000700260004037e0041
+    (block_4, r#"ignore 000f401100000200550002000700260004037e0041
 true
 TimeToWait is no IE of the object set of InitialUEMessage, which assigns it no criticality: write its criticality
 "#),
-    (block_8, r#""#),
-    (block_9, r#"AMF=42 RAN=7
+    (block_5, r#""#),
+    (block_6, r#"AMF=42 RAN=7
 radioNetwork(user_inactivity)
 "#),
-    (block_10, r#"Some(radioNetwork(user_inactivity))
-None
-"#),
-    (block_11, r#""#),
-    (block_12, r#"15 ignore 88
-NGSetup 4015000d000002000f400188006b400120
-"#),
-    (block_13, r#"ipv4
+    (block_7, r#"ipv4
 0000010086000110
 nR_CGI(NRCGI { plmn_identity: PLMNIdentity(208-93), nr_cell_identity: NRCellIdentity(0x1234/36), ie_extensions: None })
 "#),
-    (block_14, r#"the criticality of the PDU is reject, and that of its procedure is ignore
+    (block_8, r#"the criticality of the PDU is reject, and that of its procedure is ignore
 AMF-UE-NGAP-ID (IE 10), at position 1, comes after RAN-UE-NGAP-ID (IE 85), which the object set of the message has after it
 the criticality of AMF-UE-NGAP-ID (IE 10), at position 1, is ignore, and the message assigns it reject
 TimeToWait (IE 107), at position 2, is not an IE of the message
 RAN-UE-NGAP-ID (IE 85), at position 3, is in the message already, at position 0
 Cause (IE 15) is mandatory, and the message does not have it
 "#),
-    (block_15, r#"GlobalRANNodeID (IE 27) is mandatory, and the message does not have it
+    (block_9, r#"GlobalRANNodeID (IE 27) is mandatory, and the message does not have it
 SupportedTAList (IE 102) is mandatory, and the message does not have it
 40150015000002000f40016200134009180100001b40006640
 "#),
-    (block_16, r#""20" is not an MCC: it has three digits, 0 to 9
-the AMF Set ID 1024 does not fit in 10 bits
-"#),
-    (block_17, r#"the message of this PDU is UEContextReleaseRequest, not NGSetupRequest: kind() says which message a PDU holds
-these octets do not decode as NGAP-PDU: the octets end before the value does, in its field `value`
-"#),
-    (block_18, r#"{"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":7},{"Cause":{"radioNetwork":"user-inactivity"}}]}
-{"id":15,"criticality":"ignore","value":{"radioNetwork":"user-inactivity"},"_raw_value":"0500","_original_id":15,"_ie_name":"Cause"}
-"#),
-    (block_19, r#"/procedure_code = 42
+    (block_10, r#"{"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":7},{"Cause":{"radioNetwork":"user-inactivity"}}]}
+/procedure_code = 42
 /direction = "InitiatingMessage"
 /criticality = "ignore"
 /ngap/AMF-UE-NGAP-ID/id = 10
@@ -115,41 +98,18 @@ these octets do not decode as NGAP-PDU: the octets end before the value does, in
 /ngap/Cause/id = 15
 /ngap/Cause/criticality = "ignore"
 /ngap/Cause/value/radioNetwork = "user-inactivity"
-"#),
-    (block_20, r#"{"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":9},{"Cause":{"nas":"normal-release"}}]}
+{"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":9},{"Cause":{"nas":"normal-release"}}]}
 "radioNetwrok" is not a member of Cause, which has radioNetwork, transport, nas, protocol, misc, choice-Extensions; an IE itself has id, criticality, value, octets, at /ngap/Cause/radioNetwrok
 "#),
-    (block_21, r#"[{"RAN-UE-NGAP-ID":7},{"60000":{"octets":"c0ffee"},"criticality":"ignore"},{"Cause":{"radioNetwork":"user-inactivity"}},{"RANNodeName":"gnb-1","criticality":"ignore"}]
-"#),
-    (block_22, r#"002a4020000004000a0002002a005500020007000f40020500005240070200676e622d31
+    (block_11, r#"002a4020000004000a0002002a005500020007000f40020500005240070200676e622d31
 "InitiatingMessage" 42 "ignore"
 ["reject","reject","ignore","ignore"]
 "#),
-    (block_23, r#"002a4010000002000a0002002afde80003c0ffee
+    (block_12, r#"002a4010000002000a0002002afde80003c0ffee
 {"id":65000,"criticality":"reject","value":"c0ffee","_decode_error":"NGAP IE 65000 is unknown","_raw_value":"c0ffee","_original_id":65000}
 {"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":255},{"65000":{"octets":"c0ffee"},"criticality":"reject"}]}
 "#),
-    (block_24, r#"this IE is AMF-UE-NGAP-ID, not RAN-UE-NGAP-ID: "RAN-UE-NGAP-ID" is not a member of this value, which has none, at /ngap/2/RAN-UE-NGAP-ID/value
-/ngap/0/value = 1
-/ngap/RAN-UE-NGAP-ID/value = 7
-/ngap/2/value = 3
-"#),
-    (block_25, r#"{"message":"InitialContextSetupRequest","ies":[{"AllowedNSSAI":[{"s-NSSAI":{"sST":2}},{"s-NSSAI":{"sST":3}}]}]}
-"#),
-    (block_26, r#"{"_raw_transfer":"0000010086000100","decoded":{"protocolIEs":[{"id":134,"criticality":"reject","value":"ipv4","_raw_value":"00","_original_id":134,"_ie_name":"PDUSessionType"}]}}
-{"PDUSessionResourceSetupListSUReq":[{"pDUSessionID":5,"s-NSSAI":{"sST":1},"pDUSessionResourceSetupRequestTransfer":{"protocolIEs":[{"PDUSessionType":"ipv6","criticality":"reject"}]}}]}
-"#),
-    (block_27, r#"["normal-release", "authentication-failure", "deregister", "unspecified", "uE-not-in-PLMN-serving-area", "mobile-IAB-not-authorized", "iAB-not-authorized", "no-aiot-NAS-response"]
-"#),
-    (block_28, r#""radioNetwrok" is not a member of Cause, which has radioNetwork, transport, nas, protocol, misc, choice-Extensions; an IE itself has id, criticality, value, octets, at /ngap/Cause/radioNetwrok
-"valeu" is not a member of this value, which has none; an IE itself has id, criticality, value, octets, at /ngap/RAN-UE-NGAP-ID/valeu
-"GUAMI" is not an IE of UEContextReleaseRequest, which has AMF-UE-NGAP-ID, RAN-UE-NGAP-ID, PDUSessionResourceListCxtRelReq, Cause, GW-Context-Release-Indication, at /ngap/GUAMI
-"#),
-    (block_29, r#"{"SourceToTarget-TransparentContainer":"000201020002f8390000012340080100"}
-{"rRCContainer":"0102","targetCell-ID":{"nR-CGI":{"pLMNIdentity":"208-93","nRCellIdentity":4660}},"uEHistoryInformation":[{"lastVisitedCellInformation":{"eUTRANCell":"00"}}]}
-{"SourceToTarget-TransparentContainer":"000201020002f8390000000070080100"}
-"#),
-    (block_30, r#"{"sST":1}
+    (block_13, r#"{"sST":1}
 "#),
 ];
 
@@ -197,24 +157,95 @@ fn block_1() {
 /// The Rust block 2 of README.md.
 #[rustfmt::skip]
 fn block_2() {
-    use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-    use oxirush_ngap::tree;
+    use oxirush_ngap::helpers::*;
+    use oxirush_ngap::{build_ngap, extract_ngap_ies, ie, ngap::*};
 
-    // The same message as a tree: its name and its IEs by name
-    let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-    let pdu = NGAP_PDU::decode(&bytes).unwrap();
-    println!("{}", pdu.to_tree());
+    fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let network = plmn("208", "93")?;
+        let slices = || SliceSupportList(vec![SliceSupportItem::new(s_nssai(1, None), None)]);
 
-    // Its view is edited at a path, and is a PDU again
-    let mut view = pdu.to_view().unwrap();
-    let lost = tree!("radio-connection-with-ue-lost");
-    inspect::set(&mut view, "/ngap/Cause/radioNetwork", lost).unwrap();
-    let edited = pdu.with_view(&view).unwrap();
-    println!("{}", edited.to_tree());
+        // The gNB: NG SETUP REQUEST, its identity, its name, and the slices of
+        // the tracking area that it serves
+        let gnb = GlobalRANNodeID::globalGNB_ID(global_gnb_id(network, 0x123456, 24)?);
+        let plmns = BroadcastPLMNList(vec![BroadcastPLMNItem::new(network, slices(), None)]);
+        let area = SupportedTAItem::new(TAC([0, 0, 1]), plmns, None);
+        let request = build_ngap!(InitiatingMessage, NGSetup, NGSetupRequest,
+            GlobalRANNodeID(gnb),
+            RANNodeName("gnb-1"),
+            SupportedTAList(SupportedTAList(vec![area])),
+            DefaultPagingDRX(PagingDRX::v128),
+        )?;
 
-    // Its octets are those that the typed example built
-    let octets = hex::encode(edited.encode().unwrap());
-    assert_eq!(octets, "002a4015000003000a0002002a005500020007000f40020540");
+        // The AMF reads it, and answers with its name, its GUAMI and its slices
+        let received = NGAP_PDU::decode(&request.encode()?)?;
+        extract_ngap_ies!(received, NGSetupRequest,
+            opt name: String = RANNodeName(name) => name.0.into_owned(),
+            req areas: SupportedTAList = SupportedTAList(areas) => areas,
+        );
+        println!("NG SETUP REQUEST from {}: {} tracking area", name.unwrap_or_default(), areas.0.len());
+        let response = build_ngap!(SuccessfulOutcome, NGSetup, NGSetupResponse,
+            AMFName("amf-1"),
+            ServedGUAMIList(ServedGUAMIList(vec![ServedGUAMIItem::new(guami(network, 1, 1, 0)?, None, None)])),
+            RelativeAMFCapacity(RelativeAMFCapacity(255)),
+            PLMNSupportList(PLMNSupportList(vec![PLMNSupportItem::new(network, slices(), None)])),
+        )?;
+        println!("NG SETUP RESPONSE {}", hex::encode(response.encode()?));
+
+        // The gNB: INITIAL UE MESSAGE, with the REGISTRATION REQUEST of a UE and
+        // the cell that the UE is in
+        let cell = nr_cgi(network, 0x123456, 24, 1)?;
+        let location = UserLocationInformationNR::new(cell, tai(network, [0, 0, 1]), None, None);
+        let registration = hex::decode("7e004179000d0102f8390000000000000010022e08a020000000000000")?;
+        let initial = build_ngap!(InitiatingMessage, InitialUEMessage, InitialUEMessage,
+            RAN_UE_NGAP_ID(7u32),
+            NAS_PDU(registration),
+            UserLocationInformation(UserLocationInformation::userLocationInformationNR(location)),
+            RRCEstablishmentCause(RRCEstablishmentCause::mo_Signalling),
+        )?;
+
+        // The AMF reads the IEs that it needs where they are in the octets
+        let octets = initial.encode()?;
+        let received = NGAP_PDU::decode_borrowed(&octets)?;
+        extract_ngap_ies!(received, InitialUEMessage,
+            req ran_id: u32 = RAN_UE_NGAP_ID(id),
+            req nas: NASPDU = NAS_PDU(nas) => nas,
+        );
+        println!("INITIAL UE MESSAGE of RAN UE {ran_id}: NAS-PDU {}", hex::encode(&nas.0));
+
+        // It answers the UE, under the AMF UE NGAP ID that it gives it: here an
+        // AUTHENTICATION REQUEST
+        let authentication = hex::decode(
+            "7e0056000200002123553cbe9637a89d218ae64dae47bf35201055f328b43577b9b94a9ffac354dfafb3",
+        )?;
+        let downlink = build_ngap!(InitiatingMessage, DownlinkNASTransport, DownlinkNASTransport,
+            AMF_UE_NGAP_ID(1u64),
+            RAN_UE_NGAP_ID(ran_id),
+            NAS_PDU(authentication),
+        )?;
+        println!("DOWNLINK NAS TRANSPORT {}", hex::encode(downlink.encode()?));
+
+        // After the security mode, the context of the UE for the gNB: its GUAMI,
+        // its slices, its security capabilities and KgNB
+        let k_gnb = hex::decode("c18166e13cfde1dea842c708f6e0b3372b6896664df4e865c0c78bd270852005")?;
+        let setup = build_ngap!(InitiatingMessage, InitialContextSetup, InitialContextSetupRequest,
+            AMF_UE_NGAP_ID(1u64),
+            RAN_UE_NGAP_ID(ran_id),
+            GUAMI(guami(network, 1, 1, 0)?),
+            AllowedNSSAI(AllowedNSSAI(vec![AllowedNSSAIItem::new(s_nssai(1, None), None)])),
+            UESecurityCapabilities(ue_security_capabilities(0xe0, 0xe0)),
+            SecurityKey(<[u8; 32]>::try_from(k_gnb).unwrap()),
+        )?;
+
+        // The gNB checks it against its object set, and takes the key
+        let received = NGAP_PDU::decode(&setup.encode()?)?;
+        let deviations = received.check()?;
+        let key = received.ie::<ie::SecurityKey>().unwrap()?;
+        let key = hex::encode(key.0.as_octets());
+        println!("INITIAL CONTEXT SETUP REQUEST, {} deviations: KgNB {key}", deviations.len());
+        Ok(())
+    }
+
+    main().unwrap();
 }
 
 /// The Rust block 3 of README.md.
@@ -248,98 +279,6 @@ fn block_3() {
 /// The Rust block 4 of README.md.
 #[rustfmt::skip]
 fn block_4() {
-    use oxirush_ngap::ngap::{Cause, GUAMI, NRCGI, TAI};
-
-    // What holds no octets of its own is kept as it is decoded
-    struct Cell {
-        tai: TAI,
-        cgi: NRCGI,
-        guami: GUAMI,
-        last_cause: Option<Cause>,
-    }
-}
-
-/// The Rust block 5 of README.md.
-#[rustfmt::skip]
-fn block_5() {
-    use oxirush_ngap::{Error, build_ngap, extract_ngap_ies, ngap::*};
-
-    // What a node keeps of a UE after its first message
-    struct Ue {
-        ran_id: u32,
-        nas: NASPDU<'static>,
-    }
-
-    fn admit(pdu: &NGAP_PDU) -> Result<Ue, Error> {
-        // `message` borrows from `pdu`, and `nas` from `message`
-        let message: InitialUEMessage = pdu.decode_value()?;
-        extract_ngap_ies!(message, InitialUEMessage,
-            req ran_id: u32 = RAN_UE_NGAP_ID(id),
-            req nas: NASPDU = NAS_PDU(nas) => nas,
-        );
-        // Kept beyond the PDU: the octets are copied here, once
-        Ok(Ue { ran_id, nas: nas.into_owned() })
-    }
-
-    fn main() -> Result<(), Error> {
-        let pdu = build_ngap!(InitiatingMessage, InitialUEMessage, IGNORE, InitialUEMessage,
-            REJECT RAN_UE_NGAP_ID(7u32),
-            REJECT NAS_PDU(vec![0x7e, 0x00, 0x41]),
-        )?;
-        let ue = admit(&pdu)?;
-        drop(pdu);
-        println!("UE {}: a NAS-PDU of {} octets", ue.ran_id, ue.nas.0.len());
-        Ok(())
-    }
-
-    main().unwrap();
-}
-
-/// The Rust block 6 of README.md.
-#[rustfmt::skip]
-fn block_6() {
-    use oxirush_ngap::{Error, build_ngap, extract_ngap_ies, ngap::*};
-
-    async fn deliver(nas: &[u8]) {
-        println!("a NAS-PDU of {} octets", nas.len());
-    }
-
-    async fn handle(received: Vec<u8>) -> Result<(), Error> {
-        // Nothing of `received` is copied
-        let pdu = NGAP_PDU::decode_borrowed(&received)?;
-        let message: UplinkNASTransport = pdu.decode_value()?;
-        extract_ngap_ies!(message, UplinkNASTransport,
-            req nas: NASPDU = NAS_PDU(nas) => nas,
-        );
-        deliver(&nas.0).await;
-        Ok(())
-    }
-
-    fn main() -> Result<(), Error> {
-        let transport = build_ngap!(InitiatingMessage, UplinkNASTransport, IGNORE, UplinkNASTransport,
-            REJECT AMF_UE_NGAP_ID(1u64),
-            REJECT RAN_UE_NGAP_ID(7u32),
-            REJECT NAS_PDU(vec![0x7e, 0x00, 0x5d]),
-        )?;
-        let handler = handle(transport.encode()?);
-
-        // A runtime may move the handler to another thread
-        fn is_send(_: &impl Send) {}
-        is_send(&handler);
-
-        // Polled here without a runtime: this handler never waits
-        let mut handler = std::pin::pin!(handler);
-        let mut context = std::task::Context::from_waker(std::task::Waker::noop());
-        assert!(handler.as_mut().poll(&mut context).is_ready());
-        Ok(())
-    }
-
-    main().unwrap();
-}
-
-/// The Rust block 7 of README.md.
-#[rustfmt::skip]
-fn block_7() {
     use oxirush_ngap::{Message, build_ngap, ngap::*};
 
     fn main() -> Result<(), oxirush_ngap::Error> {
@@ -366,9 +305,9 @@ fn block_7() {
     main().unwrap();
 }
 
-/// The Rust block 8 of README.md.
+/// The Rust block 5 of README.md.
 #[rustfmt::skip]
-fn block_8() {
+fn block_5() {
     use oxirush_ngap::{Error, extract_ngap_ies, ngap::*};
 
     fn handle(request: &UEContextReleaseRequest) -> Result<(), Error> {
@@ -383,9 +322,9 @@ fn block_8() {
     }
 }
 
-/// The Rust block 9 of README.md.
+/// The Rust block 6 of README.md.
 #[rustfmt::skip]
-fn block_9() {
+fn block_6() {
     use oxirush_ngap::{Error, extract_ngap_ies, ie, ngap::*};
 
     fn main() -> Result<(), Error> {
@@ -409,79 +348,9 @@ fn block_9() {
     main().unwrap();
 }
 
-/// The Rust block 10 of README.md.
+/// The Rust block 7 of README.md.
 #[rustfmt::skip]
-fn block_10() {
-    use oxirush_ngap::{extract_ngap_ies, ngap::*};
-
-    // The cause of a request, when it has one that is read
-    fn cause(request: &UEContextReleaseRequest<'_>) -> Option<Cause> {
-        extract_ngap_ies!(request, UEContextReleaseRequest,
-            lax cause: Cause = Cause(value) => value,
-        );
-        cause
-    }
-
-    // A UE CONTEXT RELEASE REQUEST, then the same with an octet of its Cause spoiled
-    for octets in [
-        "002a4015000003000a0002002a005500020007000f40020500",
-        "002a4015000003000a0002002a005500020007000f4002e500",
-    ] {
-        let pdu = NGAP_PDU::decode(&hex::decode(octets).unwrap()).unwrap();
-        println!("{:?}", cause(&pdu.decode_value().unwrap()));
-    }
-}
-
-/// The Rust block 11 of README.md.
-#[rustfmt::skip]
-fn block_11() {
-    use oxirush_ngap::{build_ngap_ie, ngap::*, with_ngap_ie_mut};
-
-    // A message with one IE, which is built alone
-    let mut message = UplinkNASTransport::new(ProtocolIEContainer(vec![
-        build_ngap_ie!(UplinkNASTransport, REJECT AMF_UE_NGAP_ID(1u64)).unwrap(),
-    ]));
-
-    // The IE is decoded, changed and encoded again in its place
-    let updated = with_ngap_ie_mut!(message, UplinkNASTransport,
-        AMF_UE_NGAP_ID(id) = 42u64
-    );
-    assert_eq!(updated, Ok(true));
-}
-
-/// The Rust block 12 of README.md.
-#[rustfmt::skip]
-fn block_12() {
-    use oxirush_ngap::{build_ngap_ie, ngap::*};
-
-    fn main() -> Result<(), oxirush_ngap::Error> {
-        // An NG SETUP FAILURE, as any PDU that was received
-        let bytes = hex::decode("40150008000001000f400188").unwrap();
-        let mut pdu = NGAP_PDU::decode(&bytes)?;
-
-        // Its IEs as they were received: identifier, criticality and octets. They
-        // borrow from the PDU, and are owned here, as the PDU is changed below
-        let mut ies = pdu.protocol_ies()?.into_owned();
-        for ie in &ies.0 {
-            let octets = hex::encode(&ie.value);
-            println!("{} {:?} {octets}", ie.id.0, ie.criticality);
-        }
-
-        // One more IE, and the container is the message of the same PDU again
-        let wait = build_ngap_ie!(NGSetupFailure, IGNORE TimeToWait(TimeToWait::v5s))?;
-        ies.0.push(wait);
-        pdu.set_protocol_ies(ies)?;
-        let octets = hex::encode(pdu.encode()?);
-        println!("{} {octets}", pdu.procedure_name());
-        Ok(())
-    }
-
-    main().unwrap();
-}
-
-/// The Rust block 13 of README.md.
-#[rustfmt::skip]
-fn block_13() {
+fn block_7() {
     use oxirush_ngap::{build_ngap_ie, extract_ngap_ies, ngap::*};
 
     fn main() -> Result<(), oxirush_ngap::Error> {
@@ -513,9 +382,9 @@ fn block_13() {
     main().unwrap();
 }
 
-/// The Rust block 14 of README.md.
+/// The Rust block 8 of README.md.
 #[rustfmt::skip]
-fn block_14() {
+fn block_8() {
     use oxirush_ngap::{build_ngap, ngap::*};
 
     fn main() -> Result<(), oxirush_ngap::Error> {
@@ -543,9 +412,9 @@ fn block_14() {
     main().unwrap();
 }
 
-/// The Rust block 15 of README.md.
+/// The Rust block 9 of README.md.
 #[rustfmt::skip]
-fn block_15() {
+fn block_9() {
     use oxirush_ngap::{Deviation, build_ngap, ngap::*};
 
     fn main() -> Result<(), oxirush_ngap::Error> {
@@ -573,104 +442,22 @@ fn block_15() {
     main().unwrap();
 }
 
-/// The Rust block 16 of README.md.
+/// The Rust block 10 of README.md.
 #[rustfmt::skip]
-fn block_16() {
-    use oxirush_ngap::helpers::*;
-
-    // A PLMN from its MCC and its MNC, and what is identified within it
-    let network = plmn("208", "93").unwrap();
-    let amf = guami(network, 1, 1, 0).unwrap(); // region, set, pointer
-    let tracking_area = tai(network, [0x00, 0x00, 0x01]); // TAC
-    let cell = nr_cgi(network, 0x123456, 24, 1).unwrap(); // gNB of 24 bits, cell
-    let gnb = global_gnb_id(network, 0x123456, 24).unwrap();
-    let ng_enb = global_ng_enb_id(network, NgEnbKind::Macro, 0x12345).unwrap();
-    let lte_cell = eutra_cgi(network, NgEnbKind::Macro, 0x12345, 7).unwrap(); // ng-eNB, cell
-
-    // A bit string from octets, and the NR algorithms of a UE: the first
-    // octet of its encryption bitmap, then of its integrity bitmap
-    let algorithm_mask = oxirush_ngap::BitString::from([0xe0]);
-    let capabilities = ue_security_capabilities(0xe0, 0xe0);
-
-    // What is no MCC, and an AMF Set ID that does not fit in its 10 bits
-    println!("{}", plmn("20", "93").unwrap_err());
-    println!("{}", guami(network, 1, 1024, 0).unwrap_err());
-}
-
-/// The Rust block 17 of README.md.
-#[rustfmt::skip]
-fn block_17() {
-    use oxirush_ngap::{ErrorKind, ngap::*};
-
-    // A UE CONTEXT RELEASE REQUEST is not decoded as an NG SETUP REQUEST
-    let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-    let pdu = NGAP_PDU::decode(&bytes).unwrap();
-    let wrong = pdu.decode_value::<NGSetupRequest>().unwrap_err();
-    assert_eq!(wrong.kind(), ErrorKind::WrongMessage);
-    println!("{wrong}");
-
-    // Octets that end early
-    let short = NGAP_PDU::decode(&bytes[..10]).unwrap_err();
-    assert_eq!(short.kind(), ErrorKind::Decode);
-    println!("{short}");
-}
-
-/// The Rust block 18 of README.md.
-#[rustfmt::skip]
-fn block_18() {
-    use oxirush_ngap::ngap::NGAP_PDU;
-
-    // UE CONTEXT RELEASE REQUEST
-    let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-    let pdu = NGAP_PDU::decode(&bytes).unwrap();
-
-    // Its tree, then its third IE as the view has it
-    println!("{}", pdu.to_tree());
-    let view = pdu.to_view().unwrap();
-    println!("{}", view["message"]["protocolIEs"][2]);
-}
-
-/// The Rust block 19 of README.md.
-#[rustfmt::skip]
-fn block_19() {
+fn block_10() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use oxirush_ngap::tree;
 
+    // A UE CONTEXT RELEASE REQUEST, as a tree
     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
     let pdu = NGAP_PDU::decode(&bytes).unwrap();
-    let view = pdu.to_view().unwrap();
+    println!("{}", pdu.to_tree());
 
-    // `/ngap` is the IEs of the message, and an IE goes by its name
-    let select = |path| inspect::select(&view, path).unwrap();
-    assert_eq!(select("/ngap/RAN-UE-NGAP-ID/value"), [&tree!(7)]);
-    assert_eq!(select("/ngap/Cause/radioNetwork"), [&tree!("user-inactivity")]);
-    assert_eq!(select("/ngap/Cause/octets"), [&tree!("0500")]);
-
-    // By its position, by its name whatever its case and its separators, by its
-    // identifier, and each IE with `*`
-    assert_eq!(select("/ngap/1/value"), select("/NGAP/ran_ue_ngap_id/value"));
-    assert_eq!(select("/ngap/@id=85/value"), [&tree!(7)]);
-    assert_eq!(select("/ngap/*/criticality").len(), 3);
-
-    // Nothing where the message could have a value and has none
-    assert!(select("/ngap/Cause/nas").is_empty());
-    assert!(select("/ngap/GUAMI/pLMNIdentity").is_empty());
-
-    // Each value with the path that selects it
+    // Its view: each value with the path that selects it
+    let mut view = pdu.to_view().unwrap();
     for (path, value) in inspect::paths(&view) {
         println!("{path} = {value}");
     }
-}
-
-/// The Rust block 20 of README.md.
-#[rustfmt::skip]
-fn block_20() {
-    use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-    use oxirush_ngap::tree;
-
-    let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-    let pdu = NGAP_PDU::decode(&bytes).unwrap();
-    let mut view = pdu.to_view().unwrap();
 
     // A value, and another alternative of a CHOICE in place of the one that is there
     inspect::set(&mut view, "/ngap/RAN-UE-NGAP-ID/value", tree!(9)).unwrap();
@@ -678,44 +465,14 @@ fn block_20() {
     let edited = pdu.with_view(&view).unwrap();
     println!("{}", edited.to_tree());
 
-    // What was not edited is the octets that were received
-    let after = edited.to_view().unwrap();
-    let octets = inspect::select(&after, "/ngap/AMF-UE-NGAP-ID/octets").unwrap();
-    assert_eq!(octets, [&tree!("002a")]);
-
     // A name that the type does not have is refused, and the view is as it was
     let wrong = inspect::set(&mut view, "/ngap/Cause/radioNetwrok", tree!("unspecified"));
     println!("{}", wrong.unwrap_err());
 }
 
-/// The Rust block 21 of README.md.
+/// The Rust block 11 of README.md.
 #[rustfmt::skip]
-fn block_21() {
-    use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-    use oxirush_ngap::tree;
-
-    let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-    let pdu = NGAP_PDU::decode(&bytes).unwrap();
-    let mut view = pdu.to_view().unwrap();
-
-    // An IE is added at the end, by its name and its typed value
-    let name = tree!({"id": "RANNodeName", "criticality": "ignore", "value": "gnb-1"});
-    inspect::insert(&mut view, "/ngap/-", name).unwrap();
-
-    // Before another IE, by its number and its octets
-    let unknown = tree!({"id": 60000, "criticality": "ignore", "octets": "c0ffee"});
-    inspect::insert(&mut view, "/ngap/Cause", unknown).unwrap();
-
-    // An IE is taken out by its name
-    inspect::remove(&mut view, "/ngap/AMF-UE-NGAP-ID").unwrap();
-
-    let edited = pdu.with_view(&view).unwrap();
-    println!("{}", edited.to_tree()["ies"]);
-}
-
-/// The Rust block 22 of README.md.
-#[rustfmt::skip]
-fn block_22() {
+fn block_11() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use oxirush_ngap::tree;
 
@@ -740,9 +497,9 @@ fn block_22() {
     println!("{}", tree!(inspect::select(&view, "/ngap/*/criticality").unwrap()));
 }
 
-/// The Rust block 23 of README.md.
+/// The Rust block 12 of README.md.
 #[rustfmt::skip]
-fn block_23() {
+fn block_12() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use oxirush_ngap::tree;
 
@@ -764,194 +521,9 @@ fn block_23() {
     println!("{}", edited.to_tree());
 }
 
-/// The Rust block 24 of README.md.
+/// The Rust block 13 of README.md.
 #[rustfmt::skip]
-fn block_24() {
-    use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-    use oxirush_ngap::tree;
-
-    // A message that has one IE twice
-    let twice = tree!({"message": "UEContextReleaseRequest", "ies": [
-        {"AMF-UE-NGAP-ID": 1},
-        {"RAN-UE-NGAP-ID": 7},
-        {"AMF-UE-NGAP-ID": 2},
-    ]});
-    let pdu = NGAP_PDU::from_tree(&twice).unwrap();
-    let mut view = pdu.to_view().unwrap();
-
-    // The name selects both, in the order of the message
-    let both = inspect::select(&view, "/ngap/AMF-UE-NGAP-ID/value").unwrap();
-    assert_eq!(both, [&tree!(1), &tree!(2)]);
-
-    // Each has its position, which is how `paths` names it, and its name may follow
-    inspect::set(&mut view, "/ngap/2/AMF-UE-NGAP-ID/value", tree!(3)).unwrap();
-
-    // After a position, the name of another IE is an error that says which IE is there
-    println!("{}", inspect::select(&view, "/ngap/2/RAN-UE-NGAP-ID/value").unwrap_err());
-
-    // The values, each with its path
-    for (path, value) in inspect::paths(&view) {
-        if path.ends_with("/value") {
-            println!("{path} = {value}");
-        }
-    }
-}
-
-/// The Rust block 25 of README.md.
-#[rustfmt::skip]
-fn block_25() {
-    use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-    use oxirush_ngap::{tree, tree::Value};
-
-    // A message whose one IE is a list of two items
-    let request = tree!({"message": "InitialContextSetupRequest", "ies": [
-        {"AllowedNSSAI": [{"s-NSSAI": {"sST": 1}}, {"s-NSSAI": {"sST": 2, "sD": "000001"}}]},
-    ]});
-    let pdu = NGAP_PDU::from_tree(&request).unwrap();
-    let mut view = pdu.to_view().unwrap();
-
-    // An item by its position, and each of them after `value`
-    let select = |view, path| -> Vec<Value> {
-        let selected = inspect::select(view, path).unwrap();
-        selected.into_iter().cloned().collect()
-    };
-    assert_eq!(select(&view, "/ngap/AllowedNSSAI/1/s-NSSAI/sD"), [tree!("000001")]);
-    assert_eq!(select(&view, "/ngap/AllowedNSSAI/value/*/s-NSSAI/sST"), [tree!(1), tree!(2)]);
-
-    // An optional member that an item does not have selects nothing
-    assert!(select(&view, "/ngap/AllowedNSSAI/0/s-NSSAI/sD").is_empty());
-
-    // An item is added at the end, and one is taken out
-    inspect::insert(&mut view, "/ngap/AllowedNSSAI/-", tree!({"s-NSSAI": {"sST": 3}})).unwrap();
-    inspect::remove(&mut view, "/ngap/AllowedNSSAI/0").unwrap();
-
-    // `null` takes an optional member out
-    inspect::set(&mut view, "/ngap/AllowedNSSAI/0/s-NSSAI/sD", Value::Null).unwrap();
-
-    let edited = pdu.with_view(&view).unwrap();
-    println!("{}", edited.to_tree());
-}
-
-/// The Rust block 26 of README.md.
-#[rustfmt::skip]
-fn block_26() {
-    use oxirush_ngap::{inspect, ngap::NGAP_PDU};
-    use oxirush_ngap::tree;
-
-    // A message with a transfer, written as the message that it contains
-    let request = tree!({"message": "PDUSessionResourceSetupRequest", "ies": [
-        {"AMF-UE-NGAP-ID": 42},
-        {"RAN-UE-NGAP-ID": 7},
-        {"PDUSessionResourceSetupListSUReq": [{
-            "pDUSessionID": 5,
-            "s-NSSAI": {"sST": 1},
-            "pDUSessionResourceSetupRequestTransfer": {"protocolIEs": [
-                {"PDUSessionType": "ipv4", "criticality": "reject"},
-            ]},
-        }]},
-    ]});
-    let pdu = NGAP_PDU::from_tree(&request).unwrap();
-    let mut view = pdu.to_view().unwrap();
-
-    // In a view, the transfer is its octets beside its decoded value
-    let transfer = "/ngap/PDUSessionResourceSetupListSUReq/0/pDUSessionResourceSetupRequestTransfer";
-    println!("{}", inspect::select(&view, transfer).unwrap()[0]);
-
-    // The IEs of the message that it contains go by name in its place
-    let kind = format!("{transfer}/PDUSessionType/value");
-    assert_eq!(inspect::select(&view, &kind).unwrap(), [&tree!("ipv4")]);
-
-    // The same value by the path that says `value` and `decoded`
-    let long = "/ngap/PDUSessionResourceSetupListSUReq/value/0\
-        /pDUSessionResourceSetupRequestTransfer/decoded/PDUSessionType/value";
-    assert_eq!(inspect::select(&view, long), inspect::select(&view, &kind));
-
-    // And by the names that the tree shows, joined: the IE by its position, then its name
-    let joined = format!("{transfer}/protocolIEs/0/PDUSessionType/value");
-    assert_eq!(inspect::select(&view, &joined), inspect::select(&view, &kind));
-
-    // An edit of the message that it contains is encoded into the transfer
-    inspect::set(&mut view, &kind, tree!("ipv6")).unwrap();
-    let edited = pdu.with_view(&view).unwrap();
-    println!("{}", edited.to_tree()["ies"][2]);
-}
-
-/// The Rust block 27 of README.md.
-#[rustfmt::skip]
-fn block_27() {
-    use oxirush_ngap::inspect;
-
-    // The names that the value at a path can have, as the specification spells them
-    let names = inspect::enumerated_at("UEContextReleaseRequest", "/ngap/Cause/nas").unwrap();
-    println!("{:?}", names.unwrap());
-
-    // A value of another type has none
-    let choice = inspect::enumerated_at("UEContextReleaseRequest", "/ngap/Cause/value");
-    assert_eq!(choice, Ok(None));
-}
-
-/// The Rust block 28 of README.md.
-#[rustfmt::skip]
-fn block_28() {
-    use oxirush_ngap::inspect;
-
-    // Whether a path can select anything in a message of a name, without a view
-    let check = |path| inspect::check_path("UEContextReleaseRequest", path);
-    assert_eq!(check("/ngap/Cause/nas"), Ok(()));
-    assert_eq!(check("/ngap/*/radioNetwork"), Ok(()));
-
-    // A name that is written wrong, and an IE that the message does not have
-    for wrong in ["/ngap/Cause/radioNetwrok", "/ngap/RAN-UE-NGAP-ID/valeu", "/ngap/GUAMI"] {
-        println!("{}", check(wrong).unwrap_err());
-    }
-}
-
-/// The Rust block 29 of README.md.
-#[rustfmt::skip]
-fn block_29() {
-    use oxirush_ngap::{ErrorKind, inspect, ngap::NGAP_PDU};
-    use oxirush_ngap::tree;
-
-    // Written: the name of the type with its value, in place of the octets
-    let name = "SourceNGRANNode-ToTargetNGRANNode-TransparentContainer";
-    let required = tree!({"message": "HandoverRequired", "ies": [
-        {"AMF-UE-NGAP-ID": 42},
-        {"RAN-UE-NGAP-ID": 7},
-        {"SourceToTarget-TransparentContainer": {name: {
-            "rRCContainer": "0102",
-            "targetCell-ID": {"nR-CGI": {"pLMNIdentity": "208-93", "nRCellIdentity": 4660}},
-            "uEHistoryInformation": [{"lastVisitedCellInformation": {"eUTRANCell": "00"}}],
-        }}},
-    ]});
-
-    // A tree shows the octets that the container was encoded as
-    let pdu = NGAP_PDU::from_tree(&required).unwrap();
-    println!("{}", pdu.to_tree()["ies"][2]);
-
-    // Read: a path goes through the name of the type
-    let mut view = pdu.to_view().unwrap();
-    let container = format!("/ngap/SourceToTarget-TransparentContainer/{name}");
-    let cell = format!("{container}/targetCell-ID/nR-CGI/nRCellIdentity");
-    assert_eq!(inspect::check_path("HandoverRequired", &cell), Ok(()));
-
-    // The path is an error until `open` has decoded the octets, and selects the value after that
-    assert_eq!(inspect::select(&view, &cell).unwrap_err().kind(), ErrorKind::NotOpened);
-    inspect::open(&mut view, &cell).unwrap();
-    assert_eq!(inspect::select(&view, &cell).unwrap(), [&tree!(4660)]);
-
-    // What the octets carry, decoded
-    let decoded = format!("{container}/decoded");
-    println!("{}", inspect::select(&view, &decoded).unwrap()[0]);
-
-    // An edit goes into it, and what is not edited is sent as it was received
-    inspect::set(&mut view, &cell, tree!(7)).unwrap();
-    let edited = pdu.with_view(&view).unwrap();
-    println!("{}", edited.to_tree()["ies"][2]);
-}
-
-/// The Rust block 30 of README.md.
-#[rustfmt::skip]
-fn block_30() {
+fn block_13() {
     use oxirush_ngap::ngap::{NGAP_PDU, SNSSAI, SST};
 
     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();

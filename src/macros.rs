@@ -283,6 +283,40 @@ macro_rules! __ngap_proc_code {
 /// assert_eq!(released(&pdu)?, (1, true, None));
 /// # Ok::<(), Error>(())
 /// ```
+///
+/// A `lax` field, on a message whose Cause decodes and on one whose Cause does not:
+///
+/// ```
+/// # use std::fmt::Write as _;
+/// # let mut printed = String::new();
+/// # macro_rules! println { ($($argument:tt)*) => { writeln!(printed, $($argument)*).unwrap() } }
+/// use oxirush_ngap::{extract_ngap_ies, ngap::*};
+///
+/// // The cause of a request, when it has one that is read
+/// fn cause(request: &UEContextReleaseRequest<'_>) -> Option<Cause> {
+///     extract_ngap_ies!(request, UEContextReleaseRequest,
+///         lax cause: Cause = Cause(value) => value,
+///     );
+///     cause
+/// }
+///
+/// // A UE CONTEXT RELEASE REQUEST, then the same with an octet of its Cause spoiled
+/// for octets in [
+///     "002a4015000003000a0002002a005500020007000f40020500",
+///     "002a4015000003000a0002002a005500020007000f4002e500",
+/// ] {
+///     let pdu = NGAP_PDU::decode(&hex::decode(octets).unwrap()).unwrap();
+///     println!("{:?}", cause(&pdu.decode_value().unwrap()));
+/// }
+/// # assert_eq!(printed, r##"Some(radioNetwork(user_inactivity))
+/// # None
+/// # "##);
+/// ```
+///
+/// ```text
+/// Some(radioNetwork(user_inactivity))
+/// None
+/// ```
 #[macro_export]
 macro_rules! extract_ngap_ies {
     ($($arguments:tt)*) => {
@@ -356,6 +390,20 @@ macro_rules! with_ngap_ie_mut {
 /// criticality that a call leaves out is the one that the specification assigns: that of
 /// the procedure for the PDU, and that of the object set of the message for an IE, which
 /// an IE that the set does not have has not: an error of the kind `Argument`.
+///
+/// ```
+/// use oxirush_ngap::{build_ngap, ngap::*};
+///
+/// // The direction, the procedure and the message, then each IE: the criticalities
+/// // are those of the specification, or written before what they are of
+/// let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest, UEContextReleaseRequest,
+///     AMF_UE_NGAP_ID(42u64),
+///     RAN_UE_NGAP_ID(7u32),
+///     IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
+/// )?;
+/// assert_eq!(hex::encode(pdu.encode()?), "002a4015000003000a0002002a005500020007000f40020500");
+/// # Ok::<(), oxirush_ngap::Error>(())
+/// ```
 #[macro_export]
 macro_rules! build_ngap {
     ($($arguments:tt)*) => {

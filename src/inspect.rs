@@ -88,6 +88,312 @@
 //! does not have is refused, and so is one beside the `decoded` value of a transfer.
 //! Hexadecimal is written in lower case and taken in either.
 //!
+//! # Examples
+//!
+//! The README has the main tasks of a PDU as JSON; these are the others.
+//!
+//! ## Add or remove an IE
+//!
+//! ```
+//! # use std::fmt::Write as _;
+//! # let mut printed = String::new();
+//! # macro_rules! println { ($($argument:tt)*) => { writeln!(printed, $($argument)*).unwrap() } }
+//! use oxirush_ngap::{inspect, ngap::NGAP_PDU};
+//! use oxirush_ngap::tree;
+//!
+//! let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
+//! let pdu = NGAP_PDU::decode(&bytes).unwrap();
+//! let mut view = pdu.to_view().unwrap();
+//!
+//! // An IE is added at the end, by its name and its typed value
+//! let name = tree!({"id": "RANNodeName", "criticality": "ignore", "value": "gnb-1"});
+//! inspect::insert(&mut view, "/ngap/-", name).unwrap();
+//!
+//! // Before another IE, by its number and its octets
+//! let unknown = tree!({"id": 60000, "criticality": "ignore", "octets": "c0ffee"});
+//! inspect::insert(&mut view, "/ngap/Cause", unknown).unwrap();
+//!
+//! // An IE is taken out by its name
+//! inspect::remove(&mut view, "/ngap/AMF-UE-NGAP-ID").unwrap();
+//!
+//! let edited = pdu.with_view(&view).unwrap();
+//! println!("{}", edited.to_tree()["ies"]);
+//! # assert_eq!(printed, r##"[{"RAN-UE-NGAP-ID":7},{"60000":{"octets":"c0ffee"},"criticality":"ignore"},{"Cause":{"radioNetwork":"user-inactivity"}},{"RANNodeName":"gnb-1","criticality":"ignore"}]
+//! # "##);
+//! ```
+//!
+//! ```json
+//! [{"RAN-UE-NGAP-ID":7},{"60000":{"octets":"c0ffee"},"criticality":"ignore"},{"Cause":{"radioNetwork":"user-inactivity"}},{"RANNodeName":"gnb-1","criticality":"ignore"}]
+//! ```
+//!
+//! ## A repeated IE
+//!
+//! ```
+//! # use std::fmt::Write as _;
+//! # let mut printed = String::new();
+//! # macro_rules! println { ($($argument:tt)*) => { writeln!(printed, $($argument)*).unwrap() } }
+//! use oxirush_ngap::{inspect, ngap::NGAP_PDU};
+//! use oxirush_ngap::tree;
+//!
+//! // A message that has one IE twice
+//! let twice = tree!({"message": "UEContextReleaseRequest", "ies": [
+//!     {"AMF-UE-NGAP-ID": 1},
+//!     {"RAN-UE-NGAP-ID": 7},
+//!     {"AMF-UE-NGAP-ID": 2},
+//! ]});
+//! let pdu = NGAP_PDU::from_tree(&twice).unwrap();
+//! let mut view = pdu.to_view().unwrap();
+//!
+//! // The name selects both, in the order of the message
+//! let both = inspect::select(&view, "/ngap/AMF-UE-NGAP-ID/value").unwrap();
+//! assert_eq!(both, [&tree!(1), &tree!(2)]);
+//!
+//! // Each has its position, which is how `paths` names it, and its name may follow
+//! inspect::set(&mut view, "/ngap/2/AMF-UE-NGAP-ID/value", tree!(3)).unwrap();
+//!
+//! // After a position, the name of another IE is an error that says which IE is there
+//! println!("{}", inspect::select(&view, "/ngap/2/RAN-UE-NGAP-ID/value").unwrap_err());
+//!
+//! // The values, each with its path
+//! for (path, value) in inspect::paths(&view) {
+//!     if path.ends_with("/value") {
+//!         println!("{path} = {value}");
+//!     }
+//! }
+//! # assert_eq!(printed, r##"this IE is AMF-UE-NGAP-ID, not RAN-UE-NGAP-ID: "RAN-UE-NGAP-ID" is not a member of this value, which has none, at /ngap/2/RAN-UE-NGAP-ID/value
+//! # /ngap/0/value = 1
+//! # /ngap/RAN-UE-NGAP-ID/value = 7
+//! # /ngap/2/value = 3
+//! # "##);
+//! ```
+//!
+//! ```text
+//! this IE is AMF-UE-NGAP-ID, not RAN-UE-NGAP-ID: "RAN-UE-NGAP-ID" is not a member of this value, which has none, at /ngap/2/RAN-UE-NGAP-ID/value
+//! /ngap/0/value = 1
+//! /ngap/RAN-UE-NGAP-ID/value = 7
+//! /ngap/2/value = 3
+//! ```
+//!
+//! ## An item of a list
+//!
+//! ```
+//! # use std::fmt::Write as _;
+//! # let mut printed = String::new();
+//! # macro_rules! println { ($($argument:tt)*) => { writeln!(printed, $($argument)*).unwrap() } }
+//! use oxirush_ngap::{inspect, ngap::NGAP_PDU};
+//! use oxirush_ngap::{tree, tree::Value};
+//!
+//! // A message whose one IE is a list of two items
+//! let request = tree!({"message": "InitialContextSetupRequest", "ies": [
+//!     {"AllowedNSSAI": [{"s-NSSAI": {"sST": 1}}, {"s-NSSAI": {"sST": 2, "sD": "000001"}}]},
+//! ]});
+//! let pdu = NGAP_PDU::from_tree(&request).unwrap();
+//! let mut view = pdu.to_view().unwrap();
+//!
+//! // An item by its position, and each of them after `value`
+//! let select = |view, path| -> Vec<Value> {
+//!     let selected = inspect::select(view, path).unwrap();
+//!     selected.into_iter().cloned().collect()
+//! };
+//! assert_eq!(select(&view, "/ngap/AllowedNSSAI/1/s-NSSAI/sD"), [tree!("000001")]);
+//! assert_eq!(select(&view, "/ngap/AllowedNSSAI/value/*/s-NSSAI/sST"), [tree!(1), tree!(2)]);
+//!
+//! // An optional member that an item does not have selects nothing
+//! assert!(select(&view, "/ngap/AllowedNSSAI/0/s-NSSAI/sD").is_empty());
+//!
+//! // An item is added at the end, and one is taken out
+//! inspect::insert(&mut view, "/ngap/AllowedNSSAI/-", tree!({"s-NSSAI": {"sST": 3}})).unwrap();
+//! inspect::remove(&mut view, "/ngap/AllowedNSSAI/0").unwrap();
+//!
+//! // `null` takes an optional member out
+//! inspect::set(&mut view, "/ngap/AllowedNSSAI/0/s-NSSAI/sD", Value::Null).unwrap();
+//!
+//! let edited = pdu.with_view(&view).unwrap();
+//! println!("{}", edited.to_tree());
+//! # assert_eq!(printed, r##"{"message":"InitialContextSetupRequest","ies":[{"AllowedNSSAI":[{"s-NSSAI":{"sST":2}},{"s-NSSAI":{"sST":3}}]}]}
+//! # "##);
+//! ```
+//!
+//! ```json
+//! {"message":"InitialContextSetupRequest","ies":[{"AllowedNSSAI":[{"s-NSSAI":{"sST":2}},{"s-NSSAI":{"sST":3}}]}]}
+//! ```
+//!
+//! ## A transfer and its members
+//!
+//! A view shows the decoded value of a transfer beside its octets, and a tree
+//! its decoded value alone.
+//!
+//! ```
+//! # use std::fmt::Write as _;
+//! # let mut printed = String::new();
+//! # macro_rules! println { ($($argument:tt)*) => { writeln!(printed, $($argument)*).unwrap() } }
+//! use oxirush_ngap::{inspect, ngap::NGAP_PDU};
+//! use oxirush_ngap::tree;
+//!
+//! // A message with a transfer, written as the message that it contains
+//! let request = tree!({"message": "PDUSessionResourceSetupRequest", "ies": [
+//!     {"AMF-UE-NGAP-ID": 42},
+//!     {"RAN-UE-NGAP-ID": 7},
+//!     {"PDUSessionResourceSetupListSUReq": [{
+//!         "pDUSessionID": 5,
+//!         "s-NSSAI": {"sST": 1},
+//!         "pDUSessionResourceSetupRequestTransfer": {"protocolIEs": [
+//!             {"PDUSessionType": "ipv4", "criticality": "reject"},
+//!         ]},
+//!     }]},
+//! ]});
+//! let pdu = NGAP_PDU::from_tree(&request).unwrap();
+//! let mut view = pdu.to_view().unwrap();
+//!
+//! // In a view, the transfer is its octets beside its decoded value
+//! let transfer = "/ngap/PDUSessionResourceSetupListSUReq/0/pDUSessionResourceSetupRequestTransfer";
+//! println!("{}", inspect::select(&view, transfer).unwrap()[0]);
+//!
+//! // The IEs of the message that it contains go by name in its place
+//! let kind = format!("{transfer}/PDUSessionType/value");
+//! assert_eq!(inspect::select(&view, &kind).unwrap(), [&tree!("ipv4")]);
+//!
+//! // The same value by the path that says `value` and `decoded`
+//! let long = "/ngap/PDUSessionResourceSetupListSUReq/value/0\
+//!     /pDUSessionResourceSetupRequestTransfer/decoded/PDUSessionType/value";
+//! assert_eq!(inspect::select(&view, long), inspect::select(&view, &kind));
+//!
+//! // And by the names that the tree shows, joined: the IE by its position, then its name
+//! let joined = format!("{transfer}/protocolIEs/0/PDUSessionType/value");
+//! assert_eq!(inspect::select(&view, &joined), inspect::select(&view, &kind));
+//!
+//! // An edit of the message that it contains is encoded into the transfer
+//! inspect::set(&mut view, &kind, tree!("ipv6")).unwrap();
+//! let edited = pdu.with_view(&view).unwrap();
+//! println!("{}", edited.to_tree()["ies"][2]);
+//! # assert_eq!(printed, r##"{"_raw_transfer":"0000010086000100","decoded":{"protocolIEs":[{"id":134,"criticality":"reject","value":"ipv4","_raw_value":"00","_original_id":134,"_ie_name":"PDUSessionType"}]}}
+//! # {"PDUSessionResourceSetupListSUReq":[{"pDUSessionID":5,"s-NSSAI":{"sST":1},"pDUSessionResourceSetupRequestTransfer":{"protocolIEs":[{"PDUSessionType":"ipv6","criticality":"reject"}]}}]}
+//! # "##);
+//! ```
+//!
+//! ```json
+//! {"_raw_transfer":"0000010086000100","decoded":{"protocolIEs":[{"id":134,"criticality":"reject","value":"ipv4","_raw_value":"00","_original_id":134,"_ie_name":"PDUSessionType"}]}}
+//! {"PDUSessionResourceSetupListSUReq":[{"pDUSessionID":5,"s-NSSAI":{"sST":1},"pDUSessionResourceSetupRequestTransfer":{"protocolIEs":[{"PDUSessionType":"ipv6","criticality":"reject"}]}}]}
+//! ```
+//!
+//! ## The names of an ENUMERATED
+//!
+//! ```
+//! # use std::fmt::Write as _;
+//! # let mut printed = String::new();
+//! # macro_rules! println { ($($argument:tt)*) => { writeln!(printed, $($argument)*).unwrap() } }
+//! use oxirush_ngap::inspect;
+//!
+//! // The names that the value at a path can have, as the specification spells them
+//! let names = inspect::enumerated_at("UEContextReleaseRequest", "/ngap/Cause/nas").unwrap();
+//! println!("{:?}", names.unwrap());
+//!
+//! // A value of another type has none
+//! let choice = inspect::enumerated_at("UEContextReleaseRequest", "/ngap/Cause/value");
+//! assert_eq!(choice, Ok(None));
+//! # assert_eq!(printed, r##"["normal-release", "authentication-failure", "deregister", "unspecified", "uE-not-in-PLMN-serving-area", "mobile-IAB-not-authorized", "iAB-not-authorized", "no-aiot-NAS-response"]
+//! # "##);
+//! ```
+//!
+//! ```text
+//! ["normal-release", "authentication-failure", "deregister", "unspecified", "uE-not-in-PLMN-serving-area", "mobile-IAB-not-authorized", "iAB-not-authorized", "no-aiot-NAS-response"]
+//! ```
+//!
+//! A name is read in any case and with any separators, as `"Normal Release"`
+//! above, and shown as the specification spells it.
+//!
+//! ## Check a path before use
+//!
+//! ```
+//! # use std::fmt::Write as _;
+//! # let mut printed = String::new();
+//! # macro_rules! println { ($($argument:tt)*) => { writeln!(printed, $($argument)*).unwrap() } }
+//! use oxirush_ngap::inspect;
+//!
+//! // Whether a path can select anything in a message of a name, without a view
+//! let check = |path| inspect::check_path("UEContextReleaseRequest", path);
+//! assert_eq!(check("/ngap/Cause/nas"), Ok(()));
+//! assert_eq!(check("/ngap/*/radioNetwork"), Ok(()));
+//!
+//! // A name that is written wrong, and an IE that the message does not have
+//! for wrong in ["/ngap/Cause/radioNetwrok", "/ngap/RAN-UE-NGAP-ID/valeu", "/ngap/GUAMI"] {
+//!     println!("{}", check(wrong).unwrap_err());
+//! }
+//! # assert_eq!(printed, r##""radioNetwrok" is not a member of Cause, which has radioNetwork, transport, nas, protocol, misc, choice-Extensions; an IE itself has id, criticality, value, octets, at /ngap/Cause/radioNetwrok
+//! # "valeu" is not a member of this value, which has none; an IE itself has id, criticality, value, octets, at /ngap/RAN-UE-NGAP-ID/valeu
+//! # "GUAMI" is not an IE of UEContextReleaseRequest, which has AMF-UE-NGAP-ID, RAN-UE-NGAP-ID, PDUSessionResourceListCxtRelReq, Cause, GW-Context-Release-Indication, at /ngap/GUAMI
+//! # "##);
+//! ```
+//!
+//! ```text
+//! "radioNetwrok" is not a member of Cause, which has radioNetwork, transport, nas, protocol, misc, choice-Extensions; an IE itself has id, criticality, value, octets, at /ngap/Cause/radioNetwrok
+//! "valeu" is not a member of this value, which has none; an IE itself has id, criticality, value, octets, at /ngap/RAN-UE-NGAP-ID/valeu
+//! "GUAMI" is not an IE of UEContextReleaseRequest, which has AMF-UE-NGAP-ID, RAN-UE-NGAP-ID, PDUSessionResourceListCxtRelReq, Cause, GW-Context-Release-Indication, at /ngap/GUAMI
+//! ```
+//!
+//! The functions `message_ies`, `message_ie_criticalities`, `item_criticality`
+//! and the others of this module give what the ASN.1 says of each message, which
+//! `check_path` reads.
+//!
+//! ## The container of a handover
+//!
+//! Written, read through [`open`], and edited, as
+//! [Octets that carry a type](#octets-that-carry-a-type) says:
+//!
+//! ```
+//! # use std::fmt::Write as _;
+//! # let mut printed = String::new();
+//! # macro_rules! println { ($($argument:tt)*) => { writeln!(printed, $($argument)*).unwrap() } }
+//! use oxirush_ngap::{ErrorKind, inspect, ngap::NGAP_PDU};
+//! use oxirush_ngap::tree;
+//!
+//! // Written: the name of the type with its value, in place of the octets
+//! let name = "SourceNGRANNode-ToTargetNGRANNode-TransparentContainer";
+//! let required = tree!({"message": "HandoverRequired", "ies": [
+//!     {"AMF-UE-NGAP-ID": 42},
+//!     {"RAN-UE-NGAP-ID": 7},
+//!     {"SourceToTarget-TransparentContainer": {name: {
+//!         "rRCContainer": "0102",
+//!         "targetCell-ID": {"nR-CGI": {"pLMNIdentity": "208-93", "nRCellIdentity": 4660}},
+//!         "uEHistoryInformation": [{"lastVisitedCellInformation": {"eUTRANCell": "00"}}],
+//!     }}},
+//! ]});
+//!
+//! // A tree shows the octets that the container was encoded as
+//! let pdu = NGAP_PDU::from_tree(&required).unwrap();
+//! println!("{}", pdu.to_tree()["ies"][2]);
+//!
+//! // Read: a path goes through the name of the type
+//! let mut view = pdu.to_view().unwrap();
+//! let container = format!("/ngap/SourceToTarget-TransparentContainer/{name}");
+//! let cell = format!("{container}/targetCell-ID/nR-CGI/nRCellIdentity");
+//! assert_eq!(inspect::check_path("HandoverRequired", &cell), Ok(()));
+//!
+//! // The path is an error until `open` has decoded the octets, and selects the value after that
+//! assert_eq!(inspect::select(&view, &cell).unwrap_err().kind(), ErrorKind::NotOpened);
+//! inspect::open(&mut view, &cell).unwrap();
+//! assert_eq!(inspect::select(&view, &cell).unwrap(), [&tree!(4660)]);
+//!
+//! // What the octets carry, decoded
+//! let decoded = format!("{container}/decoded");
+//! println!("{}", inspect::select(&view, &decoded).unwrap()[0]);
+//!
+//! // An edit goes into it, and what is not edited is sent as it was received
+//! inspect::set(&mut view, &cell, tree!(7)).unwrap();
+//! let edited = pdu.with_view(&view).unwrap();
+//! println!("{}", edited.to_tree()["ies"][2]);
+//! # assert_eq!(printed, r##"{"SourceToTarget-TransparentContainer":"000201020002f8390000012340080100"}
+//! # {"rRCContainer":"0102","targetCell-ID":{"nR-CGI":{"pLMNIdentity":"208-93","nRCellIdentity":4660}},"uEHistoryInformation":[{"lastVisitedCellInformation":{"eUTRANCell":"00"}}]}
+//! # {"SourceToTarget-TransparentContainer":"000201020002f8390000000070080100"}
+//! # "##);
+//! ```
+//!
+//! ```text
+//! {"SourceToTarget-TransparentContainer":"000201020002f8390000012340080100"}
+//! {"rRCContainer":"0102","targetCell-ID":{"nR-CGI":{"pLMNIdentity":"208-93","nRCellIdentity":4660}},"uEHistoryInformation":[{"lastVisitedCellInformation":{"eUTRANCell":"00"}}]}
+//! {"SourceToTarget-TransparentContainer":"000201020002f8390000000070080100"}
+//! ```
+//!
 //! # Paths
 //!
 //! [`paths`] gives each value of a view with the path that selects it, [`select`] the
@@ -259,6 +565,24 @@
 //! written as its digits where JSON has a number for it, a bit string with other octets
 //! than its length has and padding bits that are not zero are each an error, which says
 //! where the fault is by the names of the value.
+//!
+//! ## Values as they are usually written
+//!
+//! A tree, a view and a value alone show the values of some types as they are
+//! usually written, and take them so or in the form of their ASN.1 type. A string
+//! of decimal digits is never read as octets: octets whose hexadecimal has no
+//! letter are written after `0x`.
+//!
+//! | Type | Notation |
+//! |------|----------|
+//! | `PLMNIdentity` | `"208-93"`, the MCC and the MNC, or its octets: `"02f839"`, `"0x134001"`. `"310410"` is refused, as it is read as 310-410 and as the octets 0x310410 |
+//! | `TransportLayerAddress` | `"10.0.0.1"`, `"2001:db8::1"`, or the two with a comma |
+//! | `TAC`, `EPS-TAC`, `LAC`, `GTP-TEID`, `FiveG-TMSI`, `SST`, `PortNumber`, `AMFRegionID`, `AMFSetID`, `AMFPointer`, `NRCellIdentity`, `EUTRACellIdentity`, `UL-NAS-Count` | a number, also read in hexadecimal as `"0x…"`. A string of digits, as `"123456"`, is refused: it is the number 123456 and the octets 0x123456 |
+//! | `ENUMERATED` | the name of the value, read in any case |
+//! | `INTEGER` | a number, which 64 bits hold, as the bindings hold it |
+//! | a bit string whose size varies, as the identifier of a gNB | `{"value": "000004", "length": 22}`: its octets in hexadecimal, from its first bit, and its length in bits |
+//! | a bit string of another size than the one that its type gives beside an extension marker | `{"value": "c00000", "length": 24}`, where a mask of the 16 bits of its type is `"c000"` |
+//! | the other strings: an SD, keys, the NAS-PDU and the other containers | hexadecimal, written in lower case and read in either |
 //!
 //! # Errors
 //!
@@ -501,6 +825,18 @@ impl NGAPPDU<'_> {
     ///
     /// [`with_view`](Self::with_view) is this for the view of a PDU that is at hand, and
     /// refuses the view of another message.
+    ///
+    /// ```
+    /// use oxirush_ngap::ngap::NGAP_PDU;
+    ///
+    /// // A view, kept as JSON text and read back
+    /// let octets = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
+    /// let view = NGAP_PDU::decode(&octets)?.to_view()?;
+    /// let text = view.to_string();
+    /// let read: oxirush_ngap::tree::Value = text.parse().unwrap();
+    /// assert_eq!(NGAP_PDU::from_view(&read)?.encode()?, octets);
+    /// # Ok::<(), oxirush_ngap::Error>(())
+    /// ```
     pub fn from_view(view: &Value) -> Result<NGAP_PDU, Error> {
         NGAP_PDU::of_parts(shared::view_parts(&TABLES, view)?)
     }

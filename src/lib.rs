@@ -17,28 +17,103 @@
 
 //! A codec for NGAP, the NG Application Protocol of 3GPP TS 38.413, in aligned PER.
 //!
-//! ```
-//! use oxirush_ngap::{build_ngap, ngap::*};
+//! ```rust
+//! use oxirush_ngap::{build_ngap, extract_ngap_ies, ngap::*};
 //!
-//! let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-//!     IGNORE, UEContextReleaseRequest,
-//!     REJECT AMF_UE_NGAP_ID(1u64),
-//!     REJECT RAN_UE_NGAP_ID(7u32),
-//!     IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
-//! )?;
-//! let bytes = pdu.encode()?;
-//! let decoded = NGAP_PDU::decode(&bytes)?;
-//! assert_eq!(decoded.procedure_name(), "UEContextReleaseRequest");
-//! # Ok::<(), oxirush_ngap::Error>(())
+//! fn main() -> Result<(), Box<dyn std::error::Error>> {
+//!     // Decode a UE CONTEXT RELEASE REQUEST
+//!     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500")?;
+//!     let pdu = NGAP_PDU::decode(&bytes)?;
+//!     assert_eq!((pdu.procedure_code(), pdu.is_initiating()), (42, true));
+//!     println!("{}", pdu.procedure_name());
+//!     # assert_eq!(pdu.procedure_name(), "UEContextReleaseRequest");
+//!
+//!     // Read its IEs by name. An `opt` field is `None` when its IE is not there,
+//!     // and what follows `=>` is what the field keeps of the decoded value
+//!     let request: UEContextReleaseRequest = pdu.decode_value()?;
+//!     extract_ngap_ies!(request, UEContextReleaseRequest,
+//!         opt amf_id: u64 = AMF_UE_NGAP_ID(id),
+//!         opt ran_id: u32 = RAN_UE_NGAP_ID(id),
+//!         opt cause: Cause = Cause(cause) => cause,
+//!     );
+//!     println!("AMF={amf_id:?} RAN={ran_id:?} cause={cause:?}");
+//!     # assert_eq!(format!("AMF={amf_id:?} RAN={ran_id:?} cause={cause:?}"), "AMF=Some(42) RAN=Some(7) cause=Some(radioNetwork(user_inactivity))");
+//!
+//!     // Build it with another cause: the direction, the procedure, the criticality
+//!     // of the PDU and the message, then each IE with its criticality
+//!     let rebuilt = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
+//!         IGNORE, UEContextReleaseRequest,
+//!
+//!         REJECT AMF_UE_NGAP_ID(42u64),
+//!         REJECT RAN_UE_NGAP_ID(7u32),
+//!         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::radio_connection_with_ue_lost)),
+//!     )?;
+//!
+//!     // Encode it
+//!     let encoded = hex::encode(rebuilt.encode()?);
+//!     assert_eq!(encoded, "002a4015000003000a0002002a005500020007000f40020540");
+//!     Ok(())
+//! }
+//! ```
+//!
+//! ```text
+//! UEContextReleaseRequest
+//! AMF=Some(42) RAN=Some(7) cause=Some(radioNetwork(user_inactivity))
 //! ```
 //!
 //! The types of [`ngap`] are generated from the ASN.1 modules of the specification and
 //! checked in: `rasn-compiler` resolves the modules, and the generator of the crate
-//! writes each type with its codec on [`oxirush-aper`](https://github.com/linouxis9/oxirush-aper).
-//! The README has the examples, task by task.
+//! writes each type with its codec on [`oxirush-aper`](aper).
+//!
+//! # Tasks
+//!
+//! The [README](https://github.com/linouxis9/oxirush-ngap#readme) has an example of
+//! each, with what it prints.
+//!
+//! | Task | Items |
+//! |------|-------|
+//! | Answer a gNB, from NG SETUP to the INITIAL CONTEXT SETUP | [`build_ngap!`], [`extract_ngap_ies!`], [`helpers`], [`NGAP_PDU::ie`](ngap::NGAPPDU::ie) |
+//! | Decode a PDU | [`NGAP_PDU::decode`](ngap::NGAPPDU::decode), [`NGAP_PDU::decode_borrowed`](ngap::NGAPPDU::decode_borrowed), [`NGAP_PDU::kind`](ngap::NGAPPDU::kind), [`NGAP_PDU::decode_value`](ngap::NGAPPDU::decode_value) |
+//! | Build a PDU | [`build_ngap!`], [`NGAP_PDU::of_message`](ngap::NGAPPDU::of_message) |
+//! | Read the IEs of a message | [`extract_ngap_ies!`], [`ie`], [`with_ngap_ie_mut!`], [`build_ngap_ie!`] |
+//! | A transfer and a handover container, typed | [`ngap::decode_open_type`], [`ngap::encode_open_type`] |
+//! | Check a message, and answer one that is faulty | [`NGAP_PDU::check`](ngap::NGAPPDU::check), [`NGAP_PDU::check_structure`](ngap::NGAPPDU::check_structure), [`Deviation`], [`NGAP_PDU::criticality_diagnostics_for_response`](ngap::NGAPPDU::criticality_diagnostics_for_response) |
+//! | A PDU as JSON | [`NGAP_PDU::to_tree`](ngap::NGAPPDU::to_tree), [`NGAP_PDU::to_view`](ngap::NGAPPDU::to_view), [`NGAP_PDU::with_view`](ngap::NGAPPDU::with_view), [`inspect`] |
+//! | Write a message from its tree | [`NGAP_PDU::from_tree`](ngap::NGAPPDU::from_tree) |
 //!
 //! Every function and macro that can fail returns an [`Error`]: its [`ErrorKind`] is
 //! what a caller matches on, and its `Display` says what is wrong.
+//!
+//! ```
+//! # use std::fmt::Write as _;
+//! # let mut printed = String::new();
+//! # macro_rules! println { ($($argument:tt)*) => { writeln!(printed, $($argument)*).unwrap() } }
+//! use oxirush_ngap::{ErrorKind, ngap::*};
+//!
+//! // A UE CONTEXT RELEASE REQUEST is not decoded as an NG SETUP REQUEST
+//! let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
+//! let pdu = NGAP_PDU::decode(&bytes).unwrap();
+//! let wrong = pdu.decode_value::<NGSetupRequest>().unwrap_err();
+//! assert_eq!(wrong.kind(), ErrorKind::WrongMessage);
+//! println!("{wrong}");
+//!
+//! // Octets that end early
+//! let short = NGAP_PDU::decode(&bytes[..10]).unwrap_err();
+//! assert_eq!(short.kind(), ErrorKind::Decode);
+//! println!("{short}");
+//! # assert_eq!(printed, r##"the message of this PDU is UEContextReleaseRequest, not NGSetupRequest: kind() says which message a PDU holds
+//! # these octets do not decode as NGAP-PDU: the octets end before the value does, in its field `value`
+//! # "##);
+//! ```
+//!
+//! ```text
+//! the message of this PDU is UEContextReleaseRequest, not NGSetupRequest: kind() says which message a PDU holds
+//! these octets do not decode as NGAP-PDU: the octets end before the value does, in its field `value`
+//! ```
+//!
+//! Every call that can fail returns an `oxirush_ngap::Error`. Its `kind()` is
+//! what a caller matches on, and the documentation of `ErrorKind` lists the
+//! kinds; `error.ie()` names the IE of an error of the macros.
 //!
 //! The codec builds, encodes and decodes a message whatever its IEs are. `check()` of
 //! a PDU reports how it deviates from what the ASN.1 assigns its message, each as a
@@ -205,6 +280,17 @@
 //! `Decode` that says `the number does not fit in 64 bits`. The PDU still decodes:
 //! its IEs are octets until one is read, and the JSON forms of the `inspect` feature
 //! show an IE that does not decode as the octets received, and write them back.
+//!
+//! # The OxiRush family
+//!
+//! - [oxirush-utils](https://docs.rs/oxirush-utils): the 3GPP identities, and the JSON tree with its paths that the others share.
+//! - [oxirush-aper](https://docs.rs/oxirush-aper): aligned PER, the runtime of the NGAP and S1AP codecs.
+//! - [oxirush-nas](https://docs.rs/oxirush-nas): the NAS messages of 5GS and EPS.
+//! - [oxirush-security](https://docs.rs/oxirush-security): NAS security, AKA and the derivation of keys.
+//! - [oxirush-ngap](https://docs.rs/oxirush-ngap): NGAP, between a gNB and an AMF.
+//! - [oxirush-s1ap](https://docs.rs/oxirush-s1ap): S1AP, between an eNB and an MME.
+//! - [oxirush-gtp-u](https://docs.rs/oxirush-gtp-u): GTP-U tunnels, with a test UPF.
+//! - [oxirush-sctp](https://docs.rs/oxirush-sctp): SCTP sockets, which carry NGAP and S1AP.
 
 #![forbid(unsafe_code)]
 
@@ -219,6 +305,19 @@ pub mod inspect;
 #[cfg(feature = "inspect")]
 mod inspect_registry;
 pub mod macros;
+/// The types of the ASN.1 modules of TS 38.413, as the generator writes them:
+/// [`NGAP_PDU`](ngap::NGAP_PDU) and its three directions, each message, each IE and
+/// each type of a value, which decode and encode themselves in aligned PER.
+///
+/// ```
+/// use oxirush_ngap::ngap::{AMFUENGAPID, decode_open_type, encode_open_type};
+///
+/// // `AMF-UE-NGAP-ID ::= INTEGER (0..1099511627775)`, as the value of its IE holds it
+/// let octets = encode_open_type(&AMFUENGAPID(42))?;
+/// assert_eq!(octets, [0x00, 0x2a]);
+/// assert_eq!(decode_open_type::<AMFUENGAPID>(&octets)?, AMFUENGAPID(42));
+/// # Ok::<(), oxirush_ngap::Error>(())
+/// ```
 // The bindings are formatted where they are generated, by the rustfmt of the toolchain
 // that the generator runs with: a later one breaks some of their long lines otherwise.
 #[rustfmt::skip]

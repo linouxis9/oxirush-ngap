@@ -108,8 +108,8 @@ others at the revisions that it is tested with:
 oxirush-ngap = { git = "https://github.com/linouxis9/oxirush-ngap", features = ["inspect"] }
 
 [patch.crates-io]
-oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "65d0e0935f62d999e1d8b8c82bd997a433abfd09" }
-oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "eb1c453cd08dc3d0b712f53d4273595793cb9106" }
+oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "6252c750dde9ba669bcc3501dbf08ffec0638758" }
+oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "2f99edcc40baa5cf7397f94ecfc131dc1143bac5" }
 ```
 
 In a clone of the repository, cargo takes them with `--config`, as CI does:
@@ -117,9 +117,9 @@ In a clone of the repository, cargo takes them with `--config`, as CI does:
 ```bash
 cargo test --all-features \
   --config 'patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"' \
-  --config 'patch.crates-io.oxirush-aper.rev="65d0e0935f62d999e1d8b8c82bd997a433abfd09"' \
+  --config 'patch.crates-io.oxirush-aper.rev="6252c750dde9ba669bcc3501dbf08ffec0638758"' \
   --config 'patch.crates-io.oxirush-utils.git="https://github.com/linouxis9/oxirush-utils"' \
-  --config 'patch.crates-io.oxirush-utils.rev="eb1c453cd08dc3d0b712f53d4273595793cb9106"'
+  --config 'patch.crates-io.oxirush-utils.rev="2f99edcc40baa5cf7397f94ecfc131dc1143bac5"'
 ```
 
 The minimum supported Rust version is 1.88. The crate depends on one version of

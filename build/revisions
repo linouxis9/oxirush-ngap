@@ -9,5 +9,5 @@
 #
 # protocols/build/pin.py of oxirush-aper writes them wherever this repository names a
 # revision of one, and with `--check`, which CI runs, holds each place to them.
-oxirush-aper 65d0e0935f62d999e1d8b8c82bd997a433abfd09
-oxirush-utils eb1c453cd08dc3d0b712f53d4273595793cb9106
+oxirush-aper 6252c750dde9ba669bcc3501dbf08ffec0638758
+oxirush-utils 2f99edcc40baa5cf7397f94ecfc131dc1143bac5

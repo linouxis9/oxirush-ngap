@@ -575,7 +575,7 @@ receiver that checks the structure of a message and reads the IEs that it
 needs, with the macro or `ie`, pays for those IEs alone: decoding an IE checks
 its value, and one that does not decode is an error of the kind
 `UndecodableIe` there, which `Deviation::of` makes a deviation of. `check()`
-is for a tool that looks at every value: it costs 4 to 8 times as much
+is for a tool that looks at every value: it costs 6 to 11 times as much
 ([Performance](#performance)).
 
 ## Answer a faulty message
@@ -1189,34 +1189,34 @@ Decoding, ns per call, and the ratio to this crate:
 
 | PDU (octets) | this crate, the envelope alone | this crate | rasn 0.29 | hampi 0.7.2 | asn1c (Open5GS 2.8.0) | free5GC ngap 1.2.0 | pycrate 0.8.1 |
 |---|---|---|---|---|---|---|---|
-| UEContextReleaseRequest (25) | 8 | 103 | 703 (6.8x) | 632 (6.1x) | 1,826 (17.7x) | 1,236 (12.0x) | 75,504 (733.0x) |
-| InitialUEMessage (70) | 8 | 166 | 1,506 (9.1x) | 1,846 (11.1x) | 3,020 (18.2x) | 2,113 (12.7x) | 136,718 (823.1x) |
-| InitialContextSetupRequest (212) | 10 | 480 | 3,805 (7.9x) | 4,720 (9.8x) | 6,981 (14.5x) | 4,980 (10.4x) | 459,774 (958.1x) |
-| NGSetupResponse (58) | 9 | 358 | 2,049 (5.7x) | 2,492 (7.0x) | 3,743 (10.4x) | 2,665 (7.4x) | 183,325 (511.7x) |
-| PDUSessionResourceSetupRequest (192) | 9 | 189 | 1,329 (7.0x) | 1,962 (10.4x) | 3,553 (18.8x) | 2,304 (12.2x) | 284,716 (1507.2x) |
-| HandoverRequest (238) | 10 | 524 | 4,119 (7.9x) | 5,442 (10.4x) | 7,620 (14.5x) | 5,530 (10.6x) | 506,016 (965.5x) |
+| UEContextReleaseRequest (25) | 8 | 88 | 636 (7.2x) | 594 (6.7x) | 1,670 (18.9x) | 1,150 (13.0x) | 68,916 (778.7x) |
+| InitialUEMessage (70) | 8 | 151 | 1,389 (9.2x) | 1,706 (11.3x) | 2,797 (18.5x) | 1,878 (12.4x) | 127,498 (842.1x) |
+| InitialContextSetupRequest (212) | 10 | 495 | 3,628 (7.3x) | 4,364 (8.8x) | 6,486 (13.1x) | 4,484 (9.1x) | 431,384 (871.0x) |
+| NGSetupResponse (58) | 8 | 316 | 1,881 (6.0x) | 2,324 (7.4x) | 3,532 (11.2x) | 2,354 (7.5x) | 172,873 (547.9x) |
+| PDUSessionResourceSetupRequest (192) | 10 | 180 | 1,230 (6.8x) | 1,805 (10.0x) | 3,177 (17.6x) | 2,099 (11.6x) | 267,008 (1481.7x) |
+| HandoverRequest (238) | 8 | 525 | 3,948 (7.5x) | 5,017 (9.5x) | 7,324 (13.9x) | 4,993 (9.5x) | 465,894 (886.7x) |
 
 Encoding, ns per call, and the ratio to this crate:
 
 | PDU (octets) | this crate | rasn 0.29 | hampi 0.7.2 | asn1c (Open5GS 2.8.0) | free5GC ngap 1.2.0 | pycrate 0.8.1 |
 |---|---|---|---|---|---|---|
-| UEContextReleaseRequest (25) | 69 | 952 (13.9x) | 1,380 (20.1x) | 959 (14.0x) | 624 (9.1x) | 48,701 (709.9x) |
-| InitialUEMessage (70) | 108 | 1,375 (12.8x) | 2,633 (24.5x) | 1,557 (14.5x) | 966 (9.0x) | 81,451 (756.3x) |
-| InitialContextSetupRequest (212) | 267 | 2,882 (10.8x) | 5,802 (21.7x) | 3,718 (13.9x) | 2,231 (8.4x) | 303,566 (1137.8x) |
-| NGSetupResponse (58) | 140 | 1,571 (11.2x) | 2,998 (21.4x) | 1,572 (11.2x) | 1,036 (7.4x) | 114,281 (814.5x) |
-| PDUSessionResourceSetupRequest (192) | 129 | 1,434 (11.1x) | 3,074 (23.9x) | 2,103 (16.3x) | 1,345 (10.4x) | 203,056 (1575.3x) |
-| HandoverRequest (238) | 293 | 3,347 (11.4x) | 6,482 (22.1x) | 4,054 (13.8x) | 2,566 (8.8x) | 335,740 (1145.9x) |
+| UEContextReleaseRequest (25) | 63 | 889 (14.0x) | 1,314 (20.8x) | 898 (14.2x) | 578 (9.1x) | 45,156 (713.4x) |
+| InitialUEMessage (70) | 99 | 1,265 (12.8x) | 2,640 (26.6x) | 1,474 (14.9x) | 888 (9.0x) | 77,259 (779.6x) |
+| InitialContextSetupRequest (212) | 251 | 2,638 (10.5x) | 6,159 (24.5x) | 3,352 (13.4x) | 2,021 (8.0x) | 288,997 (1150.9x) |
+| NGSetupResponse (58) | 128 | 1,453 (11.4x) | 3,048 (23.8x) | 1,492 (11.7x) | 964 (7.5x) | 106,966 (835.7x) |
+| PDUSessionResourceSetupRequest (192) | 119 | 1,347 (11.3x) | 3,054 (25.6x) | 1,987 (16.7x) | 1,128 (9.5x) | 192,710 (1618.1x) |
+| HandoverRequest (238) | 277 | 3,053 (11.0x) | 6,941 (25.0x) | 3,819 (13.8x) | 2,295 (8.3x) | 309,128 (1114.8x) |
 
 Every figure for HandoverRequest, per call:
 
 |  | decode ns | cycles | instructions | allocations | octets allocated | encode ns | cycles | instructions | allocations | octets allocated | most memory held, KiB |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| this crate | 524 | 2,263 | 6,738 | 3 | 584 | 293 | 1,321 | 4,377 | 2 | 495 | 4,596 |
-| rasn 0.29 | 4,119 (7.9x) | 18,598 (8.2x) | 41,873 (6.2x) | 35 | 2,168 | 3,347 (11.4x) | 14,653 (11.1x) | 46,686 (10.7x) | 53 | 2,171 | 5,012 |
-| hampi 0.7.2 | 5,442 (10.4x) | 24,361 (10.8x) | 69,543 (10.3x) | 76 | 7,641 | 6,482 (22.1x) | 28,542 (21.6x) | 89,347 (20.4x) | 27 | 2,315 | 3,808 |
-| asn1c (Open5GS 2.8.0) | 7,620 (14.5x) | 33,118 (14.6x) | 118,724 (17.6x) | 121 | 15,532 | 4,054 (13.8x) | 19,387 (14.7x) | 65,555 (15.0x) | 32 | 4,504 | 6,336 |
-| free5GC ngap 1.2.0 | 5,530 (10.6x) | 32,416 (14.3x) | 97,010 (14.4x) | 179 | 2,952 | 2,566 (8.8x) | 15,178 (11.5x) | 43,829 (10.0x) | 36 | 1,184 | 9,700 |
-| pycrate 0.8.1 | 506,016 (965.5x) | 2,246,998 (993.0x) | 4,383,066 (650.5x) |  |  | 335,740 (1145.9x) | 1,331,788 (1008.0x) | 3,021,229 (690.2x) |  |  | 37,452 |
+| this crate | 525 | 2,327 | 6,573 | 3 | 584 | 277 | 1,251 | 4,376 | 2 | 495 | 3,884 |
+| rasn 0.29 | 3,948 (7.5x) | 17,973 (7.7x) | 41,848 (6.4x) | 35 | 2,168 | 3,053 (11.0x) | 13,886 (11.1x) | 46,672 (10.7x) | 53 | 2,171 | 4,652 |
+| hampi 0.7.2 | 5,017 (9.5x) | 23,137 (9.9x) | 69,702 (10.6x) | 76 | 7,641 | 6,941 (25.0x) | 31,925 (25.5x) | 89,343 (20.4x) | 27 | 2,315 | 3,440 |
+| asn1c (Open5GS 2.8.0) | 7,324 (13.9x) | 33,063 (14.2x) | 118,711 (18.1x) | 121 | 15,532 | 3,819 (13.8x) | 17,399 (13.9x) | 65,546 (15.0x) | 32 | 4,504 | 6,336 |
+| free5GC ngap 1.2.0 | 4,993 (9.5x) | 28,849 (12.4x) | 95,642 (14.5x) | 179 | 2,952 | 2,295 (8.3x) | 13,008 (10.4x) | 41,964 (9.6x) | 36 | 1,184 | 9,436 |
+| pycrate 0.8.1 | 465,894 (886.7x) | 2,141,808 (920.6x) | 4,442,005 (675.8x) |  |  | 309,128 (1114.8x) | 1,437,455 (1148.7x) | 2,975,625 (679.9x) |  |  | 37,416 |
 
 The time is the fastest of three runs of a call repeated for about 0.2 s, and
 the cycles and the instructions those that `perf stat` counts for the calls
@@ -1225,15 +1225,15 @@ The allocations and the octets that they ask for are counted by an allocator
 that counts in Rust, by `malloc`, `calloc` and `realloc` for asn1c, by
 `runtime.MemStats` for Go; pycrate's are not counted. The most memory held is
 the high-water mark of the resident memory of the program (`VmHWM`), its runtime
-included. The figures were taken on an AMD Ryzen 7 5700G, each program on one
-core, while other work kept the load average of the machine between 4.7 and 6.7
-(of 16 threads, the other thread of that core among them). The script fetches
-each implementation at a pinned version: hampi 0.7.2 and rasn 0.29.0 from
-crates.io, Open5GS v2.8.0 from GitHub, the ngap package v1.2.0 of free5GC
-through its go.mod, pycrate 0.8.1 from PyPI, and the ASN.1 from the archive of
-3GPP. From the root of the repository, with oxirush-aper beside it, whose
-`protocols/benches/compare/` has the script, and with what the script says
-it needs:
+included. The figures were taken on an AMD Ryzen 7 5700G (16 threads, Linux
+7.0, Rust 1.98.1, Go 1.27, Python 3.14), each program on one core, measured on
+a quiet machine on 2026-10-18: each is the median of three runs of the script,
+which fetches each implementation at a pinned version: hampi 0.7.2 and rasn
+0.29.0 from crates.io, Open5GS v2.8.0 from GitHub, the ngap package v1.2.0 of
+free5GC through its go.mod, pycrate 0.8.1 from PyPI, and the ASN.1 from the
+archive of 3GPP. From the root of the repository, with oxirush-aper beside
+it, whose `protocols/benches/compare/` has the script, and with what the
+script says it needs:
 
 ```sh
 python3 ../oxirush-aper/protocols/benches/compare/compare.py --core 3 --perf "sudo -n perf"
@@ -1249,10 +1249,10 @@ readers` measures them:
 
 | Message | the first IE: `decode_value()`, then the macro | the macro on the PDU | `ie::<T>()` | every IE: `decode_value()`, then the macro | the macro on the PDU |
 |---|---|---|---|---|---|
-| An INITIAL CONTEXT SETUP REQUEST of 2 PDU sessions and a NAS-PDU of 1,500 octets | 215 ns, 1 allocation | 80 ns, no allocation | 50 ns, no allocation | 965 ns, 3 allocations | 808 ns, 2 allocations |
-| A PDU SESSION RESOURCE SETUP REQUEST of 8 PDU sessions | 121 ns, 1 allocation | 51 ns, no allocation | 49 ns, no allocation | 733 ns, 2 allocations | 663 ns, 1 allocation |
-| A HANDOVER REQUIRED of a container of 4,000 octets | 169 ns, 1 allocation | 65 ns, no allocation | 49 ns, no allocation | 506 ns, 2 allocations | 392 ns, 1 allocation |
-| A PAGING of 16 tracking areas | 145 ns, 1 allocation | 80 ns, no allocation | 86 ns, no allocation | 788 ns, 2 allocations | 706 ns, 1 allocation |
+| An INITIAL CONTEXT SETUP REQUEST of 2 PDU sessions and a NAS-PDU of 1,500 octets | 113 ns, 1 allocation | 38 ns, no allocation | 27 ns, no allocation | 579 ns, 3 allocations | 500 ns, 2 allocations |
+| A PDU SESSION RESOURCE SETUP REQUEST of 8 PDU sessions | 66 ns, 1 allocation | 24 ns, no allocation | 27 ns, no allocation | 471 ns, 2 allocations | 425 ns, 1 allocation |
+| A HANDOVER REQUIRED of a container of 4,000 octets | 86 ns, 1 allocation | 30 ns, no allocation | 27 ns, no allocation | 290 ns, 2 allocations | 248 ns, 1 allocation |
+| A PAGING of 16 tracking areas | 99 ns, 1 allocation | 52 ns, no allocation | 64 ns, no allocation | 565 ns, 2 allocations | 522 ns, 1 allocation |
 
 `check()`, which decodes the value of each IE, and `check_structure()`, which
 compares the container alone with the object set of its message, on the PDUs
@@ -1260,31 +1260,31 @@ of the comparison (`cargo run --release --bin checks` in `benches/`):
 
 | PDU (octets) | `check()` | `check_structure()` | `check()` / `check_structure()` |
 |---|---|---|---|
-| UEContextReleaseRequest (25) | 575 ns, 6 allocations | 131 ns, 2 allocations | 4.4x |
-| InitialUEMessage (70) | 1,044 ns, 10 allocations | 201 ns, 2 allocations | 5.2x |
-| InitialContextSetupRequest (212) | 3,017 ns, 21 allocations | 389 ns, 2 allocations | 7.8x |
-| NGSetupResponse (58) | 1,330 ns, 12 allocations | 159 ns, 2 allocations | 8.4x |
-| PDUSessionResourceSetupRequest (192) | 1,155 ns, 11 allocations | 141 ns, 2 allocations | 8.2x |
-| HandoverRequest (238) | 3,434 ns, 24 allocations | 402 ns, 2 allocations | 8.5x |
+| UEContextReleaseRequest (25) | 392 ns, 6 allocations | 64 ns, 2 allocations | 6.1x |
+| InitialUEMessage (70) | 777 ns, 10 allocations | 104 ns, 2 allocations | 7.5x |
+| InitialContextSetupRequest (212) | 1,926 ns, 21 allocations | 196 ns, 2 allocations | 9.8x |
+| NGSetupResponse (58) | 914 ns, 12 allocations | 83 ns, 2 allocations | 11.0x |
+| PDUSessionResourceSetupRequest (192) | 715 ns, 11 allocations | 73 ns, 2 allocations | 9.8x |
+| HandoverRequest (238) | 2,182 ns, 24 allocations | 198 ns, 2 allocations | 11.0x |
 
-These were taken on the same machine, each program on one core, at a load
-average of 10 to 12.
+These were taken on the same machine, each program on one core, as the median
+of three runs.
 
 A clean `cargo build -j 5` of the crate and its dependencies on Rust 1.88, on
-five cores of the same machine while it ran other work (a load average of 9 to
-12), with the debug information of the default profile and without it:
+five cores of the same machine, the median of three builds, with the debug
+information of the default profile and without it:
 
 | Build | Time | Peak memory | Peak memory, `CARGO_PROFILE_DEV_DEBUG=0` |
 |-------|------|-------------|------------------------------------------|
-| No feature | 24 s | 1.35 GiB | 1.11 GiB |
-| `inspect` | 40 s | 2.03 GiB | 1.58 GiB |
-| `serde` | 44 s | 2.13 GiB | 1.65 GiB |
-| `inspect`, `--release` | 57 s | 1.58 GiB | 1.57 GiB |
+| No feature | 15 s | 1.36 GiB | 1.09 GiB |
+| `inspect` | 24 s | 2.02 GiB | 1.57 GiB |
+| `serde` | 24 s | 2.11 GiB | 1.60 GiB |
+| `inspect`, `--release` | 35 s | 1.60 GiB | 1.59 GiB |
 
 On a message of 65,535 IEs of one name, 393 KB, `decode` takes 0.01 ms, `check`
-7.17 ms, `to_view` 74 ms and 37 MB, `with_view` 131 ms and 48 MB,
-`inspect::paths` 30 ms, and an edit at a path 0.01 ms, on one core of the same
-machine at a load average of 7 to 9. In `benches/`, `cargo bench --bench scale`
+6.40 ms, `to_view` 69 ms and 37 MB, `with_view` 120 ms and 48 MB,
+`inspect::paths` 25 ms, and an edit at a path 0.01 ms, on one core of the same
+machine, the median of three runs. In `benches/`, `cargo bench --bench scale`
 measures them, and `cargo bench --bench codec` and `--bench allocations` the
 codec on the PDUs of the tests; from the root of the repository,
 `python3 ../oxirush-aper/protocols/benches/build_cost.py +1.88.0 --features inspect`

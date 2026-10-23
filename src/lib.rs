@@ -76,13 +76,17 @@
 //! | Decode a PDU | [`NGAP_PDU::decode`](ngap::NGAPPDU::decode), [`NGAP_PDU::decode_borrowed`](ngap::NGAPPDU::decode_borrowed), [`NGAP_PDU::kind`](ngap::NGAPPDU::kind), [`NGAP_PDU::decode_value`](ngap::NGAPPDU::decode_value) |
 //! | Build a PDU | [`build_ngap!`], [`NGAP_PDU::of_message`](ngap::NGAPPDU::of_message) |
 //! | Read the IEs of a message | [`extract_ngap_ies!`], [`ie`], [`with_ngap_ie_mut!`], [`build_ngap_ie!`] |
-//! | A transfer and a handover container, typed | [`ngap::decode_open_type`], [`ngap::encode_open_type`] |
+//! | A transfer and a handover container, typed | [`ngap::decode_open_type`], [`ngap::encode_open_type`], [`PDUSessionResourceSetupRequestTransfer::check`](ngap::PDUSessionResourceSetupRequestTransfer::check) |
 //! | Check a message, and answer one that is faulty | [`NGAP_PDU::check`](ngap::NGAPPDU::check), [`NGAP_PDU::check_structure`](ngap::NGAPPDU::check_structure), [`Deviation`], [`NGAP_PDU::criticality_diagnostics_for_response`](ngap::NGAPPDU::criticality_diagnostics_for_response) |
 //! | A PDU as JSON | [`NGAP_PDU::to_tree`](ngap::NGAPPDU::to_tree), [`NGAP_PDU::to_view`](ngap::NGAPPDU::to_view), [`NGAP_PDU::with_view`](ngap::NGAPPDU::with_view), [`inspect`] |
 //! | Write a message from its tree | [`NGAP_PDU::from_tree`](ngap::NGAPPDU::from_tree) |
 //!
+// Without `inspect` the items of the JSON forms in the tasks are no links: the links are
+// checked in the build of every feature, which docs.rs makes.
+#![cfg_attr(not(feature = "inspect"), allow(rustdoc::broken_intra_doc_links))]
 //! Every function and macro that can fail returns an [`Error`]: its [`ErrorKind`] is
-//! what a caller matches on, and its `Display` says what is wrong.
+//! what a caller matches on, and its `Display` says what is wrong. `error.ie()` names
+//! the IE of an error of the macros.
 //!
 //! ```
 //! # use std::fmt::Write as _;
@@ -110,10 +114,6 @@
 //! the message of this PDU is UEContextReleaseRequest, not NGSetupRequest: kind() says which message a PDU holds
 //! these octets do not decode as NGAP-PDU: the octets end before the value does, in its field `value`
 //! ```
-//!
-//! Every call that can fail returns an `oxirush_ngap::Error`. Its `kind()` is
-//! what a caller matches on, and the documentation of `ErrorKind` lists the
-//! kinds; `error.ie()` names the IE of an error of the macros.
 //!
 //! The codec builds, encodes and decodes a message whatever its IEs are. `check()` of
 //! a PDU reports how it deviates from what the ASN.1 assigns its message, each as a
@@ -293,6 +293,7 @@
 //! - [oxirush-sctp](https://docs.rs/oxirush-sctp): SCTP sockets, which carry NGAP and S1AP.
 
 #![forbid(unsafe_code)]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 extern crate alloc;
 
@@ -348,12 +349,23 @@ pub use oxirush_aper::protocol::Message;
 pub use oxirush_aper::{
     AsnType, BitString, Bits, Decode, Encode, Error, ErrorKind, Fault, Faults, Octets,
 };
+/// ```
+/// use oxirush_ngap::{Deviation, build_ngap, ngap::*};
+///
+/// // An INITIAL UE MESSAGE of its first IE alone
+/// let pdu = build_ngap!(InitiatingMessage, InitialUEMessage, InitialUEMessage, RAN_UE_NGAP_ID(7u32))?;
+/// let deviations: Vec<Deviation> = pdu.check()?;
+/// assert!(matches!(deviations[0], Deviation::MissingIe { id: 38, .. }));
+/// assert_eq!(deviations[0].to_string(), "NAS-PDU (IE 38) is mandatory, and the message does not have it");
+/// # Ok::<(), oxirush_ngap::Error>(())
+/// ```
+pub use registry::Deviation;
+pub use registry::Ngap;
 /// The IEs of the protocol, one marker type each, by the names that the macros take:
 /// `ies::<T>()` and `ie::<T>()` of a PDU and of a message take them, as
 /// `pdu.ie::<ie::Cause>()`. Each implements [`aper::protocol::Ie`], which gives its
 /// identifier and the type of its value.
 pub use registry::ie;
-pub use registry::{Deviation, Ngap};
 
 /// The examples of the README, which the documentation tests compile and run.
 #[cfg(all(doctest, feature = "serde"))]

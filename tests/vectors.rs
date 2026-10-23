@@ -287,7 +287,10 @@ fn a_view_in_the_json_encoding_rules_is_read_as_its_octets() {
         {"id": 21, "criticality": "ignore", "value": "v128"},
     ]));
     let error = NGAP_PDU::from_view(&jer).unwrap_err().to_string();
-    assert!(error.contains(r#""000001" is read in two ways"#), "{error}");
+    assert!(
+        error.contains(r#""000001" is a number in quotes: write 1 without quotes"#),
+        "{error}"
+    );
     let read = NGAP_PDU::from_view(&inspect::__view_of_jer(&jer).unwrap()).unwrap();
     assert_eq!(read, NGAP_PDU::from_view(&readable).unwrap());
 }

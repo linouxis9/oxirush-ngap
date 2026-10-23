@@ -16,6 +16,12 @@
 //! A tree and a view are a [`Value`] of `oxirush-utils`, which the crate has as
 //! [`tree::Value`](crate::tree::Value), with `tree!` to write one.
 //!
+//! A tree, a view and the serde form show each value as it is, keys too: the
+//! `SecurityKey` of an INITIAL CONTEXT SETUP REQUEST, KgNB, and the next hop NH are
+//! strings of hexadecimal digits in them, so that they are encoded back to the same
+//! octets. They are no form for a log: `Debug` and `Display` of the bindings print no
+//! key, and the length of the octets of a message that may hold one.
+//!
 //! [`to_view`] returns `procedure_code`, `direction`, `criticality` and `message`: the
 //! message in JSON, each value in the form of its ASN.1 type, which [Values](#values)
 //! lists. An IE whose identifier is known has its typed
@@ -56,9 +62,14 @@
 //! - `_edited`: [`set`], [`remove`] or [`insert`] changed something under the value, whose
 //!   octets are no longer those beside it;
 //! - `_lossy`: the typed value encodes to other octets than those beside it: they hold
-//!   what a later version of its type adds, which the value has no place for, or are in
-//!   another form than the canonical one. A tree has the octets in the place of the
-//!   value, so that it gives them back.
+//!   what a later version of its type adds, which the value has no place for, or, for
+//!   the container of the message, are in another form than the canonical one. A tree
+//!   has the octets in the place of the value, so that it gives them back.
+//!
+//! The value of an IE and a transfer in another form than the one that X.691 gives them,
+//! as with padding bits that are not zero, are their octets, with the `_decode_error` of
+//! a reader of that one form: the tree has their octets too. A path list has
+//! `_decode_error` and `_lossy`, which say why the tree has octets.
 //!
 //! [`from_view`] encodes the view, and [`with_view`] the view of a PDU that is at hand.
 //! What was not edited keeps the octets received. To edit:
@@ -122,7 +133,7 @@
 //! # "##);
 //! ```
 //!
-//! ```json
+//! ```text
 //! [{"RAN-UE-NGAP-ID":7},{"60000":{"octets":"c0ffee"},"criticality":"ignore"},{"Cause":{"radioNetwork":"user-inactivity"}},{"RANNodeName":"gnb-1","criticality":"ignore"}]
 //! ```
 //!
@@ -214,7 +225,7 @@
 //! # "##);
 //! ```
 //!
-//! ```json
+//! ```text
 //! {"message":"InitialContextSetupRequest","ies":[{"AllowedNSSAI":[{"s-NSSAI":{"sST":2}},{"s-NSSAI":{"sST":3}}]}]}
 //! ```
 //!
@@ -238,7 +249,7 @@
 //!         "pDUSessionID": 5,
 //!         "s-NSSAI": {"sST": 1},
 //!         "pDUSessionResourceSetupRequestTransfer": {"protocolIEs": [
-//!             {"PDUSessionType": "ipv4", "criticality": "reject"},
+//!             {"PDUSessionType": "ipv4"},
 //!         ]},
 //!     }]},
 //! ]});
@@ -267,13 +278,13 @@
 //! let edited = pdu.with_view(&view).unwrap();
 //! println!("{}", edited.to_tree()["ies"][2]);
 //! # assert_eq!(printed, r##"{"_raw_transfer":"0000010086000100","decoded":{"protocolIEs":[{"id":134,"criticality":"reject","value":"ipv4","_raw_value":"00","_original_id":134,"_ie_name":"PDUSessionType"}]}}
-//! # {"PDUSessionResourceSetupListSUReq":[{"pDUSessionID":5,"s-NSSAI":{"sST":1},"pDUSessionResourceSetupRequestTransfer":{"protocolIEs":[{"PDUSessionType":"ipv6","criticality":"reject"}]}}]}
+//! # {"PDUSessionResourceSetupListSUReq":[{"pDUSessionID":5,"s-NSSAI":{"sST":1},"pDUSessionResourceSetupRequestTransfer":{"protocolIEs":[{"PDUSessionType":"ipv6"}]}}]}
 //! # "##);
 //! ```
 //!
-//! ```json
+//! ```text
 //! {"_raw_transfer":"0000010086000100","decoded":{"protocolIEs":[{"id":134,"criticality":"reject","value":"ipv4","_raw_value":"00","_original_id":134,"_ie_name":"PDUSessionType"}]}}
-//! {"PDUSessionResourceSetupListSUReq":[{"pDUSessionID":5,"s-NSSAI":{"sST":1},"pDUSessionResourceSetupRequestTransfer":{"protocolIEs":[{"PDUSessionType":"ipv6","criticality":"reject"}]}}]}
+//! {"PDUSessionResourceSetupListSUReq":[{"pDUSessionID":5,"s-NSSAI":{"sST":1},"pDUSessionResourceSetupRequestTransfer":{"protocolIEs":[{"PDUSessionType":"ipv6"}]}}]}
 //! ```
 //!
 //! ## The names of an ENUMERATED
@@ -705,14 +716,15 @@ impl NGAPPDU<'_> {
     /// ```json
     /// {"PDUSessionResourceSetupListSUReq": [{"pDUSessionID": 5, "s-NSSAI": {"sST": 1},
     ///   "pDUSessionResourceSetupRequestTransfer": {"protocolIEs": [
-    ///     {"PDUSessionType": "ipv4", "criticality": "reject"}]}}]}
+    ///     {"PDUSessionType": "ipv4"}]}}]}
     /// ```
     ///
     /// The `criticality` of an IE that a value holds alone or as an entry of a list is
-    /// left out when it is the one that [`item_criticality`] gives. That of an IE of a
-    /// message that a transfer contains, and that of an IE of an extension container, is
-    /// always there: the tables have the criticality that an object set assigns for the
-    /// messages of the procedures and for the single containers only.
+    /// left out when it is the one that [`item_criticality`] gives, and that of an IE of
+    /// a message that a transfer contains when it is the one that the object set of the
+    /// transfer assigns it. That of an IE of an extension container is always there: the
+    /// tables have the criticality that an object set assigns for the messages, the
+    /// transfers and the single containers only.
     ///
     /// Every PDU that decodes has a tree, which [`from_tree`](Self::from_tree) makes the
     /// same PDU again. A procedure that the specification does not have in that direction
@@ -748,9 +760,9 @@ impl NGAPPDU<'_> {
     ///
     /// A value is written as [`to_tree`](Self::to_tree) shows it: a transfer as its
     /// decoded value, or as its `octets`, and each IE that the value holds as its name
-    /// with its value. Such an IE says its `criticality` where
-    /// [`to_tree`](Self::to_tree) always shows it, and where [`item_criticality`] has
-    /// none for it. A value is also written as [`to_view`](Self::to_view) shows it, with
+    /// with its value. Such an IE says its `criticality` where no table has one for it:
+    /// in an extension container, and where the object set of the transfer, or
+    /// [`item_criticality`], has none for it. A value is also written as [`to_view`](Self::to_view) shows it, with
     /// `decoded` for the value of a transfer and an entry with its `id`, its
     /// `criticality` and its `value` for an IE, and the two forms are taken in one tree.
     ///

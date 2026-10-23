@@ -295,7 +295,7 @@ fn digits_that_could_be_a_plmn_identity_or_its_octets_are_refused() {
         tac(tree!("000001"))
             .unwrap_err()
             .to_string()
-            .contains("0x000001")
+            .contains("\"000001\" is a number in quotes: write 1 without quotes")
     );
     assert_eq!(
         tac(tree!("1")).unwrap_err().to_string(),
@@ -319,7 +319,7 @@ fn digits_that_could_be_a_plmn_identity_or_its_octets_are_refused_by_serde() {
         "{error}"
     );
     let yaml = "message: InitialContextSetupRequest\nies:\n- GUAMI: {pLMNIdentity: '001001', aMFRegionID: 1, aMFSetID: 1, aMFPointer: 0}\n";
-    let error = serde_yaml::from_str::<NGAP_PDU>(yaml)
+    let error = serde_norway::from_str::<NGAP_PDU>(yaml)
         .unwrap_err()
         .to_string();
     assert!(

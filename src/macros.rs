@@ -414,18 +414,37 @@ macro_rules! build_ngap {
 /// Build one NGAP protocol IE entry. Every message takes the same
 /// `ProtocolIEField`: the name before the comma says where the IE goes, and is the
 /// type of a message, or of a transfer of protocol IEs, as
-/// `PDUSessionResourceSetupRequestTransfer`.
+/// `PDUSessionResourceSetupRequestTransfer`. The IE has the criticality that the object
+/// set of that message or transfer assigns it, unless the call writes its own.
 ///
-/// An IE that goes in no message is built without that name. Such is the alternative
-/// that a later version added to a CHOICE, which is one IE in a single container, as
-/// the `TargetRNC-ID` of a `TargetID`:
+/// An IE that goes in no message is built without that name, and with its criticality.
+/// Such is the alternative that a later version added to a CHOICE, which is one IE in a
+/// single container, as the `TargetRNC-ID` of a `TargetID`.
 ///
-/// ```ignore
-/// build_ngap_ie!(REJECT TargetRNC_ID(target))
+/// ```
+/// use oxirush_ngap::{build_ngap_ie, helpers::plmn, ngap::*};
+///
+/// // An IE of a message and one of a transfer, of the criticality of their object sets
+/// let amf = build_ngap_ie!(UEContextReleaseRequest, AMF_UE_NGAP_ID(42u64))?;
+/// let kind = build_ngap_ie!(PDUSessionResourceSetupRequestTransfer,
+///     PDUSessionType(PDUSessionType::ipv4))?;
+/// assert_eq!((amf.criticality, kind.criticality), (Criticality::reject, Criticality::reject));
+///
+/// // One of another criticality, which a test of a peer sends
+/// let ignored = build_ngap_ie!(UEContextReleaseRequest, IGNORE AMF_UE_NGAP_ID(42u64))?;
+/// assert_eq!(ignored.criticality, Criticality::ignore);
+///
+/// // An IE in a single container: the target of a handover to an RNC
+/// let lai = LAI::new(plmn("208", "93")?, LAC([0x00, 0x01]), None);
+/// let rnc = build_ngap_ie!(REJECT TargetRNC_ID(TargetRNCID::new(lai, RNCID(1), None, None)))?;
+/// let target = TargetID::choice_Extensions(rnc);
+/// assert!(matches!(&target, TargetID::choice_Extensions(ie) if ie.id.0 == 178));
+/// # Ok::<(), oxirush_ngap::Error>(())
 /// ```
 ///
 /// Gives a `Result<ProtocolIEField, Error>`: a value that does not encode into its
-/// open type is an error of the kind `Encode`.
+/// open type is an error of the kind `Encode`, and an IE that the object set does not
+/// have, without its criticality, one of the kind `Argument`.
 #[macro_export]
 macro_rules! build_ngap_ie {
     ($($arguments:tt)*) => {

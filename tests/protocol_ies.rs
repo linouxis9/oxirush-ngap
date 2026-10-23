@@ -268,8 +268,8 @@ fn the_ies_of_a_transfer_are_read_changed_and_built_by_the_macros() -> Result<()
         "0000010086000110"
     );
 
-    // An IE that it does not have names the transfer; the tables have no object set of
-    // a transfer, so the error tells of no criticality
+    // An IE that it does not have names the transfer, with the criticality that the
+    // object set of the transfer assigns it
     let missing = || -> Result<(), Error> {
         extract_ngap_ies!(read, PDUSessionResourceSetupRequestTransfer,
             req _rate: PDUSessionAggregateMaximumBitRate =
@@ -285,6 +285,201 @@ fn the_ies_of_a_transfer_are_read_changed_and_built_by_the_macros() -> Result<()
             .contains("PDUSessionResourceSetupRequestTransfer"),
         "{error}"
     );
-    assert_eq!(error.ie(), None);
+    let assigned = error.ie().map(|ie| (ie.id, ie.criticality));
+    assert_eq!(
+        assigned,
+        Some((130, oxirush_ngap::aper::Criticality::Reject))
+    );
+    Ok(())
+}
+
+#[test]
+fn an_ie_of_a_transfer_has_the_criticality_of_its_object_set() -> Result<(), Error> {
+    use oxirush_ngap::aper::BitString;
+
+    // TS 38.413 clause 9.3.4.1: each IE of a PDU SESSION RESOURCE SETUP REQUEST
+    // TRANSFER is `reject` but those of the later releases.
+    let tunnel = UPTransportLayerInformation::gTPTunnel(GTPTunnel::new(
+        TransportLayerAddress(BitString::from([127, 0, 0, 22])),
+        GTPTEID([0, 0, 0x20, 0x01]),
+        None,
+    ));
+    let ies = [
+        build_ngap_ie!(
+            PDUSessionResourceSetupRequestTransfer,
+            UL_NGU_UP_TNLInformation(tunnel)
+        )?,
+        build_ngap_ie!(
+            PDUSessionResourceSetupRequestTransfer,
+            PDUSessionType(PDUSessionType::ipv4)
+        )?,
+        build_ngap_ie!(
+            PDUSessionResourceSetupRequestTransfer,
+            PDUSessionAggregateMaximumBitRate(PDUSessionAggregateMaximumBitRate::new(
+                BitRate(1),
+                BitRate(1),
+                None
+            ))
+        )?,
+        build_ngap_ie!(
+            PDUSessionResourceSetupRequestTransfer,
+            RedundantPDUSessionInformation(RedundantPDUSessionInformation::new(RSN::v1, None))
+        )?,
+    ];
+    let criticalities: Vec<_> = ies.iter().map(|ie| (ie.id.0, ie.criticality)).collect();
+    assert_eq!(
+        criticalities,
+        [
+            (139, Criticality::reject),
+            (134, Criticality::reject),
+            (130, Criticality::reject),
+            (197, Criticality::ignore),
+        ]
+    );
+    // And so in the transfer of a modification
+    let modified = build_ngap_ie!(
+        PDUSessionResourceModifyRequestTransfer,
+        PDUSessionAggregateMaximumBitRate(PDUSessionAggregateMaximumBitRate::new(
+            BitRate(1),
+            BitRate(1),
+            None
+        ))
+    )?;
+    assert_eq!(modified.criticality, Criticality::reject);
+    // An IE that the object set of the transfer does not have is assigned none
+    let error = build_ngap_ie!(
+        PDUSessionResourceSetupRequestTransfer,
+        TimeToWait(TimeToWait::v5s)
+    )
+    .unwrap_err();
+    assert_eq!(error.kind(), ErrorKind::Argument);
+    assert_eq!(
+        error.to_string(),
+        "TimeToWait is no IE of the object set of PDUSessionResourceSetupRequestTransfer, \
+         which assigns it no criticality: write its criticality"
+    );
+    Ok(())
+}
+
+#[test]
+fn a_transfer_is_checked_against_its_object_set() -> Result<(), Error> {
+    let transfer = |ies| {
+        encode_open_type(&PDUSessionResourceSetupRequestTransfer::new(
+            ProtocolIEContainer(ies),
+        ))
+    };
+    let tunnel = || {
+        UPTransportLayerInformation::gTPTunnel(GTPTunnel::new(
+            TransportLayerAddress(oxirush_ngap::aper::BitString::from([127, 0, 0, 22])),
+            GTPTEID([0, 0, 0x20, 0x01]),
+            None,
+        ))
+    };
+    let flows = || {
+        QosFlowSetupRequestList(vec![QosFlowSetupRequestItem::new(
+            QosFlowIdentifier(9),
+            QosFlowLevelQosParameters::new(
+                QosCharacteristics::nonDynamic5QI(NonDynamic5QIDescriptor::new(
+                    FiveQI(9),
+                    None,
+                    None,
+                    None,
+                    None,
+                )),
+                AllocationAndRetentionPriority::new(
+                    PriorityLevelARP(8),
+                    PreEmptionCapability::shall_not_trigger_pre_emption,
+                    PreEmptionVulnerability::not_pre_emptable,
+                    None,
+                ),
+                None,
+                None,
+                None,
+                None,
+            ),
+            None,
+            None,
+        )])
+    };
+    // A transfer as the specification has a sender construct it deviates in nothing
+    let octets = transfer(vec![
+        build_ngap_ie!(
+            PDUSessionResourceSetupRequestTransfer,
+            UL_NGU_UP_TNLInformation(tunnel())
+        )?,
+        build_ngap_ie!(
+            PDUSessionResourceSetupRequestTransfer,
+            PDUSessionType(PDUSessionType::ipv4)
+        )?,
+        build_ngap_ie!(
+            PDUSessionResourceSetupRequestTransfer,
+            QosFlowSetupRequestList(flows())
+        )?,
+    ])?;
+    assert_eq!(PDUSessionResourceSetupRequestTransfer::check(&octets)?, []);
+    assert_eq!(
+        PDUSessionResourceSetupRequestTransfer::check_structure(&octets)?,
+        []
+    );
+    // One that misses an IE, has one of another criticality, one out of its order and one
+    // that its set does not have
+    let octets = transfer(vec![
+        build_ngap_ie!(
+            PDUSessionResourceSetupRequestTransfer,
+            PDUSessionType(PDUSessionType::ipv4)
+        )?,
+        build_ngap_ie!(PDUSessionResourceSetupRequestTransfer,
+            IGNORE UL_NGU_UP_TNLInformation(tunnel()))?,
+        build_ngap_ie!(PDUSessionResourceSetupRequestTransfer, IGNORE TimeToWait(TimeToWait::v5s))?,
+    ])?;
+    let found = PDUSessionResourceSetupRequestTransfer::check_structure(&octets)?;
+    let found: Vec<_> = found.iter().map(ToString::to_string).collect();
+    assert_eq!(
+        found,
+        [
+            "UL-NGU-UP-TNLInformation (IE 139), at position 1, comes after PDUSessionType (IE \
+             134), which the object set of the message has after it",
+            "the criticality of UL-NGU-UP-TNLInformation (IE 139), at position 1, is ignore, and \
+             the message assigns it reject",
+            "TimeToWait (IE 107), at position 2, is not an IE of the message",
+            "QosFlowSetupRequestList (IE 136) is mandatory, and the message does not have it",
+        ]
+    );
+    // `check` decodes the values too: one that does not decode is reported
+    let mut ies = vec![
+        build_ngap_ie!(
+            PDUSessionResourceSetupRequestTransfer,
+            UL_NGU_UP_TNLInformation(tunnel())
+        )?,
+        build_ngap_ie!(
+            PDUSessionResourceSetupRequestTransfer,
+            PDUSessionType(PDUSessionType::ipv4)
+        )?,
+        build_ngap_ie!(
+            PDUSessionResourceSetupRequestTransfer,
+            QosFlowSetupRequestList(flows())
+        )?,
+    ];
+    ies[1].value = Octets::owned(vec![]);
+    let octets = transfer(ies)?;
+    assert_eq!(
+        PDUSessionResourceSetupRequestTransfer::check_structure(&octets)?,
+        []
+    );
+    let found = PDUSessionResourceSetupRequestTransfer::check(&octets)?;
+    let found: Vec<_> = found.iter().map(ToString::to_string).collect();
+    assert_eq!(
+        found,
+        ["PDUSessionType (IE 134), at position 1, does not decode: there are no octets"]
+    );
+    // Octets that are no container of protocol IEs
+    let error = PDUSessionResourceSetupRequestTransfer::check(&[0x00, 0x00]).unwrap_err();
+    assert_eq!(error.kind(), ErrorKind::Decode);
+    assert!(
+        error
+            .to_string()
+            .starts_with("these octets do not decode as PDUSessionResourceSetupRequestTransfer"),
+        "{error}"
+    );
     Ok(())
 }

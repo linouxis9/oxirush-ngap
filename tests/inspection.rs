@@ -507,8 +507,9 @@ fn redundant(value: &oxirush_ngap::tree::Value, holder: &str, found: &mut Vec<St
                     "decoded" | "id" | "extensionValue" => true,
                     // A bit string whose size varies has a `value` and a `length`.
                     "value" => !members.contains_key("length"),
-                    // No table has the criticality of the IEs of a contained message.
-                    "criticality" => holder != "protocolIEs",
+                    // The tables have the criticality that an object set assigns to the
+                    // IEs of a message and of a transfer, and to those of a single container.
+                    "criticality" => true,
                     name => name.starts_with('_'),
                 };
                 if wraps {
@@ -530,8 +531,7 @@ fn a_message_is_shown_and_written_by_name_to_any_depth() {
         NGAP_PDU::from_tree(tree).map(|pdu| pdu.encode().unwrap())
     };
     // A transfer is its decoded value, and the IEs of the message that it contains go
-    // by name. Their criticality is written: the tables have that of the IEs of the
-    // messages of the procedures.
+    // by name, with the criticality that the object set of the transfer assigns them.
     let wire = fixture("PDUSessionResourceSetupRequest");
     let tunnel = tree!({"gTPTunnel": {
         "transportLayerAddress": {"value": "00", "length": 1},
@@ -554,9 +554,9 @@ fn a_message_is_shown_and_written_by_name_to_any_depth() {
                 "pDUSessionID": 0,
                 "s-NSSAI": {"sST": 85},
                 "pDUSessionResourceSetupRequestTransfer": {"protocolIEs": [
-                    {"UL-NGU-UP-TNLInformation": &tunnel, "criticality": "reject"},
-                    {"PDUSessionType": "ipv4", "criticality": "reject"},
-                    {"QosFlowSetupRequestList": [&flow], "criticality": "reject"},
+                    {"UL-NGU-UP-TNLInformation": &tunnel},
+                    {"PDUSessionType": "ipv4"},
+                    {"QosFlowSetupRequestList": [&flow]},
                 ]},
             }]},
         ],
@@ -588,13 +588,26 @@ fn a_message_is_shown_and_written_by_name_to_any_depth() {
         {"QosFlowSetupRequestList": [flow], "criticality": "reject"},
     ]}});
     assert_eq!(written(&explicit).unwrap(), wire);
-    // An IE of a contained message says its criticality, and one of an extension
-    // container too: `message_tree` shows both.
+    // A criticality that is written in the place of the one of the object set of the
+    // transfer is sent, and shown.
     let mut unassigned = request.clone();
     let kind = unassigned.pointer_mut(&format!("{transfer}/protocolIEs/1"));
-    kind.unwrap().as_object_mut().unwrap().remove("criticality");
-    let error = written(&unassigned).unwrap_err().to_string();
-    assert!(error.contains("Type says its \"criticality\""), "{error}");
+    kind.unwrap()["criticality"] = tree!("ignore");
+    let pdu = NGAP_PDU::from_tree(&unassigned).unwrap();
+    assert_eq!(pdu.to_tree(), unassigned);
+    assert_ne!(pdu.encode().unwrap(), wire);
+    // An IE that the object set of the transfer does not have says its criticality, and
+    // one of an extension container too: `to_tree` shows both.
+    let mut unexpected = request.clone();
+    let ies = unexpected.pointer_mut(&format!("{transfer}/protocolIEs"));
+    let cause = tree!({"Cause": {"misc": "unspecified"}});
+    ies.unwrap().as_array_mut().unwrap().push(cause);
+    let error = written(&unexpected).unwrap_err().to_string();
+    assert_eq!(
+        error,
+        "PDUSessionResourceSetupRequestTransfer has no IE Cause: one that is sent in it says \
+         its \"criticality\""
+    );
     let mut extended = request.clone();
     let item = format!("{transfer}/protocolIEs/2/QosFlowSetupRequestList/0");
     let indicator = tree!({"RedundantQosFlowIndicator": "true", "criticality": "ignore"});
@@ -1167,11 +1180,18 @@ fn well_known_values_are_shown_and_taken_as_they_are_usually_written() {
         NGAP_PDU::from_view(&view).unwrap().encode().unwrap(),
         edited.encode().unwrap()
     );
-    // Digits alone are read in two ways, and refused with both.
+    // Digits alone are refused: read in two ways, with both, and where both are one
+    // number, with that number as JSON writes it.
+    ie(&mut view, 102)["value"][0]["tAC"] = tree!("000010");
+    let error = NGAP_PDU::from_view(&view).unwrap_err().to_string();
+    assert!(
+        error.contains("the number 10 ") && error.contains("the number 16"),
+        "{error}"
+    );
     ie(&mut view, 102)["value"][0]["tAC"] = tree!("000007");
     let error = NGAP_PDU::from_view(&view).unwrap_err().to_string();
     assert!(
-        error.contains("the number 000007") && error.contains("the number 7"),
+        error.contains("\"000007\" is a number in quotes: write 7 without quotes"),
         "{error}"
     );
     ie(&mut view, 102)["value"][0]["tAC"] = tree!("0x000007");
@@ -2972,4 +2992,107 @@ fn the_additional_information_of_qos_flows_has_the_type_of_what_it_extends() {
             assert!(refused.contains(has), "{refused}");
         }
     }
+}
+
+/// Where the tree of a PDU has an IE as its octets, the view says why, and so does its
+/// path list: octets that do not decode, or that are in another form than the one of
+/// X.691, have a `_decode_error`, and those that a typed value has no place for `_lossy`.
+fn agree(wire: &[u8]) -> usize {
+    use oxirush_ngap::tree::Value;
+    let Ok(pdu) = NGAP_PDU::decode(wire) else {
+        return 0;
+    };
+    let (tree, Ok(view)) = (pdu.to_tree(), pdu.to_view()) else {
+        return 0;
+    };
+    let (Some(Value::Array(shown)), Some(Value::Array(viewed))) =
+        (tree.get("ies"), view.pointer("/message/protocolIEs"))
+    else {
+        return 0;
+    };
+    assert_eq!(shown.len(), viewed.len(), "{tree}");
+    let says_why =
+        |entry: &Value| entry.get("_decode_error").is_some() || entry.get("_lossy").is_some();
+    let mut why = 0;
+    for (shown, viewed) in shown.iter().zip(viewed) {
+        let mut members = shown.as_object().into_iter().flatten();
+        let value = members
+            .find(|(name, _)| *name != "criticality")
+            .map(|(_, value)| value);
+        let as_octets = (value.and_then(Value::as_object))
+            .is_some_and(|value| value.len() == 1 && value.contains_key("octets"));
+        let said = says_why(viewed) || viewed.get("value").is_some_and(says_why);
+        assert_eq!(
+            as_octets, said,
+            "{shown} is shown so, and viewed as {viewed}"
+        );
+        why += usize::from(said);
+    }
+    let listed = inspect::paths(&view);
+    let listed = listed
+        .iter()
+        .filter(|(path, _)| path.ends_with("/_decode_error") || path.ends_with("/_lossy"));
+    assert!(listed.count() >= why, "{view}");
+    why
+}
+
+#[test]
+fn the_tree_and_the_paths_of_a_view_read_the_octets_of_an_ie_alike() {
+    // The AMF-UE-NGAP-ID of a UE CONTEXT RELEASE COMPLETE, of the padding bits 0001 after
+    // its length: the tree has its octets, and the view and the path list say why.
+    let wire = hex::decode("2029000f000002000a40020301005540020001").unwrap();
+    agree(&wire);
+    let view = NGAP_PDU::decode(&wire).unwrap().to_view().unwrap();
+    let error = inspect::select(&view, "/ngap/AMF-UE-NGAP-ID/_decode_error").unwrap();
+    assert_eq!(
+        error,
+        [&oxirush_ngap::tree!(
+            "these octets do not decode as AMF-UE-NGAP-ID: at bit 3, padding bits are not zero \
+             (X.691 §11.1.4): the value is read, and a sender by the clause writes it otherwise"
+        )]
+    );
+    let listed = inspect::paths(&view);
+    let value = listed
+        .iter()
+        .find(|(path, _)| path == "/ngap/AMF-UE-NGAP-ID/value");
+    assert_eq!(value.map(|(_, value)| value.as_str()), Some(Some("0301")));
+    // Each PDU of the fixtures, and each with the last bit of the value of one of its IEs
+    // changed, which is a padding bit of many.
+    let mut said = 0;
+    for file in [
+        include_str!("fixtures/messages.tsv"),
+        include_str!("fixtures/vectors.tsv"),
+        include_str!("fixtures/captured.tsv"),
+        include_str!("fixtures/later.tsv"),
+        include_str!("fixtures/fuzzed.tsv"),
+    ] {
+        let lines = file
+            .lines()
+            .filter(|line| !line.starts_with('#') && !line.is_empty());
+        for line in lines {
+            let wire = hex::decode(line.split('\t').nth(1).unwrap()).unwrap();
+            said += agree(&wire);
+            let Ok(pdu) = NGAP_PDU::decode(&wire) else {
+                continue;
+            };
+            let Ok(ies) = pdu.protocol_ies() else {
+                continue;
+            };
+            let ies = ies.into_owned();
+            for at in 0..ies.0.len() {
+                let mut changed = ies.clone();
+                let mut value = changed.0[at].value.to_vec();
+                let Some(last) = value.last_mut() else {
+                    continue;
+                };
+                *last ^= 1;
+                changed.0[at].value = oxirush_ngap::Octets::owned(value);
+                let mut pdu = pdu.clone();
+                pdu.set_protocol_ies(changed).unwrap();
+                said += agree(&pdu.encode().unwrap());
+            }
+        }
+    }
+    // Some of them have octets that the view says why it shows as such.
+    assert!(said > 100, "{said}");
 }

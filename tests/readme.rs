@@ -66,12 +66,15 @@ Unsuccessful_NGSetup is not handled here
 true
 TimeToWait is no IE of the object set of InitialUEMessage, which assigns it no criticality: write its criticality
 "#),
-    (block_5, r#""#),
+    (block_5, r#"AMF=42 RAN=7 cause=radioNetwork(user_inactivity)
+"#),
     (block_6, r#"AMF=42 RAN=7
 radioNetwork(user_inactivity)
 "#),
     (block_7, r#"ipv4
 0000010086000110
+UL-NGU-UP-TNLInformation (IE 139) is mandatory, and the message does not have it
+QosFlowSetupRequestList (IE 136) is mandatory, and the message does not have it
 nR_CGI(NRCGI { plmn_identity: PLMNIdentity(208-93), nr_cell_identity: NRCellIdentity(0x1234/36), ie_extensions: None })
 "#),
     (block_8, r#"the criticality of the PDU is reject, and that of its procedure is ignore
@@ -268,12 +271,17 @@ fn block_3() {
         })
     }
 
-    // A UE CONTEXT RELEASE REQUEST, then an NG SETUP FAILURE
-    let request = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-    println!("{}", receive(&request).unwrap());
+    fn main() -> Result<(), Box<dyn std::error::Error>> {
+        // A UE CONTEXT RELEASE REQUEST, then an NG SETUP FAILURE
+        let request = hex::decode("002a4015000003000a0002002a005500020007000f40020500")?;
+        println!("{}", receive(&request)?);
 
-    let failure = hex::decode("40150008000001000f400188").unwrap();
-    println!("{}", receive(&failure).unwrap());
+        let failure = hex::decode("40150008000001000f400188")?;
+        println!("{}", receive(&failure)?);
+        Ok(())
+    }
+
+    main().unwrap();
 }
 
 /// The Rust block 4 of README.md.
@@ -320,6 +328,15 @@ fn block_5() {
         println!("AMF={amf_id} RAN={ran_id} cause={cause:?}");
         Ok(())
     }
+
+    fn main() -> Result<(), Box<dyn std::error::Error>> {
+        // A UE CONTEXT RELEASE REQUEST
+        let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500")?;
+        handle(&NGAP_PDU::decode(&bytes)?.decode_value()?)?;
+        Ok(())
+    }
+
+    main().unwrap();
 }
 
 /// The Rust block 6 of README.md.
@@ -362,13 +379,16 @@ fn block_7() {
         );
         println!("{kind:?}");
 
-        // One is built as a message is
+        // One is built as a message is, and checked against its object set
         let ipv6 = PDUSessionResourceSetupRequestTransfer::new(ProtocolIEContainer(vec![
             build_ngap_ie!(PDUSessionResourceSetupRequestTransfer,
-                REJECT PDUSessionType(PDUSessionType::ipv6))?,
+                PDUSessionType(PDUSessionType::ipv6))?,
         ]));
-        let octets = hex::encode(encode_open_type(&ipv6)?);
-        println!("{octets}");
+        let octets = encode_open_type(&ipv6)?;
+        println!("{}", hex::encode(&octets));
+        for deviation in PDUSessionResourceSetupRequestTransfer::check(&octets)? {
+            println!("{deviation}");
+        }
 
         // The octets of a SourceToTarget-TransparentContainer, as the type that they carry
         let octets = hex::decode("000201020002f8390000012340080100").unwrap();
@@ -448,26 +468,31 @@ fn block_10() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use oxirush_ngap::tree;
 
-    // A UE CONTEXT RELEASE REQUEST, as a tree
-    let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-    let pdu = NGAP_PDU::decode(&bytes).unwrap();
-    println!("{}", pdu.to_tree());
+    fn main() -> Result<(), Box<dyn std::error::Error>> {
+        // A UE CONTEXT RELEASE REQUEST, as a tree
+        let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500")?;
+        let pdu = NGAP_PDU::decode(&bytes)?;
+        println!("{}", pdu.to_tree());
 
-    // Its view: each value with the path that selects it
-    let mut view = pdu.to_view().unwrap();
-    for (path, value) in inspect::paths(&view) {
-        println!("{path} = {value}");
+        // Its view: each value with the path that selects it
+        let mut view = pdu.to_view()?;
+        for (path, value) in inspect::paths(&view) {
+            println!("{path} = {value}");
+        }
+
+        // A value, and another alternative of a CHOICE in place of the one that is there
+        inspect::set(&mut view, "/ngap/RAN-UE-NGAP-ID/value", tree!(9))?;
+        inspect::set(&mut view, "/ngap/Cause/nas", tree!("Normal Release"))?;
+        let edited = pdu.with_view(&view)?;
+        println!("{}", edited.to_tree());
+
+        // A name that the type does not have is refused, and the view is as it was
+        let wrong = inspect::set(&mut view, "/ngap/Cause/radioNetwrok", tree!("unspecified"));
+        println!("{}", wrong.unwrap_err());
+        Ok(())
     }
 
-    // A value, and another alternative of a CHOICE in place of the one that is there
-    inspect::set(&mut view, "/ngap/RAN-UE-NGAP-ID/value", tree!(9)).unwrap();
-    inspect::set(&mut view, "/ngap/Cause/nas", tree!("Normal Release")).unwrap();
-    let edited = pdu.with_view(&view).unwrap();
-    println!("{}", edited.to_tree());
-
-    // A name that the type does not have is refused, and the view is as it was
-    let wrong = inspect::set(&mut view, "/ngap/Cause/radioNetwrok", tree!("unspecified"));
-    println!("{}", wrong.unwrap_err());
+    main().unwrap();
 }
 
 /// The Rust block 11 of README.md.
@@ -476,25 +501,30 @@ fn block_11() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use oxirush_ngap::tree;
 
-    // A tree: the name of the message, whatever its case and its separators, then its IEs
-    let request = tree!({
-        "message": "ue context release request",
-        "ies": [
-            {"AMF-UE-NGAP-ID": 42},
-            {"RAN-UE-NGAP-ID": 7},
-            {"Cause": {"radioNetwork": "user-inactivity"}},
-            // An IE that the message does not have says its criticality
-            {"RANNodeName": "gnb-1", "criticality": "ignore"},
-        ],
-    });
+    fn main() -> Result<(), Box<dyn std::error::Error>> {
+        // A tree: the name of the message, whatever its case and its separators, then its IEs
+        let request = tree!({
+            "message": "ue context release request",
+            "ies": [
+                {"AMF-UE-NGAP-ID": 42},
+                {"RAN-UE-NGAP-ID": 7},
+                {"Cause": {"radioNetwork": "user-inactivity"}},
+                // An IE that the message does not have says its criticality
+                {"RANNodeName": "gnb-1", "criticality": "ignore"},
+            ],
+        });
 
-    let pdu = NGAP_PDU::from_tree(&request).unwrap();
-    println!("{}", hex::encode(pdu.encode().unwrap()));
+        let pdu = NGAP_PDU::from_tree(&request)?;
+        println!("{}", hex::encode(pdu.encode()?));
 
-    // The name gave the direction, the procedure code and the criticalities
-    let view = pdu.to_view().unwrap();
-    println!("{} {} {}", view["direction"], view["procedure_code"], view["criticality"]);
-    println!("{}", tree!(inspect::select(&view, "/ngap/*/criticality").unwrap()));
+        // The name gave the direction, the procedure code and the criticalities
+        let view = pdu.to_view()?;
+        println!("{} {} {}", view["direction"], view["procedure_code"], view["criticality"]);
+        println!("{}", tree!(inspect::select(&view, "/ngap/*/criticality")?));
+        Ok(())
+    }
+
+    main().unwrap();
 }
 
 /// The Rust block 12 of README.md.
@@ -503,22 +533,27 @@ fn block_12() {
     use oxirush_ngap::{inspect, ngap::NGAP_PDU};
     use oxirush_ngap::tree;
 
-    // `{"octets": "…"}` in place of a value is the octets of the IE, whatever they are
-    let request = tree!({"message": "UEContextReleaseRequest", "ies": [
-        {"AMF-UE-NGAP-ID": 42},
-        {"65000": {"octets": "c0ffee"}, "criticality": "reject"},
-    ]});
-    let pdu = NGAP_PDU::from_tree(&request).unwrap();
-    println!("{}", hex::encode(pdu.encode().unwrap()));
+    fn main() -> Result<(), Box<dyn std::error::Error>> {
+        // `{"octets": "…"}` in place of a value is the octets of the IE, whatever they are
+        let request = tree!({"message": "UEContextReleaseRequest", "ies": [
+            {"AMF-UE-NGAP-ID": 42},
+            {"65000": {"octets": "c0ffee"}, "criticality": "reject"},
+        ]});
+        let pdu = NGAP_PDU::from_tree(&request)?;
+        println!("{}", hex::encode(pdu.encode()?));
 
-    // A view shows an IE that does not decode by its octets, and says why
-    let mut view = pdu.to_view().unwrap();
-    println!("{}", view["message"]["protocolIEs"][1]);
+        // A view shows an IE that does not decode by its octets, and says why
+        let mut view = pdu.to_view()?;
+        println!("{}", view["message"]["protocolIEs"][1]);
 
-    // In a view, the `octets` of an IE are set in place of its value
-    inspect::set(&mut view, "/ngap/AMF-UE-NGAP-ID/octets", tree!("00ff")).unwrap();
-    let edited = pdu.with_view(&view).unwrap();
-    println!("{}", edited.to_tree());
+        // In a view, the `octets` of an IE are set in place of its value
+        inspect::set(&mut view, "/ngap/AMF-UE-NGAP-ID/octets", tree!("00ff"))?;
+        let edited = pdu.with_view(&view)?;
+        println!("{}", edited.to_tree());
+        Ok(())
+    }
+
+    main().unwrap();
 }
 
 /// The Rust block 13 of README.md.
@@ -526,13 +561,18 @@ fn block_12() {
 fn block_13() {
     use oxirush_ngap::ngap::{NGAP_PDU, SNSSAI, SST};
 
-    let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-    let pdu = NGAP_PDU::decode(&bytes).unwrap();
-    let text = serde_json::to_string(&pdu).unwrap();
-    let read: NGAP_PDU = serde_json::from_str(&text).unwrap();
-    assert_eq!(read.encode().unwrap(), bytes);
+    fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500")?;
+        let pdu = NGAP_PDU::decode(&bytes)?;
+        let text = serde_json::to_string(&pdu)?;
+        let read: NGAP_PDU = serde_json::from_str(&text)?;
+        assert_eq!(read.encode()?, bytes);
 
-    // A value alone has the form that a tree shows it in: an SST is a number
-    let slice = SNSSAI::new(SST([1]), None, None);
-    println!("{}", serde_json::to_string(&slice).unwrap());
+        // A value alone has the form that a tree shows it in: an SST is a number
+        let slice = SNSSAI::new(SST([1]), None, None);
+        println!("{}", serde_json::to_string(&slice)?);
+        Ok(())
+    }
+
+    main().unwrap();
 }

@@ -32307,6 +32307,23 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(GTPTEID);
     /// `GTPTunnel ::= SEQUENCE`, with an extension marker.
+    ///
+    /// ```
+    /// use oxirush_ngap::aper::BitString;
+    /// use oxirush_ngap::ngap::*;
+    /// use std::net::Ipv4Addr;
+    ///
+    /// // The end of a tunnel: an IPv4 address in 32 bits, and its TEID
+    /// let address = Ipv4Addr::new(10, 0, 0, 1);
+    /// let tunnel = GTPTunnel::new(
+    ///     TransportLayerAddress(BitString::from(address.octets())),
+    ///     GTPTEID(0x2001u32.to_be_bytes()),
+    ///     None,
+    /// );
+    /// assert_eq!(tunnel.transport_layer_address.0.len(), 32);
+    /// assert_eq!(tunnel.transport_layer_address.0.as_octets(), address.octets());
+    /// assert_eq!(u32::from_be_bytes(tunnel.gtp_teid.0), 0x2001);
+    /// ```
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct GTPTunnel<'a> {
         pub transport_layer_address: TransportLayerAddress<'a>,
@@ -66483,6 +66500,22 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PDUSessionResourceSetupItemHOReq<'a>);
     /// `PDUSessionResourceSetupItemSUReq ::= SEQUENCE`, with an extension marker.
+    ///
+    /// ```
+    /// use oxirush_ngap::helpers::s_nssai;
+    /// use oxirush_ngap::{ie, ngap::*};
+    ///
+    /// // PDU session 5 of the slice of SST 1, with the octets of its transfer: here one of
+    /// // the PDU session type alone
+    /// let transfer = hex::decode("0000010086000100").unwrap();
+    /// let item = PDUSessionResourceSetupItemSUReq::new(PDUSessionID(5), None, s_nssai(1, None), transfer.into(), None);
+    ///
+    /// // The transfer, read from the item
+    /// let read: PDUSessionResourceSetupRequestTransfer =
+    ///     decode_open_type(&item.pdu_session_resource_setup_request_transfer)?;
+    /// assert_eq!(read.ie::<ie::PDUSessionType>().unwrap()?, PDUSessionType::ipv4);
+    /// # Ok::<(), oxirush_ngap::Error>(())
+    /// ```
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceSetupItemSUReq<'a> {
         pub pdu_session_id: PDUSessionID,
@@ -67116,6 +67149,48 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(PDUSessionResourceSetupListSURes<'a>);
     /// `PDUSessionResourceSetupRequestTransfer ::= SEQUENCE`, with an extension marker.
+    ///
+    /// A transfer of protocol IEs: the macros build and read its IEs as those of a message,
+    /// each with the criticality that its object set assigns, and `check` compares its octets
+    /// with that set.
+    ///
+    /// ```
+    /// use oxirush_ngap::aper::BitString;
+    /// use oxirush_ngap::{build_ngap_ie, ngap::*};
+    ///
+    /// // The UPF's end of the tunnel, the type of the session, and its QoS flow
+    /// let tunnel = GTPTunnel::new(TransportLayerAddress(BitString::from([10, 0, 0, 1])), GTPTEID([0, 0, 0, 1]), None);
+    /// let flow = QosFlowSetupRequestItem::new(
+    ///     QosFlowIdentifier(1),
+    ///     QosFlowLevelQosParameters::new(
+    ///         QosCharacteristics::nonDynamic5QI(NonDynamic5QIDescriptor::new(FiveQI(9), None, None, None, None)),
+    ///         AllocationAndRetentionPriority::new(PriorityLevelARP(8),
+    ///             PreEmptionCapability::shall_not_trigger_pre_emption,
+    ///             PreEmptionVulnerability::not_pre_emptable, None),
+    ///         None, None, None, None,
+    ///     ),
+    ///     None,
+    ///     None,
+    /// );
+    /// let transfer = PDUSessionResourceSetupRequestTransfer::new(ProtocolIEContainer(vec![
+    ///     build_ngap_ie!(PDUSessionResourceSetupRequestTransfer,
+    ///         UL_NGU_UP_TNLInformation(UPTransportLayerInformation::gTPTunnel(tunnel)))?,
+    ///     build_ngap_ie!(PDUSessionResourceSetupRequestTransfer, PDUSessionType(PDUSessionType::ipv4))?,
+    ///     build_ngap_ie!(PDUSessionResourceSetupRequestTransfer,
+    ///         QosFlowSetupRequestList(QosFlowSetupRequestList(vec![flow])))?,
+    /// ]));
+    ///
+    /// // The octets that an item of a PDU SESSION RESOURCE SETUP REQUEST holds
+    /// let octets = encode_open_type(&transfer)?;
+    /// assert!(PDUSessionResourceSetupRequestTransfer::check(&octets)?.is_empty());
+    ///
+    /// // Without its QoS flows, a mandatory IE
+    /// let mut partial = transfer.clone();
+    /// partial.protocol_ies.0.pop();
+    /// let found = PDUSessionResourceSetupRequestTransfer::check(&encode_open_type(&partial)?)?;
+    /// assert_eq!(found[0].to_string(), "QosFlowSetupRequestList (IE 136) is mandatory, and the message does not have it");
+    /// # Ok::<(), oxirush_ngap::Error>(())
+    /// ```
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct PDUSessionResourceSetupRequestTransfer<'a> {
         pub protocol_ies: ProtocolIEContainer<'a>,
@@ -99101,6 +99176,23 @@ pub mod ngap_ies {
     #[cfg(feature = "serde")]
     oxirush_utils::impl_serde!(UserLocationInformationN3IWFWithoutPortNumber<'a>);
     /// `UserLocationInformationNR ::= SEQUENCE`, with an extension marker.
+    ///
+    /// ```
+    /// use oxirush_ngap::helpers::{nr_cgi, plmn, tai};
+    /// use oxirush_ngap::ngap::*;
+    ///
+    /// // The cell and the tracking area of a UE, as an INITIAL UE MESSAGE has them
+    /// let network = plmn("208", "93")?;
+    /// let location = UserLocationInformationNR::new(
+    ///     nr_cgi(network, 0x123456, 24, 1)?,
+    ///     tai(network, [0x00, 0x00, 0x01]),
+    ///     None,
+    ///     None,
+    /// );
+    /// let ie = UserLocationInformation::userLocationInformationNR(location);
+    /// assert_eq!(hex::encode(encode_open_type(&ie)?), "4002f839123456001002f839000001");
+    /// # Ok::<(), oxirush_ngap::Error>(())
+    /// ```
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     pub struct UserLocationInformationNR {
         pub nr_cgi: NRCGI,
@@ -110878,6 +110970,18 @@ pub type AMF_UE_NGAP_ID = AMFUENGAPID;
 pub type RAN_UE_NGAP_ID = RANUENGAPID;
 /// A PDU that owns its octets: what `decode` gives, what the macros build, and what
 /// is kept and sent. It borrows nothing, and so has no lifetime to write.
+///
+/// ```
+/// use oxirush_ngap::ngap::NGAP_PDU;
+///
+/// // A UE CONTEXT RELEASE REQUEST, kept after the octets that it was read from
+/// let received = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
+/// let pdu: NGAP_PDU = NGAP_PDU::decode(&received)?;
+/// drop(received);
+/// assert_eq!(pdu.procedure_name(), "UEContextReleaseRequest");
+/// assert_eq!(hex::encode(pdu.encode()?), "002a4015000003000a0002002a005500020007000f40020500");
+/// # Ok::<(), oxirush_ngap::Error>(())
+/// ```
 #[allow(non_camel_case_types)]
 pub type NGAP_PDU = NGAPPDU<'static>;
 pub use crate::registry::NgapPduKind;
@@ -110890,6 +110994,19 @@ impl NGAPPDU<'static> {
     /// `check`. The crate has no limit on the octets of a PDU, and a call on a PDU takes
     /// time and memory in proportion to them: the caller bounds what it reads from a
     /// peer.
+    ///
+    /// ```
+    /// use oxirush_ngap::{ErrorKind, ngap::NGAP_PDU};
+    ///
+    /// let octets = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
+    /// let pdu = NGAP_PDU::decode(&octets)?;
+    /// assert_eq!((pdu.direction(), pdu.procedure_name()), ("InitiatingMessage", "UEContextReleaseRequest"));
+    ///
+    /// // The octets of a PDU that end early
+    /// let error = NGAP_PDU::decode(&octets[..octets.len() - 1]).unwrap_err();
+    /// assert_eq!(error.kind(), ErrorKind::Decode);
+    /// # Ok::<(), oxirush_ngap::Error>(())
+    /// ```
     pub fn decode(bytes: &[u8]) -> Result<Self, crate::Error> {
         match NGAPPDU::usual(bytes) {
             Some((alternative, code, criticality, message)) => Ok(Self::of_alternative(
@@ -111149,28 +111266,78 @@ impl<'a> NGAPPDU<'a> {
         matches!(self, NGAPPDU::unsuccessfulOutcome(_))
     }
 }
+/// The name of the message, its procedure code and its direction, then the identifiers of
+/// the UE that the message has, by the names of its IEs:
+///
+/// ```
+/// use oxirush_ngap::ngap::NGAP_PDU;
+///
+/// let octets = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
+/// let pdu = NGAP_PDU::decode(&octets)?;
+/// assert_eq!(pdu.to_string(), "UEContextReleaseRequest (procedure 42, initiating message), AMF-UE-NGAP-ID 42, RAN-UE-NGAP-ID 7");
+/// # Ok::<(), oxirush_ngap::Error>(())
+/// ```
+///
+/// A procedure that the specification does not have in that direction is an unknown
+/// message, with its procedure code.
 impl core::fmt::Display for NGAPPDU<'_> {
     fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(
-            formatter,
-            "{} {} (code={})",
-            self.direction(),
-            self.procedure_name(),
-            self.procedure_code()
-        )
+        let direction = match self {
+            NGAPPDU::initiatingMessage(_) => "initiating message",
+            NGAPPDU::successfulOutcome(_) => "successful outcome",
+            NGAPPDU::unsuccessfulOutcome(_) => "unsuccessful outcome",
+        };
+        let code = self.procedure_code();
+        match crate::registry::message_name(self.direction(), code) {
+            Some(name) => write!(formatter, "{name} (procedure {code}, {direction})")?,
+            None => write!(
+                formatter,
+                "an unknown message (procedure {code}, {direction})"
+            )?,
+        }
+        if let Some(Ok(id)) = self.ie::<crate::ie::AMF_UE_NGAP_ID>() {
+            let name = <crate::ie::AMF_UE_NGAP_ID as oxirush_aper::protocol::Ie>::NAME;
+            write!(formatter, ", {name} {}", id.0)?;
+        }
+        if let Some(Ok(id)) = self.ie::<crate::ie::RAN_UE_NGAP_ID>() {
+            let name = <crate::ie::RAN_UE_NGAP_ID as oxirush_aper::protocol::Ie>::NAME;
+            write!(formatter, ", {name} {}", id.0)?;
+        }
+        Ok(())
     }
 }
 /// The open type of a value: its complete encoding in aligned PER, in which an empty
-/// encoding becomes one zero octet (X.691 (02/2021) §11.1.4, §11.2.1).
+/// encoding becomes one zero octet (X.691 (02/2021) §11.1.4, §11.2.1). It is what a
+/// transfer, a container or the value of an IE holds as octets.
+///
+/// ```
+/// use oxirush_ngap::ngap::{Cause, CauseRadioNetwork, decode_open_type, encode_open_type};
+///
+/// let cause = Cause::radioNetwork(CauseRadioNetwork::unspecified);
+/// let octets = encode_open_type(&cause)?;
+/// assert_eq!(hex::encode(&octets), "0000");
+/// assert_eq!(decode_open_type::<Cause>(&octets)?, cause);
+/// # Ok::<(), oxirush_ngap::Error>(())
+/// ```
 pub fn encode_open_type<T: Encode>(value: &T) -> Result<Octets<'static>, crate::Error> {
     oxirush_aper::encode(value).map(Octets::owned)
 }
 /// The value of the type `T` that the octets of an open type hold, in aligned PER: one
 /// value, whole, and no octet after it. What the value holds of octets is borrowed
 /// from `value`.
+///
+/// ```
+/// use oxirush_ngap::{ErrorKind, ngap::{Cause, CauseRadioNetwork, decode_open_type}};
+///
+/// // The octets of a Cause, as the value of its IE holds them
+/// let cause: Cause = decode_open_type(&[0x00, 0x00])?;
+/// assert_eq!(cause, Cause::radioNetwork(CauseRadioNetwork::unspecified));
+///
+/// // An octet after the value is an error
+/// let error = decode_open_type::<Cause>(&[0x00, 0x00, 0x00]).unwrap_err();
+/// assert_eq!(error.kind(), ErrorKind::Decode);
+/// # Ok::<(), oxirush_ngap::Error>(())
+/// ```
 pub fn decode_open_type<'a, T: Decode<'a>>(value: &'a [u8]) -> Result<T, crate::Error> {
     oxirush_aper::decode(value)
 }
-
-// The transfers of protocol IEs, whose IEs the macros read and build.
-oxirush_aper::__transfer!(crate::Ngap, ngap, AIOTSessionReleaseCommandTransfer CommandRequestTransfer InventoryRequestTransfer MBSSessionSetupOrModRequestTransfer MulticastSessionUpdateRequestTransfer PDUSessionResourceModifyRequestTransfer PDUSessionResourceSetupRequestTransfer);

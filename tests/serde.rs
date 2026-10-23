@@ -194,21 +194,21 @@ fn a_name_written_twice_is_refused() {
 fn an_unquoted_true_of_yaml_is_the_name_of_an_enumerated() {
     let yaml = "message: UEContextReleaseRequest\nies:\n- AMF-UE-NGAP-ID: 1\n- RAN-UE-NGAP-ID: 2\n\
                 - Cause: {nas: normal-release}\n- GW-Context-Release-Indication: true\n";
-    let pdu: NGAP_PDU = serde_yaml::from_str(yaml).unwrap();
+    let pdu: NGAP_PDU = serde_norway::from_str(yaml).unwrap();
     assert_eq!(
         pdu.to_tree()["ies"][3],
         tree!({"GW-Context-Release-Indication": "true"})
     );
-    let quoted = serde_yaml::from_str::<NGAP_PDU>(&yaml.replace(": true", ": 'true'")).unwrap();
+    let quoted = serde_norway::from_str::<NGAP_PDU>(&yaml.replace(": true", ": 'true'")).unwrap();
     assert_eq!(quoted, pdu);
     assert!(
-        serde_yaml::to_string(&pdu)
+        serde_norway::to_string(&pdu)
             .unwrap()
             .contains("GW-Context-Release-Indication: 'true'")
     );
     // A type without such a name takes no boolean.
     let other = yaml.replace("{nas: normal-release}", "{nas: true}");
-    let error = serde_yaml::from_str::<NGAP_PDU>(&other)
+    let error = serde_norway::from_str::<NGAP_PDU>(&other)
         .unwrap_err()
         .to_string();
     assert!(

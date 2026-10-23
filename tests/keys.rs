@@ -59,7 +59,8 @@ fn debug_of_a_message_with_a_key_shows_the_length_of_its_octets() -> Result<(), 
         );
         assert_eq!(
             pdu.to_string(),
-            "InitiatingMessage InitialContextSetup (code=14)"
+            "InitialContextSetupRequest (procedure 14, initiating message), AMF-UE-NGAP-ID 1, \
+             RAN-UE-NGAP-ID 7"
         );
 
         // Its IEs: the two identifiers are printed, and the key is 32 octets
@@ -113,9 +114,9 @@ fn debug_of_a_message_without_a_key_shows_its_octets() -> Result<(), Error> {
         REJECT NAS_PDU(vec![0x7e, 0x00, 0x5d]),
     )?;
     let printed = format!("{pdu:?}");
-    assert!(printed.contains("7E005D"), "{printed}");
+    assert!(printed.contains("7e005d"), "{printed}");
     let printed = format!("{:?}", pdu.protocol_ies()?);
-    assert!(printed.contains("value: 037E005D"), "{printed}");
+    assert!(printed.contains("value: 037e005d"), "{printed}");
     Ok(())
 }
 

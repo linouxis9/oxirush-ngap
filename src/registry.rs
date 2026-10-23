@@ -583,3 +583,13 @@ oxirush_aper::__ies! {
     496 "AIoT-SecurityInfo" crate::ngap::AIoTSecurityInfo<'a> => AIoT_SecurityInfo AIoTSecurityInfo;
 }
 oxirush_aper::__lists! {}
+oxirush_aper::__transfer_sets! {
+    protocol Ngap, bindings ngap;
+    "AIOTSessionReleaseCommandTransfer" AIOTSessionReleaseCommandTransfer [466 reject mandatory, 15 ignore mandatory];
+    "CommandRequestTransfer" CommandRequestTransfer [466 reject mandatory, 472 reject mandatory, 474 reject mandatory, 473 reject mandatory];
+    "InventoryRequestTransfer" InventoryRequestTransfer [466 reject mandatory, 468 reject mandatory, 469 reject mandatory, 470 reject mandatory, 471 reject optional, 496 reject mandatory];
+    "MBSSessionSetupOrModRequestTransfer" MBSSessionSetupOrModRequestTransfer [352 reject optional, 297 reject mandatory, 357 ignore optional, 372 ignore optional, 434 reject optional];
+    "MulticastSessionUpdateRequestTransfer" MulticastSessionUpdateRequestTransfer [299 reject mandatory, 298 reject optional, 297 reject optional, 351 reject optional, 352 reject optional, 444 reject optional];
+    "PDUSessionResourceModifyRequestTransfer" PDUSessionResourceModifyRequestTransfer [130 reject optional, 140 reject optional, 129 reject optional, 135 reject optional, 137 reject optional, 126 reject optional, 166 ignore optional, 186 ignore optional, 190 ignore optional, 195 ignore optional, 138 ignore optional, 319 ignore optional, 317 ignore optional, 435 ignore optional];
+    "PDUSessionResourceSetupRequestTransfer" PDUSessionResourceSetupRequestTransfer [130 reject optional, 139 reject mandatory, 126 reject optional, 127 reject optional, 134 reject mandatory, 138 reject optional, 129 reject optional, 136 reject mandatory, 166 ignore optional, 22 ignore optional, 195 ignore optional, 186 ignore optional, 190 ignore optional, 197 ignore optional, 318 ignore optional, 394 ignore optional];
+}

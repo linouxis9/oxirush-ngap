@@ -105,9 +105,12 @@ before this crate is published:
    `.github/workflows/protocol.yml`, and what `protocols/tests/package.sh`
    and `protocols/tests/workspace_member.sh` write for the two crates when no
    directory is given for them.
-3. Delete the patch and its lines from the Installation of the README, this
-   section but for its last paragraph, and the line of `oxirush-utils` in
-   `build/revisions`.
+3. Delete the line `This page describes oxirush-ngap ..., which is not on
+   crates.io yet.` under the first block of the README, the part of its
+   Installation from `Until ... is on crates.io` to the `--config` block, the
+   comment `# with the --config lines of Installation` of its Tests and
+   fuzzing, this section but for its last paragraph, and the line of
+   `oxirush-utils` in `build/revisions`.
 4. `cargo publish --dry-run` then builds the package against crates.io
    alone, and fails while a dependency is not there.
 
@@ -193,7 +196,7 @@ Three readings of the vectors do not depend on each other:
   `later.tsv` it says that it does not know the additions, and it stops at a
   type that has 64 of them, which are more than it takes.
 
-```bash
+```sh
 python3 -m venv venv && venv/bin/pip install pycrate==0.8.1
 venv/bin/python ../oxirush-aper/protocols/tests/fixtures/generate.py --check
 venv/bin/python ../oxirush-aper/protocols/tests/fixtures/generate.py --values values.jsonl
@@ -271,7 +274,7 @@ CI runs each for a minute, from the vectors and the captured PDUs.
 | `view` | The view of a PDU gives that PDU back, a view and a tree are written to a PDU that has the same view and the same tree, each path of a view selects its value, and each value that a view decodes has the JSON form that the JSON Encoding Rules of rasn give the same octets |
 | `paths` | `select`, `set`, `insert`, `remove`, `open`, `check_path` and `enumerated_at` take any path and any value without a panic, and a view that one of them changed is a PDU or an error |
 
-```bash
+```sh
 cargo install cargo-fuzz
 ../oxirush-aper/protocols/fuzz/seed.sh
 # What the targets take from the inside of the crate is behind its own name
@@ -311,7 +314,7 @@ the codec, the macros and the JSON forms on the messages of
 `tests/fixtures/messages.tsv` and on four messages of the size that a
 network sends.
 
-```bash
+```sh
 cd benches
 cargo bench --bench codec -- decode/                   # the time, with criterion
 cargo bench --bench allocations                        # the allocations of each operation

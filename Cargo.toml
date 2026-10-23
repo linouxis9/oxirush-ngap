@@ -29,6 +29,7 @@ serde = ["inspect", "oxirush-utils/serde", "dep:serde_core"]
 
 [package.metadata.docs.rs]
 all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
 
 # `--cfg oxirush_ngap_hooks` gives the fuzz targets of `fuzz/` what they take from the
 # inside of the crate, the module `hooks`. No other build has it: cargo-fuzz sets
@@ -47,7 +48,7 @@ serde_core = { version = "1.0.220", optional = true, default-features = false, f
 hex = "0.4"
 # JSON as text, and YAML, another format that describes itself, for the tests of `serde`.
 serde_json = "1.0.154"
-serde_yaml = "0.9"
+serde_norway = "0.9"
 
 [[example]]
 name = "ngap_build_pdu"

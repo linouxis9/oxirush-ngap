@@ -147,6 +147,21 @@ pub const AMF_POINTER_BITS: usize = 6;
 ///
 /// An error of the kind `Argument` for an AMF Set ID that does not fit in 10 bits and
 /// for an AMF Pointer that does not fit in 6 (TS 38.413 clauses 9.3.3.12 and 9.3.3.19).
+///
+/// ```
+/// use oxirush_ngap::helpers::{guami, plmn};
+///
+/// // AMF Region 1, AMF Set 1 and AMF Pointer 0, in PLMN 208-93
+/// let amf = guami(plmn("208", "93")?, 1, 1, 0)?;
+/// assert_eq!(amf.amf_region_id.0.value(), 1);
+/// assert_eq!((amf.amf_set_id.0.value(), amf.amf_set_id.0.len()), (1, 10));
+/// assert_eq!((amf.amf_pointer.0.value(), amf.amf_pointer.0.len()), (0, 6));
+///
+/// // An AMF Set ID of 11 bits
+/// let error = guami(plmn("208", "93")?, 1, 1024, 0).unwrap_err();
+/// assert_eq!(error.to_string(), "the AMF Set ID 1024 does not fit in 10 bits");
+/// # Ok::<(), oxirush_ngap::Error>(())
+/// ```
 pub fn guami(
     plmn_identity: PLMNIdentity,
     region_id: u8,
@@ -165,6 +180,16 @@ pub fn guami(
 }
 
 /// Build a 5G Tracking Area Identity: a PLMN and the three octets of a TAC.
+///
+/// ```
+/// use oxirush_ngap::helpers::{plmn, tai};
+///
+/// // TAC 1 of PLMN 208-93
+/// let area = tai(plmn("208", "93")?, [0x00, 0x00, 0x01]);
+/// assert_eq!(area.plmn_identity.0, [0x02, 0xf8, 0x39]);
+/// assert_eq!(area.tac.0, [0x00, 0x00, 0x01]);
+/// # Ok::<(), oxirush_ngap::Error>(())
+/// ```
 pub fn tai(plmn_identity: PLMNIdentity, tac: [u8; 3]) -> TAI {
     TAI::new(plmn_identity, TAC(tac), None)
 }
@@ -186,6 +211,19 @@ fn of_a_gnb_id(length: u32) -> Result<u32, Error> {
 ///
 /// An error of the kind `Argument` for a length outside 22 to 32, for a gNB ID that does
 /// not fit in it, and for a cell that does not fit in the bits after it.
+///
+/// ```
+/// use oxirush_ngap::helpers::{nr_cgi, plmn};
+///
+/// // Cell 1 of the gNB 0x123456, whose ID has 24 bits: 12 bits are left for the cell
+/// let cell = nr_cgi(plmn("208", "93")?, 0x123456, 24, 1)?;
+/// assert_eq!(cell.nr_cell_identity.0.value(), 0x1234_5600_1);
+///
+/// // A cell of 13 bits beside a gNB ID of 24
+/// let error = nr_cgi(plmn("208", "93")?, 0x123456, 24, 0x1000).unwrap_err();
+/// assert_eq!(error.to_string(), "the cell of the gNB 4096 does not fit in 12 bits");
+/// # Ok::<(), oxirush_ngap::Error>(())
+/// ```
 pub fn nr_cgi(
     plmn_identity: PLMNIdentity,
     gnb_id: u32,
@@ -296,7 +334,17 @@ pub fn eutra_cgi(
     ))
 }
 
-/// Build Single Network Slice Selection Assistance Information.
+/// Build Single Network Slice Selection Assistance Information: a Slice/Service Type,
+/// and a Slice Differentiator when it has one (TS 38.413 clause 9.3.1.24).
+///
+/// ```
+/// use oxirush_ngap::helpers::s_nssai;
+///
+/// // The slice of SST 1, of the Slice Differentiator 0000ff, and the one without
+/// let slice = s_nssai(1, Some([0x00, 0x00, 0xff]));
+/// assert_eq!((slice.sst.0, slice.sd.map(|sd| sd.0)), ([1], Some([0x00, 0x00, 0xff])));
+/// assert_eq!(s_nssai(1, None).sd, None);
+/// ```
 pub fn s_nssai(sst: u8, sd: Option<[u8; 3]>) -> SNSSAI {
     SNSSAI::new(SST([sst]), sd.map(SD), None)
 }

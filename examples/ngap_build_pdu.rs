@@ -204,7 +204,7 @@ fn admitted_sessions() -> PDUSessionResourceAdmittedList<'static> {
 }
 
 fn print_and_encode(pdu: &NGAP_PDU) -> Result<(), Error> {
-    // Display example: "InitiatingMessage NGSetup (code=21)".
+    // Display example: "NGSetupRequest (procedure 21, initiating message)".
     println!("{pdu}");
     println!(
         "  procedure: {}  direction: {}  code: {}",

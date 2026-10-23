@@ -11,6 +11,12 @@ not source compatible with 0.4.2.
 
 ### Breaking changes relative to 0.4.2
 
+- `Display` of a PDU is the name of its message, its procedure code and its
+  direction, then the identifiers of the UE that it has, by the names of
+  their IEs: `UEContextReleaseRequest (procedure 42, initiating message),
+  AMF-UE-NGAP-ID 42, RAN-UE-NGAP-ID 7`, where 0.4.2 printed
+  `InitiatingMessage UEContextReleaseRequest (code=42)`. `Debug` prints octets in
+  hexadecimal in lower case.
 - The crate no longer depends on `rasn`, and `oxirush_ngap::rasn` is gone.
   The bindings implement `AsnType`, `Decode` and `Encode` of
   `oxirush-aper`, which the crate re-exports as `oxirush_ngap::aper`, and
@@ -110,6 +116,12 @@ not source compatible with 0.4.2.
 
 ### Added
 
+- Each transfer of protocol IEs, as `PDUSessionResourceSetupRequestTransfer`,
+  has the object set that TS 38.413 gives it: the macros give its IEs their
+  criticality, a tree writes them without it, and `check` and
+  `check_structure` of its type compare the octets of a transfer with the
+  set as those of a PDU compare its message.
+
 - `ie`: a marker type for each IE, by the names that the macros take it by,
   and `ies::<T>()` and `ie::<T>()` of a PDU, of a message and of a transfer:
   every occurrence of an IE in order, each decoded alone, and the first. On a
@@ -208,6 +220,11 @@ not source compatible with 0.4.2.
 
 ### Fixed
 
+- A view and a tree read the value of an IE, and a transfer, alike. Octets in
+  another form than the one of X.691, as padding bits that are not zero, are
+  their octets with a `_decode_error` in a view, which a path list lists, where
+  the view had the value that a tolerant reader gives and the tree the octets.
+  A path list lists `_lossy`, where a typed value has no place for all its octets.
 - The octets of a PLMN identity with an MNC of three digits. TS 38.413 clause
   9.3.3.5 has the digits of the MCC, then those of the MNC: 310-410 is
   `13 40 01`. `helpers::plmn` wrote `13 00 14`, the order of TS 24.008,

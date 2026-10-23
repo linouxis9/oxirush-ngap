@@ -9,7 +9,7 @@ the protocol is in `src/` and `compare/` here.
 The comparison with the other implementations of NGAP is in the
 [README](../README.md#performance). The figures below were taken on the same
 machine, an AMD Ryzen 7 5700G (16 threads, Linux 7.0, Rust 1.98.1), measured
-on a quiet machine on 2026-10-18.
+on a quiet machine on 2026-10-18, at aad0ccf.
 
 ## Reading the IEs, and checking a PDU
 
@@ -37,9 +37,9 @@ of the comparison (`cargo run --release --bin checks` in `benches/`):
 | UEContextReleaseRequest (25) | 392 ns, 6 allocations | 64 ns, 2 allocations | 6.1x |
 | InitialUEMessage (70) | 777 ns, 10 allocations | 104 ns, 2 allocations | 7.5x |
 | InitialContextSetupRequest (212) | 1,926 ns, 21 allocations | 196 ns, 2 allocations | 9.8x |
-| NGSetupResponse (58) | 914 ns, 12 allocations | 83 ns, 2 allocations | 11.0x |
+| NGSetupResponse (58) | 914 ns, 12 allocations | 83 ns, 2 allocations | 11x |
 | PDUSessionResourceSetupRequest (192) | 715 ns, 11 allocations | 73 ns, 2 allocations | 9.8x |
-| HandoverRequest (238) | 2,182 ns, 24 allocations | 198 ns, 2 allocations | 11.0x |
+| HandoverRequest (238) | 2,182 ns, 24 allocations | 198 ns, 2 allocations | 11x |
 
 Each program ran on one core, and each figure is the median of three runs.
 
@@ -71,8 +71,26 @@ The programs, the machine and the method of the comparison of the
 |  | decode ns | cycles | instructions | allocations | octets allocated | encode ns | cycles | instructions | allocations | octets allocated | most memory held, KiB |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | this crate | 525 | 2,327 | 6,573 | 3 | 584 | 277 | 1,251 | 4,376 | 2 | 495 | 3,884 |
-| rasn 0.29 | 3,948 (7.5x) | 17,973 (7.7x) | 41,848 (6.4x) | 35 | 2,168 | 3,053 (11.0x) | 13,886 (11.1x) | 46,672 (10.7x) | 53 | 2,171 | 4,652 |
-| hampi 0.7.2 | 5,017 (9.5x) | 23,137 (9.9x) | 69,702 (10.6x) | 76 | 7,641 | 6,941 (25.0x) | 31,925 (25.5x) | 89,343 (20.4x) | 27 | 2,315 | 3,440 |
-| asn1c (Open5GS 2.8.0) | 7,324 (13.9x) | 33,063 (14.2x) | 118,711 (18.1x) | 121 | 15,532 | 3,819 (13.8x) | 17,399 (13.9x) | 65,546 (15.0x) | 32 | 4,504 | 6,336 |
-| free5GC ngap 1.2.0 | 4,993 (9.5x) | 28,849 (12.4x) | 95,642 (14.5x) | 179 | 2,952 | 2,295 (8.3x) | 13,008 (10.4x) | 41,964 (9.6x) | 36 | 1,184 | 9,436 |
-| pycrate 0.8.1 | 465,894 (886.7x) | 2,141,808 (920.6x) | 4,442,005 (675.8x) |  |  | 309,128 (1114.8x) | 1,437,455 (1148.7x) | 2,975,625 (679.9x) |  |  | 37,416 |
+| rasn 0.29 | 3,948 (7.5x) | 17,973 (7.7x) | 41,848 (6.4x) | 35 | 2,168 | 3,053 (11x) | 13,886 (11x) | 46,672 (11x) | 53 | 2,171 | 4,652 |
+| hampi 0.7.2 | 5,017 (9.5x) | 23,137 (9.9x) | 69,702 (11x) | 76 | 7,641 | 6,941 (25x) | 31,925 (26x) | 89,343 (20x) | 27 | 2,315 | 3,440 |
+| asn1c (Open5GS 2.8.0) | 7,324 (14x) | 33,063 (14x) | 118,711 (18x) | 121 | 15,532 | 3,819 (14x) | 17,399 (14x) | 65,546 (15x) | 32 | 4,504 | 6,336 |
+| free5GC ngap 1.2.0 | 4,993 (9.5x) | 28,849 (12x) | 95,642 (14x) | 179 | 2,952 | 2,295 (8.3x) | 13,008 (10x) | 41,964 (9.6x) | 36 | 1,184 | 9,436 |
+| pycrate 0.8.1 | 465,894 (890x) | 2,141,808 (920x) | 4,442,005 (680x) |  |  | 309,128 (1,100x) | 1,437,455 (1,100x) | 2,975,625 (680x) |  |  | 37,416 |
+
+## The method of the comparison
+
+A time is the fastest of three runs of a call repeated for about 0.2 s. The
+cycles and the instructions are those that `perf stat` counts for the calls
+alone: the difference between a run of twice the calls and one of the calls.
+The allocations and the octets that they ask for are counted by an allocator
+that counts in Rust, by `malloc`, `calloc` and `realloc` for asn1c, by
+`runtime.MemStats` for Go; pycrate's are not counted. The most memory held is
+the high-water mark of the resident memory of the program (`VmHWM`), its runtime
+included. The figures were taken at aad0ccf on an AMD Ryzen 7 5700G (16 threads, Linux
+7.0, Rust 1.98.1, Go 1.27, Python 3.14), each program on one core, measured on
+a quiet machine on 2026-10-18: each is the median of three runs of the script,
+which fetches each implementation at a pinned version: hampi 0.7.2 and rasn
+0.29.0 from crates.io, Open5GS v2.8.0 from GitHub, the ngap package v1.2.0 of
+free5GC through its go.mod, pycrate 0.8.1 from PyPI, and the ASN.1 from the
+archive of 3GPP.
+The [README](../README.md#against-other-implementations) has the command.

@@ -2,7 +2,7 @@
 name = "oxirush-ngap"
 version = "0.5.0"
 edition = "2024"
-description = "A Rust codec for NGAP, the NG Application Protocol between an NG-RAN node and an AMF (3GPP TS 38.413): types generated from the ASN.1 of the specification, aligned PER, and macros that build a message and read its IEs by name"
+description = "5G NGAP (3GPP TS 38.413, Release 19) in Rust, generated from the ASN.1: aligned PER, IEs read and built by name, message checks with their causes, JSON trees and serde. No unsafe code."
 license = "Apache-2.0"
 repository = "https://github.com/linouxis9/oxirush-ngap"
 authors = ["Valentin D'Emmanuele"]

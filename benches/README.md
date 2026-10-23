@@ -68,14 +68,30 @@ measures a clean build.
 The programs, the machine and the method of the comparison of the
 [README](../README.md#against-other-implementations), per call:
 
-|  | decode ns | cycles | instructions | allocations | octets allocated | encode ns | cycles | instructions | allocations | octets allocated | most memory held, KiB |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| this crate | 525 | 2,327 | 6,573 | 3 | 584 | 277 | 1,251 | 4,376 | 2 | 495 | 3,884 |
-| rasn 0.29 | 3,948 (7.5x) | 17,973 (7.7x) | 41,848 (6.4x) | 35 | 2,168 | 3,053 (11x) | 13,886 (11x) | 46,672 (11x) | 53 | 2,171 | 4,652 |
-| hampi 0.7.2 | 5,017 (9.5x) | 23,137 (9.9x) | 69,702 (11x) | 76 | 7,641 | 6,941 (25x) | 31,925 (26x) | 89,343 (20x) | 27 | 2,315 | 3,440 |
-| asn1c (Open5GS 2.8.0) | 7,324 (14x) | 33,063 (14x) | 118,711 (18x) | 121 | 15,532 | 3,819 (14x) | 17,399 (14x) | 65,546 (15x) | 32 | 4,504 | 6,336 |
-| free5GC ngap 1.2.0 | 4,993 (9.5x) | 28,849 (12x) | 95,642 (14x) | 179 | 2,952 | 2,295 (8.3x) | 13,008 (10x) | 41,964 (9.6x) | 36 | 1,184 | 9,436 |
-| pycrate 0.8.1 | 465,894 (890x) | 2,141,808 (920x) | 4,442,005 (680x) |  |  | 309,128 (1,100x) | 1,437,455 (1,100x) | 2,975,625 (680x) |  |  | 37,416 |
+|  | this crate | rasn 0.29 | hampi 0.7.2 | asn1c (Open5GS 2.8.0) | free5GC ngap 1.2.0 | pycrate 0.8.1 |
+|---|---|---|---|---|---|---|
+| decode ns | 525 | 3,948 | 5,017 | 7,324 | 4,993 | 465,894 |
+| decode cycles | 2,327 | 17,973 | 23,137 | 33,063 | 28,849 | 2,141,808 |
+| decode instructions | 6,573 | 41,848 | 69,702 | 118,711 | 95,642 | 4,442,005 |
+| decode allocations | 3 | 35 | 76 | 121 | 179 |  |
+| decode octets allocated | 584 | 2,168 | 7,641 | 15,532 | 2,952 |  |
+| encode ns | 277 | 3,053 | 6,941 | 3,819 | 2,295 | 309,128 |
+| encode cycles | 1,251 | 13,886 | 31,925 | 17,399 | 13,008 | 1,437,455 |
+| encode instructions | 4,376 | 46,672 | 89,343 | 65,546 | 41,964 | 2,975,625 |
+| encode allocations | 2 | 53 | 27 | 32 | 36 |  |
+| encode octets allocated | 495 | 2,171 | 2,315 | 4,504 | 1,184 |  |
+| most memory held, KiB | 3,884 | 4,652 | 3,440 | 6,336 | 9,436 | 37,416 |
+
+The time, the cycles and the instructions of each other implementation over this crate's:
+
+|  | rasn / this crate | hampi / this crate | asn1c / this crate | free5GC / this crate | pycrate / this crate |
+|---|---|---|---|---|---|
+| decode ns | 7.5x | 9.5x | 14x | 9.5x | 890x |
+| decode cycles | 7.7x | 9.9x | 14x | 12x | 920x |
+| decode instructions | 6.4x | 11x | 18x | 14x | 680x |
+| encode ns | 11x | 25x | 14x | 8.3x | 1,100x |
+| encode cycles | 11x | 26x | 14x | 10x | 1,100x |
+| encode instructions | 11x | 20x | 15x | 9.6x | 680x |
 
 ## The method of the comparison
 

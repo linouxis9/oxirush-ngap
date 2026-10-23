@@ -6,8 +6,8 @@ are those of `protocols/benches/` of
 beside this repository, which oxirush-ngap and oxirush-s1ap share; what is of
 the protocol is in `src/` and `compare/` here.
 
-The comparison with the other implementations of NGAP is in the
-[README](../README.md#performance). The figures below were taken on the same
+The README sums up the comparison with the other implementations of NGAP,
+and [The six PDUs](#the-six-pdus) has its figures. The figures below were taken on the same
 machine, an AMD Ryzen 7 5700G (16 threads, Linux 7.0, Rust 1.98.1), measured
 on a quiet machine on 2026-10-18, at aad0ccf.
 
@@ -62,6 +62,61 @@ measures them, and `cargo bench --bench codec` and `--bench allocations` the
 codec on the PDUs of the tests; from the root of the repository,
 `python3 ../oxirush-aper/protocols/benches/build_cost.py +1.88.0 --features inspect`
 measures a clean build.
+
+## The six PDUs
+
+The comparison of the [README](../README.md#against-other-implementations),
+on the six PDUs of `compare/pdus.tsv`, which each implementation decodes and
+encodes. The envelope alone is `NGAP_PDU::decode`, which leaves the value of
+each IE in its octets; "this crate" decodes the PDU and then every IE of its
+message as its type, which is what the others do; and encoding writes the PDU
+from the typed values of its IEs, as `build_ngap!` does.
+
+Decoding, ns per call:
+
+| PDU (octets) | this crate, the envelope alone | this crate | rasn 0.29 | hampi 0.7.2 | asn1c (Open5GS 2.8.0) | free5GC ngap 1.2.0 | pycrate 0.8.1 |
+|---|---|---|---|---|---|---|---|
+| UEContextReleaseRequest (25) | 8 | 88 | 636 | 594 | 1,670 | 1,150 | 68,916 |
+| InitialUEMessage (70) | 8 | 151 | 1,389 | 1,706 | 2,797 | 1,878 | 127,498 |
+| InitialContextSetupRequest (212) | 10 | 495 | 3,628 | 4,364 | 6,486 | 4,484 | 431,384 |
+| NGSetupResponse (58) | 8 | 316 | 1,881 | 2,324 | 3,532 | 2,354 | 172,873 |
+| PDUSessionResourceSetupRequest (192) | 10 | 180 | 1,230 | 1,805 | 3,177 | 2,099 | 267,008 |
+| HandoverRequest (238) | 8 | 525 | 3,948 | 5,017 | 7,324 | 4,993 | 465,894 |
+
+The time of each other implementation over this crate's, decoding:
+
+| PDU (octets) | rasn / this crate | hampi / this crate | asn1c / this crate | free5GC / this crate | pycrate / this crate |
+|---|---|---|---|---|---|
+| UEContextReleaseRequest (25) | 7.2x | 6.7x | 19x | 13x | 780x |
+| InitialUEMessage (70) | 9.2x | 11x | 18x | 12x | 840x |
+| InitialContextSetupRequest (212) | 7.3x | 8.8x | 13x | 9.1x | 870x |
+| NGSetupResponse (58) | 6.0x | 7.4x | 11x | 7.5x | 550x |
+| PDUSessionResourceSetupRequest (192) | 6.8x | 10x | 18x | 12x | 1,500x |
+| HandoverRequest (238) | 7.5x | 9.5x | 14x | 9.5x | 890x |
+
+Encoding, ns per call:
+
+| PDU (octets) | this crate | rasn 0.29 | hampi 0.7.2 | asn1c (Open5GS 2.8.0) | free5GC ngap 1.2.0 | pycrate 0.8.1 |
+|---|---|---|---|---|---|---|
+| UEContextReleaseRequest (25) | 63 | 889 | 1,314 | 898 | 578 | 45,156 |
+| InitialUEMessage (70) | 99 | 1,265 | 2,640 | 1,474 | 888 | 77,259 |
+| InitialContextSetupRequest (212) | 251 | 2,638 | 6,159 | 3,352 | 2,021 | 288,997 |
+| NGSetupResponse (58) | 128 | 1,453 | 3,048 | 1,492 | 964 | 106,966 |
+| PDUSessionResourceSetupRequest (192) | 119 | 1,347 | 3,054 | 1,987 | 1,128 | 192,710 |
+| HandoverRequest (238) | 277 | 3,053 | 6,941 | 3,819 | 2,295 | 309,128 |
+
+The time of each other implementation over this crate's, encoding:
+
+| PDU (octets) | rasn / this crate | hampi / this crate | asn1c / this crate | free5GC / this crate | pycrate / this crate |
+|---|---|---|---|---|---|
+| UEContextReleaseRequest (25) | 14x | 21x | 14x | 9.1x | 710x |
+| InitialUEMessage (70) | 13x | 27x | 15x | 9.0x | 780x |
+| InitialContextSetupRequest (212) | 10x | 24x | 13x | 8.0x | 1,200x |
+| NGSetupResponse (58) | 11x | 24x | 12x | 7.5x | 840x |
+| PDUSessionResourceSetupRequest (192) | 11x | 26x | 17x | 9.5x | 1,600x |
+| HandoverRequest (238) | 11x | 25x | 14x | 8.3x | 1,100x |
+
+The figures were taken at aad0ccf, by [the method of the comparison](#the-method-of-the-comparison).
 
 ## Every figure of the comparison for HandoverRequest
 

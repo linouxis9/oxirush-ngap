@@ -7,7 +7,7 @@ license = "Apache-2.0"
 repository = "https://github.com/linouxis9/oxirush-ngap"
 authors = ["Valentin D'Emmanuele"]
 rust-version = "1.88"
-keywords = ["5g", "ngap", "3gpp", "asn1", "telecom"]
+keywords = ["ngap", "5g", "gnb", "amf", "3gpp"]
 categories = ["network-programming", "encoding", "parser-implementations"]
 readme = "README.md"
 # `benches/` is a package of its own, whose files are no benchmark of the crate.

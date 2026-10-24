@@ -3,7 +3,7 @@
 //! the ASN.1 of the specification, and writes the bindings, the registry, the inspection
 //! and the oracle of the tests.
 
-use generator::protocol::{Protocol, generate};
+use generator::protocol::{Protocol, UeIds, generate};
 
 /// The IEs whose octets ASN.1 leaves open, each with the type of this module that TS
 /// 38.413 gives them for a handover between NG-RAN nodes: clauses 9.3.1.20, 9.3.1.21
@@ -140,6 +140,12 @@ fn main() -> anyhow::Result<()> {
             ("AMF_UE_NGAP_ID", "AMFUENGAPID"),
             ("RAN_UE_NGAP_ID", "RANUENGAPID"),
         ],
+        ue_ids: UeIds {
+            ie: "UE_NGAP_IDs",
+            choice: "UENGAPIDs",
+            pair: ("uE_NGAP_ID_pair", "amf_ue_ngap_id", "ran_ue_ngap_id"),
+            first: "aMF_UE_NGAP_ID",
+        },
         release_request: "002a4015000003000a0002002a005500020007000f40020500",
         release_display: "UEContextReleaseRequest (procedure 42, initiating message), AMF-UE-NGAP-ID 42, RAN-UE-NGAP-ID 7",
         other_message: "NGSetupRequest",

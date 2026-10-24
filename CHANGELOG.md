@@ -15,8 +15,10 @@ not source compatible with 0.4.2.
   direction, then the identifiers of the UE that it has, by the names of
   their IEs: `UEContextReleaseRequest (procedure 42, initiating message),
   AMF-UE-NGAP-ID 42, RAN-UE-NGAP-ID 7`, where 0.4.2 printed
-  `InitiatingMessage UEContextReleaseRequest (code=42)`. `Debug` prints octets in
-  hexadecimal in lower case.
+  `InitiatingMessage UEContextReleaseRequest (code=42)`. The identifiers that
+  UE-NGAP-IDs holds, as in a UE CONTEXT RELEASE COMMAND, are shown alike: the
+  pair, or the AMF-UE-NGAP-ID alone. `Debug` prints octets in hexadecimal in
+  lower case.
 - The crate no longer depends on `rasn`, and `oxirush_ngap::rasn` is gone.
   The bindings implement `AsnType`, `Decode` and `Encode` of
   `oxirush-aper`, which the crate re-exports as `oxirush_ngap::aper`, and

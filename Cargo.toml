@@ -19,6 +19,7 @@ include = [
     "tests/fixtures/*.tsv",
     "README.md",
     "CHANGELOG.md",
+    "SECURITY.md",
     "LICENSE",
 ]
 

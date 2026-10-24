@@ -111267,7 +111267,8 @@ impl<'a> NGAPPDU<'a> {
     }
 }
 /// The name of the message, its procedure code and its direction, then the identifiers of
-/// the UE that the message has, by the names of its IEs:
+/// the UE that the message has, by the names of their IEs, also where one IE holds both
+/// or the first alone:
 ///
 /// ```
 /// use oxirush_ngap::ngap::NGAP_PDU;
@@ -111302,6 +111303,16 @@ impl core::fmt::Display for NGAPPDU<'_> {
         if let Some(Ok(id)) = self.ie::<crate::ie::RAN_UE_NGAP_ID>() {
             let name = <crate::ie::RAN_UE_NGAP_ID as oxirush_aper::protocol::Ie>::NAME;
             write!(formatter, ", {name} {}", id.0)?;
+        }
+        if let Some(Ok(ids)) = self.ie::<crate::ie::UE_NGAP_IDs>() {
+            let first = <crate::ie::AMF_UE_NGAP_ID as oxirush_aper::protocol::Ie>::NAME;
+            if let crate::ngap::UENGAPIDs::uE_NGAP_ID_pair(pair) = &ids {
+                let second = <crate::ie::RAN_UE_NGAP_ID as oxirush_aper::protocol::Ie>::NAME;
+                let (one, other) = (pair.amf_ue_ngap_id.0, pair.ran_ue_ngap_id.0);
+                write!(formatter, ", {first} {one}, {second} {other}")?;
+            } else if let crate::ngap::UENGAPIDs::aMF_UE_NGAP_ID(id) = &ids {
+                write!(formatter, ", {first} {}", id.0)?;
+            }
         }
         Ok(())
     }

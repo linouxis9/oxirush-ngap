@@ -70,7 +70,7 @@ oxirush-aper and oxirush-utils at the revisions that it is tested with:
 oxirush-ngap = { git = "https://github.com/linouxis9/oxirush-ngap", features = ["inspect"] }
 
 [patch.crates-io]
-oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "48d0bb4607f1ac11ada9966db59297a96d5ca154" }
+oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "93754a798eba4b3f36fb37928bb12d21d5ec8961" }
 oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "1fb4d2720fa0b1c036e54d3e9907b278adac0f80" }
 ```
 
@@ -79,7 +79,7 @@ In a clone, cargo takes them with `--config`, as CI does:
 ```sh
 cargo test --all-features \
   --config 'patch.crates-io.oxirush-aper.git="https://github.com/linouxis9/oxirush-aper"' \
-  --config 'patch.crates-io.oxirush-aper.rev="48d0bb4607f1ac11ada9966db59297a96d5ca154"' \
+  --config 'patch.crates-io.oxirush-aper.rev="93754a798eba4b3f36fb37928bb12d21d5ec8961"' \
   --config 'patch.crates-io.oxirush-utils.git="https://github.com/linouxis9/oxirush-utils"' \
   --config 'patch.crates-io.oxirush-utils.rev="1fb4d2720fa0b1c036e54d3e9907b278adac0f80"'
 ```

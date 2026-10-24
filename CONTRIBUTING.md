@@ -41,7 +41,7 @@ rustfmt --edition 2024 src/ngap.rs src/registry.rs src/inspect_registry.rs \
 
 `rasn-compiler` finds rustfmt through `CARGO`. Commit the five files after
 regenerating them, and do not edit them by hand. They were last regenerated
-on 2026-10-16, with the generator of that revision and the rustfmt of Rust
+on 2026-10-24, with the generator of that revision and the rustfmt of Rust
 1.88: they came out as they are committed, octet for octet. The `Reproduce`
 workflow does it again from the archive of 3GPP when the generator, the
 bindings or the vectors change, and on demand: it extracts the modules, runs
@@ -154,7 +154,6 @@ the vectors, which pycrate wrote and tshark reads, hold for both:
 | Fixed-size `BIT STRING` longer than 16 bits | It is octet-aligned |
 | `OCTET STRING` and `BIT STRING` with a two-octet length determinant | The length is octet-aligned wherever the string starts |
 | Extensible `SEQUENCE` | Its decoder consumes and skips the additions that it does not know |
-
 
 ## The fixtures of the tests
 

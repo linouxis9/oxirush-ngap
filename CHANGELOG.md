@@ -2,7 +2,7 @@
 
 All notable changes to `oxirush-ngap` are recorded here.
 
-## Unreleased (0.5.0)
+## 0.5.0 - 2026-10-24
 
 The bindings come from TS 38.413 V19.4.0 (Release 19) instead of V16.6.0, and
 their codec is [`oxirush-aper`](https://github.com/linouxis9/oxirush-aper),

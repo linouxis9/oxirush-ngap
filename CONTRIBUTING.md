@@ -75,48 +75,20 @@ revision of `build/revisions`, as `build/` takes the generator. A file of
 A change to a shared piece is a commit of oxirush-aper, which each protocol
 crate takes when `build/revisions` records it.
 
-### Until oxirush-aper and oxirush-utils are published
+### The revision of oxirush-aper
 
-Neither is on crates.io yet, so the repository takes both from their
-repositories. `build/revisions` records the commit of each, and every place
-that names one names that commit and no branch: the patch of the README, the
-workflows of oxirush-aper that the two workflows call, and the patch of
-`oxirush-utils` in the manifests of `benches/`, `fuzz/` and `oracle/`, which
-take `oxirush-aper` from the checkout beside the repository. The jobs, the
-scripts and the Reproduce workflow, which checks oxirush-aper out beside the
-repository, read the file. `python3 ../oxirush-aper/protocols/build/pin.py
---check`, which CI runs, fails when a place names another commit, so a
-change of `oxirush-aper` or of `oxirush-utils` changes no result here before
-a commit of this repository says so.
+`build/revisions` records the commit of oxirush-aper whose `generator/` wrote
+the bindings, and whose `protocols/` and workflows the jobs take: the two
+workflows call those of that commit, and the jobs and the Reproduce workflow
+check it out beside the repository, where the manifests of `benches/`,
+`fuzz/` and `oracle/` take it. `python3 ../oxirush-aper/protocols/build/pin.py
+--check`, which CI runs, fails when a workflow names another commit. The
+crates themselves come from crates.io.
 
 To move to another revision, write it in `build/revisions`, check
 oxirush-aper out at it beside this repository, run
 `python3 ../oxirush-aper/protocols/build/pin.py`, which writes it in each
 place, generate the bindings again, and commit the three together.
-
-When `oxirush-aper` 0.1.0 and `oxirush-utils` 0.1.0 are on crates.io, and
-before this crate is published:
-
-1. Delete the line of `oxirush-utils` from `[patch.crates-io]` of
-   `benches/Cargo.toml`, `fuzz/Cargo.toml` and `oracle/Cargo.toml`. The line
-   of `oxirush-aper` stays: those packages build the programs of the
-   checkout beside the repository, with the crate of that checkout.
-2. In oxirush-aper, delete `unpublished` and each `$UNPUBLISHED` from
-   `.github/workflows/protocol.yml`, and what `protocols/tests/package.sh`
-   and `protocols/tests/workspace_member.sh` write for the two crates when no
-   directory is given for them.
-3. Delete the line `This page describes oxirush-ngap ..., which is not on
-   crates.io yet.` under the first block of the README, the part of its
-   Installation from `Until ... is on crates.io` to the `--config` block, the
-   comment `# with the --config lines of Installation` of its Tests and
-   fuzzing, this section but for its last paragraph, and the line of
-   `oxirush-utils` in `build/revisions`.
-4. `cargo publish --dry-run` then builds the package against crates.io
-   alone, and fails while a dependency is not there.
-
-The line of `oxirush-aper` stays in `build/revisions`, with the commit of the
-release: its `generator/`, its `protocols/` and its workflows are not
-published, and the jobs check it out at that commit.
 
 `oxirush-aper`, oxirush-ngap and oxirush-s1ap are released in step. Both
 protocol crates depend on one version of `oxirush-aper` exactly (`=0.1.0` in
@@ -322,10 +294,6 @@ cargo bench --bench codec -- --profile-time 10 to-view/fixtures
 go tool pprof -top target/criterion/to-view/fixtures/profile/profile.pb
 cd .. && python3 ../oxirush-aper/protocols/benches/build_cost.py +1.88.0 --features inspect  # a clean build
 ```
-
-Until `oxirush-aper` and `oxirush-utils` are on crates.io, `build_cost.py` is
-told where each is, before the other arguments: the `--config` options that
-`UNPUBLISHED` of `.github/workflows/ci.yml` has.
 
 `--profile-time` runs the benchmark under [pprof](https://crates.io/crates/pprof)
 and writes a CPU profile that `go tool pprof` reads; with `PROFILE=flamegraph`

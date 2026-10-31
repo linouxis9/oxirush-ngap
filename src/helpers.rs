@@ -425,10 +425,10 @@ mod tests {
     #[test]
     fn each_kind_of_ng_enb_id_has_its_bits_and_the_cell_the_rest() {
         let network = plmn("208", "93").unwrap();
-        for (kind, bits) in [
-            (NgEnbKind::Macro, 20),
-            (NgEnbKind::ShortMacro, 18),
-            (NgEnbKind::LongMacro, 21),
+        for (kind, bits, name) in [
+            (NgEnbKind::Macro, 20, "macro"),
+            (NgEnbKind::ShortMacro, 18, "short macro"),
+            (NgEnbKind::LongMacro, 21, "long macro"),
         ] {
             assert_eq!(kind.bits(), bits);
             let most = (1u32 << bits) - 1;
@@ -452,7 +452,15 @@ mod tests {
                 (1 << (28 - bits)) | u64::from(cell)
             );
             assert!(eutra_cgi(network, kind, 1, cell + 1).is_err());
-            assert!(eutra_cgi(network, kind, most + 1, 0).is_err());
+            assert_eq!(
+                eutra_cgi(network, kind, most + 1, 0)
+                    .unwrap_err()
+                    .to_string(),
+                format!(
+                    "the {name} ng-eNB ID {} does not fit in {bits} bits",
+                    most + 1
+                )
+            );
         }
     }
 

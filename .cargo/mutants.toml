@@ -16,3 +16,13 @@ all_features = true
 # Reproduce workflow writes it again and holds it to what is committed. Its generator,
 # in oxirush-aper, has the mutants of its own, against these files.
 exclude_globs = ["src/ngap.rs", "src/registry.rs", "src/inspect_registry.rs"]
+
+# Mutants that no test can tell from the code, each with why.
+exclude_re = [
+    # The gNB ID in the leftmost bits of the NR Cell Identity, and the cell, which
+    # `fits` has kept to the 36 bits that the gNB ID leaves it, in the others: no bit
+    # is in both, so `^` joins them as `|` does.
+    'src/helpers\.rs:.*: replace \| with \^ in nr_cgi',
+    # The ng-eNB ID and the cell of the E-UTRA Cell Identity, likewise in 28 bits.
+    'src/helpers\.rs:.*: replace \| with \^ in eutra_cgi',
+]

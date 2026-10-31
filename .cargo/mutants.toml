@@ -1,0 +1,18 @@
+# What cargo-mutants 27.1.0 (https://mutants.rs) changes in the crate, and what it
+# leaves alone. .github/workflows/mutants.yml runs every mutant in shards; here, a
+# file at a time:
+#
+#     cargo mutants -f src/helpers.rs
+#
+# The CI of the crate is the same build without debug information
+# (CARGO_PROFILE_DEV_DEBUG=0), which builds the bindings faster and in less memory.
+
+# Every feature, so that the code of `inspect` and of `serde` is in the build that
+# the tests run on: without its feature, a mutant of that code would build without it
+# and pass.
+all_features = true
+
+# The code that build/ generates from the ASN.1, which is no code to mutate: the
+# Reproduce workflow writes it again and holds it to what is committed. Its generator,
+# in oxirush-aper, has the mutants of its own, against these files.
+exclude_globs = ["src/ngap.rs", "src/registry.rs", "src/inspect_registry.rs"]

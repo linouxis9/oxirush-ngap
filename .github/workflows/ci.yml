@@ -17,3 +17,30 @@ jobs:
     uses: linouxis9/oxirush-aper/.github/workflows/protocol.yml@2c7865f979f1c1a98a3a55bf8dea2fae0a5cd061
     with:
       protocol: ngap
+
+  # The lines of the hand-written code that no test reaches: the summary of each file
+  # in the log, and each line in the report that the job keeps (cargo-llvm-cov 0.9.1).
+  # The generated bindings are measured with them, and left out of the summary.
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-24.04
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: llvm-tools-preview
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-llvm-cov@0.9.1
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo llvm-cov --all-features --html --ignore-filename-regex 'src/(ngap|registry|inspect_registry)\.rs'
+      - run: cargo llvm-cov report --summary-only --ignore-filename-regex 'src/(ngap|registry|inspect_registry)\.rs'
+      - run: cargo llvm-cov report --lcov --output-path target/llvm-cov/lcov.info
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            target/llvm-cov/html
+            target/llvm-cov/lcov.info

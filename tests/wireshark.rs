@@ -19,7 +19,8 @@
 //! this crate reads them, compared field by field.
 //!
 //! The crate's reading of each PDU is its tree and what `check()` finds,
-//! written here as one line of JSON; `tests/wireshark/compare.py` has tshark
+//! written here as one line of JSON, with the container of a handover decoded
+//! where the message says that it is an NG-RAN node's (see [`containers`]); `tests/wireshark/compare.py` has tshark
 //! dissect the same octets as NGAP and compares the two along
 //! `tests/wireshark/mapping.tsv`. A difference that
 //! `tests/wireshark/known.tsv` does not explain fails the test. Without
@@ -37,7 +38,9 @@ use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
+use oxirush_ngap::inspect;
 use oxirush_ngap::ngap::NGAP_PDU;
+use oxirush_utils::tree::{Map, Value as Tree};
 use serde_json::{Value, json};
 
 fn found(program: &str, argument: &str) -> bool {
@@ -45,6 +48,108 @@ fn found(program: &str, argument: &str) -> bool {
         .arg(argument)
         .output()
         .is_ok_and(|output| output.status.success())
+}
+
+/// The value of a view in the form of a tree: without what a view keeps of what was
+/// received (its members that start with `_`), and an IE or an extension as its name
+/// with its value.
+fn as_tree(value: &Tree) -> Tree {
+    match value {
+        Tree::Object(members)
+            if members.contains_key("id")
+                && (members.contains_key("value") || members.contains_key("extensionValue")) =>
+        {
+            let id = members["id"].as_u64();
+            let name = members
+                .get("_ie_name")
+                .and_then(Tree::as_str)
+                .or_else(|| {
+                    let names = inspect::ie_names().iter();
+                    names
+                        .copied()
+                        .find(|&(of, _)| Some(u64::from(of)) == id)
+                        .map(|(_, name)| name)
+                })
+                .map_or_else(|| members["id"].to_string(), str::to_owned);
+            let inner = members
+                .get("value")
+                .or_else(|| members.get("extensionValue"));
+            let mut ie = Map::new();
+            ie.insert(name, inner.map(as_tree).unwrap_or_default());
+            if let Some(criticality) = members.get("criticality") {
+                ie.insert("criticality".into(), criticality.clone());
+            }
+            Tree::Object(ie)
+        }
+        Tree::Object(members) => Tree::Object(
+            members
+                .iter()
+                .filter(|(name, _)| !name.starts_with('_'))
+                .map(|(name, member)| (name.clone(), as_tree(member)))
+                .collect(),
+        ),
+        Tree::Array(entries) => Tree::Array(entries.iter().map(as_tree).collect()),
+        other => other.clone(),
+    }
+}
+
+/// The containers of a handover in the tree, decoded where the message says which
+/// type their octets carry: TS 38.413 gives them by reference (§9.3.1.20, §9.3.1.21),
+/// and they are an NG-RAN node's own when the HandoverType of the message is a
+/// handover within the 5GS or to it from the EPS, and in a HANDOVER REQUEST
+/// ACKNOWLEDGE, which the target NG-RAN node sends. This is the choice that Wireshark
+/// makes; for another HandoverType, or none, the octets stay.
+fn containers(pdu: &NGAP_PDU, tree: &mut Tree) {
+    let ies = tree
+        .get("ies")
+        .and_then(Tree::as_array)
+        .cloned()
+        .unwrap_or_default();
+    let to_ngran = ies.iter().any(|ie| {
+        matches!(
+            ie.get("HandoverType").and_then(Tree::as_str),
+            Some("intra5gs" | "eps-to-5gs")
+        )
+    });
+    let acknowledge =
+        tree.get("message").and_then(Tree::as_str) == Some("HandoverRequestAcknowledge");
+    let Ok(mut view) = pdu.to_view() else { return };
+    for (index, ie) in ies.iter().enumerate() {
+        for (container, carried, decoded_when) in [
+            (
+                "SourceToTarget-TransparentContainer",
+                "SourceNGRANNode-ToTargetNGRANNode-TransparentContainer",
+                to_ngran,
+            ),
+            (
+                "TargetToSource-TransparentContainer",
+                "TargetNGRANNode-ToSourceNGRANNode-TransparentContainer",
+                to_ngran || acknowledge,
+            ),
+        ] {
+            if !decoded_when || !ie.get(container).is_some_and(Tree::is_string) {
+                continue;
+            }
+            let path = format!("/ngap/{container}/{carried}");
+            if inspect::open(&mut view, &path).is_err() {
+                continue;
+            }
+            // Octets that do not decode as the type keep their place in the tree
+            if let Ok([opened]) = inspect::select(&view, &path).as_deref()
+                && let Some(decoded) = opened.get("decoded")
+            {
+                let mut value = Map::new();
+                value.insert(carried.into(), as_tree(decoded));
+                if let Some(ie) = tree
+                    .get_mut("ies")
+                    .and_then(|ies| ies.get_mut(index))
+                    .and_then(Tree::as_object_mut)
+                {
+                    ie.insert(container.into(), Tree::Object(value));
+                }
+            }
+        }
+    }
 }
 
 /// What the crate reads of `octets`, as one line of JSON. The tree is
@@ -58,7 +163,9 @@ fn reading(octets: &[u8]) -> String {
                 Ok(deviations) => deviations.iter().map(ToString::to_string).collect(),
                 Err(error) => json!([format!("error: {error}")]),
             };
-            format!("{head},\"check\":{check},\"tree\":{}}}", pdu.to_tree())
+            let mut tree = pdu.to_tree();
+            containers(&pdu, &mut tree);
+            format!("{head},\"check\":{check},\"tree\":{tree}}}")
         }
         Err(error) => format!("{head},\"error\":{}}}", json!(error.to_string())),
     }

@@ -2,6 +2,7 @@
 #
 # Columns, separated by tabs: kind, wireshark, crate, note. The kinds:
 #   name   a field of Wireshark, and the member of the crate's tree that it is, where the names differ
+#   ie     the name of an IE or an extension in Wireshark, and its name in the crate, where another version renamed it
 #   none   a field that is compared to nothing (a name ending with * is a prefix), and why
 #   value  a coded value that the two name differently: `field=Wireshark's name`, the crate's name
 
@@ -12,3 +13,9 @@ none	gsm_a.*	a NAS message of a NAS-PDU, which the crate keeps as octets: compar
 none	ngap.TransportLayerAddressIPv4	the IPv4 address of a transport layer address: compared as that address
 none	ngap.TransportLayerAddressIPv6	the IPv6 address of a transport layer address: compared as that address
 name	ngap.URI_address	traceCollectionEntityURI
+name	ngap.synchronisationState_enum	synchronisationState
+name	ngap.parentTImeSource_enum	parentTImeSource
+ie	MBSCommServiceType	CommServiceType	TS 38.413 V19 names CommServiceType the extension 399 that V18 names MBSCommServiceType
+name	ngap.MBSCommServiceType	commServiceType	its value, which Wireshark names by the type of V18
+value	ngap.MBSCommServiceType=broadcast	mbs-broadcast
+value	ngap.MBSCommServiceType=multicast	mbs-multicast

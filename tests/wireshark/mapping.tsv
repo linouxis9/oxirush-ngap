@@ -1,0 +1,14 @@
+# What Wireshark shows of an NGAP PDU that compare.py does not compare by name, and why.
+#
+# Columns, separated by tabs: kind, wireshark, crate, note. The kinds:
+#   name   a field of Wireshark, and the member of the crate's tree that it is, where the names differ
+#   none   a field that is compared to nothing (a name ending with * is a prefix), and why
+#   value  a coded value that the two name differently: `field=Wireshark's name`, the crate's name
+
+none	e212.*	the MCC and MNC of a PLMN identity: compared as the PLMN identity
+none	nas-5gs.*	the NAS message of a NAS-PDU, which the crate keeps as octets: compared as them
+none	nas-eps.*	the NAS message of a NAS-PDU, which the crate keeps as octets: compared as them
+none	gsm_a.*	a NAS message of a NAS-PDU, which the crate keeps as octets: compared as them
+none	ngap.TransportLayerAddressIPv4	the IPv4 address of a transport layer address: compared as that address
+none	ngap.TransportLayerAddressIPv6	the IPv6 address of a transport layer address: compared as that address
+name	ngap.URI_address	traceCollectionEntityURI

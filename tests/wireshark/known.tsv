@@ -1,0 +1,20 @@
+# The differences between Wireshark and the crate that were triaged, which do not fail the run. A difference
+# that no row explains fails it; the first row that explains one is its verdict.
+#
+# Columns, separated by tabs: octets (`*`, the octets, or `re:` and a regular expression over them), where (a
+# regular expression over the path of the difference; for a row of a class, over the crate's error, Wireshark's
+# errors and what check() found), what (a regular expression over the kind of difference, or the class of a
+# PDU: crate-refuses, ws-malformed), verdict, reference.
+
+# Wireshark 4.6.4 has the ASN.1 of TS 38.413 V18.6.0, the crate that of V19.4.0
+*	.*	an IE that Wireshark does not know	wireshark-gap	TS 38.413 V19: an IE that V18.6.0 does not have
+*	.*	an extension that Wireshark does not know	wireshark-gap	TS 38.413 V19: an extension that V18.6.0 does not have
+
+# Both find the PDU faulty
+*	does not decode	ws-malformed	both-refuse	an IE that check() finds does not decode, where Wireshark stops
+*	the value is followed by \d+ octets	crate-refuses	several-pdus	a payload of several PDUs: Wireshark reads each, the crate one PDU a buffer, and refuses the octets after it
+*	Not a NAS (5GS|EPS) PD	ws-malformed	both-ignore	a NAS-PDU whose octets are no NAS message: the crate keeps them as octets, Wireshark's NAS dissector reports it
+*	no alternative of the CHOICE	crate-refuses	crate-by-clause	an alternative of NGAP-PDU after its extension marker, which no procedure has (TS 38.413 §10.2): Wireshark notes it undecoded
+*	Missing Mandatory elements	ws-malformed	both-ignore	a NAS-PDU cut short: the crate keeps its octets, Wireshark's NAS dissector reports it
+re:^002c40	Malformed	ws-malformed	both-ignore	a UE radio capability of a test whose octets are no RRC message: Wireshark's NR RRC dissector fails on them, the crate keeps them
+*	.*/octets	a member that only the crate shows	crate-octets	a value not written as its sender writes it (padding bits that are not zero, X.691 §11.1.4): the tree keeps its octets and check() reports it, Wireshark reads the value without a note

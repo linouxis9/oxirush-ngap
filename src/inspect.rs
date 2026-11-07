@@ -628,8 +628,17 @@
 //! | `TargetToSource-TransparentContainer` | `TargetNGRANNode-ToSourceNGRANNode-TransparentContainer` | 9.3.1.21 |
 //! | `TargettoSource-Failure-TransparentContainer` | `TargetNGRANNode-ToSourceNGRANNode-FailureTransparentContainer` | 9.3.1.186 |
 //!
-//! For another target system they are octets of its own specification, and nothing in a
-//! message says which they are. So a view and a tree show such an IE by its octets,
+//! At a handover to EPS they carry the containers of TS 36.413, which the tables of
+//! oxirush-s1ap read once the program calls `oxirush_s1ap::inspect::register()`:
+//!
+//! | The octets of | carry a | Clause |
+//! | --- | --- | --- |
+//! | `SourceToTarget-TransparentContainer` | `SourceeNB-ToTargeteNB-TransparentContainer` | 9.3.1.20 |
+//! | `TargetToSource-TransparentContainer` | `TargeteNB-ToSourceeNB-TransparentContainer` | 9.3.1.21 |
+//!
+//! Before that call such a name is an error that says to make it. For another target
+//! system the octets are those of its own specification, and nothing in a message says
+//! which they are. So a view and a tree show such an IE by its octets,
 //! and the one that writes or reads it names the type, in any case:
 //!
 //! - written, the value of the IE is an object with one member, the name of the type

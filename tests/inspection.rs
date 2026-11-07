@@ -951,8 +951,10 @@ fn the_container_of_a_handover_is_written_and_selected_by_the_type_that_it_carri
     ] {
         let error = inspect::check_path("HandoverRequired", &path).unwrap_err();
         let text = error.to_string();
+        // and of S1AP, at a handover to EPS
+        let s1ap = "SourceeNB-ToTargeteNB-TransparentContainer";
         assert!(
-            text.contains(&format!("which has {name}; an IE itself")),
+            text.contains(&format!("which has {name}, {s1ap}; an IE itself")),
             "{error}"
         );
         assert_eq!(inspect::select(&view, &path), Err(error.clone()), "{path}");
@@ -3095,4 +3097,25 @@ fn the_tree_and_the_paths_of_a_view_read_the_octets_of_an_ie_alike() {
     }
     // Some of them have octets that the view says why it shows as such.
     assert!(said > 100, "{said}");
+}
+
+/// The handover container of S1AP that the IE may carry is written by the name of
+/// its type once the program registers the tables of oxirush-s1ap: before, the name is
+/// refused with the call that registers them. No test of this file registers them.
+#[test]
+fn a_container_of_the_other_protocol_says_the_call_that_registers_its_tables() {
+    let tree = oxirush_ngap::tree!({"message": "HandoverRequired", "ies": [
+        {"AMF-UE-NGAP-ID": 42},
+        {"RAN-UE-NGAP-ID": 7},
+        {"SourceToTarget-TransparentContainer": {"SourceeNB-ToTargeteNB-TransparentContainer": {}}},
+    ]});
+    let error = NGAP_PDU::from_tree(&tree).unwrap_err().to_string();
+    let call = "SourceeNB-ToTargeteNB-TransparentContainer is a type of S1AP: call oxirush_s1ap::inspect::register()";
+    assert!(error.contains(call), "{error}");
+    let path =
+        "/ngap/SourceToTarget-TransparentContainer/SourceeNB-ToTargeteNB-TransparentContainer/rRC";
+    let error = inspect::check_path("HandoverRequired", path)
+        .unwrap_err()
+        .to_string();
+    assert!(error.contains(call), "{error}");
 }

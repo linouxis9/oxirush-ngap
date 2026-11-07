@@ -39,6 +39,8 @@ oxirush_aper::__carried! {
     101 "SourceNGRANNode-ToTargetNGRANNode-TransparentContainer" crate::ngap::SourceNGRANNodeToTargetNGRANNodeTransparentContainer;
     106 "TargetNGRANNode-ToSourceNGRANNode-TransparentContainer" crate::ngap::TargetNGRANNodeToSourceNGRANNodeTransparentContainer;
     262 "TargetNGRANNode-ToSourceNGRANNode-FailureTransparentContainer" crate::ngap::TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainer;
+    of "S1AP" 101 "SourceeNB-ToTargeteNB-TransparentContainer";
+    of "S1AP" 106 "TargeteNB-ToSourceeNB-TransparentContainer";
 }
 pub(crate) fn type_form(name: &str) -> Option<Form> {
     Some(match name {

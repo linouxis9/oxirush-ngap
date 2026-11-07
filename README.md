@@ -489,8 +489,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
   one, and so do trees and views.
 - The tree is the crate's own JSON, with the names of the specification. It
   is not the JSON Encoding Rules (ITU-T X.697).
-- RRC containers, and handover containers of other systems than NG-RAN, stay
-  octets.
+- RRC containers, and handover containers of other systems than NG-RAN and
+  E-UTRAN, stay octets. Those of E-UTRAN are read by the tables of
+  oxirush-s1ap, which a program registers with
+  `oxirush_s1ap::inspect::register()`.
 - A PDU has no size limit, and time and memory grow with its size: a view
   takes up to 143 octets per octet ([`to_view`]). Bound what you read from
   SCTP.

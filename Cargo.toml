@@ -24,7 +24,10 @@ include = [
 ]
 
 [features]
-inspect = ["oxirush-aper/inspect", "oxirush-utils/tree"]
+# With the register of protocols of oxirush-aper, a lock of the standard library: the
+# handover containers of the other protocol of the family, whose tables a program
+# registers with `inspect::register()`.
+inspect = ["oxirush-aper/inspect", "oxirush-aper/std", "oxirush-utils/tree"]
 # `Serialize` and `Deserialize` for every type of the bindings, through its tree.
 serde = ["inspect", "oxirush-utils/serde", "dep:serde_core"]
 
@@ -50,6 +53,9 @@ hex = "0.4"
 # JSON as text, and YAML, another format that describes itself, for the tests of `serde`.
 serde_json = "1.0.154"
 serde_norway = "0.9"
+# The other protocol of the family, whose tables the tests of the handover containers
+# between 5GS and EPS register.
+oxirush-s1ap = { version = "0.3", features = ["inspect"] }
 
 [[example]]
 name = "ngap_build_pdu"

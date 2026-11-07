@@ -24,6 +24,22 @@ const CARRIED: &[(&str, &str)] = &[
     ),
 ];
 
+/// The IEs whose octets carry a type of S1AP at a handover to EPS, each with that type:
+/// TS 38.413 clauses 9.3.1.20 and 9.3.1.21 give them the containers of TS 36.413. The
+/// tables of oxirush-s1ap read them, once a program registers them.
+const FOREIGN: &[(&str, &str, &str)] = &[
+    (
+        "SourceToTarget-TransparentContainer",
+        "S1AP",
+        "SourceeNB-ToTargeteNB-TransparentContainer",
+    ),
+    (
+        "TargetToSource-TransparentContainer",
+        "S1AP",
+        "TargeteNB-ToSourceeNB-TransparentContainer",
+    ),
+];
+
 /// The examples of the types that a program meets first, which the documentation of each
 /// has after what the type is in ASN.1.
 const EXAMPLES: &[(&str, &str)] = &[
@@ -134,6 +150,7 @@ fn main() -> anyhow::Result<()> {
         name: "NGAP",
         modules: "ngap",
         carried: CARRIED,
+        foreign: FOREIGN,
         keys: &["SecurityKey"],
         plmn: "PLMNIdentity",
         aliases: &[

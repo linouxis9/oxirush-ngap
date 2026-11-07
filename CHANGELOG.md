@@ -4,6 +4,15 @@ All notable changes to `oxirush-ngap` are recorded here.
 
 ## Unreleased
 
+- At a handover to EPS, the transparent containers carry those of TS 36.413
+  (TS 38.413 clauses 9.3.1.20 and 9.3.1.21): a tree writes them by the name
+  of their type, `SourceeNB-ToTargeteNB-TransparentContainer` and
+  `TargeteNB-ToSourceeNB-TransparentContainer`, and a view opens, reads and
+  edits them by the tables of oxirush-s1ap, once a program calls
+  `oxirush_s1ap::inspect::register()`. `inspect::register()` registers the
+  tables of NGAP for oxirush-s1ap in the same way. Without the call, the name
+  is refused with the call to make. The feature `inspect` turns on the
+  register of oxirush-aper, which needs the standard library.
 - The keywords take `gnb` and `amf` in the place of `asn1` and `telecom`, as those who look for the crate search.
 
 ## 0.5.0 - 2026-10-24

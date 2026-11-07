@@ -1,4 +1,4 @@
-//! Build NGAP PDUs using the `build_ngap!` and `build_ngap_ie!` ergonomic macros.
+//! Build NGAP PDUs using `build_ngap!` and `Ie::field`.
 //!
 //! The examples cover simple and complex context setup, UE release, handover
 //! outcomes, failure handling, and standalone IE construction. The macro
@@ -7,7 +7,7 @@
 
 use oxirush_ngap::helpers::*;
 use oxirush_ngap::ngap::*;
-use oxirush_ngap::{Error, build_ngap, build_ngap_ie};
+use oxirush_ngap::{Error, Ie, build_ngap, ie};
 
 fn main() -> Result<(), Error> {
     // ── 1. Simple: InitialContextSetupResponse ─────────────────────────────
@@ -15,11 +15,9 @@ fn main() -> Result<(), Error> {
     let amf_ue_id: u64 = 1;
     let ran_ue_id: u32 = 0;
 
-    // The direction, the procedure, its criticality and the message, then
-    // each IE with its criticality.
-    let pdu = build_ngap!(SuccessfulOutcome, InitialContextSetup,
-        REJECT, InitialContextSetupResponse,
-
+    // The message, after the criticality of the PDU where it is not that of
+    // its procedure, then each IE with its criticality.
+    let pdu = build_ngap!(REJECT InitialContextSetupResponse,
         IGNORE AMF_UE_NGAP_ID(amf_ue_id),
         IGNORE RAN_UE_NGAP_ID(ran_ue_id),
         IGNORE PDUSessionResourceSetupListCxtRes(session_setup_response_list()),
@@ -30,9 +28,7 @@ fn main() -> Result<(), Error> {
 
     // ── 2. UEContextReleaseRequest with Cause ──────────────────────────────
 
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
-
+    let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(amf_ue_id),
         REJECT RAN_UE_NGAP_ID(ran_ue_id),
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
@@ -53,9 +49,7 @@ fn main() -> Result<(), Error> {
         UEAggregateMaximumBitRate::new(BitRate(1_000_000_000), BitRate(500_000_000), None);
     let allowed_slice = AllowedNSSAIItem::new(s_nssai(1, Some([0x00, 0x00, 0x01])), None);
 
-    let pdu = build_ngap!(InitiatingMessage, InitialContextSetup,
-        REJECT, InitialContextSetupRequest,
-
+    let pdu = build_ngap!(REJECT InitialContextSetupRequest,
         // The UE, on each side of the interface
         REJECT AMF_UE_NGAP_ID(amf_ue_id),
         REJECT RAN_UE_NGAP_ID(ran_ue_id),
@@ -84,9 +78,7 @@ fn main() -> Result<(), Error> {
     let target = TargetID::targetRANNodeID(TargetRANNodeID::new(target_gnb, target_area, None));
     let cause = Cause::radioNetwork(CauseRadioNetwork::handover_desirable_for_radio_reason);
 
-    let pdu = build_ngap!(InitiatingMessage, HandoverPreparation,
-        REJECT, HandoverRequired,
-
+    let pdu = build_ngap!(REJECT HandoverRequired,
         REJECT AMF_UE_NGAP_ID(amf_ue_id),
         REJECT RAN_UE_NGAP_ID(ran_ue_id),
 
@@ -105,9 +97,7 @@ fn main() -> Result<(), Error> {
 
     // ── 5. SuccessfulOutcome + UnsuccessfulOutcome ─────────────────────────
 
-    let pdu = build_ngap!(SuccessfulOutcome, HandoverResourceAllocation,
-        REJECT, HandoverRequestAcknowledge,
-
+    let pdu = build_ngap!(REJECT HandoverRequestAcknowledge,
         IGNORE AMF_UE_NGAP_ID(amf_ue_id),
         IGNORE RAN_UE_NGAP_ID(ran_ue_id),
 
@@ -118,22 +108,21 @@ fn main() -> Result<(), Error> {
     println!("\n=== 5. HandoverRequestAcknowledge (SuccessfulOutcome) ===");
     print_and_encode(&pdu)?;
 
-    let pdu = build_ngap!(UnsuccessfulOutcome, NGSetup,
-        REJECT, NGSetupFailure,
-
+    let pdu = build_ngap!(REJECT NGSetupFailure,
         IGNORE Cause(Cause::misc(CauseMisc::unknown_PLMN_or_SNPN)),
     )?;
 
     println!("\n=== 5. NGSetupFailure (UnsuccessfulOutcome) ===");
     print_and_encode(&pdu)?;
 
-    // ── 6. build_ngap_ie! for conditional IE construction ──────────────────
+    // ── 6. Ie::field for an IE built apart ──────────────────
 
-    let cause_ie = build_ngap_ie!(UEContextReleaseRequest, IGNORE
-        Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity))
+    let cause_ie = ie::Cause::field(
+        Criticality::Ignore,
+        Cause::radioNetwork(CauseRadioNetwork::user_inactivity),
     )?;
 
-    println!("\n=== 6. Single IE (via build_ngap_ie!) ===");
+    println!("\n=== 6. Single IE (via Ie::field) ===");
     println!(
         "IE ID: {}, Criticality: {:?}",
         cause_ie.id.0, cause_ie.criticality

@@ -3,8 +3,7 @@
 
 use oxirush_ngap::ngap::*;
 use oxirush_ngap::{
-    AsnType, Direction, Error, ErrorKind, Message, Octets, build_ngap, build_ngap_ie,
-    extract_ngap_ies, with_ngap_ie_mut,
+    AsnType, Direction, Error, ErrorKind, Ie, Message, Octets, build_ngap, extract_ngap_ies, ie,
 };
 
 /// A UE CONTEXT RELEASE REQUEST with its three IEs, the message of the README.
@@ -244,8 +243,8 @@ fn request(ies: Vec<ProtocolIEField>) -> UEContextReleaseRequest {
 
 /// The entry of an AMF UE NGAP ID and that of a RAN UE NGAP ID.
 fn amf_and_ran() -> (ProtocolIEField<'static>, ProtocolIEField<'static>) {
-    let amf = build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(42u64));
-    let ran = build_ngap_ie!(UEContextReleaseRequest, REJECT RAN_UE_NGAP_ID(7u32));
+    let amf = ie::AMF_UE_NGAP_ID::field(Criticality::Reject, 42u64);
+    let ran = ie::RAN_UE_NGAP_ID::field(Criticality::Reject, 7u32);
     (amf.unwrap(), ran.unwrap())
 }
 
@@ -416,8 +415,7 @@ fn the_first_of_an_ie_that_is_there_twice_decides_each_field() {
 fn a_value_outside_its_constraint_is_an_error_of_the_macros_that_build() {
     // An AMF UE NGAP ID is an INTEGER (0..1099511627775), TS 38.413 clause 9.3.3.1, and
     // the macro takes a `u64`.
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(u64::MAX),
         REJECT RAN_UE_NGAP_ID(7u32),
     );
@@ -428,12 +426,11 @@ fn a_value_outside_its_constraint_is_an_error_of_the_macros_that_build() {
         "a value of AMF-UE-NGAP-ID does not encode: 18446744073709551615 is outside its \
          constraint (0..1099511627775)"
     );
-    let ie = build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(u64::MAX));
+    let ie = ie::AMF_UE_NGAP_ID::field(Criticality::Reject, u64::MAX);
     assert_eq!(ie.unwrap_err(), error);
 
     // The last value of the constraint is built.
-    let last = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let last = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID((1u64 << 40) - 1),
     );
     assert!(last.is_ok());
@@ -444,32 +441,21 @@ fn changing_an_ie_says_whether_it_did_or_why_it_did_not() {
     let (amf, _) = amf_and_ran();
     let mut message = request(vec![amf]);
 
-    // The IE is changed, another one is not there, and the expression says no.
-    let changed = with_ngap_ie_mut!(message, UEContextReleaseRequest, AMF_UE_NGAP_ID(id) = 43u64);
-    assert_eq!(changed, Ok(true));
-    let absent = with_ngap_ie_mut!(message, UEContextReleaseRequest, RAN_UE_NGAP_ID(id) = 8u32);
-    assert_eq!(absent, Ok(false));
-    let refused =
-        with_ngap_ie_mut!(message, UEContextReleaseRequest, AMF_UE_NGAP_ID(id) => id.0 == 0);
-    assert_eq!(refused, Ok(false));
+    // The IE is changed, and another one is not there.
+    assert_eq!(message.set_ie::<ie::AMF_UE_NGAP_ID>(43u64), Ok(true));
+    assert_eq!(message.set_ie::<ie::RAN_UE_NGAP_ID>(8u32), Ok(false));
     assert_eq!(ids(&message), Ok((43, None)));
 
     // A value that does not encode: the message is as it was.
     let before = message.clone();
-    let outside = with_ngap_ie_mut!(
-        message,
-        UEContextReleaseRequest,
-        AMF_UE_NGAP_ID(id) = u64::MAX
-    );
+    let outside = message.set_ie::<ie::AMF_UE_NGAP_ID>(u64::MAX);
     assert_eq!(outside.unwrap_err().kind(), ErrorKind::Encode);
     assert_eq!(message, before);
 
-    // An IE that does not decode is not changed either.
+    // An IE that does not decode is replaced: its value is not read.
     let mut message = request(vec![undecodable(10)]);
-    let before = message.clone();
-    let unread = with_ngap_ie_mut!(message, UEContextReleaseRequest, AMF_UE_NGAP_ID(id) = 1u64);
-    assert_eq!(unread.unwrap_err().kind(), ErrorKind::UndecodableIe);
-    assert_eq!(message, before);
+    assert_eq!(message.set_ie::<ie::AMF_UE_NGAP_ID>(1u64), Ok(true));
+    assert_eq!(ids(&message), Ok((1, None)));
 }
 
 #[test]

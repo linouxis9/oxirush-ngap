@@ -51,7 +51,7 @@ with that set.
 
 ```
 use oxirush_ngap::aper::BitString;
-use oxirush_ngap::{build_ngap_ie, ngap::*};
+use oxirush_ngap::{Ie, ie, ngap::*};
 
 // The UPF's end of the tunnel, the type of the session, and its QoS flow
 let tunnel = GTPTunnel::new(TransportLayerAddress(BitString::from([10, 0, 0, 1])), GTPTEID([0, 0, 0, 1]), None);
@@ -68,11 +68,9 @@ let flow = QosFlowSetupRequestItem::new(
     None,
 );
 let transfer = PDUSessionResourceSetupRequestTransfer::new(ProtocolIEContainer(vec![
-    build_ngap_ie!(PDUSessionResourceSetupRequestTransfer,
-        UL_NGU_UP_TNLInformation(UPTransportLayerInformation::gTPTunnel(tunnel)))?,
-    build_ngap_ie!(PDUSessionResourceSetupRequestTransfer, PDUSessionType(PDUSessionType::ipv4))?,
-    build_ngap_ie!(PDUSessionResourceSetupRequestTransfer,
-        QosFlowSetupRequestList(QosFlowSetupRequestList(vec![flow])))?,
+    ie::UL_NGU_UP_TNLInformation::field_of::<PDUSessionResourceSetupRequestTransfer>(UPTransportLayerInformation::gTPTunnel(tunnel))?,
+    ie::PDUSessionType::field_of::<PDUSessionResourceSetupRequestTransfer>(PDUSessionType::ipv4)?,
+    ie::QosFlowSetupRequestList::field_of::<PDUSessionResourceSetupRequestTransfer>(QosFlowSetupRequestList(vec![flow]))?,
 ]));
 
 // The octets that an item of a PDU SESSION RESOURCE SETUP REQUEST holds

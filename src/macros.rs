@@ -17,8 +17,7 @@
 //! ```
 //! use oxirush_ngap::{build_ngap, ngap::*};
 //!
-//! let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-//!     IGNORE, UEContextReleaseRequest,
+//! let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
 //!     REJECT AMF_UE_NGAP_ID(1u64),
 //!     REJECT RAN_UE_NGAP_ID(7u32),
 //!     IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
@@ -46,7 +45,7 @@
 //! ```
 //! use oxirush_ngap::{Message, build_ngap, ngap::*};
 //!
-//! let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest, UEContextReleaseRequest,
+//! let pdu = build_ngap!(UEContextReleaseRequest,
 //!     AMF_UE_NGAP_ID(1u64),
 //!     RAN_UE_NGAP_ID(7u32),
 //!     Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
@@ -56,35 +55,20 @@
 //! # Ok::<(), oxirush_ngap::Error>(())
 //! ```
 //!
-//! ## `build_ngap_ie!` — build one Protocol IE entry
+//! ## One IE: `Ie::field` and `Ie::field_of`
 //!
-//! This is useful for conditionally included IEs or IEs built separately.
+//! The marker type of an IE builds the entry of a container that holds it, for an IE
+//! that a message has on a condition or that is built apart: with a criticality, or
+//! with the one that the object set of a message or of a transfer assigns it.
 //!
 //! ```
-//! use oxirush_ngap::{build_ngap_ie, ngap::*};
+//! use oxirush_ngap::{Ie, ie, ngap::*};
 //!
-//! let ie = build_ngap_ie!(UEContextReleaseRequest,
-//!     REJECT AMF_UE_NGAP_ID(1u64)
-//! )?;
+//! let ie = ie::AMF_UE_NGAP_ID::field(Criticality::Reject, 1u64)?;
+//! assert_eq!(ie.criticality, Criticality::Reject);
+//! let ie = ie::AMF_UE_NGAP_ID::field_of::<UEContextReleaseRequest>(1u64)?;
 //! assert_eq!(ie.criticality, Criticality::Reject);
 //! # Ok::<(), oxirush_ngap::Error>(())
-//! ```
-//!
-//! Without its criticality the IE has the one that the object set of the message assigns
-//! it. An IE that goes in no message has its criticality written:
-//!
-//! ```
-//! use oxirush_ngap::{build_ngap_ie, ngap::*};
-//!
-//! let ie = build_ngap_ie!(UEContextReleaseRequest, AMF_UE_NGAP_ID(1u64))?;
-//! assert_eq!(ie.criticality, Criticality::Reject);
-//! # Ok::<(), oxirush_ngap::Error>(())
-//! ```
-//!
-//! ```compile_fail
-//! use oxirush_ngap::{build_ngap_ie, ngap::*};
-//!
-//! let ie = build_ngap_ie!(AMF_UE_NGAP_ID(1u64));
 //! ```
 //!
 //! An IE name is its ASN.1 identifier without `id-` and with `_` for `-`. The
@@ -93,18 +77,18 @@
 //! addressed by the IE names.
 //!
 //! ```
-//! use oxirush_ngap::{build_ngap_ie, ngap::*};
+//! use oxirush_ngap::{Ie, ie, ngap::*};
 //!
 //! fn downlink(transfer: SONConfigurationTransfer) -> Result<ProtocolIEField, oxirush_ngap::Error> {
-//!     build_ngap_ie!(DownlinkRANConfigurationTransfer, IGNORE SONConfigurationTransferDL(transfer))
+//!     ie::SONConfigurationTransferDL::field(Criticality::Ignore, transfer)
 //! }
 //! ```
 //!
 //! ```compile_fail
-//! use oxirush_ngap::{build_ngap_ie, ngap::*};
+//! use oxirush_ngap::{Ie, ie, ngap::*};
 //!
 //! fn downlink(transfer: SONConfigurationTransfer) -> Result<ProtocolIEField, oxirush_ngap::Error> {
-//!     build_ngap_ie!(DownlinkRANConfigurationTransfer, IGNORE SONConfigurationTransfer(transfer))
+//!     ie::SONConfigurationTransfer::field(Criticality::Ignore, transfer)
 //! }
 //! ```
 //!
@@ -150,7 +134,7 @@
 //! `into_owned()`, or copied as the example below copies its NAS-PDU.
 //!
 //! ```
-//! use oxirush_ngap::{Error, ErrorKind, build_ngap_ie, extract_ngap_ies, ngap::*};
+//! use oxirush_ngap::{Error, ErrorKind, Ie, extract_ngap_ies, ie, ngap::*};
 //!
 //! fn handle(msg: &UplinkNASTransport) -> Result<Vec<u8>, Error> {
 //!     extract_ngap_ies!(msg, UplinkNASTransport,
@@ -163,8 +147,8 @@
 //! }
 //!
 //! let mut message = UplinkNASTransport::new(ProtocolIEContainer(vec![
-//!     build_ngap_ie!(UplinkNASTransport, REJECT AMF_UE_NGAP_ID(1u64))?,
-//!     build_ngap_ie!(UplinkNASTransport, REJECT NAS_PDU(vec![0x7e, 0x00]))?,
+//!     ie::AMF_UE_NGAP_ID::field(Criticality::Reject, 1u64)?,
+//!     ie::NAS_PDU::field(Criticality::Reject, vec![0x7e, 0x00])?,
 //! ]));
 //! assert_eq!(handle(&message)?, [0x7e, 0x00]);
 //!
@@ -174,30 +158,23 @@
 //! # Ok::<(), Error>(())
 //! ```
 //!
-//! ## `with_ngap_ie_mut!` — locate and mutate one decoded NGAP IE
+//! ## `set_ie` — change one IE of a message
 //!
-//! This decodes the matching open type, passes the concrete value into the
-//! expression, then re-encodes it. It gives a `Result<bool, Error>`: what the
-//! expression says, `Ok(false)` for an IE that is not in the message, and an error
-//! for an IE that does not decode (`UndecodableIe`) or a changed value that does
-//! not encode (`Encode`).
-//! The setter form `IeName(binding) = value` expands to `binding.0 = value`.
+//! `set_ie::<T>(value)` of a message or of a transfer makes `value` the value of the IE
+//! `T`, in its place and with its criticality, and says whether the message has it. It
+//! gives an error for a value that does not encode (`Encode`).
 //!
-//! When a message has the same IE twice, both macros use the same one, the first:
-//! `extract_ngap_ies!` reads it and `with_ngap_ie_mut!` changes it, and neither decodes
-//! the others. `check()` of the PDU reports the second as `Deviation::RepeatedIe`, and
+//! When a message has the same IE twice, `extract_ngap_ies!` reads the first and `set_ie`
+//! changes it. `check()` of the PDU reports the second as `Deviation::RepeatedIe`, and
 //! `ies::<T>()` of the message gives every one.
 //!
 //! ```
-//! use oxirush_ngap::{build_ngap_ie, ngap::*, with_ngap_ie_mut};
+//! use oxirush_ngap::{Ie, ie, ngap::*};
 //!
 //! let mut message = UplinkNASTransport::new(ProtocolIEContainer(vec![
-//!     build_ngap_ie!(UplinkNASTransport, REJECT AMF_UE_NGAP_ID(1u64))?,
+//!     ie::AMF_UE_NGAP_ID::field(Criticality::Reject, 1u64)?,
 //! ]));
-//! let updated = with_ngap_ie_mut!(message, UplinkNASTransport,
-//!     AMF_UE_NGAP_ID(id) = 42u64
-//! )?;
-//! assert!(updated);
+//! assert_eq!(message.set_ie::<ie::AMF_UE_NGAP_ID>(42u64), Ok(true));
 //! # Ok::<(), oxirush_ngap::Error>(())
 //! ```
 
@@ -235,7 +212,7 @@
 /// protocol IEs are an error of the kind `Decode`; `lax` fields are then `None`.
 ///
 /// When the message has the IE twice, the field is the first one, which is the one
-/// that `with_ngap_ie_mut!` changes, and the second is not decoded. `check()` of the PDU
+/// that `set_ie` changes, and the second is not decoded. `check()` of the PDU
 /// reports it as `Deviation::RepeatedIe`, and `ies::<T>()` of the message gives every
 /// one.
 ///
@@ -256,8 +233,7 @@
 ///     Ok((amf, inactive, sessions))
 /// }
 ///
-/// let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-///     IGNORE, UEContextReleaseRequest,
+/// let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
 ///     REJECT AMF_UE_NGAP_ID(1u64),
 ///     REJECT RAN_UE_NGAP_ID(7u32),
 ///     IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
@@ -306,65 +282,6 @@ macro_rules! extract_ngap_ies {
     };
 }
 
-/// Locate, decode, mutate, and re-encode one NGAP protocol IE, of a message or of a
-/// transfer of protocol IEs.
-///
-/// Gives a `Result<bool, Error>`: what the expression says, `Ok(false)` when the IE is
-/// not in the message, and an error when the IE does not decode (`UndecodableIe`) or
-/// the changed value does not encode (`Encode`). The message is as it was after an
-/// error.
-///
-/// When the message has the IE twice, the first one is changed, which is the one that
-/// `extract_ngap_ies!` reads; the second is not decoded.
-///
-/// `= value` gives the one value that the IE is a name for. After `=>` comes a block
-/// that changes the value of the IE, which it has by the name in parentheses, mutable
-/// and its own, and gives whether it changed it, a `bool`: a value of a CHOICE is
-/// matched by `&mut`, so that what the match finds is changed in place.
-///
-/// ```
-/// use oxirush_ngap::{Error, build_ngap, with_ngap_ie_mut, ngap::*};
-///
-/// let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-///     IGNORE, UEContextReleaseRequest,
-///     REJECT AMF_UE_NGAP_ID(1u64),
-///     REJECT RAN_UE_NGAP_ID(7u32),
-///     IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
-/// )?;
-/// let mut message: UEContextReleaseRequest = pdu.decode_value()?;
-///
-/// // The one value of an IE
-/// assert!(with_ngap_ie_mut!(message, UEContextReleaseRequest, RAN_UE_NGAP_ID(id) = 8)?);
-///
-/// // A block that changes the value where it is, and says whether it did
-/// let changed = with_ngap_ie_mut!(message, UEContextReleaseRequest, Cause(cause) => {
-///     match &mut cause {
-///         Cause::radioNetwork(why) => {
-///             *why = CauseRadioNetwork::unspecified;
-///             true
-///         }
-///         _ => false,
-///     }
-/// })?;
-/// assert!(changed);
-/// assert_eq!(message, {
-///     let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-///         IGNORE, UEContextReleaseRequest,
-///         REJECT AMF_UE_NGAP_ID(1u64),
-///         REJECT RAN_UE_NGAP_ID(8u32),
-///         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::unspecified)),
-///     )?;
-///     pdu.decode_value::<UEContextReleaseRequest>()?.into_owned()
-/// });
-/// # Ok::<(), Error>(())
-/// ```
-#[macro_export]
-macro_rules! with_ngap_ie_mut {
-    ($($arguments:tt)*) => {
-        $crate::aper::__with_ie_mut!($crate, ngap, $($arguments)*)
-    };
-}
-
 /// Build a complete `NGAP_PDU` from a direction, procedure, message, and IEs.
 ///
 /// Gives a `Result<NGAP_PDU, Error>`: a value that does not encode into its open type,
@@ -378,7 +295,7 @@ macro_rules! with_ngap_ie_mut {
 ///
 /// // The direction, the procedure and the message, then each IE: the criticalities
 /// // are those of the specification, or written before what they are of
-/// let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest, UEContextReleaseRequest,
+/// let pdu = build_ngap!(UEContextReleaseRequest,
 ///     AMF_UE_NGAP_ID(42u64),
 ///     RAN_UE_NGAP_ID(7u32),
 ///     IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
@@ -393,56 +310,14 @@ macro_rules! build_ngap {
     };
 }
 
-/// Build one NGAP protocol IE entry. Every message takes the same
-/// `ProtocolIEField`: the name before the comma says where the IE goes, and is the
-/// type of a message, or of a transfer of protocol IEs, as
-/// `PDUSessionResourceSetupRequestTransfer`. The IE has the criticality that the object
-/// set of that message or transfer assigns it, unless the call writes its own.
-///
-/// An IE that goes in no message is built without that name, and with its criticality.
-/// Such is the alternative that a later version added to a CHOICE, which is one IE in a
-/// single container, as the `TargetRNC-ID` of a `TargetID`.
-///
-/// ```
-/// use oxirush_ngap::{build_ngap_ie, helpers::plmn, ngap::*};
-///
-/// // An IE of a message and one of a transfer, of the criticality of their object sets
-/// let amf = build_ngap_ie!(UEContextReleaseRequest, AMF_UE_NGAP_ID(42u64))?;
-/// let kind = build_ngap_ie!(PDUSessionResourceSetupRequestTransfer,
-///     PDUSessionType(PDUSessionType::ipv4))?;
-/// assert_eq!((amf.criticality, kind.criticality), (Criticality::Reject, Criticality::Reject));
-///
-/// // One of another criticality, which a test of a peer sends
-/// let ignored = build_ngap_ie!(UEContextReleaseRequest, IGNORE AMF_UE_NGAP_ID(42u64))?;
-/// assert_eq!(ignored.criticality, Criticality::Ignore);
-///
-/// // An IE in a single container: the target of a handover to an RNC
-/// let lai = LAI::new(plmn("208", "93")?, LAC([0x00, 0x01]), None);
-/// let rnc = build_ngap_ie!(REJECT TargetRNC_ID(TargetRNCID::new(lai, RNCID(1), None, None)))?;
-/// let target = TargetID::choice_Extensions(rnc);
-/// assert!(matches!(&target, TargetID::choice_Extensions(ie) if ie.id.0 == 178));
-/// # Ok::<(), oxirush_ngap::Error>(())
-/// ```
-///
-/// Gives a `Result<ProtocolIEField, Error>`: a value that does not encode into its
-/// open type is an error of the kind `Encode`, and an IE that the object set does not
-/// have, without its criticality, one of the kind `Argument`.
-#[macro_export]
-macro_rules! build_ngap_ie {
-    ($($arguments:tt)*) => {
-        $crate::aper::__build_ie!($crate, ngap, "build_ngap_ie!", $($arguments)*)
-    };
-}
-
 #[cfg(test)]
 mod tests {
     use crate::ngap::*;
-    use crate::{Error, ErrorKind};
+    use crate::{Error, ErrorKind, Ie, ie};
 
     #[test]
     fn mutating_macro_updates_newtype_payload() -> Result<(), Error> {
-        let mut pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-            IGNORE, UEContextReleaseRequest,
+        let mut pdu = build_ngap!(IGNORE UEContextReleaseRequest,
             REJECT AMF_UE_NGAP_ID(1u64),
             REJECT RAN_UE_NGAP_ID(7u32),
             IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
@@ -455,8 +330,7 @@ mod tests {
             oxirush_aper::decode(&message.value).expect("decode request");
         let mut request = request;
 
-        let changed =
-            with_ngap_ie_mut!(request, UEContextReleaseRequest, AMF_UE_NGAP_ID(id) = 42u64);
+        let changed = request.set_ie::<ie::AMF_UE_NGAP_ID>(42u64);
         assert_eq!(changed, Ok(true));
 
         let ie = request
@@ -484,14 +358,13 @@ mod tests {
             let ies = request.protocol_ies.0.iter();
             ies.map(|ie| ie.value.to_vec()).collect()
         };
-        let entry = |id: u64| build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(id));
+        let entry = |id: u64| ie::AMF_UE_NGAP_ID::field(Criticality::Reject, id);
         let mut request =
             UEContextReleaseRequest::new(ProtocolIEContainer(vec![entry(1)?, entry(2)?]));
         // The first one is read, and is the one that is changed.
         assert_eq!(id(&request)?, 1);
         let before = ids(&request);
-        let changed =
-            with_ngap_ie_mut!(request, UEContextReleaseRequest, AMF_UE_NGAP_ID(id) = 42u64);
+        let changed = request.set_ie::<ie::AMF_UE_NGAP_ID>(42u64);
         assert_eq!(changed, Ok(true));
         assert_eq!(id(&request)?, 42);
         let after = ids(&request);
@@ -508,78 +381,39 @@ mod tests {
             let octets = crate::Octets::from(vec![0xff]);
             ProtocolIEField::new(10u16, Criticality::Reject, octets)
         };
-        let entry = build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(1u64))?;
-        // The first one decodes: both macros take it, and decode no other.
+        let entry = ie::AMF_UE_NGAP_ID::field(Criticality::Reject, 1u64)?;
+        // The first one decodes: the macro and `set_ie` take it, and decode no other.
         let mut request =
             UEContextReleaseRequest::new(ProtocolIEContainer(vec![entry.clone(), undecodable()]));
         assert_eq!(id(&request)?, 1);
-        let changed =
-            with_ngap_ie_mut!(request, UEContextReleaseRequest, AMF_UE_NGAP_ID(id) = 42u64);
+        let changed = request.set_ie::<ie::AMF_UE_NGAP_ID>(42u64);
         assert_eq!(changed, Ok(true));
         assert_eq!(id(&request)?, 42);
-        // The first one does not decode: it is the error of both.
+        // The first one does not decode: it is the error of the macro, and `set_ie`
+        // replaces it, without reading it.
         let mut request =
             UEContextReleaseRequest::new(ProtocolIEContainer(vec![undecodable(), entry.clone()]));
-        let before = request.clone();
         assert_eq!(id(&request).unwrap_err().kind(), ErrorKind::UndecodableIe);
-        let changed =
-            with_ngap_ie_mut!(request, UEContextReleaseRequest, AMF_UE_NGAP_ID(id) = 42u64);
-        assert_eq!(changed.unwrap_err().kind(), ErrorKind::UndecodableIe);
-        // The message is as it was.
-        assert_eq!(request, before);
-        Ok(())
-    }
-
-    #[test]
-    fn a_message_that_is_another_one_each_time_it_is_read_is_no_panic() -> Result<(), Error> {
-        // The macro reads the expression of its message more than once: one that gives
-        // a message with the IE, then one without it, has nowhere to write the IE.
-        struct Each {
-            messages: [UEContextReleaseRequest<'static>; 2],
-            reads: usize,
-        }
-        impl Each {
-            fn next(&mut self) -> &mut UEContextReleaseRequest<'static> {
-                self.reads += 1;
-                &mut self.messages[usize::from(self.reads > 2)]
-            }
-        }
-        let with = build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(1u64))?;
-        let mut each = Each {
-            messages: [
-                UEContextReleaseRequest::new(ProtocolIEContainer(vec![with])),
-                UEContextReleaseRequest::new(ProtocolIEContainer(vec![])),
-            ],
-            reads: 0,
-        };
-        let changed = with_ngap_ie_mut!(
-            each.next(),
-            UEContextReleaseRequest,
-            AMF_UE_NGAP_ID(id) = 2u64
-        );
-        assert_eq!(changed, Ok(false));
-        assert_eq!(each.reads, 3);
+        assert_eq!(request.set_ie::<ie::AMF_UE_NGAP_ID>(42u64), Ok(true));
+        assert_eq!(id(&request)?, 42);
         Ok(())
     }
 
     #[test]
     fn builder_macros_cover_ie_and_outcome_forms() -> Result<(), Error> {
-        let ie = build_ngap_ie!(
-            UEContextReleaseRequest,
-            REJECT AMF_UE_NGAP_ID(1u64)
-        )?;
+        let ie = ie::AMF_UE_NGAP_ID::field(Criticality::Reject, 1u64)?;
         assert_eq!(ie.id.0, 10);
 
         // The direction and the procedure code of a PDU are those of its message.
-        let initiating = build_ngap!(InitiatingMessage, NGSetup, REJECT, NGSetupRequest,)?;
+        let initiating = build_ngap!(REJECT NGSetupRequest,)?;
         assert_eq!(initiating.direction(), crate::Direction::Initiating);
         assert_eq!(initiating.procedure_code(), 21);
 
-        let successful = build_ngap!(SuccessfulOutcome, NGSetup, REJECT, NGSetupResponse,)?;
+        let successful = build_ngap!(REJECT NGSetupResponse,)?;
         assert_eq!(successful.direction(), crate::Direction::Successful);
         assert_eq!(successful.procedure_code(), 21);
 
-        let unsuccessful = build_ngap!(UnsuccessfulOutcome, NGSetup, REJECT, NGSetupFailure,)?;
+        let unsuccessful = build_ngap!(REJECT NGSetupFailure,)?;
         assert_eq!(unsuccessful.direction(), crate::Direction::Unsuccessful);
         assert_eq!(unsuccessful.procedure_code(), 21);
         Ok(())
@@ -591,10 +425,7 @@ mod tests {
     fn octet_string_containing_ies_have_macros() -> Result<(), Error> {
         let transfer = MBSSessionSetupOrModRequestTransfer::new(ProtocolIEContainer(vec![]));
         let octets = oxirush_aper::encode(&transfer).expect("encode transfer");
-        let ie = build_ngap_ie!(
-            BroadcastSessionSetupRequest,
-            REJECT MBSSessionSetupRequestTransfer(octets.clone())
-        )?;
+        let ie = ie::MBSSessionSetupRequestTransfer::field(Criticality::Reject, octets.clone())?;
         assert_eq!(ie.id.0, 315);
 
         let request = BroadcastSessionSetupRequest::new(ProtocolIEContainer(vec![ie]));

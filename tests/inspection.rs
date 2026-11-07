@@ -2,7 +2,12 @@
 
 use oxirush_ngap::tree;
 use oxirush_ngap::tree::Value;
-use oxirush_ngap::{Direction, build_ngap, inspect, ngap::*};
+use oxirush_ngap::{Criticality, Direction, Ngap, Presence, build_ngap, inspect, ngap::*};
+
+/// The name that ASN.1 gives the message of a PDU.
+fn name_of(pdu: &NGAP_PDU) -> Option<&'static str> {
+    Ngap::object_set(pdu.direction(), pdu.procedure_code()).map(|set| set.name)
+}
 
 /// The value at a JSON pointer of a view, as `/message/protocolIEs/0/value`.
 trait Pointer {
@@ -30,8 +35,7 @@ impl Pointer for Value {
 
 #[test]
 fn inspect_repeated_ies_and_edit_one_without_reordering() {
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
@@ -123,8 +127,7 @@ fn contained_transfer_edits_are_typed_and_do_not_reorder_outer_ies() {
         None,
     );
     let raw = encode_open_type(&transfer).unwrap().to_vec();
-    let pdu = build_ngap!(SuccessfulOutcome, PDUSessionResourceSetup,
-        IGNORE, PDUSessionResourceSetupResponse,
+    let pdu = build_ngap!(IGNORE PDUSessionResourceSetupResponse,
         IGNORE AMF_UE_NGAP_ID(1u64),
         IGNORE RAN_UE_NGAP_ID(7u32),
         IGNORE PDUSessionResourceFailedToSetupListSURes(PDUSessionResourceFailedToSetupListSURes(vec![PDUSessionResourceFailedToSetupItemSURes::new(PDUSessionID(7), raw.into(), None)])),
@@ -185,8 +188,7 @@ fn editing_a_known_ie_cannot_drop_unknown_sequence_additions() {
 
 #[test]
 fn the_octets_of_an_ie_are_replaced_or_added_as_its_raw_value_without_value() {
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(7u32),
     )
@@ -214,14 +216,12 @@ fn the_octets_of_an_ie_are_replaced_or_added_as_its_raw_value_without_value() {
 
 #[test]
 fn a_new_ie_takes_a_typed_value_of_the_type_of_its_identifier() {
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(7u32),
     )
     .unwrap();
-    let with_cause = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let with_cause = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
@@ -252,13 +252,11 @@ fn a_new_ie_takes_a_typed_value_of_the_type_of_its_identifier() {
 
 #[test]
 fn a_new_ie_whose_value_is_a_string_is_typed_too() {
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
     )
     .unwrap();
-    let typed = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let typed = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         IGNORE RRCEstablishmentCause(RRCEstablishmentCause::mo_Signalling),
         REJECT NAS_PDU(vec![0x7e, 0x00]),
@@ -316,8 +314,7 @@ fn an_ie_that_does_not_decode_is_edited_as_its_octets() {
 
 #[test]
 fn a_changed_raw_value_alone_sends_nothing_else() {
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(7u32),
     )
@@ -364,8 +361,7 @@ fn an_ie_that_contains_a_type_is_decoded_and_edited_like_a_transfer() {
 
 #[test]
 fn a_transfer_that_was_not_received_is_encoded_from_its_decoded_value() {
-    let pdu = build_ngap!(SuccessfulOutcome, PDUSessionResourceSetup,
-        REJECT, PDUSessionResourceSetupResponse,
+    let pdu = build_ngap!(REJECT PDUSessionResourceSetupResponse,
         IGNORE AMF_UE_NGAP_ID(1u64),
         IGNORE RAN_UE_NGAP_ID(7u32),
     )
@@ -410,10 +406,7 @@ fn a_transfer_that_was_not_received_is_encoded_from_its_decoded_value() {
 
     // The value of an IE that contains a type is written the same way.
     let release = build_ngap!(
-        InitiatingMessage,
-        DistributionRelease,
-        REJECT,
-        DistributionReleaseRequest,
+        REJECT DistributionReleaseRequest,
     )
     .unwrap();
     let received = NGAP_PDU::decode(&fixture("DistributionReleaseRequest")).unwrap();
@@ -487,7 +480,7 @@ fn a_message_is_shown_and_written_as_its_name_and_its_ies_by_name() {
         ],
     });
     let pdu = NGAP_PDU::from_tree(&request).unwrap();
-    assert_eq!(inspect::message_name(&pdu), Some("UEContextReleaseRequest"));
+    assert_eq!(name_of(&pdu), Some("UEContextReleaseRequest"));
     let view = pdu.to_view().unwrap();
     assert_eq!(view["criticality"], tree!("ignore"));
     let criticalities = view["message"]["protocolIEs"].as_array().unwrap().iter();
@@ -1124,7 +1117,7 @@ fn the_names_that_a_message_shows_join_into_the_path_of_each_value() {
     let required = NGAP_PDU::decode(&fixture("HandoverRequired")).unwrap();
     let required = required.to_view().unwrap();
     assert!(
-        inspect::ie_names()
+        Ngap::ie_names()
             .iter()
             .any(|(_, name)| *name == "Target-RAN-Node-ID")
     );
@@ -1151,10 +1144,7 @@ fn sent(
     entries: &[oxirush_ngap::tree::Value],
 ) -> Result<oxirush_ngap::tree::Value, oxirush_ngap::Error> {
     let pdu = build_ngap!(
-        InitiatingMessage,
-        UEContextReleaseRequest,
-        IGNORE,
-        UEContextReleaseRequest,
+        IGNORE UEContextReleaseRequest,
     )
     .unwrap();
     let mut view = pdu.to_view()?;
@@ -1361,8 +1351,7 @@ fn an_enumerated_value_is_named_whatever_its_case_and_separators() {
 
 /// A UE CONTEXT RELEASE REQUEST: two UE NGAP IDs and a cause.
 fn release_request() -> NGAP_PDU {
-    build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
@@ -1475,8 +1464,7 @@ fn short(view: &oxirush_ngap::tree::Value, path: &str) -> String {
 #[test]
 fn an_ie_that_is_there_twice_goes_by_its_position() {
     use oxirush_ngap::tree;
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         REJECT AMF_UE_NGAP_ID(2u64),
@@ -1567,10 +1555,7 @@ fn the_ies_of_a_contained_message_go_by_name_in_its_place() {
     // The list that holds them is never named.
     assert!(paths.iter().all(|(path, _)| !path.contains("protocolIEs")));
     let ie = contained[0].split('/').nth(1).unwrap();
-    assert!(
-        inspect::ie_names().iter().any(|(_, name)| *name == ie),
-        "{ie}"
-    );
+    assert!(Ngap::ie_names().iter().any(|(_, name)| *name == ie), "{ie}");
     // An IE of the contained message is selected as one of the PDU is, and the path
     // that names the list is taken too.
     let ids = |view: &oxirush_ngap::tree::Value, path: &str| -> Vec<oxirush_ngap::tree::Value> {
@@ -1661,18 +1646,35 @@ fn a_message_goes_by_the_name_that_asn1_gives_it() {
     {
         let fields: Vec<_> = line.split('\t').collect();
         let pdu = NGAP_PDU::decode(&hex::decode(fields[1]).unwrap()).unwrap();
-        assert_eq!(inspect::message_name(&pdu), Some(fields[0]));
+        assert_eq!(name_of(&pdu), Some(fields[0]));
     }
     // A name finds its message again, however it is written, and no other does.
-    for (direction, code, name) in inspect::message_names() {
-        let found = Some((direction, code));
-        assert_eq!(inspect::message_named(name), found, "{name}");
-        assert_eq!(inspect::message_named(&name.to_lowercase()), found);
-        assert_eq!(inspect::message_named(&name.replace('-', "")), found);
+    for set in Ngap::object_sets() {
+        let (name, found) = (set.name, Some((set.direction, set.procedure_code)));
+        assert_eq!(
+            Ngap::object_set_named(name).map(|set| (set.direction, set.procedure_code)),
+            found,
+            "{name}"
+        );
+        assert_eq!(
+            Ngap::object_set_named(&name.to_lowercase())
+                .map(|set| (set.direction, set.procedure_code)),
+            found
+        );
+        assert_eq!(
+            Ngap::object_set_named(&name.replace('-', ""))
+                .map(|set| (set.direction, set.procedure_code)),
+            found
+        );
     }
-    assert_eq!(inspect::message_named("NoSuchMessage"), None);
+    assert_eq!(
+        Ngap::object_set_named("NoSuchMessage").map(|set| (set.direction, set.procedure_code)),
+        None
+    );
     // The view of a message that is written from its name.
-    let (direction, procedure_code) = inspect::message_named("ue context release request").unwrap();
+    let (direction, procedure_code) = Ngap::object_set_named("ue context release request")
+        .map(|set| (set.direction, set.procedure_code))
+        .unwrap();
     let mut view = tree!({
         "direction": direction.name(),
         "procedure_code": procedure_code,
@@ -1686,7 +1688,7 @@ fn a_message_goes_by_the_name_that_asn1_gives_it() {
     )
     .unwrap();
     let pdu = NGAP_PDU::from_view(&view).unwrap();
-    assert_eq!(inspect::message_name(&pdu), Some("UEContextReleaseRequest"));
+    assert_eq!(name_of(&pdu), Some("UEContextReleaseRequest"));
     assert_eq!(pdu.direction(), Direction::Initiating);
 }
 
@@ -1797,8 +1799,7 @@ fn what_is_nested_deeper_than_the_inspection_goes_keeps_its_octets() {
             value,
         ));
     }
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE Cause(cause),
@@ -1826,79 +1827,78 @@ fn what_is_nested_deeper_than_the_inspection_goes_keeps_its_octets() {
 }
 
 #[test]
-fn a_message_has_the_ies_of_its_object_set() {
+fn a_message_has_the_ies_and_the_criticalities_of_its_object_set() {
     let id = |name: &str| {
-        let mut names = inspect::ie_names().iter();
+        let mut names = Ngap::ie_names().iter();
         names.find(|(_, known)| *known == name).unwrap().0
     };
-    let ies = inspect::message_ies("InitialContextSetupRequest").unwrap();
-    assert_eq!(ies[0], (id("AMF-UE-NGAP-ID"), true));
-    assert!(ies.contains(&(id("PDUSessionResourceSetupListCxtReq"), false)));
-    // The presence of an IE that is there on a condition is not mandatory.
-    assert!(ies.contains(&(id("UEAggregateMaximumBitRate"), false)));
-    let listed = |name: &str| ies.iter().any(|(ie, _)| *ie == id(name));
-    assert!(!listed("PDUSessionResourceSetupListSUReq"));
-    // A name is taken as that of a message is, and a message without IEs has none.
+    let request = Ngap::object_set_named("InitialContextSetupRequest").unwrap();
+    assert_eq!(request.criticality, Criticality::Reject);
+    let ies = request.ies.unwrap();
+    let of = |name: &str| {
+        let ie = ies.iter().find(|(ie, ..)| *ie == id(name));
+        ie.map(|(_, criticality, presence)| (*criticality, *presence))
+    };
+    assert_eq!(ies[0].0, id("AMF-UE-NGAP-ID"));
     assert_eq!(
-        inspect::message_ies("initial-context-setup-request"),
-        Some(ies)
+        of("AMF-UE-NGAP-ID"),
+        Some((Criticality::Reject, Presence::Mandatory))
     );
-    assert_eq!(inspect::message_ies("PrivateMessage"), Some(&[][..]));
-    assert_eq!(inspect::message_ies("NoSuchMessage"), None);
-    // Every message has its IEs in the order of its set, each of them known.
-    for (.., name) in inspect::message_names() {
-        let ies = inspect::message_ies(name).unwrap();
-        assert!(name == "PrivateMessage" || !ies.is_empty(), "{name}");
-        for (ie, _) in ies {
-            assert!(
-                inspect::ie_names().iter().any(|(known, _)| known == ie),
-                "{name} {ie}"
-            );
-        }
-    }
-}
-
-#[test]
-fn a_message_has_the_criticality_that_asn1_assigns() {
-    let id = |name: &str| {
-        let mut names = inspect::ie_names().iter();
-        names.find(|(_, known)| *known == name).unwrap().0
-    };
-    let request = inspect::message_ie_criticalities("InitialContextSetupRequest").unwrap();
-    assert_eq!(request[0], (10, "reject"));
-    assert_eq!(request[0].0, id("AMF-UE-NGAP-ID"));
-    let assistance = id("CoreNetworkAssistanceInformationForInactive");
-    assert!(request.contains(&(assistance, "ignore")));
+    assert_eq!(
+        of("PDUSessionResourceSetupListCxtReq"),
+        Some((Criticality::Reject, Presence::Optional))
+    );
+    // An IE that is there on a condition.
+    assert_eq!(
+        of("UEAggregateMaximumBitRate"),
+        Some((Criticality::Reject, Presence::Conditional))
+    );
+    assert_eq!(
+        of("CoreNetworkAssistanceInformationForInactive"),
+        Some((Criticality::Ignore, Presence::Optional))
+    );
+    assert_eq!(of("PDUSessionResourceSetupListSUReq"), None);
     // An IE has the criticality that the set of each message gives it.
-    let response = inspect::message_ie_criticalities("InitialContextSetupResponse").unwrap();
-    assert_eq!(response[0], (id("AMF-UE-NGAP-ID"), "ignore"));
+    let response = Ngap::object_set_named("InitialContextSetupResponse").unwrap();
+    let first = response.ies.unwrap()[0];
+    assert_eq!(
+        first,
+        (
+            id("AMF-UE-NGAP-ID"),
+            Criticality::Ignore,
+            Presence::Mandatory
+        )
+    );
     // A name is taken as that of a message is, and a message without IEs has none.
+    let named = Ngap::object_set_named("initial-context-setup-request");
+    assert_eq!(named, Some(request));
+    assert_eq!(Ngap::object_set_named("PrivateMessage").unwrap().ies, None);
+    assert_eq!(Ngap::object_set_named("NoSuchMessage"), None);
+    // The procedure has its own criticality, which is that of each of its messages.
+    let procedure = |name: &str| Ngap::object_set_named(name).map(|set| set.criticality);
     assert_eq!(
-        inspect::message_ie_criticalities("initial-context-setup-request"),
-        Some(request)
+        procedure("initial-context-setup-response"),
+        Some(Criticality::Reject)
     );
-    assert_eq!(
-        inspect::message_ie_criticalities("PrivateMessage"),
-        Some(&[][..])
-    );
-    assert_eq!(inspect::message_ie_criticalities("NoSuchMessage"), None);
-    // The procedure has its own, which is that of each of its messages.
-    let procedure = inspect::message_criticality;
-    assert_eq!(procedure("InitialContextSetupRequest"), Some("reject"));
-    assert_eq!(procedure("initial-context-setup-response"), Some("reject"));
-    assert_eq!(procedure("Paging"), Some("ignore"));
-    assert_eq!(procedure("ErrorIndication"), Some("ignore"));
-    assert_eq!(procedure("NoSuchMessage"), None);
-    // Every message has the IEs of its set in their order, each with a criticality.
-    let known = ["reject", "ignore", "notify"];
-    for (.., name) in inspect::message_names() {
-        let ies = inspect::message_ies(name).unwrap().iter().map(|(ie, _)| ie);
-        let assigned = inspect::message_ie_criticalities(name).unwrap();
-        assert!(ies.eq(assigned.iter().map(|(ie, _)| ie)), "{name}");
-        for (ie, criticality) in assigned {
-            assert!(known.contains(criticality), "{name} {ie}");
+    assert_eq!(procedure("Paging"), Some(Criticality::Ignore));
+    assert_eq!(procedure("ErrorIndication"), Some(Criticality::Ignore));
+    // Every message is found by its direction and its procedure code, and has the IEs of
+    // its set, each of them known.
+    for set in Ngap::object_sets() {
+        assert_eq!(
+            Ngap::object_set(set.direction, set.procedure_code),
+            Some(set)
+        );
+        let ies = set.ies.unwrap_or_default();
+        assert!(
+            set.name == "PrivateMessage" || !ies.is_empty(),
+            "{}",
+            set.name
+        );
+        for (ie, ..) in ies {
+            let known = Ngap::ie_names().iter().any(|(known, _)| known == ie);
+            assert!(known, "{} {ie}", set.name);
         }
-        assert!(known.contains(&procedure(name).unwrap()), "{name}");
     }
 }
 
@@ -1912,15 +1912,24 @@ fn the_messages_of_the_fixtures_have_the_criticality_that_asn1_assigns() {
         let fields: Vec<_> = line.split('\t').collect();
         let pdu = NGAP_PDU::decode(&hex::decode(fields[1]).unwrap()).unwrap();
         let view = pdu.to_view().unwrap();
-        let procedure = inspect::message_criticality(fields[0]);
-        assert_eq!(view["criticality"].as_str(), procedure, "{}", fields[0]);
-        let assigned = inspect::message_ie_criticalities(fields[0]).unwrap();
+        let set = Ngap::object_set_named(fields[0]).unwrap();
+        assert_eq!(
+            view["criticality"].as_str(),
+            Some(set.criticality.name()),
+            "{}",
+            fields[0]
+        );
+        let assigned = set.ies.unwrap_or_default();
         // A private message has no IEs of an object set.
         let entries = view["message"]["protocolIEs"].as_array();
         for ie in entries.into_iter().flatten() {
             let id = ie["id"].as_u64().unwrap();
-            let mut assigned = assigned.iter().filter(|(known, _)| u64::from(*known) == id);
-            let assigned = assigned.next().map(|(_, criticality)| *criticality);
+            let mut assigned = assigned
+                .iter()
+                .filter(|(known, ..)| u64::from(*known) == id);
+            let assigned = assigned
+                .next()
+                .map(|(_, criticality, _)| criticality.name());
             assert_eq!(ie["criticality"].as_str(), assigned, "{}", fields[0]);
             ies += 1;
         }
@@ -1931,18 +1940,21 @@ fn the_messages_of_the_fixtures_have_the_criticality_that_asn1_assigns() {
 #[test]
 fn an_ie_that_a_value_holds_alone_has_the_criticality_of_its_object_sets() {
     let id = |name: &str| {
-        let mut names = inspect::ie_names().iter();
+        let mut names = Ngap::ie_names().iter();
         names.find(|(_, known)| *known == name).unwrap().0
     };
     // The alternatives that extend the CHOICE of a node and that of a location.
-    let item = |name: &str| inspect::item_criticality(id(name));
-    assert_eq!(inspect::item_criticality(240), Some("reject"));
-    assert_eq!(item("GlobalTNGF-ID"), Some("reject"));
-    assert_eq!(item("UserLocationInformationTNGF"), Some("ignore"));
+    let item = |name: &str| Ngap::item_criticality(id(name));
+    assert_eq!(Ngap::item_criticality(240), Some(Criticality::Reject));
+    assert_eq!(item("GlobalTNGF-ID"), Some(Criticality::Reject));
+    assert_eq!(
+        item("UserLocationInformationTNGF"),
+        Some(Criticality::Ignore)
+    );
     // The IEs of a message and those of a transfer are in no single container.
     assert_eq!(item("AMF-UE-NGAP-ID"), None);
     assert_eq!(item("PDUSessionType"), None);
-    assert_eq!(inspect::item_criticality(u16::MAX), None);
+    assert_eq!(Ngap::item_criticality(u16::MAX), None);
 }
 
 #[test]
@@ -1969,7 +1981,7 @@ fn the_identifiers_of_the_registry_are_the_constants_of_the_bindings() {
         let number = number.trim_start_matches(kind).trim_matches(['(', ')']);
         constants.insert((kind.into(), letters(name)), number.parse().unwrap());
     }
-    for (id, name) in inspect::ie_names() {
+    for (id, name) in Ngap::ie_names() {
         let constant = constants.get(&("ProtocolIEID".into(), letters(name)));
         assert_eq!(constant, Some(&u64::from(*id)), "{name}");
     }
@@ -2246,7 +2258,8 @@ fn a_name_is_its_letters_and_its_digits() {
     assert_eq!(cause, [&tree!({"nas": "deregister"})]);
     assert!(NGAP_PDU::from_view(&edited).is_ok());
     assert_eq!(
-        inspect::message_named("ue context-release_REQUEST"),
+        Ngap::object_set_named("ue context-release_REQUEST")
+            .map(|set| (set.direction, set.procedure_code)),
         Some((Direction::Initiating, 42))
     );
 }
@@ -2260,7 +2273,7 @@ fn a_path_is_checked_against_a_message_without_a_view() {
     {
         let wire = hex::decode(line.split('\t').nth(1).unwrap()).unwrap();
         let pdu = NGAP_PDU::decode(&wire).unwrap();
-        let name = inspect::message_name(&pdu).unwrap();
+        let name = name_of(&pdu).unwrap();
         let view = pdu.to_view().unwrap();
         for (path, _) in inspect::paths(&view) {
             let checked = inspect::check_path(name, &path);
@@ -2544,8 +2557,7 @@ fn modification(rate: u64, bits: usize) -> NGAP_PDU {
         EUTRAintegrityProtectionAlgorithms(mask(16)),
         None,
     );
-    build_ngap!(InitiatingMessage, UEContextModification,
-        REJECT, UEContextModificationRequest,
+    build_ngap!(REJECT UEContextModificationRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(1u32),
         IGNORE UEAggregateMaximumBitRate(rates),

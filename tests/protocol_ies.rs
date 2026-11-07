@@ -2,7 +2,7 @@
 
 use oxirush_ngap::Octets;
 use oxirush_ngap::ngap::*;
-use oxirush_ngap::{Error, ErrorKind, build_ngap, build_ngap_ie};
+use oxirush_ngap::{Error, ErrorKind, Ie, build_ngap, ie};
 
 /// The messages of the fixtures, then the vectors with content: the name of each, and
 /// the octets of its PDU.
@@ -44,16 +44,15 @@ fn the_ies_of_every_message_are_read_and_put_back_as_the_same_octets() {
 #[test]
 fn a_message_that_the_macros_built_has_the_ies_that_it_was_built_with() -> Result<(), Error> {
     let cause = || Cause::radioNetwork(CauseRadioNetwork::user_inactivity);
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(42u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE Cause(cause()),
     )?;
     let built = vec![
-        build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(42u64))?,
-        build_ngap_ie!(UEContextReleaseRequest, REJECT RAN_UE_NGAP_ID(7u32))?,
-        build_ngap_ie!(UEContextReleaseRequest, IGNORE Cause(cause()))?,
+        ie::AMF_UE_NGAP_ID::field(Criticality::Reject, 42u64)?,
+        ie::RAN_UE_NGAP_ID::field(Criticality::Reject, 7u32)?,
+        ie::Cause::field(Criticality::Ignore, cause())?,
     ];
     assert_eq!(pdu.protocol_ies()?.0, built);
 
@@ -74,19 +73,19 @@ fn an_unknown_ie_and_a_repeated_one_are_kept_with_their_criticality() -> Result<
         Criticality::Notify,
         Octets::from(vec![0xc0, 0xff]),
     );
-    let mut again = build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(2u64))?;
+    let mut again = ie::AMF_UE_NGAP_ID::field(Criticality::Reject, 2u64)?;
     again.criticality = Criticality::Ignore;
     let ies = vec![
-        build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(1u64))?,
+        ie::AMF_UE_NGAP_ID::field(Criticality::Reject, 1u64)?,
         unknown,
         again,
-        build_ngap_ie!(NGSetupFailure, NOTIFY TimeToWait(TimeToWait::v5s))?,
+        ie::TimeToWait::field(Criticality::Notify, TimeToWait::v5s)?,
     ];
 
     // Put into a message that had three other IEs: the PDU is the same but for them.
     let mut pdu = NGAP_PDU::decode(&hex::decode(RELEASE_REQUEST).unwrap())?;
     pdu.set_protocol_ies(ProtocolIEContainer(ies.clone()))?;
-    assert_eq!(pdu.kind(), NgapPduKind::Initiating_UEContextReleaseRequest);
+    assert_eq!(pdu.kind(), NgapPduKind::UEContextReleaseRequest);
     let NGAP_PDU::initiatingMessage(held) = &pdu else {
         panic!("{pdu}");
     };
@@ -176,7 +175,7 @@ fn a_message_without_protocol_ies_and_octets_that_are_none_are_errors() -> Resul
     );
 
     // More IEs than a container has: the PDU is as it was.
-    let ie = build_ngap_ie!(UEContextReleaseRequest, REJECT RAN_UE_NGAP_ID(7u32))?;
+    let ie = ie::RAN_UE_NGAP_ID::field(Criticality::Reject, 7u32)?;
     let mut pdu = request.clone();
     let error = pdu
         .set_protocol_ies(ProtocolIEContainer(vec![ie; 65536]))
@@ -198,8 +197,7 @@ fn a_message_without_protocol_ies_and_octets_that_are_none_are_errors() -> Resul
 #[test]
 fn a_field_takes_the_value_of_an_ie_as_its_type_or_as_the_value_that_it_names() -> Result<(), Error>
 {
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(42u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
@@ -227,8 +225,8 @@ fn a_field_takes_the_value_of_an_ie_as_its_type_or_as_the_value_that_it_names() 
 /// before an IE says where the IE goes, and gives the same IE.
 #[test]
 fn an_ie_is_built_with_the_name_of_its_message_or_without_one() -> Result<(), Error> {
-    let named = build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(42u64))?;
-    let alone = build_ngap_ie!(REJECT AMF_UE_NGAP_ID(42u64))?;
+    let named = ie::AMF_UE_NGAP_ID::field(Criticality::Reject, 42u64)?;
+    let alone = ie::AMF_UE_NGAP_ID::field(Criticality::Reject, 42u64)?;
     assert_eq!(named, alone);
     assert_eq!((alone.id.0, alone.criticality), (10, Criticality::Reject));
     assert_eq!(alone.value, [0x00, 0x2a]);
@@ -239,11 +237,10 @@ fn an_ie_is_built_with_the_name_of_its_message_or_without_one() -> Result<(), Er
 /// REQUEST holds as octets, is read, changed and built by the macros as a message is.
 #[test]
 fn the_ies_of_a_transfer_are_read_changed_and_built_by_the_macros() -> Result<(), Error> {
-    use oxirush_ngap::{extract_ngap_ies, with_ngap_ie_mut};
+    use oxirush_ngap::{Ie, extract_ngap_ies};
 
     let mut transfer = PDUSessionResourceSetupRequestTransfer::new(ProtocolIEContainer(vec![
-        build_ngap_ie!(PDUSessionResourceSetupRequestTransfer,
-            REJECT PDUSessionType(PDUSessionType::ipv4))?,
+        ie::PDUSessionType::field(Criticality::Reject, PDUSessionType::ipv4)?,
     ]));
     let octets = encode_open_type(&transfer)?;
     assert_eq!(hex::encode(&octets), "0000010086000100");
@@ -259,9 +256,7 @@ fn the_ies_of_a_transfer_are_read_changed_and_built_by_the_macros() -> Result<()
     assert_eq!(kind()?, PDUSessionType::ipv4);
 
     // Changed in its place
-    let changed = with_ngap_ie_mut!(transfer, PDUSessionResourceSetupRequestTransfer,
-        PDUSessionType(kind) => { kind = PDUSessionType::ipv6; true }
-    );
+    let changed = transfer.set_ie::<ie::PDUSessionType>(PDUSessionType::ipv6);
     assert_eq!(changed, Ok(true));
     assert_eq!(
         hex::encode(encode_open_type(&transfer)?),
@@ -305,25 +300,15 @@ fn an_ie_of_a_transfer_has_the_criticality_of_its_object_set() -> Result<(), Err
         None,
     ));
     let ies = [
-        build_ngap_ie!(
-            PDUSessionResourceSetupRequestTransfer,
-            UL_NGU_UP_TNLInformation(tunnel)
+        ie::UL_NGU_UP_TNLInformation::field_of::<PDUSessionResourceSetupRequestTransfer>(tunnel)?,
+        ie::PDUSessionType::field_of::<PDUSessionResourceSetupRequestTransfer>(
+            PDUSessionType::ipv4,
         )?,
-        build_ngap_ie!(
-            PDUSessionResourceSetupRequestTransfer,
-            PDUSessionType(PDUSessionType::ipv4)
+        ie::PDUSessionAggregateMaximumBitRate::field_of::<PDUSessionResourceSetupRequestTransfer>(
+            PDUSessionAggregateMaximumBitRate::new(BitRate(1), BitRate(1), None),
         )?,
-        build_ngap_ie!(
-            PDUSessionResourceSetupRequestTransfer,
-            PDUSessionAggregateMaximumBitRate(PDUSessionAggregateMaximumBitRate::new(
-                BitRate(1),
-                BitRate(1),
-                None
-            ))
-        )?,
-        build_ngap_ie!(
-            PDUSessionResourceSetupRequestTransfer,
-            RedundantPDUSessionInformation(RedundantPDUSessionInformation::new(RSN::v1, None))
+        ie::RedundantPDUSessionInformation::field_of::<PDUSessionResourceSetupRequestTransfer>(
+            RedundantPDUSessionInformation::new(RSN::v1, None),
         )?,
     ];
     let criticalities: Vec<_> = ies.iter().map(|ie| (ie.id.0, ie.criticality)).collect();
@@ -337,21 +322,14 @@ fn an_ie_of_a_transfer_has_the_criticality_of_its_object_set() -> Result<(), Err
         ]
     );
     // And so in the transfer of a modification
-    let modified = build_ngap_ie!(
-        PDUSessionResourceModifyRequestTransfer,
-        PDUSessionAggregateMaximumBitRate(PDUSessionAggregateMaximumBitRate::new(
-            BitRate(1),
-            BitRate(1),
-            None
-        ))
-    )?;
+    let modified =
+        ie::PDUSessionAggregateMaximumBitRate::field_of::<PDUSessionResourceModifyRequestTransfer>(
+            PDUSessionAggregateMaximumBitRate::new(BitRate(1), BitRate(1), None),
+        )?;
     assert_eq!(modified.criticality, Criticality::Reject);
     // An IE that the object set of the transfer does not have is assigned none
-    let error = build_ngap_ie!(
-        PDUSessionResourceSetupRequestTransfer,
-        TimeToWait(TimeToWait::v5s)
-    )
-    .unwrap_err();
+    let error = ie::TimeToWait::field_of::<PDUSessionResourceSetupRequestTransfer>(TimeToWait::v5s)
+        .unwrap_err();
     assert_eq!(error.kind(), ErrorKind::Argument);
     assert_eq!(
         error.to_string(),
@@ -403,18 +381,11 @@ fn a_transfer_is_checked_against_its_object_set() -> Result<(), Error> {
     };
     // A transfer as the specification has a sender construct it deviates in nothing
     let octets = transfer(vec![
-        build_ngap_ie!(
-            PDUSessionResourceSetupRequestTransfer,
-            UL_NGU_UP_TNLInformation(tunnel())
+        ie::UL_NGU_UP_TNLInformation::field_of::<PDUSessionResourceSetupRequestTransfer>(tunnel())?,
+        ie::PDUSessionType::field_of::<PDUSessionResourceSetupRequestTransfer>(
+            PDUSessionType::ipv4,
         )?,
-        build_ngap_ie!(
-            PDUSessionResourceSetupRequestTransfer,
-            PDUSessionType(PDUSessionType::ipv4)
-        )?,
-        build_ngap_ie!(
-            PDUSessionResourceSetupRequestTransfer,
-            QosFlowSetupRequestList(flows())
-        )?,
+        ie::QosFlowSetupRequestList::field_of::<PDUSessionResourceSetupRequestTransfer>(flows())?,
     ])?;
     assert_eq!(PDUSessionResourceSetupRequestTransfer::check(&octets)?, []);
     assert_eq!(
@@ -424,13 +395,11 @@ fn a_transfer_is_checked_against_its_object_set() -> Result<(), Error> {
     // One that misses an IE, has one of another criticality, one out of its order and one
     // that its set does not have
     let octets = transfer(vec![
-        build_ngap_ie!(
-            PDUSessionResourceSetupRequestTransfer,
-            PDUSessionType(PDUSessionType::ipv4)
+        ie::PDUSessionType::field_of::<PDUSessionResourceSetupRequestTransfer>(
+            PDUSessionType::ipv4,
         )?,
-        build_ngap_ie!(PDUSessionResourceSetupRequestTransfer,
-            IGNORE UL_NGU_UP_TNLInformation(tunnel()))?,
-        build_ngap_ie!(PDUSessionResourceSetupRequestTransfer, IGNORE TimeToWait(TimeToWait::v5s))?,
+        ie::UL_NGU_UP_TNLInformation::field(Criticality::Ignore, tunnel())?,
+        ie::TimeToWait::field(Criticality::Ignore, TimeToWait::v5s)?,
     ])?;
     let found = PDUSessionResourceSetupRequestTransfer::check_structure(&octets)?;
     let found: Vec<_> = found.iter().map(ToString::to_string).collect();
@@ -447,18 +416,11 @@ fn a_transfer_is_checked_against_its_object_set() -> Result<(), Error> {
     );
     // `check` decodes the values too: one that does not decode is reported
     let mut ies = vec![
-        build_ngap_ie!(
-            PDUSessionResourceSetupRequestTransfer,
-            UL_NGU_UP_TNLInformation(tunnel())
+        ie::UL_NGU_UP_TNLInformation::field_of::<PDUSessionResourceSetupRequestTransfer>(tunnel())?,
+        ie::PDUSessionType::field_of::<PDUSessionResourceSetupRequestTransfer>(
+            PDUSessionType::ipv4,
         )?,
-        build_ngap_ie!(
-            PDUSessionResourceSetupRequestTransfer,
-            PDUSessionType(PDUSessionType::ipv4)
-        )?,
-        build_ngap_ie!(
-            PDUSessionResourceSetupRequestTransfer,
-            QosFlowSetupRequestList(flows())
-        )?,
+        ie::QosFlowSetupRequestList::field_of::<PDUSessionResourceSetupRequestTransfer>(flows())?,
     ];
     ies[1].value = Octets::owned(vec![]);
     let octets = transfer(ies)?;

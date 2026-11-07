@@ -1,7 +1,6 @@
 // Auto-generated from ASN.1 by the generator of oxirush-aper; do not edit.
 pub(crate) use crate::registry::{
-    IE_NAMES, IE_TYPES, ITEM_CRITICALITIES, MESSAGE_IE_CRITICALITIES, MESSAGES,
-    PROCEDURE_CRITICALITIES, ie, ie_contents,
+    IE_NAMES, IE_TYPES, ITEM_CRITICALITIES, MESSAGES, ie, ie_contents,
 };
 use oxirush_aper::inspect::Form;
 pub(crate) const PROTOCOL: &str = "NGAP";

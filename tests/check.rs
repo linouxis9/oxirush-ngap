@@ -56,8 +56,7 @@ fn vectors(file: &'static str) -> impl Iterator<Item = (&'static str, Vec<u8>)> 
 #[test]
 fn a_message_as_its_object_set_has_it_deviates_in_nothing() -> Result<(), Error> {
     // UE CONTEXT RELEASE REQUEST: its three mandatory IEs, in the order of the set.
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(42u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE Cause(cause()),
@@ -74,8 +73,7 @@ fn a_message_as_its_object_set_has_it_deviates_in_nothing() -> Result<(), Error>
 #[test]
 fn a_mandatory_ie_that_is_missing_is_reported() -> Result<(), Error> {
     // Without its Cause, whose presence is mandatory.
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(42u64),
         REJECT RAN_UE_NGAP_ID(7u32),
     )?;
@@ -94,8 +92,7 @@ fn a_mandatory_ie_that_is_missing_is_reported() -> Result<(), Error> {
 
 #[test]
 fn an_ie_that_is_there_twice_is_reported() -> Result<(), Error> {
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(42u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE Cause(cause()),
@@ -120,8 +117,7 @@ fn an_ie_that_is_there_twice_is_reported() -> Result<(), Error> {
 #[test]
 fn an_ie_of_another_message_is_reported() -> Result<(), Error> {
     // TimeToWait is an IE of the failures of the setup procedures.
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(42u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE TimeToWait(TimeToWait::v5s),
@@ -146,8 +142,7 @@ fn an_ie_of_another_message_is_reported() -> Result<(), Error> {
 #[test]
 fn ies_that_are_out_of_the_order_of_the_object_set_are_reported() -> Result<(), Error> {
     // The two identifiers in the other order.
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT RAN_UE_NGAP_ID(7u32),
         REJECT AMF_UE_NGAP_ID(42u64),
         IGNORE Cause(cause()),
@@ -171,8 +166,7 @@ fn ies_that_are_out_of_the_order_of_the_object_set_are_reported() -> Result<(), 
 #[test]
 fn a_criticality_that_is_not_the_assigned_one_is_reported() -> Result<(), Error> {
     // The Cause with `reject`, where the object set of the message has `ignore`.
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(42u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         REJECT Cause(cause()),
@@ -192,8 +186,7 @@ fn a_criticality_that_is_not_the_assigned_one_is_reported() -> Result<(), Error>
     assert_eq!(checked(&pdu, tree), [criticality]);
 
     // The PDU with `reject`, where the procedure has `ignore`.
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        REJECT, UEContextReleaseRequest,
+    let pdu = build_ngap!(REJECT UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(42u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE Cause(cause()),
@@ -214,8 +207,7 @@ fn a_criticality_that_is_not_the_assigned_one_is_reported() -> Result<(), Error>
 #[test]
 fn every_deviation_of_a_message_is_reported_in_the_order_of_the_message() -> Result<(), Error> {
     // The message of the README: each sentence is what `Display` says.
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        REJECT, UEContextReleaseRequest,
+    let pdu = build_ngap!(REJECT UEContextReleaseRequest,
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE AMF_UE_NGAP_ID(42u64),
         IGNORE TimeToWait(TimeToWait::v5s),
@@ -266,8 +258,7 @@ fn an_encoding_that_is_not_the_canonical_one_is_read_and_reported() -> Result<()
     use oxirush_ngap::aper::{decode_strict, decode_with_faults};
     use oxirush_ngap::{Fault, Faults};
     // UE CONTEXT RELEASE REQUEST, as its sender is to write it.
-    let canonical = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let canonical = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(42u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE Cause(cause()),
@@ -355,8 +346,7 @@ fn a_conditional_ie_is_not_reported_missing() -> Result<(), Error> {
     // HANDOVER COMMAND, with its four mandatory IEs. Its NASSecurityParametersFromNGRAN
     // is conditional: TS 38.413 clause 9.2.3.2 has it present when the Handover Type is
     // 5GStoEPS or 5GtoUTRA, which is prose that the object set does not have.
-    let pdu = build_ngap!(SuccessfulOutcome, HandoverPreparation,
-        REJECT, HandoverCommand,
+    let pdu = build_ngap!(REJECT HandoverCommand,
         REJECT AMF_UE_NGAP_ID(42u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         REJECT HandoverType(HandoverType::intra5gs),
@@ -434,8 +424,7 @@ fn what_has_no_object_set_is_not_checked_against_one() -> Result<(), Error> {
     );
 
     // A message that does not decode is an error, and no deviation.
-    let request = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let request = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(42u64),
     )?;
     let NGAP_PDU::initiatingMessage(mut held) = request else {

@@ -89,19 +89,16 @@ fn a_message_in_fragments_is_read_through_a_pdu_that_borrows() -> Result<(), Err
 /// specification assigns.
 #[test]
 fn a_criticality_that_a_call_leaves_out_is_the_one_that_is_assigned() -> Result<(), Error> {
-    use oxirush_ngap::{Message, build_ngap, build_ngap_ie};
+    use oxirush_ngap::{Ie, Message, build_ngap, ie};
 
     assert_eq!(UEContextReleaseRequest::CRITICALITY, Criticality::Ignore);
     assert_eq!(NGSetupRequest::CRITICALITY, Criticality::Reject);
-    let written = build_ngap!(InitiatingMessage, UEContextReleaseRequest, IGNORE,
-        UEContextReleaseRequest,
+    let written = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(42u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
     )?;
     let assigned = build_ngap!(
-        InitiatingMessage,
-        UEContextReleaseRequest,
         UEContextReleaseRequest,
         AMF_UE_NGAP_ID(42u64),
         RAN_UE_NGAP_ID(7u32),
@@ -110,8 +107,7 @@ fn a_criticality_that_a_call_leaves_out_is_the_one_that_is_assigned() -> Result<
     assert_eq!(assigned, written);
     assert!(assigned.check()?.is_empty());
     // Some written and some left out, in any order.
-    let mixed = build_ngap!(InitiatingMessage, UEContextReleaseRequest, IGNORE,
-        UEContextReleaseRequest,
+    let mixed = build_ngap!(IGNORE UEContextReleaseRequest,
         AMF_UE_NGAP_ID(42u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
@@ -121,13 +117,7 @@ fn a_criticality_that_a_call_leaves_out_is_the_one_that_is_assigned() -> Result<
     let again = NGAP_PDU::of_message(&message, UEContextReleaseRequest::CRITICALITY)?;
     assert_eq!(again, written);
     // An IE that the object set of the message does not have is assigned none.
-    let error = build_ngap!(
-        InitiatingMessage,
-        NGSetup,
-        NGSetupRequest,
-        AMF_UE_NGAP_ID(1u64),
-    )
-    .unwrap_err();
+    let error = build_ngap!(NGSetupRequest, AMF_UE_NGAP_ID(1u64),).unwrap_err();
     assert_eq!(error.kind(), ErrorKind::Argument);
     assert!(
         error
@@ -136,9 +126,9 @@ fn a_criticality_that_a_call_leaves_out_is_the_one_that_is_assigned() -> Result<
         "{error}"
     );
     // One IE, of its message.
-    let ie = build_ngap_ie!(NGSetupRequest, DefaultPagingDRX(PagingDRX::v128))?;
+    let ie = ie::DefaultPagingDRX::field_of::<NGSetupRequest>(PagingDRX::v128)?;
     assert_eq!(ie.criticality, Criticality::Ignore);
-    let error = build_ngap_ie!(NGSetupRequest, AMF_UE_NGAP_ID(1u64)).unwrap_err();
+    let error = ie::AMF_UE_NGAP_ID::field_of::<NGSetupRequest>(1u64).unwrap_err();
     assert_eq!(error.kind(), ErrorKind::Argument);
     Ok(())
 }

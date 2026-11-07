@@ -34,7 +34,7 @@ fn areas() -> Result<SupportedTAList, Error> {
 /// An NG SETUP REQUEST as a gNB sends it, whose last IE is the DefaultPagingDRX.
 fn request() -> Result<Vec<u8>, Error> {
     let node = GlobalRANNodeID::globalGNB_ID(global_gnb_id(plmn("208", "93")?, 1, 24)?);
-    build_ngap!(InitiatingMessage, NGSetup, REJECT, NGSetupRequest,
+    build_ngap!(REJECT NGSetupRequest,
         REJECT GlobalRANNodeID(node),
         IGNORE RANNodeName(RANNodeName("gnb-1".into())),
         REJECT SupportedTAList(areas()?),
@@ -46,7 +46,7 @@ fn request() -> Result<Vec<u8>, Error> {
 /// The same request without its SupportedTAList.
 fn without_areas() -> Result<Vec<u8>, Error> {
     let node = GlobalRANNodeID::globalGNB_ID(global_gnb_id(plmn("208", "93")?, 1, 24)?);
-    build_ngap!(InitiatingMessage, NGSetup, REJECT, NGSetupRequest,
+    build_ngap!(REJECT NGSetupRequest,
         REJECT GlobalRANNodeID(node),
         IGNORE RANNodeName(RANNodeName("gnb-1".into())),
         IGNORE DefaultPagingDRX(PagingDRX::v128),
@@ -110,7 +110,7 @@ fn reported(pdu: &NGAP_PDU) -> Result<(Cause, Vec<CriticalityDiagnosticsIEItem>)
 /// 10.3.5 and 10.3.6 have the procedure rejected.
 fn failure(pdu: &NGAP_PDU) -> Result<NGAP_PDU, Error> {
     let (cause, items) = reported(pdu)?;
-    build_ngap!(UnsuccessfulOutcome, NGSetup, REJECT, NGSetupFailure,
+    build_ngap!(REJECT NGSetupFailure,
         IGNORE Cause(cause),
         IGNORE CriticalityDiagnostics(diagnostics(false, items)),
     )
@@ -120,7 +120,7 @@ fn failure(pdu: &NGAP_PDU) -> Result<NGAP_PDU, Error> {
 /// 10.2 has it.
 fn indication(pdu: &NGAP_PDU) -> Result<NGAP_PDU, Error> {
     let (cause, items) = reported(pdu)?;
-    build_ngap!(InitiatingMessage, ErrorIndication, IGNORE, ErrorIndication,
+    build_ngap!(IGNORE ErrorIndication,
         IGNORE Cause(cause),
         IGNORE CriticalityDiagnostics(diagnostics(true, items)),
     )
@@ -338,7 +338,7 @@ fn each_deviation_has_the_cause_of_its_clause() -> Result<(), Error> {
     // as `ignore`, and its identifiers in the other order.
     let ie =
         |id: u16, criticality| ProtocolIEField::new(ProtocolIEID(id), criticality, vec![0].into());
-    let mut pdu = build_ngap!(InitiatingMessage, UplinkNASTransport, IGNORE, UplinkNASTransport,
+    let mut pdu = build_ngap!(IGNORE UplinkNASTransport,
         REJECT RAN_UE_NGAP_ID(7u32),
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT NAS_PDU(vec![0x7e, 0x00, 0x5d]),
@@ -400,7 +400,7 @@ fn a_value_outside_the_root_of_an_extensible_constraint_is_reported() -> Result<
             ServedGUAMIItem::new(oxirush_ngap::helpers::guami(network, 1, 1, 0)?, None, None);
         let slices = SliceSupportList(vec![SliceSupportItem::new(s_nssai(1, None), None)]);
         let supported = PLMNSupportItem::new(network, slices, None);
-        build_ngap!(SuccessfulOutcome, NGSetup, REJECT, NGSetupResponse,
+        build_ngap!(REJECT NGSetupResponse,
             REJECT AMFName(AMFName(name.into())),
             REJECT ServedGUAMIList(ServedGUAMIList(vec![served])),
             IGNORE RelativeAMFCapacity(RelativeAMFCapacity(255)),

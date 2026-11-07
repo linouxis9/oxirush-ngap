@@ -17,8 +17,25 @@ All notable changes to `oxirush-ngap` are recorded here.
   compared with a tree, as `tree!("ignore")`, and no longer with a string or a
   number.
 
+- `build_ngap!` takes the message alone, and the criticality of the PDU before it
+  where it is not that of its procedure: `build_ngap!(IGNORE UEContextReleaseRequest,
+  ...)`. A variant of `NgapPduKind` is the name of the type of its message.
+- `message.set_ie::<ie::X>(value)` changes an IE, and `ie::X::field(criticality,
+  value)` and `ie::X::field_of::<Message>(value)` build one, with the trait `Ie`,
+  which the crate re-exports, in scope.
+- `Ngap::object_sets()`, `Ngap::object_set(direction, code)` and
+  `Ngap::object_set_named(name)` give what the ASN.1 says of each message: its
+  direction, its code, its name, the criticality of its procedure and its IEs
+  with their criticalities and their `Presence`. `Ngap::ie_names()` and
+  `Ngap::item_criticality(id)` give the names of the IEs and the criticality of
+  an IE in a single container.
+
 ### Removed
 
+- `with_ngap_ie_mut!` and `build_ngap_ie!`.
+- The lookups of `inspect`: `ie_names`, `message_names`, `message_name`,
+  `message_named`, `message_ies`, `message_ie_criticalities`,
+  `message_criticality` and `item_criticality`.
 - `is_initiating()`, `is_successful()` and `is_unsuccessful()`: compare
   `direction()` with a `Direction`.
 - `build/fields.tsv` and the hidden macros `__ngap_ie_id!` and `__ngap_proc_code!`.
@@ -32,6 +49,15 @@ All notable changes to `oxirush-ngap` are recorded here.
 | `pdu.direction() == "SuccessfulOutcome"` | `pdu.direction() == Direction::Successful` |
 | `inspect::message_named(name)` gives `("InitiatingMessage", code)` | it gives `(Direction::Initiating, code)` |
 | `tree["message"] == "..."` | `tree["message"] == tree!("...")` (oxirush-utils 0.2.0) |
+| `build_ngap!(InitiatingMessage, UEContextReleaseRequest, UEContextReleaseRequest, ...)` | `build_ngap!(UEContextReleaseRequest, ...)` |
+| `build_ngap!(SuccessfulOutcome, Proc, IGNORE, Response, ...)` | `build_ngap!(IGNORE Response, ...)` |
+| `NgapPduKind::Initiating_Proc` | `NgapPduKind::` and the name of the type of the message |
+| `with_ngap_ie_mut!(m, M, X(id) = v)` | `m.set_ie::<ie::X>(v)` |
+| `build_ngap_ie!(REJECT X(v))` | `ie::X::field(Criticality::Reject, v)` |
+| `build_ngap_ie!(Message, X(v))` | `ie::X::field_of::<Message>(v)` |
+| `inspect::message_ies(name)` | `Ngap::object_set_named(name)`, and its `ies` |
+| `inspect::message_names()`, `message_named(name)` | `Ngap::object_sets()`, `Ngap::object_set_named(name)` |
+| `inspect::message_name(&pdu)` | `Ngap::object_set(pdu.direction(), pdu.procedure_code())`, and its `name` |
 
 ### Added
 

@@ -17,8 +17,6 @@ fn a_pdu_shows_the_identifiers_of_its_ue_however_its_message_carries_them() -> R
     // UE CONTEXT RELEASE COMMAND, with the pair
     let pair = UENGAPIDPair::new(AMFUENGAPID(42), RANUENGAPID(7), None);
     let command = build_ngap!(
-        InitiatingMessage,
-        UEContextRelease,
         UEContextReleaseCommand,
         UE_NGAP_IDs(UENGAPIDs::uE_NGAP_ID_pair(pair)),
         Cause(cause()),
@@ -30,8 +28,6 @@ fn a_pdu_shows_the_identifiers_of_its_ue_however_its_message_carries_them() -> R
 
     // and with the AMF UE NGAP ID alone
     let command = build_ngap!(
-        InitiatingMessage,
-        UEContextRelease,
         UEContextReleaseCommand,
         UE_NGAP_IDs(UENGAPIDs::aMF_UE_NGAP_ID(AMFUENGAPID(42))),
         Cause(cause()),
@@ -43,8 +39,6 @@ fn a_pdu_shows_the_identifiers_of_its_ue_however_its_message_carries_them() -> R
 
     // UE CONTEXT RELEASE COMPLETE has them as two IEs, and NG SETUP REQUEST none
     let complete = build_ngap!(
-        SuccessfulOutcome,
-        UEContextRelease,
         UEContextReleaseComplete,
         AMF_UE_NGAP_ID(42u64),
         RAN_UE_NGAP_ID(7u32),
@@ -53,12 +47,7 @@ fn a_pdu_shows_the_identifiers_of_its_ue_however_its_message_carries_them() -> R
         received(&complete)?.to_string(),
         "UEContextReleaseComplete (procedure 41, successful outcome), AMF-UE-NGAP-ID 42, RAN-UE-NGAP-ID 7"
     );
-    let setup = build_ngap!(
-        InitiatingMessage,
-        NGSetup,
-        NGSetupRequest,
-        DefaultPagingDRX(PagingDRX::v128),
-    )?;
+    let setup = build_ngap!(NGSetupRequest, DefaultPagingDRX(PagingDRX::v128),)?;
     assert_eq!(
         received(&setup)?.to_string(),
         "NGSetupRequest (procedure 21, initiating message)"

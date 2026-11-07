@@ -127,7 +127,7 @@ fn initial_context_setup_request() -> Written {
              /allocationAndRetentionPriority/priorityLevelARP",
             tree!(3),
         ),
-        typed: typed!(InitiatingMessage InitialContextSetup REJECT InitialContextSetupRequest {
+        typed: typed!(REJECT InitialContextSetupRequest {
             REJECT AMF_UE_NGAP_ID: AMFUENGAPID,
             REJECT RAN_UE_NGAP_ID: RANUENGAPID,
             REJECT UEAggregateMaximumBitRate: UEAggregateMaximumBitRate,
@@ -173,7 +173,7 @@ fn pdu_session_resource_setup_request() -> Written {
             tree!(0x0200_0008),
         ),
         typed: typed!(
-            InitiatingMessage PDUSessionResourceSetup REJECT PDUSessionResourceSetupRequest {
+            REJECT PDUSessionResourceSetupRequest {
                 REJECT AMF_UE_NGAP_ID: AMFUENGAPID,
                 REJECT RAN_UE_NGAP_ID: RANUENGAPID,
                 REJECT PDUSessionResourceSetupListSUReq: PDUSessionResourceSetupListSUReq<'a>,
@@ -236,7 +236,7 @@ fn handover_required() -> Written {
         tree,
         path: "/ngap/TargetID/targetRANNodeID/selectedTAI/tAC",
         edit: ("/ngap/TargetID/targetRANNodeID/selectedTAI/tAC", tree!(2)),
-        typed: typed!(InitiatingMessage HandoverPreparation REJECT HandoverRequired {
+        typed: typed!(REJECT HandoverRequired {
             REJECT AMF_UE_NGAP_ID: AMFUENGAPID,
             REJECT RAN_UE_NGAP_ID: RANUENGAPID,
             REJECT HandoverType: HandoverType,
@@ -266,7 +266,7 @@ fn paging() -> Written {
         tree,
         path: "/ngap/TAIListForPaging/15/tAI/tAC",
         edit: ("/ngap/TAIListForPaging/15/tAI/tAC", tree!(17)),
-        typed: typed!(InitiatingMessage Paging IGNORE Paging {
+        typed: typed!(IGNORE Paging {
             IGNORE UEPagingIdentity: UEPagingIdentity,
             IGNORE PagingDRX: PagingDRX,
             IGNORE TAIListForPaging: TAIListForPaging,

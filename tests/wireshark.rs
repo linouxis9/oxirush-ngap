@@ -38,6 +38,7 @@ use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
+use oxirush_ngap::Ngap;
 use oxirush_ngap::inspect;
 use oxirush_ngap::ngap::NGAP_PDU;
 use oxirush_utils::tree::{Map, Value as Tree};
@@ -64,7 +65,7 @@ fn as_tree(value: &Tree) -> Tree {
                 .get("_ie_name")
                 .and_then(Tree::as_str)
                 .or_else(|| {
-                    let names = inspect::ie_names().iter();
+                    let names = Ngap::ie_names().iter();
                     names
                         .copied()
                         .find(|&(of, _)| Some(u64::from(of)) == id)

@@ -23,8 +23,6 @@ fn fixtures() -> impl Iterator<Item = (&'static str, Vec<u8>)> {
 /// A UE CONTEXT RELEASE REQUEST of these IEs.
 fn release_request() -> NGAP_PDU {
     build_ngap!(
-        InitiatingMessage,
-        UEContextReleaseRequest,
         UEContextReleaseRequest,
         AMF_UE_NGAP_ID(42u64),
         RAN_UE_NGAP_ID(7u32),
@@ -58,12 +56,7 @@ fn the_macro_reads_a_pdu_without_decode_value() -> Result<(), Error> {
     }
     assert_eq!(read(&release_request())?, (42, 7));
     // A PDU of another message is an error of the kind `WrongMessage`.
-    let setup = build_ngap!(
-        InitiatingMessage,
-        NGSetup,
-        NGSetupRequest,
-        DefaultPagingDRX(PagingDRX::v128),
-    )?;
+    let setup = build_ngap!(NGSetupRequest, DefaultPagingDRX(PagingDRX::v128),)?;
     assert_eq!(read(&setup).unwrap_err().kind(), ErrorKind::WrongMessage);
     Ok(())
 }
@@ -74,8 +67,6 @@ fn a_nas_pdu_in_fragments_is_read_and_kept() -> Result<(), Error> {
     // the OCTET STRING of the NAS-PDU.
     let nas: Vec<u8> = (0..20_000).map(|at| (at % 253) as u8).collect();
     let pdu = build_ngap!(
-        InitiatingMessage,
-        DownlinkNASTransport,
         DownlinkNASTransport,
         AMF_UE_NGAP_ID(42u64),
         RAN_UE_NGAP_ID(7u32),
@@ -161,8 +152,6 @@ fn check_structure_reports_what_check_reports_of_the_container() -> Result<(), E
 #[test]
 fn a_repeated_ie_is_there_twice_for_ies_and_once_for_the_macro() -> Result<(), Error> {
     let pdu = build_ngap!(
-        InitiatingMessage,
-        UEContextReleaseRequest,
         UEContextReleaseRequest,
         AMF_UE_NGAP_ID(42u64),
         RAN_UE_NGAP_ID(7u32),

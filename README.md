@@ -26,7 +26,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("AMF UE {amf_id}, RAN UE {ran_id}, cause {cause:?}");
 
     // Build the same message with another cause, and encode it
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest, UEContextReleaseRequest,
+    let pdu = build_ngap!(UEContextReleaseRequest,
         AMF_UE_NGAP_ID(42u64),
         RAN_UE_NGAP_ID(7u32),
         Cause(Cause::radioNetwork(CauseRadioNetwork::radio_connection_with_ue_lost)),
@@ -84,7 +84,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let gnb = GlobalRANNodeID::globalGNB_ID(global_gnb_id(network, 0x123456, 24)?);
     let plmns = BroadcastPLMNList(vec![BroadcastPLMNItem::new(network, slices(), None)]);
     let area = SupportedTAItem::new(TAC([0, 0, 1]), plmns, None);
-    let request = build_ngap!(InitiatingMessage, NGSetup, NGSetupRequest,
+    let request = build_ngap!(NGSetupRequest,
         GlobalRANNodeID(gnb),
         RANNodeName("gnb-1"),
         SupportedTAList(SupportedTAList(vec![area])),
@@ -98,7 +98,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         req areas: SupportedTAList = SupportedTAList(areas) => areas,
     );
     println!("{received}: {}, {} tracking area", name.unwrap_or_default(), areas.0.len());
-    let response = build_ngap!(SuccessfulOutcome, NGSetup, NGSetupResponse,
+    let response = build_ngap!(NGSetupResponse,
         AMFName("amf-1"),
         ServedGUAMIList(ServedGUAMIList(vec![ServedGUAMIItem::new(guami(network, 1, 1, 0)?, None, None)])),
         RelativeAMFCapacity(RelativeAMFCapacity(255)),
@@ -110,7 +110,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cell = nr_cgi(network, 0x123456, 24, 1)?;
     let location = UserLocationInformationNR::new(cell, tai(network, [0, 0, 1]), None, None);
     let registration = hex::decode("7e004179000d0102f8390000000000000010022e08a020000000000000")?;
-    let initial = build_ngap!(InitiatingMessage, InitialUEMessage, InitialUEMessage,
+    let initial = build_ngap!(InitialUEMessage,
         RAN_UE_NGAP_ID(7u32),
         NAS_PDU(registration),
         UserLocationInformation(UserLocationInformation::userLocationInformationNR(location)),
@@ -130,7 +130,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let authentication = hex::decode(
         "7e0056000200002123553cbe9637a89d218ae64dae47bf35201055f328b43577b9b94a9ffac354dfafb3",
     )?;
-    let downlink = build_ngap!(InitiatingMessage, DownlinkNASTransport, DownlinkNASTransport,
+    let downlink = build_ngap!(DownlinkNASTransport,
         AMF_UE_NGAP_ID(1u64),
         RAN_UE_NGAP_ID(ran_id),
         NAS_PDU(authentication),
@@ -140,7 +140,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // After the security mode: the UE's GUAMI, slices, security capabilities and KgNB
     let mut k_gnb = [0; 32];
     hex::decode_to_slice("c18166e13cfde1dea842c708f6e0b3372b6896664df4e865c0c78bd270852005", &mut k_gnb)?;
-    let setup = build_ngap!(InitiatingMessage, InitialContextSetup, InitialContextSetupRequest,
+    let setup = build_ngap!(InitialContextSetupRequest,
         AMF_UE_NGAP_ID(1u64),
         RAN_UE_NGAP_ID(ran_id),
         GUAMI(guami(network, 1, 1, 0)?),
@@ -181,7 +181,7 @@ fn receive(octets: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
     // `decode_borrowed` copies nothing: the PDU borrows from `octets`
     let pdu = NGAP_PDU::decode_borrowed(octets)?;
     match pdu.kind() {
-        NgapPduKind::Initiating_UEContextReleaseRequest => {
+        NgapPduKind::UEContextReleaseRequest => {
             // Only the IEs that a field asks for are decoded
             extract_ngap_ies!(pdu, UEContextReleaseRequest,
                 req amf_id: u64 = AMF_UE_NGAP_ID(id),
@@ -209,7 +209,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ```text
 release of AMF UE 42, RAN UE 7: Some(radioNetwork(user_inactivity))
-Unsuccessful_NGSetup is not handled here
+NGSetupFailure is not handled here
 ```
 
 | Method | Does |
@@ -234,8 +234,8 @@ decoded value. An error goes to the enclosing function through `?`.
 A `lax` field reads an IE the way TS 38.413 (10.3.4.2) has a receiver treat
 an IE of criticality `ignore`: one that does not decode counts as absent.
 When an IE is repeated, the macro and `ie` take the first, and `ies` gives
-each. `with_ngap_ie_mut!` changes one IE of a message in place, and
-`build_ngap_ie!` builds one: their documentation has an example of each.
+each. `message.set_ie::<ie::X>(value)` changes one IE of a message in place,
+and `ie::X::field(criticality, value)` builds one.
 
 ## Build a PDU
 
@@ -254,7 +254,7 @@ use oxirush_ngap::{Message, build_ngap, ngap::*};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // The criticalities of the procedure and of the message's object set
-    let pdu = build_ngap!(InitiatingMessage, InitialUEMessage, InitialUEMessage,
+    let pdu = build_ngap!(InitialUEMessage,
         RAN_UE_NGAP_ID(7u32),
         NAS_PDU(vec![0x7e, 0x00, 0x41]),
     )?;
@@ -266,7 +266,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("{}", again == pdu);
 
     // An IE that the message cannot have has no criticality to take
-    let error = build_ngap!(InitiatingMessage, InitialUEMessage, InitialUEMessage,
+    let error = build_ngap!(InitialUEMessage,
         TimeToWait(TimeToWait::v5s),
     );
     if let Err(error) = error {
@@ -291,7 +291,7 @@ writes them. The macros, `check` and `check_structure` take a transfer as
 they take a message.
 
 ```rust
-use oxirush_ngap::{build_ngap_ie, extract_ngap_ies, ngap::*};
+use oxirush_ngap::{Ie, ie, extract_ngap_ies, ngap::*};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // The transfer of a PDU SESSION RESOURCE SETUP REQUEST, as its item holds it
@@ -304,8 +304,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Build one, and check it against its object set
     let ipv6 = PDUSessionResourceSetupRequestTransfer::new(ProtocolIEContainer(vec![
-        build_ngap_ie!(PDUSessionResourceSetupRequestTransfer,
-            PDUSessionType(PDUSessionType::ipv6))?,
+        ie::PDUSessionType::field_of::<PDUSessionResourceSetupRequestTransfer>(PDUSessionType::ipv6)?,
     ]));
     let octets = encode_open_type(&ipv6)?;
     println!("{}", hex::encode(&octets));
@@ -345,7 +344,7 @@ use oxirush_ngap::{Deviation, build_ngap, ngap::*};
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // An NG SETUP REQUEST with the wrong criticality, an IE it cannot have,
     // and none of its mandatory IEs but the paging DRX
-    let request = build_ngap!(InitiatingMessage, NGSetup, IGNORE, NGSetupRequest,
+    let request = build_ngap!(IGNORE NGSetupRequest,
         IGNORE DefaultPagingDRX(PagingDRX::v128),
         REJECT TimeToWait(TimeToWait::v5s),
     )?;
@@ -357,7 +356,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // The AMF rejects the procedure, and reports the IEs at fault
     let cause = deviations.iter().find_map(Deviation::cause).ok_or("no cause")?;
-    let failure = build_ngap!(UnsuccessfulOutcome, NGSetup, NGSetupFailure,
+    let failure = build_ngap!(NGSetupFailure,
         Cause(Cause::protocol(cause)),
         CriticalityDiagnostics(received.criticality_diagnostics_for_response(&deviations)),
     )?;

@@ -114,7 +114,7 @@ fn each_captured_pdu_is_read_and_written_as_the_octets_that_its_sender_sent() {
 #[cfg(feature = "inspect")]
 mod forms {
     use super::*;
-    use oxirush_ngap::inspect;
+    use oxirush_ngap::Ngap;
     use oxirush_ngap::tree::Value;
 
     /// `value` without what a view keeps of what was received: the members whose name
@@ -153,7 +153,8 @@ mod forms {
             // The message has the name that tshark gives it.
             let (message, _) = name.split_once('/').unwrap();
             if message != "-" {
-                assert_eq!(inspect::message_name(&pdu), Some(message), "{name}");
+                let set = Ngap::object_set(pdu.direction(), pdu.procedure_code());
+                assert_eq!(set.map(|set| set.name), Some(message), "{name}");
                 named += 1;
             }
 

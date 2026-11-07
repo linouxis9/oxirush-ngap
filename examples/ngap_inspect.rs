@@ -6,7 +6,7 @@
 //! ```
 
 use oxirush_ngap::tree;
-use oxirush_ngap::{inspect, ngap::NGAP_PDU};
+use oxirush_ngap::{Ngap, inspect, ngap::NGAP_PDU};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // NG SETUP REQUEST: GlobalRANNodeID, SupportedTAList and DefaultPagingDRX.
@@ -18,7 +18,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // The message by the name that ASN.1 gives it, then each value with the path that
     // selects it: `/ngap` stands for the IEs of the message, and an IE goes by its name.
-    let name = inspect::message_name(&pdu).expect("a message of TS 38.413");
+    let set = Ngap::object_set(pdu.direction(), pdu.procedure_code());
+    let name = set.expect("a message of the specification").name;
     println!("{name}");
     for (path, value) in inspect::paths(&view) {
         println!("{path} = {value}");

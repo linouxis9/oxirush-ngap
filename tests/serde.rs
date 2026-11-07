@@ -138,7 +138,7 @@ fn a_type_of_the_bindings_is_serialized_as_the_tree_of_a_pdu_shows_it() {
     assert_eq!(written(&other), tree!("ffffff"));
     assert_eq!(read::<PLMNIdentity>(&tree!("ffffff")).unwrap(), other);
     // The same value in a tree of a PDU.
-    let pdu = build_ngap!(SuccessfulOutcome, NGSetup, REJECT, NGSetupResponse,
+    let pdu = build_ngap!(REJECT NGSetupResponse,
         REJECT AMFName(AMFName("amf".into())),
         REJECT ServedGUAMIList(ServedGUAMIList(vec![ServedGUAMIItem::new(guami.clone(), None, None)])),
         IGNORE RelativeAMFCapacity(255u8),

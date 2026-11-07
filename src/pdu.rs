@@ -76,7 +76,7 @@ impl<'a> NGAPPDU<'a> {
     /// this amends a message of any type:
     ///
     /// ```
-    /// use oxirush_ngap::{build_ngap_ie, ngap::*};
+    /// use oxirush_ngap::{Ie, ie, ngap::*};
     ///
     /// // An NG SETUP FAILURE
     /// let failure = hex::decode("40150008000001000f400188").unwrap();
@@ -84,11 +84,11 @@ impl<'a> NGAPPDU<'a> {
     ///
     /// // Its IEs, with one more: they are owned, as the PDU is changed
     /// let mut ies = pdu.protocol_ies()?.into_owned();
-    /// let wait = build_ngap_ie!(NGSetupFailure, IGNORE TimeToWait(TimeToWait::v5s))?;
+    /// let wait = ie::TimeToWait::field(Criticality::Ignore, TimeToWait::v5s)?;
     /// ies.0.push(wait);
     /// pdu.set_protocol_ies(ies)?;
     ///
-    /// assert_eq!(pdu.kind(), NgapPduKind::Unsuccessful_NGSetup);
+    /// assert_eq!(pdu.kind(), NgapPduKind::NGSetupFailure);
     /// let failure: NGSetupFailure = pdu.decode_value()?;
     /// assert_eq!(failure.protocol_ies.0.len(), 2);
     /// # Ok::<(), oxirush_ngap::Error>(())
@@ -120,7 +120,7 @@ impl<'a> NGAPPDU<'a> {
     /// use oxirush_ngap::{build_ngap, ie, ngap::*};
     ///
     /// // A UE CONTEXT RELEASE REQUEST with its RAN-UE-NGAP-ID twice
-    /// let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest, UEContextReleaseRequest,
+    /// let pdu = build_ngap!(UEContextReleaseRequest,
     ///     AMF_UE_NGAP_ID(42u64),
     ///     RAN_UE_NGAP_ID(7u32),
     ///     RAN_UE_NGAP_ID(8u32),
@@ -175,8 +175,7 @@ impl<'a> NGAPPDU<'a> {
     /// use oxirush_ngap::{build_ngap, ngap::*};
     ///
     /// // A message that is at hand, as one that a test changed after it was decoded
-    /// let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-    ///     IGNORE, UEContextReleaseRequest,
+    /// let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
     ///     REJECT AMF_UE_NGAP_ID(1u64),
     ///     REJECT RAN_UE_NGAP_ID(7u32),
     ///     IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
@@ -228,8 +227,7 @@ impl<'a> NGAPPDU<'a> {
     ///
     /// // A UE CONTEXT RELEASE REQUEST without its Cause, and with its two identifiers
     /// // in the other order
-    /// let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-    ///     IGNORE, UEContextReleaseRequest,
+    /// let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
     ///     REJECT RAN_UE_NGAP_ID(7u32),
     ///     REJECT AMF_UE_NGAP_ID(42u64),
     /// )?;
@@ -272,7 +270,7 @@ impl<'a> NGAPPDU<'a> {
     /// use oxirush_ngap::{build_ngap, ngap::*};
     ///
     /// // A UE CONTEXT RELEASE REQUEST without its Cause
-    /// let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest, UEContextReleaseRequest,
+    /// let pdu = build_ngap!(UEContextReleaseRequest,
     ///     AMF_UE_NGAP_ID(42u64),
     ///     RAN_UE_NGAP_ID(7u32),
     /// )?;
@@ -304,8 +302,7 @@ impl<'a> NGAPPDU<'a> {
     ///
     /// // A UE CONTEXT RELEASE REQUEST without its RAN UE NGAP ID, which is mandatory and
     /// // of the criticality reject: the procedure has no response
-    /// let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest, IGNORE,
-    ///     UEContextReleaseRequest,
+    /// let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
     ///     REJECT AMF_UE_NGAP_ID(42u64),
     ///     IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
     /// )?;
@@ -338,7 +335,7 @@ impl<'a> NGAPPDU<'a> {
     ///
     /// // An NG SETUP REQUEST without its Global RAN Node ID, which is mandatory and of
     /// // the criticality reject: the NG SETUP FAILURE says so
-    /// let pdu = build_ngap!(InitiatingMessage, NGSetup, REJECT, NGSetupRequest,
+    /// let pdu = build_ngap!(REJECT NGSetupRequest,
     ///     IGNORE DefaultPagingDRX(PagingDRX::v128),
     /// )?;
     /// let deviations = pdu.check()?;

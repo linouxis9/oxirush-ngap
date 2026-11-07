@@ -605,8 +605,7 @@ mod tests {
 
     #[test]
     fn pdu_encode_decode_round_trip() {
-        let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-            IGNORE, UEContextReleaseRequest,
+        let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
             REJECT AMF_UE_NGAP_ID(1u64),
             REJECT RAN_UE_NGAP_ID(7u32),
             IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),

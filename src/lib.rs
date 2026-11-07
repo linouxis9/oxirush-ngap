@@ -39,11 +39,9 @@
 //!     println!("AMF={amf_id:?} RAN={ran_id:?} cause={cause:?}");
 //!     # assert_eq!(format!("AMF={amf_id:?} RAN={ran_id:?} cause={cause:?}"), "AMF=Some(42) RAN=Some(7) cause=Some(radioNetwork(user_inactivity))");
 //!
-//!     // Build it with another cause: the direction, the procedure, the criticality
-//!     // of the PDU and the message, then each IE with its criticality
-//!     let rebuilt = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-//!         IGNORE, UEContextReleaseRequest,
-//!
+//!     // Build it with another cause: the message, after the criticality of the PDU
+//!     // where it is not that of its procedure, then each IE with its criticality
+//!     let rebuilt = build_ngap!(IGNORE UEContextReleaseRequest,
 //!         REJECT AMF_UE_NGAP_ID(42u64),
 //!         REJECT RAN_UE_NGAP_ID(7u32),
 //!         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::radio_connection_with_ue_lost)),
@@ -75,7 +73,7 @@
 //! | Answer a gNB, from NG SETUP to the INITIAL CONTEXT SETUP | [`build_ngap!`], [`extract_ngap_ies!`], [`helpers`], [`NGAP_PDU::ie`](ngap::NGAPPDU::ie) |
 //! | Decode a PDU | [`NGAP_PDU::decode`](ngap::NGAPPDU::decode), [`NGAP_PDU::decode_borrowed`](ngap::NGAPPDU::decode_borrowed), [`NGAP_PDU::kind`](ngap::NGAPPDU::kind), [`NGAP_PDU::decode_value`](ngap::NGAPPDU::decode_value) |
 //! | Build a PDU | [`build_ngap!`], [`NGAP_PDU::of_message`](ngap::NGAPPDU::of_message) |
-//! | Read the IEs of a message | [`extract_ngap_ies!`], [`ie`], [`with_ngap_ie_mut!`], [`build_ngap_ie!`] |
+//! | Read the IEs of a message | [`extract_ngap_ies!`], [`ie`], [`Ie::field`], `set_ie` |
 //! | A transfer and a handover container, typed | [`ngap::decode_open_type`], [`ngap::encode_open_type`], [`PDUSessionResourceSetupRequestTransfer::check`](ngap::PDUSessionResourceSetupRequestTransfer::check) |
 //! | Check a message, and answer one that is faulty | [`NGAP_PDU::check`](ngap::NGAPPDU::check), [`NGAP_PDU::check_structure`](ngap::NGAPPDU::check_structure), [`Deviation`], [`NGAP_PDU::criticality_diagnostics_for_response`](ngap::NGAPPDU::criticality_diagnostics_for_response) |
 //! | A PDU as JSON | [`NGAP_PDU::to_tree`](ngap::NGAPPDU::to_tree), [`NGAP_PDU::to_view`](ngap::NGAPPDU::to_view), [`NGAP_PDU::with_view`](ngap::NGAPPDU::with_view), [`inspect`] |
@@ -164,7 +162,7 @@
 //!     Ok(Ue { ran_id, nas: nas.into_owned() })
 //! }
 //!
-//! let pdu = build_ngap!(InitiatingMessage, InitialUEMessage, IGNORE, InitialUEMessage,
+//! let pdu = build_ngap!(IGNORE InitialUEMessage,
 //!     REJECT RAN_UE_NGAP_ID(7u32),
 //!     REJECT NAS_PDU(vec![0x7e, 0x00, 0x41]),
 //! )?;
@@ -197,7 +195,7 @@
 //!     Ok(())
 //! }
 //!
-//! let transport = build_ngap!(InitiatingMessage, UplinkNASTransport, IGNORE, UplinkNASTransport,
+//! let transport = build_ngap!(IGNORE UplinkNASTransport,
 //!     REJECT AMF_UE_NGAP_ID(1u64),
 //!     REJECT RAN_UE_NGAP_ID(7u32),
 //!     REJECT NAS_PDU(vec![0x7e, 0x00, 0x5d]),
@@ -341,15 +339,16 @@ pub use oxirush_utils::identity;
 pub use oxirush_utils::tree;
 
 pub use ngap::NgapPduKind;
-pub use oxirush_aper::protocol::Message;
+pub use oxirush_aper::protocol::{Ie, Message};
 pub use oxirush_aper::{
-    AsnType, BitString, Bits, Decode, Direction, Encode, Error, ErrorKind, Fault, Faults, Octets,
+    AsnType, BitString, Bits, Criticality, Decode, Direction, Encode, Error, ErrorKind, Fault,
+    Faults, ObjectSet, Octets, Presence,
 };
 /// ```
 /// use oxirush_ngap::{Deviation, build_ngap, ngap::*};
 ///
 /// // An INITIAL UE MESSAGE of its first IE alone
-/// let pdu = build_ngap!(InitiatingMessage, InitialUEMessage, InitialUEMessage, RAN_UE_NGAP_ID(7u32))?;
+/// let pdu = build_ngap!(InitialUEMessage, RAN_UE_NGAP_ID(7u32))?;
 /// let deviations: Vec<Deviation> = pdu.check()?;
 /// assert!(matches!(deviations[0], Deviation::MissingIe { id: 38, .. }));
 /// assert_eq!(deviations[0].to_string(), "NAS-PDU (IE 38) is mandatory, and the message does not have it");

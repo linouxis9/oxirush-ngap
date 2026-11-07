@@ -1,11 +1,10 @@
 use oxirush_ngap::aper::{Decode, Encode, decode, encode};
 use oxirush_ngap::ngap::*;
-use oxirush_ngap::{BitString, Bits, Error, ErrorKind, Octets, build_ngap, extract_ngap_ies};
+use oxirush_ngap::{BitString, Bits, Error, ErrorKind, Ie, Octets, build_ngap, extract_ngap_ies};
 
 #[test]
 fn public_macros_round_trip_typed_open_message() -> Result<(), Error> {
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(42u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
@@ -88,17 +87,17 @@ fn plmn_support_item_round_trips() {
 #[test]
 fn ie_names_address_their_own_ie_before_a_same_named_type() -> Result<(), Error> {
     let name = AMFName("amf".into());
-    let ie = oxirush_ngap::build_ngap_ie!(NGSetupResponse, REJECT AMFName(name.clone()))?;
+    let ie = oxirush_ngap::ie::AMFName::field(Criticality::Reject, name.clone())?;
     assert_eq!(ie.id, ID_AMFNAME);
-    let ie = oxirush_ngap::build_ngap_ie!(DownlinkNASTransport, REJECT OldAMF(name.clone()))?;
+    let ie = oxirush_ngap::ie::OldAMF::field(Criticality::Reject, name.clone())?;
     assert_eq!(ie.id, ID_OLD_AMF);
-    let ie = oxirush_ngap::build_ngap_ie!(InitialUEMessage,
-        IGNORE RRCEstablishmentCause(RRCEstablishmentCause::mo_Signalling)
+    let ie = oxirush_ngap::ie::RRCEstablishmentCause::field(
+        Criticality::Ignore,
+        RRCEstablishmentCause::mo_Signalling,
     )?;
     assert_eq!(ie.id, ID_RRCESTABLISHMENT_CAUSE);
 
-    let pdu = build_ngap!(SuccessfulOutcome, NGSetup,
-        REJECT, NGSetupResponse,
+    let pdu = build_ngap!(REJECT NGSetupResponse,
         REJECT AMFName(name.clone()),
     )?;
     let response: NGSetupResponse = pdu.decode_value().expect("decode message");
@@ -130,8 +129,7 @@ fn every_constrained_list_encodes_its_length_per_x691() -> Result<(), Error> {
         ])),
         None,
     );
-    let error = build_ngap!(InitiatingMessage, ErrorIndication,
-        IGNORE, ErrorIndication,
+    let error = build_ngap!(IGNORE ErrorIndication,
         IGNORE Cause(Cause::protocol(CauseProtocol::abstract_syntax_error_reject)),
         IGNORE CriticalityDiagnostics(diagnostics),
     )?;
@@ -142,8 +140,7 @@ fn every_constrained_list_encodes_its_length_per_x691() -> Result<(), Error> {
     );
     assert_eq!(NGAP_PDU::decode(&wire).expect("decode"), error);
 
-    let reset = build_ngap!(InitiatingMessage, NGReset,
-        REJECT, NGReset,
+    let reset = build_ngap!(REJECT NGReset,
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::unspecified)),
         REJECT ResetType(ResetType::partOfNG_Interface(UEAssociatedLogicalNGConnectionList(vec![
             UEAssociatedLogicalNGConnectionItem::new(Some(AMFUENGAPID(5)), Some(RANUENGAPID(6)), None),
@@ -197,8 +194,7 @@ fn multiline_extension_list_has_an_aligned_count() {
 #[test]
 fn utf8_string_names_have_an_unconstrained_length() -> Result<(), Error> {
     let name = ExtendedAMFName::new(None, Some(AMFNameUTF8String("amf-é".into())), None);
-    let pdu = build_ngap!(SuccessfulOutcome, NGSetup,
-        REJECT, NGSetupResponse,
+    let pdu = build_ngap!(REJECT NGSetupResponse,
         IGNORE Extended_AMFName(name.clone()),
     )?;
     let wire = pdu.encode().expect("encode NGSetupResponse");
@@ -244,8 +240,7 @@ fn long_fixed_size_bit_strings_are_octet_aligned() -> Result<(), Error> {
     let mut nh = [0u8; 32];
     (nh[0], nh[31]) = (0x80, 0x01);
     let context = SecurityContext::new(NextHopChainingCount(5), SecurityKey(nh.into()), None);
-    let pdu = build_ngap!(SuccessfulOutcome, PathSwitchRequest,
-        REJECT, PathSwitchRequestAcknowledge,
+    let pdu = build_ngap!(REJECT PathSwitchRequestAcknowledge,
         REJECT SecurityContext(context.clone()),
     )?;
     let wire = pdu.encode().expect("encode PathSwitchRequestAcknowledge");
@@ -271,8 +266,7 @@ fn long_fixed_size_bit_strings_are_octet_aligned() -> Result<(), Error> {
         NgENBID::macroNgENB_ID(bits(20)),
         None,
     ));
-    let pdu = build_ngap!(InitiatingMessage, NGSetup,
-        REJECT, NGSetupRequest,
+    let pdu = build_ngap!(REJECT NGSetupRequest,
         REJECT GlobalRANNodeID(node.clone()),
     )?;
     let wire = pdu.encode().expect("encode NGSetupRequest");
@@ -326,15 +320,13 @@ fn long_fixed_size_bit_strings_are_octet_aligned() -> Result<(), Error> {
 /// Wireshark decodes from the expected octets.
 #[test]
 fn octet_string_ies_have_ie_names() -> Result<(), Error> {
-    let initial = build_ngap!(InitiatingMessage, InitialUEMessage,
-        IGNORE, InitialUEMessage,
+    let initial = build_ngap!(IGNORE InitialUEMessage,
         REJECT RAN_UE_NGAP_ID(7u32),
         REJECT NAS_PDU(vec![0x7e, 0x00, 0x41]),
     )?
     .encode()
     .expect("encode InitialUEMessage");
-    let reroute = build_ngap!(InitiatingMessage, RerouteNASRequest,
-        REJECT, RerouteNASRequest,
+    let reroute = build_ngap!(REJECT RerouteNASRequest,
         REJECT RAN_UE_NGAP_ID(7u32),
         REJECT NGAP_Message(initial.clone()),
     )?;
@@ -357,8 +349,7 @@ fn octet_string_ies_have_ie_names() -> Result<(), Error> {
 /// An extracted field and its binding may share a name.
 #[test]
 fn extraction_binding_may_share_the_field_name() -> Result<(), Error> {
-    let pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
+    let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(42u64),
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
     )?;
@@ -377,8 +368,7 @@ fn extraction_binding_may_share_the_field_name() -> Result<(), Error> {
 
 /// A message with the identifier that the functions below require, or without it.
 fn release_request(id: Option<u64>) -> UEContextReleaseRequest<'static> {
-    let ie =
-        |id: u64| oxirush_ngap::build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(id));
+    let ie = |id: u64| oxirush_ngap::ie::AMF_UE_NGAP_ID::field(Criticality::Reject, id);
     let ies = id.map(|id| ie(id).expect("an identifier"));
     UEContextReleaseRequest::new(ProtocolIEContainer(ies.into_iter().collect()))
 }

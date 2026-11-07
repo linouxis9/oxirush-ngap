@@ -105,9 +105,7 @@ fn main() -> Result<(), Error> {
     // ── Build test PDUs ─────────────────────────────────────────────────────
 
     // 1. UEContextReleaseRequest
-    let release_pdu = build_ngap!(InitiatingMessage, UEContextReleaseRequest,
-        IGNORE, UEContextReleaseRequest,
-
+    let release_pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(42u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
@@ -115,9 +113,7 @@ fn main() -> Result<(), Error> {
 
     // 2. HandoverRequired
     let cause = Cause::radioNetwork(CauseRadioNetwork::handover_desirable_for_radio_reason);
-    let handover_pdu = build_ngap!(InitiatingMessage, HandoverPreparation,
-        REJECT, HandoverRequired,
-
+    let handover_pdu = build_ngap!(REJECT HandoverRequired,
         REJECT AMF_UE_NGAP_ID(100u64),
         REJECT RAN_UE_NGAP_ID(50u32),
 
@@ -136,9 +132,7 @@ fn main() -> Result<(), Error> {
         UEAggregateMaximumBitRate::new(BitRate(1_000_000_000), BitRate(500_000_000), None);
     let sessions = session_setup_request_list(vec![0x7e, 0x00, 0x42, 0x01]);
     let allowed_slice = AllowedNSSAIItem::new(s_nssai(1, Some([0x00, 0x00, 0x01])), None);
-    let ics_pdu = build_ngap!(InitiatingMessage, InitialContextSetup,
-        REJECT, InitialContextSetupRequest,
-
+    let ics_pdu = build_ngap!(REJECT InitialContextSetupRequest,
         REJECT AMF_UE_NGAP_ID(200u64),
         REJECT RAN_UE_NGAP_ID(10u32),
 

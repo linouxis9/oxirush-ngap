@@ -38,7 +38,7 @@ fn debug_of_a_key_and_of_what_holds_one_shows_its_length() {
 #[test]
 fn debug_of_a_message_with_a_key_shows_the_length_of_its_octets() -> Result<(), Error> {
     // An INITIAL CONTEXT SETUP REQUEST with K_gNB
-    let pdu = build_ngap!(InitiatingMessage, InitialContextSetup, REJECT, InitialContextSetupRequest,
+    let pdu = build_ngap!(REJECT InitialContextSetupRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         REJECT SecurityKey(SecurityKey::from(KGNB)),
@@ -90,7 +90,7 @@ fn debug_of_a_message_with_a_key_shows_the_length_of_its_octets() -> Result<(), 
 fn debug_of_a_message_with_a_security_context_shows_no_next_hop() -> Result<(), Error> {
     // A PATH SWITCH REQUEST ACKNOWLEDGE with the next hop NH
     let context = SecurityContext::new(NextHopChainingCount(1), SecurityKey::from(NH), None);
-    let pdu = build_ngap!(SuccessfulOutcome, PathSwitchRequest, REJECT, PathSwitchRequestAcknowledge,
+    let pdu = build_ngap!(REJECT PathSwitchRequestAcknowledge,
         IGNORE AMF_UE_NGAP_ID(1u64),
         IGNORE RAN_UE_NGAP_ID(7u32),
         REJECT SecurityContext(context),
@@ -108,7 +108,7 @@ fn debug_of_a_message_with_a_security_context_shows_no_next_hop() -> Result<(), 
 #[test]
 fn debug_of_a_message_without_a_key_shows_its_octets() -> Result<(), Error> {
     // An UPLINK NAS TRANSPORT: its object set has no IE that holds a key
-    let pdu = build_ngap!(InitiatingMessage, UplinkNASTransport, IGNORE, UplinkNASTransport,
+    let pdu = build_ngap!(IGNORE UplinkNASTransport,
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         REJECT NAS_PDU(vec![0x7e, 0x00, 0x5d]),
@@ -123,7 +123,7 @@ fn debug_of_a_message_without_a_key_shows_its_octets() -> Result<(), Error> {
 #[cfg(feature = "inspect")]
 #[test]
 fn a_tree_and_a_view_have_the_key() -> Result<(), Error> {
-    let pdu = build_ngap!(InitiatingMessage, InitialContextSetup, REJECT, InitialContextSetupRequest,
+    let pdu = build_ngap!(REJECT InitialContextSetupRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         REJECT SecurityKey(SecurityKey::from(KGNB)),

@@ -6,6 +6,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
+use oxirush_ngap::Ngap;
 use oxirush_ngap::inspect;
 use oxirush_ngap::ngap::NGAP_PDU;
 use oxirush_ngap::tree;
@@ -146,7 +147,7 @@ fn the_vectors_hold_each_message_and_each_ie_of_the_registry() {
         }
         found
     };
-    let names: BTreeMap<u16, &str> = inspect::ie_names().iter().copied().collect();
+    let names: BTreeMap<u16, &str> = Ngap::ie_names().iter().copied().collect();
     let (minimal, content) = (held(MESSAGES), held(VECTORS));
     assert_eq!(names.len(), 489);
 
@@ -162,7 +163,7 @@ fn the_vectors_hold_each_message_and_each_ie_of_the_registry() {
     assert_eq!(content.len(), 489);
 
     // Each of the 144 messages is in both files.
-    let messages: BTreeSet<_> = inspect::message_names().map(|(.., name)| name).collect();
+    let messages: BTreeSet<_> = Ngap::object_sets().iter().map(|set| set.name).collect();
     let of = |file| -> BTreeSet<&str> {
         let names = vectors(file).map(|(name, _)| name.split('/').next().unwrap());
         names.collect()

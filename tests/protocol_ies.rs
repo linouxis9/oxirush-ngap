@@ -71,11 +71,11 @@ fn an_unknown_ie_and_a_repeated_one_are_kept_with_their_criticality() -> Result<
     // another value and another criticality, and an IE of another message.
     let unknown = ProtocolIEField::new(
         60000u16,
-        Criticality::notify,
+        Criticality::Notify,
         Octets::from(vec![0xc0, 0xff]),
     );
     let mut again = build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(2u64))?;
-    again.criticality = Criticality::ignore;
+    again.criticality = Criticality::Ignore;
     let ies = vec![
         build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(1u64))?,
         unknown,
@@ -90,7 +90,7 @@ fn an_unknown_ie_and_a_repeated_one_are_kept_with_their_criticality() -> Result<
     let NGAP_PDU::initiatingMessage(held) = &pdu else {
         panic!("{pdu}");
     };
-    assert_eq!(held.criticality, Criticality::ignore);
+    assert_eq!(held.criticality, Criticality::Ignore);
 
     // They are read back as they were written, from the PDU and from its octets.
     assert_eq!(pdu.protocol_ies()?.0, ies);
@@ -102,10 +102,10 @@ fn an_unknown_ie_and_a_repeated_one_are_kept_with_their_criticality() -> Result<
     assert_eq!(
         told,
         [
-            (10, Criticality::reject),
-            (60000, Criticality::notify),
-            (10, Criticality::ignore),
-            (107, Criticality::notify),
+            (10, Criticality::Reject),
+            (60000, Criticality::Notify),
+            (10, Criticality::Ignore),
+            (107, Criticality::Notify),
         ]
     );
     Ok(())
@@ -230,7 +230,7 @@ fn an_ie_is_built_with_the_name_of_its_message_or_without_one() -> Result<(), Er
     let named = build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(42u64))?;
     let alone = build_ngap_ie!(REJECT AMF_UE_NGAP_ID(42u64))?;
     assert_eq!(named, alone);
-    assert_eq!((alone.id.0, alone.criticality), (10, Criticality::reject));
+    assert_eq!((alone.id.0, alone.criticality), (10, Criticality::Reject));
     assert_eq!(alone.value, [0x00, 0x2a]);
     Ok(())
 }
@@ -330,10 +330,10 @@ fn an_ie_of_a_transfer_has_the_criticality_of_its_object_set() -> Result<(), Err
     assert_eq!(
         criticalities,
         [
-            (139, Criticality::reject),
-            (134, Criticality::reject),
-            (130, Criticality::reject),
-            (197, Criticality::ignore),
+            (139, Criticality::Reject),
+            (134, Criticality::Reject),
+            (130, Criticality::Reject),
+            (197, Criticality::Ignore),
         ]
     );
     // And so in the transfer of a modification
@@ -345,7 +345,7 @@ fn an_ie_of_a_transfer_has_the_criticality_of_its_object_set() -> Result<(), Err
             None
         ))
     )?;
-    assert_eq!(modified.criticality, Criticality::reject);
+    assert_eq!(modified.criticality, Criticality::Reject);
     // An IE that the object set of the transfer does not have is assigned none
     let error = build_ngap_ie!(
         PDUSessionResourceSetupRequestTransfer,

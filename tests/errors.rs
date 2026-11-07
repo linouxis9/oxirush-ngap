@@ -3,8 +3,8 @@
 
 use oxirush_ngap::ngap::*;
 use oxirush_ngap::{
-    AsnType, Error, ErrorKind, Message, Octets, build_ngap, build_ngap_ie, extract_ngap_ies,
-    with_ngap_ie_mut,
+    AsnType, Direction, Error, ErrorKind, Message, Octets, build_ngap, build_ngap_ie,
+    extract_ngap_ies, with_ngap_ie_mut,
 };
 
 /// A UE CONTEXT RELEASE REQUEST with its three IEs, the message of the README.
@@ -78,12 +78,12 @@ fn a_pdu_of_a_procedure_that_the_specification_does_not_have_is_no_message() {
 #[test]
 fn the_type_of_a_message_says_which_message_it_is() {
     assert_eq!(UEContextReleaseRequest::NAME, "UEContextReleaseRequest");
-    assert_eq!(UEContextReleaseRequest::DIRECTION, "InitiatingMessage");
+    assert_eq!(UEContextReleaseRequest::DIRECTION, Direction::Initiating);
     assert_eq!(UEContextReleaseRequest::PROCEDURE_CODE, 42);
     // The name is the one that ASN.1 gives the message, which is not always that of
     // its procedure.
     assert_eq!(NGSetupFailure::NAME, "NGSetupFailure");
-    assert_eq!(NGSetupFailure::DIRECTION, "UnsuccessfulOutcome");
+    assert_eq!(NGSetupFailure::DIRECTION, Direction::Unsuccessful);
     assert_eq!(NGSetupFailure::PROCEDURE_CODE, 21);
     let pdu = release_request();
     let of = |direction, code| (pdu.direction(), pdu.procedure_code()) == (direction, code);
@@ -251,7 +251,7 @@ fn amf_and_ran() -> (ProtocolIEField<'static>, ProtocolIEField<'static>) {
 
 /// An entry with the identifier of an IE, whose octets are not the value of that IE.
 fn undecodable(id: u16) -> ProtocolIEField<'static> {
-    ProtocolIEField::new(id, Criticality::reject, Octets::from(vec![0xff]))
+    ProtocolIEField::new(id, Criticality::Reject, Octets::from(vec![0xff]))
 }
 
 #[test]
@@ -360,7 +360,7 @@ fn a_lax_field_is_the_ie_if_it_decodes_and_none_otherwise() {
     // It is there and does not decode: the message that was received, with one octet
     // of the value of the IE spoiled.
     let spoiled = spoiled_request();
-    assert_eq!(spoiled.protocol_ies.0[2].criticality, Criticality::ignore);
+    assert_eq!(spoiled.protocol_ies.0[2].criticality, Criticality::Ignore);
     assert_eq!(id_and_cause(&spoiled), Ok((42, None)));
     assert_eq!(cause_if_read(&spoiled), None);
 
@@ -919,7 +919,7 @@ mod inspect_errors {
         let view = view();
         let without = |member: &str| {
             let mut view = view.clone();
-            view.as_object_mut().unwrap().remove(member);
+            view.as_object_mut().unwrap().shift_remove(member);
             view
         };
         let with = |member: &str, value: Value| {

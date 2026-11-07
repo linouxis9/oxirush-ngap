@@ -69,7 +69,7 @@ fn a_message_in_fragments_is_read_through_a_pdu_that_borrows() -> Result<(), Err
     let nas = NASPDU(vec![0x7e; 20_000].into());
     let ie = ProtocolIEField::new(
         ProtocolIEID(38),
-        Criticality::reject,
+        Criticality::Reject,
         oxirush_ngap::aper::encode(&nas)?.into(),
     );
     let mut pdu = NGAP_PDU::decode(&hex::decode(INITIAL_UE_MESSAGE).unwrap())?;
@@ -91,8 +91,8 @@ fn a_message_in_fragments_is_read_through_a_pdu_that_borrows() -> Result<(), Err
 fn a_criticality_that_a_call_leaves_out_is_the_one_that_is_assigned() -> Result<(), Error> {
     use oxirush_ngap::{Message, build_ngap, build_ngap_ie};
 
-    assert_eq!(UEContextReleaseRequest::CRITICALITY, Criticality::ignore);
-    assert_eq!(NGSetupRequest::CRITICALITY, Criticality::reject);
+    assert_eq!(UEContextReleaseRequest::CRITICALITY, Criticality::Ignore);
+    assert_eq!(NGSetupRequest::CRITICALITY, Criticality::Reject);
     let written = build_ngap!(InitiatingMessage, UEContextReleaseRequest, IGNORE,
         UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(42u64),
@@ -137,7 +137,7 @@ fn a_criticality_that_a_call_leaves_out_is_the_one_that_is_assigned() -> Result<
     );
     // One IE, of its message.
     let ie = build_ngap_ie!(NGSetupRequest, DefaultPagingDRX(PagingDRX::v128))?;
-    assert_eq!(ie.criticality, Criticality::ignore);
+    assert_eq!(ie.criticality, Criticality::Ignore);
     let error = build_ngap_ie!(NGSetupRequest, AMF_UE_NGAP_ID(1u64)).unwrap_err();
     assert_eq!(error.kind(), ErrorKind::Argument);
     Ok(())

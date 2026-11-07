@@ -16,16 +16,15 @@ impl<'a> NGAPPDU<'a> {
         <Self as Pdu<'a>>::value(self)
     }
 
-    /// The PDU of a direction, as `direction()` says it, with the code of its procedure,
-    /// its criticality and the octets of the open type that holds its message; `None`
-    /// for what is no direction.
+    /// The PDU of a direction, with the code of its procedure, its criticality and the
+    /// octets of the open type that holds its message.
     #[cfg(feature = "inspect")]
     pub(crate) fn of(
-        direction: &str,
+        direction: crate::Direction,
         procedure_code: u8,
         criticality: Criticality,
         value: Octets<'a>,
-    ) -> Option<Self> {
+    ) -> Self {
         <Self as Pdu<'a>>::__of(direction, procedure_code, criticality, value)
     }
 
@@ -185,7 +184,7 @@ impl<'a> NGAPPDU<'a> {
     /// let mut message: UEContextReleaseRequest = pdu.decode_value()?;
     /// message.protocol_ies.0.swap(0, 1);
     ///
-    /// let again = NGAP_PDU::of_message(&message, Criticality::ignore)?;
+    /// let again = NGAP_PDU::of_message(&message, Criticality::Ignore)?;
     /// assert_eq!(again.procedure_name(), "UEContextReleaseRequest");
     /// assert_eq!(again.decode_value::<UEContextReleaseRequest>()?, message);
     /// # Ok::<(), oxirush_ngap::Error>(())
@@ -314,7 +313,7 @@ impl<'a> NGAPPDU<'a> {
     /// let diagnostics = pdu.criticality_diagnostics(&deviations);
     /// assert_eq!(diagnostics.procedure_code, Some(ProcedureCode(42)));
     /// assert_eq!(diagnostics.triggering_message, Some(TriggeringMessage::initiating_message));
-    /// assert_eq!(diagnostics.procedure_criticality, Some(Criticality::ignore));
+    /// assert_eq!(diagnostics.procedure_criticality, Some(Criticality::Ignore));
     /// let items = diagnostics.ies_criticality_diagnostics.unwrap();
     /// assert_eq!(items.0[0].ie_id, ProtocolIEID(85));
     /// assert_eq!(items.0[0].type_of_error, TypeOfError::missing);
@@ -346,7 +345,7 @@ impl<'a> NGAPPDU<'a> {
     /// let diagnostics = pdu.criticality_diagnostics_for_response(&deviations);
     /// assert_eq!(diagnostics.procedure_code, None);
     /// assert_eq!(diagnostics.triggering_message, None);
-    /// assert_eq!(diagnostics.procedure_criticality, Some(Criticality::reject));
+    /// assert_eq!(diagnostics.procedure_criticality, Some(Criticality::Reject));
     /// let items = diagnostics.ies_criticality_diagnostics.unwrap();
     /// assert_eq!(items.0[0].ie_id, ProtocolIEID(27));
     /// assert_eq!(items.0[0].type_of_error, TypeOfError::missing);

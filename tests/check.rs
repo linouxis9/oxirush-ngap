@@ -11,7 +11,7 @@
 
 use oxirush_ngap::Octets;
 use oxirush_ngap::ngap::*;
-use oxirush_ngap::{Deviation, Error, ErrorKind, build_ngap};
+use oxirush_ngap::{Deviation, Direction, Error, ErrorKind, build_ngap};
 
 /// What `check()` reports of `pdu`, which is the same for the PDU that its octets
 /// decode to. With the `inspect` feature, `tree` is the same message written as a
@@ -86,7 +86,7 @@ fn a_mandatory_ie_that_is_missing_is_reported() -> Result<(), Error> {
     let missing = Deviation::MissingIe {
         id: 15,
         name: "Cause",
-        criticality: Criticality::ignore,
+        criticality: Criticality::Ignore,
     };
     assert_eq!(checked(&pdu, tree), [missing]);
     Ok(())
@@ -137,7 +137,7 @@ fn an_ie_of_another_message_is_reported() -> Result<(), Error> {
         id: 107,
         name: Some("TimeToWait"),
         position: 2,
-        criticality: Criticality::ignore,
+        criticality: Criticality::Ignore,
     };
     assert_eq!(checked(&pdu, tree), [unexpected]);
     Ok(())
@@ -186,8 +186,8 @@ fn a_criticality_that_is_not_the_assigned_one_is_reported() -> Result<(), Error>
         id: 15,
         name: "Cause",
         position: 2,
-        criticality: Criticality::reject,
-        assigned: Criticality::ignore,
+        criticality: Criticality::Reject,
+        assigned: Criticality::Ignore,
     };
     assert_eq!(checked(&pdu, tree), [criticality]);
 
@@ -204,8 +204,8 @@ fn a_criticality_that_is_not_the_assigned_one_is_reported() -> Result<(), Error>
         {"Cause": {"radioNetwork": "user-inactivity"}}
     ]}"#;
     let of_the_pdu = Deviation::PduCriticality {
-        criticality: Criticality::reject,
-        assigned: Criticality::ignore,
+        criticality: Criticality::Reject,
+        assigned: Criticality::Ignore,
     };
     assert_eq!(checked(&pdu, tree), [of_the_pdu]);
     Ok(())
@@ -251,7 +251,7 @@ fn every_deviation_of_a_message_is_reported_in_the_order_of_the_message() -> Res
     ies.0.truncate(1);
     let octets = Octets::from(vec![0xc0, 0xff]);
     ies.0
-        .push(ProtocolIEField::new(60000u16, Criticality::ignore, octets));
+        .push(ProtocolIEField::new(60000u16, Criticality::Ignore, octets));
     unknown.set_protocol_ies(ies)?;
     let said = unknown.check()?[1].to_string();
     assert_eq!(
@@ -378,10 +378,10 @@ fn what_has_no_object_set_is_not_checked_against_one() -> Result<(), Error> {
     let NGAP_PDU::initiatingMessage(mut held) = private else {
         panic!("an initiating message");
     };
-    held.criticality = Criticality::reject;
+    held.criticality = Criticality::Reject;
     let of_the_pdu = Deviation::PduCriticality {
-        criticality: Criticality::reject,
-        assigned: Criticality::ignore,
+        criticality: Criticality::Reject,
+        assigned: Criticality::Ignore,
     };
     let private = NGAP_PDU::initiatingMessage(held.clone());
     assert_eq!(private.check()?, [of_the_pdu]);
@@ -395,21 +395,21 @@ fn what_has_no_object_set_is_not_checked_against_one() -> Result<(), Error> {
     held.procedure_code = ProcedureCode(200);
     for (criticality, cause) in [
         (
-            Criticality::reject,
+            Criticality::Reject,
             Some(CauseProtocol::abstract_syntax_error_reject),
         ),
         (
-            Criticality::notify,
+            Criticality::Notify,
             Some(CauseProtocol::abstract_syntax_error_ignore_and_notify),
         ),
-        (Criticality::ignore, None),
+        (Criticality::Ignore, None),
     ] {
         held.criticality = criticality;
         let pdu = NGAP_PDU::initiatingMessage(held.clone());
         let deviations = pdu.check()?;
         let unknown = Deviation::UnknownProcedure {
             procedure_code: 200,
-            direction: "InitiatingMessage",
+            direction: Direction::Initiating,
             criticality,
         };
         assert_eq!(deviations, [unknown]);

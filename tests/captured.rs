@@ -24,6 +24,7 @@
 
 use std::collections::BTreeMap;
 
+use oxirush_ngap::Direction;
 use oxirush_ngap::ngap::*;
 
 /// A PDU of the fixtures.
@@ -70,12 +71,9 @@ fn each_captured_pdu_is_read_and_written_as_the_octets_that_its_sender_sent() {
         };
         // What the capture read in its first two octets.
         assert_eq!(pdu.procedure_code(), captured.procedure_code, "{name}");
-        let alternatives = [
-            pdu.is_initiating(),
-            pdu.is_successful(),
-            pdu.is_unsuccessful(),
-        ];
-        let alternative = alternatives.iter().position(|is| *is);
+        let alternative = Direction::ALL
+            .iter()
+            .position(|direction| *direction == pdu.direction());
         assert_eq!(alternative, Some(captured.alternative.into()), "{name}");
 
         // Written back, it is the octets that were sent, and so is the PDU that

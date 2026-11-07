@@ -216,7 +216,7 @@ Unsuccessful_NGSetup is not handled here
 |--------|------|
 | `decode`, `decode_borrowed` | Decode one PDU (`decode_borrowed` copies nothing) |
 | `encode`, `encode_into` | Encode it |
-| `procedure_code`, `procedure_name`, `direction`, `kind` | `42`, `"UEContextReleaseRequest"`, `"InitiatingMessage"`, and an `NgapPduKind` (`Other` for a procedure that the specification lacks in that direction) |
+| `procedure_code`, `procedure_name`, `direction`, `kind` | `42`, `"UEContextReleaseRequest"`, `Direction::Initiating`, and an `NgapPduKind` (`Other` for a procedure that the specification lacks in that direction) |
 | `decode_value`, `message` | The message as its type |
 | `protocol_ies`, `set_protocol_ies` | The IEs of the message, whatever it is |
 | `ie::<T>`, `ies::<T>` | The first IE of a type, or every one in order. A message and a transfer have them too |
@@ -258,7 +258,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         RAN_UE_NGAP_ID(7u32),
         NAS_PDU(vec![0x7e, 0x00, 0x41]),
     )?;
-    println!("{:?} {}", pdu.criticality(), hex::encode(pdu.encode()?));
+    println!("{} {}", pdu.criticality(), hex::encode(pdu.encode()?));
 
     // The PDU of a message you already have
     let message: InitialUEMessage = pdu.decode_value()?;

@@ -4,6 +4,37 @@ All notable changes to `oxirush-ngap` are recorded here.
 
 ## Unreleased
 
+### Changed
+
+- The codec of each member of a `SEQUENCE` is one line in the bindings, which
+  are about a sixth shorter, and a build takes less memory.
+- `Criticality` is the one of oxirush-aper, which an error and a deviation have
+  too: its values are `Criticality::Reject`, `Ignore` and `Notify`.
+- The direction of a PDU is `Direction`: `pdu.direction()`, `Message::DIRECTION`,
+  `NgapPduKind::Other` and `Deviation::UnknownProcedure` have it. It prints as
+  before, `InitiatingMessage`.
+- The trees and the identities are those of oxirush-utils 0.2.0: a tree is
+  compared with a tree, as `tree!("ignore")`, and no longer with a string or a
+  number.
+
+### Removed
+
+- `is_initiating()`, `is_successful()` and `is_unsuccessful()`: compare
+  `direction()` with a `Direction`.
+- `build/fields.tsv` and the hidden macros `__ngap_ie_id!` and `__ngap_proc_code!`.
+
+### Migration
+
+| Before | Now |
+|--------|-----|
+| `Criticality::reject` | `Criticality::Reject` |
+| `pdu.is_initiating()` | `pdu.direction() == Direction::Initiating` |
+| `pdu.direction() == "SuccessfulOutcome"` | `pdu.direction() == Direction::Successful` |
+| `inspect::message_named(name)` gives `("InitiatingMessage", code)` | it gives `(Direction::Initiating, code)` |
+| `tree["message"] == "..."` | `tree["message"] == tree!("...")` (oxirush-utils 0.2.0) |
+
+### Added
+
 - At a handover to EPS, the transparent containers carry those of TS 36.413
   (TS 38.413 clauses 9.3.1.20 and 9.3.1.21): a tree writes them by the name
   of their type, `SourceeNB-ToTargeteNB-TransparentContainer` and

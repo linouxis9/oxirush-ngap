@@ -69,7 +69,7 @@ fn debug_of_a_message_with_a_key_shows_the_length_of_its_octets() -> Result<(), 
         assert!(has_no_key(&printed), "{printed}");
         assert!(printed.contains("value: 0001"), "{printed}");
         assert!(
-            printed.contains("id: ProtocolIEID(94), criticality: reject, value: 32 octets"),
+            printed.contains("id: ProtocolIEID(94), criticality: Reject, value: 32 octets"),
             "{printed}"
         );
 
@@ -99,7 +99,7 @@ fn debug_of_a_message_with_a_security_context_shows_no_next_hop() -> Result<(), 
     let printed = format!("{pdu:?} {:?}", pdu.protocol_ies()?);
     assert!(has_no_key(&printed), "{printed}");
     assert!(
-        printed.contains("id: ProtocolIEID(93), criticality: reject, value: 33 octets"),
+        printed.contains("id: ProtocolIEID(93), criticality: Reject, value: 33 octets"),
         "{printed}"
     );
     Ok(())

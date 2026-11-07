@@ -183,7 +183,7 @@ fn octets_that_are_no_plmn_identity_are_shown_as_octets() {
         let tree = pdu.to_tree();
         assert_eq!(
             tree["ies"][1]["TAIListForPaging"][1]["tAI"]["pLMNIdentity"],
-            octets
+            tree!(octets)
         );
         assert_eq!(NGAP_PDU::from_view(&view).unwrap().encode().unwrap(), wire);
         assert_eq!(NGAP_PDU::from_tree(&tree).unwrap().encode().unwrap(), wire);
@@ -203,8 +203,8 @@ fn the_notation_of_a_plmn_identity_has_the_octets_of_the_clause() {
     let pdu = NGAP_PDU::decode(&wire).unwrap();
     let tree = pdu.to_tree();
     let areas = &tree["ies"][1]["TAIListForPaging"];
-    assert_eq!(areas[0]["tAI"]["pLMNIdentity"], "208-93");
-    assert_eq!(areas[1]["tAI"]["pLMNIdentity"], "310-410");
+    assert_eq!(areas[0]["tAI"]["pLMNIdentity"], tree!("208-93"));
+    assert_eq!(areas[1]["tAI"]["pLMNIdentity"], tree!("310-410"));
     let mut view = pdu.to_view().unwrap();
     let identities = "/ngap/TAIListForPaging/value/*/tAI/pLMNIdentity";
     let shown = inspect::select(&view, identities).unwrap();
@@ -248,7 +248,7 @@ fn digits_that_could_be_a_plmn_identity_or_its_octets_are_refused() {
         ("0x134001", "310-410"),
         ("02f839", "208-93"),
     ] {
-        assert_eq!(guami(written).unwrap(), read, "{written}");
+        assert_eq!(guami(written).unwrap(), tree!(read), "{written}");
     }
     for (digits, other) in [
         ("310410", "134-001"),
@@ -279,9 +279,9 @@ fn digits_that_could_be_a_plmn_identity_or_its_octets_are_refused() {
                 .clone(),
         )
     };
-    assert_eq!(tac(tree!(1)).unwrap(), 1);
-    assert_eq!(tac(tree!("0x000001")).unwrap(), 1);
-    assert_eq!(tac(tree!("00000a")).unwrap(), 10);
+    assert_eq!(tac(tree!(1)).unwrap(), tree!(1));
+    assert_eq!(tac(tree!("0x000001")).unwrap(), tree!(1));
+    assert_eq!(tac(tree!("00000a")).unwrap(), tree!(10));
     let at = "at userLocationInformationNR/tAI/tAC";
     assert_eq!(
         tac(tree!("123456")).unwrap_err().to_string(),

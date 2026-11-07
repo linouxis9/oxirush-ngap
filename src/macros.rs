@@ -66,7 +66,7 @@
 //! let ie = build_ngap_ie!(UEContextReleaseRequest,
 //!     REJECT AMF_UE_NGAP_ID(1u64)
 //! )?;
-//! assert_eq!(ie.criticality, Criticality::reject);
+//! assert_eq!(ie.criticality, Criticality::Reject);
 //! # Ok::<(), oxirush_ngap::Error>(())
 //! ```
 //!
@@ -77,7 +77,7 @@
 //! use oxirush_ngap::{build_ngap_ie, ngap::*};
 //!
 //! let ie = build_ngap_ie!(UEContextReleaseRequest, AMF_UE_NGAP_ID(1u64))?;
-//! assert_eq!(ie.criticality, Criticality::reject);
+//! assert_eq!(ie.criticality, Criticality::Reject);
 //! # Ok::<(), oxirush_ngap::Error>(())
 //! ```
 //!
@@ -200,24 +200,6 @@
 //! assert!(updated);
 //! # Ok::<(), oxirush_ngap::Error>(())
 //! ```
-
-/// The identifier of the IE that the macros take by this name.
-#[macro_export]
-#[doc(hidden)]
-macro_rules! __ngap_ie_id {
-    ($name:ident) => {
-        <$crate::ie::$name as $crate::aper::protocol::Ie>::ID
-    };
-}
-
-/// The code of the procedure of this name.
-#[macro_export]
-#[doc(hidden)]
-macro_rules! __ngap_proc_code {
-    ($name:ident) => {
-        $crate::registry::procedures::$name
-    };
-}
 
 /// Extract typed NGAP protocol IEs into `req`, `opt` and `lax` fields, from a message or
 /// from a transfer of protocol IEs, as `PDUSessionResourceSetupRequestTransfer`.
@@ -428,11 +410,11 @@ macro_rules! build_ngap {
 /// let amf = build_ngap_ie!(UEContextReleaseRequest, AMF_UE_NGAP_ID(42u64))?;
 /// let kind = build_ngap_ie!(PDUSessionResourceSetupRequestTransfer,
 ///     PDUSessionType(PDUSessionType::ipv4))?;
-/// assert_eq!((amf.criticality, kind.criticality), (Criticality::reject, Criticality::reject));
+/// assert_eq!((amf.criticality, kind.criticality), (Criticality::Reject, Criticality::Reject));
 ///
 /// // One of another criticality, which a test of a peer sends
 /// let ignored = build_ngap_ie!(UEContextReleaseRequest, IGNORE AMF_UE_NGAP_ID(42u64))?;
-/// assert_eq!(ignored.criticality, Criticality::ignore);
+/// assert_eq!(ignored.criticality, Criticality::Ignore);
 ///
 /// // An IE in a single container: the target of a handover to an RNC
 /// let lai = LAI::new(plmn("208", "93")?, LAC([0x00, 0x01]), None);
@@ -524,7 +506,7 @@ mod tests {
         // after one that decodes and before it.
         let undecodable = || {
             let octets = crate::Octets::from(vec![0xff]);
-            ProtocolIEField::new(10u16, Criticality::reject, octets)
+            ProtocolIEField::new(10u16, Criticality::Reject, octets)
         };
         let entry = build_ngap_ie!(UEContextReleaseRequest, REJECT AMF_UE_NGAP_ID(1u64))?;
         // The first one decodes: both macros take it, and decode no other.
@@ -590,15 +572,15 @@ mod tests {
 
         // The direction and the procedure code of a PDU are those of its message.
         let initiating = build_ngap!(InitiatingMessage, NGSetup, REJECT, NGSetupRequest,)?;
-        assert!(initiating.is_initiating());
+        assert_eq!(initiating.direction(), crate::Direction::Initiating);
         assert_eq!(initiating.procedure_code(), 21);
 
         let successful = build_ngap!(SuccessfulOutcome, NGSetup, REJECT, NGSetupResponse,)?;
-        assert!(successful.is_successful());
+        assert_eq!(successful.direction(), crate::Direction::Successful);
         assert_eq!(successful.procedure_code(), 21);
 
         let unsuccessful = build_ngap!(UnsuccessfulOutcome, NGSetup, REJECT, NGSetupFailure,)?;
-        assert!(unsuccessful.is_unsuccessful());
+        assert_eq!(unsuccessful.direction(), crate::Direction::Unsuccessful);
         assert_eq!(unsuccessful.procedure_code(), 21);
         Ok(())
     }

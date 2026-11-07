@@ -88,7 +88,7 @@ fn diagnostics(
         true => CriticalityDiagnostics::new(
             Some(ProcedureCode(21)),
             Some(TriggeringMessage::initiating_message),
-            Some(Criticality::reject),
+            Some(Criticality::Reject),
             items,
             None,
         ),
@@ -169,7 +169,7 @@ fn the_error_of_a_missing_ie_has_the_criticality_that_is_assigned() -> Result<()
     let missing = Deviation::MissingIe {
         id: SUPPORTED_TA_LIST,
         name: "SupportedTAList",
-        criticality: Criticality::reject,
+        criticality: Criticality::Reject,
     };
     assert_eq!(Deviation::of(&error), Some(missing.clone()));
     assert_eq!(pdu.check()?, std::slice::from_ref(&missing));
@@ -181,7 +181,7 @@ fn the_error_of_a_missing_ie_has_the_criticality_that_is_assigned() -> Result<()
     );
     assert_eq!(missing.type_of_error(), Some(TypeOfError::missing));
     let item = CriticalityDiagnosticsIEItem::new(
-        Criticality::reject,
+        Criticality::Reject,
         ProtocolIEID(SUPPORTED_TA_LIST),
         TypeOfError::missing,
         None,
@@ -218,7 +218,7 @@ fn the_error_of_an_ie_that_does_not_decode_has_the_criticality_that_was_received
             id: DEFAULT_PAGING_DRX,
             name: "DefaultPagingDRX",
             position: 3,
-            criticality: Criticality::ignore,
+            criticality: Criticality::Ignore,
             ..
         }
     ));
@@ -258,7 +258,7 @@ fn an_ie_of_the_criticality_ignore_is_in_no_item_of_the_diagnostics() -> Result<
     assert!(matches!(
         deviations[..],
         [Deviation::UndecodableIe {
-            criticality: Criticality::ignore,
+            criticality: Criticality::Ignore,
             ..
         }]
     ));
@@ -267,17 +267,17 @@ fn an_ie_of_the_criticality_ignore_is_in_no_item_of_the_diagnostics() -> Result<
     let missing = Deviation::MissingIe {
         id: DEFAULT_PAGING_DRX,
         name: "DefaultPagingDRX",
-        criticality: Criticality::ignore,
+        criticality: Criticality::Ignore,
     };
     assert_eq!(missing.diagnostics_item(), None);
     // The same IE missing as `reject` has its item.
     let reject = Deviation::MissingIe {
         id: DEFAULT_PAGING_DRX,
         name: "DefaultPagingDRX",
-        criticality: Criticality::reject,
+        criticality: Criticality::Reject,
     };
     let item = CriticalityDiagnosticsIEItem::new(
-        Criticality::reject,
+        Criticality::Reject,
         ProtocolIEID(DEFAULT_PAGING_DRX),
         TypeOfError::missing,
         None,
@@ -302,8 +302,8 @@ fn check_reports_every_ie_that_is_missing_or_does_not_decode() -> Result<(), Err
     assert_eq!(
         ies,
         [
-            Some((DEFAULT_PAGING_DRX, Criticality::ignore)),
-            Some((SUPPORTED_TA_LIST, Criticality::reject)),
+            Some((DEFAULT_PAGING_DRX, Criticality::Ignore)),
+            Some((SUPPORTED_TA_LIST, Criticality::Reject)),
         ]
     );
     let types: Vec<_> = deviations.iter().map(Deviation::type_of_error).collect();
@@ -320,7 +320,7 @@ fn check_reports_every_ie_that_is_missing_or_does_not_decode() -> Result<(), Err
         .filter_map(Deviation::diagnostics_item)
         .collect();
     let missing = CriticalityDiagnosticsIEItem::new(
-        Criticality::reject,
+        Criticality::Reject,
         ProtocolIEID(SUPPORTED_TA_LIST),
         TypeOfError::missing,
         None,
@@ -345,8 +345,8 @@ fn each_deviation_has_the_cause_of_its_clause() -> Result<(), Error> {
         IGNORE UserLocationInformation(location()?),
     )?;
     let mut ies = pdu.protocol_ies()?.into_owned();
-    ies.0.push(ie(60_000, Criticality::notify));
-    ies.0.push(ie(60_001, Criticality::ignore));
+    ies.0.push(ie(60_000, Criticality::Notify));
+    ies.0.push(ie(60_001, Criticality::Ignore));
     pdu.set_protocol_ies(ies)?;
 
     let deviations = pdu.check()?;
@@ -372,7 +372,7 @@ fn each_deviation_has_the_cause_of_its_clause() -> Result<(), Error> {
         )
     };
     // The IE received as `ignore` has none.
-    assert_eq!(items, [item(60_000, Criticality::notify)]);
+    assert_eq!(items, [item(60_000, Criticality::Notify)]);
     Ok(())
 }
 
@@ -415,7 +415,7 @@ fn a_value_outside_the_root_of_an_extensible_constraint_is_reported() -> Result<
             id: 1,
             name: "AMFName",
             position: 0,
-            criticality: Criticality::reject,
+            criticality: Criticality::Reject,
             ..
         }]
     ));
@@ -424,7 +424,7 @@ fn a_value_outside_the_root_of_an_extensible_constraint_is_reported() -> Result<
         "AMFName (IE 1), at position 0, has a value of a later version of its type: a size \
          of 0 is outside the root of its constraint (1..150, ...)"
     );
-    assert_eq!(deviations[0].ie(), Some((1, Criticality::reject)));
+    assert_eq!(deviations[0].ie(), Some((1, Criticality::Reject)));
     assert_eq!(
         deviations[0].type_of_error(),
         Some(TypeOfError::not_understood)

@@ -18,13 +18,13 @@
 //! A codec for NGAP, the NG Application Protocol of 3GPP TS 38.413, in aligned PER.
 //!
 //! ```rust
-//! use oxirush_ngap::{build_ngap, extract_ngap_ies, ngap::*};
+//! use oxirush_ngap::{Direction, build_ngap, extract_ngap_ies, ngap::*};
 //!
 //! fn main() -> Result<(), Box<dyn std::error::Error>> {
 //!     // Decode a UE CONTEXT RELEASE REQUEST
 //!     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500")?;
 //!     let pdu = NGAP_PDU::decode(&bytes)?;
-//!     assert_eq!((pdu.procedure_code(), pdu.is_initiating()), (42, true));
+//!     assert_eq!((pdu.procedure_code(), pdu.direction()), (42, Direction::Initiating));
 //!     println!("{}", pdu.procedure_name());
 //!     # assert_eq!(pdu.procedure_name(), "UEContextReleaseRequest");
 //!
@@ -239,11 +239,7 @@
 //!
 //! The list of the abbreviations is `ABBREVIATIONS` of `generator/src/names.rs` in
 //! oxirush-aper, with the identifiers that the specifications write otherwise than
-//! their others, as `parentTImeSource`. `build/fields.tsv` of the repository has each
-//! field of each type with the name that rasn-compiler gives it, which the fields had
-//! before this rule and have in 0.4.2 for every field of a type that 0.4.2 has but two,
-//! the `targetRANNodeID-RIM` of `RIMInformationTransfer` and the `targetRANNodeID-SON`
-//! of `SONConfigurationTransfer`. The JSON forms keep the identifiers of ASN.1.
+//! their others, as `parentTImeSource`. The JSON forms keep the identifiers of ASN.1.
 //!
 //! A `SEQUENCE` is a struct that a literal builds, and its `new` takes the members in
 //! their order. An extensible `CHOICE` or `ENUMERATED` is `#[non_exhaustive]`: a later
@@ -347,7 +343,7 @@ pub use oxirush_utils::tree;
 pub use ngap::NgapPduKind;
 pub use oxirush_aper::protocol::Message;
 pub use oxirush_aper::{
-    AsnType, BitString, Bits, Decode, Encode, Error, ErrorKind, Fault, Faults, Octets,
+    AsnType, BitString, Bits, Decode, Direction, Encode, Error, ErrorKind, Fault, Faults, Octets,
 };
 /// ```
 /// use oxirush_ngap::{Deviation, build_ngap, ngap::*};

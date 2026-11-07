@@ -142,7 +142,7 @@ fn containers(pdu: &NGAP_PDU, tree: &mut Tree) {
                 value.insert(carried.into(), as_tree(decoded));
                 if let Some(ie) = tree
                     .get_mut("ies")
-                    .and_then(|ies| ies.get_mut(index))
+                    .and_then(|ies| ies.as_array_mut()?.get_mut(index))
                     .and_then(Tree::as_object_mut)
                 {
                     ie.insert(container.into(), Tree::Object(value));

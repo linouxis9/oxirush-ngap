@@ -47,22 +47,22 @@ fn main() {
     let ies = vec![
         ProtocolIEField::new(
             ID_AMFNAME,
-            Criticality::reject,
+            Criticality::Reject,
             encode_open_type(&amf_name).expect("encode AMF name"),
         ),
         ProtocolIEField::new(
             ID_SERVED_GUAMILIST,
-            Criticality::reject,
+            Criticality::Reject,
             encode_open_type(&served_guamis).expect("encode served GUAMIs"),
         ),
         ProtocolIEField::new(
             ID_RELATIVE_AMFCAPACITY,
-            Criticality::ignore,
+            Criticality::Ignore,
             encode_open_type(&RelativeAMFCapacity(255)).expect("encode AMF capacity"),
         ),
         ProtocolIEField::new(
             ID_PLMNSUPPORT_LIST,
-            Criticality::reject,
+            Criticality::Reject,
             encode_open_type(&plmn_support).expect("encode PLMN support"),
         ),
     ];
@@ -72,7 +72,7 @@ fn main() {
     // ASN.1-derived procedure code.
     let pdu = NGAP_PDU::successfulOutcome(SuccessfulOutcome::new(
         ID_NGSETUP,
-        Criticality::reject,
+        Criticality::Reject,
         encode_open_type(&response).expect("encode NG Setup Response"),
     ));
 

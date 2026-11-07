@@ -1,6 +1,32 @@
 #![cfg(feature = "inspect")]
 
-use oxirush_ngap::{build_ngap, inspect, ngap::*};
+use oxirush_ngap::tree;
+use oxirush_ngap::tree::Value;
+use oxirush_ngap::{Direction, build_ngap, inspect, ngap::*};
+
+/// The value at a JSON pointer of a view, as `/message/protocolIEs/0/value`.
+trait Pointer {
+    fn pointer(&self, pointer: &str) -> Option<&Value>;
+    fn pointer_mut(&mut self, pointer: &str) -> Option<&mut Value>;
+}
+
+impl Pointer for Value {
+    fn pointer(&self, pointer: &str) -> Option<&Value> {
+        let mut steps = pointer.split('/').skip(1);
+        steps.try_fold(self, |value, step| match value {
+            Value::Array(items) => items.get(step.parse::<usize>().ok()?),
+            _ => value.get(step),
+        })
+    }
+
+    fn pointer_mut(&mut self, pointer: &str) -> Option<&mut Value> {
+        let mut steps = pointer.split('/').skip(1);
+        steps.try_fold(self, |value, step| match value {
+            Value::Array(items) => items.get_mut(step.parse::<usize>().ok()?),
+            _ => value.get_mut(step),
+        })
+    }
+}
 
 #[test]
 fn inspect_repeated_ies_and_edit_one_without_reordering() {
@@ -137,12 +163,12 @@ fn editing_a_known_ie_cannot_drop_unknown_sequence_additions() {
     assert_eq!(list.0[0].slice_support_list.0[1].s_nssai.sst.0[0], 2);
     let response = NGSetupResponse::new(ProtocolIEContainer(vec![ProtocolIEField::new(
         ProtocolIEID(80),
-        Criticality::reject,
+        Criticality::Reject,
         raw.into(),
     )]));
     let pdu = NGAP_PDU::successfulOutcome(SuccessfulOutcome::new(
         ProcedureCode(21),
-        Criticality::reject,
+        Criticality::Reject,
         encode_open_type(&response).unwrap(),
     ));
     let wire = pdu.encode().unwrap();
@@ -168,7 +194,7 @@ fn the_octets_of_an_ie_are_replaced_or_added_as_its_raw_value_without_value() {
     let mut view = pdu.to_view().unwrap();
     // RAN-UE-NGAP-ID 9, as its octets in place of the typed value.
     let ie = view.pointer_mut("/message/protocolIEs/1").unwrap();
-    ie.as_object_mut().unwrap().remove("value");
+    ie.as_object_mut().unwrap().shift_remove("value");
     ie["_raw_value"] = oxirush_ngap::tree!("0009");
     let ies = view.pointer_mut("/message/protocolIEs").unwrap();
     ies.as_array_mut()
@@ -261,12 +287,12 @@ fn a_new_ie_whose_value_is_a_string_is_typed_too() {
 fn an_ie_that_does_not_decode_is_edited_as_its_octets() {
     let request = UEContextReleaseRequest::new(ProtocolIEContainer(vec![ProtocolIEField::new(
         ProtocolIEID(60000),
-        Criticality::ignore,
+        Criticality::Ignore,
         vec![0xC0, 0xFF, 0xEE].into(),
     )]));
     let pdu = NGAP_PDU::initiatingMessage(InitiatingMessage::new(
         ProcedureCode(42),
-        Criticality::ignore,
+        Criticality::Ignore,
         encode_open_type(&request).unwrap(),
     ));
     let mut view = pdu.to_view().unwrap();
@@ -431,7 +457,7 @@ fn a_message_is_shown_and_written_as_its_name_and_its_ies_by_name() {
         let shown = NGAP_PDU::decode(&wire).unwrap().to_tree();
         // A private message has no IEs of the protocol to name: its octets.
         if shown.get("ies").is_none() {
-            assert_eq!(shown["message"], "PrivateMessage");
+            assert_eq!(shown["message"], tree!("PrivateMessage"));
             assert!(shown["octets"].is_string());
             assert_eq!(NGAP_PDU::from_tree(&shown).unwrap().encode().unwrap(), wire);
             continue;
@@ -463,14 +489,14 @@ fn a_message_is_shown_and_written_as_its_name_and_its_ies_by_name() {
     let pdu = NGAP_PDU::from_tree(&request).unwrap();
     assert_eq!(inspect::message_name(&pdu), Some("UEContextReleaseRequest"));
     let view = pdu.to_view().unwrap();
-    assert_eq!(view["criticality"], "ignore");
+    assert_eq!(view["criticality"], tree!("ignore"));
     let criticalities = view["message"]["protocolIEs"].as_array().unwrap().iter();
     let criticalities: Vec<_> = criticalities
         .map(|ie| ie["criticality"].as_str().unwrap())
         .collect();
     assert_eq!(criticalities, ["reject", "reject", "ignore", "reject"]);
     let shown = pdu.to_tree();
-    assert_eq!(shown["message"], "UEContextReleaseRequest");
+    assert_eq!(shown["message"], tree!("UEContextReleaseRequest"));
     assert_eq!(shown["ies"][0], oxirush_ngap::tree!({"AMF-UE-NGAP-ID": 1}));
     assert_eq!(
         shown["ies"][3],
@@ -1117,7 +1143,7 @@ fn fixture(name: &str) -> Vec<u8> {
 /// The entry of the IE `id` of a view.
 fn ie(view: &mut oxirush_ngap::tree::Value, id: u16) -> &mut oxirush_ngap::tree::Value {
     let ies = view["message"]["protocolIEs"].as_array_mut().unwrap();
-    ies.iter_mut().find(|ie| ie["id"] == id).unwrap()
+    ies.iter_mut().find(|ie| ie["id"] == tree!(id)).unwrap()
 }
 
 /// The view of a message that has `entries` for IEs, encoded and decoded again.
@@ -1648,7 +1674,7 @@ fn a_message_goes_by_the_name_that_asn1_gives_it() {
     // The view of a message that is written from its name.
     let (direction, procedure_code) = inspect::message_named("ue context release request").unwrap();
     let mut view = tree!({
-        "direction": direction,
+        "direction": direction.name(),
         "procedure_code": procedure_code,
         "criticality": "ignore",
         "message": {"protocolIEs": []},
@@ -1661,7 +1687,7 @@ fn a_message_goes_by_the_name_that_asn1_gives_it() {
     .unwrap();
     let pdu = NGAP_PDU::from_view(&view).unwrap();
     assert_eq!(inspect::message_name(&pdu), Some("UEContextReleaseRequest"));
-    assert!(pdu.is_initiating());
+    assert_eq!(pdu.direction(), Direction::Initiating);
 }
 
 #[test]
@@ -1705,7 +1731,7 @@ fn an_edit_changes_what_is_sent_or_is_refused() {
     // The name of an ENUMERATED value of the PDU itself is taken as any other.
     inspect::set(&mut view, "/criticality", tree!("Reject")).unwrap();
     let pdu = NGAP_PDU::from_view(&view).unwrap();
-    assert_eq!(pdu.to_view().unwrap()["criticality"], "reject");
+    assert_eq!(pdu.to_view().unwrap()["criticality"], tree!("reject"));
 }
 
 #[test]
@@ -1767,7 +1793,7 @@ fn what_is_nested_deeper_than_the_inspection_goes_keeps_its_octets() {
         let value = encode_open_type(&cause).unwrap();
         cause = Cause::choice_Extensions(ProtocolIEField::new(
             ProtocolIEID(15),
-            Criticality::ignore,
+            Criticality::Ignore,
             value,
         ));
     }
@@ -1965,7 +1991,7 @@ fn the_identifiers_of_the_registry_are_the_constants_of_the_bindings() {
 fn a_kind_that_the_specification_does_not_have_says_the_direction_of_its_pdu() {
     let pdu = NGAP_PDU::unsuccessfulOutcome(UnsuccessfulOutcome::new(
         ProcedureCode(46),
-        Criticality::ignore,
+        Criticality::Ignore,
         oxirush_ngap::Octets::from(vec![0]),
     ));
     let oxirush_ngap::NgapPduKind::Other {
@@ -2037,8 +2063,8 @@ fn a_procedure_that_the_specification_does_not_have_has_a_view_of_its_ies() {
     let pdu = NGAP_PDU::decode(&octets).unwrap();
     assert_eq!(pdu.procedure_code(), 200);
     let mut view = pdu.to_view().unwrap();
-    assert_eq!(view["procedure_code"], 200);
-    assert_eq!(view["direction"], "InitiatingMessage");
+    assert_eq!(view["procedure_code"], tree!(200));
+    assert_eq!(view["direction"], tree!("InitiatingMessage"));
     // Each IE is read with the type of its identifier, and has its name.
     let id = inspect::select(&view, "/ngap/RAN-UE-NGAP-ID/value").unwrap();
     assert_eq!(id, [&tree!(7)]);
@@ -2083,7 +2109,7 @@ fn a_procedure_that_the_specification_does_not_have_has_a_view_of_its_ies() {
     assert_eq!(NGAP_PDU::from_tree(&tree).unwrap(), pdu);
     // Without the criticality, which no table has for it, it is refused.
     let mut unsaid = tree.clone();
-    unsaid.as_object_mut().unwrap().remove("criticality");
+    unsaid.as_object_mut().unwrap().shift_remove("criticality");
     let error = NGAP_PDU::from_tree(&unsaid).unwrap_err();
     assert_eq!(error.kind(), ErrorKind::Form);
     // A message that is no container of protocol IEs does not decode, and has no view:
@@ -2221,7 +2247,7 @@ fn a_name_is_its_letters_and_its_digits() {
     assert!(NGAP_PDU::from_view(&edited).is_ok());
     assert_eq!(
         inspect::message_named("ue context-release_REQUEST"),
-        Some(("InitiatingMessage", 42))
+        Some((Direction::Initiating, 42))
     );
 }
 

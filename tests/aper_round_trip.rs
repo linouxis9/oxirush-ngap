@@ -119,10 +119,10 @@ fn every_constrained_list_encodes_its_length_per_x691() -> Result<(), Error> {
     let diagnostics = CriticalityDiagnostics::new(
         Some(ProcedureCode(14)),
         Some(TriggeringMessage::initiating_message),
-        Some(Criticality::reject),
+        Some(Criticality::Reject),
         Some(CriticalityDiagnosticsIEList(vec![
             CriticalityDiagnosticsIEItem::new(
-                Criticality::reject,
+                Criticality::Reject,
                 ID_GUAMI,
                 TypeOfError::missing,
                 None,
@@ -172,7 +172,7 @@ fn multiline_extension_list_has_an_aligned_count() {
         )]);
     let extension = ProtocolExtensionField::new(
         ProtocolExtensionID(356),
-        Criticality::ignore,
+        Criticality::Ignore,
         encode_open_type(&list).unwrap(),
     );
     let value = TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainer::new(
@@ -556,7 +556,7 @@ fn a_value_keeps_its_extension_container_after_its_octets() {
         Some(ProtocolExtensionContainer(vec![
             ProtocolExtensionField::new(
                 ProtocolExtensionID(1),
-                Criticality::ignore,
+                Criticality::Ignore,
                 Octets::from(vec![0x00]),
             ),
         ])),

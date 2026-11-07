@@ -695,13 +695,14 @@ impl NGAPPDU<'_> {
     ///
     /// ```
     /// use oxirush_ngap::ngap::NGAP_PDU;
+    /// use oxirush_ngap::tree;
     ///
     /// // A UE CONTEXT RELEASE REQUEST
     /// let octets = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
     /// let pdu = NGAP_PDU::decode(&octets)?;
     /// let tree = pdu.to_tree();
-    /// assert_eq!(tree["message"], "UEContextReleaseRequest");
-    /// assert_eq!(tree["ies"][2]["Cause"]["radioNetwork"], "user-inactivity");
+    /// assert_eq!(tree["message"], tree!("UEContextReleaseRequest"));
+    /// assert_eq!(tree["ies"][2]["Cause"]["radioNetwork"], tree!("user-inactivity"));
     ///
     /// // The tree is a PDU again, of the same octets
     /// assert_eq!(NGAP_PDU::from_tree(&tree)?.encode()?, octets);
@@ -749,7 +750,7 @@ impl NGAPPDU<'_> {
     /// `octets` in the place of its IEs: `{"message": "PrivateMessage", "octets": "…"}`.
     pub fn to_tree(&self) -> Value {
         let (direction, code) = (self.direction(), self.procedure_code());
-        let criticality = json::to_value(&self.criticality());
+        let criticality = self.criticality().to_tree();
         shared::tree(&TABLES, direction, code, criticality, self.value())
     }
 
@@ -796,12 +797,12 @@ impl NGAPPDU<'_> {
     fn of_parts(parts: Parts) -> Result<NGAP_PDU, Error> {
         let criticality = json::from_value(&parts.criticality)?;
         let value = Octets::owned(parts.message);
-        NGAP_PDU::of(parts.direction, parts.code, criticality, value).ok_or_else(|| {
-            Error::form(
-                "the direction of a view is InitiatingMessage, SuccessfulOutcome or \
-                 UnsuccessfulOutcome",
-            )
-        })
+        Ok(NGAP_PDU::of(
+            parts.direction,
+            parts.code,
+            criticality,
+            value,
+        ))
     }
 
     /// The view of this PDU: its `procedure_code`, its `direction`, its `criticality` and
@@ -830,13 +831,13 @@ impl NGAPPDU<'_> {
     /// // A UE CONTEXT RELEASE REQUEST
     /// let octets = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
     /// let view = NGAP_PDU::decode(&octets)?.to_view()?;
-    /// assert_eq!(view["procedure_code"], 42);
+    /// assert_eq!(view["procedure_code"], tree!(42));
     /// assert_eq!(inspect::select(&view, "/ngap/RAN-UE-NGAP-ID/value")?, [&tree!(7)]);
     /// # Ok::<(), oxirush_ngap::Error>(())
     /// ```
     pub fn to_view(&self) -> Result<Value, Error> {
         let (direction, code) = (self.direction(), self.procedure_code());
-        let criticality = json::to_value(&self.criticality());
+        let criticality = self.criticality().to_tree();
         shared::view(&TABLES, direction, code, criticality, self.value())
     }
 

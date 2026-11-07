@@ -273,7 +273,7 @@ fn block_4() {
             RAN_UE_NGAP_ID(7u32),
             NAS_PDU(vec![0x7e, 0x00, 0x41]),
         )?;
-        println!("{:?} {}", pdu.criticality(), hex::encode(pdu.encode()?));
+        println!("{} {}", pdu.criticality(), hex::encode(pdu.encode()?));
 
         // The PDU of a message you already have
         let message: InitialUEMessage = pdu.decode_value()?;

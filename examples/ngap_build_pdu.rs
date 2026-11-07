@@ -146,24 +146,24 @@ fn main() -> Result<(), Error> {
     //       ProtocolIEContainer(vec![
     //           ProtocolIEField::new(
     //               ProtocolIEID(10),
-    //               Criticality::ignore,
+    //               Criticality::Ignore,
     //               encode_open_type(&AMFUENGAPID(1))?,
     //           ),
     //           ProtocolIEField::new(
     //               ProtocolIEID(85),
-    //               Criticality::ignore,
+    //               Criticality::Ignore,
     //               encode_open_type(&RANUENGAPID(0))?,
     //           ),
     //           ProtocolIEField::new(
     //               ProtocolIEID(75),
-    //               Criticality::ignore,
+    //               Criticality::Ignore,
     //               encode_open_type(&session_setup_response_list())?,
     //           ),
     //       ]),
     //   );
     //   let pdu = NGAP_PDU::successfulOutcome(SuccessfulOutcome::new(
     //       ProcedureCode(14),
-    //       Criticality::reject,
+    //       Criticality::Reject,
     //       encode_open_type(&response)?,
     //   ));
     Ok(())

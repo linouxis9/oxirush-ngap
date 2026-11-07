@@ -51,7 +51,7 @@ fn opened(pdu: &NGAP_PDU) -> Value {
     let mut view = pdu.to_view().unwrap();
     for (ie, carried) in CARRIED {
         let ies = view["message"]["protocolIEs"].as_array();
-        if ies.is_some_and(|ies| ies.iter().any(|entry| entry["_ie_name"] == ie)) {
+        if ies.is_some_and(|ies| ies.iter().any(|entry| entry["_ie_name"] == tree!(ie))) {
             inspect::open(&mut view, &format!("/ngap/{ie}/{carried}")).unwrap();
         }
     }

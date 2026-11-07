@@ -12,13 +12,13 @@ edition = "2024"
 [package.metadata]
 cargo-fuzz = true
 
-# What the targets do, which the three programs call.
+# What the targets do, which the programs call.
 [lib]
 name = "targets"
 path = "../../oxirush-aper/protocols/fuzz/src/lib.rs"
 
 [dependencies]
-libfuzzer-sys = "0.4"
+libfuzzer-sys = { version = "0.4", features = ["arbitrary-derive"] }
 serde_json = "1"
 
 [dependencies.codec]
@@ -57,6 +57,27 @@ bench = false
 [[bin]]
 name = "paths"
 path = "../../oxirush-aper/protocols/fuzz/fuzz_targets/paths.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "exact"
+path = "../../oxirush-aper/protocols/fuzz/fuzz_targets/exact.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "edit"
+path = "../../oxirush-aper/protocols/fuzz/fuzz_targets/edit.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "tree"
+path = "../../oxirush-aper/protocols/fuzz/fuzz_targets/tree.rs"
 test = false
 doc = false
 bench = false

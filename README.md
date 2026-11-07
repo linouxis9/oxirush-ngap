@@ -535,9 +535,11 @@ The tests run 144 messages and 479 vectors that pycrate 0.8.1 encoded from
 the ASN.1, and 177 PDUs that Open5GS, free5GC and PacketRusher sent in lab
 runs, through the codec, the views and the trees. `oracle/` compares the
 crate with the codec of rasn 0.29 on each of them, also cut short,
-lengthened and with bits flipped. `fuzz/` has three
-[cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets, `decode`, `view`
-and `paths`, which CI runs for a minute each. `examples/` has four programs.
+lengthened and with bits flipped. `fuzz/` has six
+[cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets: `decode`, `view`,
+`paths` and `exact` read any octets, and `edit` and `tree` edit the PDUs of
+the tests and write new ones. CI runs each for a minute, and the Fuzz
+workflow of oxirush-aper an hour each night. `examples/` has four programs.
 
 ```sh
 cargo test --all-features

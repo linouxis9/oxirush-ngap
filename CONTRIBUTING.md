@@ -233,24 +233,30 @@ Downlink NAS Transport.
 
 ## Fuzzing
 
-`fuzz/` has three [cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets,
+`fuzz/` has six [cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets,
 a package of its own that is not published. A target does not only look for a
 panic: it gives its octets to the crate and to its oracle, the same types
-with the codec of rasn, and compares what the two make of them.
-CI runs each for a minute, from the vectors and the captured PDUs.
+with the codec of rasn, and compares what the two make of them, or holds
+what the crate writes to what it reads and to what `check` says.
+CI runs each for a minute, from the vectors and the captured PDUs, and the
+Fuzz workflow of oxirush-aper an hour each night and four hours on Sunday.
 
 | Target | What holds for any octets |
 |--------|---------------------------|
 | `decode` | A PDU, the protocol IEs of its message and the message as its type are read by the crate and by rasn as the same value, which both write as the same octets, or by neither, and what was read is written and read again as the same |
 | `view` | The view of a PDU gives that PDU back, a view and a tree are written to a PDU that has the same view and the same tree, each path of a view selects its value, and each value that a view decodes has the JSON form that the JSON Encoding Rules of rasn give the same octets |
 | `paths` | `select`, `set`, `insert`, `remove`, `open`, `check_path` and `enumerated_at` take any path and any value without a panic, and a view that one of them changed is a PDU or an error |
+| `exact` | A PDU is written back to the octets that it was read from, but where `check` finds a form that X.691 does not give; `check_structure` says what `check` says of all but the values, and the Criticality Diagnostics of the deviations encode; a PDU that `check` finds nothing to say of is written to the same octets by the codec of its message and from the values of its view |
+| `edit` | A PDU of the fixtures edited by the paths of its view, with values of the views of the fixtures and of the fuzzer: what `with_view` writes is what `from_view` writes, encodes and is read back, and only the IEs that an edit was under change |
+| `tree` | A PDU written from a tree whose IEs the fuzzer takes from the trees of the fixtures, changes, repeats, removes and puts in another order: it encodes, is read back, and its tree writes it again |
 
 ```sh
 cargo install cargo-fuzz
 ../oxirush-aper/protocols/fuzz/seed.sh
 # What the targets take from the inside of the crate is behind its own name
 export RUSTFLAGS="--cfg oxirush_ngap_hooks"
-cargo +nightly fuzz run decode -- -max_total_time=60 -max_len=4096
+cargo +nightly fuzz run decode -- -max_total_time=60 -max_len=4096 -dict=fuzz/corpus/protocol.dict
+cargo +nightly fuzz run edit -- -max_total_time=60 -max_len=1024 -len_control=0
 ```
 
 ## The tests that compare

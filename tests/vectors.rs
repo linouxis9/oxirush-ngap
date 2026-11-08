@@ -46,45 +46,34 @@ fn vectors(file: &'static str) -> impl Iterator<Item = (&'static str, Vec<u8>)> 
     })
 }
 
-/// The view of a PDU, with the containers of a handover decoded as the types that they
+/// The tree of a PDU, with the containers of a handover decoded as the types that they
 /// carry.
 fn opened(pdu: &NGAPPDU<'_>) -> Value {
-    let mut view = pdu.to_view().unwrap();
+    let mut tree = pdu.to_tree();
     for (ie, carried) in CARRIED {
-        let ies = view["message"]["protocolIEs"].as_array();
-        if ies.is_some_and(|ies| ies.iter().any(|entry| entry["_ie_name"] == tree!(ie))) {
-            inspect::open(&mut view, &format!("/ngap/{ie}/{carried}")).unwrap();
+        let ies = tree["ies"].as_array();
+        if ies.is_some_and(|ies| ies.iter().any(|entry| entry.get(ie).is_some())) {
+            inspect::open(&mut tree, &format!("/ngap/{ie}/{carried}")).unwrap();
         }
     }
-    view
+    tree
 }
 
-/// `value` without what a view keeps of what was received: the members whose name
-/// starts with `_`, at any depth.
-fn written(value: &Value) -> Value {
-    match value {
-        Value::Object(members) => {
-            let kept = members.iter().filter(|(name, _)| !name.starts_with('_'));
-            Value::Object(
-                kept.map(|(name, value)| (name.clone(), written(value)))
-                    .collect(),
-            )
-        }
-        Value::Array(entries) => Value::Array(entries.iter().map(written).collect()),
-        other => other.clone(),
-    }
-}
-
-/// The identifier of each IE that a view holds, at any depth: in the message, in a list,
-/// in a transfer and in an extension container. `unread` takes why an IE or a transfer
-/// was not read with its type.
+/// The identifier of each IE that a tree holds, at any depth: in the message, in a list,
+/// in a transfer and in an extension container, each an object of one member, the name
+/// of the IE, beside its criticality. `unread` takes each value that is its octets, as
+/// an IE or a transfer that was not read with its type is.
 fn identifiers(value: &Value, found: &mut BTreeSet<u16>, unread: &mut Vec<String>) {
+    let names: &BTreeMap<&str, u16> = &IDS;
     match value {
+        Value::Object(members) if members.len() == 1 && members.contains_key("octets") => {
+            unread.push(value.to_string());
+        }
         Value::Object(members) => {
-            if let (Some(id), true) = (members.get("id"), members.contains_key("criticality")) {
-                found.extend(id.as_u64().map(|id| id as u16));
+            let mut named = members.keys().filter(|name| *name != "criticality");
+            if let (Some(name), None) = (named.next(), named.next()) {
+                found.extend(names.get(name.as_str()));
             }
-            unread.extend(members.get("_decode_error").map(Value::to_string));
             for member in members.values() {
                 identifiers(member, found, unread);
             }
@@ -98,9 +87,17 @@ fn identifiers(value: &Value, found: &mut BTreeSet<u16>, unread: &mut Vec<String
     }
 }
 
-/// The octets of the PDU of a view, or why it has none.
-fn octets(view: &Value) -> Result<String, String> {
-    let pdu = NGAPPDU::from_view(view).map_err(|error| error.to_string())?;
+/// The identifier of each IE by its name.
+static IDS: std::sync::LazyLock<BTreeMap<&str, u16>> = std::sync::LazyLock::new(|| {
+    Ngap::ie_names()
+        .iter()
+        .map(|&(id, name)| (name, id))
+        .collect()
+});
+
+/// The octets of the PDU of a tree, or why it has none.
+fn octets(tree: &Value) -> Result<String, String> {
+    let pdu = NGAPPDU::from_tree(tree).map_err(|error| error.to_string())?;
     let octets = pdu.encode().map_err(|error| error.to_string())?;
     Ok(hex::encode(octets))
 }
@@ -111,26 +108,17 @@ fn each_vector_is_read_with_its_types_and_written_to_the_same_octets() {
     for (name, wire) in vectors(VECTORS) {
         count += 1;
         let pdu = NGAPPDU::decode(&wire).unwrap();
-        let view = opened(&pdu);
+        let tree = opened(&pdu);
         let wire = Ok(hex::encode(&wire));
 
-        // Every IE and every transfer is read with its type.
-        let (mut found, mut unread) = (BTreeSet::new(), Vec::new());
-        identifiers(&view, &mut found, &mut unread);
-        assert_eq!(unread, Vec::<String>::new(), "{name}");
-
-        // The view keeps the octets received, and without them it is written from its
-        // values alone: each IE, each transfer and each container from its type.
-        assert_eq!(octets(&view), wire, "{name}: its view");
-        assert_eq!(octets(&written(&view)), wire, "{name}: its values");
-        assert_eq!(pdu.with_view(&view).unwrap(), pdu, "{name}");
-
-        // And so is its tree, for a message that has IEs to name.
+        // Every IE and every transfer is read with its type, and the tree is written
+        // from its values alone: each IE, each transfer and each container from its type.
         if !name.starts_with("PrivateMessage/") {
-            let tree = pdu.to_tree();
-            let again = NGAPPDU::from_tree(&tree).unwrap().encode().unwrap();
-            assert_eq!(Ok(hex::encode(again)), wire, "{name}: its tree");
+            let (mut found, mut unread) = (BTreeSet::new(), Vec::new());
+            identifiers(&tree, &mut found, &mut unread);
+            assert_eq!(unread, Vec::<String>::new(), "{name}");
         }
+        assert_eq!(octets(&tree), wire, "{name}: its tree");
     }
     assert!(count > 400, "{count} vectors");
 }
@@ -142,8 +130,8 @@ fn the_vectors_hold_each_message_and_each_ie_of_the_registry() {
     let held = |file| {
         let (mut found, mut unread) = (BTreeSet::new(), Vec::new());
         for (_, wire) in vectors(file) {
-            let view = opened(&NGAPPDU::decode(&wire).unwrap());
-            identifiers(&view["message"], &mut found, &mut unread);
+            let tree = opened(&NGAPPDU::decode(&wire).unwrap());
+            identifiers(&tree["ies"], &mut found, &mut unread);
         }
         found
     };
@@ -176,10 +164,12 @@ fn the_vectors_hold_each_message_and_each_ie_of_the_registry() {
 /// `later.tsv` has messages of a later release: pycrate encoded them with modules in
 /// which a few types have additions after their extension marker, 64 of them for one
 /// type, and encoded the same messages without the additions with the modules as they
-/// are. The additions are skipped where they are, in a list and in a container too, and
-/// what is read is the message without them (X.691 (02/2021) 19.7-19.9).
+/// are. The additions are skipped where they are, in a list and in a container too
+/// (X.691 (02/2021) 19.7-19.9): the PDU keeps the octets of its IEs, and its tree has an
+/// IE that holds an addition as its octets, which it gives back, and every other IE as
+/// the message without the additions has it.
 #[test]
-fn the_additions_of_a_later_release_are_skipped_as_pycrate_writes_them() {
+fn the_additions_of_a_later_release_are_kept_as_pycrate_writes_them() {
     let mut count = 0;
     for line in LATER.lines().filter(|line| !line.starts_with('#')) {
         let fields: Vec<_> = line.split('\t').collect();
@@ -187,26 +177,29 @@ fn the_additions_of_a_later_release_are_skipped_as_pycrate_writes_them() {
         assert!(later.len() > known.len(), "{name}");
         count += 1;
 
-        // The PDU keeps the octets of its IEs, the additions among them.
         let pdu = NGAPPDU::decode(&hex::decode(later).unwrap())
             .unwrap()
             .into_owned();
         assert_eq!(hex::encode(pdu.encode().unwrap()), later, "{name}");
-
-        // Each IE is read with its type, as the same value as without the additions.
-        let view = opened(&pdu);
-        let (mut found, mut unread) = (BTreeSet::new(), Vec::new());
-        identifiers(&view, &mut found, &mut unread);
-        assert_eq!(unread, Vec::<String>::new(), "{name}");
-        let without = opened(
-            &NGAPPDU::decode(&hex::decode(known).unwrap())
-                .unwrap()
-                .into_owned(),
-        );
-        assert_eq!(written(&view), written(&without), "{name}");
-
-        // And its values are written as the message without them.
-        assert_eq!(octets(&written(&view)), Ok(known.to_string()), "{name}");
+        let tree = opened(&pdu);
+        assert_eq!(octets(&tree), Ok(later.to_string()), "{name}");
+        let without = opened(&NGAPPDU::decode(&hex::decode(known).unwrap()).unwrap());
+        let (Some(Value::Array(ies)), Some(Value::Array(known))) =
+            (tree.get("ies"), without.get("ies"))
+        else {
+            panic!("{name}: a message of IEs");
+        };
+        assert_eq!(ies.len(), known.len(), "{name}");
+        let mut kept = 0;
+        for (ie, known) in ies.iter().zip(known) {
+            let (mut found, mut unread) = (BTreeSet::new(), Vec::new());
+            identifiers(ie, &mut found, &mut unread);
+            match unread.is_empty() {
+                true => assert_eq!(ie, known, "{name}"),
+                false => kept += 1,
+            }
+        }
+        assert!(kept > 0, "{name}");
     }
     assert_eq!(count, 9);
 }
@@ -230,26 +223,27 @@ fn each_alternative_of_the_type_null_is_listed_and_selected() {
             octets[1] = code.parse().unwrap();
         }
         let pdu = NGAPPDU::decode(&octets).unwrap();
-        let mut view = pdu.to_view().unwrap();
+        let mut tree = pdu.to_tree();
         assert_eq!(
-            inspect::select(&view, path),
+            inspect::select(&tree, path),
             Ok(vec![&Value::Null]),
             "{name} {path}"
         );
-        let paths = inspect::paths(&view);
+        let paths = inspect::paths(&tree);
         assert!(
             paths.contains(&(path.to_string(), Value::Null)),
             "{name} {path}"
         );
-        inspect::set(&mut view, path, Value::Null).unwrap();
-        assert_eq!(pdu.with_view(&view).unwrap(), pdu, "{name} {path}");
+        inspect::set(&mut tree, path, Value::Null).unwrap();
+        assert_eq!(NGAPPDU::from_tree(&tree).unwrap(), pdu, "{name} {path}");
         count += 1;
     }
     assert_eq!(count, 44 + 43);
 }
 
-/// The view of an NG SETUP REQUEST whose values are written in the JSON Encoding Rules of
-/// ITU-T X.697, as pycrate writes them, or as a view has them.
+/// The NG SETUP REQUEST whose values pycrate writes in the JSON Encoding Rules of ITU-T
+/// X.697: the procedure code, the direction and the criticality of its PDU, and the
+/// protocol IEs of its message.
 fn setup_request(ies: Value) -> Value {
     tree!({
         "procedure_code": 21,
@@ -260,11 +254,11 @@ fn setup_request(ies: Value) -> Value {
 }
 
 /// The review of the release candidate is right that a string of decimal digits is never
-/// read as octets in a view, where it is a number or a PLMN identity; in the JSON Encoding
+/// read as octets in a tree, where it is a number or a PLMN identity; in the JSON Encoding
 /// Rules it is octets, and the values of the reference are written in them:
-/// `__view_of_jer` reads them as a view has them, and `from_view` refuses them as they are.
+/// `__tree_of_jer` reads them as a tree has them, and `from_tree` refuses them as they are.
 #[test]
-fn a_view_in_the_json_encoding_rules_is_read_as_its_octets() {
+fn the_json_encoding_rules_are_read_as_their_octets() {
     let jer = setup_request(tree!([
         {"id": 27, "criticality": "reject", "value": {"globalGNB-ID": {
             "pLMNIdentity": "02F839",
@@ -279,32 +273,36 @@ fn a_view_in_the_json_encoding_rules_is_read_as_its_octets() {
         }]},
         {"id": 21, "criticality": "ignore", "value": "v128"},
     ]));
-    let readable = setup_request(tree!([
-        {"id": 27, "criticality": "reject", "value": {"globalGNB-ID": {
+    let readable = tree!({"message": "NGSetupRequest", "ies": [
+        {"GlobalRANNodeID": {"globalGNB-ID": {
             "pLMNIdentity": "208-93",
             "gNB-ID": {"gNB-ID": {"value": "000004", "length": 22}},
         }}},
-        {"id": 102, "criticality": "reject", "value": [{
+        {"SupportedTAList": [{
             "tAC": 1,
             "broadcastPLMNList": [{
                 "pLMNIdentity": "208-93",
                 "tAISliceSupportList": [{"s-NSSAI": {"sST": 1}}],
             }],
         }]},
-        {"id": 21, "criticality": "ignore", "value": "v128"},
-    ]));
-    let error = NGAPPDU::from_view(&jer).unwrap_err().to_string();
+        {"DefaultPagingDRX": "v128"},
+    ]});
+    let read = inspect::__tree_of_jer(&jer).unwrap();
+    assert_eq!(read["ies"][1]["SupportedTAList"][0]["tAC"], tree!(1));
+    let read = NGAPPDU::from_tree(&read).unwrap();
+    assert_eq!(read, NGAPPDU::from_tree(&readable).unwrap());
+    let mut as_jer = readable.clone();
+    as_jer["ies"][1]["SupportedTAList"][0]["tAC"] = tree!("000001");
+    let error = NGAPPDU::from_tree(&as_jer).unwrap_err().to_string();
     assert!(
         error.contains(r#""000001" is a number in quotes: write 1 without quotes"#),
         "{error}"
     );
-    let read = NGAPPDU::from_view(&inspect::__view_of_jer(&jer).unwrap()).unwrap();
-    assert_eq!(read, NGAPPDU::from_view(&readable).unwrap());
 }
 
 /// The values of the vectors as the reference has them: `generate.py --values FILE` of
-/// oxirush-aper writes each as a view, in the JSON encoding of ASN.1, and
-/// `REFERENCE_VALUES` is that file. A PDU that is written from the view of a vector is
+/// oxirush-aper writes each in the JSON encoding of ASN.1, and `REFERENCE_VALUES` is that
+/// file. A PDU that is written from the tree of the values of a vector is
 /// the octets of the vector: the crate gives each name, each number and each string of
 /// the reference the bits that the reference gave it.
 #[test]
@@ -316,12 +314,12 @@ fn a_pdu_written_from_the_values_of_the_reference_is_the_octets_of_the_reference
     let mut failures = Vec::new();
     let mut count = 0;
     for line in values.lines() {
-        let (name, view) = line.split_once('\t').unwrap();
-        let view: Value = serde_json::from_str(view).unwrap();
+        let (name, values) = line.split_once('\t').unwrap();
+        let values: Value = serde_json::from_str(values).unwrap();
         count += 1;
-        // The values are written in the JSON Encoding Rules, which a view reads so.
-        let view = inspect::__view_of_jer(&view).unwrap();
-        match octets(&view) {
+        // The values are written in the JSON Encoding Rules, which a tree reads so.
+        let tree = inspect::__tree_of_jer(&values).unwrap();
+        match octets(&tree) {
             Ok(written) if written == hex::encode(&wires[name]) => {}
             Ok(_) => failures.push(format!("{name}: other octets")),
             Err(error) => failures.push(format!("{name}: {error}")),
@@ -337,25 +335,19 @@ fn a_pdu_written_from_the_values_of_the_reference_is_the_octets_of_the_reference
 }
 
 /// The PDUs that a fuzzer found a fault with hold to the properties of the fuzz target
-/// `view`: the review of the release candidate found a PDU of a procedure that the
+/// `json`: the review of the release candidate found a PDU of a procedure that the
 /// specification does not have, whose paths listed a value that `select()` did not take.
-/// Each gives its tree and its view back, and each path that its view lists selects its
-/// value.
+/// Each gives its tree back, and each path that its tree lists selects its value.
 #[test]
 fn the_pdus_that_a_fuzzer_found_a_fault_with_hold_to_the_properties_of_its_target() {
     let mut count = 0;
     for (name, octets) in vectors(FUZZED) {
         let pdu = NGAPPDU::decode(&octets).unwrap();
-        assert_eq!(
-            NGAPPDU::from_tree(&pdu.to_tree()).as_ref(),
-            Ok(&pdu),
-            "{name}"
-        );
-        let view = pdu.to_view().unwrap();
-        assert_eq!(pdu.with_view(&view).as_ref(), Ok(&pdu), "{name}");
-        for (path, value) in inspect::paths(&view) {
+        let tree = pdu.to_tree();
+        assert_eq!(NGAPPDU::from_tree(&tree).as_ref(), Ok(&pdu), "{name}");
+        for (path, value) in inspect::paths(&tree) {
             assert_eq!(
-                inspect::select(&view, &path),
+                inspect::select(&tree, &path),
                 Ok(vec![&value]),
                 "{name} {path}"
             );

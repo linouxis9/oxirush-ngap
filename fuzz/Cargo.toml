@@ -48,8 +48,8 @@ doc = false
 bench = false
 
 [[bin]]
-name = "view"
-path = "../../oxirush-aper/protocols/fuzz/fuzz_targets/view.rs"
+name = "json"
+path = "../../oxirush-aper/protocols/fuzz/fuzz_targets/json.rs"
 test = false
 doc = false
 bench = false

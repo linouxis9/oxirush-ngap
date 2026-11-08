@@ -57,7 +57,7 @@ oxirush-ngap = "0.5"
 
 | Feature | Adds |
 |---------|------|
-| `inspect` | A PDU as JSON: its tree, its view, and paths to read and edit them |
+| `inspect` | A PDU as JSON: its tree, and paths to read and edit it |
 | `serde` | `Serialize` and `Deserialize` for every type, through its tree. Turns on `inspect` |
 
 The minimum supported Rust version is 1.88. The crate depends on one exact
@@ -411,11 +411,11 @@ INDICATION, the answer where a procedure has no failure message.
 
 ## A PDU as JSON
 
-With the `inspect` feature, a PDU has two JSON forms. The tree is the short
-one, to print a message or to write one. The view keeps everything that was
-received, and the [`inspect`] functions read and edit it by path, under
-`/ngap` and the name of the IE. Both forms, and serde's, carry keys such as
-KgNB in hexadecimal: do not log them.
+With the `inspect` feature, a PDU is a JSON tree, to print a message or to
+write one: the name of the message and its IEs by name. The [`inspect`]
+functions read and edit a tree by path, under `/ngap` and the name of the IE.
+A tree, and serde's form, carry keys such as KgNB in hexadecimal: do not
+log them.
 
 ```rust
 use oxirush_ngap::{inspect, ngap::NGAPPDU, tree};
@@ -423,22 +423,21 @@ use oxirush_ngap::{inspect, ngap::NGAPPDU, tree};
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // A UE CONTEXT RELEASE REQUEST, as a tree
     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500")?;
-    let pdu = NGAPPDU::decode(&bytes)?;
-    println!("{}", pdu.to_tree());
+    let mut tree = NGAPPDU::decode(&bytes)?.to_tree();
+    println!("{tree}");
 
-    // Its view: each value with the path that selects it
-    let mut view = pdu.to_view()?;
-    for (path, value) in inspect::paths(&view) {
+    // Each value with the path that selects it
+    for (path, value) in inspect::paths(&tree) {
         println!("{path} = {value}");
     }
 
     // Set a value, and pick another alternative of a CHOICE
-    inspect::set(&mut view, "/ngap/RAN-UE-NGAP-ID/value", tree!(9))?;
-    inspect::set(&mut view, "/ngap/Cause/nas", tree!("Normal Release"))?;
-    println!("{}", pdu.with_view(&view)?.to_tree());
+    inspect::set(&mut tree, "/ngap/RAN-UE-NGAP-ID", tree!(9))?;
+    inspect::set(&mut tree, "/ngap/Cause/nas", tree!("Normal Release"))?;
+    println!("{}", NGAPPDU::from_tree(&tree)?.to_tree());
 
-    // A misspelt name is refused, and the view stays as it was
-    if let Err(error) = inspect::set(&mut view, "/ngap/Cause/radioNetwrok", tree!("unspecified")) {
+    // A misspelt name is refused, and the tree stays as it was
+    if let Err(error) = inspect::set(&mut tree, "/ngap/Cause/radioNetwrok", tree!("unspecified")) {
         println!("{error}");
     }
     Ok(())
@@ -447,20 +446,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ```text
 {"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":7},{"Cause":{"radioNetwork":"user-inactivity"}}]}
-/procedure_code = 42
-/direction = "InitiatingMessage"
-/criticality = "ignore"
-/ngap/AMF-UE-NGAP-ID/id = 10
-/ngap/AMF-UE-NGAP-ID/criticality = "reject"
-/ngap/AMF-UE-NGAP-ID/value = 42
-/ngap/RAN-UE-NGAP-ID/id = 85
-/ngap/RAN-UE-NGAP-ID/criticality = "reject"
-/ngap/RAN-UE-NGAP-ID/value = 7
-/ngap/Cause/id = 15
-/ngap/Cause/criticality = "ignore"
-/ngap/Cause/value/radioNetwork = "user-inactivity"
+/ngap/AMF-UE-NGAP-ID = 42
+/ngap/RAN-UE-NGAP-ID = 7
+/ngap/Cause/radioNetwork = "user-inactivity"
 {"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":9},{"Cause":{"nas":"normal-release"}}]}
-"radioNetwrok" is not a member of Cause, which has radioNetwork, transport, nas, protocol, misc, choice-Extensions; an IE itself has id, criticality, value, octets, at /ngap/Cause/radioNetwrok
+"radioNetwrok" is not a member of Cause, which has radioNetwork, transport, nas, protocol, misc, choice-Extensions, at /ngap/Cause/radioNetwrok
 ```
 
 The [`inspect`] module has the rules of the paths and more examples: adding
@@ -494,17 +484,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let pdu = NGAPPDU::from_tree(&request)?;
     println!("{}", hex::encode(pdu.encode()?));
 
-    let view = pdu.to_view()?;
-    println!("{} {} {}", view["direction"], view["procedure_code"], view["criticality"]);
-    println!("{}", tree!(inspect::select(&view, "/ngap/*/criticality")?));
+    // The name gave the procedure and the criticalities, which the tree writes
+    // where the message does not assign them
+    println!("{pdu}");
+    println!("{}", tree!(inspect::select(&pdu.to_tree(), "/ngap/*/criticality")?));
     Ok(())
 }
 ```
 
 ```text
 002a4027000005000a0002002a005500020007000f40020500005240070200676e622d31fde80003c0ffee
-"InitiatingMessage" 42 "ignore"
-["reject","reject","ignore","ignore","reject"]
+UEContextReleaseRequest (procedure 42, initiating message), AMF-UE-NGAP-ID 42, RAN-UE-NGAP-ID 7
+["ignore","reject"]
 ```
 
 ## Limits
@@ -514,15 +505,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 - `check()` does not judge conditional IEs: their conditions are prose.
 - A value that you decode as its type and encode again loses what a later
   release added to it. A PDU keeps the octets of its IEs until you decode
-  one, and so do trees and views.
+  one, and a tree keeps those of an IE whose value has no place for them.
 - The tree is the crate's own JSON, with the names of the specification. It
   is not the JSON Encoding Rules (ITU-T X.697).
 - RRC containers, and handover containers of other systems than NG-RAN and
   E-UTRAN, stay octets. Those of E-UTRAN are read by the tables of
   oxirush-s1ap, which a program registers with
   `oxirush_s1ap::inspect::register()`.
-- A PDU has no size limit, and time and memory grow with its size: a view
-  takes up to 143 octets per octet ([`to_view`]). Bound what you read from
+- A PDU has no size limit, and time and memory grow with its size: a tree
+  takes up to 142 octets per octet ([`to_tree`]). Bound what you read from
   SCTP.
 - The bindings are those of TS 38.413 V19.4.0 (Release 19), in aligned PER
   (ITU-T X.691 (02/2021)).
@@ -563,10 +554,10 @@ python3 ../oxirush-aper/protocols/benches/compare/compare.py --core 3 --perf "su
 
 The tests run 144 messages and 479 vectors that pycrate 0.8.1 encoded from
 the ASN.1, and 177 PDUs that Open5GS, free5GC and PacketRusher sent in lab
-runs, through the codec, the views and the trees. `oracle/` compares the
+runs, through the codec and the trees. `oracle/` compares the
 crate with the codec of rasn 0.29 on each of them, also cut short,
 lengthened and with bits flipped. `fuzz/` has six
-[cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets: `decode`, `view`,
+[cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets: `decode`, `json`,
 `paths` and `exact` read any octets, and `edit` and `tree` edit the PDUs of
 the tests and write new ones. CI runs each for a minute, and the Fuzz
 workflow of oxirush-aper an hour each night. `examples/` has four programs.
@@ -574,7 +565,7 @@ workflow of oxirush-aper an hour each night. `examples/` has four programs.
 ```sh
 cargo test --all-features
 cd oracle && cargo test     # against the codec of rasn
-../oxirush-aper/protocols/fuzz/seed.sh && RUSTFLAGS="--cfg oxirush_ngap_hooks" cargo +nightly fuzz run view -- -max_total_time=60
+../oxirush-aper/protocols/fuzz/seed.sh && RUSTFLAGS="--cfg oxirush_ngap_hooks" cargo +nightly fuzz run json -- -max_total_time=60
 cargo run --example ngap_build_pdu
 ```
 
@@ -606,4 +597,4 @@ Copyright 2025-2026 Valentin D'Emmanuele. Licensed under the Apache License,
 Version 2.0: see [LICENSE](LICENSE).
 
 [`inspect`]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/inspect/index.html
-[`to_view`]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/ngap/ngap_pdu_descriptions/enum.NGAPPDU.html#method.to_view
+[`to_tree`]: https://docs.rs/oxirush-ngap/latest/oxirush_ngap/ngap/ngap_pdu_descriptions/enum.NGAPPDU.html#method.to_tree

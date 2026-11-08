@@ -38,10 +38,9 @@ use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
-use oxirush_ngap::Ngap;
 use oxirush_ngap::inspect;
 use oxirush_ngap::ngap::NGAPPDU;
-use oxirush_utils::tree::{Map, Value as Tree};
+use oxirush_utils::tree::Value as Tree;
 use serde_json::{Value, json};
 
 fn found(program: &str, argument: &str) -> bool {
@@ -51,56 +50,13 @@ fn found(program: &str, argument: &str) -> bool {
         .is_ok_and(|output| output.status.success())
 }
 
-/// The value of a view in the form of a tree: without what a view keeps of what was
-/// received (its members that start with `_`), and an IE or an extension as its name
-/// with its value.
-fn as_tree(value: &Tree) -> Tree {
-    match value {
-        Tree::Object(members)
-            if members.contains_key("id")
-                && (members.contains_key("value") || members.contains_key("extensionValue")) =>
-        {
-            let id = members["id"].as_u64();
-            let name = members
-                .get("_ie_name")
-                .and_then(Tree::as_str)
-                .or_else(|| {
-                    let names = Ngap::ie_names().iter();
-                    names
-                        .copied()
-                        .find(|&(of, _)| Some(u64::from(of)) == id)
-                        .map(|(_, name)| name)
-                })
-                .map_or_else(|| members["id"].to_string(), str::to_owned);
-            let inner = members
-                .get("value")
-                .or_else(|| members.get("extensionValue"));
-            let mut ie = Map::new();
-            ie.insert(name, inner.map(as_tree).unwrap_or_default());
-            if let Some(criticality) = members.get("criticality") {
-                ie.insert("criticality".into(), criticality.clone());
-            }
-            Tree::Object(ie)
-        }
-        Tree::Object(members) => Tree::Object(
-            members
-                .iter()
-                .filter(|(name, _)| !name.starts_with('_'))
-                .map(|(name, member)| (name.clone(), as_tree(member)))
-                .collect(),
-        ),
-        Tree::Array(entries) => Tree::Array(entries.iter().map(as_tree).collect()),
-        other => other.clone(),
-    }
-}
-
 /// The containers of a handover in the tree, decoded where the message says which
 /// type their octets carry: TS 38.413 gives them by reference (§9.3.1.20, §9.3.1.21),
 /// and they are an NG-RAN node's own when the HandoverType of the message is a
 /// handover within the 5GS or to it from the EPS, and in a HANDOVER REQUEST
 /// ACKNOWLEDGE, which the target NG-RAN node sends. This is the choice that Wireshark
 /// makes; for another HandoverType, or none, the octets stay.
-fn containers(pdu: &NGAPPDU<'_>, tree: &mut Tree) {
+fn containers(tree: &mut Tree) {
     let ies = tree
         .get("ies")
         .and_then(Tree::as_array)
@@ -114,7 +70,6 @@ fn containers(pdu: &NGAPPDU<'_>, tree: &mut Tree) {
     });
     let acknowledge =
         tree.get("message").and_then(Tree::as_str) == Some("HandoverRequestAcknowledge");
-    let Ok(mut view) = pdu.to_view() else { return };
     for (index, ie) in ies.iter().enumerate() {
         for (container, carried, decoded_when) in [
             (
@@ -131,23 +86,14 @@ fn containers(pdu: &NGAPPDU<'_>, tree: &mut Tree) {
             if !decoded_when || !ie.get(container).is_some_and(Tree::is_string) {
                 continue;
             }
-            let path = format!("/ngap/{container}/{carried}");
-            if inspect::open(&mut view, &path).is_err() {
+            let mut opened = tree.clone();
+            if inspect::open(&mut opened, &format!("/ngap/{index}/{carried}")).is_err() {
                 continue;
             }
             // Octets that do not decode as the type keep their place in the tree
-            if let Ok([opened]) = inspect::select(&view, &path).as_deref()
-                && let Some(decoded) = opened.get("decoded")
-            {
-                let mut value = Map::new();
-                value.insert(carried.into(), as_tree(decoded));
-                if let Some(ie) = tree
-                    .get_mut("ies")
-                    .and_then(|ies| ies.as_array_mut()?.get_mut(index))
-                    .and_then(Tree::as_object_mut)
-                {
-                    ie.insert(container.into(), Tree::Object(value));
-                }
+            let value = &opened["ies"][index][container][carried];
+            if value.get("octets").is_none() {
+                *tree = opened;
             }
         }
     }
@@ -165,7 +111,7 @@ fn reading(octets: &[u8]) -> String {
                 Err(error) => json!([format!("error: {error}")]),
             };
             let mut tree = pdu.to_tree();
-            containers(&pdu, &mut tree);
+            containers(&mut tree);
             format!("{head},\"check\":{check},\"tree\":{tree}}}")
         }
         Err(error) => format!("{head},\"error\":{}}}", json!(error.to_string())),

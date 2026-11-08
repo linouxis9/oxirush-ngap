@@ -533,8 +533,8 @@ mod inspect_errors {
         let ie = "\"AMF-UE-NGAP-IDD\" is not an IE of NGAP: the nearest names are AMF-UE-NGAP-ID, AMF-UE-NGAP-ID2 and NewAMF-UE-NGAP-ID";
         let tree = tree!({"message": "UEContextReleaseRequest", "ies": [{"AMF-UE-NGAP-IDD": 1}]});
         assert_eq!(NGAPPDU::from_tree(&tree).unwrap_err().to_string(), ie);
-        let view = release_request().to_view().unwrap();
-        let error = inspect::select(&view, "/ngap/AMF-UE-NGAP-IDD").unwrap_err();
+        let tree = release_request().to_tree();
+        let error = inspect::select(&tree, "/ngap/AMF-UE-NGAP-IDD").unwrap_err();
         assert_eq!(error.to_string(), format!("{ie}, at /ngap/AMF-UE-NGAP-IDD"));
         let tree = tree!({"message": "UEContextReleaseReq", "ies": []});
         assert_eq!(
@@ -564,9 +564,9 @@ mod inspect_errors {
         assert!(NGAPPDU::from_tree(&tree).is_err());
     }
 
-    /// The view of the UE CONTEXT RELEASE REQUEST.
-    fn view() -> Value {
-        release_request().to_view().unwrap()
+    /// The tree of the UE CONTEXT RELEASE REQUEST.
+    fn tree() -> Value {
+        release_request().to_tree()
     }
 
     /// The kind of the error that a call returned.
@@ -604,13 +604,16 @@ mod inspect_errors {
         );
 
         // A procedure that the specification does not have has a tree by its procedure
-        // code and its direction, and a view, of the IEs of its message.
+        // code and its direction, of the IEs of its message.
         let tree = of_no_procedure().to_tree();
         assert_eq!(
             (&tree["procedure_code"], &tree["direction"]),
             (&tree!(200), &tree!("InitiatingMessage"))
         );
-        assert!(of_no_procedure().to_view().is_ok());
+        assert_eq!(
+            tree["ies"][2]["Cause"],
+            tree!({"radioNetwork": "user-inactivity"})
+        );
         // Its code is no name of a message, and a message of the protocol is written by
         // its name alone.
         let by_code = tree!({"procedure_code": 42, "direction": "InitiatingMessage", "ies": []});
@@ -625,22 +628,16 @@ mod inspect_errors {
 
     #[test]
     fn an_ie_that_the_protocol_does_not_have_is_unknown() {
-        // A name that is no IE: after the root of a path, in a tree, and as the `id` of
-        // an entry that an edit writes.
-        let mut view = view();
-        let error = inspect::select(&view, "/ngap/NoSuchIe/value").unwrap_err();
+        // A name that is no IE: after the root of a path, and in a tree.
+        let tree = tree();
+        let error = inspect::select(&tree, "/ngap/NoSuchIe").unwrap_err();
         assert_eq!(error.kind(), ErrorKind::UnknownIe);
         assert_eq!(
             error.to_string(),
-            "\"NoSuchIe\" is not an IE of NGAP, at /ngap/NoSuchIe/value"
+            "\"NoSuchIe\" is not an IE of NGAP, at /ngap/NoSuchIe"
         );
         assert_eq!(
             kind(written(tree!([{"NoSuchIe": 1}]))),
-            ErrorKind::UnknownIe
-        );
-        let entry = tree!({"id": "NoSuchIe", "criticality": "ignore", "value": 1});
-        assert_eq!(
-            kind(inspect::insert(&mut view, "/ngap/-", entry)),
             ErrorKind::UnknownIe
         );
 
@@ -650,7 +647,7 @@ mod inspect_errors {
         assert_eq!(error.kind(), ErrorKind::UnknownIe);
         assert_eq!(
             error.to_string(),
-            "NGAP IE 60000 is unknown: give its octets as _raw_value, without value"
+            "NGAP IE 60000 is unknown: write its value as its octets, {\"octets\": \"…\"}"
         );
         let octets = tree!([{"60000": {"octets": "c0ffee"}, "criticality": "ignore"}]);
         assert!(written(octets).is_ok());
@@ -658,7 +655,7 @@ mod inspect_errors {
 
     #[test]
     fn a_path_that_is_not_well_formed_is_a_path_error() {
-        let view = view();
+        let tree = tree();
         // No `/` before the first segment, `~` before what is no 0 and no 1, and
         // `@id=` before what is no identifier of an IE.
         for path in [
@@ -668,29 +665,29 @@ mod inspect_errors {
             "/ngap/@id=70000",
         ] {
             assert_eq!(
-                kind(inspect::select(&view, path)),
+                kind(inspect::select(&tree, path)),
                 ErrorKind::Path,
                 "{path}"
             );
             let checked = inspect::check_path("UEContextReleaseRequest", path);
             assert_eq!(kind(checked), ErrorKind::Path, "{path}");
         }
-        let error = inspect::select(&view, "ngap/Cause").unwrap_err();
+        let error = inspect::select(&tree, "ngap/Cause").unwrap_err();
         assert_eq!(
             error.to_string(),
             "\"ngap/Cause\" is no path: a path starts with \"/\", at ngap/Cause"
         );
-        // The empty path is the view itself, as that of a JSON pointer is the document.
-        assert_eq!(inspect::select(&view, ""), Ok(vec![&view]));
+        // The empty path is the tree itself, as that of a JSON pointer is the document.
+        assert_eq!(inspect::select(&tree, ""), Ok(vec![&tree]));
     }
 
     #[test]
     fn a_name_that_the_type_at_its_place_cannot_have_is_no_member() {
-        let mut view = view();
+        let mut tree = tree();
         // A member that a CHOICE does not have, a member of a value that has none, the
         // identifier of an IE where there is no list, and a name where a list goes by
         // position.
-        let error = inspect::select(&view, "/ngap/Cause/radioNetwrok").unwrap_err();
+        let error = inspect::select(&tree, "/ngap/Cause/radioNetwrok").unwrap_err();
         assert_eq!(error.kind(), ErrorKind::Path);
         let text = error.to_string();
         assert!(
@@ -700,20 +697,20 @@ mod inspect_errors {
         for path in [
             "/ngap/Cause/radioNetwork/deeper",
             "/ngap/Cause/@id=1",
-            "/message/protocolIEs/first",
+            "/ngap/AMF-UE-NGAP-ID/value",
         ] {
             assert_eq!(
-                kind(inspect::select(&view, path)),
+                kind(inspect::select(&tree, path)),
                 ErrorKind::Path,
                 "{path}"
             );
         }
-        // An edit at such a path, and the view is as it was.
-        let before = view.clone();
-        let edit = inspect::set(&mut view, "/ngap/Cause/radioNetwrok", tree!(1));
+        // An edit at such a path, and the tree is as it was.
+        let before = tree.clone();
+        let edit = inspect::set(&mut tree, "/ngap/Cause/radioNetwrok", tree!(1));
         assert_eq!(kind(edit), ErrorKind::Path);
-        assert_eq!(view, before);
-        // An IE that the object set of the message does not have, without a view.
+        assert_eq!(tree, before);
+        // An IE that the object set of the message does not have, without a tree.
         let checked = inspect::check_path("UEContextReleaseRequest", "/ngap/GUAMI");
         assert_eq!(kind(checked), ErrorKind::Path);
         // A member that the type of a written value does not have.
@@ -731,18 +728,18 @@ mod inspect_errors {
 
     #[test]
     fn an_edit_whose_path_selects_nothing_is_an_error() {
-        let mut view = view();
-        let before = view.clone();
+        let mut tree = tree();
+        let before = tree.clone();
         // An IE that the message could have and does not have, and a position after
         // its last IE: a selection has nothing there, and an edit says so.
-        for path in ["/ngap/PDUSessionResourceListCxtRelReq/value", "/ngap/7"] {
-            assert_eq!(inspect::select(&view, path), Ok(vec![]), "{path}");
-            let edit = inspect::set(&mut view, path, tree!(1));
+        for path in ["/ngap/PDUSessionResourceListCxtRelReq", "/ngap/7"] {
+            assert_eq!(inspect::select(&tree, path), Ok(vec![]), "{path}");
+            let edit = inspect::set(&mut tree, path, tree!(1));
             assert_eq!(kind(edit), ErrorKind::Path, "{path}");
         }
-        let removed = inspect::remove(&mut view, "/ngap/PDUSessionResourceListCxtRelReq");
+        let removed = inspect::remove(&mut tree, "/ngap/PDUSessionResourceListCxtRelReq");
         assert_eq!(kind(removed), ErrorKind::Path);
-        assert_eq!(view, before);
+        assert_eq!(tree, before);
     }
 
     #[test]
@@ -756,35 +753,36 @@ mod inspect_errors {
             }}},
         ]});
         let pdu = NGAPPDU::from_tree(&required).unwrap();
-        let mut view = pdu.to_view().unwrap();
+        let mut tree = pdu.to_tree();
         let cell = format!(
             "/ngap/SourceToTarget-TransparentContainer/{name}/targetCell-ID/nR-CGI/nRCellIdentity"
         );
 
-        let error = inspect::select(&view, &cell).unwrap_err();
+        let error = inspect::select(&tree, &cell).unwrap_err();
         assert_eq!(error.kind(), ErrorKind::Path);
-        let edit = inspect::set(&mut view, &cell, tree!(7));
+        let edit = inspect::set(&mut tree, &cell, tree!(7));
         assert_eq!(kind(edit), ErrorKind::Path);
 
         // The kind says what to do about it.
-        inspect::open(&mut view, &cell).unwrap();
-        assert_eq!(inspect::select(&view, &cell), Ok(vec![&tree!(4660)]));
+        inspect::open(&mut tree, &cell).unwrap();
+        assert_eq!(inspect::select(&tree, &cell), Ok(vec![&tree!(4660)]));
     }
 
     #[test]
     fn a_path_into_what_did_not_decode_says_so() {
-        // An IE whose identifier has no type keeps its octets in a view.
+        // An IE whose identifier has no type keeps its octets in a tree.
         let unknown = tree!([{"65000": {"octets": "c0ffee"}, "criticality": "ignore"}]);
-        let view = written(unknown).unwrap().to_view().unwrap();
+        let tree = written(unknown).unwrap().to_tree();
         assert_eq!(
-            inspect::select(&view, "/ngap/@id=65000/octets"),
+            inspect::select(&tree, "/ngap/@id=65000/octets"),
             Ok(vec![&tree!("c0ffee")])
         );
-        let error = inspect::select(&view, "/ngap/@id=65000/value/member").unwrap_err();
+        let error = inspect::select(&tree, "/ngap/@id=65000/member").unwrap_err();
         assert_eq!(error.kind(), ErrorKind::UndecodableIe);
         assert_eq!(
             error.to_string(),
-            "the IE did not decode, at /ngap/@id=65000/value/member"
+            "\"member\" is in no value here: the value is its octets, as it did not decode or \
+             is written as it is sent, at /ngap/@id=65000/member"
         );
     }
 
@@ -901,7 +899,7 @@ mod inspect_errors {
     }
 
     #[test]
-    fn json_that_is_no_tree_and_no_view_is_a_form_error() {
+    fn json_that_is_no_tree_is_a_form_error() {
         // A tree is an object with the name of a message and its IEs, each one member:
         // an IE that the message does not have says its criticality.
         let message = "UEContextReleaseRequest";
@@ -912,103 +910,32 @@ mod inspect_errors {
             tree!({"message": message, "ies": [], "other": 1}),
             tree!({"message": message, "ies": [{"a": 1, "b": 2}]}),
             tree!({"message": message, "ies": [{"RANNodeName": "gnb-1"}]}),
+            tree!({"message": message, "ies": [{"id": 15, "criticality": "ignore", "value": 1}]}),
         ] {
             let error = NGAPPDU::from_tree(&tree).unwrap_err();
             assert_eq!(error.kind(), ErrorKind::Value, "{tree}: {error}");
         }
-
-        // A view is an object with a procedure code, a direction, a criticality and a
-        // message.
-        let view = view();
-        let without = |member: &str| {
-            let mut view = view.clone();
-            view.as_object_mut().unwrap().shift_remove(member);
-            view
-        };
-        let with = |member: &str, value: Value| {
-            let mut view = view.clone();
-            view[member] = value;
-            view
-        };
-        for view in [
-            tree!(1),
-            without("message"),
-            without("direction"),
-            without("procedure_code"),
-            with("direction", tree!("Sideways")),
-            with("procedure_code", tree!(256)),
-            with("other", tree!(1)),
-        ] {
-            let error = NGAPPDU::from_view(&view).unwrap_err();
-            assert_eq!(error.kind(), ErrorKind::Value, "{error}");
-            // The PDU that the view is of refuses it as any PDU does.
-            let error = release_request().with_view(&view).unwrap_err();
-            assert_eq!(error.kind(), ErrorKind::Value, "{error}");
-        }
-
-        // The view of another message is not one of this PDU: another procedure code,
-        // another direction, and a procedure that the specification does not have.
-        let pdu = release_request();
-        for (member, value, other) in [
-            ("procedure_code", tree!(21), "NGSetupRequest"),
-            (
-                "direction",
-                tree!("SuccessfulOutcome"),
-                "the SuccessfulOutcome of procedure 42",
-            ),
-            (
-                "procedure_code",
-                tree!(200),
-                "the InitiatingMessage of procedure 200",
-            ),
-        ] {
-            let error = pdu.with_view(&with(member, value)).unwrap_err();
-            assert_eq!(error.kind(), ErrorKind::Value, "{error}");
-            assert_eq!(
-                error.to_string(),
-                format!(
-                    "this view is of {other}, and the PDU is UEContextReleaseRequest: with_view \
-                     takes a view of the PDU itself, and from_view any view"
-                )
-            );
-        }
-
-        // An IE is written with its value or with its octets.
-        let both = tree!({"id": "Cause", "criticality": "ignore", "value": 1, "octets": "00"});
-        let insert = inspect::insert(&mut view.clone(), "/ngap/-", both);
-        assert_eq!(kind(insert), ErrorKind::Value);
     }
 
     #[test]
     fn an_edit_that_is_refused_is_a_value_error() {
-        let mut view = view();
-        // A member that its type always has, the value of an IE and the alternative of
-        // a CHOICE are not taken out, and nothing is inserted where there is no list.
-        for path in [
-            "/ngap/Cause/criticality",
-            "/ngap/Cause/value",
-            "/ngap/Cause/radioNetwork",
-        ] {
-            let removed = inspect::remove(&mut view, path);
-            assert_eq!(kind(removed), ErrorKind::Value, "{path}");
-        }
-        let inserted = inspect::insert(&mut view, "/ngap/Cause/criticality", tree!("reject"));
+        let mut tree = tree();
+        // A member that its type always has and the alternative of a CHOICE are not taken
+        // out, and nothing is inserted where there is no list.
+        let removed = inspect::remove(&mut tree, "/ngap/Cause/radioNetwork");
+        assert_eq!(kind(removed), ErrorKind::Value);
+        let inserted = inspect::insert(&mut tree, "/ngap/Cause/radioNetwork", tree!("unspecified"));
         assert_eq!(kind(inserted), ErrorKind::Value);
-
-        // The octets of a value that an edit changed are no longer its octets.
-        inspect::set(&mut view, "/ngap/Cause/nas", tree!("normal-release")).unwrap();
-        let octets = inspect::select(&view, "/ngap/Cause/octets");
-        assert_eq!(kind(octets), ErrorKind::Value);
     }
 
     #[test]
     fn what_is_over_the_limits_of_the_inspection_is_refused() {
-        let view = view();
+        let tree = tree();
         // A path of more than 64 segments, and one of more than 4096 octets.
         let long = "/0".repeat(65);
-        assert_eq!(kind(inspect::select(&view, &long)), ErrorKind::Path);
+        assert_eq!(kind(inspect::select(&tree, &long)), ErrorKind::Path);
         let wide = format!("/{}", "a".repeat(4096));
-        assert_eq!(kind(inspect::select(&view, &wide)), ErrorKind::Path);
+        assert_eq!(kind(inspect::select(&tree, &wide)), ErrorKind::Path);
 
         // A tree that is nested deeper than a tree is read.
         let mut deep = tree!(1);
@@ -1020,8 +947,7 @@ mod inspect_errors {
             ErrorKind::Value
         );
 
-        // A private message has no list of IEs: its tree has its octets, and its view
-        // its value.
+        // A private message has no list of IEs: its tree has its octets.
         let private = NGAPPDU::decode(&hex::decode("001f400a000000000000000211e8").unwrap())
             .unwrap()
             .into_owned();
@@ -1029,7 +955,6 @@ mod inspect_errors {
             private.to_tree(),
             tree!({"message": "PrivateMessage", "octets": "000000000000000211e8"})
         );
-        assert!(private.to_view().is_ok());
     }
 
     #[test]
@@ -1040,18 +965,17 @@ mod inspect_errors {
         };
         held.value = Octets::from(vec![0xff]);
         let pdu = NGAPPDU::initiatingMessage(held);
-        let error = pdu.to_view().unwrap_err();
+        let error = pdu
+            .decode_value::<UEContextReleaseRequest<'_>>()
+            .unwrap_err();
         assert_eq!(error.kind(), ErrorKind::Decode);
-        // Its tree has the octets of its message, which it sends back.
+        // Its tree has the octets of its message, which it sends back, and no IEs to
+        // select.
+        let tree = pdu.to_tree();
         assert_eq!(
-            pdu.to_tree(),
+            tree,
             tree!({"message": "UEContextReleaseRequest", "octets": "ff"})
         );
-
-        // The octets that a view was received as, replaced by others, and edited.
-        let mut view = view();
-        view["_raw_message"] = tree!("ff");
-        inspect::set(&mut view, "/ngap/Cause/nas", tree!("normal-release")).unwrap();
-        assert_eq!(kind(NGAPPDU::from_view(&view)), ErrorKind::Decode);
+        assert_eq!(inspect::select(&tree, "/ngap/Cause"), Ok(vec![]));
     }
 }

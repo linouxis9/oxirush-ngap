@@ -80,24 +80,15 @@ SupportedTAList (IE 102) is mandatory, and the message does not have it
 NGSetupFailure (procedure 21, unsuccessful outcome): 40150018000002000f4001620013400c190200006b00001b40006640
 "#),
     (block_7, r#"{"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":7},{"Cause":{"radioNetwork":"user-inactivity"}}]}
-/procedure_code = 42
-/direction = "InitiatingMessage"
-/criticality = "ignore"
-/ngap/AMF-UE-NGAP-ID/id = 10
-/ngap/AMF-UE-NGAP-ID/criticality = "reject"
-/ngap/AMF-UE-NGAP-ID/value = 42
-/ngap/RAN-UE-NGAP-ID/id = 85
-/ngap/RAN-UE-NGAP-ID/criticality = "reject"
-/ngap/RAN-UE-NGAP-ID/value = 7
-/ngap/Cause/id = 15
-/ngap/Cause/criticality = "ignore"
-/ngap/Cause/value/radioNetwork = "user-inactivity"
+/ngap/AMF-UE-NGAP-ID = 42
+/ngap/RAN-UE-NGAP-ID = 7
+/ngap/Cause/radioNetwork = "user-inactivity"
 {"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":9},{"Cause":{"nas":"normal-release"}}]}
-"radioNetwrok" is not a member of Cause, which has radioNetwork, transport, nas, protocol, misc, choice-Extensions; an IE itself has id, criticality, value, octets, at /ngap/Cause/radioNetwrok
+"radioNetwrok" is not a member of Cause, which has radioNetwork, transport, nas, protocol, misc, choice-Extensions, at /ngap/Cause/radioNetwrok
 "#),
     (block_8, r#"002a4027000005000a0002002a005500020007000f40020500005240070200676e622d31fde80003c0ffee
-"InitiatingMessage" 42 "ignore"
-["reject","reject","ignore","ignore","reject"]
+UEContextReleaseRequest (procedure 42, initiating message), AMF-UE-NGAP-ID 42, RAN-UE-NGAP-ID 7
+["ignore","reject"]
 "#),
 ];
 
@@ -397,22 +388,21 @@ fn block_7() {
     fn main() -> Result<(), Box<dyn std::error::Error>> {
         // A UE CONTEXT RELEASE REQUEST, as a tree
         let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500")?;
-        let pdu = NGAPPDU::decode(&bytes)?;
-        println!("{}", pdu.to_tree());
+        let mut tree = NGAPPDU::decode(&bytes)?.to_tree();
+        println!("{tree}");
 
-        // Its view: each value with the path that selects it
-        let mut view = pdu.to_view()?;
-        for (path, value) in inspect::paths(&view) {
+        // Each value with the path that selects it
+        for (path, value) in inspect::paths(&tree) {
             println!("{path} = {value}");
         }
 
         // Set a value, and pick another alternative of a CHOICE
-        inspect::set(&mut view, "/ngap/RAN-UE-NGAP-ID/value", tree!(9))?;
-        inspect::set(&mut view, "/ngap/Cause/nas", tree!("Normal Release"))?;
-        println!("{}", pdu.with_view(&view)?.to_tree());
+        inspect::set(&mut tree, "/ngap/RAN-UE-NGAP-ID", tree!(9))?;
+        inspect::set(&mut tree, "/ngap/Cause/nas", tree!("Normal Release"))?;
+        println!("{}", NGAPPDU::from_tree(&tree)?.to_tree());
 
-        // A misspelt name is refused, and the view stays as it was
-        if let Err(error) = inspect::set(&mut view, "/ngap/Cause/radioNetwrok", tree!("unspecified")) {
+        // A misspelt name is refused, and the tree stays as it was
+        if let Err(error) = inspect::set(&mut tree, "/ngap/Cause/radioNetwrok", tree!("unspecified")) {
             println!("{error}");
         }
         Ok(())
@@ -442,9 +432,10 @@ fn block_8() {
         let pdu = NGAPPDU::from_tree(&request)?;
         println!("{}", hex::encode(pdu.encode()?));
 
-        let view = pdu.to_view()?;
-        println!("{} {} {}", view["direction"], view["procedure_code"], view["criticality"]);
-        println!("{}", tree!(inspect::select(&view, "/ngap/*/criticality")?));
+        // The name gave the procedure and the criticalities, which the tree writes
+        // where the message does not assign them
+        println!("{pdu}");
+        println!("{}", tree!(inspect::select(&pdu.to_tree(), "/ngap/*/criticality")?));
         Ok(())
     }
 

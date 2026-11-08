@@ -305,40 +305,40 @@ mod tests {
     use super::*;
     use codec::inspect;
 
-    /// How many octets a string of a view is, which has them in hexadecimal.
-    fn length(view: &Value, path: &str) -> usize {
-        let selected = inspect::select(view, path).unwrap();
+    /// How many octets a string of a tree is, which has them in hexadecimal.
+    fn length(tree: &Value, path: &str) -> usize {
+        let selected = inspect::select(tree, path).unwrap();
         selected[0].as_str().unwrap().len() / 2
     }
 
-    /// How many entries a list of a view has.
-    fn entries(view: &Value, path: &str) -> usize {
-        inspect::select(view, path).unwrap().len()
+    /// How many entries a list of a tree has.
+    fn entries(tree: &Value, path: &str) -> usize {
+        inspect::select(tree, path).unwrap().len()
     }
 
     /// The messages have the sizes that their inputs are named after.
     #[test]
     fn the_written_messages_have_the_sizes_that_they_say() {
-        let view = |written: Written| Pdu::from_tree(&written.tree).unwrap().to_view().unwrap();
+        let tree = |written: Written| Pdu::from_tree(&written.tree).unwrap().to_tree();
 
-        let setup = view(initial_context_setup_request());
-        assert_eq!(length(&setup, "/ngap/NAS-PDU/value"), 1_500);
+        let setup = tree(initial_context_setup_request());
+        assert_eq!(length(&setup, "/ngap/NAS-PDU"), 1_500);
         assert_eq!(
-            entries(&setup, "/ngap/PDUSessionResourceSetupListCxtReq/value/*"),
+            entries(&setup, "/ngap/PDUSessionResourceSetupListCxtReq/*"),
             2
         );
 
-        let sessions = view(pdu_session_resource_setup_request());
+        let sessions = tree(pdu_session_resource_setup_request());
         assert_eq!(
-            entries(&sessions, "/ngap/PDUSessionResourceSetupListSUReq/value/*"),
+            entries(&sessions, "/ngap/PDUSessionResourceSetupListSUReq/*"),
             8
         );
 
-        let handover = view(handover_required());
-        let container = "/ngap/SourceToTarget-TransparentContainer/value";
+        let handover = tree(handover_required());
+        let container = "/ngap/SourceToTarget-TransparentContainer";
         assert_eq!(length(&handover, container), 4_000);
 
-        let paging = view(paging());
-        assert_eq!(entries(&paging, "/ngap/TAIListForPaging/value/*"), 16);
+        let paging = tree(paging());
+        assert_eq!(entries(&paging, "/ngap/TAIListForPaging/*"), 16);
     }
 }

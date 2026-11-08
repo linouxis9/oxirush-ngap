@@ -1,7 +1,7 @@
 //! `Debug` prints no octet of a key: of K_gNB and of the next hop NH, which are a
 //! `SecurityKey`, it shows the length, as does every value that holds one. The octets of
 //! an IE and of a message whose type holds a key are shown by their length too. A tree
-//! and a view are the data of a message, and have the key.
+//! is the data of a message, and has the key.
 
 use oxirush_ngap::ngap::*;
 use oxirush_ngap::{Error, build_ngap, extract_ngap_ies};
@@ -127,17 +127,15 @@ fn debug_of_a_message_without_a_key_shows_its_octets() -> Result<(), Error> {
 
 #[cfg(feature = "inspect")]
 #[test]
-fn a_tree_and_a_view_have_the_key() -> Result<(), Error> {
+fn a_tree_has_the_key() -> Result<(), Error> {
     let pdu = build_ngap!(REJECT InitialContextSetupRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(7u32),
         REJECT SecurityKey(SecurityKey::from(KGNB)),
     )?;
     let key = "5a".repeat(32);
-    for written in [pdu.to_tree(), pdu.to_view()?] {
-        let written = written.to_string().to_ascii_lowercase();
-        assert!(written.contains(&key), "{written}");
-    }
+    let written = pdu.to_tree().to_string().to_ascii_lowercase();
+    assert!(written.contains(&key), "{written}");
     Ok(())
 }
 

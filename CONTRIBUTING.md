@@ -153,7 +153,7 @@ Three readings of the vectors do not depend on each other:
   It reads a message of `later.tsv` as the message without the additions.
 - pycrate has the value of each vector, and `generate.py --values FILE` writes
   them in the JSON encoding of ASN.1. An ignored test of `tests/vectors.rs`
-  reads each as a view with `inspect::__view_of_jer`, where a string of
+  reads each as a tree with `inspect::__tree_of_jer`, where a string of
   decimal digits is octets as those rules have them, and writes a PDU from it,
   and its octets are those of the vector, for each of the 479: the crate gives
   each name and each number of the reference the bits that the reference gave
@@ -245,10 +245,10 @@ Fuzz workflow of oxirush-aper an hour each night and four hours on Sunday.
 | Target | What holds for any octets |
 |--------|---------------------------|
 | `decode` | A PDU, the protocol IEs of its message and the message as its type are read by the crate and by rasn as the same value, which both write as the same octets, or by neither, and what was read is written and read again as the same |
-| `view` | The view of a PDU gives that PDU back, a view and a tree are written to a PDU that has the same view and the same tree, each path of a view selects its value, and each value that a view decodes has the JSON form that the JSON Encoding Rules of rasn give the same octets |
-| `paths` | `select`, `set`, `insert`, `remove`, `open`, `check_path` and `enumerated_at` take any path and any value without a panic, and a view that one of them changed is a PDU or an error |
-| `exact` | A PDU is written back to the octets that it was read from, but where `check` finds a form that X.691 does not give; `check_structure` says what `check` says of all but the values, and the Criticality Diagnostics of the deviations encode; a PDU that `check` finds nothing to say of is written to the same octets by the codec of its message and from the values of its view |
-| `edit` | A PDU of the fixtures edited by the paths of its view, with values of the views of the fixtures and of the fuzzer: what `with_view` writes is what `from_view` writes, encodes and is read back, and only the IEs that an edit was under change |
+| `json` | The tree of a PDU gives that PDU back, each path of a tree selects its value, and each value that a tree decodes has the JSON form that the JSON Encoding Rules of rasn give the same octets |
+| `paths` | `select`, `set`, `insert`, `remove`, `open`, `check_path` and `enumerated_at` take any path and any value without a panic, and a tree that one of them changed is a PDU or an error |
+| `exact` | A PDU is written back to the octets that it was read from, but where `check` finds a form that X.691 does not give; `check_structure` says what `check` says of all but the values, and the Criticality Diagnostics of the deviations encode; a PDU that `check` finds nothing to say of is written to the same octets by the codec of its message |
+| `edit` | A PDU of the fixtures edited by the paths of its tree, with values of the trees of the fixtures and of the fuzzer: what `from_tree` writes encodes and is read back, and only the IEs that an edit was under change |
 | `tree` | A PDU written from a tree whose IEs the fuzzer takes from the trees of the fixtures, changes, repeats, removes and puts in another order: it encodes, is read back, and its tree writes it again |
 
 ```sh
@@ -272,7 +272,7 @@ for a cargo that is run from that directory.
 
 | Test | What it holds |
 |------|---------------|
-| `oracle/tests/compare.rs` | The crate against the oracle of `oracle/`, which has the same types with the codec of rasn 0.29. Each vector and each captured PDU, its truncations, it with one more octet and with each bit of chosen octets changed is given to both, as a PDU and as its message: both read it and write the same octets, or neither reads it. With `inspect`, each IE and each transfer that a view decodes has the JSON form that the JSON Encoding Rules of rasn give it, but for two bit strings that rasn writes otherwise than X.697 has them. The bindings hold an `INTEGER` in 64 bits, which is the one difference that the comparison takes. |
+| `oracle/tests/compare.rs` | The crate against the oracle of `oracle/`, which has the same types with the codec of rasn 0.29. Each vector and each captured PDU, its truncations, it with one more octet and with each bit of chosen octets changed is given to both, as a PDU and as its message: both read it and write the same octets, or neither reads it. With `inspect`, each IE and each transfer that a tree decodes has the JSON form that the JSON Encoding Rules of rasn give it, but for two bit strings that rasn writes otherwise than X.697 has them. The bindings hold an `INTEGER` in 64 bits, which is the one difference that the comparison takes. |
 | `oracle/tests/codec.rs` | The codecs that the oracle has in the place of those that rasn 0.29 derives: the `SEQUENCE`, the list of a size constraint, and the strings whose length takes two octets. |
 | `oracle/tests/allocation.rs` | The list codec that rasn derives reserves memory for the count that a length determinant claims, where the crate reserves for the elements that it reads. |
 
@@ -296,9 +296,9 @@ network sends.
 cd benches
 cargo bench --bench codec -- decode/                   # the time, with criterion
 cargo bench --bench allocations                        # the allocations of each operation
-cargo bench --bench heap -- to-view/fixtures           # where they are made
-cargo bench --bench codec -- --profile-time 10 to-view/fixtures
-go tool pprof -top target/criterion/to-view/fixtures/profile/profile.pb
+cargo bench --bench heap -- to-tree/fixtures           # where they are made
+cargo bench --bench codec -- --profile-time 10 to-tree/fixtures
+go tool pprof -top target/criterion/to-tree/fixtures/profile/profile.pb
 cd .. && python3 ../oxirush-aper/protocols/benches/build_cost.py +1.88.0 --features inspect  # a clean build
 ```
 

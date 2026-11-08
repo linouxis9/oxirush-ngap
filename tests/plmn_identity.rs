@@ -188,51 +188,45 @@ fn octets_that_are_no_plmn_identity_are_shown_as_octets() {
     for octets in ["abcdef", "02f8f9", "0ff839", "02f83f", "02a839"] {
         let wire = hex::decode(PAGING.replacen("134001", octets, 1)).unwrap();
         let pdu = NGAPPDU::decode(&wire).unwrap();
-        let view = pdu.to_view().unwrap();
-        let shown = inspect::select(&view, "/ngap/TAIListForPaging/1/tAI/pLMNIdentity").unwrap();
-        assert_eq!(shown, [&tree!(octets)]);
         let tree = pdu.to_tree();
-        assert_eq!(
-            tree["ies"][1]["TAIListForPaging"][1]["tAI"]["pLMNIdentity"],
-            tree!(octets)
-        );
-        assert_eq!(NGAPPDU::from_view(&view).unwrap().encode().unwrap(), wire);
+        let shown = inspect::select(&tree, "/ngap/TAIListForPaging/1/tAI/pLMNIdentity").unwrap();
+        assert_eq!(shown, [&tree!(octets)]);
         assert_eq!(NGAPPDU::from_tree(&tree).unwrap().encode().unwrap(), wire);
     }
 }
 
 /// With the `inspect` feature a PLMN identity is written and shown as its MCC and its
-/// MNC, `"310-410"`, in a view and in a tree: the same octets.
+/// MNC, `"310-410"`, in a tree: the same octets.
 #[cfg(feature = "inspect")]
 #[test]
 fn the_notation_of_a_plmn_identity_has_the_octets_of_the_clause() {
     use oxirush_ngap::inspect;
     use oxirush_ngap::tree;
 
-    // Shown: the tree and the view of the PAGING name the networks that tshark reads.
+    // Shown: the tree of the PAGING names the networks that tshark reads.
     let wire = hex::decode(PAGING).unwrap();
     let pdu = NGAPPDU::decode(&wire).unwrap();
     let tree = pdu.to_tree();
     let areas = &tree["ies"][1]["TAIListForPaging"];
     assert_eq!(areas[0]["tAI"]["pLMNIdentity"], tree!("208-93"));
     assert_eq!(areas[1]["tAI"]["pLMNIdentity"], tree!("310-410"));
-    let mut view = pdu.to_view().unwrap();
-    let identities = "/ngap/TAIListForPaging/value/*/tAI/pLMNIdentity";
-    let shown = inspect::select(&view, identities).unwrap();
+    let mut edited = tree.clone();
+    let identities = "/ngap/TAIListForPaging/*/tAI/pLMNIdentity";
+    let shown = inspect::select(&tree, identities).unwrap();
     assert_eq!(shown, [&tree!("208-93"), &tree!("310-410")]);
 
     // Written: the tree is the octets of the message, and so is each identity of the
-    // vectors, set through the view.
+    // vectors, set through a path.
     assert_eq!(NGAPPDU::from_tree(&tree).unwrap().encode().unwrap(), wire);
     for (mcc, mnc, octets) in IDENTITIES {
         let first = "/ngap/TAIListForPaging/0/tAI/pLMNIdentity";
-        inspect::set(&mut view, first, tree!(format!("{mcc}-{mnc}"))).unwrap();
-        let edited = NGAPPDU::from_view(&view).unwrap();
-        let paging: Paging = edited.decode_value().unwrap();
+        inspect::set(&mut edited, first, tree!(format!("{mcc}-{mnc}"))).unwrap();
+        let written = NGAPPDU::from_tree(&edited).unwrap();
+        let paging: Paging = written.decode_value().unwrap();
         let areas: TAIListForPaging =
             oxirush_ngap::decode(&paging.protocol_ies.0[1].value).unwrap();
         assert_eq!(&areas.0[0].tai.plmn_identity.0[..], octets, "{mcc}-{mnc}");
-        let shown = edited.to_view().unwrap();
+        let shown = written.to_tree();
         let shown = inspect::select(&shown, first).unwrap();
         assert_eq!(shown, [&tree!(format!("{mcc}-{mnc}"))]);
     }

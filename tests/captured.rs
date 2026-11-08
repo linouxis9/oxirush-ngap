@@ -18,9 +18,8 @@
 //! The PDUs of `tests/fixtures/captured.tsv`, which other implementations sent:
 //! Open5GS, free5GC and PacketRusher, captured on the wire. Nothing of them was
 //! written or chosen with this crate. Each is read, and written back as the octets
-//! that its sender sent. With `inspect`, each is the same octets through its tree and
-//! through its view, in which every IE is read with its type, and has the name that
-//! tshark gives it. The tests of `oracle/` compare what the codec of rasn makes of each.
+//! that its sender sent. With `inspect`, each is the same octets through its tree, in
+//! which every IE is read with its type, and has the name that tshark gives it. The tests of `oracle/` compare what the codec of rasn makes of each.
 
 use std::collections::BTreeMap;
 
@@ -117,34 +116,21 @@ mod forms {
     use oxirush_ngap::Ngap;
     use oxirush_ngap::tree::Value;
 
-    /// `value` without what a view keeps of what was received: the members whose name
-    /// starts with `_`, at any depth.
-    fn written(value: &Value) -> Value {
-        match value {
-            Value::Object(members) => {
-                let kept = members.iter().filter(|(name, _)| !name.starts_with('_'));
-                let kept = kept.map(|(name, value)| (name.clone(), written(value)));
-                Value::Object(kept.collect())
-            }
-            Value::Array(entries) => Value::Array(entries.iter().map(written).collect()),
-            other => other.clone(),
-        }
-    }
-
-    /// Why an IE or a transfer of a view was not read with its type, at any depth.
+    /// Each value of a tree that is its octets, as an IE or a transfer that was not read
+    /// with its type is, at any depth.
     fn unread(value: &Value, found: &mut Vec<String>) {
         match value {
-            Value::Object(members) => {
-                found.extend(members.get("_decode_error").map(Value::to_string));
-                members.values().for_each(|member| unread(member, found));
+            Value::Object(members) if members.len() == 1 && members.contains_key("octets") => {
+                found.push(value.to_string())
             }
+            Value::Object(members) => members.values().for_each(|member| unread(member, found)),
             Value::Array(entries) => entries.iter().for_each(|entry| unread(entry, found)),
             _ => {}
         }
     }
 
     #[test]
-    fn each_captured_pdu_is_the_same_octets_through_its_tree_and_its_view() {
+    fn each_captured_pdu_is_the_same_octets_through_its_tree() {
         let mut named = 0;
         for captured in captured() {
             let name = captured.name;
@@ -158,24 +144,12 @@ mod forms {
                 named += 1;
             }
 
-            // Every IE and every transfer of its view is read with its type.
-            let view = pdu.to_view().unwrap();
-            let mut found = Vec::new();
-            unread(&view, &mut found);
-            assert_eq!(found, Vec::<String>::new(), "{name}");
-
-            // The view gives the octets back, and so do its values alone, without the
-            // octets that it keeps of what was received.
-            let octets = |view: &Value| NGAPPDU::from_view(view).unwrap().encode().unwrap();
-            assert_eq!(octets(&view), captured.octets, "{name}: its view");
-            assert_eq!(
-                octets(&written(&view)),
-                captured.octets,
-                "{name}: its values"
-            );
-
-            // And so does its tree.
+            // Every IE and every transfer of its tree is read with its type, and the tree
+            // gives the octets back.
             let tree = pdu.to_tree();
+            let mut found = Vec::new();
+            unread(&tree, &mut found);
+            assert_eq!(found, Vec::<String>::new(), "{name}");
             let again = NGAPPDU::from_tree(&tree).unwrap().encode().unwrap();
             assert_eq!(again, captured.octets, "{name}: its tree");
         }

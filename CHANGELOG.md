@@ -6,6 +6,14 @@ All notable changes to `oxirush-ngap` are recorded here.
 
 ### Changed
 
+- A PDU as JSON is its tree alone: `to_tree` gives it and `from_tree` writes it, and
+  the paths of `inspect` read and edit it. A path names an IE and selects its value,
+  as the paths of a NAS message do: `/ngap/AMF-UE-NGAP-ID`, `/ngap/Cause/radioNetwork`;
+  the IEs of a transfer and of a list of single containers go by name in their place,
+  and `criticality` after the value of an IE is the criticality beside it, which a tree
+  writes where the message does not assign it. A tree has an IE that it cannot show as
+  a value, or whose value has no place for all of its octets, as `{"octets": "…"}`,
+  so `from_tree` writes the same octets for every IE that an edit leaves.
 - The codec of each member of a `SEQUENCE` is one line in the bindings, which
   are about a sixth shorter, and a build takes less memory.
 - The trees of the bindings read the names of their members and values in the
@@ -60,6 +68,11 @@ All notable changes to `oxirush-ngap` are recorded here.
 
 ### Removed
 
+- The view of a PDU: `to_view`, `from_view` and `with_view`, with the paths of
+  views (`/ngap/X/value`, `octets` of an IE that has a value, `_raw_value`,
+  `_edited`, `_decode_error`, `_lossy`, `decoded`, entries with an `id`). A tree and
+  its paths do what a program did with a view.
+- The fuzz target `view`, which is `json` and reads trees.
 - `with_ngap_ie_mut!` and `build_ngap_ie!`.
 - The lookups of `inspect`: `ie_names`, `message_names`, `message_name`,
   `message_named`, `message_ies`, `message_ie_criticalities`,
@@ -87,6 +100,14 @@ All notable changes to `oxirush-ngap` are recorded here.
 
 | Before | Now |
 |--------|-----|
+| `pdu.to_view()?` | `pdu.to_tree()` |
+| `NGAPPDU::from_view(&view)?`, `pdu.with_view(&view)?` | `NGAPPDU::from_tree(&tree)?` |
+| `/ngap/AMF-UE-NGAP-ID/value`, `/ngap/Cause/value/nas` | `/ngap/AMF-UE-NGAP-ID`, `/ngap/Cause/nas` |
+| `/ngap/X/criticality` of a view | `/ngap/X/criticality`, there where the message does not assign it |
+| `{"id": "X", "criticality": "c", "value": v}` inserted | `{"X": v, "criticality": "c"}`, the criticality where the message does not assign it |
+| `/ngap/X/octets` set | `/ngap/X` set to `{"octets": "…"}` |
+| a transfer's `decoded` | the transfer itself |
+| `inspect::__view_of_jer(&values)` | `inspect::__tree_of_jer(&values)` |
 | `Criticality::reject` | `Criticality::Reject` |
 | `pdu.is_initiating()` | `pdu.direction() == Direction::Initiating` |
 | `pdu.direction() == "SuccessfulOutcome"` | `pdu.direction() == Direction::Successful` |

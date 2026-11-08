@@ -48,6 +48,8 @@ All notable changes to `oxirush-ngap` are recorded here.
   `Vec<u8>`.
 - The methods of a PDU and its `Display` are those of oxirush-aper, written
   once for both protocols, with the same documentation.
+- `decode` and `encode` of a PDU, and `set_protocol_ies`, are the codecs of the
+  types: a PDU is read and written by one implementation.
 
 ### Removed
 
@@ -61,6 +63,8 @@ All notable changes to `oxirush-ngap` are recorded here.
 - `NGAP_PDU`, which is `NGAPPDU<'static>`; `decode_borrowed`, which is `decode`;
   `message()`; `ngap::decode_open_type` and `ngap::encode_open_type`; and
   `src/pdu.rs`.
+- `encode_into` of a PDU: `oxirush_ngap::aper::encode_into(&pdu, &mut octets)`
+  keeps a buffer from one PDU to the next.
 - The aliases of the types of the two identifiers of a UE, as
   `ngap::AMF_UE_NGAP_ID` for `AMFUENGAPID`.
 - The examples in the documentation of a few generated types: the README has

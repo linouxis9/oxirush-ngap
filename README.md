@@ -241,7 +241,7 @@ NGSetupFailure is not handled here
 | Method | Does |
 |--------|------|
 | `decode` | Decode one PDU, which borrows from the octets and copies nothing |
-| `encode`, `encode_into` | Encode it |
+| `encode` | Encode it |
 | `procedure_code`, `procedure_name`, `direction`, `kind` | `42`, `"UEContextReleaseRequest"`, `Direction::Initiating`, and an `NgapPduKind` (`Other` for a procedure that the specification lacks in that direction) |
 | `decode_value`, `message` | The message as its type |
 | `protocol_ies`, `set_protocol_ies` | The IEs of the message, whatever it is |

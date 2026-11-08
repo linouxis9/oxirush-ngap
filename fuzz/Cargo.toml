@@ -75,3 +75,10 @@ path = "../../oxirush-aper/protocols/fuzz/fuzz_targets/tree.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "transfer"
+path = "../../oxirush-aper/protocols/fuzz/fuzz_targets/transfer.rs"
+test = false
+doc = false
+bench = false

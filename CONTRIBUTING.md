@@ -232,7 +232,7 @@ Downlink NAS Transport.
 
 ## Fuzzing
 
-`fuzz/` has six [cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets,
+`fuzz/` has seven [cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets,
 a package of its own that is not published. A target does not only look for a
 panic: it holds what the crate writes to what it reads and to what `check` says.
 CI runs each for a minute, from the vectors and the captured PDUs. The Fuzz
@@ -248,6 +248,7 @@ that of oxirush-aper does the same with the head of each repository.
 | `exact` | A PDU is written back to the octets that it was read from, but where `check` finds a form that X.691 does not give; `check_structure` says what `check` says of all but the values, and the Criticality Diagnostics of the deviations encode; a PDU that `check` finds nothing to say of is written to the same octets by the codec of its message |
 | `edit` | A PDU of the fixtures edited by the paths of its tree, with values of the trees of the fixtures and of the fuzzer: what `from_tree` writes encodes and is read back, and only the IEs that an edit was under change |
 | `tree` | A PDU written from a tree whose IEs the fuzzer takes from the trees of the fixtures, changes, repeats, removes and puts in another order: it encodes, is read back, and its tree writes it again |
+| `transfer` | A PDU of the fixtures in which the fuzzer's octets take the place of a transfer, an IE or another value that holds others: what `from_tree` writes with them encodes, is read back, and its tree writes it again |
 
 ```sh
 cargo install cargo-fuzz

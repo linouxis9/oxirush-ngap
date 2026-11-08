@@ -336,7 +336,10 @@ fn a_pdu_written_from_the_values_of_the_reference_is_the_octets_of_the_reference
 
 /// The PDUs that a fuzzer found a fault with hold to the properties of the fuzz target
 /// `json`: the review of the release candidate found a PDU of a procedure that the
-/// specification does not have, whose paths listed a value that `select()` did not take.
+/// specification does not have, whose paths listed a value that `select()` did not take,
+/// and the fuzzing of 0.6.0 one whose SONConfigurationTransferUL holds, in its
+/// `sONInformation`, an IE of an identifier that NGAP does not have, whose digits
+/// `select()` did not take.
 /// Each gives its tree back, and each path that its tree lists selects its value.
 #[test]
 fn the_pdus_that_a_fuzzer_found_a_fault_with_hold_to_the_properties_of_its_target() {
@@ -354,5 +357,5 @@ fn the_pdus_that_a_fuzzer_found_a_fault_with_hold_to_the_properties_of_its_targe
         }
         count += 1;
     }
-    assert_eq!(count, 1);
+    assert_eq!(count, 2);
 }

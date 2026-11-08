@@ -2,6 +2,13 @@
 
 All notable changes to `oxirush-ngap` are recorded here.
 
+## Unreleased
+
+### Added
+
+- `TimeToWait::seconds`, the time that a Time to Wait says to wait at least
+  (TS 38.413 clause 9.3.1.56), beside the helpers.
+
 ## 0.6.1 - 2026-11-08
 
 ### Fixed

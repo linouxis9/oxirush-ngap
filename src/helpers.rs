@@ -1,7 +1,8 @@
 //! Convenience helpers for building common NGAP types.
 //!
 //! These helpers cover PLMN/TBCD encoding, NR identifiers, security bit
-//! strings, and common AMF/gNB identities used by NGAP consumers.
+//! strings, and common AMF/gNB identities used by NGAP consumers, and the
+//! seconds of a Time to Wait ([`TimeToWait::seconds`]).
 //!
 //! None of them panics. One that takes a number for a field of a fixed size
 //! gives an [`Error`] of the kind `Argument` for a number that does not fit,
@@ -296,10 +297,41 @@ pub fn ue_security_capabilities(encryption: u8, integrity: u8) -> UESecurityCapa
     }
 }
 
+impl TimeToWait {
+    /// The time that the node is to wait at least before it starts the procedure again,
+    /// in seconds (TS 38.413 clause 9.3.1.56): that of an NG SETUP FAILURE, a RAN
+    /// CONFIGURATION UPDATE FAILURE or an AMF CONFIGURATION UPDATE FAILURE.
+    ///
+    /// ```
+    /// use oxirush_ngap::ngap::TimeToWait;
+    /// use std::time::Duration;
+    ///
+    /// let wait = Duration::from_secs(TimeToWait::v10s.seconds());
+    /// assert_eq!(wait, Duration::from_secs(10));
+    /// ```
+    pub fn seconds(self) -> u64 {
+        match self {
+            Self::v1s => 1,
+            Self::v2s => 2,
+            Self::v5s => 5,
+            Self::v10s => 10,
+            Self::v20s => 20,
+            Self::v60s => 60,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{ErrorKind, build_ngap};
+
+    /// TS 38.413 clause 9.3.1.56: ENUMERATED (1s, 2s, 5s, 10s, 20s, 60s, ...).
+    #[test]
+    fn a_time_to_wait_is_its_seconds() {
+        let seconds = TimeToWait::VALUES.map(TimeToWait::seconds);
+        assert_eq!(seconds, [1, 2, 5, 10, 20, 60]);
+    }
 
     #[test]
     fn a_plmn_identity_has_the_order_of_the_application_protocols() {

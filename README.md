@@ -48,9 +48,9 @@ Each example is followed by its output.
 
 ```toml
 [dependencies]
-oxirush-ngap = "0.5"
+oxirush-ngap = "0.6"
 # With the JSON forms:
-# oxirush-ngap = { version = "0.5", features = ["inspect"] }
+# oxirush-ngap = { version = "0.6", features = ["inspect"] }
 # The examples of this page also use:
 # hex = "0.4"
 ```

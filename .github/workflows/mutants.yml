@@ -39,7 +39,7 @@ permissions:
 
 jobs:
   mutants:
-    uses: linouxis9/oxirush-aper/.github/workflows/protocol-mutants.yml@e011b64da0a1c269d2349466017eb6169538d364
+    uses: linouxis9/oxirush-aper/.github/workflows/protocol-mutants.yml@9da38c74f80a1efe78e27898a78e456b886b11ed
     with:
       protocol: ngap
       weekly: "3 23 * * 6"

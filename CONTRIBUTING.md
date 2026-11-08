@@ -67,10 +67,11 @@ revision of `build/revisions`, as `build/` takes the generator. A file of
 | The README test: `readme.py` writes `tests/readme.rs` from the README | `protocols/tests/readme.py` |
 | `package.sh`, `workspace_member.sh` | `protocols/tests/` |
 | The writer of the vectors and their reading by tshark: `generate.py`, `dissect.py` | `protocols/tests/fixtures/` |
+| The comparison with Wireshark: `compare.py`, which `tests/wireshark.rs` runs with `tests/wireshark/`, and `extract.py`, which collects PDUs from captures | `protocols/tests/wireshark/` |
 | The oracle and its tests `codec.rs` and `compare.rs` | `protocols/oracle/`, which `oracle/Cargo.toml` builds with the bindings of `oracle/src/` and `oracle/tests/allocation.rs` here |
 | The fuzz targets and `seed.sh` | `protocols/fuzz/`, which `fuzz/Cargo.toml` builds with the crate, which it names `codec`: its module `hooks` names what is of the protocol |
 | The benchmarks, their programs, `build_cost.py` and the comparison with other implementations | `protocols/benches/`, which `benches/Cargo.toml` builds with `benches/src/protocol.rs`, `benches/src/readers.rs` and `benches/compare/pdus.tsv` here |
-| The jobs of CI and of the Reproduce workflow | `.github/workflows/protocol.yml` and `protocol-reproduce.yml` of oxirush-aper, which the two workflows here call |
+| The jobs of CI, of the Reproduce workflow and of the Mutants workflow | `.github/workflows/protocol.yml`, `protocol-reproduce.yml` and `protocol-mutants.yml` of oxirush-aper, which the three workflows here call |
 
 A change to a shared piece is a commit of oxirush-aper, which each protocol
 crate takes when `build/revisions` records it.

@@ -18,15 +18,15 @@
 //! The PDUs of `tests/wireshark/corpus.tsv` as Wireshark reads them and as
 //! this crate reads them, compared field by field.
 //!
-//! The crate's reading of each PDU is its tree and what `check()` finds,
-//! written here as one line of JSON, with the container of a handover decoded
-//! where the message says that it is an NG-RAN node's (see [`containers`]); `tests/wireshark/compare.py` has tshark
-//! dissect the same octets as NGAP and compares the two along
-//! `tests/wireshark/mapping.tsv`. A difference that
-//! `tests/wireshark/known.tsv` does not explain fails the test. Without
-//! tshark, or without Python 3, the test says that it is skipped and passes;
-//! with a tshark other than the one that known.tsv was triaged with,
-//! compare.py says so and passes.
+//! The crate's reading of each PDU is its tree and what `check()` finds, written here
+//! as one line of JSON, with the container of a handover decoded where the message says
+//! that it is an NG-RAN node's (see [`containers`]); `compare.py` of
+//! `protocols/tests/wireshark/` in the checkout of oxirush-aper beside the repository
+//! has tshark dissect the same octets as NGAP and compares the two along
+//! `tests/wireshark/mapping.tsv`. A difference that `tests/wireshark/known.tsv` does
+//! not explain fails the test. Without tshark, without Python 3 or without that
+//! checkout, the test says that it is skipped and passes; with a tshark other than the
+//! one that known.tsv was triaged with, compare.py says so and passes.
 //!
 //! Other PDUs are compared with `NGAP_WIRESHARK_CORPUS=<rows>`, rows as those
 //! of the corpus, and `NGAP_WIRESHARK_OUTPUT=<directory>` keeps the report:
@@ -183,6 +183,14 @@ fn wireshark_reads_the_pdus_as_the_crate_does() {
         eprintln!("skipped: python3 is not installed, which compares the PDUs with Wireshark");
         return;
     }
+    let compare = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../oxirush-aper/protocols/tests/wireshark/compare.py");
+    if !compare.exists() {
+        eprintln!(
+            "skipped: the checkout of oxirush-aper beside the repository, which compares the PDUs with Wireshark, is not there"
+        );
+        return;
+    }
     let corpus = std::env::var_os("NGAP_WIRESHARK_CORPUS")
         .map_or_else(|| here.join("corpus.tsv"), PathBuf::from);
     let output = std::env::var_os("NGAP_WIRESHARK_OUTPUT").map_or_else(
@@ -206,7 +214,7 @@ fn wireshark_reads_the_pdus_as_the_crate_does() {
 
     let status = Command::new("python3")
         .arg("-I")
-        .arg(here.join("compare.py"))
+        .arg(&compare)
         .arg("--protocol")
         .arg("ngap")
         .arg("--corpus")

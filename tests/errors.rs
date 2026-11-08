@@ -615,7 +615,7 @@ mod inspect_errors {
         // its name alone.
         let by_code = tree!({"procedure_code": 42, "direction": "InitiatingMessage", "ies": []});
         let error = NGAPPDU::from_tree(&by_code).unwrap_err();
-        assert_eq!(error.kind(), ErrorKind::Form);
+        assert_eq!(error.kind(), ErrorKind::Value);
         assert_eq!(
             error.to_string(),
             "the InitiatingMessage of procedure 42 is UEContextReleaseRequest: it is \
@@ -691,7 +691,7 @@ mod inspect_errors {
         // identifier of an IE where there is no list, and a name where a list goes by
         // position.
         let error = inspect::select(&view, "/ngap/Cause/radioNetwrok").unwrap_err();
-        assert_eq!(error.kind(), ErrorKind::NoSuchMember);
+        assert_eq!(error.kind(), ErrorKind::Path);
         let text = error.to_string();
         assert!(
             text.starts_with("\"radioNetwrok\" is not a member of Cause, which has radioNetwork, "),
@@ -704,24 +704,24 @@ mod inspect_errors {
         ] {
             assert_eq!(
                 kind(inspect::select(&view, path)),
-                ErrorKind::NoSuchMember,
+                ErrorKind::Path,
                 "{path}"
             );
         }
         // An edit at such a path, and the view is as it was.
         let before = view.clone();
         let edit = inspect::set(&mut view, "/ngap/Cause/radioNetwrok", tree!(1));
-        assert_eq!(kind(edit), ErrorKind::NoSuchMember);
+        assert_eq!(kind(edit), ErrorKind::Path);
         assert_eq!(view, before);
         // An IE that the object set of the message does not have, without a view.
         let checked = inspect::check_path("UEContextReleaseRequest", "/ngap/GUAMI");
-        assert_eq!(kind(checked), ErrorKind::NoSuchMember);
+        assert_eq!(kind(checked), ErrorKind::Path);
         // A member that the type of a written value does not have.
         let error = NGAPPDU::from_tree(&tree!({"message": "InitialContextSetupRequest", "ies": [
             {"AllowedNSSAI": [{"s-NSSAI": {"sST": 1, "other": 2}}]},
         ]}))
         .unwrap_err();
-        assert_eq!(error.kind(), ErrorKind::NoSuchMember);
+        assert_eq!(error.kind(), ErrorKind::Path);
         assert_eq!(
             error.to_string(),
             "this is not a value of AllowedNSSAI: \"other\" is not a member that its type has: it has \
@@ -738,10 +738,10 @@ mod inspect_errors {
         for path in ["/ngap/PDUSessionResourceListCxtRelReq/value", "/ngap/7"] {
             assert_eq!(inspect::select(&view, path), Ok(vec![]), "{path}");
             let edit = inspect::set(&mut view, path, tree!(1));
-            assert_eq!(kind(edit), ErrorKind::NothingSelected, "{path}");
+            assert_eq!(kind(edit), ErrorKind::Path, "{path}");
         }
         let removed = inspect::remove(&mut view, "/ngap/PDUSessionResourceListCxtRelReq");
-        assert_eq!(kind(removed), ErrorKind::NothingSelected);
+        assert_eq!(kind(removed), ErrorKind::Path);
         assert_eq!(view, before);
     }
 
@@ -762,9 +762,9 @@ mod inspect_errors {
         );
 
         let error = inspect::select(&view, &cell).unwrap_err();
-        assert_eq!(error.kind(), ErrorKind::NotOpened);
+        assert_eq!(error.kind(), ErrorKind::Path);
         let edit = inspect::set(&mut view, &cell, tree!(7));
-        assert_eq!(kind(edit), ErrorKind::NotOpened);
+        assert_eq!(kind(edit), ErrorKind::Path);
 
         // The kind says what to do about it.
         inspect::open(&mut view, &cell).unwrap();
@@ -914,7 +914,7 @@ mod inspect_errors {
             tree!({"message": message, "ies": [{"RANNodeName": "gnb-1"}]}),
         ] {
             let error = NGAPPDU::from_tree(&tree).unwrap_err();
-            assert_eq!(error.kind(), ErrorKind::Form, "{tree}: {error}");
+            assert_eq!(error.kind(), ErrorKind::Value, "{tree}: {error}");
         }
 
         // A view is an object with a procedure code, a direction, a criticality and a
@@ -940,10 +940,10 @@ mod inspect_errors {
             with("other", tree!(1)),
         ] {
             let error = NGAPPDU::from_view(&view).unwrap_err();
-            assert_eq!(error.kind(), ErrorKind::Form, "{error}");
+            assert_eq!(error.kind(), ErrorKind::Value, "{error}");
             // The PDU that the view is of refuses it as any PDU does.
             let error = release_request().with_view(&view).unwrap_err();
-            assert_eq!(error.kind(), ErrorKind::Form, "{error}");
+            assert_eq!(error.kind(), ErrorKind::Value, "{error}");
         }
 
         // The view of another message is not one of this PDU: another procedure code,
@@ -963,7 +963,7 @@ mod inspect_errors {
             ),
         ] {
             let error = pdu.with_view(&with(member, value)).unwrap_err();
-            assert_eq!(error.kind(), ErrorKind::Form, "{error}");
+            assert_eq!(error.kind(), ErrorKind::Value, "{error}");
             assert_eq!(
                 error.to_string(),
                 format!(
@@ -976,11 +976,11 @@ mod inspect_errors {
         // An IE is written with its value or with its octets.
         let both = tree!({"id": "Cause", "criticality": "ignore", "value": 1, "octets": "00"});
         let insert = inspect::insert(&mut view.clone(), "/ngap/-", both);
-        assert_eq!(kind(insert), ErrorKind::Form);
+        assert_eq!(kind(insert), ErrorKind::Value);
     }
 
     #[test]
-    fn an_edit_that_is_refused_is_an_edit_error() {
+    fn an_edit_that_is_refused_is_a_value_error() {
         let mut view = view();
         // A member that its type always has, the value of an IE and the alternative of
         // a CHOICE are not taken out, and nothing is inserted where there is no list.
@@ -990,25 +990,25 @@ mod inspect_errors {
             "/ngap/Cause/radioNetwork",
         ] {
             let removed = inspect::remove(&mut view, path);
-            assert_eq!(kind(removed), ErrorKind::Edit, "{path}");
+            assert_eq!(kind(removed), ErrorKind::Value, "{path}");
         }
         let inserted = inspect::insert(&mut view, "/ngap/Cause/criticality", tree!("reject"));
-        assert_eq!(kind(inserted), ErrorKind::Edit);
+        assert_eq!(kind(inserted), ErrorKind::Value);
 
         // The octets of a value that an edit changed are no longer its octets.
         inspect::set(&mut view, "/ngap/Cause/nas", tree!("normal-release")).unwrap();
         let octets = inspect::select(&view, "/ngap/Cause/octets");
-        assert_eq!(kind(octets), ErrorKind::Edit);
+        assert_eq!(kind(octets), ErrorKind::Value);
     }
 
     #[test]
-    fn what_is_over_the_limits_of_the_inspection_is_a_limit_error() {
+    fn what_is_over_the_limits_of_the_inspection_is_refused() {
         let view = view();
         // A path of more than 64 segments, and one of more than 4096 octets.
         let long = "/0".repeat(65);
-        assert_eq!(kind(inspect::select(&view, &long)), ErrorKind::Limit);
+        assert_eq!(kind(inspect::select(&view, &long)), ErrorKind::Path);
         let wide = format!("/{}", "a".repeat(4096));
-        assert_eq!(kind(inspect::select(&view, &wide)), ErrorKind::Limit);
+        assert_eq!(kind(inspect::select(&view, &wide)), ErrorKind::Path);
 
         // A tree that is nested deeper than a tree is read.
         let mut deep = tree!(1);
@@ -1017,7 +1017,7 @@ mod inspect_errors {
         }
         assert_eq!(
             kind(written(tree!([{"AMF-UE-NGAP-ID": deep}]))),
-            ErrorKind::Limit
+            ErrorKind::Value
         );
 
         // A private message has no list of IEs: its tree has its octets, and its view

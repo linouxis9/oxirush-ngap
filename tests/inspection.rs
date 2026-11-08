@@ -2154,7 +2154,7 @@ fn a_procedure_that_the_specification_does_not_have_has_a_view_of_its_ies() {
     let mut unsaid = tree.clone();
     unsaid.as_object_mut().unwrap().shift_remove("criticality");
     let error = NGAPPDU::from_tree(&unsaid).unwrap_err();
-    assert_eq!(error.kind(), ErrorKind::Form);
+    assert_eq!(error.kind(), ErrorKind::Value);
     // A message that is no container of protocol IEs does not decode, and has no view:
     // one IE is claimed, and none is there. Its tree has its octets.
     let pdu = NGAPPDU::decode(&[0x00, 200, 0x00, 0x03, 0x00, 0x00, 0x01]).unwrap();

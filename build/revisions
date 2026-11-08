@@ -7,4 +7,4 @@
 #
 # protocols/build/pin.py of oxirush-aper writes it in the workflows, and with
 # `--check`, which CI runs, holds them to it.
-oxirush-aper e047fef47d4d96a505acf65afe273ea7369235eb
+oxirush-aper 1a86467976eb67234fe28f97111f0d6553b5e03d

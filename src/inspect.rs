@@ -380,7 +380,7 @@
 //! assert_eq!(inspect::check_path("HandoverRequired", &cell), Ok(()));
 //!
 //! // The path is an error until `open` has decoded the octets, and selects the value after that
-//! assert_eq!(inspect::select(&view, &cell).unwrap_err().kind(), ErrorKind::NotOpened);
+//! assert_eq!(inspect::select(&view, &cell).unwrap_err().kind(), ErrorKind::Path);
 //! inspect::open(&mut view, &cell).unwrap();
 //! assert_eq!(inspect::select(&view, &cell).unwrap(), [&tree!(4660)]);
 //!
@@ -603,14 +603,8 @@
 //! | --- | --- |
 //! | `UnknownMessage` | A name of a message, or a direction and a procedure code, that the protocol does not have |
 //! | `UnknownIe` | A name or an identifier of an IE that the protocol does not have, or has no type for where it is: its octets are written in its place |
-//! | `Path` | A path that is not well formed: no `/` before its first segment, `~` before what is no `0` and no `1`, `@id=` before what is no identifier |
-//! | `NoSuchMember` | A name that the type at that place cannot have: in a path, a member of a value, an IE of the object set of a message, a name where a list goes by position; in a value that is written, a member that its type does not have |
-//! | `NothingSelected` | An edit whose path selects nothing: an IE that the message does not have, or a position after the end of a list |
-//! | `NotOpened` | A path through the type that octets carry, before [`open`] decoded them: open, then select again |
-//! | `Value` | A JSON value that is not a value of its ASN.1 type: of another form than [Values](#values) lists, a name that an `ENUMERATED` does not have, a number outside its constraint, octets that are no hexadecimal. The message says at which member, by the names of the value |
-//! | `Form` | JSON that is not written as a tree or as a view: no name of a message, a member that neither has, an IE with its value and its octets, an IE that says no criticality where no table has one |
-//! | `Edit` | An edit that is refused: a member that its type always has, the value of an IE or the alternative of a `CHOICE` taken out, an insertion where there is no list, and the octets of a value that was edited since |
-//! | `Limit` | A path of more than 64 segments or 4096 octets, a selection of more than 65,536 values, a tree nested deeper than 256 levels |
+//! | `Path` | A path that is not well formed (no `/` before its first segment, `~` before what is no `0` and no `1`, `@id=` before what is no identifier), a name that the type at that place cannot have (a member of a value, an IE of the object set of a message, a name where a list goes by position), an edit whose path selects nothing, a path through the type that octets carry before [`open`] decoded them, a path of more than 64 segments or 4096 octets, a selection of more than 65,536 values |
+//! | `Value` | A JSON value that is not a value of its ASN.1 type (of another form than [Values](#values) lists, a name that an `ENUMERATED` does not have, a number outside its constraint, octets that are no hexadecimal: the message says at which member), JSON that is not written as a tree or as a view, a member that its type does not have, a tree nested deeper than 256 levels, and an edit that is refused: a member that its type always has, the value of an IE or the alternative of a `CHOICE` taken out, an insertion where there is no list, the octets of a value that was edited since |
 //! | `UndecodableIe` | A path into an IE or a transfer that did not decode |
 //! | `Decode` | A PDU whose message does not decode, and octets of a view that are not what they were decoded as |
 //!
@@ -880,7 +874,7 @@ impl NGAPPDU<'_> {
     ///
     /// // A view that says another procedure is not a view of this PDU
     /// view["procedure_code"] = tree!(21);
-    /// assert_eq!(pdu.with_view(&view).unwrap_err().kind(), ErrorKind::Form);
+    /// assert_eq!(pdu.with_view(&view).unwrap_err().kind(), ErrorKind::Value);
     /// # Ok::<(), oxirush_ngap::Error>(())
     /// ```
     pub fn with_view(&self, view: &Value) -> Result<NGAPPDU<'static>, Error> {

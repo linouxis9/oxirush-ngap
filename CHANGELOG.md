@@ -50,6 +50,8 @@ All notable changes to `oxirush-ngap` are recorded here.
   once for both protocols, with the same documentation.
 - `decode` and `encode` of a PDU, and `set_protocol_ies`, are the codecs of the
   types: a PDU is read and written by one implementation.
+- An error of a path or of a tree is of the kind `Path` or `Value`, those of
+  oxirush-aper 0.2, and the functions that make an error are hidden.
 - An IE has one name in the macros and in `ie`: the one after its identifier.
   The 98 IEs that were also named after their type no longer are.
 - `helpers::plmn` is `Plmn::new` of oxirush-utils, whose errors it gives, and
@@ -93,6 +95,8 @@ All notable changes to `oxirush-ngap` are recorded here.
 | `pdu.message::<M>()?` | `pdu.decode_value::<M>()?`, and `.into_owned()` to keep it |
 | `decode_open_type::<T>(&octets)`, `encode_open_type(&value)` | `oxirush_ngap::decode::<T>(&octets)`, `oxirush_ngap::encode(&value)` (a `Vec<u8>`: `.into()` gives `Octets`) |
 | `AMF_UE_NGAP_ID(42)` (the type) | `AMFUENGAPID(42)` |
+| `ErrorKind::NoSuchMember`, `NothingSelected`, `NotOpened` | `ErrorKind::Path` |
+| `ErrorKind::Form`, `Edit`, `Limit` | `ErrorKind::Value` (`Path` for the limits of a path) |
 | `plmn_from(&identity)` | `Plmn::try_from(identity)`, its `mcc()` and its `mnc()` |
 | `eutra_cgi(plmn, NgEnbKind::Macro, id, cell)` | `eutra_cgi(plmn, &NgENBID::macroNgENB_ID(Bits::new(id, 20)?), cell)` |
 | `TAI::new(plmn, tac, None)` | `TAI { plmn_identity: plmn, tac, ie_extensions: None }` |

@@ -242,8 +242,8 @@ that of oxirush-aper does the same with the head of each repository.
 
 | Target | What holds for any octets |
 |--------|---------------------------|
-| `decode` | A PDU, the protocol IEs of its message and the message as its type are read by the crate and by rasn as the same value, which both write as the same octets, or by neither, and what was read is written and read again as the same |
-| `json` | The tree of a PDU gives that PDU back, each path of a tree selects its value, and each value that a tree decodes has the JSON form that the JSON Encoding Rules of rasn give the same octets |
+| `decode` | A PDU is written as octets that are read as the same PDU, the protocol IEs of its message are put back as they were, and its message is read as its type and written |
+| `json` | The tree of a PDU gives that PDU back, and each path of a tree selects its value |
 | `paths` | `select`, `set`, `insert`, `remove`, `open`, `check_path` and `enumerated_at` take any path and any value without a panic, and a tree that one of them changed is a PDU or an error |
 | `exact` | A PDU is written back to the octets that it was read from, but where `check` finds a form that X.691 does not give; `check_structure` says what `check` says of all but the values, and the Criticality Diagnostics of the deviations encode; a PDU that `check` finds nothing to say of is written to the same octets by the codec of its message |
 | `edit` | A PDU of the fixtures edited by the paths of its tree, with values of the trees of the fixtures and of the fuzzer: what `from_tree` writes encodes and is read back, and only the IEs that an edit was under change |

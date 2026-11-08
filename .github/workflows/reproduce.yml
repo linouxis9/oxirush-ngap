@@ -1,6 +1,6 @@
 name: Reproduce
 
-# The bindings and the oracle of the tests from the ASN.1 of the specification, and
+# The bindings, and those for rasn of the benchmarks, from the ASN.1 of the specification, and
 # the vectors from pycrate: what the README says anyone can check. It fetches the
 # archive of the specification from 3GPP and pycrate from PyPI, so it runs when what it
 # checks changes, and on demand.
@@ -13,7 +13,7 @@ on:
       - src/ngap.rs
       - src/registry.rs
       - src/inspect_registry.rs
-      - oracle/**
+      - rasn/**
       - tests/fixtures/**
       - tests/vectors.rs
       - .github/workflows/reproduce.yml
@@ -23,7 +23,7 @@ on:
       - src/ngap.rs
       - src/registry.rs
       - src/inspect_registry.rs
-      - oracle/**
+      - rasn/**
       - tests/fixtures/**
       - tests/vectors.rs
       - .github/workflows/reproduce.yml
@@ -35,7 +35,7 @@ jobs:
   # The job is the one that oxirush-ngap and oxirush-s1ap share, in the repository of
   # oxirush-aper, at the revision that build/revisions records.
   reproduce:
-    uses: linouxis9/oxirush-aper/.github/workflows/protocol-reproduce.yml@ad6b84e868da5267f0c41545ea8a1207b1f00272
+    uses: linouxis9/oxirush-aper/.github/workflows/protocol-reproduce.yml@e011b64da0a1c269d2349466017eb6169538d364
     with:
       protocol: ngap
       archive: 38_series/38.413/38413-j40.zip

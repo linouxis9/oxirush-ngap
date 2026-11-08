@@ -17,7 +17,7 @@ crate has neither the generator nor the ASN.1.
 | `src/ngap.rs` | The bindings: each type of the ASN.1 with its codec on `oxirush-aper`, its conversions and, with `inspect`, its JSON form, then the flat API, the convenience methods and the `Display` implementation |
 | `src/registry.rs` | The list of the procedures and of the IEs, one line for each: its code or its identifier, its names and its types, and for each message of a procedure the IEs of its object set. The names that the macros take, `NgapPduKind` and the names and the types of `inspect` all expand from it, so each is written once |
 | `src/inspect_registry.rs` | What `inspect` alone needs, with the `inspect` feature: among it the list of the types, one line for each `SEQUENCE` and each `CHOICE` with its members, which the paths are read against, and the types that a handover's containers carry, which the generator has from the prose of the specification |
-| `oracle/src/bindings.rs`, `oracle/src/types.rs` | The oracle, a package of its own that its tests and the fuzz targets build, and the crate does not: the same types with the codec of rasn 0.29, and the list of those that the crate decodes by a name or by an identifier |
+| `rasn/src/bindings.rs` | The bindings for rasn 0.29 of the benchmarks, a package of its own that `benches/` builds and the crate does not: the same types with the codec of rasn |
 
 For maintainers, `build/` holds the generator, a package of its own whose
 lockfile pins `rasn-compiler`. What the generators of the two protocols share
@@ -36,7 +36,7 @@ curl -A "Mozilla/5.0" -O https://www.3gpp.org/ftp/Specs/archive/38_series/38.413
 python3 ../oxirush-aper/protocols/build/extract_asn1.py 38413-j40.zip
 CARGO="$(command -v cargo)" cargo run --locked --manifest-path build/Cargo.toml
 rustfmt --edition 2024 src/ngap.rs src/registry.rs src/inspect_registry.rs \
-    oracle/src/bindings.rs oracle/src/types.rs
+    rasn/src/bindings.rs
 ```
 
 `rasn-compiler` finds rustfmt through `CARGO`. Commit the five files after
@@ -62,13 +62,13 @@ revision of `build/revisions`, as `build/` takes the generator. A file of
 | What | Where it lives |
 |------|----------------|
 | The traits of a protocol, the readers `ies::<T>()`, `ie::<T>()` and `items::<L>()`, `check()` and `check_structure()`, the errors that name an IE, and the bodies of the macros, which `src/macros.rs` and `src/pdu.rs` here forward to | `src/protocol/` of oxirush-aper, which the registry of each protocol, `src/registry.rs`, invokes; the paths of `inspect` in `src/inspect/` there |
-| The generator of the bindings, of the registry and of the oracle | `generator/` of oxirush-aper; `build/main.rs` here says what is of NGAP |
+| The generator of the bindings, of the registry and of the bindings for rasn | `generator/` of oxirush-aper; `build/main.rs` here says what is of NGAP |
 | `extract_asn1.py`, `pin.py` | `protocols/build/` |
 | The README test: `readme.py` writes `tests/readme.rs` from the README | `protocols/tests/readme.py` |
 | `package.sh`, `workspace_member.sh` | `protocols/tests/` |
 | The writer of the vectors and their reading by tshark: `generate.py`, `dissect.py` | `protocols/tests/fixtures/` |
 | The comparison with Wireshark: `compare.py`, which `tests/wireshark.rs` runs with `tests/wireshark/`, and `extract.py`, which collects PDUs from captures | `protocols/tests/wireshark/` |
-| The oracle and its tests `codec.rs` and `compare.rs` | `protocols/oracle/`, which `oracle/Cargo.toml` builds with the bindings of `oracle/src/` and `oracle/tests/allocation.rs` here |
+| The codecs of the bindings for rasn in the place of rasn's | `protocols/rasn/`, which `rasn/Cargo.toml` builds with the bindings of `rasn/src/` here |
 | The fuzz targets and `seed.sh` | `protocols/fuzz/`, which `fuzz/Cargo.toml` builds with the crate, which it names `codec`: its module `hooks` names what is of the protocol |
 | The benchmarks, their programs, `build_cost.py` and the comparison with other implementations | `protocols/benches/`, which `benches/Cargo.toml` builds with `benches/src/protocol.rs`, `benches/src/readers.rs` and `benches/compare/pdus.tsv` here |
 | The jobs of CI, of the Reproduce workflow and of the Mutants workflow | `.github/workflows/protocol.yml`, `protocol-reproduce.yml` and `protocol-mutants.yml` of oxirush-aper, which the three workflows here call |
@@ -82,7 +82,7 @@ crate takes when `build/revisions` records it.
 the bindings, and whose `protocols/` and workflows the jobs take: the two
 workflows call those of that commit, and the jobs and the Reproduce workflow
 check it out beside the repository, where the manifests of `benches/`,
-`fuzz/` and `oracle/` take it. `python3 ../oxirush-aper/protocols/build/pin.py
+`fuzz/` and `rasn/` take it. `python3 ../oxirush-aper/protocols/build/pin.py
 --check`, which CI runs, fails when a workflow names another commit. The
 crates themselves come from crates.io.
 
@@ -97,7 +97,7 @@ protocol crates depend on one version of `oxirush-aper` exactly (`=0.1.0` in
 documentation and changes with them, so a release of `oxirush-aper` comes with
 a release of each, which takes that version.
 
-### rasn-compiler and the oracle
+### rasn-compiler and the bindings for rasn
 
 `rasn-compiler` runs in its stable mode, which leaves an open type opaque:
 TS 38.413 relies on parameterized information object classes, and the
@@ -107,8 +107,8 @@ generated types, and the macros give typed construction, extraction and
 mutation.
 
 What `rasn-compiler` resolves is written twice: as the bindings of the crate,
-and as bindings for rasn 0.29, in `oracle/`, which its tests and the fuzz
-targets build and the crate does not. Both have the same types by
+and as bindings for rasn 0.29, in `rasn/`, which the benchmarks build and
+the crate does not. Both have the same types by
 construction.
 
 | Subject | What the generator does |
@@ -117,10 +117,10 @@ construction.
 | Complete values | `NGAPPDU::decode`, `decode_value` and the extraction of a typed IE refuse incomplete values and trailing whole octets. |
 
 rasn 0.29's APER codec departs from ITU-T X.691 where NGAP reaches it. There
-the oracle has a codec of its own in the place of the derived one, so that
-the vectors, which pycrate wrote and tshark reads, hold for both:
+the bindings for rasn have a codec of their own in the place of the derived
+one, so that rasn reads the PDUs of the benchmarks as the crate does:
 
-| Value | Correction of the oracle |
+| Value | Correction of the bindings for rasn |
 |-------|--------------------------|
 | Constrained `SEQUENCE OF` | rasn misaligns the length determinant and the components |
 | Size-constrained `UTF8String` | Its size is not PER-visible, so its length is an unconstrained count of octets |
@@ -220,9 +220,7 @@ requests, N2 and Xn handovers, and what a core answers to messages that are
 deliberately wrong. The subscribers are test values, 208-93 0000000001 to
 0000000008 with the key of the sample configuration of PacketRusher.
 
-`tests/captured.rs` holds each of them, the comparison with the oracle of
-`oracle/tests/compare.rs` gives each to both codecs with its truncations and its
-changed bits, as it does the vectors, and the corpus of the fuzz targets
+`tests/captured.rs` holds each of them, and the corpus of the fuzz targets
 starts from them too. `dissect.py` gives them to tshark with
 the vectors: Wireshark 4.6.4 reads the procedure, the alternative of the PDU
 and the IEs of each as the file has them, and all 177 without a remark.
@@ -236,9 +234,7 @@ Downlink NAS Transport.
 
 `fuzz/` has six [cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets,
 a package of its own that is not published. A target does not only look for a
-panic: it gives its octets to the crate and to its oracle, the same types
-with the codec of rasn, and compares what the two make of them, or holds
-what the crate writes to what it reads and to what `check` says.
+panic: it holds what the crate writes to what it reads and to what `check` says.
 CI runs each for a minute, from the vectors and the captured PDUs, and the
 Fuzz workflow of oxirush-aper an hour each night and four hours on Sunday.
 
@@ -260,29 +256,6 @@ cargo +nightly fuzz run decode -- -max_total_time=60 -max_len=4096 -dict=fuzz/co
 cargo +nightly fuzz run edit -- -max_total_time=60 -max_len=1024 -len_control=0
 ```
 
-## The tests that compare
-
-The comparison with another implementation of aligned PER is in a package of
-its own, `oracle/`, which depends on the crate: the crate does not depend on
-it, so no build and no test of the crate builds rasn, and the published crate
-does not have it. Its tests take what they need from the inside of the crate
-through the module `hooks`, which the crate has with
-`--cfg oxirush_ngap_hooks` and not without: `oracle/.cargo/config.toml` sets it
-for a cargo that is run from that directory.
-
-| Test | What it holds |
-|------|---------------|
-| `oracle/tests/compare.rs` | The crate against the oracle of `oracle/`, which has the same types with the codec of rasn 0.29. Each vector and each captured PDU, its truncations, it with one more octet and with each bit of chosen octets changed is given to both, as a PDU and as its message: both read it and write the same octets, or neither reads it. With `inspect`, each IE and each transfer that a tree decodes has the JSON form that the JSON Encoding Rules of rasn give it, but for two bit strings that rasn writes otherwise than X.697 has them. The bindings hold an `INTEGER` in 64 bits, which is the one difference that the comparison takes. |
-| `oracle/tests/codec.rs` | The codecs that the oracle has in the place of those that rasn 0.29 derives: the `SEQUENCE`, the list of a size constraint, and the strings whose length takes two octets. |
-| `oracle/tests/allocation.rs` | The list codec that rasn derives reserves memory for the count that a length determinant claims, where the crate reserves for the elements that it reads. |
-
-`../oxirush-aper/protocols/tests/package.sh DIRECTORY` has cargo make the
-package, unpacks it and runs its tests there, with every feature and with
-none. `../oxirush-aper/protocols/tests/workspace_member.sh DIRECTORY
-[CRATE...]` makes a workspace of this crate and of the others that
-it is given, as `oxirush-s1ap` and `oxirush-aper`: cargo loads it, clippy
-accepts every target of every member, and rustdoc documents them. CI runs
-both.
 
 ## Benchmarks
 

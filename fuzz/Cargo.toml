@@ -26,12 +26,6 @@ package = "oxirush-ngap"
 path = ".."
 features = ["inspect"]
 
-# The oracle that the targets compare the crate with: the same types with the codec
-# of rasn.
-[dependencies.oracle]
-package = "oxirush-ngap-oracle"
-path = "../oracle"
-
 # Not part of any parent workspace.
 [workspace]
 members = ["."]

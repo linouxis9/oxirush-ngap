@@ -21,8 +21,8 @@ path = "../../oxirush-aper/protocols/benches/src/lib.rs"
 oxirush-ngap = { path = "..", features = ["inspect"] }
 hex = "0.4"
 serde_json = "1"
-# rasn 0.29, in the bindings of the oracle, for the comparison of `compare`.
-oracle = { package = "oxirush-ngap-oracle", path = "../oracle" }
+# rasn 0.29, in its bindings of `rasn/`, for the comparison of `compare`.
+rasn_bindings = { package = "oxirush-ngap-rasn", path = "../rasn" }
 
 [features]
 # The readers of IEs of the crate, which `readers` compares with `decode_value` and the

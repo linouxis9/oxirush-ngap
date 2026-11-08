@@ -1,7 +1,7 @@
 //! The generator of the bindings of the crate: the generator of oxirush-aper, which
 //! oxirush-ngap and oxirush-s1ap share, with the names of NGAP. It runs rasn-compiler on
 //! the ASN.1 of the specification, and writes the bindings, the registry, the inspection
-//! and the oracle of the tests.
+//! and the bindings for rasn of the benchmarks.
 
 use generator::protocol::{Protocol, generate};
 

@@ -15,10 +15,10 @@ permissions:
 
 jobs:
   # The jobs are those that oxirush-ngap and oxirush-s1ap share, in the repository of
-  # oxirush-aper, at the revision that build/revisions records: the tests, the oracle,
+  # oxirush-aper, at the revision that build/revisions records: the tests,
   # the package alone, the crate in a larger workspace, the benchmarks, the fuzz
   # targets, the format, and the files that the tools write.
   ci:
-    uses: linouxis9/oxirush-aper/.github/workflows/protocol.yml@ad6b84e868da5267f0c41545ea8a1207b1f00272
+    uses: linouxis9/oxirush-aper/.github/workflows/protocol.yml@e011b64da0a1c269d2349466017eb6169538d364
     with:
       protocol: ngap

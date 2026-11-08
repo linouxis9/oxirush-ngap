@@ -39,8 +39,8 @@ pub type Pdu = ngap::NGAPPDU<'static>;
 /// A PDU that borrows its message from the octets that it is decoded from.
 pub type Borrowed<'a> = ngap::NGAPPDU<'a>;
 
-/// A PDU of the rasn bindings of `oracle/`, its message an open type.
-pub type TheirPdu = oracle::bindings::NGAPPDU;
+/// A PDU of the rasn bindings of `rasn/`, its message an open type.
+pub type TheirPdu = rasn_bindings::bindings::NGAPPDU;
 
 /// The root of the paths of the IEs of a message.
 pub const ROOT: &str = "/ngap";

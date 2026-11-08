@@ -71,7 +71,7 @@ revision of `build/revisions`, as `build/` takes the generator. A file of
 | The codecs of the bindings for rasn in the place of rasn's | `protocols/rasn/`, which `rasn/Cargo.toml` builds with the bindings of `rasn/src/` here |
 | The fuzz targets and `seed.sh` | `protocols/fuzz/`, which `fuzz/Cargo.toml` builds with the crate, which it names `codec`: its module `hooks` names what is of the protocol |
 | The benchmarks, their programs, `build_cost.py` and the comparison with other implementations | `protocols/benches/`, which `benches/Cargo.toml` builds with `benches/src/protocol.rs`, `benches/src/readers.rs` and `benches/compare/pdus.tsv` here |
-| The jobs of CI, of the Reproduce workflow and of the Mutants workflow | `.github/workflows/protocol.yml`, `protocol-reproduce.yml` and `protocol-mutants.yml` of oxirush-aper, which the three workflows here call |
+| The jobs of CI and of the Reproduce, Mutants, Fuzz and Wireshark workflows | `.github/workflows/protocol.yml`, `protocol-reproduce.yml`, `protocol-mutants.yml`, `protocol-fuzz.yml` and `protocol-wireshark.yml` of oxirush-aper, which the five workflows here call |
 
 A change to a shared piece is a commit of oxirush-aper, which each protocol
 crate takes when `build/revisions` records it.
@@ -79,7 +79,7 @@ crate takes when `build/revisions` records it.
 ### The revision of oxirush-aper
 
 `build/revisions` records the commit of oxirush-aper whose `generator/` wrote
-the bindings, and whose `protocols/` and workflows the jobs take: the two
+the bindings, and whose `protocols/` and workflows the jobs take: the five
 workflows call those of that commit, and the jobs and the Reproduce workflow
 check it out beside the repository, where the manifests of `benches/`,
 `fuzz/` and `rasn/` take it. `python3 ../oxirush-aper/protocols/build/pin.py
@@ -235,8 +235,10 @@ Downlink NAS Transport.
 `fuzz/` has six [cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets,
 a package of its own that is not published. A target does not only look for a
 panic: it holds what the crate writes to what it reads and to what `check` says.
-CI runs each for a minute, from the vectors and the captured PDUs, and the
-Fuzz workflow of oxirush-aper an hour each night and four hours on Sunday.
+CI runs each for a minute, from the vectors and the captured PDUs. The Fuzz
+workflow runs each an hour every night and four hours on Sunday evening, with
+a corpus that the cache of the repository keeps and the seeds add to, and
+that of oxirush-aper does the same with the head of each repository.
 
 | Target | What holds for any octets |
 |--------|---------------------------|

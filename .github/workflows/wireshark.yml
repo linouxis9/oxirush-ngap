@@ -1,0 +1,22 @@
+name: Wireshark
+
+# The comparison of the crate with Wireshark, every night and when the workflow is started
+# by hand: the job that oxirush-ngap and oxirush-s1ap share, in the repository of
+# oxirush-aper, at the revision that build/revisions records. tshark 4.6.4 dissects the
+# PDUs of tests/wireshark/corpus.tsv and of tests/fixtures, and tests/wireshark.rs compares
+# what it reads of each with what the crate reads. A difference that
+# tests/wireshark/known.tsv does not explain fails the job, and so does a run in which
+# nothing was compared; the report is kept for 30 days.
+on:
+  schedule:
+    - cron: "23 10 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  wireshark:
+    uses: linouxis9/oxirush-aper/.github/workflows/protocol-wireshark.yml@4599259ad94d04155db621dbfd5f27a097875030
+    with:
+      protocol: ngap

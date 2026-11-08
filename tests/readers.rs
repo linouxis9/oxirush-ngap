@@ -21,7 +21,7 @@ fn fixtures() -> impl Iterator<Item = (&'static str, Vec<u8>)> {
 }
 
 /// A UE CONTEXT RELEASE REQUEST of these IEs.
-fn release_request() -> NGAP_PDU {
+fn release_request() -> NGAPPDU<'static> {
     build_ngap!(
         UEContextReleaseRequest,
         AMF_UE_NGAP_ID(42u64),
@@ -34,7 +34,7 @@ fn release_request() -> NGAP_PDU {
 #[test]
 fn an_ie_is_read_from_the_pdu_as_from_its_message() -> Result<(), Error> {
     let octets = release_request().encode()?;
-    let pdu = NGAP_PDU::decode_borrowed(&octets)?;
+    let pdu = NGAPPDU::decode(&octets)?;
     assert_eq!(pdu.ie::<ie::RAN_UE_NGAP_ID>().unwrap()?, RANUENGAPID(7));
     assert_eq!(pdu.ie::<ie::AMF_UE_NGAP_ID>().unwrap()?, AMFUENGAPID(42));
     assert!(pdu.ie::<ie::NAS_PDU>().is_none());
@@ -47,7 +47,7 @@ fn an_ie_is_read_from_the_pdu_as_from_its_message() -> Result<(), Error> {
 
 #[test]
 fn the_macro_reads_a_pdu_without_decode_value() -> Result<(), Error> {
-    fn read(pdu: &NGAP_PDU) -> Result<(u64, u32), Error> {
+    fn read(pdu: &NGAPPDU<'_>) -> Result<(u64, u32), Error> {
         extract_ngap_ies!(pdu, UEContextReleaseRequest,
             req amf: u64 = AMF_UE_NGAP_ID(id),
             req ran: u32 = RAN_UE_NGAP_ID(id),
@@ -73,7 +73,7 @@ fn a_nas_pdu_in_fragments_is_read_and_kept() -> Result<(), Error> {
         NAS_PDU(nas.clone()),
     )?;
     let octets = pdu.encode()?;
-    let pdu = NGAP_PDU::decode_borrowed(&octets)?;
+    let pdu = NGAPPDU::decode(&octets)?;
     assert_eq!(pdu.ie::<ie::NAS_PDU>().unwrap()?.0[..], nas[..]);
     fn read(pdu: &NGAPPDU<'_>) -> Result<Vec<u8>, Error> {
         extract_ngap_ies!(pdu, DownlinkNASTransport,
@@ -90,7 +90,7 @@ fn a_nas_pdu_in_fragments_is_read_and_kept() -> Result<(), Error> {
 fn every_ie_of_the_fixtures_is_read_as_the_codec_of_its_message_reads_it() -> Result<(), Error> {
     let mut read = 0;
     for (name, octets) in fixtures() {
-        let pdu = NGAP_PDU::decode(&octets)?;
+        let pdu = NGAPPDU::decode(&octets)?;
         let Ok(ies) = pdu.protocol_ies() else {
             continue;
         };
@@ -98,14 +98,14 @@ fn every_ie_of_the_fixtures_is_read_as_the_codec_of_its_message_reads_it() -> Re
         // decode is an error of the kind `UndecodableIe` of the reader.
         let of = |id: u16| ies.0.iter().filter(move |ie| ie.id.0 == id);
         let nas: Vec<Result<NASPDU, ErrorKind>> = of(38)
-            .map(|ie| decode_open_type(&ie.value).map_err(|_| ErrorKind::UndecodableIe))
+            .map(|ie| oxirush_ngap::decode(&ie.value).map_err(|_| ErrorKind::UndecodableIe))
             .collect();
         let read_nas = pdu
             .ies::<ie::NAS_PDU>()
             .map(|nas| nas.map_err(|error| error.kind()));
         assert_eq!(read_nas.collect::<Vec<_>>(), nas, "{name}");
         let causes: Vec<Result<Cause, ErrorKind>> = of(15)
-            .map(|ie| decode_open_type(&ie.value).map_err(|_| ErrorKind::UndecodableIe))
+            .map(|ie| oxirush_ngap::decode(&ie.value).map_err(|_| ErrorKind::UndecodableIe))
             .collect();
         let read_causes = pdu
             .ies::<ie::Cause>()
@@ -129,7 +129,7 @@ fn check_structure_reports_what_check_reports_of_the_container() -> Result<(), E
     };
     let mut compared = 0;
     for (name, octets) in fixtures() {
-        let pdu = NGAP_PDU::decode(&octets)?;
+        let pdu = NGAPPDU::decode(&octets)?;
         let (Ok(all), Ok(structure)) = (pdu.check(), pdu.check_structure()) else {
             assert_eq!(
                 pdu.check().is_err(),
@@ -190,7 +190,7 @@ fn octets_of_the_message_that_end_early_are_an_error_of_every_reader() -> Result
     let ids: Vec<_> = cut.ies::<ie::RAN_UE_NGAP_ID>().collect();
     assert_eq!(ids[0], Ok(RANUENGAPID(7)));
     assert_eq!(ids[1].as_ref().unwrap_err().kind(), ErrorKind::Decode);
-    fn read(pdu: &NGAP_PDU) -> Result<u32, Error> {
+    fn read(pdu: &NGAPPDU<'_>) -> Result<u32, Error> {
         extract_ngap_ies!(pdu, UEContextReleaseRequest, req ran: u32 = RAN_UE_NGAP_ID(id));
         Ok(ran)
     }

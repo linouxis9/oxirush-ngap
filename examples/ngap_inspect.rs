@@ -6,14 +6,14 @@
 //! ```
 
 use oxirush_ngap::tree;
-use oxirush_ngap::{Ngap, inspect, ngap::NGAP_PDU};
+use oxirush_ngap::{Ngap, inspect, ngap::NGAPPDU};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // NG SETUP REQUEST: GlobalRANNodeID, SupportedTAList and DefaultPagingDRX.
     let wire = hex::decode(
         "00150025000003001b00080002f839000000000066000d000060b72f0002f839000002c80015400100",
     )?;
-    let pdu = NGAP_PDU::decode(&wire)?;
+    let pdu = NGAPPDU::decode(&wire)?;
     let mut view = pdu.to_view()?;
 
     // The message by the name that ASN.1 gives it, then each value with the path that

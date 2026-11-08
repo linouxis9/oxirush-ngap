@@ -111,7 +111,7 @@ fn diagnostics(
 
 /// The cause of the first deviation of a request that has one, and the items of the
 /// Criticality Diagnostics of its IEs.
-fn reported(pdu: &NGAP_PDU) -> Result<(Cause, Vec<CriticalityDiagnosticsIEItem>), Error> {
+fn reported(pdu: &NGAPPDU<'_>) -> Result<(Cause, Vec<CriticalityDiagnosticsIEItem>), Error> {
     let deviations = pdu.check()?;
     let cause = deviations.iter().find_map(Deviation::cause);
     let items = deviations.iter().filter_map(Deviation::diagnostics_item);
@@ -121,7 +121,7 @@ fn reported(pdu: &NGAP_PDU) -> Result<(Cause, Vec<CriticalityDiagnosticsIEItem>)
 
 /// The NG SETUP FAILURE that rejects a request which deviates, as clauses 10.3.4.2,
 /// 10.3.5 and 10.3.6 have the procedure rejected.
-fn failure(pdu: &NGAP_PDU) -> Result<NGAP_PDU, Error> {
+fn failure(pdu: &NGAPPDU<'_>) -> Result<NGAPPDU<'static>, Error> {
     let (cause, items) = reported(pdu)?;
     build_ngap!(REJECT NGSetupFailure,
         IGNORE Cause(cause),
@@ -131,7 +131,7 @@ fn failure(pdu: &NGAP_PDU) -> Result<NGAP_PDU, Error> {
 
 /// The ERROR INDICATION that answers a request with a transfer syntax error, as clause
 /// 10.2 has it.
-fn indication(pdu: &NGAP_PDU) -> Result<NGAP_PDU, Error> {
+fn indication(pdu: &NGAPPDU<'_>) -> Result<NGAPPDU<'static>, Error> {
     let (cause, items) = reported(pdu)?;
     build_ngap!(IGNORE ErrorIndication,
         IGNORE Cause(cause),
@@ -140,8 +140,8 @@ fn indication(pdu: &NGAP_PDU) -> Result<NGAP_PDU, Error> {
 }
 
 /// The cause and the Criticality Diagnostics of a failure, as its receiver reads them.
-fn answered(failure: &NGAP_PDU) -> Result<(Cause, CriticalityDiagnostics), Error> {
-    let received = NGAP_PDU::decode(&failure.encode()?)?;
+fn answered(failure: &NGAPPDU<'_>) -> Result<(Cause, CriticalityDiagnostics), Error> {
+    let received = NGAPPDU::decode(&failure.encode()?)?.into_owned();
     let message: NGSetupFailure = received.decode_value()?;
     extract_ngap_ies!(message, NGSetupFailure,
         req cause: Cause = Cause(cause) => cause,
@@ -152,8 +152,8 @@ fn answered(failure: &NGAP_PDU) -> Result<(Cause, CriticalityDiagnostics), Error
 
 /// The cause and the Criticality Diagnostics of an error indication, as its receiver
 /// reads them.
-fn indicated(indication: &NGAP_PDU) -> Result<(Cause, CriticalityDiagnostics), Error> {
-    let received = NGAP_PDU::decode(&indication.encode()?)?;
+fn indicated(indication: &NGAPPDU<'_>) -> Result<(Cause, CriticalityDiagnostics), Error> {
+    let received = NGAPPDU::decode(&indication.encode()?)?.into_owned();
     let message: ErrorIndication = received.decode_value()?;
     extract_ngap_ies!(message, ErrorIndication,
         req cause: Cause = Cause(cause) => cause,
@@ -164,7 +164,7 @@ fn indicated(indication: &NGAP_PDU) -> Result<(Cause, CriticalityDiagnostics), E
 
 #[test]
 fn a_request_as_the_specification_has_it_deviates_in_nothing() -> Result<(), Error> {
-    let pdu = NGAP_PDU::decode(&request()?)?;
+    let pdu = NGAPPDU::decode(&request()?)?.into_owned();
     assert_eq!(pdu.check()?, []);
     assert_eq!(accept(&pdu.decode_value()?)?, 1);
     Ok(())
@@ -172,7 +172,7 @@ fn a_request_as_the_specification_has_it_deviates_in_nothing() -> Result<(), Err
 
 #[test]
 fn the_error_of_a_missing_ie_has_the_criticality_that_is_assigned() -> Result<(), Error> {
-    let pdu = NGAP_PDU::decode(&without_areas()?)?;
+    let pdu = NGAPPDU::decode(&without_areas()?)?.into_owned();
     let error = accept(&pdu.decode_value()?).unwrap_err();
     assert_eq!(error.kind(), ErrorKind::MissingIe);
     let ie = ErrorIe::new(SUPPORTED_TA_LIST, aper::Criticality::Reject, None);
@@ -211,7 +211,7 @@ fn the_error_of_a_missing_ie_has_the_criticality_that_is_assigned() -> Result<()
 #[test]
 fn the_error_of_an_ie_that_does_not_decode_has_the_criticality_that_was_received()
 -> Result<(), Error> {
-    let pdu = NGAP_PDU::decode(&spoiled()?)?;
+    let pdu = NGAPPDU::decode(&spoiled()?)?.into_owned();
     let error = accept(&pdu.decode_value()?).unwrap_err();
     assert_eq!(error.kind(), ErrorKind::UndecodableIe);
     assert_eq!(
@@ -267,7 +267,7 @@ fn the_error_of_an_ie_that_does_not_decode_has_the_criticality_that_was_received
 #[test]
 fn an_ie_of_the_criticality_ignore_is_in_no_item_of_the_diagnostics() -> Result<(), Error> {
     // Received as `ignore`, and not decoded.
-    let deviations = NGAP_PDU::decode(&spoiled()?)?.check()?;
+    let deviations = NGAPPDU::decode(&spoiled()?)?.into_owned().check()?;
     assert!(matches!(
         deviations[..],
         [Deviation::UndecodableIe {
@@ -305,7 +305,7 @@ fn check_reports_every_ie_that_is_missing_or_does_not_decode() -> Result<(), Err
     // the macro stops at the first, and `check` has both.
     let mut octets = without_areas()?;
     *octets.last_mut().unwrap() = 0xff;
-    let pdu = NGAP_PDU::decode(&octets)?;
+    let pdu = NGAPPDU::decode(&octets)?;
     // The first of its fields that has no value: the areas, which are missing.
     let first = accept(&pdu.decode_value()?).unwrap_err();
     assert_eq!(first.kind(), ErrorKind::MissingIe);

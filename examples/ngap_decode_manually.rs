@@ -1,7 +1,7 @@
 //! Encode and decode NGAP PDUs **without macros** using the codec and the generated types.
 //!
 //! This example demonstrates the complete raw-codec workflow:
-//! - Constructing an `NGAP_PDU` by hand (`ProtocolIEID`, `Criticality`, the octets of
+//! - Constructing an `NGAPPDU` by hand (`ProtocolIEID`, `Criticality`, the octets of
 //!   an open type)
 //! - Encoding and decoding with the functions of the aligned PER runtime
 //! - Decoding and pattern-matching open protocol IE values
@@ -63,22 +63,30 @@ fn main() {
         ProtocolIEField {
             id: ID_AMFNAME,
             criticality: Criticality::Reject,
-            value: encode_open_type(&amf_name).expect("encode AMF name"),
+            value: oxirush_ngap::encode(&amf_name)
+                .expect("encode AMF name")
+                .into(),
         },
         ProtocolIEField {
             id: ID_SERVED_GUAMILIST,
             criticality: Criticality::Reject,
-            value: encode_open_type(&served_guamis).expect("encode served GUAMIs"),
+            value: oxirush_ngap::encode(&served_guamis)
+                .expect("encode served GUAMIs")
+                .into(),
         },
         ProtocolIEField {
             id: ID_RELATIVE_AMFCAPACITY,
             criticality: Criticality::Ignore,
-            value: encode_open_type(&RelativeAMFCapacity(255)).expect("encode AMF capacity"),
+            value: oxirush_ngap::encode(&RelativeAMFCapacity(255))
+                .expect("encode AMF capacity")
+                .into(),
         },
         ProtocolIEField {
             id: ID_PLMNSUPPORT_LIST,
             criticality: Criticality::Reject,
-            value: encode_open_type(&plmn_support).expect("encode PLMN support"),
+            value: oxirush_ngap::encode(&plmn_support)
+                .expect("encode PLMN support")
+                .into(),
         },
     ];
     let response = NGSetupResponse {
@@ -87,10 +95,12 @@ fn main() {
 
     // The outer PDU wraps the APER-encoded message in its direction and
     // ASN.1-derived procedure code.
-    let pdu = NGAP_PDU::successfulOutcome(SuccessfulOutcome {
+    let pdu = NGAPPDU::successfulOutcome(SuccessfulOutcome {
         procedure_code: ID_NGSETUP,
         criticality: Criticality::Reject,
-        value: encode_open_type(&response).expect("encode NG Setup Response"),
+        value: oxirush_ngap::encode(&response)
+            .expect("encode NG Setup Response")
+            .into(),
     });
 
     // ── 2. Encode to APER ───────────────────────────────────────────────────
@@ -102,7 +112,7 @@ fn main() {
     println!("APER hex: {}", hex::encode(&aper_bytes));
 
     // ── 3. Decode from APER ─────────────────────────────────────────────────
-    // `NGAP_PDU::decode(&bytes)` is the equivalent convenience API.
+    // `NGAPPDU::decode(&bytes)` is the equivalent convenience API.
 
     // The PDU borrows the octets of its message from `aper_bytes`: nothing is copied.
     let decoded: NGAPPDU = aper::decode(&aper_bytes).expect("APER decode failed");
@@ -120,33 +130,32 @@ fn main() {
     // type, iterate `protocol_ies`, then decode each recognized IE open type.
 
     match &decoded {
-        // `NGAP_PDU` is the PDU that owns its octets, `NGAPPDU<'static>`: a PDU that
-        // borrows is matched by the name of its type.
         NGAPPDU::successfulOutcome(outcome) => {
             println!("Type:           SuccessfulOutcome");
             println!("Procedure code: {}", outcome.procedure_code.0);
             println!("Criticality:    {:?}", outcome.criticality);
 
             let response: NGSetupResponse =
-                decode_open_type(&outcome.value).expect("decode NG Setup Response");
+                oxirush_ngap::decode(&outcome.value).expect("decode NG Setup Response");
 
             for ie in &response.protocol_ies.0 {
                 match ie.id {
                     ID_AMFNAME => {
-                        let name: AMFName = decode_open_type(&ie.value).expect("decode AMF name");
+                        let name: AMFName =
+                            oxirush_ngap::decode(&ie.value).expect("decode AMF name");
                         println!("AMF Name:       {}", name.0);
                     }
 
                     ID_RELATIVE_AMFCAPACITY => {
                         let capacity: RelativeAMFCapacity =
-                            decode_open_type(&ie.value).expect("decode AMF capacity");
+                            oxirush_ngap::decode(&ie.value).expect("decode AMF capacity");
 
                         println!("AMF Capacity:   {}", capacity.0);
                     }
 
                     ID_SERVED_GUAMILIST => {
                         let list: ServedGUAMIList =
-                            decode_open_type(&ie.value).expect("decode served GUAMIs");
+                            oxirush_ngap::decode(&ie.value).expect("decode served GUAMIs");
 
                         println!("Served GUAMIs:  {} entries", list.0.len());
                         for item in &list.0 {
@@ -159,7 +168,7 @@ fn main() {
 
                     ID_PLMNSUPPORT_LIST => {
                         let list: PLMNSupportList =
-                            decode_open_type(&ie.value).expect("decode PLMN support");
+                            oxirush_ngap::decode(&ie.value).expect("decode PLMN support");
 
                         println!("PLMN Support:   {} entries", list.0.len());
                         for item in &list.0 {

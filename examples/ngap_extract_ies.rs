@@ -10,7 +10,7 @@ use oxirush_ngap::{Error, build_ngap, extract_ngap_ies};
 
 // ── 1. Simple extraction: required IDs + optional cause ────────────────────
 
-fn handle_release_request(pdu: &NGAP_PDU) -> Result<Vec<String>, Error> {
+fn handle_release_request(pdu: &NGAPPDU<'_>) -> Result<Vec<String>, Error> {
     // The message of the PDU, as its type: another message is an error.
     let msg: UEContextReleaseRequest = pdu.decode_value()?;
 
@@ -36,7 +36,7 @@ fn handle_release_request(pdu: &NGAP_PDU) -> Result<Vec<String>, Error> {
 
 // ── 2. Complex extraction: handover with pattern matching ──────────────────
 
-fn handle_handover_required(pdu: &NGAP_PDU) -> Result<Vec<String>, Error> {
+fn handle_handover_required(pdu: &NGAPPDU<'_>) -> Result<Vec<String>, Error> {
     let msg: HandoverRequired = pdu.decode_value()?;
 
     // Demonstrates concrete ENUMERATED values, a nested TargetID CHOICE,
@@ -75,7 +75,7 @@ fn handle_handover_required(pdu: &NGAP_PDU) -> Result<Vec<String>, Error> {
 
 // ── 3. InitialContextSetupRequest: many IEs + nested PDU session ───────────
 
-fn handle_initial_context_setup(pdu: &NGAP_PDU) -> Result<Vec<String>, Error> {
+fn handle_initial_context_setup(pdu: &NGAPPDU<'_>) -> Result<Vec<String>, Error> {
     let msg: InitialContextSetupRequest = pdu.decode_value()?;
 
     extract_ngap_ies!(&msg, InitialContextSetupRequest,
@@ -152,8 +152,8 @@ fn main() -> Result<(), Error> {
     )?;
 
     // Encode → decode round-trip, then extract.
-    type Handler = fn(&NGAP_PDU) -> Result<Vec<String>, Error>;
-    let cases: [(&str, &NGAP_PDU, Handler); 3] = [
+    type Handler = fn(&NGAPPDU<'_>) -> Result<Vec<String>, Error>;
+    let cases: [(&str, &NGAPPDU<'_>, Handler); 3] = [
         (
             "UEContextReleaseRequest",
             &release_pdu,
@@ -169,7 +169,7 @@ fn main() -> Result<(), Error> {
 
     for (name, pdu, handler) in cases {
         let bytes = pdu.encode()?;
-        let decoded = NGAP_PDU::decode(&bytes)?;
+        let decoded = NGAPPDU::decode(&bytes)?;
 
         println!("=== {name} ({decoded}) ===");
         match handler(&decoded) {

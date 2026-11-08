@@ -23,7 +23,7 @@
 //! fn main() -> Result<(), Box<dyn std::error::Error>> {
 //!     // Decode a UE CONTEXT RELEASE REQUEST
 //!     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500")?;
-//!     let pdu = NGAP_PDU::decode(&bytes)?;
+//!     let pdu = NGAPPDU::decode(&bytes)?;
 //!     assert_eq!((pdu.procedure_code(), pdu.direction()), (42, Direction::Initiating));
 //!     println!("{}", pdu.procedure_name());
 //!     # assert_eq!(pdu.procedure_name(), "UEContextReleaseRequest");
@@ -70,14 +70,14 @@
 //!
 //! | Task | Items |
 //! |------|-------|
-//! | Answer a gNB, from NG SETUP to the INITIAL CONTEXT SETUP | [`build_ngap!`], [`extract_ngap_ies!`], [`helpers`], [`NGAP_PDU::ie`](ngap::NGAPPDU::ie) |
-//! | Decode a PDU | [`NGAP_PDU::decode`](ngap::NGAPPDU::decode), [`NGAP_PDU::decode_borrowed`](ngap::NGAPPDU::decode_borrowed), [`NGAP_PDU::kind`](ngap::NGAPPDU::kind), [`NGAP_PDU::decode_value`](ngap::NGAPPDU::decode_value) |
-//! | Build a PDU | [`build_ngap!`], [`NGAP_PDU::of_message`](ngap::NGAPPDU::of_message) |
+//! | Answer a gNB, from NG SETUP to the INITIAL CONTEXT SETUP | [`build_ngap!`], [`extract_ngap_ies!`], [`helpers`], [`NGAPPDU::ie`](ngap::NGAPPDU::ie) |
+//! | Decode a PDU | [`NGAPPDU::decode`](ngap::NGAPPDU::decode), [`NGAPPDU::kind`](ngap::NGAPPDU::kind), [`NGAPPDU::decode_value`](ngap::NGAPPDU::decode_value) |
+//! | Build a PDU | [`build_ngap!`], [`NGAPPDU::of_message`](ngap::NGAPPDU::of_message) |
 //! | Read the IEs of a message | [`extract_ngap_ies!`], [`ie`], [`Ie::field`], `set_ie` |
-//! | A transfer and a handover container, typed | [`ngap::decode_open_type`], [`ngap::encode_open_type`], [`PDUSessionResourceSetupRequestTransfer::check`](ngap::PDUSessionResourceSetupRequestTransfer::check) |
-//! | Check a message, and answer one that is faulty | [`NGAP_PDU::check`](ngap::NGAPPDU::check), [`NGAP_PDU::check_structure`](ngap::NGAPPDU::check_structure), [`Deviation`], [`NGAP_PDU::criticality_diagnostics_for_response`](ngap::NGAPPDU::criticality_diagnostics_for_response) |
-//! | A PDU as JSON | [`NGAP_PDU::to_tree`](ngap::NGAPPDU::to_tree), [`NGAP_PDU::to_view`](ngap::NGAPPDU::to_view), [`NGAP_PDU::with_view`](ngap::NGAPPDU::with_view), [`inspect`] |
-//! | Write a message from its tree | [`NGAP_PDU::from_tree`](ngap::NGAPPDU::from_tree) |
+//! | A transfer and a handover container, typed | [`decode`], [`encode`], [`PDUSessionResourceSetupRequestTransfer::check`](ngap::PDUSessionResourceSetupRequestTransfer::check) |
+//! | Check a message, and answer one that is faulty | [`NGAPPDU::check`](ngap::NGAPPDU::check), [`NGAPPDU::check_structure`](ngap::NGAPPDU::check_structure), [`Deviation`], [`NGAPPDU::criticality_diagnostics_for_response`](ngap::NGAPPDU::criticality_diagnostics_for_response) |
+//! | A PDU as JSON | [`NGAPPDU::to_tree`](ngap::NGAPPDU::to_tree), [`NGAPPDU::to_view`](ngap::NGAPPDU::to_view), [`NGAPPDU::with_view`](ngap::NGAPPDU::with_view), [`inspect`] |
+//! | Write a message from its tree | [`NGAPPDU::from_tree`](ngap::NGAPPDU::from_tree) |
 //!
 // Without `inspect` the items of the JSON forms in the tasks are no links: the links are
 // checked in the build of every feature, which docs.rs makes.
@@ -94,13 +94,13 @@
 //!
 //! // A UE CONTEXT RELEASE REQUEST is not decoded as an NG SETUP REQUEST
 //! let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-//! let pdu = NGAP_PDU::decode(&bytes).unwrap();
+//! let pdu = NGAPPDU::decode(&bytes).unwrap();
 //! let wrong = pdu.decode_value::<NGSetupRequest>().unwrap_err();
 //! assert_eq!(wrong.kind(), ErrorKind::WrongMessage);
 //! println!("{wrong}");
 //!
 //! // Octets that end early
-//! let short = NGAP_PDU::decode(&bytes[..10]).unwrap_err();
+//! let short = NGAPPDU::decode(&bytes[..10]).unwrap_err();
 //! assert_eq!(short.kind(), ErrorKind::Decode);
 //! println!("{short}");
 //! # assert_eq!(printed, r##"the message of this PDU is UEContextReleaseRequest, not NGSetupRequest: kind() says which message a PDU holds
@@ -133,13 +133,10 @@
 //!
 //! | To | Write |
 //! | --- | --- |
-//! | Read a message where it was received | `let pdu = NGAP_PDU::decode(&octets)?;` then `pdu.decode_value()?`: the message borrows from `pdu`, which is a variable of its own |
+//! | Read a message where it was received | `let pdu = NGAPPDU::decode(&octets)?;` then `pdu.decode_value()?`: the message borrows from `pdu`, which is a variable of its own |
 //! | Keep a value after the PDU is gone | `value.into_owned()`, which gives the same type with the lifetime `'static`, as `NASPDU<'static>`: this is the type to write in a struct |
 //! | Build a value | From data that it owns: `NASPDU::from(vec)` is a `NASPDU<'static>` |
-//! | Read a PDU in the buffer that it was received in | [`NGAP_PDU::decode_borrowed`](ngap::NGAPPDU::decode_borrowed), which copies nothing: the PDU borrows from the buffer |
-//!
-//! [`NGAP_PDU`](ngap::NGAP_PDU) is the PDU that owns its octets, `NGAPPDU<'static>`,
-//! and has no lifetime to write.
+//! | Keep a PDU after the buffer that it was received in | `pdu.into_owned()`, a `NGAPPDU<'static>`: [`NGAPPDU::decode`](ngap::NGAPPDU::decode) copies nothing, and the PDU borrows from the buffer |
 //!
 //! ```
 //! use oxirush_ngap::{Error, build_ngap, extract_ngap_ies, ngap::*};
@@ -151,7 +148,7 @@
 //!     nas: NASPDU<'static>,
 //! }
 //!
-//! fn admit(pdu: &NGAP_PDU) -> Result<Ue, Error> {
+//! fn admit(pdu: &NGAPPDU<'_>) -> Result<Ue, Error> {
 //!     // `message` borrows from `pdu`, and `nas` from `message`
 //!     let message: InitialUEMessage = pdu.decode_value()?;
 //!     extract_ngap_ies!(message, InitialUEMessage,
@@ -184,7 +181,7 @@
 //! }
 //!
 //! async fn handle(received: Vec<u8>) -> Result<(), Error> {
-//!     let pdu = NGAP_PDU::decode_borrowed(&received)?;
+//!     let pdu = NGAPPDU::decode(&received)?;
 //!     let message: UplinkNASTransport = pdu.decode_value()?;
 //!     extract_ngap_ies!(message, UplinkNASTransport,
 //!         req nas: NASPDU = NAS_PDU(nas) => nas,
@@ -294,32 +291,40 @@ extern crate alloc;
 pub mod helpers;
 // What the fuzz targets and the oracle take from the inside of the crate, with
 // `--cfg oxirush_ngap_hooks`: the module `hooks`.
-oxirush_aper::__hooks! { cfg oxirush_ngap_hooks, bindings ngap, pdu NGAPPDU, owned NGAP_PDU }
+oxirush_aper::__hooks! { cfg oxirush_ngap_hooks, bindings ngap, pdu NGAPPDU }
 #[cfg(feature = "inspect")]
 pub mod inspect;
 #[cfg(feature = "inspect")]
 mod inspect_registry;
 pub mod macros;
 /// The types of the ASN.1 modules of TS 38.413, as the generator writes them:
-/// [`NGAP_PDU`](ngap::NGAP_PDU) and its three directions, each message, each IE and
+/// [`NGAPPDU`](ngap::NGAPPDU) and its three directions, each message, each IE and
 /// each type of a value, which decode and encode themselves in aligned PER.
 ///
 /// ```
-/// use oxirush_ngap::ngap::{AMFUENGAPID, decode_open_type, encode_open_type};
+/// use oxirush_ngap::{decode, encode, ngap::AMFUENGAPID};
 ///
 /// // `AMF-UE-NGAP-ID ::= INTEGER (0..1099511627775)`, as the value of its IE holds it
-/// let octets = encode_open_type(&AMFUENGAPID(42))?;
+/// let octets = encode(&AMFUENGAPID(42))?;
 /// assert_eq!(octets, [0x00, 0x2a]);
-/// assert_eq!(decode_open_type::<AMFUENGAPID>(&octets)?, AMFUENGAPID(42));
+/// assert_eq!(decode::<AMFUENGAPID>(&octets)?, AMFUENGAPID(42));
 /// # Ok::<(), oxirush_ngap::Error>(())
 /// ```
 // The bindings are formatted where they are generated, by the rustfmt of the toolchain
 // that the generator runs with: a later one breaks some of their long lines otherwise.
 #[rustfmt::skip]
 pub mod ngap;
-mod pdu;
 #[doc(hidden)]
 pub mod registry;
+
+oxirush_aper::__pdu! {
+    pdu NGAPPDU, protocol Ngap, name oxirush_ngap, bindings ngap,
+    specification "TS 38.413", construction "9.4.1", diagnostics "9.3.1.3",
+    release "002a4015000003000a0002002a005500020007000f40020500",
+    display "UEContextReleaseRequest (procedure 42, initiating message), AMF-UE-NGAP-ID 42, RAN-UE-NGAP-ID 7",
+    ue AMF_UE_NGAP_ID RAN_UE_NGAP_ID,
+    pair UE_NGAP_IDs UENGAPIDs uE_NGAP_ID_pair(amf_ue_ngap_id, ran_ue_ngap_id) aMF_UE_NGAP_ID
+}
 
 /// The aligned PER runtime that the bindings are made of, at the version that this
 /// crate is built with. The values of the bindings are its types, such as
@@ -342,7 +347,7 @@ pub use ngap::NgapPduKind;
 pub use oxirush_aper::protocol::{Ie, Message};
 pub use oxirush_aper::{
     AsnType, BitString, Bits, Criticality, Decode, Direction, Encode, Error, ErrorKind, Fault,
-    Faults, ObjectSet, Octets, Presence,
+    Faults, ObjectSet, Octets, Presence, decode, encode,
 };
 /// ```
 /// use oxirush_ngap::{Deviation, build_ngap, ngap::*};

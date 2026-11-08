@@ -27,7 +27,7 @@ fn a_pdu_is_serialized_as_its_tree_and_deserialized_from_it() {
         {"RAN-UE-NGAP-ID": 7},
         {"Cause": {"radioNetwork": "user-inactivity"}},
     ]});
-    let pdu: NGAP_PDU = read(&tree).unwrap();
+    let pdu: NGAPPDU<'static> = read(&tree).unwrap();
     assert_eq!(hex::encode(pdu.encode().unwrap()), RELEASE);
     assert_eq!(written(&pdu), tree);
     assert_eq!(
@@ -36,13 +36,13 @@ fn a_pdu_is_serialized_as_its_tree_and_deserialized_from_it() {
     );
     // A PDU that borrows its octets is the same tree.
     let octets = hex::decode(RELEASE).unwrap();
-    let borrowed = NGAP_PDU::decode_borrowed(&octets).unwrap();
+    let borrowed = NGAPPDU::decode(&octets).unwrap();
     assert_eq!(written(&borrowed), tree);
 
     // What the tree refuses, the format refuses with the same words.
     let wrong = tree!({"message": "UEContextReleaseRequest", "ies": [{"AMF-UE-NGAP-ID": -1}]});
-    let error = read::<NGAP_PDU>(&wrong).unwrap_err();
-    let refused = NGAP_PDU::from_tree(&wrong).unwrap_err();
+    let error = read::<NGAPPDU<'static>>(&wrong).unwrap_err();
+    let refused = NGAPPDU::from_tree(&wrong).unwrap_err();
     assert!(
         error.to_string().starts_with(&refused.to_string()),
         "{error}"
@@ -72,9 +72,11 @@ fn every_pdu_that_decodes_is_serialized_and_read_back() {
             tree!({"message": "UEContextReleaseRequest", "octets": "00ffff"}),
         ),
     ] {
-        let pdu = NGAP_PDU::decode(&hex::decode(octets).unwrap()).unwrap();
+        let pdu = NGAPPDU::decode(&hex::decode(octets).unwrap())
+            .unwrap()
+            .into_owned();
         assert_eq!(written(&pdu), tree, "{octets}");
-        let back: NGAP_PDU = read(&tree).unwrap();
+        let back: NGAPPDU<'static> = read(&tree).unwrap();
         assert_eq!(hex::encode(back.encode().unwrap()), octets);
     }
 }
@@ -89,11 +91,13 @@ fn a_round_trip_gives_back_what_a_later_release_added() {
     for line in LATER.lines().filter(|line| !line.starts_with('#')) {
         let fields: Vec<_> = line.split('\t').collect();
         let (name, later) = (fields[0], fields[1]);
-        let pdu = NGAP_PDU::decode(&hex::decode(later).unwrap()).unwrap();
+        let pdu = NGAPPDU::decode(&hex::decode(later).unwrap())
+            .unwrap()
+            .into_owned();
         let tree = pdu.to_tree();
-        let again = NGAP_PDU::from_tree(&tree).unwrap();
+        let again = NGAPPDU::from_tree(&tree).unwrap();
         assert_eq!(hex::encode(again.encode().unwrap()), later, "{name}");
-        let back: NGAP_PDU = read(&written(&pdu)).unwrap();
+        let back: NGAPPDU<'static> = read(&written(&pdu)).unwrap();
         assert_eq!(hex::encode(back.encode().unwrap()), later, "{name}");
         // What is kept as octets is an IE of the message, or what one holds.
         assert!(tree.to_string().contains("\"octets\""), "{name}: {tree}");
@@ -160,7 +164,7 @@ fn a_type_of_the_bindings_is_serialized_as_the_tree_of_a_pdu_shows_it() {
     );
 
     // A number outside the constraint of its type is refused, as the tree refuses it.
-    let error = read::<AMF_UE_NGAP_ID>(&tree!(1u64 << 40)).unwrap_err();
+    let error = read::<AMFUENGAPID>(&tree!(1u64 << 40)).unwrap_err();
     assert_eq!(
         error.to_string(),
         "this is not a value of AMF-UE-NGAP-ID: a number from 0 to 1099511627775 is \
@@ -173,7 +177,7 @@ fn a_type_of_the_bindings_is_serialized_as_the_tree_of_a_pdu_shows_it() {
 #[test]
 fn a_name_written_twice_is_refused() {
     let twice = r#"{"message":"NGSetupRequest","message":"UEContextReleaseRequest","ies":[]}"#;
-    let error = serde_json::from_str::<NGAP_PDU>(twice).unwrap_err();
+    let error = serde_json::from_str::<NGAPPDU<'static>>(twice).unwrap_err();
     assert!(
         error
             .to_string()
@@ -181,7 +185,7 @@ fn a_name_written_twice_is_refused() {
         "{error}"
     );
     let twice = r#"{"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":42,"AMF-UE-NGAP-ID":43}]}"#;
-    assert!(serde_json::from_str::<NGAP_PDU>(twice).is_err());
+    assert!(serde_json::from_str::<NGAPPDU<'static>>(twice).is_err());
     assert!(twice.parse::<Value>().is_err());
     let twice = r#"{"sST":1,"sST":2}"#;
     assert!(serde_json::from_str::<SNSSAI>(twice).is_err());
@@ -194,12 +198,13 @@ fn a_name_written_twice_is_refused() {
 fn an_unquoted_true_of_yaml_is_the_name_of_an_enumerated() {
     let yaml = "message: UEContextReleaseRequest\nies:\n- AMF-UE-NGAP-ID: 1\n- RAN-UE-NGAP-ID: 2\n\
                 - Cause: {nas: normal-release}\n- GW-Context-Release-Indication: true\n";
-    let pdu: NGAP_PDU = serde_norway::from_str(yaml).unwrap();
+    let pdu: NGAPPDU<'static> = serde_norway::from_str(yaml).unwrap();
     assert_eq!(
         pdu.to_tree()["ies"][3],
         tree!({"GW-Context-Release-Indication": "true"})
     );
-    let quoted = serde_norway::from_str::<NGAP_PDU>(&yaml.replace(": true", ": 'true'")).unwrap();
+    let quoted =
+        serde_norway::from_str::<NGAPPDU<'static>>(&yaml.replace(": true", ": 'true'")).unwrap();
     assert_eq!(quoted, pdu);
     assert!(
         serde_norway::to_string(&pdu)
@@ -208,7 +213,7 @@ fn an_unquoted_true_of_yaml_is_the_name_of_an_enumerated() {
     );
     // A type without such a name takes no boolean.
     let other = yaml.replace("{nas: normal-release}", "{nas: true}");
-    let error = serde_norway::from_str::<NGAP_PDU>(&other)
+    let error = serde_norway::from_str::<NGAPPDU<'static>>(&other)
         .unwrap_err()
         .to_string();
     assert!(

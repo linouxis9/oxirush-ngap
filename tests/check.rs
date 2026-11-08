@@ -16,16 +16,16 @@ use oxirush_ngap::{Deviation, Direction, Error, ErrorKind, build_ngap};
 /// What `check()` reports of `pdu`, which is the same for the PDU that its octets
 /// decode to. With the `inspect` feature, `tree` is the same message written as a
 /// tree: it has the same octets.
-fn checked(pdu: &NGAP_PDU, tree: &str) -> Vec<Deviation> {
+fn checked(pdu: &NGAPPDU<'_>, tree: &str) -> Vec<Deviation> {
     let deviations = pdu.check().unwrap();
     let octets = pdu.encode().unwrap();
-    let received = NGAP_PDU::decode(&octets).unwrap();
+    let received = NGAPPDU::decode(&octets).unwrap();
     assert_eq!(received, *pdu);
     assert_eq!(received.check().unwrap(), deviations);
     #[cfg(feature = "inspect")]
     {
         let tree = serde_json::from_str(tree).unwrap();
-        let written = NGAP_PDU::from_tree(&tree).unwrap();
+        let written = NGAPPDU::from_tree(&tree).unwrap();
         assert_eq!(written.encode().unwrap(), octets, "{tree}");
         assert_eq!(written.check().unwrap(), deviations);
     }
@@ -284,11 +284,11 @@ fn an_encoding_that_is_not_the_canonical_one_is_read_and_reported() -> Result<()
     let mut octets = other.encode()?;
     octets.insert(10, 0x80);
     octets[3] += 1;
-    let other = NGAP_PDU::decode(&octets)?;
+    let other = NGAPPDU::decode(&octets)?;
 
     // It is read as the same message.
     let ies = other.protocol_ies()?;
-    let read: AMFUENGAPID = decode_open_type(&ies.0[0].value)?;
+    let read: AMFUENGAPID = oxirush_ngap::decode(&ies.0[0].value)?;
     assert_eq!(read.0, 42);
     assert_eq!(ies.0.len(), 3);
     // And each of the three is reported, with its clause and the bit at which it is:
@@ -326,7 +326,7 @@ fn an_encoding_that_is_not_the_canonical_one_is_read_and_reported() -> Result<()
     // length of the message is in two octets.
     let mut octets = canonical.encode()?;
     octets.insert(3, 0x80);
-    assert_eq!(NGAP_PDU::decode(&octets)?, canonical);
+    assert_eq!(NGAPPDU::decode(&octets)?, canonical);
     let (pdu, faults) = decode_with_faults::<NGAPPDU>(&octets)?;
     assert_eq!(pdu, canonical);
     assert_eq!(
@@ -366,9 +366,9 @@ fn what_has_no_object_set_is_not_checked_against_one() -> Result<(), Error> {
     let (_, wire) = fixtures()
         .find(|(name, _)| *name == "PrivateMessage")
         .expect("the private message");
-    let private = NGAP_PDU::decode(&wire)?;
+    let private = NGAPPDU::decode(&wire)?;
     assert_eq!(private.check()?, []);
-    let NGAP_PDU::initiatingMessage(mut held) = private else {
+    let NGAPPDU::initiatingMessage(mut held) = private else {
         panic!("an initiating message");
     };
     held.criticality = Criticality::Reject;
@@ -376,7 +376,7 @@ fn what_has_no_object_set_is_not_checked_against_one() -> Result<(), Error> {
         criticality: Criticality::Reject,
         assigned: Criticality::Ignore,
     };
-    let private = NGAP_PDU::initiatingMessage(held.clone());
+    let private = NGAPPDU::initiatingMessage(held.clone());
     assert_eq!(private.check()?, [of_the_pdu]);
 
     // The eighth finding of the review of the move of the paths to oxirush-utils: a
@@ -398,7 +398,7 @@ fn what_has_no_object_set_is_not_checked_against_one() -> Result<(), Error> {
         (Criticality::Ignore, None),
     ] {
         held.criticality = criticality;
-        let pdu = NGAP_PDU::initiatingMessage(held.clone());
+        let pdu = NGAPPDU::initiatingMessage(held.clone());
         let deviations = pdu.check()?;
         let unknown = Deviation::UnknownProcedure {
             procedure_code: 200,
@@ -421,7 +421,7 @@ fn what_has_no_object_set_is_not_checked_against_one() -> Result<(), Error> {
         );
     }
     assert_eq!(
-        NGAP_PDU::initiatingMessage(held).check()?[0].to_string(),
+        NGAPPDU::initiatingMessage(held).check()?[0].to_string(),
         "the InitiatingMessage of procedure 200 is no message of the specification, and \
          the criticality of the PDU is ignore"
     );
@@ -430,11 +430,11 @@ fn what_has_no_object_set_is_not_checked_against_one() -> Result<(), Error> {
     let request = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(42u64),
     )?;
-    let NGAP_PDU::initiatingMessage(mut held) = request else {
+    let NGAPPDU::initiatingMessage(mut held) = request else {
         panic!("an initiating message");
     };
     held.value = Octets::from(vec![0x00, 0x00, 0x03, 0x00]);
-    let error = NGAP_PDU::initiatingMessage(held).check().unwrap_err();
+    let error = NGAPPDU::initiatingMessage(held).check().unwrap_err();
     assert_eq!(error.kind(), ErrorKind::Decode);
     Ok(())
 }
@@ -444,7 +444,7 @@ fn the_messages_of_the_fixtures_are_checked_against_their_object_sets() {
     let mut deviating = Vec::new();
     let mut checked = 0;
     for (name, wire) in fixtures() {
-        let pdu = NGAP_PDU::decode(&wire).unwrap();
+        let pdu = NGAPPDU::decode(&wire).unwrap();
         let found = pdu
             .check()
             .unwrap_or_else(|error| panic!("{name}: {error}"));
@@ -465,7 +465,7 @@ fn the_messages_of_the_fixtures_are_checked_against_their_object_sets() {
 fn the_vectors_with_content_are_checked_against_their_object_sets() {
     let (mut checked, mut outside) = (0, 0);
     for (name, wire) in vectors(include_str!("fixtures/vectors.tsv")) {
-        let pdu = NGAP_PDU::decode(&wire).unwrap();
+        let pdu = NGAPPDU::decode(&wire).unwrap();
         let found = pdu
             .check()
             .unwrap_or_else(|error| panic!("{name}: {error}"));

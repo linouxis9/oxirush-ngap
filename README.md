@@ -14,7 +14,7 @@ use oxirush_ngap::{build_ngap, extract_ngap_ies, ngap::*};
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Decode a UE CONTEXT RELEASE REQUEST
     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500")?;
-    let pdu = NGAP_PDU::decode(&bytes)?;
+    let pdu = NGAPPDU::decode(&bytes)?;
     println!("{pdu}");
 
     // Read its IEs by name: `req` fails when the IE is missing, `opt` gives an Option
@@ -98,7 +98,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     )?;
 
     // The AMF reads it, and answers with its name, its GUAMI and its slices
-    let received = NGAP_PDU::decode(&request.encode()?)?;
+    let octets = request.encode()?;
+    let received = NGAPPDU::decode(&octets)?;
     extract_ngap_ies!(received, NGSetupRequest,
         opt name: String = RANNodeName(name) => name.0.into_owned(),
         req areas: SupportedTAList = SupportedTAList(areas) => areas,
@@ -140,7 +141,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // The AMF reads the two IEs it needs, in place in the received octets
     let octets = initial.encode()?;
-    let received = NGAP_PDU::decode_borrowed(&octets)?;
+    let received = NGAPPDU::decode(&octets)?;
     extract_ngap_ies!(received, InitialUEMessage,
         req ran_id: u32 = RAN_UE_NGAP_ID(id),
         req nas: NASPDU = NAS_PDU(nas) => nas,
@@ -174,7 +175,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     )?;
 
     // The gNB checks the message against the specification, and takes the key
-    let received = NGAP_PDU::decode(&setup.encode()?)?;
+    let octets = setup.encode()?;
+    let received = NGAPPDU::decode(&octets)?;
     let deviations = received.check()?;
     extract_ngap_ies!(received, InitialContextSetupRequest,
         req key: SecurityKey = SecurityKey(key) => key,
@@ -202,8 +204,8 @@ it: an IE that does not decode fails only the read that asks for it.
 use oxirush_ngap::{NgapPduKind, extract_ngap_ies, ie, ngap::*};
 
 fn receive(octets: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
-    // `decode_borrowed` copies nothing: the PDU borrows from `octets`
-    let pdu = NGAP_PDU::decode_borrowed(octets)?;
+    // `decode` copies nothing: the PDU borrows from `octets`
+    let pdu = NGAPPDU::decode(octets)?;
     match pdu.kind() {
         NgapPduKind::UEContextReleaseRequest => {
             // Only the IEs that a field asks for are decoded
@@ -238,7 +240,7 @@ NGSetupFailure is not handled here
 
 | Method | Does |
 |--------|------|
-| `decode`, `decode_borrowed` | Decode one PDU (`decode_borrowed` copies nothing) |
+| `decode` | Decode one PDU, which borrows from the octets and copies nothing |
 | `encode`, `encode_into` | Encode it |
 | `procedure_code`, `procedure_name`, `direction`, `kind` | `42`, `"UEContextReleaseRequest"`, `Direction::Initiating`, and an `NgapPduKind` (`Other` for a procedure that the specification lacks in that direction) |
 | `decode_value`, `message` | The message as its type |
@@ -286,7 +288,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // The PDU of a message you already have
     let message: InitialUEMessage = pdu.decode_value()?;
-    let again = NGAP_PDU::of_message(&message, InitialUEMessage::CRITICALITY)?;
+    let again = NGAPPDU::of_message(&message, InitialUEMessage::CRITICALITY)?;
     println!("{}", again == pdu);
 
     // An IE that the message cannot have has no criticality to take
@@ -310,7 +312,7 @@ TimeToWait is no IE of the object set of InitialUEMessage, which assigns it no c
 
 Some IEs carry another encoded value in their octets: the transfers of a PDU
 session, and the container of a handover (TS 38.413, 9.3.1.20).
-`decode_open_type` reads them as the type you name, and `encode_open_type`
+`oxirush_ngap::decode` reads them as the type you name, and `oxirush_ngap::encode`
 writes them. The macros, `check` and `check_structure` take a transfer as
 they take a message.
 
@@ -320,7 +322,7 @@ use oxirush_ngap::{Ie, ie, extract_ngap_ies, ngap::*};
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // The transfer of a PDU SESSION RESOURCE SETUP REQUEST, as its item holds it
     let octets = hex::decode("0000010086000100")?;
-    let transfer: PDUSessionResourceSetupRequestTransfer = decode_open_type(&octets)?;
+    let transfer: PDUSessionResourceSetupRequestTransfer = oxirush_ngap::decode(&octets)?;
     extract_ngap_ies!(transfer, PDUSessionResourceSetupRequestTransfer,
         req kind: PDUSessionType = PDUSessionType(kind) => kind,
     );
@@ -332,7 +334,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             ie::PDUSessionType::field_of::<PDUSessionResourceSetupRequestTransfer>(PDUSessionType::ipv6)?,
         ]),
     };
-    let octets = encode_open_type(&ipv6)?;
+    let octets = oxirush_ngap::encode(&ipv6)?;
     println!("{}", hex::encode(&octets));
     for deviation in PDUSessionResourceSetupRequestTransfer::check(&octets)? {
         println!("{deviation}");
@@ -341,9 +343,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // A SourceToTarget-TransparentContainer, as the type it carries
     let octets = hex::decode("000201020002f8390000012340080100")?;
     let container: SourceNGRANNodeToTargetNGRANNodeTransparentContainer =
-        decode_open_type(&octets)?;
+        oxirush_ngap::decode(&octets)?;
     println!("{:?}", container.target_cell_id);
-    assert_eq!(encode_open_type(&container)?.as_ref(), &octets[..]);
+    assert_eq!(oxirush_ngap::encode(&container)?, octets);
     Ok(())
 }
 ```
@@ -374,7 +376,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         IGNORE DefaultPagingDRX(PagingDRX::v128),
         REJECT TimeToWait(TimeToWait::v5s),
     )?;
-    let received = NGAP_PDU::decode(&request.encode()?)?;
+    let octets = request.encode()?;
+    let received = NGAPPDU::decode(&octets)?;
     let deviations = received.check()?;
     for deviation in &deviations {
         println!("{deviation}");
@@ -415,12 +418,12 @@ received, and the [`inspect`] functions read and edit it by path, under
 KgNB in hexadecimal: do not log them.
 
 ```rust
-use oxirush_ngap::{inspect, ngap::NGAP_PDU, tree};
+use oxirush_ngap::{inspect, ngap::NGAPPDU, tree};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // A UE CONTEXT RELEASE REQUEST, as a tree
     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500")?;
-    let pdu = NGAP_PDU::decode(&bytes)?;
+    let pdu = NGAPPDU::decode(&bytes)?;
     println!("{}", pdu.to_tree());
 
     // Its view: each value with the path that selects it
@@ -473,7 +476,7 @@ purpose. With the `serde` feature, `Serialize` and `Deserialize` go through
 the tree, in any format that serde has.
 
 ```rust
-use oxirush_ngap::{inspect, ngap::NGAP_PDU, tree};
+use oxirush_ngap::{inspect, ngap::NGAPPDU, tree};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let request = tree!({
@@ -488,7 +491,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             {"65000": {"octets": "c0ffee"}, "criticality": "reject"},
         ],
     });
-    let pdu = NGAP_PDU::from_tree(&request)?;
+    let pdu = NGAPPDU::from_tree(&request)?;
     println!("{}", hex::encode(pdu.encode()?));
 
     let view = pdu.to_view()?;
@@ -536,7 +539,7 @@ without allocating, and `check_structure()` takes 64 to 198 ns.
 
 Six common PDUs, decoded and encoded by this crate and five other NGAP
 codecs, at the same commit and on the same machine. Decoding is the PDU and
-each of its IEs as its type, as the others do; `NGAP_PDU::decode` alone
+each of its IEs as its type, as the others do; `NGAPPDU::decode` alone
 takes 8 to 10 ns. A ratio is the time of the other implementation over this
 crate's:
 

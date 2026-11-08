@@ -205,7 +205,7 @@
 /// the IE, which the field is then.
 ///
 /// The IEs are read in one pass over the IEs of the message, which stops once each that
-/// a field asks for is found, and only those are decoded. `NGAP_PDU` is taken too,
+/// a field asks for is found, and only those are decoded. A PDU is taken too,
 /// as the message that it holds, without `decode_value` first: the octets of its message
 /// are read where they are, and a PDU of another message is an error of the kind
 /// `WrongMessage` for a `req` and an `opt` field, as octets that are no container of
@@ -219,7 +219,7 @@
 /// ```
 /// use oxirush_ngap::{Error, build_ngap, extract_ngap_ies, ngap::*};
 ///
-/// fn released(pdu: &NGAP_PDU) -> Result<(u64, bool, Option<u32>), Error> {
+/// fn released(pdu: &NGAPPDU<'_>) -> Result<(u64, bool, Option<u32>), Error> {
 ///     let message: UEContextReleaseRequest = pdu.decode_value()?;
 ///     extract_ngap_ies!(message, UEContextReleaseRequest,
 ///         // The one value that the IE is a name for
@@ -263,7 +263,7 @@
 ///     "002a4015000003000a0002002a005500020007000f40020500",
 ///     "002a4015000003000a0002002a005500020007000f4002e500",
 /// ] {
-///     let pdu = NGAP_PDU::decode(&hex::decode(octets).unwrap()).unwrap();
+///     let pdu = NGAPPDU::decode(&hex::decode(octets).unwrap()).unwrap().into_owned();
 ///     println!("{:?}", cause(&pdu.decode_value().unwrap()));
 /// }
 /// # assert_eq!(printed, r##"Some(radioNetwork(user_inactivity))
@@ -282,9 +282,9 @@ macro_rules! extract_ngap_ies {
     };
 }
 
-/// Build a complete `NGAP_PDU` from a direction, procedure, message, and IEs.
+/// Build a complete `NGAPPDU` from a direction, procedure, message, and IEs.
 ///
-/// Gives a `Result<NGAP_PDU, Error>`: a value that does not encode into its open type,
+/// Gives a `Result<NGAPPDU<'static>, Error>`: a value that does not encode into its open type,
 /// such as an integer outside its constraint, is an error of the kind `Encode`. A
 /// criticality that a call leaves out is the one that the specification assigns: that of
 /// the procedure for the PDU, and that of the object set of the message for an IE, which
@@ -323,7 +323,7 @@ mod tests {
             IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
         )?;
 
-        let NGAP_PDU::initiatingMessage(message) = &mut pdu else {
+        let NGAPPDU::initiatingMessage(message) = &mut pdu else {
             panic!("expected initiating message");
         };
         let request: UEContextReleaseRequest =

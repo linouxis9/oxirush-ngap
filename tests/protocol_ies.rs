@@ -24,7 +24,7 @@ const RELEASE_REQUEST: &str = "002a4015000003000a0002002a005500020007000f4002050
 fn the_ies_of_every_message_are_read_and_put_back_as_the_same_octets() {
     let mut read = 0;
     for (name, wire) in fixtures() {
-        let mut pdu = NGAP_PDU::decode(&wire).unwrap();
+        let mut pdu = NGAPPDU::decode(&wire).unwrap();
         // The private message has private IEs: see the test of the errors.
         if name.split('/').next() == Some("PrivateMessage") {
             continue;
@@ -59,7 +59,7 @@ fn a_message_that_the_macros_built_has_the_ies_that_it_was_built_with() -> Resul
     // They are those of the typed message, and of the octets of the README.
     let request: UEContextReleaseRequest = pdu.decode_value()?;
     assert_eq!(pdu.protocol_ies()?, request.protocol_ies);
-    let received = NGAP_PDU::decode(&hex::decode(RELEASE_REQUEST).unwrap())?;
+    let received = NGAPPDU::decode(&hex::decode(RELEASE_REQUEST).unwrap())?.into_owned();
     assert_eq!(received.protocol_ies()?.0, built);
     Ok(())
 }
@@ -83,17 +83,17 @@ fn an_unknown_ie_and_a_repeated_one_are_kept_with_their_criticality() -> Result<
     ];
 
     // Put into a message that had three other IEs: the PDU is the same but for them.
-    let mut pdu = NGAP_PDU::decode(&hex::decode(RELEASE_REQUEST).unwrap())?;
+    let mut pdu = NGAPPDU::decode(&hex::decode(RELEASE_REQUEST).unwrap())?.into_owned();
     pdu.set_protocol_ies(ProtocolIEContainer(ies.clone()))?;
     assert_eq!(pdu.kind(), NgapPduKind::UEContextReleaseRequest);
-    let NGAP_PDU::initiatingMessage(held) = &pdu else {
+    let NGAPPDU::initiatingMessage(held) = &pdu else {
         panic!("{pdu}");
     };
     assert_eq!(held.criticality, Criticality::Ignore);
 
     // They are read back as they were written, from the PDU and from its octets.
     assert_eq!(pdu.protocol_ies()?.0, ies);
-    let received = NGAP_PDU::decode(&pdu.encode()?)?;
+    let received = NGAPPDU::decode(&pdu.encode()?)?.into_owned();
     assert_eq!(received, pdu);
     let read = received.protocol_ies()?.0;
     assert_eq!(read, ies);
@@ -114,12 +114,12 @@ fn an_unknown_ie_and_a_repeated_one_are_kept_with_their_criticality() -> Result<
 fn the_message_of_an_unknown_procedure_is_read_as_a_container_of_protocol_ies() -> Result<(), Error>
 {
     // The IEs of the release request, under a procedure code that TS 38.413 does not have.
-    let known = NGAP_PDU::decode(&hex::decode(RELEASE_REQUEST).unwrap())?;
-    let NGAP_PDU::initiatingMessage(mut held) = known.clone() else {
+    let known = NGAPPDU::decode(&hex::decode(RELEASE_REQUEST).unwrap())?.into_owned();
+    let NGAPPDU::initiatingMessage(mut held) = known.clone() else {
         panic!("{known}");
     };
     held.procedure_code = ProcedureCode(200);
-    let mut pdu = NGAP_PDU::initiatingMessage(held);
+    let mut pdu = NGAPPDU::initiatingMessage(held);
     assert!(matches!(pdu.kind(), NgapPduKind::Other { .. }));
     let mut ies = pdu.protocol_ies()?.into_owned();
     assert_eq!(ies, known.protocol_ies()?);
@@ -136,7 +136,7 @@ fn a_message_without_protocol_ies_and_octets_that_are_none_are_errors() -> Resul
     let (_, wire) = fixtures()
         .find(|(name, _)| *name == "PrivateMessage")
         .expect("the private message");
-    let mut private = NGAP_PDU::decode(&wire)?;
+    let mut private = NGAPPDU::decode(&wire)?;
     let before = private.clone();
     let read = private.protocol_ies().unwrap_err();
     assert_eq!(read.kind(), ErrorKind::WrongMessage);
@@ -149,12 +149,12 @@ fn a_message_without_protocol_ies_and_octets_that_are_none_are_errors() -> Resul
     assert_eq!(private, before);
 
     // Octets that are no message: the message is named.
-    let request = NGAP_PDU::decode(&hex::decode(RELEASE_REQUEST).unwrap())?;
-    let NGAP_PDU::initiatingMessage(mut held) = request.clone() else {
+    let request = NGAPPDU::decode(&hex::decode(RELEASE_REQUEST).unwrap())?.into_owned();
+    let NGAPPDU::initiatingMessage(mut held) = request.clone() else {
         panic!("{request}");
     };
     held.value = Octets::from(vec![0x00, 0x00, 0x03, 0x00]);
-    let short = NGAP_PDU::initiatingMessage(held.clone());
+    let short = NGAPPDU::initiatingMessage(held.clone());
     let error = short.protocol_ies().unwrap_err();
     assert_eq!(error.kind(), ErrorKind::Decode);
     assert_eq!(
@@ -164,9 +164,7 @@ fn a_message_without_protocol_ies_and_octets_that_are_none_are_errors() -> Resul
     );
     // The same octets under a procedure that the specification does not have.
     held.procedure_code = ProcedureCode(200);
-    let error = NGAP_PDU::initiatingMessage(held)
-        .protocol_ies()
-        .unwrap_err();
+    let error = NGAPPDU::initiatingMessage(held).protocol_ies().unwrap_err();
     assert_eq!(error.kind(), ErrorKind::Decode);
     assert_eq!(
         error.to_string(),
@@ -245,11 +243,11 @@ fn the_ies_of_a_transfer_are_read_changed_and_built_by_the_macros() -> Result<()
             PDUSessionType::ipv4,
         )?]),
     };
-    let octets = encode_open_type(&transfer)?;
+    let octets = oxirush_ngap::encode(&transfer)?;
     assert_eq!(hex::encode(&octets), "0000010086000100");
 
     // Read from its octets, by name
-    let read: PDUSessionResourceSetupRequestTransfer = decode_open_type(&octets)?;
+    let read: PDUSessionResourceSetupRequestTransfer = oxirush_ngap::decode(&octets)?;
     let kind = || -> Result<PDUSessionType, Error> {
         extract_ngap_ies!(read, PDUSessionResourceSetupRequestTransfer,
             req kind: PDUSessionType = PDUSessionType(kind) => kind,
@@ -262,7 +260,7 @@ fn the_ies_of_a_transfer_are_read_changed_and_built_by_the_macros() -> Result<()
     let changed = transfer.set_ie::<ie::PDUSessionType>(PDUSessionType::ipv6);
     assert_eq!(changed, Ok(true));
     assert_eq!(
-        hex::encode(encode_open_type(&transfer)?),
+        hex::encode(oxirush_ngap::encode(&transfer)?),
         "0000010086000110"
     );
 
@@ -355,7 +353,7 @@ fn an_ie_of_a_transfer_has_the_criticality_of_its_object_set() -> Result<(), Err
 #[test]
 fn a_transfer_is_checked_against_its_object_set() -> Result<(), Error> {
     let transfer = |ies| {
-        encode_open_type(&PDUSessionResourceSetupRequestTransfer {
+        oxirush_ngap::encode(&PDUSessionResourceSetupRequestTransfer {
             protocol_ies: ProtocolIEContainer(ies),
         })
     };

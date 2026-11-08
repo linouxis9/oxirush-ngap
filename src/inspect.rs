@@ -1,7 +1,7 @@
 //! Decoded PDUs as JSON, in two forms: a view, which is read and edited by paths and
 //! encoded again, and a tree, the short form in which a message is shown and written.
 //!
-//! The two forms are methods of the PDU, [`NGAP_PDU`], and the functions of this module
+//! The two forms are methods of the PDU, [`NGAPPDU`], and the functions of this module
 //! read and edit a view by its paths, and say what the messages of the protocol have.
 //!
 //! | | Tree | View |
@@ -109,11 +109,11 @@
 //! # use std::fmt::Write as _;
 //! # let mut printed = String::new();
 //! # macro_rules! println { ($($argument:tt)*) => { writeln!(printed, $($argument)*).unwrap() } }
-//! use oxirush_ngap::{inspect, ngap::NGAP_PDU};
+//! use oxirush_ngap::{inspect, ngap::NGAPPDU};
 //! use oxirush_ngap::tree;
 //!
 //! let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-//! let pdu = NGAP_PDU::decode(&bytes).unwrap();
+//! let pdu = NGAPPDU::decode(&bytes).unwrap();
 //! let mut view = pdu.to_view().unwrap();
 //!
 //! // An IE is added at the end, by its name and its typed value
@@ -143,7 +143,7 @@
 //! # use std::fmt::Write as _;
 //! # let mut printed = String::new();
 //! # macro_rules! println { ($($argument:tt)*) => { writeln!(printed, $($argument)*).unwrap() } }
-//! use oxirush_ngap::{inspect, ngap::NGAP_PDU};
+//! use oxirush_ngap::{inspect, ngap::NGAPPDU};
 //! use oxirush_ngap::tree;
 //!
 //! // A message that has one IE twice
@@ -152,7 +152,7 @@
 //!     {"RAN-UE-NGAP-ID": 7},
 //!     {"AMF-UE-NGAP-ID": 2},
 //! ]});
-//! let pdu = NGAP_PDU::from_tree(&twice).unwrap();
+//! let pdu = NGAPPDU::from_tree(&twice).unwrap();
 //! let mut view = pdu.to_view().unwrap();
 //!
 //! // The name selects both, in the order of the message
@@ -191,14 +191,14 @@
 //! # use std::fmt::Write as _;
 //! # let mut printed = String::new();
 //! # macro_rules! println { ($($argument:tt)*) => { writeln!(printed, $($argument)*).unwrap() } }
-//! use oxirush_ngap::{inspect, ngap::NGAP_PDU};
+//! use oxirush_ngap::{inspect, ngap::NGAPPDU};
 //! use oxirush_ngap::{tree, tree::Value};
 //!
 //! // A message whose one IE is a list of two items
 //! let request = tree!({"message": "InitialContextSetupRequest", "ies": [
 //!     {"AllowedNSSAI": [{"s-NSSAI": {"sST": 1}}, {"s-NSSAI": {"sST": 2, "sD": "000001"}}]},
 //! ]});
-//! let pdu = NGAP_PDU::from_tree(&request).unwrap();
+//! let pdu = NGAPPDU::from_tree(&request).unwrap();
 //! let mut view = pdu.to_view().unwrap();
 //!
 //! // An item by its position, and each of them after `value`
@@ -238,7 +238,7 @@
 //! # use std::fmt::Write as _;
 //! # let mut printed = String::new();
 //! # macro_rules! println { ($($argument:tt)*) => { writeln!(printed, $($argument)*).unwrap() } }
-//! use oxirush_ngap::{inspect, ngap::NGAP_PDU};
+//! use oxirush_ngap::{inspect, ngap::NGAPPDU};
 //! use oxirush_ngap::tree;
 //!
 //! // A message with a transfer, written as the message that it contains
@@ -253,7 +253,7 @@
 //!         ]},
 //!     }]},
 //! ]});
-//! let pdu = NGAP_PDU::from_tree(&request).unwrap();
+//! let pdu = NGAPPDU::from_tree(&request).unwrap();
 //! let mut view = pdu.to_view().unwrap();
 //!
 //! // In a view, the transfer is its octets beside its decoded value
@@ -354,7 +354,7 @@
 //! # use std::fmt::Write as _;
 //! # let mut printed = String::new();
 //! # macro_rules! println { ($($argument:tt)*) => { writeln!(printed, $($argument)*).unwrap() } }
-//! use oxirush_ngap::{ErrorKind, inspect, ngap::NGAP_PDU};
+//! use oxirush_ngap::{ErrorKind, inspect, ngap::NGAPPDU};
 //! use oxirush_ngap::tree;
 //!
 //! // Written: the name of the type with its value, in place of the octets
@@ -370,7 +370,7 @@
 //! ]});
 //!
 //! // A tree shows the octets that the container was encoded as
-//! let pdu = NGAP_PDU::from_tree(&required).unwrap();
+//! let pdu = NGAPPDU::from_tree(&required).unwrap();
 //! println!("{}", pdu.to_tree()["ies"][2]);
 //!
 //! // Read: a path goes through the name of the type
@@ -659,11 +659,11 @@
 //! reports, and what is not edited is sent as the octets received. The `rRCContainer`
 //! in it stays octets: it is a message of RRC.
 //!
-//! [`to_tree`]: NGAP_PDU::to_tree
-//! [`from_tree`]: NGAP_PDU::from_tree
-//! [`to_view`]: NGAP_PDU::to_view
-//! [`from_view`]: NGAP_PDU::from_view
-//! [`with_view`]: NGAP_PDU::with_view
+//! [`to_tree`]: NGAPPDU::to_tree
+//! [`from_tree`]: NGAPPDU::from_tree
+//! [`to_view`]: NGAPPDU::to_view
+//! [`from_view`]: NGAPPDU::from_view
+//! [`with_view`]: NGAPPDU::with_view
 
 // The tables, the paths and the functions of the module, which oxirush-aper writes for
 // both protocols.
@@ -671,9 +671,10 @@ oxirush_aper::__inspect! {
     bindings ngap, pdu NGAPPDU, hooks oxirush_ngap_hooks, any crate::ngap::ErrorIndication<'a>
 }
 
-use crate::ngap::{NGAP_PDU, NGAPPDU};
+use crate::ngap::NGAPPDU;
 use oxirush_aper::Octets;
 use oxirush_aper::inspect::Parts;
+use oxirush_aper::protocol::Pdu;
 
 /// The two JSON forms of a PDU, with the `inspect` feature: its tree, the short form in
 /// which a message is shown and written, and its view, which keeps what was received and
@@ -688,18 +689,18 @@ impl NGAPPDU<'_> {
     /// ```
     ///
     /// ```
-    /// use oxirush_ngap::ngap::NGAP_PDU;
+    /// use oxirush_ngap::ngap::NGAPPDU;
     /// use oxirush_ngap::tree;
     ///
     /// // A UE CONTEXT RELEASE REQUEST
     /// let octets = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-    /// let pdu = NGAP_PDU::decode(&octets)?;
+    /// let pdu = NGAPPDU::decode(&octets)?;
     /// let tree = pdu.to_tree();
     /// assert_eq!(tree["message"], tree!("UEContextReleaseRequest"));
     /// assert_eq!(tree["ies"][2]["Cause"]["radioNetwork"], tree!("user-inactivity"));
     ///
     /// // The tree is a PDU again, of the same octets
-    /// assert_eq!(NGAP_PDU::from_tree(&tree)?.encode()?, octets);
+    /// assert_eq!(NGAPPDU::from_tree(&tree)?.encode()?, octets);
     /// # Ok::<(), oxirush_ngap::Error>(())
     /// ```
     ///
@@ -771,7 +772,7 @@ impl NGAPPDU<'_> {
     /// `criticality` and its `value` for an IE, and the two forms are taken in one tree.
     ///
     /// ```
-    /// use oxirush_ngap::ngap::NGAP_PDU;
+    /// use oxirush_ngap::ngap::NGAPPDU;
     /// use oxirush_ngap::tree;
     ///
     /// let request = tree!({"message": "UEContextReleaseRequest", "ies": [
@@ -779,19 +780,19 @@ impl NGAPPDU<'_> {
     ///     {"RAN-UE-NGAP-ID": 7},
     ///     {"Cause": {"radioNetwork": "user-inactivity"}},
     /// ]});
-    /// let octets = NGAP_PDU::from_tree(&request)?.encode()?;
+    /// let octets = NGAPPDU::from_tree(&request)?.encode()?;
     /// assert_eq!(hex::encode(octets), "002a4015000003000a0002002a005500020007000f40020500");
     /// # Ok::<(), oxirush_ngap::Error>(())
     /// ```
-    pub fn from_tree(tree: &Value) -> Result<NGAP_PDU, Error> {
-        NGAP_PDU::of_parts(shared::tree_parts(&TABLES, tree)?)
+    pub fn from_tree(tree: &Value) -> Result<NGAPPDU<'static>, Error> {
+        NGAPPDU::of_parts(shared::tree_parts(&TABLES, tree)?)
     }
 
     /// The PDU of what a view or a tree writes.
-    fn of_parts(parts: Parts) -> Result<NGAP_PDU, Error> {
+    fn of_parts(parts: Parts) -> Result<NGAPPDU<'static>, Error> {
         let criticality = json::from_value(&parts.criticality)?;
         let value = Octets::owned(parts.message);
-        Ok(NGAP_PDU::of(
+        Ok(NGAPPDU::__of(
             parts.direction,
             parts.code,
             criticality,
@@ -811,20 +812,20 @@ impl NGAPPDU<'_> {
     /// [`protocol_ies`](Self::protocol_ies) reads them whatever the message is. Its tree
     /// has its procedure code and its direction in the place of the name of a message.
     ///
-    /// A view takes up to 143 octets of memory for each octet of the NGAP_PDU, and
+    /// A view takes up to 143 octets of memory for each octet of the PDU, and
     /// [`with_view`](Self::with_view) 177: those of a message of 65,535 IEs of an
     /// identifier that the crate does not know, each of no octet, 262 KB, which takes 37
     /// MB and 46 MB. IEs that decode take less for each octet: 94 and 120 octets for
-    /// 65,535 AMF UE NGAP IDs. The crate has no limit on the octets of a NGAP_PDU: the
+    /// 65,535 AMF UE NGAP IDs. The crate has no limit on the octets of a PDU: the
     /// caller bounds them.
     ///
     /// ```
-    /// use oxirush_ngap::{inspect, ngap::NGAP_PDU};
+    /// use oxirush_ngap::{inspect, ngap::NGAPPDU};
     /// use oxirush_ngap::tree;
     ///
     /// // A UE CONTEXT RELEASE REQUEST
     /// let octets = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-    /// let view = NGAP_PDU::decode(&octets)?.to_view()?;
+    /// let view = NGAPPDU::decode(&octets)?.to_view()?;
     /// assert_eq!(view["procedure_code"], tree!(42));
     /// assert_eq!(inspect::select(&view, "/ngap/RAN-UE-NGAP-ID/value")?, [&tree!(7)]);
     /// # Ok::<(), oxirush_ngap::Error>(())
@@ -843,18 +844,18 @@ impl NGAPPDU<'_> {
     /// refuses the view of another message.
     ///
     /// ```
-    /// use oxirush_ngap::ngap::NGAP_PDU;
+    /// use oxirush_ngap::ngap::NGAPPDU;
     ///
     /// // A view, kept as JSON text and read back
     /// let octets = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-    /// let view = NGAP_PDU::decode(&octets)?.to_view()?;
+    /// let view = NGAPPDU::decode(&octets)?.to_view()?;
     /// let text = view.to_string();
     /// let read: oxirush_ngap::tree::Value = text.parse().unwrap();
-    /// assert_eq!(NGAP_PDU::from_view(&read)?.encode()?, octets);
+    /// assert_eq!(NGAPPDU::from_view(&read)?.encode()?, octets);
     /// # Ok::<(), oxirush_ngap::Error>(())
     /// ```
-    pub fn from_view(view: &Value) -> Result<NGAP_PDU, Error> {
-        NGAP_PDU::of_parts(shared::view_parts(&TABLES, view)?)
+    pub fn from_view(view: &Value) -> Result<NGAPPDU<'static>, Error> {
+        NGAPPDU::of_parts(shared::view_parts(&TABLES, view)?)
     }
 
     /// The PDU of a view of this PDU, as [`to_view`](Self::to_view) gives it and the
@@ -866,12 +867,12 @@ impl NGAPPDU<'_> {
     /// [`from_view`](Self::from_view) gives the PDU of any view.
     ///
     /// ```
-    /// use oxirush_ngap::{ErrorKind, inspect, ngap::NGAP_PDU};
+    /// use oxirush_ngap::{ErrorKind, inspect, ngap::NGAPPDU};
     /// use oxirush_ngap::tree;
     ///
     /// // A UE CONTEXT RELEASE REQUEST, and its view with another cause
     /// let octets = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-    /// let pdu = NGAP_PDU::decode(&octets)?;
+    /// let pdu = NGAPPDU::decode(&octets)?;
     /// let mut view = pdu.to_view()?;
     /// inspect::set(&mut view, "/ngap/Cause/nas", tree!("normal-release"))?;
     /// let edited = pdu.with_view(&view)?;
@@ -882,10 +883,10 @@ impl NGAPPDU<'_> {
     /// assert_eq!(pdu.with_view(&view).unwrap_err().kind(), ErrorKind::Form);
     /// # Ok::<(), oxirush_ngap::Error>(())
     /// ```
-    pub fn with_view(&self, view: &Value) -> Result<NGAP_PDU, Error> {
+    pub fn with_view(&self, view: &Value) -> Result<NGAPPDU<'static>, Error> {
         let (direction, code) = (self.direction(), self.procedure_code());
         shared::of_the_pdu(&TABLES, view, direction, code)?;
-        NGAP_PDU::from_view(view)
+        NGAPPDU::from_view(view)
     }
 }
 
@@ -905,6 +906,6 @@ impl<'de> serde_core::Deserialize<'de> for NGAPPDU<'_> {
     fn deserialize<D: serde_core::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         use serde_core::de::Error as _;
         let tree = <Value as serde_core::Deserialize>::deserialize(deserializer)?;
-        NGAP_PDU::from_tree(&tree).map_err(D::Error::custom)
+        NGAPPDU::from_tree(&tree).map_err(D::Error::custom)
     }
 }

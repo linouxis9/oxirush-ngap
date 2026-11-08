@@ -27115,19 +27115,13 @@ pub mod ngap_pdu_descriptions {
     }
 }
 
-// The names of the modules at the root, and the aliases of the crate.
+// The names of the modules at the root.
 pub use ngap_common_data_types::*;
 pub use ngap_constants::*;
 pub use ngap_containers::*;
 pub use ngap_ies::*;
 pub use ngap_pdu_contents::*;
 pub use ngap_pdu_descriptions::*;
-#[allow(non_camel_case_types)]
-pub type NGAP_PDU = NGAPPDU;
-#[allow(non_camel_case_types)]
-pub type AMF_UE_NGAP_ID = AMFUENGAPID;
-#[allow(non_camel_case_types)]
-pub type RAN_UE_NGAP_ID = RANUENGAPID;
 #[allow(unused_imports)]
 use rasn::prelude::{
     BitString, FixedBitString, FixedOctetString, Integer, OctetString, PrintableString, SequenceOf,

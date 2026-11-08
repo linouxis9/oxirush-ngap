@@ -36,13 +36,15 @@ const MOST: usize = 65_535;
 const BOUND: Duration = Duration::from_secs(60);
 
 /// An UPLINK NAS TRANSPORT of `count` IEs of the identifier `id`, each of `value`.
-fn message_of(count: usize, id: u16, value: &[u8]) -> NGAP_PDU {
+fn message_of(count: usize, id: u16, value: &[u8]) -> NGAPPDU<'static> {
     let ie = ProtocolIEField {
         id: ProtocolIEID(id),
         criticality: Criticality::Reject,
         value: value.to_vec().into(),
     };
-    let mut pdu = NGAP_PDU::decode(&hex::decode("002e4003000000").unwrap()).unwrap();
+    let mut pdu = NGAPPDU::decode(&hex::decode("002e4003000000").unwrap())
+        .unwrap()
+        .into_owned();
     pdu.set_protocol_ies(ProtocolIEContainer(vec![ie; count]))
         .unwrap();
     pdu
@@ -146,7 +148,7 @@ fn open_on_the_containers_of_a_handover_is_done_within_a_bound() {
         (0..CONTAINERS).map(|_| tree!({"SourceToTarget-TransparentContainer": &container}));
     ies.extend(containers);
     let required = tree!({"message": "HandoverRequired", "ies": ies});
-    let pdu = NGAP_PDU::from_tree(&required).unwrap();
+    let pdu = NGAPPDU::from_tree(&required).unwrap();
     let view = within("to_view", move || pdu.to_view().unwrap());
     let cell = format!(
         "/ngap/SourceToTarget-TransparentContainer/{name}/targetCell-ID/nR-CGI/nRCellIdentity"

@@ -5,7 +5,7 @@ use oxirush_ngap::tree::Value;
 use oxirush_ngap::{Criticality, Direction, Ngap, Presence, build_ngap, inspect, ngap::*};
 
 /// The name that ASN.1 gives the message of a PDU.
-fn name_of(pdu: &NGAP_PDU) -> Option<&'static str> {
+fn name_of(pdu: &NGAPPDU<'_>) -> Option<&'static str> {
     Ngap::object_set(pdu.direction(), pdu.procedure_code()).map(|set| set.name)
 }
 
@@ -52,11 +52,11 @@ fn inspect_repeated_ies_and_edit_one_without_reordering() {
         Some(&oxirush_ngap::tree!(2))
     );
     assert_eq!(
-        NGAP_PDU::from_view(&view).unwrap().encode().unwrap(),
+        NGAPPDU::from_view(&view).unwrap().encode().unwrap(),
         pdu.encode().unwrap()
     );
     *view.pointer_mut("/message/protocolIEs/0/value").unwrap() = oxirush_ngap::tree!(42);
-    let edited = NGAP_PDU::from_view(&view).unwrap();
+    let edited = NGAPPDU::from_view(&view).unwrap();
     let view = edited.to_view().unwrap();
     assert_eq!(
         view.pointer("/message/protocolIEs/0/value"),
@@ -76,11 +76,11 @@ fn inspect_every_canonical_procedure_and_round_trip() {
     {
         let fields: Vec<_> = line.split('\t').collect();
         let wire = hex::decode(fields[1]).unwrap();
-        let pdu = NGAP_PDU::decode(&wire).unwrap();
+        let pdu = NGAPPDU::decode(&wire).unwrap();
         let view = pdu.to_view().unwrap();
         assert!(view["message"].is_object(), "{}", fields[0]);
         assert_eq!(
-            NGAP_PDU::from_view(&view).unwrap().encode().unwrap(),
+            NGAPPDU::from_view(&view).unwrap().encode().unwrap(),
             wire,
             "{}",
             fields[0]
@@ -96,14 +96,14 @@ fn the_view_of_a_pdu_that_was_edited_is_that_pdu_edited() {
 
     // UE CONTEXT RELEASE REQUEST
     let wire = hex::decode("002a4015000003000a0002002a005500020007000f40020500").unwrap();
-    let pdu = NGAP_PDU::decode(&wire).unwrap();
+    let pdu = NGAPPDU::decode(&wire).unwrap();
     let mut view = pdu.to_view().unwrap();
     inspect::set(&mut view, "/ngap/Cause/radioNetwork", tree!("unspecified")).unwrap();
     inspect::remove(&mut view, "/ngap/AMF-UE-NGAP-ID").unwrap();
 
     // The edits, and the octets received for what was not edited.
     let edited = pdu.with_view(&view).unwrap();
-    assert_eq!(edited, NGAP_PDU::from_view(&view).unwrap());
+    assert_eq!(edited, NGAPPDU::from_view(&view).unwrap());
     assert_eq!(
         hex::encode(edited.encode().unwrap()),
         "002a400f000002005500020007000f40020000"
@@ -126,7 +126,7 @@ fn contained_transfer_edits_are_typed_and_do_not_reorder_outer_ies() {
         criticality_diagnostics: None,
         ie_extensions: None,
     };
-    let raw = encode_open_type(&transfer).unwrap().to_vec();
+    let raw = oxirush_ngap::encode(&transfer).unwrap().to_vec();
     let pdu = build_ngap!(IGNORE PDUSessionResourceSetupResponse,
         IGNORE AMF_UE_NGAP_ID(1u64),
         IGNORE RAN_UE_NGAP_ID(7u32),
@@ -139,11 +139,11 @@ fn contained_transfer_edits_are_typed_and_do_not_reorder_outer_ies() {
         Some(&oxirush_ngap::tree!("semantic-error"))
     );
     assert_eq!(
-        NGAP_PDU::from_view(&view).unwrap().encode().unwrap(),
+        NGAPPDU::from_view(&view).unwrap().encode().unwrap(),
         pdu.encode().unwrap()
     );
     *view.pointer_mut(path).unwrap() = oxirush_ngap::tree!("abstract-syntax-error-reject");
-    let edited = NGAP_PDU::from_view(&view).unwrap();
+    let edited = NGAPPDU::from_view(&view).unwrap();
     let checked = edited.to_view().unwrap();
     assert_eq!(
         checked.pointer(path),
@@ -154,7 +154,7 @@ fn contained_transfer_edits_are_typed_and_do_not_reorder_outer_ies() {
         Some(&oxirush_ngap::tree!(1))
     );
     view["typo"] = oxirush_ngap::tree!(1);
-    assert!(NGAP_PDU::from_view(&view).is_err());
+    assert!(NGAPPDU::from_view(&view).is_err());
 }
 
 #[test]
@@ -162,7 +162,7 @@ fn editing_a_known_ie_cannot_drop_unknown_sequence_additions() {
     // The first SliceSupportItem has a future SEQUENCE addition. Its bytes
     // come from the independent unknown_extensions fixture, inside PLMNSupportList.
     let raw = hex::decode("0002f839000180080801000010").unwrap();
-    let list: PLMNSupportList = decode_open_type(&raw).unwrap();
+    let list: PLMNSupportList = oxirush_ngap::decode(&raw).unwrap();
     assert_eq!(list.0[0].slice_support_list.0[1].s_nssai.sst.0[0], 2);
     let response = NGSetupResponse {
         protocol_ies: ProtocolIEContainer(vec![ProtocolIEField {
@@ -171,19 +171,19 @@ fn editing_a_known_ie_cannot_drop_unknown_sequence_additions() {
             value: raw.into(),
         }]),
     };
-    let pdu = NGAP_PDU::successfulOutcome(SuccessfulOutcome {
+    let pdu = NGAPPDU::successfulOutcome(SuccessfulOutcome {
         procedure_code: ProcedureCode(21),
         criticality: Criticality::Reject,
-        value: encode_open_type(&response).unwrap(),
+        value: oxirush_ngap::encode(&response).unwrap().into(),
     });
     let wire = pdu.encode().unwrap();
     let mut view = pdu.to_view().unwrap();
-    assert_eq!(NGAP_PDU::from_view(&view).unwrap().encode().unwrap(), wire);
+    assert_eq!(NGAPPDU::from_view(&view).unwrap().encode().unwrap(), wire);
     let path = "/message/protocolIEs/0/value/0/sliceSupportList/0/s-NSSAI/sST";
     assert_eq!(view.pointer(path), Some(&oxirush_ngap::tree!(1)));
     *view.pointer_mut(path).unwrap() = oxirush_ngap::tree!(3);
     assert!(
-        NGAP_PDU::from_view(&view).is_err(),
+        NGAPPDU::from_view(&view).is_err(),
         "a typed edit must not silently discard a future IE extension"
     );
 }
@@ -204,7 +204,7 @@ fn the_octets_of_an_ie_are_replaced_or_added_as_its_raw_value_without_value() {
     ies.as_array_mut()
         .unwrap()
         .push(oxirush_ngap::tree!({"id": 60000, "criticality": "ignore", "_raw_value": "C0FFEE"}));
-    let edited = NGAP_PDU::from_view(&view).unwrap();
+    let edited = NGAPPDU::from_view(&view).unwrap();
     let view = edited.to_view().unwrap();
     assert_eq!(
         view.pointer("/message/protocolIEs/1/value"),
@@ -235,7 +235,7 @@ fn a_new_ie_takes_a_typed_value_of_the_type_of_its_identifier() {
         ies.as_array_mut()
             .unwrap()
             .push(oxirush_ngap::tree!({"id": id, "criticality": "ignore", "value": value}));
-        NGAP_PDU::from_view(&view)
+        NGAPPDU::from_view(&view)
     };
     let cause = oxirush_ngap::tree!({"radioNetwork": "user-inactivity"});
     assert_eq!(
@@ -272,13 +272,13 @@ fn a_new_ie_whose_value_is_a_string_is_typed_too() {
     ies.push(oxirush_ngap::tree!({"id": 90, "criticality": "ignore", "value": "mo-Signalling"}));
     ies.push(oxirush_ngap::tree!({"id": 38, "criticality": "reject", "value": "7e00"}));
     assert_eq!(
-        NGAP_PDU::from_view(&view).unwrap().encode().unwrap(),
+        NGAPPDU::from_view(&view).unwrap().encode().unwrap(),
         typed.encode().unwrap()
     );
     // Hexadecimal in lower case is the same octets.
     *view.pointer_mut("/message/protocolIEs/2/value").unwrap() = oxirush_ngap::tree!("7e00");
     assert_eq!(
-        NGAP_PDU::from_view(&view).unwrap().encode().unwrap(),
+        NGAPPDU::from_view(&view).unwrap().encode().unwrap(),
         typed.encode().unwrap()
     );
 }
@@ -292,28 +292,28 @@ fn an_ie_that_does_not_decode_is_edited_as_its_octets() {
             value: vec![0xC0, 0xFF, 0xEE].into(),
         }]),
     };
-    let pdu = NGAP_PDU::initiatingMessage(InitiatingMessage {
+    let pdu = NGAPPDU::initiatingMessage(InitiatingMessage {
         procedure_code: ProcedureCode(42),
         criticality: Criticality::Ignore,
-        value: encode_open_type(&request).unwrap(),
+        value: oxirush_ngap::encode(&request).unwrap().into(),
     });
     let mut view = pdu.to_view().unwrap();
     let path = "/message/protocolIEs/0/value";
     assert_eq!(view.pointer(path), Some(&oxirush_ngap::tree!("c0ffee")));
     assert!(view["message"]["protocolIEs"][0]["_decode_error"].is_string());
     assert_eq!(
-        NGAP_PDU::from_view(&view).unwrap().encode().unwrap(),
+        NGAPPDU::from_view(&view).unwrap().encode().unwrap(),
         pdu.encode().unwrap()
     );
     *view.pointer_mut(path).unwrap() = oxirush_ngap::tree!("DECAFBAD");
-    let edited = NGAP_PDU::from_view(&view).unwrap();
+    let edited = NGAPPDU::from_view(&view).unwrap();
     assert_eq!(
         edited.to_view().unwrap().pointer(path),
         Some(&oxirush_ngap::tree!("decafbad"))
     );
     // Its type is unknown, so a typed value has no encoding.
     *view.pointer_mut(path).unwrap() = oxirush_ngap::tree!(5);
-    assert!(NGAP_PDU::from_view(&view).is_err());
+    assert!(NGAPPDU::from_view(&view).is_err());
 }
 
 #[test]
@@ -328,7 +328,7 @@ fn a_changed_raw_value_alone_sends_nothing_else() {
         .pointer_mut("/message/protocolIEs/1/_raw_value")
         .unwrap() = oxirush_ngap::tree!("0009");
     assert_eq!(
-        NGAP_PDU::from_view(&view).unwrap().encode().unwrap(),
+        NGAPPDU::from_view(&view).unwrap().encode().unwrap(),
         pdu.encode().unwrap()
     );
 }
@@ -340,17 +340,17 @@ fn an_ie_that_contains_a_type_is_decoded_and_edited_like_a_transfer() {
     let wire =
         hex::decode("00460022000003012b000700328d3ee97789012c000a090079f487fab2100000000f40020000")
             .unwrap();
-    let pdu = NGAP_PDU::decode(&wire).unwrap();
+    let pdu = NGAPPDU::decode(&wire).unwrap();
     let mut view = pdu.to_view().unwrap();
     let path = "/message/protocolIEs/1/value/decoded/cause/radioNetwork";
     assert_eq!(
         view.pointer(path),
         Some(&oxirush_ngap::tree!("unspecified"))
     );
-    assert_eq!(NGAP_PDU::from_view(&view).unwrap().encode().unwrap(), wire);
+    assert_eq!(NGAPPDU::from_view(&view).unwrap().encode().unwrap(), wire);
 
     *view.pointer_mut(path).unwrap() = oxirush_ngap::tree!("user-inactivity");
-    let edited = NGAP_PDU::from_view(&view).unwrap();
+    let edited = NGAPPDU::from_view(&view).unwrap();
     let checked = edited.to_view().unwrap();
     assert_eq!(
         checked.pointer(path),
@@ -385,7 +385,7 @@ fn a_transfer_that_was_not_received_is_encoded_from_its_decoded_value() {
             "criticality": "ignore",
             "value": [{"pDUSessionID": 5, "pDUSessionResourceSetupResponseTransfer": transfer}],
         }));
-        NGAP_PDU::from_view(&view).and_then(|pdu| pdu.to_view())
+        NGAPPDU::from_view(&view).and_then(|pdu| pdu.to_view())
     };
     let sent = written(oxirush_ngap::tree!({"decoded": &transfer})).unwrap();
     let item = "/message/protocolIEs/2/value/0/pDUSessionResourceSetupResponseTransfer";
@@ -413,7 +413,9 @@ fn a_transfer_that_was_not_received_is_encoded_from_its_decoded_value() {
         REJECT DistributionReleaseRequest,
     )
     .unwrap();
-    let received = NGAP_PDU::decode(&fixture("DistributionReleaseRequest")).unwrap();
+    let received = NGAPPDU::decode(&fixture("DistributionReleaseRequest"))
+        .unwrap()
+        .into_owned();
     let received = received.to_view().unwrap();
     // With its `decoded` member alone, then as the decoded value itself.
     for alone in [false, true] {
@@ -437,7 +439,7 @@ fn a_transfer_that_was_not_received_is_encoded_from_its_decoded_value() {
             .collect();
         let mut view = release.to_view().unwrap();
         view["message"]["protocolIEs"] = ies.into();
-        let sent = NGAP_PDU::from_view(&view).unwrap().encode().unwrap();
+        let sent = NGAPPDU::from_view(&view).unwrap().encode().unwrap();
         assert_eq!(sent, fixture("DistributionReleaseRequest"));
     }
 }
@@ -451,12 +453,12 @@ fn a_message_is_shown_and_written_as_its_name_and_its_ies_by_name() {
     {
         let fields: Vec<_> = line.split('\t').collect();
         let wire = hex::decode(fields[1]).unwrap();
-        let shown = NGAP_PDU::decode(&wire).unwrap().to_tree();
+        let shown = NGAPPDU::decode(&wire).unwrap().to_tree();
         // A private message has no IEs of the protocol to name: its octets.
         if shown.get("ies").is_none() {
             assert_eq!(shown["message"], tree!("PrivateMessage"));
             assert!(shown["octets"].is_string());
-            assert_eq!(NGAP_PDU::from_tree(&shown).unwrap().encode().unwrap(), wire);
+            assert_eq!(NGAPPDU::from_tree(&shown).unwrap().encode().unwrap(), wire);
             continue;
         };
         assert!(
@@ -464,7 +466,7 @@ fn a_message_is_shown_and_written_as_its_name_and_its_ies_by_name() {
             "{}",
             fields[0]
         );
-        let written = NGAP_PDU::from_tree(&shown);
+        let written = NGAPPDU::from_tree(&shown);
         assert_eq!(
             written.unwrap().encode().unwrap(),
             wire,
@@ -483,7 +485,7 @@ fn a_message_is_shown_and_written_as_its_name_and_its_ies_by_name() {
             {"65000": {"octets": "00"}, "criticality": "reject"},
         ],
     });
-    let pdu = NGAP_PDU::from_tree(&request).unwrap();
+    let pdu = NGAPPDU::from_tree(&request).unwrap();
     assert_eq!(name_of(&pdu), Some("UEContextReleaseRequest"));
     let view = pdu.to_view().unwrap();
     assert_eq!(view["criticality"], tree!("ignore"));
@@ -502,7 +504,7 @@ fn a_message_is_shown_and_written_as_its_name_and_its_ies_by_name() {
     // What is not a message, not an IE, or an IE of another message without its
     // criticality, is refused with what is wrong.
     let refused =
-        |tree: oxirush_ngap::tree::Value| NGAP_PDU::from_tree(&tree).unwrap_err().to_string();
+        |tree: oxirush_ngap::tree::Value| NGAPPDU::from_tree(&tree).unwrap_err().to_string();
     let named =
         |message: &str, ie: &str| oxirush_ngap::tree!({"message": message, "ies": [{ie: 1}]});
     assert!(
@@ -549,9 +551,9 @@ fn redundant(value: &oxirush_ngap::tree::Value, holder: &str, found: &mut Vec<St
 #[test]
 fn a_message_is_shown_and_written_by_name_to_any_depth() {
     use oxirush_ngap::tree;
-    let shown = |wire: &[u8]| NGAP_PDU::decode(wire).unwrap().to_tree();
+    let shown = |wire: &[u8]| NGAPPDU::decode(wire).unwrap().to_tree();
     let written = |tree: &oxirush_ngap::tree::Value| {
-        NGAP_PDU::from_tree(tree).map(|pdu| pdu.encode().unwrap())
+        NGAPPDU::from_tree(tree).map(|pdu| pdu.encode().unwrap())
     };
     // A transfer is its decoded value, and the IEs of the message that it contains go
     // by name, with the criticality that the object set of the transfer assigns them.
@@ -616,7 +618,7 @@ fn a_message_is_shown_and_written_by_name_to_any_depth() {
     let mut unassigned = request.clone();
     let kind = unassigned.pointer_mut(&format!("{transfer}/protocolIEs/1"));
     kind.unwrap()["criticality"] = tree!("ignore");
-    let pdu = NGAP_PDU::from_tree(&unassigned).unwrap();
+    let pdu = NGAPPDU::from_tree(&unassigned).unwrap();
     assert_eq!(pdu.to_tree(), unassigned);
     assert_ne!(pdu.encode().unwrap(), wire);
     // An IE that the object set of the transfer does not have says its criticality, and
@@ -635,7 +637,7 @@ fn a_message_is_shown_and_written_by_name_to_any_depth() {
     let item = format!("{transfer}/protocolIEs/2/QosFlowSetupRequestList/0");
     let indicator = tree!({"RedundantQosFlowIndicator": "true", "criticality": "ignore"});
     extended.pointer_mut(&item).unwrap()["iE-Extensions"] = tree!([indicator]);
-    let pdu = NGAP_PDU::from_tree(&extended).unwrap();
+    let pdu = NGAPPDU::from_tree(&extended).unwrap();
     let view = pdu.to_view().unwrap();
     let extension = "/ngap/PDUSessionResourceSetupListSUReq/0\
         /pDUSessionResourceSetupRequestTransfer/QosFlowSetupRequestList/0/iE-Extensions/0";
@@ -656,7 +658,7 @@ fn a_message_is_shown_and_written_by_name_to_any_depth() {
         tree!({"message": "NGSetupRequest", "ies": [node]})
     };
     let node = setup(tree!({"choice-Extensions": {"GlobalTNGF-ID": identity}}));
-    let pdu = NGAP_PDU::from_tree(&node).unwrap();
+    let pdu = NGAPPDU::from_tree(&node).unwrap();
     let view = pdu.to_view().unwrap();
     let held = "/ngap/GlobalRANNodeID/choice-Extensions";
     let criticality = inspect::select(&view, &format!("{held}/criticality")).unwrap();
@@ -672,19 +674,19 @@ fn a_message_is_shown_and_written_by_name_to_any_depth() {
     assert!(error.contains("Cause says its \"criticality\""), "{error}");
     let cause = tree!({"Cause": {"misc": "unspecified"}, "criticality": "ignore"});
     let node = setup(tree!({"choice-Extensions": cause}));
-    let pdu = NGAP_PDU::from_tree(&node).unwrap();
+    let pdu = NGAPPDU::from_tree(&node).unwrap();
     assert_eq!(pdu.to_tree(), node);
     // A transfer that does not decode has its octets, and so has an IE that contains a
     // type when its octets are not of that type.
     let mut undecoded = request.clone();
     *undecoded.pointer_mut(transfer).unwrap() = tree!({"octets": "ff"});
-    let pdu = NGAP_PDU::from_tree(&undecoded).unwrap();
+    let pdu = NGAPPDU::from_tree(&undecoded).unwrap();
     assert_eq!(pdu.to_tree(), undecoded);
     let release = tree!({
         "message": "DistributionReleaseRequest",
         "ies": [{"MBS-DistributionReleaseRequestTransfer": "ff"}],
     });
-    let pdu = NGAP_PDU::from_tree(&release).unwrap();
+    let pdu = NGAPPDU::from_tree(&release).unwrap();
     let shown = pdu.to_tree();
     let octets = tree!({"MBS-DistributionReleaseRequestTransfer": {"octets": "01ff"}});
     assert_eq!(shown["ies"][0], octets);
@@ -700,7 +702,11 @@ fn a_message_is_shown_and_written_by_name_to_any_depth() {
 fn the_value_of_an_ie_and_of_a_transfer_may_be_left_out_of_a_path() {
     use oxirush_ngap::{tree, tree::Value};
     let name = "PDUSessionResourceSetupRequest";
-    let view = NGAP_PDU::decode(&fixture(name)).unwrap().to_view().unwrap();
+    let view = NGAPPDU::decode(&fixture(name))
+        .unwrap()
+        .into_owned()
+        .to_view()
+        .unwrap();
     let long = "/ngap/PDUSessionResourceSetupListSUReq/value/0\
         /pDUSessionResourceSetupRequestTransfer/decoded/QosFlowSetupRequestList/value/0";
     let transfer = "/ngap/PDUSessionResourceSetupListSUReq/0\
@@ -764,7 +770,7 @@ fn the_value_of_an_ie_and_of_a_transfer_may_be_left_out_of_a_path() {
         tree!("ipv6"),
     )
     .unwrap();
-    let after = NGAP_PDU::from_view(&edited).unwrap().to_view().unwrap();
+    let after = NGAPPDU::from_view(&edited).unwrap().to_view().unwrap();
     let flows = inspect::select(&after, &format!("{list}/value/*/qosFlowIdentifier")).unwrap();
     assert_eq!(flows, [&tree!(0), &tree!(5)]);
     let bearers = inspect::select(&after, &format!("{list}/value/*/e-RAB-ID")).unwrap();
@@ -855,11 +861,11 @@ fn the_container_of_a_handover_is_written_and_selected_by_the_type_that_it_carri
             {"SourceToTarget-TransparentContainer": container},
         ]})
     };
-    let pdu = NGAP_PDU::from_tree(&required(tree!({name: &container}))).unwrap();
+    let pdu = NGAPPDU::from_tree(&required(tree!({name: &container}))).unwrap();
     // The octets are the APER encoding of the type, which the bindings read.
     let message: HandoverRequired = pdu.decode_value().unwrap();
     let octets: SourceToTargetTransparentContainer =
-        decode_open_type(&message.protocol_ies.0[2].value).unwrap();
+        oxirush_ngap::decode(&message.protocol_ies.0[2].value).unwrap();
     let carried: SourceNGRANNodeToTargetNGRANNodeTransparentContainer =
         oxirush_ngap::aper::decode(&octets.0).unwrap();
     assert_eq!(carried.rrc_container.0, [1, 2]);
@@ -895,7 +901,7 @@ fn the_container_of_a_handover_is_written_and_selected_by_the_type_that_it_carri
     // The octets that were received are kept, and are those of the transfer.
     let received = inspect::select(&view, &format!("{ie}/{name}/octets")).unwrap();
     assert_eq!(received, [&hexadecimal]);
-    assert_eq!(NGAP_PDU::from_view(&view).unwrap(), pdu);
+    assert_eq!(NGAPPDU::from_view(&view).unwrap(), pdu);
     // An edit changes what the view has: octets are opened before it goes into them.
     let mut view = pdu.to_view().unwrap();
     for path in [cell.clone(), cell.replace(name, &format!("value/{name}"))] {
@@ -914,7 +920,7 @@ fn the_container_of_a_handover_is_written_and_selected_by_the_type_that_it_carri
         cells,
     )
     .unwrap();
-    let mut after = NGAP_PDU::from_view(&view).unwrap().to_view().unwrap();
+    let mut after = NGAPPDU::from_view(&view).unwrap().to_view().unwrap();
     assert!(inspect::select(&after, &format!("{ie}/value")).unwrap()[0].is_string());
     inspect::open(&mut after, &cell).unwrap();
     assert_eq!(inspect::select(&after, &cell).unwrap(), [&tree!(7)]);
@@ -935,7 +941,7 @@ fn the_container_of_a_handover_is_written_and_selected_by_the_type_that_it_carri
         let entry = tree!({"id": id, "criticality": "reject", "value": value});
         inspect::insert(&mut after, "/ngap/-", entry).unwrap();
     }
-    let sent = NGAP_PDU::from_view(&after).unwrap().to_view().unwrap();
+    let sent = NGAPPDU::from_view(&after).unwrap().to_view().unwrap();
     let octets = |ie: &str| inspect::select(&sent, &format!("/ngap/{ie}/value")).unwrap();
     assert_eq!(
         octets("SourceToTarget-TransparentContainer"),
@@ -951,18 +957,18 @@ fn the_container_of_a_handover_is_written_and_selected_by_the_type_that_it_carri
     );
     // Octets that are not of the type say so where they are selected, and are sent
     // as they came.
-    let other = NGAP_PDU::from_tree(&required(tree!("ff"))).unwrap();
+    let other = NGAPPDU::from_tree(&required(tree!("ff"))).unwrap();
     let mut view = other.to_view().unwrap();
     inspect::open(&mut view, &cell).unwrap();
     let error = inspect::select(&view, &cell).unwrap_err().to_string();
     assert!(error.contains("the transfer did not decode"), "{error}");
-    assert_eq!(NGAP_PDU::from_view(&view).unwrap(), other);
+    assert_eq!(NGAPPDU::from_view(&view).unwrap(), other);
     // A path that goes through no such name opens nothing.
     let before = view.clone();
     inspect::open(&mut view, "/ngap/RAN-UE-NGAP-ID/value").unwrap();
     assert_eq!(view, before);
     // The name is one of a type that the IE may carry.
-    let written = NGAP_PDU::from_tree(&required(back));
+    let written = NGAPPDU::from_tree(&required(back));
     let error = written.unwrap_err().to_string();
     assert!(
         error.contains(&format!("for a type that they carry: {name}")),
@@ -1017,7 +1023,9 @@ fn the_names_that_a_message_shows_join_into_the_path_of_each_value() {
         .filter(|line| !line.starts_with('#') && !line.is_empty())
     {
         let fields: Vec<_> = line.split('\t').collect();
-        let pdu = NGAP_PDU::decode(&hex::decode(fields[1]).unwrap()).unwrap();
+        let pdu = NGAPPDU::decode(&hex::decode(fields[1]).unwrap())
+            .unwrap()
+            .into_owned();
         // A private message has no IEs of the protocol to name.
         let shown = pdu.to_tree();
         if shown.get("ies").is_none() {
@@ -1071,7 +1079,11 @@ fn the_names_that_a_message_shows_join_into_the_path_of_each_value() {
 
     // An entry of the message that a transfer contains, by its position then its name.
     let name = "PDUSessionResourceSetupRequest";
-    let mut view = NGAP_PDU::decode(&fixture(name)).unwrap().to_view().unwrap();
+    let mut view = NGAPPDU::decode(&fixture(name))
+        .unwrap()
+        .into_owned()
+        .to_view()
+        .unwrap();
     let ies = "/ngap/PDUSessionResourceSetupListSUReq/0\
         /pDUSessionResourceSetupRequestTransfer/protocolIEs";
     let tunnel = format!("{ies}/0/UL-NGU-UP-TNLInformation/gTPTunnel/gTP-TEID");
@@ -1106,7 +1118,7 @@ fn the_names_that_a_message_shows_join_into_the_path_of_each_value() {
     // name.
     inspect::set(&mut view, &tunnel, tree!(7)).unwrap();
     inspect::remove(&mut view, &format!("{ies}/1/PDUSessionType")).unwrap();
-    let sent = NGAP_PDU::from_view(&view).unwrap().to_view().unwrap();
+    let sent = NGAPPDU::from_view(&view).unwrap().to_view().unwrap();
     assert_eq!(inspect::select(&sent, &tunnel).unwrap(), [&tree!(7)]);
     let names = inspect::select(&sent, &format!("{ies}/*/_ie_name")).unwrap();
     assert_eq!(
@@ -1118,7 +1130,9 @@ fn the_names_that_a_message_shows_join_into_the_path_of_each_value() {
     );
     // A member of a value that is named as another IE is that member: the target of a
     // handover has a `targetRANNodeID`, and `Target-RAN-Node-ID` is an IE.
-    let required = NGAP_PDU::decode(&fixture("HandoverRequired")).unwrap();
+    let required = NGAPPDU::decode(&fixture("HandoverRequired"))
+        .unwrap()
+        .into_owned();
     let required = required.to_view().unwrap();
     assert!(
         Ngap::ie_names()
@@ -1153,7 +1167,7 @@ fn sent(
     .unwrap();
     let mut view = pdu.to_view()?;
     *view["message"]["protocolIEs"].as_array_mut().unwrap() = entries.to_vec();
-    NGAP_PDU::from_view(&view)?.to_view()
+    NGAPPDU::from_view(&view)?.to_view()
 }
 
 #[test]
@@ -1161,7 +1175,7 @@ fn well_known_values_are_shown_and_taken_as_they_are_usually_written() {
     use oxirush_ngap::tree;
     // NG SETUP REQUEST: GlobalRANNodeID is IE 27 and SupportedTAList IE 102.
     let wire = fixture("NGSetupRequest");
-    let mut view = NGAP_PDU::decode(&wire).unwrap().to_view().unwrap();
+    let mut view = NGAPPDU::decode(&wire).unwrap().to_view().unwrap();
     let area = &ie(&mut view, 102)["value"][0];
     let slice = "/broadcastPLMNList/0/tAISliceSupportList/0/s-NSSAI/sST";
     assert_eq!(area["tAC"], tree!(0x60B72F));
@@ -1171,14 +1185,14 @@ fn well_known_values_are_shown_and_taken_as_they_are_usually_written() {
     );
     assert_eq!(area.pointer(slice), Some(&tree!(0x59)));
     // What is not edited keeps its octets.
-    assert_eq!(NGAP_PDU::from_view(&view).unwrap().encode().unwrap(), wire);
+    assert_eq!(NGAPPDU::from_view(&view).unwrap().encode().unwrap(), wire);
 
     // Edited as they are shown, a number in hexadecimal too.
     let area = &mut ie(&mut view, 102)["value"][0];
     area["tAC"] = tree!(7);
     area["broadcastPLMNList"][0]["pLMNIdentity"] = tree!("001-01");
     *area.pointer_mut(slice).unwrap() = tree!("0x2A");
-    let edited = NGAP_PDU::from_view(&view).unwrap();
+    let edited = NGAPPDU::from_view(&view).unwrap();
     let mut shown = edited.to_view().unwrap();
     let area = &ie(&mut shown, 102)["value"][0];
     assert_eq!(area["tAC"], tree!(7));
@@ -1199,19 +1213,19 @@ fn well_known_values_are_shown_and_taken_as_they_are_usually_written() {
     area["broadcastPLMNList"][0]["pLMNIdentity"] = tree!("00f110");
     *area.pointer_mut(slice).unwrap() = tree!("2a");
     assert_eq!(
-        NGAP_PDU::from_view(&view).unwrap().encode().unwrap(),
+        NGAPPDU::from_view(&view).unwrap().encode().unwrap(),
         edited.encode().unwrap()
     );
     // Digits alone are refused: read in two ways, with both, and where both are one
     // number, with that number as JSON writes it.
     ie(&mut view, 102)["value"][0]["tAC"] = tree!("000010");
-    let error = NGAP_PDU::from_view(&view).unwrap_err().to_string();
+    let error = NGAPPDU::from_view(&view).unwrap_err().to_string();
     assert!(
         error.contains("the number 10 ") && error.contains("the number 16"),
         "{error}"
     );
     ie(&mut view, 102)["value"][0]["tAC"] = tree!("000007");
-    let error = NGAP_PDU::from_view(&view).unwrap_err().to_string();
+    let error = NGAPPDU::from_view(&view).unwrap_err().to_string();
     assert!(
         error.contains("\"000007\" is a number in quotes: write 7 without quotes"),
         "{error}"
@@ -1226,13 +1240,13 @@ fn well_known_values_are_shown_and_taken_as_they_are_usually_written() {
         ("pLMNIdentity", tree!("208-9")),
         ("pLMNIdentity", tree!("20-893")),
     ] {
-        let mut view = NGAP_PDU::decode(&wire).unwrap().to_view().unwrap();
+        let mut view = NGAPPDU::decode(&wire).unwrap().to_view().unwrap();
         let area = &mut ie(&mut view, 102)["value"][0];
         match member {
             "tAC" => area["tAC"] = refused.clone(),
             _ => area["broadcastPLMNList"][0]["pLMNIdentity"] = refused.clone(),
         }
-        assert!(NGAP_PDU::from_view(&view).is_err(), "{member} {refused}");
+        assert!(NGAPPDU::from_view(&view).is_err(), "{member} {refused}");
     }
 }
 
@@ -1241,19 +1255,19 @@ fn the_parts_of_a_guami_are_numbers_of_their_bits() {
     use oxirush_ngap::tree;
     // INITIAL CONTEXT SETUP REQUEST: GUAMI is IE 28.
     let wire = fixture("InitialContextSetupRequest");
-    let mut view = NGAP_PDU::decode(&wire).unwrap().to_view().unwrap();
+    let mut view = NGAPPDU::decode(&wire).unwrap().to_view().unwrap();
     let guami = &mut ie(&mut view, 28)["value"];
     assert_eq!(guami["aMFSetID"], tree!(0));
     guami["pLMNIdentity"] = tree!("310-410");
     guami["aMFRegionID"] = tree!(0xCA);
     guami["aMFSetID"] = tree!(0x3FF);
     guami["aMFPointer"] = tree!(1);
-    let edited = NGAP_PDU::from_view(&view).unwrap();
+    let edited = NGAPPDU::from_view(&view).unwrap();
     let mut shown = edited.to_view().unwrap();
     // The same GUAMI as the crate's helper builds from these numbers.
     let network = oxirush_ngap::helpers::plmn("310", "410").unwrap();
     let expected = oxirush_ngap::helpers::guami(network, 0xCA, 0x3FF, 1).unwrap();
-    let expected = encode_open_type(&expected).unwrap();
+    let expected = oxirush_ngap::encode(&expected).unwrap();
     assert_eq!(
         ie(&mut shown, 28)["_raw_value"],
         tree!(hex::encode(&expected))
@@ -1261,7 +1275,7 @@ fn the_parts_of_a_guami_are_numbers_of_their_bits() {
     assert_eq!(ie(&mut shown, 28)["value"]["aMFSetID"], tree!(0x3FF));
     // The AMF Set ID has ten bits.
     ie(&mut view, 28)["value"]["aMFSetID"] = tree!(0x400);
-    assert!(NGAP_PDU::from_view(&view).is_err());
+    assert!(NGAPPDU::from_view(&view).is_err());
 }
 
 #[test]
@@ -1280,7 +1294,7 @@ fn a_tunnel_endpoint_is_an_ip_address_and_a_number() {
         gtp_teid: GTPTEID::from([0, 0, 0, 7]),
         ie_extensions: None,
     });
-    let expected = encode_open_type(&expected).unwrap();
+    let expected = oxirush_ngap::encode(&expected).unwrap();
     assert_eq!(ie(&mut shown, 139)["value"], tunnel);
     assert_eq!(
         ie(&mut shown, 139)["_raw_value"],
@@ -1356,7 +1370,7 @@ fn an_enumerated_value_is_named_whatever_its_case_and_separators() {
 }
 
 /// A UE CONTEXT RELEASE REQUEST: two UE NGAP IDs and a cause.
-fn release_request() -> NGAP_PDU {
+fn release_request() -> NGAPPDU<'static> {
     build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(7u32),
@@ -1415,7 +1429,9 @@ fn every_path_of_every_canonical_procedure_selects_its_value() {
         .filter(|line| !line.starts_with('#') && !line.is_empty())
     {
         let fields: Vec<_> = line.split('\t').collect();
-        let pdu = NGAP_PDU::decode(&hex::decode(fields[1]).unwrap()).unwrap();
+        let pdu = NGAPPDU::decode(&hex::decode(fields[1]).unwrap())
+            .unwrap()
+            .into_owned();
         let view = pdu.to_view().unwrap();
         for (path, value) in inspect::paths(&view) {
             // The list that holds the IEs of a message is never named.
@@ -1494,7 +1510,7 @@ fn an_ie_that_is_there_twice_goes_by_its_position() {
     let both = inspect::select(&view, "/ngap/AMF-UE-NGAP-ID/value").unwrap();
     assert_eq!(both, [&tree!(1), &tree!(2)]);
     inspect::set(&mut view, "/ngap/2/value", tree!(3)).unwrap();
-    let edited = NGAP_PDU::from_view(&view).unwrap();
+    let edited = NGAPPDU::from_view(&view).unwrap();
     let view = edited.to_view().unwrap();
     let both = inspect::select(&view, "/ngap/AMF-UE-NGAP-ID/value").unwrap();
     assert_eq!(both, [&tree!(1), &tree!(3)]);
@@ -1512,7 +1528,7 @@ fn a_value_set_at_a_path_changes_the_octets_of_its_ie_alone() {
     inspect::set(&mut view, "/ngap/RAN-UE-NGAP-ID/value", tree!(9)).unwrap();
     let cause = tree!("Release Due To NGRAN Generated Reason");
     inspect::set(&mut view, "/ngap/Cause/value/radioNetwork", cause).unwrap();
-    let view = NGAP_PDU::from_view(&view).unwrap().to_view().unwrap();
+    let view = NGAPPDU::from_view(&view).unwrap().to_view().unwrap();
     let after = octets(&view);
     assert_eq!(after[0], before[0]);
     assert_eq!(after[1], tree!("0009"));
@@ -1533,7 +1549,7 @@ fn ies_are_added_taken_out_and_given_their_octets_at_a_path() {
     inspect::insert(&mut view, "/ngap/Cause", unknown).unwrap();
     inspect::remove(&mut view, "/ngap/AMF-UE-NGAP-ID").unwrap();
     inspect::set(&mut view, "/ngap/RAN-UE-NGAP-ID/octets", tree!("400102")).unwrap();
-    let view = NGAP_PDU::from_view(&view).unwrap().to_view().unwrap();
+    let view = NGAPPDU::from_view(&view).unwrap().to_view().unwrap();
     let ids: Vec<_> = (inspect::select(&view, "/ngap/*/id").unwrap().into_iter())
         .map(|id| id.as_u64().unwrap())
         .collect();
@@ -1549,7 +1565,9 @@ fn ies_are_added_taken_out_and_given_their_octets_at_a_path() {
 #[test]
 fn the_ies_of_a_contained_message_go_by_name_in_its_place() {
     use oxirush_ngap::tree;
-    let pdu = NGAP_PDU::decode(&fixture("PDUSessionResourceSetupRequest")).unwrap();
+    let pdu = NGAPPDU::decode(&fixture("PDUSessionResourceSetupRequest"))
+        .unwrap()
+        .into_owned();
     let mut view = pdu.to_view().unwrap();
     let transfer = "/ngap/PDUSessionResourceSetupListSUReq/value/0\
         /pDUSessionResourceSetupRequestTransfer/decoded";
@@ -1651,7 +1669,9 @@ fn a_message_goes_by_the_name_that_asn1_gives_it() {
         .filter(|line| !line.starts_with('#') && !line.is_empty())
     {
         let fields: Vec<_> = line.split('\t').collect();
-        let pdu = NGAP_PDU::decode(&hex::decode(fields[1]).unwrap()).unwrap();
+        let pdu = NGAPPDU::decode(&hex::decode(fields[1]).unwrap())
+            .unwrap()
+            .into_owned();
         assert_eq!(name_of(&pdu), Some(fields[0]));
     }
     // A name finds its message again, however it is written, and no other does.
@@ -1693,7 +1713,7 @@ fn a_message_goes_by_the_name_that_asn1_gives_it() {
         tree!({"id": "RAN-UE-NGAP-ID", "criticality": "reject", "value": 7}),
     )
     .unwrap();
-    let pdu = NGAP_PDU::from_view(&view).unwrap();
+    let pdu = NGAPPDU::from_view(&view).unwrap();
     assert_eq!(name_of(&pdu), Some("UEContextReleaseRequest"));
     assert_eq!(pdu.direction(), Direction::Initiating);
 }
@@ -1728,28 +1748,30 @@ fn an_edit_changes_what_is_sent_or_is_refused() {
             .iter()
             .all(|(path, _)| !path.contains("_edited"))
     );
-    let sent = NGAP_PDU::from_view(&view).unwrap().to_view().unwrap();
+    let sent = NGAPPDU::from_view(&view).unwrap().to_view().unwrap();
     let octets = inspect::select(&sent, "/ngap/RAN-UE-NGAP-ID/octets").unwrap();
     assert_eq!(octets, [&tree!("0009")]);
     // Octets that are set are those of the IE again.
     inspect::set(&mut view, "/ngap/RAN-UE-NGAP-ID/octets", tree!("0007")).unwrap();
     let octets = inspect::select(&view, "/ngap/RAN-UE-NGAP-ID/octets").unwrap();
     assert_eq!(octets, [&tree!("0007")]);
-    assert_eq!(NGAP_PDU::from_view(&view).unwrap(), release_request());
+    assert_eq!(NGAPPDU::from_view(&view).unwrap(), release_request());
     // The name of an ENUMERATED value of the PDU itself is taken as any other.
     inspect::set(&mut view, "/criticality", tree!("Reject")).unwrap();
-    let pdu = NGAP_PDU::from_view(&view).unwrap();
+    let pdu = NGAPPDU::from_view(&view).unwrap();
     assert_eq!(pdu.to_view().unwrap()["criticality"], tree!("reject"));
 }
 
 #[test]
 fn null_takes_an_optional_member_out_and_a_transfer_has_its_octets() {
     use oxirush_ngap::{tree, tree::Value};
-    let pdu = NGAP_PDU::decode(&fixture("PDUSessionResourceSetupRequest")).unwrap();
+    let pdu = NGAPPDU::decode(&fixture("PDUSessionResourceSetupRequest"))
+        .unwrap()
+        .into_owned();
     let view = pdu.to_view().unwrap();
     let item = "/ngap/PDUSessionResourceSetupListSUReq/value/0";
     let transfer = format!("{item}/pDUSessionResourceSetupRequestTransfer");
-    let sent = |view: &Value| NGAP_PDU::from_view(view)?.to_view();
+    let sent = |view: &Value| NGAPPDU::from_view(view)?.to_view();
     // An optional member that is there is taken out, and one that is not is not
     // selected.
     let sd = format!("{item}/s-NSSAI/sD");
@@ -1789,7 +1811,7 @@ fn null_takes_an_optional_member_out_and_a_transfer_has_its_octets() {
     let mut edited = view.clone();
     let raw = "/message/protocolIEs/2/value/0/pDUSessionResourceSetupRequestTransfer";
     edited.pointer_mut(raw).unwrap()["octets"] = tree!("00");
-    let error = NGAP_PDU::from_view(&edited).unwrap_err().to_string();
+    let error = NGAPPDU::from_view(&edited).unwrap_err().to_string();
     assert!(error.contains("has no member \"octets\""), "{error}");
 }
 
@@ -1798,7 +1820,7 @@ fn what_is_nested_deeper_than_the_inspection_goes_keeps_its_octets() {
     // A cause in the extension of a cause, forty times.
     let mut cause = Cause::misc(CauseMisc::unspecified);
     for _ in 0..40 {
-        let value = encode_open_type(&cause).unwrap();
+        let value = oxirush_ngap::encode(&cause).unwrap().into();
         cause = Cause::choice_Extensions(ProtocolIEField {
             id: ProtocolIEID(15),
             criticality: Criticality::Ignore,
@@ -1811,7 +1833,9 @@ fn what_is_nested_deeper_than_the_inspection_goes_keeps_its_octets() {
         IGNORE Cause(cause),
     )
     .unwrap();
-    let pdu = NGAP_PDU::decode(&pdu.encode().unwrap()).unwrap();
+    let pdu = NGAPPDU::decode(&pdu.encode().unwrap())
+        .unwrap()
+        .into_owned();
     let view = pdu.to_view().unwrap();
     // A path has 64 segments at most: the deepest value is listed whole, at a path
     // that selects it, and holds why the IE at the bottom was not decoded.
@@ -1829,7 +1853,7 @@ fn what_is_nested_deeper_than_the_inspection_goes_keeps_its_octets() {
     // The other IEs are read, and the PDU is sent as it came.
     let ran = inspect::select(&view, "/ngap/RAN-UE-NGAP-ID/value").unwrap();
     assert_eq!(ran, [&oxirush_ngap::tree!(7)]);
-    assert_eq!(NGAP_PDU::from_view(&view).unwrap(), pdu);
+    assert_eq!(NGAPPDU::from_view(&view).unwrap(), pdu);
 }
 
 #[test]
@@ -1916,7 +1940,9 @@ fn the_messages_of_the_fixtures_have_the_criticality_that_asn1_assigns() {
         .filter(|line| !line.starts_with('#') && !line.is_empty())
     {
         let fields: Vec<_> = line.split('\t').collect();
-        let pdu = NGAP_PDU::decode(&hex::decode(fields[1]).unwrap()).unwrap();
+        let pdu = NGAPPDU::decode(&hex::decode(fields[1]).unwrap())
+            .unwrap()
+            .into_owned();
         let view = pdu.to_view().unwrap();
         let set = Ngap::object_set_named(fields[0]).unwrap();
         assert_eq!(
@@ -2007,7 +2033,7 @@ fn the_identifiers_of_the_registry_are_the_constants_of_the_bindings() {
 
 #[test]
 fn a_kind_that_the_specification_does_not_have_says_the_direction_of_its_pdu() {
-    let pdu = NGAP_PDU::unsuccessfulOutcome(UnsuccessfulOutcome {
+    let pdu = NGAPPDU::unsuccessfulOutcome(UnsuccessfulOutcome {
         procedure_code: ProcedureCode(46),
         criticality: Criticality::Ignore,
         value: oxirush_ngap::Octets::from(vec![0]),
@@ -2050,7 +2076,9 @@ fn a_member_that_is_absent_selects_nothing_and_one_that_its_type_has_not_is_an_e
     let error = select("/ngap/*/value/misspelled").unwrap_err().to_string();
     assert!(error.contains("is not a member of"), "{error}");
     // A list of values has no IEs to name.
-    let pdu = NGAP_PDU::decode(&fixture("PDUSessionResourceSetupRequest")).unwrap();
+    let pdu = NGAPPDU::decode(&fixture("PDUSessionResourceSetupRequest"))
+        .unwrap()
+        .into_owned();
     let setup = pdu.to_view().unwrap();
     let item = "/ngap/PDUSessionResourceSetupListSUReq/value";
     assert_eq!(
@@ -2078,7 +2106,7 @@ fn a_procedure_that_the_specification_does_not_have_has_a_view_of_its_ies() {
     // specification does not have: the second octet of a PDU.
     let mut octets = release_request().encode().unwrap();
     octets[1] = 200;
-    let pdu = NGAP_PDU::decode(&octets).unwrap();
+    let pdu = NGAPPDU::decode(&octets).unwrap();
     assert_eq!(pdu.procedure_code(), 200);
     let mut view = pdu.to_view().unwrap();
     assert_eq!(view["procedure_code"], tree!(200));
@@ -2093,10 +2121,7 @@ fn a_procedure_that_the_specification_does_not_have_has_a_view_of_its_ies() {
     );
     // The view is the PDU, and an edit of it is sent under the same procedure code.
     assert_eq!(pdu.with_view(&view).unwrap(), pdu);
-    assert_eq!(
-        NGAP_PDU::from_view(&view).unwrap().encode().unwrap(),
-        octets
-    );
+    assert_eq!(NGAPPDU::from_view(&view).unwrap().encode().unwrap(), octets);
     inspect::set(&mut view, "/ngap/RAN-UE-NGAP-ID/value", tree!(9)).unwrap();
     let edited = pdu.with_view(&view).unwrap();
     assert_eq!(edited.procedure_code(), 200);
@@ -2108,7 +2133,7 @@ fn a_procedure_that_the_specification_does_not_have_has_a_view_of_its_ies() {
         "procedure_code": 200, "direction": "InitiatingMessage", "criticality": "ignore",
         "message": {"protocolIEs": [{"id": 85, "criticality": "reject", "value": 9}]},
     });
-    let written = NGAP_PDU::from_view(&written).unwrap();
+    let written = NGAPPDU::from_view(&written).unwrap();
     assert_eq!(written.protocol_ies().unwrap().0.len(), 1);
     // Its tree has its procedure code and its direction in the place of a name, and
     // the criticality of the PDU, which no table assigns: it is the PDU again.
@@ -2124,15 +2149,15 @@ fn a_procedure_that_the_specification_does_not_have_has_a_view_of_its_ies() {
             "criticality": "ignore",
         })
     );
-    assert_eq!(NGAP_PDU::from_tree(&tree).unwrap(), pdu);
+    assert_eq!(NGAPPDU::from_tree(&tree).unwrap(), pdu);
     // Without the criticality, which no table has for it, it is refused.
     let mut unsaid = tree.clone();
     unsaid.as_object_mut().unwrap().shift_remove("criticality");
-    let error = NGAP_PDU::from_tree(&unsaid).unwrap_err();
+    let error = NGAPPDU::from_tree(&unsaid).unwrap_err();
     assert_eq!(error.kind(), ErrorKind::Form);
     // A message that is no container of protocol IEs does not decode, and has no view:
     // one IE is claimed, and none is there. Its tree has its octets.
-    let pdu = NGAP_PDU::decode(&[0x00, 200, 0x00, 0x03, 0x00, 0x00, 0x01]).unwrap();
+    let pdu = NGAPPDU::decode(&[0x00, 200, 0x00, 0x03, 0x00, 0x00, 0x01]).unwrap();
     assert!(pdu.to_view().is_err());
     let tree = pdu.to_tree();
     assert_eq!(
@@ -2140,7 +2165,7 @@ fn a_procedure_that_the_specification_does_not_have_has_a_view_of_its_ies() {
         tree!({"procedure_code": 200, "direction": "InitiatingMessage", "octets": "000001",
                "criticality": "reject"})
     );
-    assert_eq!(NGAP_PDU::from_tree(&tree).unwrap(), pdu);
+    assert_eq!(NGAPPDU::from_tree(&tree).unwrap(), pdu);
 }
 
 #[test]
@@ -2208,11 +2233,13 @@ fn an_edit_names_a_member_that_the_type_has_and_keeps_what_it_always_has() {
     assert_eq!(view, before);
     // An alternative takes the place of the one that is there.
     inspect::set(&mut view, "/ngap/Cause/value/nas", tree!("normal-release")).unwrap();
-    let sent = NGAP_PDU::from_view(&view).unwrap().to_view().unwrap();
+    let sent = NGAPPDU::from_view(&view).unwrap().to_view().unwrap();
     let cause = inspect::select(&sent, "/ngap/Cause/value").unwrap();
     assert_eq!(cause, [&tree!({"nas": "normal-release"})]);
     // A member that the type always has stays, and an optional one is added by its name.
-    let pdu = NGAP_PDU::decode(&fixture("PDUSessionResourceSetupRequest")).unwrap();
+    let pdu = NGAPPDU::decode(&fixture("PDUSessionResourceSetupRequest"))
+        .unwrap()
+        .into_owned();
     let mut setup = pdu.to_view().unwrap();
     let slice = "/ngap/PDUSessionResourceSetupListSUReq/value/0/s-NSSAI";
     let error = inspect::remove(&mut setup, &format!("{slice}/sST"))
@@ -2224,7 +2251,7 @@ fn an_edit_names_a_member_that_the_type_has_and_keeps_what_it_always_has() {
         .to_string();
     assert!(error.contains("its type always has it"), "{error}");
     inspect::set(&mut setup, &format!("{slice}/sd"), tree!("010203")).unwrap();
-    let sent = NGAP_PDU::from_view(&setup).unwrap().to_view().unwrap();
+    let sent = NGAPPDU::from_view(&setup).unwrap().to_view().unwrap();
     let sd = inspect::select(&sent, &format!("{slice}/sD")).unwrap();
     assert_eq!(sd, [&tree!("010203")]);
 }
@@ -2262,7 +2289,7 @@ fn a_name_is_its_letters_and_its_digits() {
     inspect::set(&mut edited, "/ngap/cause/value/NAS", tree!("deregister")).unwrap();
     let cause = inspect::select(&edited, "/ngap/Cause/value").unwrap();
     assert_eq!(cause, [&tree!({"nas": "deregister"})]);
-    assert!(NGAP_PDU::from_view(&edited).is_ok());
+    assert!(NGAPPDU::from_view(&edited).is_ok());
     assert_eq!(
         Ngap::object_set_named("ue context-release_REQUEST")
             .map(|set| (set.direction, set.procedure_code)),
@@ -2278,7 +2305,7 @@ fn a_path_is_checked_against_a_message_without_a_view() {
         .filter(|line| !line.starts_with('#') && !line.is_empty())
     {
         let wire = hex::decode(line.split('\t').nth(1).unwrap()).unwrap();
-        let pdu = NGAP_PDU::decode(&wire).unwrap();
+        let pdu = NGAPPDU::decode(&wire).unwrap();
         let name = name_of(&pdu).unwrap();
         let view = pdu.to_view().unwrap();
         for (path, _) in inspect::paths(&view) {
@@ -2440,12 +2467,14 @@ fn a_path_is_checked_against_a_message_without_a_view() {
 #[test]
 fn an_ie_is_written_by_its_name_and_its_octets_wherever_a_view_has_ies() {
     use oxirush_ngap::tree;
-    let pdu = NGAP_PDU::decode(&fixture("PDUSessionResourceSetupRequest")).unwrap();
+    let pdu = NGAPPDU::decode(&fixture("PDUSessionResourceSetupRequest"))
+        .unwrap()
+        .into_owned();
     let view = pdu.to_view().unwrap();
     let transfer = "/ngap/PDUSessionResourceSetupListSUReq/value/0\
         /pDUSessionResourceSetupRequestTransfer/decoded";
     let raw = "/message/protocolIEs/2/value/0/pDUSessionResourceSetupRequestTransfer/decoded";
-    let sent = |view: &oxirush_ngap::tree::Value| NGAP_PDU::from_view(view)?.to_view();
+    let sent = |view: &oxirush_ngap::tree::Value| NGAPPDU::from_view(view)?.to_view();
     let kind = tree!({"id": "PDUSessionType", "criticality": "reject", "value": "ipv6"});
     let unknown = tree!({"id": 60000, "criticality": "ignore", "octets": "00"});
     // On a path that names the list, as on one that has the root.
@@ -2489,11 +2518,11 @@ fn an_ie_is_written_by_its_name_and_its_octets_wherever_a_view_has_ies() {
     // A name that no IE has is refused, and so are a value and octets together.
     let mut edited = view.clone();
     edited["message"]["protocolIEs"][0]["id"] = tree!("NoSuchIE");
-    let error = NGAP_PDU::from_view(&edited).unwrap_err().to_string();
+    let error = NGAPPDU::from_view(&edited).unwrap_err().to_string();
     assert!(error.contains("is not an IE of NGAP"), "{error}");
     let mut edited = view.clone();
     edited["message"]["protocolIEs"][0]["octets"] = tree!("00");
-    let error = NGAP_PDU::from_view(&edited).unwrap_err().to_string();
+    let error = NGAPPDU::from_view(&edited).unwrap_err().to_string();
     assert!(
         error.contains("its value or its octets, not both"),
         "{error}"
@@ -2520,7 +2549,9 @@ fn the_octets_of_an_ie_without_a_value_have_a_path() {
 
 #[test]
 fn a_private_message_has_no_ies_under_the_root() {
-    let pdu = NGAP_PDU::decode(&fixture("PrivateMessage")).unwrap();
+    let pdu = NGAPPDU::decode(&fixture("PrivateMessage"))
+        .unwrap()
+        .into_owned();
     let view = pdu.to_view().unwrap();
     let error = inspect::select(&view, "/ngap/Cause")
         .unwrap_err()
@@ -2542,13 +2573,13 @@ fn the_identifier_that_the_octets_were_decoded_as_is_a_number() {
     let mut view = release_request().to_view().unwrap();
     inspect::set(&mut view, "/ngap/Cause/value/nas", tree!("normal-release")).unwrap();
     ie(&mut view, 15)["_original_id"] = tree!("fifteen");
-    let error = NGAP_PDU::from_view(&view).unwrap_err().to_string();
+    let error = NGAPPDU::from_view(&view).unwrap_err().to_string();
     assert!(error.contains("_original_id is the identifier"), "{error}");
 }
 
 /// A request to modify a UE context: its aggregate maximum bit rate for the downlink,
 /// and UE security capabilities whose NR encryption algorithms are this many bits.
-fn modification(rate: u64, bits: usize) -> NGAP_PDU {
+fn modification(rate: u64, bits: usize) -> NGAPPDU<'static> {
     // The first two bits of a string of this length.
     let mask = |length: usize| {
         let mut octets = vec![0; length.div_ceil(8)];
@@ -2590,7 +2621,7 @@ fn an_integer_of_two_to_the_63_or_more_is_a_number() {
         // Received, it is the number that it is.
         let pdu = modification(rate, 16);
         let wire = pdu.encode().unwrap();
-        let mut view = NGAP_PDU::decode(&wire).unwrap().to_view().unwrap();
+        let mut view = NGAPPDU::decode(&wire).unwrap().to_view().unwrap();
         let entry = &view["message"]["protocolIEs"][2];
         assert!(entry.get("_decode_error").is_none(), "{entry}");
         assert_eq!(inspect::select(&view, &downlink).unwrap(), [&tree!(rate)]);
@@ -2599,12 +2630,12 @@ fn an_integer_of_two_to_the_63_or_more_is_a_number() {
         let tree = pdu.to_tree();
         let shown = &tree["ies"][2]["UEAggregateMaximumBitRate"];
         assert_eq!(shown["uEAggregateMaximumBitRateDL"], tree!(rate));
-        assert_eq!(NGAP_PDU::from_tree(&tree).unwrap().encode().unwrap(), wire);
-        assert_eq!(NGAP_PDU::from_view(&view).unwrap().encode().unwrap(), wire);
+        assert_eq!(NGAPPDU::from_tree(&tree).unwrap().encode().unwrap(), wire);
+        assert_eq!(NGAPPDU::from_view(&view).unwrap().encode().unwrap(), wire);
 
         // Edited, it is what the bindings encode for the other number.
         inspect::set(&mut view, &downlink, tree!(rate - 1)).unwrap();
-        let edited = NGAP_PDU::from_view(&view).unwrap();
+        let edited = NGAPPDU::from_view(&view).unwrap();
         assert_eq!(edited, modification(rate - 1, 16));
     }
 
@@ -2618,14 +2649,14 @@ fn an_integer_of_two_to_the_63_or_more_is_a_number() {
         ue_aggregate_maximum_bit_rate_ul: BitRate(1),
         ie_extensions: None,
     };
-    let largest = encode_open_type(&largest).unwrap();
+    let largest = oxirush_ngap::encode(&largest).unwrap();
     let nine = [0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
     assert_eq!(
         largest,
         [&[0x20, 0x09][..], &nine[..], &[0x00, 0x01][..]].concat()
     );
     let beyond = [&[0x20, 0x09, 0x01][..], &[0; 8][..], &[0x00, 0x01][..]].concat();
-    let error = decode_open_type::<UEAggregateMaximumBitRate>(&beyond).unwrap_err();
+    let error = oxirush_ngap::decode::<UEAggregateMaximumBitRate>(&beyond).unwrap_err();
     assert_eq!(
         error.to_string(),
         "these octets do not decode as UEAggregateMaximumBitRate: the number does not fit in \
@@ -2637,7 +2668,7 @@ fn an_integer_of_two_to_the_63_or_more_is_a_number() {
     pdu.set_protocol_ies(ies).unwrap();
     let wire = pdu.encode().unwrap();
 
-    let view = NGAP_PDU::decode(&wire).unwrap().to_view().unwrap();
+    let view = NGAPPDU::decode(&wire).unwrap().to_view().unwrap();
     let entry = &view["message"]["protocolIEs"][2];
     assert_eq!(entry["_raw_value"], tree!(hex::encode(&beyond)));
     assert_eq!(entry["value"], entry["_raw_value"]);
@@ -2645,9 +2676,9 @@ fn an_integer_of_two_to_the_63_or_more_is_a_number() {
     assert!(why.contains("the number does not fit in 64 bits"), "{why}");
     // The other IEs are read, and the view and the tree give the octets back.
     assert_eq!(view["message"]["protocolIEs"][1]["value"], tree!(1));
-    assert_eq!(NGAP_PDU::from_view(&view).unwrap().encode().unwrap(), wire);
+    assert_eq!(NGAPPDU::from_view(&view).unwrap().encode().unwrap(), wire);
     let tree = pdu.to_tree();
-    assert_eq!(NGAP_PDU::from_tree(&tree).unwrap().encode().unwrap(), wire);
+    assert_eq!(NGAPPDU::from_tree(&tree).unwrap().encode().unwrap(), wire);
 
     // JSON has no exact number for 2^64, and its decimal digits are no number: a rate
     // is written as a number that 64 bits hold.
@@ -2662,7 +2693,7 @@ fn an_integer_of_two_to_the_63_or_more_is_a_number() {
         ]})
     };
     for digits in ["18446744073709551616", "18446744073709551615"] {
-        let error = NGAP_PDU::from_tree(&written(tree!(digits))).unwrap_err();
+        let error = NGAPPDU::from_tree(&written(tree!(digits))).unwrap_err();
         assert_eq!(error.kind(), oxirush_ngap::ErrorKind::Value);
         assert_eq!(
             error.to_string(),
@@ -2673,7 +2704,7 @@ fn an_integer_of_two_to_the_63_or_more_is_a_number() {
             )
         );
     }
-    let negative = NGAP_PDU::from_tree(&written(tree!(-1))).unwrap_err();
+    let negative = NGAPPDU::from_tree(&written(tree!(-1))).unwrap_err();
     assert_eq!(
         negative.to_string(),
         "this is not a value of UEAggregateMaximumBitRate: a number from 0 to \
@@ -2699,7 +2730,7 @@ fn a_bit_string_of_another_size_than_its_type_gives_has_its_length() {
         [&tree!("c000")]
     );
     inspect::set(&mut view, &algorithms, tree!("8000")).unwrap();
-    let edited = NGAP_PDU::from_view(&view).unwrap().to_view().unwrap();
+    let edited = NGAPPDU::from_view(&view).unwrap().to_view().unwrap();
     assert_eq!(
         inspect::select(&edited, &algorithms).unwrap(),
         [&tree!("8000")]
@@ -2709,7 +2740,7 @@ fn a_bit_string_of_another_size_than_its_type_gives_has_its_length() {
     for bits in [20, 24] {
         let pdu = modification(1, bits);
         let wire = pdu.encode().unwrap();
-        let mut view = NGAP_PDU::decode(&wire).unwrap().to_view().unwrap();
+        let mut view = NGAPPDU::decode(&wire).unwrap().to_view().unwrap();
         let entry = &view["message"]["protocolIEs"][3];
         assert!(entry.get("_decode_error").is_none(), "{entry}");
         let shown = tree!({"value": "c00000", "length": bits});
@@ -2727,26 +2758,26 @@ fn a_bit_string_of_another_size_than_its_type_gives_has_its_length() {
         let tree = pdu.to_tree();
         let written = &tree["ies"][3]["UESecurityCapabilities"];
         assert_eq!(written["nRencryptionAlgorithms"], shown);
-        assert_eq!(NGAP_PDU::from_tree(&tree).unwrap().encode().unwrap(), wire);
-        assert_eq!(NGAP_PDU::from_view(&view).unwrap().encode().unwrap(), wire);
+        assert_eq!(NGAPPDU::from_tree(&tree).unwrap().encode().unwrap(), wire);
+        assert_eq!(NGAPPDU::from_view(&view).unwrap().encode().unwrap(), wire);
 
         // Edited to the size of the type, it is what the bindings encode for that.
         inspect::set(&mut view, &algorithms, tree!("c000")).unwrap();
-        assert_eq!(NGAP_PDU::from_view(&view).unwrap(), modification(1, 16));
+        assert_eq!(NGAPPDU::from_view(&view).unwrap(), modification(1, 16));
     }
 
     // From the size of the type to another one, by the whole value and by its length.
     let mut view = modification(1, 16).to_view().unwrap();
     let longer = tree!({"value": "c00000", "length": 24});
     inspect::set(&mut view, &algorithms, longer).unwrap();
-    assert_eq!(NGAP_PDU::from_view(&view).unwrap(), modification(1, 24));
+    assert_eq!(NGAPPDU::from_view(&view).unwrap(), modification(1, 24));
     inspect::set(&mut view, &format!("{algorithms}/length"), tree!(20)).unwrap();
-    assert_eq!(NGAP_PDU::from_view(&view).unwrap(), modification(1, 20));
+    assert_eq!(NGAPPDU::from_view(&view).unwrap(), modification(1, 20));
 
     // What is not the string that it says is refused: three octets without a length
     // are not the 16 bits of the type, and 20 bits are not two octets.
     let written = |algorithms: oxirush_ngap::tree::Value| {
-        NGAP_PDU::from_tree(&tree!({"message": message, "ies": [
+        NGAPPDU::from_tree(&tree!({"message": message, "ies": [
             {"AMF-UE-NGAP-ID": 1},
             {"RAN-UE-NGAP-ID": 1},
             {"UESecurityCapabilities": {
@@ -2778,8 +2809,8 @@ fn an_extension_has_its_type(
     tree: oxirush_ngap::tree::Value,
     extension: &str,
     at: &str,
-    (value, octets): (oxirush_ngap::tree::Value, oxirush_ngap::Octets<'static>),
-    (other, other_octets): (oxirush_ngap::tree::Value, oxirush_ngap::Octets<'static>),
+    (value, octets): (oxirush_ngap::tree::Value, Vec<u8>),
+    (other, other_octets): (oxirush_ngap::tree::Value, Vec<u8>),
 ) {
     let at = format!("{extension}/{at}");
     let received = |view: &oxirush_ngap::tree::Value| -> String {
@@ -2788,28 +2819,28 @@ fn an_extension_has_its_type(
     };
 
     // Written from its tree, and typed in the view of what was received.
-    let pdu = NGAP_PDU::from_tree(&tree).unwrap();
+    let pdu = NGAPPDU::from_tree(&tree).unwrap();
     let wire = pdu.encode().unwrap();
-    let mut view = NGAP_PDU::decode(&wire).unwrap().to_view().unwrap();
+    let mut view = NGAPPDU::decode(&wire).unwrap().to_view().unwrap();
     assert_eq!(inspect::select(&view, &at).unwrap(), [&value], "{at}");
     assert_eq!(received(&view), hex::encode(&octets), "{at}");
     let entries = inspect::select(&view, extension).unwrap();
     assert!(entries[0]["_decode_error"].is_null(), "{}", entries[0]);
 
     // The same octets back, through the view and through the tree.
-    assert_eq!(NGAP_PDU::from_view(&view).unwrap().encode().unwrap(), wire);
+    assert_eq!(NGAPPDU::from_view(&view).unwrap().encode().unwrap(), wire);
     let shown = pdu.to_tree();
     assert_eq!(shown, tree);
-    assert_eq!(NGAP_PDU::from_tree(&shown).unwrap().encode().unwrap(), wire);
+    assert_eq!(NGAPPDU::from_tree(&shown).unwrap().encode().unwrap(), wire);
 
     // Edited through the view, and the edited PDU through its tree.
     inspect::set(&mut view, &at, other.clone()).unwrap();
-    let edited = NGAP_PDU::from_view(&view).unwrap();
+    let edited = NGAPPDU::from_view(&view).unwrap();
     let after = edited.to_view().unwrap();
     assert_eq!(inspect::select(&after, &at).unwrap(), [&other], "{at}");
     assert_eq!(received(&after), hex::encode(&other_octets), "{at}");
     let shown = edited.to_tree();
-    let written = NGAP_PDU::from_tree(&shown).unwrap();
+    let written = NGAPPDU::from_tree(&shown).unwrap();
     assert_eq!(written.encode().unwrap(), edited.encode().unwrap());
 }
 
@@ -2820,9 +2851,10 @@ fn an_extension_has_its_type(
 #[test]
 fn the_qos_parameter_set_index_has_the_type_of_what_it_extends() {
     use oxirush_ngap::tree;
-    let index = |index: u8| encode_open_type(&AlternativeQoSParaSetIndex(index.into())).unwrap();
+    let index =
+        |index: u8| oxirush_ngap::encode(&AlternativeQoSParaSetIndex(index.into())).unwrap();
     let notified =
-        |index: u8| encode_open_type(&AlternativeQoSParaSetNotifyIndex(index.into())).unwrap();
+        |index: u8| oxirush_ngap::encode(&AlternativeQoSParaSetNotifyIndex(index.into())).unwrap();
     assert_eq!(
         (index(3).as_slice(), notified(3).as_slice()),
         (&[0x20][..], &[0x18][..])
@@ -2911,7 +2943,7 @@ fn the_qos_parameter_set_index_has_the_type_of_what_it_extends() {
             {"CurrentQoSParaSetIndex": value, "criticality": "ignore"},
         ]})
     };
-    let refused = NGAP_PDU::from_tree(&alone(tree!(3)))
+    let refused = NGAPPDU::from_tree(&alone(tree!(3)))
         .unwrap_err()
         .to_string();
     assert!(
@@ -2922,7 +2954,7 @@ fn the_qos_parameter_set_index_has_the_type_of_what_it_extends() {
         refused.contains("QosFlowNotifyItem") && refused.contains("none here"),
         "{refused}"
     );
-    let pdu = NGAP_PDU::from_tree(&alone(tree!({"octets": "18"}))).unwrap();
+    let pdu = NGAPPDU::from_tree(&alone(tree!({"octets": "18"}))).unwrap();
     let view = pdu.to_view().unwrap();
     let error = view["message"]["protocolIEs"][0]["_decode_error"].as_str();
     assert!(
@@ -2947,7 +2979,7 @@ fn the_additional_information_of_qos_flows_has_the_type_of_what_it_extends() {
             downlink_tl_container: container(octets),
             ie_extensions: None,
         };
-        encode_open_type(&QosFlowAdditionalInfoListRelCom(vec![item])).unwrap()
+        oxirush_ngap::encode(&QosFlowAdditionalInfoListRelCom(vec![item])).unwrap()
     };
     let response = |octets: &[u8]| {
         let item = QosFlowAdditionalInfoItemRelRes {
@@ -2955,7 +2987,7 @@ fn the_additional_information_of_qos_flows_has_the_type_of_what_it_extends() {
             uplink_tl_container: container(octets),
             ie_extensions: None,
         };
-        encode_open_type(&QosFlowAdditionalInfoListRelRes(vec![item])).unwrap()
+        oxirush_ngap::encode(&QosFlowAdditionalInfoListRelRes(vec![item])).unwrap()
     };
 
     // Of the transfer of a release command.
@@ -3013,7 +3045,7 @@ fn the_additional_information_of_qos_flows_has_the_type_of_what_it_extends() {
         released("uplinkTLContainer"),
         responded("downlinkTLContainer"),
     ] {
-        let refused = NGAP_PDU::from_tree(&wrong).unwrap_err().to_string();
+        let refused = NGAPPDU::from_tree(&wrong).unwrap_err().to_string();
         assert!(
             refused.contains("is not a member that its type has"),
             "{refused}"
@@ -3061,7 +3093,7 @@ fn the_additional_information_of_qos_flows_has_the_type_of_what_it_extends() {
 /// X.691, have a `_decode_error`, and those that a typed value has no place for `_lossy`.
 fn agree(wire: &[u8]) -> usize {
     use oxirush_ngap::tree::Value;
-    let Ok(pdu) = NGAP_PDU::decode(wire) else {
+    let Ok(pdu) = NGAPPDU::decode(wire) else {
         return 0;
     };
     let (tree, Ok(view)) = (pdu.to_tree(), pdu.to_view()) else {
@@ -3104,7 +3136,7 @@ fn the_tree_and_the_paths_of_a_view_read_the_octets_of_an_ie_alike() {
     // its length: the tree has its octets, and the view and the path list say why.
     let wire = hex::decode("2029000f000002000a40020301005540020001").unwrap();
     agree(&wire);
-    let view = NGAP_PDU::decode(&wire).unwrap().to_view().unwrap();
+    let view = NGAPPDU::decode(&wire).unwrap().to_view().unwrap();
     let error = inspect::select(&view, "/ngap/AMF-UE-NGAP-ID/_decode_error").unwrap();
     assert_eq!(
         error,
@@ -3134,7 +3166,7 @@ fn the_tree_and_the_paths_of_a_view_read_the_octets_of_an_ie_alike() {
         for line in lines {
             let wire = hex::decode(line.split('\t').nth(1).unwrap()).unwrap();
             said += agree(&wire);
-            let Ok(pdu) = NGAP_PDU::decode(&wire) else {
+            let Ok(pdu) = NGAPPDU::decode(&wire) else {
                 continue;
             };
             let Ok(ies) = pdu.protocol_ies() else {
@@ -3169,7 +3201,7 @@ fn a_container_of_the_other_protocol_says_the_call_that_registers_its_tables() {
         {"RAN-UE-NGAP-ID": 7},
         {"SourceToTarget-TransparentContainer": {"SourceeNB-ToTargeteNB-TransparentContainer": {}}},
     ]});
-    let error = NGAP_PDU::from_tree(&tree).unwrap_err().to_string();
+    let error = NGAPPDU::from_tree(&tree).unwrap_err().to_string();
     let call = "SourceeNB-ToTargeteNB-TransparentContainer is a type of S1AP: call oxirush_s1ap::inspect::register()";
     assert!(error.contains(call), "{error}");
     let path =

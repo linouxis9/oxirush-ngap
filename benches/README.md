@@ -67,7 +67,7 @@ measures a clean build.
 
 The comparison of the [README](../README.md#against-other-implementations),
 on the six PDUs of `compare/pdus.tsv`, which each implementation decodes and
-encodes. The envelope alone is `NGAP_PDU::decode`, which leaves the value of
+encodes. The envelope alone is `NGAPPDU::decode`, which leaves the value of
 each IE in its octets; "this crate" decodes the PDU and then every IE of its
 message as its type, which is what the others do; and encoding writes the PDU
 from the typed values of its IEs, as `build_ngap!` does.

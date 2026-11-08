@@ -65,7 +65,7 @@ fn each_captured_pdu_is_read_and_written_as_the_octets_that_its_sender_sent() {
     let mut senders: BTreeMap<&str, usize> = BTreeMap::new();
     for captured in captured() {
         let name = captured.name;
-        let pdu = match NGAP_PDU::decode(&captured.octets) {
+        let pdu = match NGAPPDU::decode(&captured.octets) {
             Ok(pdu) => pdu,
             Err(error) => panic!("{name} of {}: {error}", captured.source),
         };
@@ -79,7 +79,7 @@ fn each_captured_pdu_is_read_and_written_as_the_octets_that_its_sender_sent() {
         // Written back, it is the octets that were sent, and so is the PDU that
         // borrows them.
         assert_eq!(pdu.encode().unwrap(), captured.octets, "{name}");
-        let borrowed = NGAP_PDU::decode_borrowed(&captured.octets).unwrap();
+        let borrowed = NGAPPDU::decode(&captured.octets).unwrap();
         assert_eq!(borrowed, pdu, "{name}");
         assert_eq!(borrowed.encode().unwrap(), captured.octets, "{name}");
 
@@ -148,7 +148,7 @@ mod forms {
         let mut named = 0;
         for captured in captured() {
             let name = captured.name;
-            let pdu = NGAP_PDU::decode(&captured.octets).unwrap();
+            let pdu = NGAPPDU::decode(&captured.octets).unwrap();
 
             // The message has the name that tshark gives it.
             let (message, _) = name.split_once('/').unwrap();
@@ -166,7 +166,7 @@ mod forms {
 
             // The view gives the octets back, and so do its values alone, without the
             // octets that it keeps of what was received.
-            let octets = |view: &Value| NGAP_PDU::from_view(view).unwrap().encode().unwrap();
+            let octets = |view: &Value| NGAPPDU::from_view(view).unwrap().encode().unwrap();
             assert_eq!(octets(&view), captured.octets, "{name}: its view");
             assert_eq!(
                 octets(&written(&view)),
@@ -176,7 +176,7 @@ mod forms {
 
             // And so does its tree.
             let tree = pdu.to_tree();
-            let again = NGAP_PDU::from_tree(&tree).unwrap().encode().unwrap();
+            let again = NGAPPDU::from_tree(&tree).unwrap().encode().unwrap();
             assert_eq!(again, captured.octets, "{name}: its tree");
         }
         assert!(named > 70, "{named} messages that tshark names");

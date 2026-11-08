@@ -6,8 +6,8 @@ use oxirush_ngap::ngap::*;
 use oxirush_ngap::{Error, build_ngap};
 
 /// The PDU that the octets of `pdu` decode to: what a peer receives.
-fn received(pdu: &NGAP_PDU) -> Result<NGAP_PDU, Error> {
-    NGAP_PDU::decode(&pdu.encode()?)
+fn received(pdu: &NGAPPDU<'_>) -> Result<NGAPPDU<'static>, Error> {
+    Ok(NGAPPDU::decode(&pdu.encode()?)?.into_owned())
 }
 
 #[test]

@@ -146,24 +146,24 @@ fn main() -> Result<(), Error> {
     //           ProtocolIEField {
     //               id: ProtocolIEID(10),
     //               criticality: Criticality::Ignore,
-    //               value: encode_open_type(&AMFUENGAPID(1))?,
+    //               value: oxirush_ngap::encode(&AMFUENGAPID(1))?,
     //           },
     //           ProtocolIEField {
     //               id: ProtocolIEID(85),
     //               criticality: Criticality::Ignore,
-    //               value: encode_open_type(&RANUENGAPID(0))?,
+    //               value: oxirush_ngap::encode(&RANUENGAPID(0))?,
     //           },
     //           ProtocolIEField {
     //               id: ProtocolIEID(75),
     //               criticality: Criticality::Ignore,
-    //               value: encode_open_type(&session_setup_response_list())?,
+    //               value: oxirush_ngap::encode(&session_setup_response_list())?,
     //           },
     //       ]),
     //   };
-    //   let pdu = NGAP_PDU::successfulOutcome(SuccessfulOutcome {
+    //   let pdu = NGAPPDU::successfulOutcome(SuccessfulOutcome {
     //       procedure_code: ProcedureCode(14),
     //       criticality: Criticality::Reject,
-    //       value: encode_open_type(&response)?,
+    //       value: oxirush_ngap::encode(&response)?,
     //   });
     Ok(())
 }
@@ -202,7 +202,7 @@ fn admitted_sessions() -> PDUSessionResourceAdmittedList<'static> {
     }])
 }
 
-fn print_and_encode(pdu: &NGAP_PDU) -> Result<(), Error> {
+fn print_and_encode(pdu: &NGAPPDU<'_>) -> Result<(), Error> {
     // Display example: "NGSetupRequest (procedure 21, initiating message)".
     println!("{pdu}");
     println!(

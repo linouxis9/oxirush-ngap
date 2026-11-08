@@ -40,7 +40,7 @@ use std::process::{Command, Stdio};
 
 use oxirush_ngap::Ngap;
 use oxirush_ngap::inspect;
-use oxirush_ngap::ngap::NGAP_PDU;
+use oxirush_ngap::ngap::NGAPPDU;
 use oxirush_utils::tree::{Map, Value as Tree};
 use serde_json::{Value, json};
 
@@ -100,7 +100,7 @@ fn as_tree(value: &Tree) -> Tree {
 /// handover within the 5GS or to it from the EPS, and in a HANDOVER REQUEST
 /// ACKNOWLEDGE, which the target NG-RAN node sends. This is the choice that Wireshark
 /// makes; for another HandoverType, or none, the octets stay.
-fn containers(pdu: &NGAP_PDU, tree: &mut Tree) {
+fn containers(pdu: &NGAPPDU<'_>, tree: &mut Tree) {
     let ies = tree
         .get("ies")
         .and_then(Tree::as_array)
@@ -158,7 +158,7 @@ fn containers(pdu: &NGAP_PDU, tree: &mut Tree) {
 fn reading(octets: &[u8]) -> String {
     let head = json!({"octets": hex::encode(octets)}).to_string();
     let head = head.trim_end_matches('}');
-    match NGAP_PDU::decode(octets) {
+    match NGAPPDU::decode(octets) {
         Ok(pdu) => {
             let check: Value = match pdu.check() {
                 Ok(deviations) => deviations.iter().map(ToString::to_string).collect(),

@@ -116,7 +116,9 @@ fn the_identities_of_a_paging_are_those_that_tshark_reads() -> Result<(), Error>
     );
 
     // The helpers read the same networks in the same octets.
-    let pdu = NGAP_PDU::decode(&hex::decode(PAGING).unwrap()).expect("decode PDU");
+    let pdu = NGAPPDU::decode(&hex::decode(PAGING).unwrap())
+        .expect("decode PDU")
+        .into_owned();
     let paging: Paging = pdu.decode_value().expect("decode message");
     extract_ngap_ies!(&paging, Paging,
         req areas: TAIListForPaging = TAIListForPaging(areas) => areas,
@@ -178,7 +180,7 @@ fn octets_that_are_no_plmn_identity_are_shown_as_octets() {
 
     for octets in ["abcdef", "02f8f9", "0ff839", "02f83f", "02a839"] {
         let wire = hex::decode(PAGING.replacen("134001", octets, 1)).unwrap();
-        let pdu = NGAP_PDU::decode(&wire).unwrap();
+        let pdu = NGAPPDU::decode(&wire).unwrap();
         let view = pdu.to_view().unwrap();
         let shown = inspect::select(&view, "/ngap/TAIListForPaging/1/tAI/pLMNIdentity").unwrap();
         assert_eq!(shown, [&tree!(octets)]);
@@ -187,8 +189,8 @@ fn octets_that_are_no_plmn_identity_are_shown_as_octets() {
             tree["ies"][1]["TAIListForPaging"][1]["tAI"]["pLMNIdentity"],
             tree!(octets)
         );
-        assert_eq!(NGAP_PDU::from_view(&view).unwrap().encode().unwrap(), wire);
-        assert_eq!(NGAP_PDU::from_tree(&tree).unwrap().encode().unwrap(), wire);
+        assert_eq!(NGAPPDU::from_view(&view).unwrap().encode().unwrap(), wire);
+        assert_eq!(NGAPPDU::from_tree(&tree).unwrap().encode().unwrap(), wire);
     }
 }
 
@@ -202,7 +204,7 @@ fn the_notation_of_a_plmn_identity_has_the_octets_of_the_clause() {
 
     // Shown: the tree and the view of the PAGING name the networks that tshark reads.
     let wire = hex::decode(PAGING).unwrap();
-    let pdu = NGAP_PDU::decode(&wire).unwrap();
+    let pdu = NGAPPDU::decode(&wire).unwrap();
     let tree = pdu.to_tree();
     let areas = &tree["ies"][1]["TAIListForPaging"];
     assert_eq!(areas[0]["tAI"]["pLMNIdentity"], tree!("208-93"));
@@ -214,13 +216,14 @@ fn the_notation_of_a_plmn_identity_has_the_octets_of_the_clause() {
 
     // Written: the tree is the octets of the message, and so is each identity of the
     // vectors, set through the view.
-    assert_eq!(NGAP_PDU::from_tree(&tree).unwrap().encode().unwrap(), wire);
+    assert_eq!(NGAPPDU::from_tree(&tree).unwrap().encode().unwrap(), wire);
     for (mcc, mnc, octets) in IDENTITIES {
         let first = "/ngap/TAIListForPaging/0/tAI/pLMNIdentity";
         inspect::set(&mut view, first, tree!(format!("{mcc}-{mnc}"))).unwrap();
-        let edited = NGAP_PDU::from_view(&view).unwrap();
+        let edited = NGAPPDU::from_view(&view).unwrap();
         let paging: Paging = edited.decode_value().unwrap();
-        let areas: TAIListForPaging = decode_open_type(&paging.protocol_ies.0[1].value).unwrap();
+        let areas: TAIListForPaging =
+            oxirush_ngap::decode(&paging.protocol_ies.0[1].value).unwrap();
         assert_eq!(&areas.0[0].tai.plmn_identity.0[..], octets, "{mcc}-{mnc}");
         let shown = edited.to_view().unwrap();
         let shown = inspect::select(&shown, first).unwrap();
@@ -242,7 +245,7 @@ fn digits_that_could_be_a_plmn_identity_or_its_octets_are_refused() {
         let tree = tree!({"message": "InitialContextSetupRequest", "ies": [{"GUAMI": {
             "pLMNIdentity": plmn, "aMFRegionID": 1, "aMFSetID": 1, "aMFPointer": 0,
         }}]});
-        NGAP_PDU::from_tree(&tree)
+        NGAPPDU::from_tree(&tree)
             .map(|pdu| pdu.to_tree()["ies"][0]["GUAMI"]["pLMNIdentity"].clone())
     };
     for (written, read) in [
@@ -274,7 +277,7 @@ fn digits_that_could_be_a_plmn_identity_or_its_octets_are_refused() {
         }});
         let tree =
             tree!({"message": "InitialUEMessage", "ies": [{"UserLocationInformation": location}]});
-        let pdu = NGAP_PDU::from_tree(&tree)?;
+        let pdu = NGAPPDU::from_tree(&tree)?;
         Ok::<_, Error>(
             pdu.to_tree()["ies"][0]["UserLocationInformation"]["userLocationInformationNR"]["tAI"]
                 ["tAC"]
@@ -313,7 +316,7 @@ fn digits_that_could_be_a_plmn_identity_or_its_octets_are_refused() {
 #[test]
 fn digits_that_could_be_a_plmn_identity_or_its_octets_are_refused_by_serde() {
     let text = r#"{"message": "InitialContextSetupRequest", "ies": [{"GUAMI": {"pLMNIdentity": "310410", "aMFRegionID": 1, "aMFSetID": 1, "aMFPointer": 0}}]}"#;
-    let error = serde_json::from_str::<NGAP_PDU>(text)
+    let error = serde_json::from_str::<NGAPPDU<'static>>(text)
         .unwrap_err()
         .to_string();
     assert!(
@@ -321,7 +324,7 @@ fn digits_that_could_be_a_plmn_identity_or_its_octets_are_refused_by_serde() {
         "{error}"
     );
     let yaml = "message: InitialContextSetupRequest\nies:\n- GUAMI: {pLMNIdentity: '001001', aMFRegionID: 1, aMFSetID: 1, aMFPointer: 0}\n";
-    let error = serde_norway::from_str::<NGAP_PDU>(yaml)
+    let error = serde_norway::from_str::<NGAPPDU<'static>>(yaml)
         .unwrap_err()
         .to_string();
     assert!(

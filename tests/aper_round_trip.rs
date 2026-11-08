@@ -10,14 +10,14 @@ fn public_macros_round_trip_typed_open_message() -> Result<(), Error> {
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
     )?;
 
-    let NGAP_PDU::initiatingMessage(message) = &pdu else {
+    let NGAPPDU::initiatingMessage(message) = &pdu else {
         panic!("expected initiating message");
     };
     // Extension bit, octet padding, then the aligned 16-bit ProtocolIE count.
     assert_eq!(&message.value[..3], &[0x00, 0x00, 0x03]);
 
     let wire = pdu.encode().expect("encode PDU");
-    let decoded = NGAP_PDU::decode(&wire).expect("decode PDU");
+    let decoded = NGAPPDU::decode(&wire).expect("decode PDU");
     assert_eq!(decoded, pdu);
 
     let request: UEContextReleaseRequest = decoded.decode_value().expect("decode message");
@@ -157,7 +157,7 @@ fn every_constrained_list_encodes_its_length_per_x691() -> Result<(), Error> {
         hex::encode(&wire),
         "00094014000002000f40016200134008780e000000001c40"
     );
-    assert_eq!(NGAP_PDU::decode(&wire).expect("decode"), error);
+    assert_eq!(NGAPPDU::decode(&wire).expect("decode"), error);
 
     let reset = build_ngap!(REJECT NGReset,
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::unspecified)),
@@ -170,7 +170,7 @@ fn every_constrained_list_encodes_its_length_per_x691() -> Result<(), Error> {
         hex::encode(&wire),
         "00140013000002000f4002000000580006400160050006"
     );
-    assert_eq!(NGAP_PDU::decode(&wire).expect("decode"), reset);
+    assert_eq!(NGAPPDU::decode(&wire).expect("decode"), reset);
     Ok(())
 }
 
@@ -190,7 +190,7 @@ fn multiline_extension_list_has_an_aligned_count() {
     let extension = ProtocolExtensionField {
         id: ProtocolExtensionID(356),
         criticality: Criticality::Ignore,
-        extension_value: encode_open_type(&list).unwrap(),
+        extension_value: oxirush_ngap::encode(&list).unwrap().into(),
     };
     let value = TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainer {
         cell_cag_information: None,
@@ -224,7 +224,7 @@ fn utf8_string_names_have_an_unconstrained_length() -> Result<(), Error> {
     let wire = pdu.encode().expect("encode NGSetupResponse");
     assert_eq!(hex::encode(&wire), "2015000f000001011240082006616d662dc3a9");
     // The message borrows from the PDU, which is kept beside it.
-    let decoded = NGAP_PDU::decode(&wire).expect("decode PDU");
+    let decoded = NGAPPDU::decode(&wire).expect("decode PDU");
     let response: NGSetupResponse = decoded.decode_value().expect("decode message");
     extract_ngap_ies!(&response, NGSetupResponse,
         req extended: ExtendedAMFName = Extended_AMFName(value) => value,
@@ -277,7 +277,7 @@ fn long_fixed_size_bit_strings_are_octet_aligned() -> Result<(), Error> {
         "20190028000001005d0021288000000000000000000000000000000000000000000000000000000000000001"
     );
     // The message borrows from the PDU, which is kept beside it.
-    let decoded = NGAP_PDU::decode(&wire).expect("decode PDU");
+    let decoded = NGAPPDU::decode(&wire).expect("decode PDU");
     let acknowledge: PathSwitchRequestAcknowledge = decoded.decode_value().expect("decode message");
     extract_ngap_ies!(&acknowledge, PathSwitchRequestAcknowledge,
         req security_context: SecurityContext = SecurityContext(value) => value,
@@ -300,7 +300,7 @@ fn long_fixed_size_bit_strings_are_octet_aligned() -> Result<(), Error> {
     let wire = pdu.encode().expect("encode NGSetupRequest");
     assert_eq!(hex::encode(&wire), "0015000f000001001b00084002f83900924920");
     // The message borrows from the PDU, which is kept beside it.
-    let decoded = NGAP_PDU::decode(&wire).expect("decode PDU");
+    let decoded = NGAPPDU::decode(&wire).expect("decode PDU");
     let request: NGSetupRequest = decoded.decode_value().expect("decode message");
     extract_ngap_ies!(&request, NGSetupRequest,
         req global_ran_node_id: GlobalRANNodeID = GlobalRANNodeID(value) => value,
@@ -367,7 +367,7 @@ fn octet_string_ies_have_ie_names() -> Result<(), Error> {
         "00240023000002005500020007002a001615000f401100000200550002000700260004037e0041"
     );
     // The message borrows from the PDU, which is kept beside it.
-    let decoded = NGAP_PDU::decode(&wire).expect("decode PDU");
+    let decoded = NGAPPDU::decode(&wire).expect("decode PDU");
     let request: RerouteNASRequest = decoded.decode_value().expect("decode message");
     assert_eq!(request.protocol_ies.0[1].id, ID_NGAP_MESSAGE);
     extract_ngap_ies!(&request, RerouteNASRequest,
@@ -471,9 +471,9 @@ fn a_missing_required_ie_is_an_error_of_the_crate() {
 /// empty, but the helper takes any type, such as NULL.
 #[test]
 fn an_empty_open_type_value_is_one_zero_octet() {
-    let value = encode_open_type(&()).expect("encode NULL");
+    let value = oxirush_ngap::encode(&()).expect("encode NULL");
     assert_eq!(value, [0]);
-    decode_open_type::<()>(&value).expect("decode NULL");
+    oxirush_ngap::decode::<()>(&value).expect("decode NULL");
 }
 
 /// A number of an extensible constraint whose root is several ranges, as

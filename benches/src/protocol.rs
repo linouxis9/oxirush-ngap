@@ -34,7 +34,7 @@ pub use codec::ngap as types;
 pub use codec::{build_ngap as build, extract_ngap_ies as extract_ies};
 
 /// A PDU of the protocol, which owns its octets.
-pub type Pdu = ngap::NGAP_PDU;
+pub type Pdu = ngap::NGAPPDU<'static>;
 
 /// A PDU that borrows its message from the octets that it is decoded from.
 pub type Borrowed<'a> = ngap::NGAPPDU<'a>;

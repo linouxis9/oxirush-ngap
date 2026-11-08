@@ -51,10 +51,7 @@ fn debug_of_a_message_with_a_key_shows_the_length_of_its_octets() -> Result<(), 
     assert!(hex::encode(&octets).contains(&"5a".repeat(32)));
 
     // The PDU, which owns its octets or borrows them
-    for pdu in [
-        NGAP_PDU::decode(&octets)?,
-        NGAP_PDU::decode_borrowed(&octets)?,
-    ] {
+    for pdu in [NGAPPDU::decode(&octets)?, NGAPPDU::decode(&octets)?] {
         let printed = format!("{pdu:?}");
         assert!(has_no_key(&printed), "{printed}");
         assert!(
@@ -156,7 +153,7 @@ fn a_refusal_of_a_key_shows_nothing_of_what_is_written() {
     let wrong = |value: tree::Value| {
         let tree =
             tree!({"message": "InitialContextSetupRequest", "ies": [{"SecurityKey": value}]});
-        NGAP_PDU::from_tree(&tree).unwrap_err().to_string()
+        NGAPPDU::from_tree(&tree).unwrap_err().to_string()
     };
     for (written, why) in [
         (
@@ -179,6 +176,6 @@ fn a_refusal_of_a_key_shows_nothing_of_what_is_written() {
     let next_hop =
         tree!({"SecurityContext": {"nextHopChainingCount": 1, "nextHopNH": [key.clone()]}});
     let tree = tree!({"message": "InitialContextSetupRequest", "ies": [next_hop]});
-    let error = NGAP_PDU::from_tree(&tree).unwrap_err().to_string();
+    let error = NGAPPDU::from_tree(&tree).unwrap_err().to_string();
     assert!(has_no_key(&error), "{error}");
 }

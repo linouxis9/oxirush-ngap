@@ -38,10 +38,12 @@ permissions:
   contents: read
 
 jobs:
+  # A dispatch gives its minutes as text, which fromJSON makes the number that the
+  # called workflow takes, as it does the boolean of `weekly`; a schedule gives neither.
   fuzz:
-    uses: linouxis9/oxirush-aper/.github/workflows/protocol-fuzz.yml@4599259ad94d04155db621dbfd5f27a097875030
+    uses: linouxis9/oxirush-aper/.github/workflows/protocol-fuzz.yml@0261e08543b789e2c546de7b5cc62de7998fb1cf
     with:
       protocol: ngap
       weekly: "43 22 * * 0"
-      minutes: ${{ inputs.minutes || 0 }}
-      report: ${{ inputs.weekly || false }}
+      minutes: ${{ fromJSON(inputs.minutes || '0') }}
+      report: ${{ fromJSON(inputs.weekly || 'false') }}

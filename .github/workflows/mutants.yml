@@ -39,10 +39,10 @@ permissions:
 
 jobs:
   mutants:
-    uses: linouxis9/oxirush-aper/.github/workflows/protocol-mutants.yml@4599259ad94d04155db621dbfd5f27a097875030
+    uses: linouxis9/oxirush-aper/.github/workflows/protocol-mutants.yml@0261e08543b789e2c546de7b5cc62de7998fb1cf
     with:
       protocol: ngap
       weekly: "3 23 * * 6"
-      full: ${{ inputs.full || false }}
+      full: ${{ fromJSON(inputs.full || 'false') }}
       parallel: ${{ inputs.parallel || '' }}
       recheck: ${{ inputs.recheck || '' }}

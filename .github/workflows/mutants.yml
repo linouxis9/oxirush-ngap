@@ -2,16 +2,17 @@ name: Mutants
 
 # The mutation testing of the crate: the jobs that oxirush-ngap and oxirush-s1ap share,
 # in the repository of oxirush-aper, at the revision that build/revisions records, which
-# say what each run mutates. Every mutant runs each Saturday evening, and when the run is
-# started by hand with `full`; on the other nights after a day with a commit, and when it
-# is started by hand without `full`, the mutants of the code that the commits of the last
-# day changed; started by hand with `recheck`, the mutants that a file of the repository
-# names, as a missed.txt has them, again at the head. The crates of the family start at
-# times of their own, the longest first, to leave runners to the other CI.
+# say what each run mutates. Every mutant runs each Sunday, the day of the week without
+# fuzzing, and when the run is started by hand with `full`; on the other nights after a
+# day with a commit, and when it is started by hand without `full`, the mutants of the
+# code that the commits of the last day changed; started by hand with `recheck`, the
+# mutants that a file of the repository names, as a missed.txt has them, again at the
+# head. The crates of the family start at times of their own, with few jobs at once, to
+# leave runners to the other CI.
 on:
   schedule:
-    - cron: "3 23 * * 6"
-    - cron: "3 4 * * 1-6"
+    - cron: "53 22 * * 0"
+    - cron: "43 3 * * 1-6"
   workflow_dispatch:
     inputs:
       full:
@@ -42,7 +43,7 @@ jobs:
     uses: linouxis9/oxirush-aper/.github/workflows/protocol-mutants.yml@ea1df59c7a30322b80ed0554ac6e26a51373e32e
     with:
       protocol: ngap
-      weekly: "3 23 * * 6"
+      weekly: "53 22 * * 0"
       full: ${{ fromJSON(inputs.full || 'false') }}
       parallel: ${{ inputs.parallel || '' }}
       recheck: ${{ inputs.recheck || '' }}

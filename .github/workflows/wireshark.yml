@@ -1,6 +1,6 @@
 name: Wireshark
 
-# The comparison of the crate with Wireshark, every night and when the workflow is started
+# The comparison of the crate with Wireshark, every day and when the workflow is started
 # by hand: the job that oxirush-ngap and oxirush-s1ap share, in the repository of
 # oxirush-aper, at the revision that build/revisions records. tshark 4.6.4 dissects the
 # PDUs of tests/wireshark/corpus.tsv and of tests/fixtures, and tests/wireshark.rs compares
@@ -9,7 +9,7 @@ name: Wireshark
 # nothing was compared; the report is kept for 30 days.
 on:
   schedule:
-    - cron: "23 10 * * *"
+    - cron: "53 23 * * *"
   workflow_dispatch:
 
 permissions:

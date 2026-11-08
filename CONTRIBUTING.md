@@ -236,9 +236,10 @@ Downlink NAS Transport.
 a package of its own that is not published. A target does not only look for a
 panic: it holds what the crate writes to what it reads and to what `check` says.
 CI runs each for a minute, from the vectors and the captured PDUs. The Fuzz
-workflow runs each an hour every night and four hours on Sunday evening, with
-a corpus that the cache of the repository keeps and the seeds add to, and
-that of oxirush-aper does the same with the head of each repository.
+workflow runs each an hour every day but Wednesday and Sunday, and four hours
+on Wednesday, with a corpus that the cache of the repository keeps and the
+seeds add to, and that of oxirush-aper does the same with the head of each
+repository.
 
 | Target | What holds for any octets |
 |--------|---------------------------|

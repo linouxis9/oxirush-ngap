@@ -558,7 +558,7 @@ runs, through the codec and the trees. `fuzz/` has eight
 [cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets: `decode`, `json`,
 `paths` and `exact` read any octets, and `edit`, `tree`, `transfer` and `jer`
 edit the PDUs of the tests and write new ones. CI runs each for a minute, and
-the Fuzz workflows of this repository and of oxirush-aper an hour each night.
+the Fuzz workflows of this repository and of oxirush-aper an hour each day.
 `examples/` has four programs.
 
 ```sh

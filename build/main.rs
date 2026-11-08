@@ -54,24 +54,48 @@ use oxirush_ngap::aper::BitString;
 use oxirush_ngap::{Ie, ie, ngap::*};
 
 // The UPF's end of the tunnel, the type of the session, and its QoS flow
-let tunnel = GTPTunnel::new(TransportLayerAddress(BitString::from([10, 0, 0, 1])), GTPTEID([0, 0, 0, 1]), None);
-let flow = QosFlowSetupRequestItem::new(
-    QosFlowIdentifier(1),
-    QosFlowLevelQosParameters::new(
-        QosCharacteristics::nonDynamic5QI(NonDynamic5QIDescriptor::new(FiveQI(9), None, None, None, None)),
-        AllocationAndRetentionPriority::new(PriorityLevelARP(8),
-            PreEmptionCapability::shall_not_trigger_pre_emption,
-            PreEmptionVulnerability::not_pre_emptable, None),
-        None, None, None, None,
-    ),
-    None,
-    None,
-);
-let transfer = PDUSessionResourceSetupRequestTransfer::new(ProtocolIEContainer(vec![
-    ie::UL_NGU_UP_TNLInformation::field_of::<PDUSessionResourceSetupRequestTransfer>(UPTransportLayerInformation::gTPTunnel(tunnel))?,
-    ie::PDUSessionType::field_of::<PDUSessionResourceSetupRequestTransfer>(PDUSessionType::ipv4)?,
-    ie::QosFlowSetupRequestList::field_of::<PDUSessionResourceSetupRequestTransfer>(QosFlowSetupRequestList(vec![flow]))?,
-]));
+let tunnel = GTPTunnel {
+    transport_layer_address: TransportLayerAddress(BitString::from([10, 0, 0, 1])),
+    gtp_teid: GTPTEID([0, 0, 0, 1]),
+    ie_extensions: None,
+};
+let flow = QosFlowSetupRequestItem {
+    qos_flow_identifier: QosFlowIdentifier(1),
+    qos_flow_level_qos_parameters: QosFlowLevelQosParameters {
+        qos_characteristics: QosCharacteristics::nonDynamic5QI(NonDynamic5QIDescriptor {
+            five_qi: FiveQI(9),
+            priority_level_qos: None,
+            averaging_window: None,
+            maximum_data_burst_volume: None,
+            ie_extensions: None,
+        }),
+        allocation_and_retention_priority: AllocationAndRetentionPriority {
+            priority_level_arp: PriorityLevelARP(8),
+            pre_emption_capability: PreEmptionCapability::shall_not_trigger_pre_emption,
+            pre_emption_vulnerability: PreEmptionVulnerability::not_pre_emptable,
+            ie_extensions: None,
+        },
+        gbr_qos_information: None,
+        reflective_qos_attribute: None,
+        additional_qos_flow_information: None,
+        ie_extensions: None,
+    },
+    e_rab_id: None,
+    ie_extensions: None,
+};
+let transfer = PDUSessionResourceSetupRequestTransfer {
+    protocol_ies: ProtocolIEContainer(vec![
+        ie::UL_NGU_UP_TNLInformation::field_of::<PDUSessionResourceSetupRequestTransfer>(
+            UPTransportLayerInformation::gTPTunnel(tunnel),
+        )?,
+        ie::PDUSessionType::field_of::<PDUSessionResourceSetupRequestTransfer>(
+            PDUSessionType::ipv4,
+        )?,
+        ie::QosFlowSetupRequestList::field_of::<PDUSessionResourceSetupRequestTransfer>(
+            QosFlowSetupRequestList(vec![flow]),
+        )?,
+    ]),
+};
 
 // The octets that an item of a PDU SESSION RESOURCE SETUP REQUEST holds
 let octets = encode_open_type(&transfer)?;
@@ -81,7 +105,10 @@ assert!(PDUSessionResourceSetupRequestTransfer::check(&octets)?.is_empty());
 let mut partial = transfer.clone();
 partial.protocol_ies.0.pop();
 let found = PDUSessionResourceSetupRequestTransfer::check(&encode_open_type(&partial)?)?;
-assert_eq!(found[0].to_string(), "QosFlowSetupRequestList (IE 136) is mandatory, and the message does not have it");
+assert_eq!(
+    found[0].to_string(),
+    "QosFlowSetupRequestList (IE 136) is mandatory, and the message does not have it"
+);
 # Ok::<(), oxirush_ngap::Error>(())
 ```"#,
     ),
@@ -94,12 +121,21 @@ use oxirush_ngap::{ie, ngap::*};
 // PDU session 5 of the slice of SST 1, with the octets of its transfer: here one of
 // the PDU session type alone
 let transfer = hex::decode("0000010086000100").unwrap();
-let item = PDUSessionResourceSetupItemSUReq::new(PDUSessionID(5), None, s_nssai(1, None), transfer.into(), None);
+let item = PDUSessionResourceSetupItemSUReq {
+    pdu_session_id: PDUSessionID(5),
+    pdu_session_nas_pdu: None,
+    s_nssai: s_nssai(1, None),
+    pdu_session_resource_setup_request_transfer: transfer.into(),
+    ie_extensions: None,
+};
 
 // The transfer, read from the item
 let read: PDUSessionResourceSetupRequestTransfer =
     decode_open_type(&item.pdu_session_resource_setup_request_transfer)?;
-assert_eq!(read.ie::<ie::PDUSessionType>().unwrap()?, PDUSessionType::ipv4);
+assert_eq!(
+    read.ie::<ie::PDUSessionType>().unwrap()?,
+    PDUSessionType::ipv4
+);
 # Ok::<(), oxirush_ngap::Error>(())
 ```"#,
     ),
@@ -112,13 +148,16 @@ use std::net::Ipv4Addr;
 
 // The end of a tunnel: an IPv4 address in 32 bits, and its TEID
 let address = Ipv4Addr::new(10, 0, 0, 1);
-let tunnel = GTPTunnel::new(
-    TransportLayerAddress(BitString::from(address.octets())),
-    GTPTEID(0x2001u32.to_be_bytes()),
-    None,
-);
+let tunnel = GTPTunnel {
+    transport_layer_address: TransportLayerAddress(BitString::from(address.octets())),
+    gtp_teid: GTPTEID(0x2001u32.to_be_bytes()),
+    ie_extensions: None,
+};
 assert_eq!(tunnel.transport_layer_address.0.len(), 32);
-assert_eq!(tunnel.transport_layer_address.0.as_octets(), address.octets());
+assert_eq!(
+    tunnel.transport_layer_address.0.as_octets(),
+    address.octets()
+);
 assert_eq!(u32::from_be_bytes(tunnel.gtp_teid.0), 0x2001);
 ```"#,
     ),
@@ -130,14 +169,17 @@ use oxirush_ngap::ngap::*;
 
 // The cell and the tracking area of a UE, as an INITIAL UE MESSAGE has them
 let network = plmn("208", "93")?;
-let location = UserLocationInformationNR::new(
-    nr_cgi(network, 0x123456, 24, 1)?,
-    tai(network, [0x00, 0x00, 0x01]),
-    None,
-    None,
-);
+let location = UserLocationInformationNR {
+    nr_cgi: nr_cgi(network, 0x123456, 24, 1)?,
+    tai: tai(network, [0x00, 0x00, 0x01]),
+    time_stamp: None,
+    ie_extensions: None,
+};
 let ie = UserLocationInformation::userLocationInformationNR(location);
-assert_eq!(hex::encode(encode_open_type(&ie)?), "4002f839123456001002f839000001");
+assert_eq!(
+    hex::encode(encode_open_type(&ie)?),
+    "4002f839123456001002f839000001"
+);
 # Ok::<(), oxirush_ngap::Error>(())
 ```"#,
     ),

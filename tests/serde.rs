@@ -114,7 +114,11 @@ fn a_type_of_the_bindings_is_serialized_as_the_tree_of_a_pdu_shows_it() {
 
     // An SST is a number, an SD its octets, a PLMN identity its MCC and its MNC, and the
     // parts of a GUAMI numbers.
-    let slice = SNSSAI::new(SST([1]), Some(SD([0, 0, 0xab])), None);
+    let slice = SNSSAI {
+        sst: SST([1]),
+        sd: Some(SD([0, 0, 0xab])),
+        ie_extensions: None,
+    };
     let shown = tree!({"sST": 1, "sD": "0000ab"});
     assert_eq!(written(&slice), shown);
     assert_eq!(read::<SNSSAI>(&shown).unwrap(), slice);
@@ -140,13 +144,9 @@ fn a_type_of_the_bindings_is_serialized_as_the_tree_of_a_pdu_shows_it() {
     // The same value in a tree of a PDU.
     let pdu = build_ngap!(REJECT NGSetupResponse,
         REJECT AMFName(AMFName("amf".into())),
-        REJECT ServedGUAMIList(ServedGUAMIList(vec![ServedGUAMIItem::new(guami.clone(), None, None)])),
+        REJECT ServedGUAMIList(ServedGUAMIList(vec![ServedGUAMIItem { guami: guami.clone(), backup_amf_name: None, ie_extensions: None }])),
         IGNORE RelativeAMFCapacity(255u8),
-        REJECT PLMNSupportList(PLMNSupportList(vec![PLMNSupportItem::new(
-            network,
-            SliceSupportList(vec![SliceSupportItem::new(slice.clone(), None)]),
-            None,
-        )])),
+        REJECT PLMNSupportList(PLMNSupportList(vec![PLMNSupportItem { plmn_identity: network, slice_support_list: SliceSupportList(vec![SliceSupportItem { s_nssai: slice.clone(), ie_extensions: None }]), ie_extensions: None }])),
     )
     .unwrap();
     let tree = pdu.to_tree();

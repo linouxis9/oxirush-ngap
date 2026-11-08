@@ -68,11 +68,11 @@ fn a_message_that_the_macros_built_has_the_ies_that_it_was_built_with() -> Resul
 fn an_unknown_ie_and_a_repeated_one_are_kept_with_their_criticality() -> Result<(), Error> {
     // An IE of the message, an IE that the protocol does not have, the first again with
     // another value and another criticality, and an IE of another message.
-    let unknown = ProtocolIEField::new(
-        60000u16,
-        Criticality::Notify,
-        Octets::from(vec![0xc0, 0xff]),
-    );
+    let unknown = ProtocolIEField {
+        id: ProtocolIEID(60000),
+        criticality: Criticality::Notify,
+        value: Octets::from(vec![0xc0, 0xff]),
+    };
     let mut again = ie::AMF_UE_NGAP_ID::field(Criticality::Reject, 2u64)?;
     again.criticality = Criticality::Ignore;
     let ies = vec![
@@ -239,9 +239,12 @@ fn an_ie_is_built_with_the_name_of_its_message_or_without_one() -> Result<(), Er
 fn the_ies_of_a_transfer_are_read_changed_and_built_by_the_macros() -> Result<(), Error> {
     use oxirush_ngap::{Ie, extract_ngap_ies};
 
-    let mut transfer = PDUSessionResourceSetupRequestTransfer::new(ProtocolIEContainer(vec![
-        ie::PDUSessionType::field(Criticality::Reject, PDUSessionType::ipv4)?,
-    ]));
+    let mut transfer = PDUSessionResourceSetupRequestTransfer {
+        protocol_ies: ProtocolIEContainer(vec![ie::PDUSessionType::field(
+            Criticality::Reject,
+            PDUSessionType::ipv4,
+        )?]),
+    };
     let octets = encode_open_type(&transfer)?;
     assert_eq!(hex::encode(&octets), "0000010086000100");
 
@@ -294,21 +297,28 @@ fn an_ie_of_a_transfer_has_the_criticality_of_its_object_set() -> Result<(), Err
 
     // TS 38.413 clause 9.3.4.1: each IE of a PDU SESSION RESOURCE SETUP REQUEST
     // TRANSFER is `reject` but those of the later releases.
-    let tunnel = UPTransportLayerInformation::gTPTunnel(GTPTunnel::new(
-        TransportLayerAddress(BitString::from([127, 0, 0, 22])),
-        GTPTEID([0, 0, 0x20, 0x01]),
-        None,
-    ));
+    let tunnel = UPTransportLayerInformation::gTPTunnel(GTPTunnel {
+        transport_layer_address: TransportLayerAddress(BitString::from([127, 0, 0, 22])),
+        gtp_teid: GTPTEID([0, 0, 0x20, 0x01]),
+        ie_extensions: None,
+    });
     let ies = [
         ie::UL_NGU_UP_TNLInformation::field_of::<PDUSessionResourceSetupRequestTransfer>(tunnel)?,
         ie::PDUSessionType::field_of::<PDUSessionResourceSetupRequestTransfer>(
             PDUSessionType::ipv4,
         )?,
         ie::PDUSessionAggregateMaximumBitRate::field_of::<PDUSessionResourceSetupRequestTransfer>(
-            PDUSessionAggregateMaximumBitRate::new(BitRate(1), BitRate(1), None),
+            PDUSessionAggregateMaximumBitRate {
+                pdu_session_aggregate_maximum_bit_rate_dl: BitRate(1),
+                pdu_session_aggregate_maximum_bit_rate_ul: BitRate(1),
+                ie_extensions: None,
+            },
         )?,
         ie::RedundantPDUSessionInformation::field_of::<PDUSessionResourceSetupRequestTransfer>(
-            RedundantPDUSessionInformation::new(RSN::v1, None),
+            RedundantPDUSessionInformation {
+                rsn: RSN::v1,
+                ie_extensions: None,
+            },
         )?,
     ];
     let criticalities: Vec<_> = ies.iter().map(|ie| (ie.id.0, ie.criticality)).collect();
@@ -322,10 +332,13 @@ fn an_ie_of_a_transfer_has_the_criticality_of_its_object_set() -> Result<(), Err
         ]
     );
     // And so in the transfer of a modification
-    let modified =
-        ie::PDUSessionAggregateMaximumBitRate::field_of::<PDUSessionResourceModifyRequestTransfer>(
-            PDUSessionAggregateMaximumBitRate::new(BitRate(1), BitRate(1), None),
-        )?;
+    let modified = ie::PDUSessionAggregateMaximumBitRate::field_of::<
+        PDUSessionResourceModifyRequestTransfer,
+    >(PDUSessionAggregateMaximumBitRate {
+        pdu_session_aggregate_maximum_bit_rate_dl: BitRate(1),
+        pdu_session_aggregate_maximum_bit_rate_ul: BitRate(1),
+        ie_extensions: None,
+    })?;
     assert_eq!(modified.criticality, Criticality::Reject);
     // An IE that the object set of the transfer does not have is assigned none
     let error = ie::TimeToWait::field_of::<PDUSessionResourceSetupRequestTransfer>(TimeToWait::v5s)
@@ -342,42 +355,44 @@ fn an_ie_of_a_transfer_has_the_criticality_of_its_object_set() -> Result<(), Err
 #[test]
 fn a_transfer_is_checked_against_its_object_set() -> Result<(), Error> {
     let transfer = |ies| {
-        encode_open_type(&PDUSessionResourceSetupRequestTransfer::new(
-            ProtocolIEContainer(ies),
-        ))
+        encode_open_type(&PDUSessionResourceSetupRequestTransfer {
+            protocol_ies: ProtocolIEContainer(ies),
+        })
     };
     let tunnel = || {
-        UPTransportLayerInformation::gTPTunnel(GTPTunnel::new(
-            TransportLayerAddress(oxirush_ngap::aper::BitString::from([127, 0, 0, 22])),
-            GTPTEID([0, 0, 0x20, 0x01]),
-            None,
-        ))
+        UPTransportLayerInformation::gTPTunnel(GTPTunnel {
+            transport_layer_address: TransportLayerAddress(oxirush_ngap::aper::BitString::from([
+                127, 0, 0, 22,
+            ])),
+            gtp_teid: GTPTEID([0, 0, 0x20, 0x01]),
+            ie_extensions: None,
+        })
     };
     let flows = || {
-        QosFlowSetupRequestList(vec![QosFlowSetupRequestItem::new(
-            QosFlowIdentifier(9),
-            QosFlowLevelQosParameters::new(
-                QosCharacteristics::nonDynamic5QI(NonDynamic5QIDescriptor::new(
-                    FiveQI(9),
-                    None,
-                    None,
-                    None,
-                    None,
-                )),
-                AllocationAndRetentionPriority::new(
-                    PriorityLevelARP(8),
-                    PreEmptionCapability::shall_not_trigger_pre_emption,
-                    PreEmptionVulnerability::not_pre_emptable,
-                    None,
-                ),
-                None,
-                None,
-                None,
-                None,
-            ),
-            None,
-            None,
-        )])
+        QosFlowSetupRequestList(vec![QosFlowSetupRequestItem {
+            qos_flow_identifier: QosFlowIdentifier(9),
+            qos_flow_level_qos_parameters: QosFlowLevelQosParameters {
+                qos_characteristics: QosCharacteristics::nonDynamic5QI(NonDynamic5QIDescriptor {
+                    five_qi: FiveQI(9),
+                    priority_level_qos: None,
+                    averaging_window: None,
+                    maximum_data_burst_volume: None,
+                    ie_extensions: None,
+                }),
+                allocation_and_retention_priority: AllocationAndRetentionPriority {
+                    priority_level_arp: PriorityLevelARP(8),
+                    pre_emption_capability: PreEmptionCapability::shall_not_trigger_pre_emption,
+                    pre_emption_vulnerability: PreEmptionVulnerability::not_pre_emptable,
+                    ie_extensions: None,
+                },
+                gbr_qos_information: None,
+                reflective_qos_attribute: None,
+                additional_qos_flow_information: None,
+                ie_extensions: None,
+            },
+            e_rab_id: None,
+            ie_extensions: None,
+        }])
     };
     // A transfer as the specification has a sender construct it deviates in nothing
     let octets = transfer(vec![

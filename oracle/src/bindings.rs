@@ -855,15 +855,6 @@ pub mod ngap_containers {
         criticality: [Criticality] {},
         value: [Any] {},
     } }
-    impl ProtocolIEField {
-        pub fn new(id: impl Into<ProtocolIEID>, criticality: Criticality, value: Any) -> Self {
-            Self {
-                id: id.into(),
-                criticality,
-                value,
-            }
-        }
-    }
     #[doc = " `ProtocolIE-Container`: the IEs of a message."]
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("0..=65535"), identifier = "ProtocolIE-Container")]
@@ -884,19 +875,6 @@ pub mod ngap_containers {
         #[rasn(identifier = "extensionValue")]
         extension_value: [Any] {},
     } }
-    impl ProtocolExtensionField {
-        pub fn new(
-            id: impl Into<ProtocolExtensionID>,
-            criticality: Criticality,
-            extension_value: Any,
-        ) -> Self {
-            Self {
-                id: id.into(),
-                criticality,
-                extension_value,
-            }
-        }
-    }
     #[doc = " `ProtocolExtensionContainer`: the `iE-Extensions` of a type."]
     #[derive(AsnType, Debug, Clone, PartialEq, Eq, Hash)]
     #[rasn(delegate, size("1..=65535"), identifier = "ProtocolExtensionContainer")]

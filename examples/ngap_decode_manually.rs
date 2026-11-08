@@ -24,57 +24,74 @@ fn main() {
     let plmn_identity = PLMNIdentity([0x02, 0xF8, 0x39]);
 
     // The GUAMI that the AMF serves.
-    let guami = GUAMI::new(
+    let guami = GUAMI {
         plmn_identity,
         // A bit string of 64 bits at most is a number with a length, which the type
         // of one size has.
-        AMFRegionID::new(1).expect("an AMF Region ID of 8 bits"),
-        AMFSetID::new(1).expect("an AMF Set ID of 10 bits"),
-        AMFPointer::new(0).expect("an AMF Pointer of 6 bits"),
-        None,
-    );
-    let served_guamis = ServedGUAMIList(vec![ServedGUAMIItem::new(guami, None, None)]);
+        amf_region_id: AMFRegionID::new(1).expect("an AMF Region ID of 8 bits"),
+        amf_set_id: AMFSetID::new(1).expect("an AMF Set ID of 10 bits"),
+        amf_pointer: AMFPointer::new(0).expect("an AMF Pointer of 6 bits"),
+        ie_extensions: None,
+    };
+    let served_guamis = ServedGUAMIList(vec![ServedGUAMIItem {
+        guami,
+        backup_amf_name: None,
+        ie_extensions: None,
+    }]);
 
     // The PLMN that it supports, with one slice.
-    let slice = SNSSAI::new(SST([1]), Some(SD([0x00, 0x00, 0x01])), None);
-    let slices = SliceSupportList(vec![SliceSupportItem::new(slice, None)]);
-    let plmn_support = PLMNSupportList(vec![PLMNSupportItem::new(plmn_identity, slices, None)]);
+    let slice = SNSSAI {
+        sst: SST([1]),
+        sd: Some(SD([0x00, 0x00, 0x01])),
+        ie_extensions: None,
+    };
+    let slices = SliceSupportList(vec![SliceSupportItem {
+        s_nssai: slice,
+        ie_extensions: None,
+    }]);
+    let plmn_support = PLMNSupportList(vec![PLMNSupportItem {
+        plmn_identity,
+        slice_support_list: slices,
+        ie_extensions: None,
+    }]);
 
     let amf_name = AMFName("amf-1".into());
 
     // The value of an IE is an open type: every entry holds its numeric ID, its
     // criticality, and the APER octets of its concrete NGAP value.
     let ies = vec![
-        ProtocolIEField::new(
-            ID_AMFNAME,
-            Criticality::Reject,
-            encode_open_type(&amf_name).expect("encode AMF name"),
-        ),
-        ProtocolIEField::new(
-            ID_SERVED_GUAMILIST,
-            Criticality::Reject,
-            encode_open_type(&served_guamis).expect("encode served GUAMIs"),
-        ),
-        ProtocolIEField::new(
-            ID_RELATIVE_AMFCAPACITY,
-            Criticality::Ignore,
-            encode_open_type(&RelativeAMFCapacity(255)).expect("encode AMF capacity"),
-        ),
-        ProtocolIEField::new(
-            ID_PLMNSUPPORT_LIST,
-            Criticality::Reject,
-            encode_open_type(&plmn_support).expect("encode PLMN support"),
-        ),
+        ProtocolIEField {
+            id: ID_AMFNAME,
+            criticality: Criticality::Reject,
+            value: encode_open_type(&amf_name).expect("encode AMF name"),
+        },
+        ProtocolIEField {
+            id: ID_SERVED_GUAMILIST,
+            criticality: Criticality::Reject,
+            value: encode_open_type(&served_guamis).expect("encode served GUAMIs"),
+        },
+        ProtocolIEField {
+            id: ID_RELATIVE_AMFCAPACITY,
+            criticality: Criticality::Ignore,
+            value: encode_open_type(&RelativeAMFCapacity(255)).expect("encode AMF capacity"),
+        },
+        ProtocolIEField {
+            id: ID_PLMNSUPPORT_LIST,
+            criticality: Criticality::Reject,
+            value: encode_open_type(&plmn_support).expect("encode PLMN support"),
+        },
     ];
-    let response = NGSetupResponse::new(ProtocolIEContainer(ies));
+    let response = NGSetupResponse {
+        protocol_ies: ProtocolIEContainer(ies),
+    };
 
     // The outer PDU wraps the APER-encoded message in its direction and
     // ASN.1-derived procedure code.
-    let pdu = NGAP_PDU::successfulOutcome(SuccessfulOutcome::new(
-        ID_NGSETUP,
-        Criticality::Reject,
-        encode_open_type(&response).expect("encode NG Setup Response"),
-    ));
+    let pdu = NGAP_PDU::successfulOutcome(SuccessfulOutcome {
+        procedure_code: ID_NGSETUP,
+        criticality: Criticality::Reject,
+        value: encode_open_type(&response).expect("encode NG Setup Response"),
+    });
 
     // ── 2. Encode to APER ───────────────────────────────────────────────────
     // `pdu.encode()` is the convenience API; this deliberately uses the runtime.

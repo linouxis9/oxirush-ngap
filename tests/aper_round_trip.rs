@@ -37,7 +37,11 @@ fn public_macros_round_trip_typed_open_message() -> Result<(), Error> {
 
 #[test]
 fn snssai_round_trips_with_optional_sd() {
-    let value = SNSSAI::new(SST([1]), Some(SD([0, 0, 1])), None);
+    let value = SNSSAI {
+        sst: SST([1]),
+        sd: Some(SD([0, 0, 1])),
+        ie_extensions: None,
+    };
     let wire = encode(&value).expect("encode S-NSSAI");
     let decoded: SNSSAI = decode(&wire).expect("decode S-NSSAI");
     assert_eq!(decoded, value);
@@ -45,12 +49,19 @@ fn snssai_round_trips_with_optional_sd() {
 
 #[test]
 fn plmn_support_list_round_trips_nested_slice() {
-    let slice = SNSSAI::new(SST([1]), Some(SD([0, 0, 1])), None);
-    let value = PLMNSupportList(vec![PLMNSupportItem::new(
-        PLMNIdentity([0x02, 0xf8, 0x39]),
-        SliceSupportList(vec![SliceSupportItem::new(slice, None)]),
-        None,
-    )]);
+    let slice = SNSSAI {
+        sst: SST([1]),
+        sd: Some(SD([0, 0, 1])),
+        ie_extensions: None,
+    };
+    let value = PLMNSupportList(vec![PLMNSupportItem {
+        plmn_identity: PLMNIdentity([0x02, 0xf8, 0x39]),
+        slice_support_list: SliceSupportList(vec![SliceSupportItem {
+            s_nssai: slice,
+            ie_extensions: None,
+        }]),
+        ie_extensions: None,
+    }]);
     let wire = encode(&value).expect("encode PLMN support");
     let decoded: PLMNSupportList = decode(&wire).expect("decode PLMN support");
     assert_eq!(decoded, value);
@@ -58,10 +69,14 @@ fn plmn_support_list_round_trips_nested_slice() {
 
 #[test]
 fn slice_support_list_round_trips() {
-    let value = SliceSupportList(vec![SliceSupportItem::new(
-        SNSSAI::new(SST([1]), Some(SD([0, 0, 1])), None),
-        None,
-    )]);
+    let value = SliceSupportList(vec![SliceSupportItem {
+        s_nssai: SNSSAI {
+            sst: SST([1]),
+            sd: Some(SD([0, 0, 1])),
+            ie_extensions: None,
+        },
+        ie_extensions: None,
+    }]);
     let wire = encode(&value).expect("encode slice support");
     let decoded: SliceSupportList = decode(&wire).expect("decode slice support");
     assert_eq!(decoded, value);
@@ -69,14 +84,18 @@ fn slice_support_list_round_trips() {
 
 #[test]
 fn plmn_support_item_round_trips() {
-    let value = PLMNSupportItem::new(
-        PLMNIdentity([0x02, 0xf8, 0x39]),
-        SliceSupportList(vec![SliceSupportItem::new(
-            SNSSAI::new(SST([1]), Some(SD([0, 0, 1])), None),
-            None,
-        )]),
-        None,
-    );
+    let value = PLMNSupportItem {
+        plmn_identity: PLMNIdentity([0x02, 0xf8, 0x39]),
+        slice_support_list: SliceSupportList(vec![SliceSupportItem {
+            s_nssai: SNSSAI {
+                sst: SST([1]),
+                sd: Some(SD([0, 0, 1])),
+                ie_extensions: None,
+            },
+            ie_extensions: None,
+        }]),
+        ie_extensions: None,
+    };
     let wire = encode(&value).expect("encode PLMN support item");
     let decoded: PLMNSupportItem = decode(&wire).expect("decode PLMN support item");
     assert_eq!(decoded, value);
@@ -115,20 +134,20 @@ fn ie_names_address_their_own_ie_before_a_same_named_type() -> Result<(), Error>
 /// §11.9.3.5).
 #[test]
 fn every_constrained_list_encodes_its_length_per_x691() -> Result<(), Error> {
-    let diagnostics = CriticalityDiagnostics::new(
-        Some(ProcedureCode(14)),
-        Some(TriggeringMessage::initiating_message),
-        Some(Criticality::Reject),
-        Some(CriticalityDiagnosticsIEList(vec![
-            CriticalityDiagnosticsIEItem::new(
-                Criticality::Reject,
-                ID_GUAMI,
-                TypeOfError::missing,
-                None,
-            ),
+    let diagnostics = CriticalityDiagnostics {
+        procedure_code: Some(ProcedureCode(14)),
+        triggering_message: Some(TriggeringMessage::initiating_message),
+        procedure_criticality: Some(Criticality::Reject),
+        ies_criticality_diagnostics: Some(CriticalityDiagnosticsIEList(vec![
+            CriticalityDiagnosticsIEItem {
+                ie_criticality: Criticality::Reject,
+                ie_id: ID_GUAMI,
+                type_of_error: TypeOfError::missing,
+                ie_extensions: None,
+            },
         ])),
-        None,
-    );
+        ie_extensions: None,
+    };
     let error = build_ngap!(IGNORE ErrorIndication,
         IGNORE Cause(Cause::protocol(CauseProtocol::abstract_syntax_error_reject)),
         IGNORE CriticalityDiagnostics(diagnostics),
@@ -143,7 +162,7 @@ fn every_constrained_list_encodes_its_length_per_x691() -> Result<(), Error> {
     let reset = build_ngap!(REJECT NGReset,
         IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::unspecified)),
         REJECT ResetType(ResetType::partOfNG_Interface(UEAssociatedLogicalNGConnectionList(vec![
-            UEAssociatedLogicalNGConnectionItem::new(Some(AMFUENGAPID(5)), Some(RANUENGAPID(6)), None),
+            UEAssociatedLogicalNGConnectionItem { amf_ue_ngap_id: Some(AMFUENGAPID(5)), ran_ue_ngap_id: Some(RANUENGAPID(6)), ie_extensions: None },
         ]))),
     )?;
     let wire = reset.encode().expect("encode NGReset");
@@ -160,25 +179,26 @@ fn every_constrained_list_encodes_its_length_per_x691() -> Result<(), Error> {
 /// encoding (X.691 (02/2021) §20.6, §11.9.3.3, §11.5.7.3).
 #[test]
 fn multiline_extension_list_has_an_aligned_count() {
-    let list =
-        NGAPIESupportInformationResponseList(vec![NGAPIESupportInformationResponseItem::new(
-            ProtocolIEID(10),
+    let list = NGAPIESupportInformationResponseList(vec![NGAPIESupportInformationResponseItem {
+        ngap_protocol_ie_id: ProtocolIEID(10),
+        ngap_protocol_ie_support_info:
             NGAPIESupportInformationResponseItemNgapProtocolIESupportInfo::supported,
+        ngap_protocol_ie_presence_info:
             NGAPIESupportInformationResponseItemNgapProtocolIEPresenceInfo::present,
-            None,
-        )]);
-    let extension = ProtocolExtensionField::new(
-        ProtocolExtensionID(356),
-        Criticality::Ignore,
-        encode_open_type(&list).unwrap(),
-    );
-    let value = TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainer::new(
-        None,
-        Some(ProtocolExtensionContainer(vec![
+        ie_extensions: None,
+    }]);
+    let extension = ProtocolExtensionField {
+        id: ProtocolExtensionID(356),
+        criticality: Criticality::Ignore,
+        extension_value: encode_open_type(&list).unwrap(),
+    };
+    let value = TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainer {
+        cell_cag_information: None,
+        ie_extensions: Some(ProtocolExtensionContainer(vec![
             extension.clone(),
             extension,
         ])),
-    );
+    };
     let wire = hex::decode("2000010164400400000a000164400400000a00").unwrap();
     assert_eq!(encode(&value).unwrap(), wire);
     assert_eq!(
@@ -193,7 +213,11 @@ fn multiline_extension_list_has_an_aligned_count() {
 /// Wireshark decodes the expected octets.
 #[test]
 fn utf8_string_names_have_an_unconstrained_length() -> Result<(), Error> {
-    let name = ExtendedAMFName::new(None, Some(AMFNameUTF8String("amf-é".into())), None);
+    let name = ExtendedAMFName {
+        amf_name_visible_string: None,
+        amf_name_utf8_string: Some(AMFNameUTF8String("amf-é".into())),
+        ie_extensions: None,
+    };
     let pdu = build_ngap!(REJECT NGSetupResponse,
         IGNORE Extended_AMFName(name.clone()),
     )?;
@@ -239,7 +263,11 @@ fn long_fixed_size_bit_strings_are_octet_aligned() -> Result<(), Error> {
     // The first and the last bit of the 256.
     let mut nh = [0u8; 32];
     (nh[0], nh[31]) = (0x80, 0x01);
-    let context = SecurityContext::new(NextHopChainingCount(5), SecurityKey(nh.into()), None);
+    let context = SecurityContext {
+        next_hop_chaining_count: NextHopChainingCount(5),
+        next_hop_nh: SecurityKey(nh.into()),
+        ie_extensions: None,
+    };
     let pdu = build_ngap!(REJECT PathSwitchRequestAcknowledge,
         REJECT SecurityContext(context.clone()),
     )?;
@@ -261,11 +289,11 @@ fn long_fixed_size_bit_strings_are_octet_aligned() -> Result<(), Error> {
         let number = (0..length).fold(0, |number, bit| number << 1 | u64::from(bit % 3 == 0));
         Bits::new(number, length).unwrap()
     };
-    let node = GlobalRANNodeID::globalNgENB_ID(GlobalNgENBID::new(
-        oxirush_ngap::helpers::plmn("208", "93")?,
-        NgENBID::macroNgENB_ID(bits(20)),
-        None,
-    ));
+    let node = GlobalRANNodeID::globalNgENB_ID(GlobalNgENBID {
+        plmn_identity: oxirush_ngap::helpers::plmn("208", "93")?,
+        ng_enb_id: NgENBID::macroNgENB_ID(bits(20)),
+        ie_extensions: None,
+    });
     let pdu = build_ngap!(REJECT NGSetupRequest,
         REJECT GlobalRANNodeID(node.clone()),
     )?;
@@ -305,13 +333,16 @@ fn long_fixed_size_bit_strings_are_octet_aligned() -> Result<(), Error> {
     }
     // The first bit alone.
     let first = |length: usize| Bits::new(1 << (length - 1), length).unwrap();
-    assert_round_trip!(RIMInformation::new(
-        GNBSetID(first(22)),
-        RIMInformationRIMRSDetection::rs_detected,
-        None,
-    ));
+    assert_round_trip!(RIMInformation {
+        target_gnb_set_id: GNBSetID(first(22)),
+        rim_rs_detection: RIMInformationRIMRSDetection::rs_detected,
+        ie_extensions: None
+    });
     assert_round_trip!(CellCAGList(vec![CAGID(first(32))]));
-    assert_round_trip!(SNPNMobilityInformation::new(NID(first(44)), None));
+    assert_round_trip!(SNPNMobilityInformation {
+        serving_nid: NID(first(44)),
+        ie_extensions: None
+    });
     Ok(())
 }
 
@@ -370,7 +401,9 @@ fn extraction_binding_may_share_the_field_name() -> Result<(), Error> {
 fn release_request(id: Option<u64>) -> UEContextReleaseRequest<'static> {
     let ie = |id: u64| oxirush_ngap::ie::AMF_UE_NGAP_ID::field(Criticality::Reject, id);
     let ies = id.map(|id| ie(id).expect("an identifier"));
-    UEContextReleaseRequest::new(ProtocolIEContainer(ies.into_iter().collect()))
+    UEContextReleaseRequest {
+        protocol_ies: ProtocolIEContainer(ies.into_iter().collect()),
+    }
 }
 
 /// A `req` field that is not there is the error of the enclosing function: the
@@ -454,7 +487,12 @@ fn an_empty_open_type_value_is_one_zero_octet() {
 fn a_number_between_the_ranges_of_an_extensible_root_is_written_in_the_root() {
     let period = |value: u8| -> ExpectedUEActivityBehaviour {
         let period = ExpectedActivityPeriod(u64::from(value));
-        ExpectedUEActivityBehaviour::new(Some(period), None, None, None)
+        ExpectedUEActivityBehaviour {
+            expected_activity_period: Some(period),
+            expected_idle_period: None,
+            source_of_ue_activity_behaviour_information: None,
+            ie_extensions: None,
+        }
     };
     let written = |value| hex::encode(encode(&period(value)).unwrap());
     let read = |octets: &str| {
@@ -540,17 +578,15 @@ fn a_string_with_a_length_of_two_octets_is_written_as_pycrate_writes_it() {
 /// decoded from, and keeps the container.
 #[test]
 fn a_value_keeps_its_extension_container_after_its_octets() {
-    let sent = TAI::new(
-        PLMNIdentity([0x02, 0xf8, 0x39]),
-        TAC([0x00, 0x00, 0x01]),
-        Some(ProtocolExtensionContainer(vec![
-            ProtocolExtensionField::new(
-                ProtocolExtensionID(1),
-                Criticality::Ignore,
-                Octets::from(vec![0x00]),
-            ),
-        ])),
-    );
+    let sent = TAI {
+        plmn_identity: PLMNIdentity([0x02, 0xf8, 0x39]),
+        tac: TAC([0x00, 0x00, 0x01]),
+        ie_extensions: Some(ProtocolExtensionContainer(vec![ProtocolExtensionField {
+            id: ProtocolExtensionID(1),
+            criticality: Criticality::Ignore,
+            extension_value: Octets::from(vec![0x00]),
+        }])),
+    };
     let octets = encode(&sent).unwrap();
     let kept: TAI = decode(&octets).unwrap();
     drop(octets);
@@ -569,5 +605,12 @@ fn a_sequence_is_built_by_a_literal() {
         tac,
         ie_extensions: None,
     };
-    assert_eq!(literal, TAI::new(plmn_identity, tac, None));
+    assert_eq!(
+        literal,
+        TAI {
+            plmn_identity,
+            tac,
+            ie_extensions: None
+        }
+    );
 }

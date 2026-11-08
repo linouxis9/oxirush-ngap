@@ -242,8 +242,11 @@ fn every_deviation_of_a_message_is_reported_in_the_order_of_the_message() -> Res
     let mut ies = unknown.protocol_ies()?.into_owned();
     ies.0.truncate(1);
     let octets = Octets::from(vec![0xc0, 0xff]);
-    ies.0
-        .push(ProtocolIEField::new(60000u16, Criticality::Ignore, octets));
+    ies.0.push(ProtocolIEField {
+        id: ProtocolIEID(60000),
+        criticality: Criticality::Ignore,
+        value: octets,
+    });
     unknown.set_protocol_ies(ies)?;
     let said = unknown.check()?[1].to_string();
     assert_eq!(
@@ -408,13 +411,13 @@ fn what_has_no_object_set_is_not_checked_against_one() -> Result<(), Error> {
         assert_eq!(deviations[0].diagnostics_item(), None);
         assert_eq!(
             pdu.criticality_diagnostics(&deviations),
-            CriticalityDiagnostics::new(
-                Some(ProcedureCode(200)),
-                Some(TriggeringMessage::initiating_message),
-                Some(criticality),
-                None,
-                None,
-            )
+            CriticalityDiagnostics {
+                procedure_code: Some(ProcedureCode(200)),
+                triggering_message: Some(TriggeringMessage::initiating_message),
+                procedure_criticality: Some(criticality),
+                ies_criticality_diagnostics: None,
+                ie_extensions: None
+            }
         );
     }
     assert_eq!(

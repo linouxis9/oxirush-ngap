@@ -121,16 +121,16 @@ fn the_view_of_a_pdu_that_was_edited_is_that_pdu_edited() {
 
 #[test]
 fn contained_transfer_edits_are_typed_and_do_not_reorder_outer_ies() {
-    let transfer = PDUSessionResourceSetupUnsuccessfulTransfer::new(
-        Cause::protocol(CauseProtocol::semantic_error),
-        None,
-        None,
-    );
+    let transfer = PDUSessionResourceSetupUnsuccessfulTransfer {
+        cause: Cause::protocol(CauseProtocol::semantic_error),
+        criticality_diagnostics: None,
+        ie_extensions: None,
+    };
     let raw = encode_open_type(&transfer).unwrap().to_vec();
     let pdu = build_ngap!(IGNORE PDUSessionResourceSetupResponse,
         IGNORE AMF_UE_NGAP_ID(1u64),
         IGNORE RAN_UE_NGAP_ID(7u32),
-        IGNORE PDUSessionResourceFailedToSetupListSURes(PDUSessionResourceFailedToSetupListSURes(vec![PDUSessionResourceFailedToSetupItemSURes::new(PDUSessionID(7), raw.into(), None)])),
+        IGNORE PDUSessionResourceFailedToSetupListSURes(PDUSessionResourceFailedToSetupListSURes(vec![PDUSessionResourceFailedToSetupItemSURes { pdu_session_id: PDUSessionID(7), pdu_session_resource_setup_unsuccessful_transfer: raw.into(), ie_extensions: None }])),
     ).unwrap();
     let mut view = pdu.to_view().unwrap();
     let path = "/message/protocolIEs/2/value/0/pDUSessionResourceSetupUnsuccessfulTransfer/decoded/cause/protocol";
@@ -164,16 +164,18 @@ fn editing_a_known_ie_cannot_drop_unknown_sequence_additions() {
     let raw = hex::decode("0002f839000180080801000010").unwrap();
     let list: PLMNSupportList = decode_open_type(&raw).unwrap();
     assert_eq!(list.0[0].slice_support_list.0[1].s_nssai.sst.0[0], 2);
-    let response = NGSetupResponse::new(ProtocolIEContainer(vec![ProtocolIEField::new(
-        ProtocolIEID(80),
-        Criticality::Reject,
-        raw.into(),
-    )]));
-    let pdu = NGAP_PDU::successfulOutcome(SuccessfulOutcome::new(
-        ProcedureCode(21),
-        Criticality::Reject,
-        encode_open_type(&response).unwrap(),
-    ));
+    let response = NGSetupResponse {
+        protocol_ies: ProtocolIEContainer(vec![ProtocolIEField {
+            id: ProtocolIEID(80),
+            criticality: Criticality::Reject,
+            value: raw.into(),
+        }]),
+    };
+    let pdu = NGAP_PDU::successfulOutcome(SuccessfulOutcome {
+        procedure_code: ProcedureCode(21),
+        criticality: Criticality::Reject,
+        value: encode_open_type(&response).unwrap(),
+    });
     let wire = pdu.encode().unwrap();
     let mut view = pdu.to_view().unwrap();
     assert_eq!(NGAP_PDU::from_view(&view).unwrap().encode().unwrap(), wire);
@@ -283,16 +285,18 @@ fn a_new_ie_whose_value_is_a_string_is_typed_too() {
 
 #[test]
 fn an_ie_that_does_not_decode_is_edited_as_its_octets() {
-    let request = UEContextReleaseRequest::new(ProtocolIEContainer(vec![ProtocolIEField::new(
-        ProtocolIEID(60000),
-        Criticality::Ignore,
-        vec![0xC0, 0xFF, 0xEE].into(),
-    )]));
-    let pdu = NGAP_PDU::initiatingMessage(InitiatingMessage::new(
-        ProcedureCode(42),
-        Criticality::Ignore,
-        encode_open_type(&request).unwrap(),
-    ));
+    let request = UEContextReleaseRequest {
+        protocol_ies: ProtocolIEContainer(vec![ProtocolIEField {
+            id: ProtocolIEID(60000),
+            criticality: Criticality::Ignore,
+            value: vec![0xC0, 0xFF, 0xEE].into(),
+        }]),
+    };
+    let pdu = NGAP_PDU::initiatingMessage(InitiatingMessage {
+        procedure_code: ProcedureCode(42),
+        criticality: Criticality::Ignore,
+        value: encode_open_type(&request).unwrap(),
+    });
     let mut view = pdu.to_view().unwrap();
     let path = "/message/protocolIEs/0/value";
     assert_eq!(view.pointer(path), Some(&oxirush_ngap::tree!("c0ffee")));
@@ -1269,11 +1273,13 @@ fn a_tunnel_endpoint_is_an_ip_address_and_a_number() {
     // UL-NGU-UP-TNLInformation is IE 139, a UPTransportLayerInformation.
     let tunnel = tree!({"gTPTunnel": {"transportLayerAddress": "10.0.0.1", "gTP-TEID": 7}});
     let mut shown = added(139, tunnel.clone()).unwrap();
-    let expected = UPTransportLayerInformation::gTPTunnel(GTPTunnel::new(
-        TransportLayerAddress(oxirush_ngap::BitString::from([10, 0, 0, 1])),
-        GTPTEID::from([0, 0, 0, 7]),
-        None,
-    ));
+    let expected = UPTransportLayerInformation::gTPTunnel(GTPTunnel {
+        transport_layer_address: TransportLayerAddress(oxirush_ngap::BitString::from([
+            10, 0, 0, 1,
+        ])),
+        gtp_teid: GTPTEID::from([0, 0, 0, 7]),
+        ie_extensions: None,
+    });
     let expected = encode_open_type(&expected).unwrap();
     assert_eq!(ie(&mut shown, 139)["value"], tunnel);
     assert_eq!(
@@ -1793,11 +1799,11 @@ fn what_is_nested_deeper_than_the_inspection_goes_keeps_its_octets() {
     let mut cause = Cause::misc(CauseMisc::unspecified);
     for _ in 0..40 {
         let value = encode_open_type(&cause).unwrap();
-        cause = Cause::choice_Extensions(ProtocolIEField::new(
-            ProtocolIEID(15),
-            Criticality::Ignore,
+        cause = Cause::choice_Extensions(ProtocolIEField {
+            id: ProtocolIEID(15),
+            criticality: Criticality::Ignore,
             value,
-        ));
+        });
     }
     let pdu = build_ngap!(IGNORE UEContextReleaseRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
@@ -2001,11 +2007,11 @@ fn the_identifiers_of_the_registry_are_the_constants_of_the_bindings() {
 
 #[test]
 fn a_kind_that_the_specification_does_not_have_says_the_direction_of_its_pdu() {
-    let pdu = NGAP_PDU::unsuccessfulOutcome(UnsuccessfulOutcome::new(
-        ProcedureCode(46),
-        Criticality::Ignore,
-        oxirush_ngap::Octets::from(vec![0]),
-    ));
+    let pdu = NGAP_PDU::unsuccessfulOutcome(UnsuccessfulOutcome {
+        procedure_code: ProcedureCode(46),
+        criticality: Criticality::Ignore,
+        value: oxirush_ngap::Octets::from(vec![0]),
+    });
     let oxirush_ngap::NgapPduKind::Other {
         direction,
         procedure_code,
@@ -2549,14 +2555,18 @@ fn modification(rate: u64, bits: usize) -> NGAP_PDU {
         octets[0] = 0xc0;
         oxirush_ngap::BitString::new(octets, length).unwrap()
     };
-    let rates = UEAggregateMaximumBitRate::new(BitRate(rate), BitRate(1), None);
-    let capabilities = UESecurityCapabilities::new(
-        NRencryptionAlgorithms(mask(bits)),
-        NRintegrityProtectionAlgorithms(mask(16)),
-        EUTRAencryptionAlgorithms(mask(16)),
-        EUTRAintegrityProtectionAlgorithms(mask(16)),
-        None,
-    );
+    let rates = UEAggregateMaximumBitRate {
+        ue_aggregate_maximum_bit_rate_dl: BitRate(rate),
+        ue_aggregate_maximum_bit_rate_ul: BitRate(1),
+        ie_extensions: None,
+    };
+    let capabilities = UESecurityCapabilities {
+        nr_encryption_algorithms: NRencryptionAlgorithms(mask(bits)),
+        nr_integrity_protection_algorithms: NRintegrityProtectionAlgorithms(mask(16)),
+        eutra_encryption_algorithms: EUTRAencryptionAlgorithms(mask(16)),
+        eutra_integrity_protection_algorithms: EUTRAintegrityProtectionAlgorithms(mask(16)),
+        ie_extensions: None,
+    };
     build_ngap!(REJECT UEContextModificationRequest,
         REJECT AMF_UE_NGAP_ID(1u64),
         REJECT RAN_UE_NGAP_ID(1u32),
@@ -2603,7 +2613,11 @@ fn an_integer_of_two_to_the_63_or_more_is_a_number() {
     // shown as the octets that were received, with why they do not decode, and is
     // written back as it is. The octets are those of the largest rate that the
     // bindings hold, with the nine octets of 2^64 in the place of its own nine.
-    let largest = UEAggregateMaximumBitRate::new(BitRate(u64::MAX), BitRate(1), None);
+    let largest = UEAggregateMaximumBitRate {
+        ue_aggregate_maximum_bit_rate_dl: BitRate(u64::MAX),
+        ue_aggregate_maximum_bit_rate_ul: BitRate(1),
+        ie_extensions: None,
+    };
     let largest = encode_open_type(&largest).unwrap();
     let nine = [0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff];
     assert_eq!(
@@ -2928,11 +2942,19 @@ fn the_additional_information_of_qos_flows_has_the_type_of_what_it_extends() {
     let flow = || QosFlowIdentifier(1);
     let container = |octets: &[u8]| Some(TLContainer(octets.to_vec().into()));
     let command = |octets: &[u8]| {
-        let item = QosFlowAdditionalInfoItemRelCom::new(flow(), container(octets), None);
+        let item = QosFlowAdditionalInfoItemRelCom {
+            qos_flow_identifier: flow(),
+            downlink_tl_container: container(octets),
+            ie_extensions: None,
+        };
         encode_open_type(&QosFlowAdditionalInfoListRelCom(vec![item])).unwrap()
     };
     let response = |octets: &[u8]| {
-        let item = QosFlowAdditionalInfoItemRelRes::new(flow(), container(octets), None);
+        let item = QosFlowAdditionalInfoItemRelRes {
+            qos_flow_identifier: flow(),
+            uplink_tl_container: container(octets),
+            ie_extensions: None,
+        };
         encode_open_type(&QosFlowAdditionalInfoListRelRes(vec![item])).unwrap()
     };
 

@@ -45,9 +45,15 @@ fn main() -> Result<(), Error> {
 
     let network = plmn("208", "93")?;
     let sessions = session_setup_request_list(vec![0x7e, 0x00, 0x42]);
-    let bit_rate =
-        UEAggregateMaximumBitRate::new(BitRate(1_000_000_000), BitRate(500_000_000), None);
-    let allowed_slice = AllowedNSSAIItem::new(s_nssai(1, Some([0x00, 0x00, 0x01])), None);
+    let bit_rate = UEAggregateMaximumBitRate {
+        ue_aggregate_maximum_bit_rate_dl: BitRate(1_000_000_000),
+        ue_aggregate_maximum_bit_rate_ul: BitRate(500_000_000),
+        ie_extensions: None,
+    };
+    let allowed_slice = AllowedNSSAIItem {
+        s_nssai: s_nssai(1, Some([0x00, 0x00, 0x01])),
+        ie_extensions: None,
+    };
 
     let pdu = build_ngap!(REJECT InitialContextSetupRequest,
         // The UE, on each side of the interface
@@ -75,7 +81,11 @@ fn main() -> Result<(), Error> {
 
     let target_gnb = GlobalRANNodeID::globalGNB_ID(global_gnb_id(network, 0x123456, 24)?);
     let target_area = tai(network, [0x00, 0x00, 0x01]);
-    let target = TargetID::targetRANNodeID(TargetRANNodeID::new(target_gnb, target_area, None));
+    let target = TargetID::targetRANNodeID(TargetRANNodeID {
+        global_ran_node_id: target_gnb,
+        selected_tai: target_area,
+        ie_extensions: None,
+    });
     let cause = Cause::radioNetwork(CauseRadioNetwork::handover_desirable_for_radio_reason);
 
     let pdu = build_ngap!(REJECT HandoverRequired,
@@ -131,65 +141,65 @@ fn main() -> Result<(), Error> {
     // ── Equivalent hand-written code (for comparison) ──────────────────────
     // Without macros, the same InitialContextSetupResponse (example 1) is:
     //
-    //   let response = InitialContextSetupResponse::new(
-    //       ProtocolIEContainer(vec![
-    //           ProtocolIEField::new(
-    //               ProtocolIEID(10),
-    //               Criticality::Ignore,
-    //               encode_open_type(&AMFUENGAPID(1))?,
-    //           ),
-    //           ProtocolIEField::new(
-    //               ProtocolIEID(85),
-    //               Criticality::Ignore,
-    //               encode_open_type(&RANUENGAPID(0))?,
-    //           ),
-    //           ProtocolIEField::new(
-    //               ProtocolIEID(75),
-    //               Criticality::Ignore,
-    //               encode_open_type(&session_setup_response_list())?,
-    //           ),
+    //   let response = InitialContextSetupResponse {
+    //       protocol_ies: ProtocolIEContainer(vec![
+    //           ProtocolIEField {
+    //               id: ProtocolIEID(10),
+    //               criticality: Criticality::Ignore,
+    //               value: encode_open_type(&AMFUENGAPID(1))?,
+    //           },
+    //           ProtocolIEField {
+    //               id: ProtocolIEID(85),
+    //               criticality: Criticality::Ignore,
+    //               value: encode_open_type(&RANUENGAPID(0))?,
+    //           },
+    //           ProtocolIEField {
+    //               id: ProtocolIEID(75),
+    //               criticality: Criticality::Ignore,
+    //               value: encode_open_type(&session_setup_response_list())?,
+    //           },
     //       ]),
-    //   );
-    //   let pdu = NGAP_PDU::successfulOutcome(SuccessfulOutcome::new(
-    //       ProcedureCode(14),
-    //       Criticality::Reject,
-    //       encode_open_type(&response)?,
-    //   ));
+    //   };
+    //   let pdu = NGAP_PDU::successfulOutcome(SuccessfulOutcome {
+    //       procedure_code: ProcedureCode(14),
+    //       criticality: Criticality::Reject,
+    //       value: encode_open_type(&response)?,
+    //   });
     Ok(())
 }
 
 fn session_setup_response_list() -> PDUSessionResourceSetupListCxtRes<'static> {
-    PDUSessionResourceSetupListCxtRes(vec![PDUSessionResourceSetupItemCxtRes::new(
-        PDUSessionID(1),
-        vec![0x01].into(),
-        None,
-    )])
+    PDUSessionResourceSetupListCxtRes(vec![PDUSessionResourceSetupItemCxtRes {
+        pdu_session_id: PDUSessionID(1),
+        pdu_session_resource_setup_response_transfer: vec![0x01].into(),
+        ie_extensions: None,
+    }])
 }
 
 fn session_setup_request_list(nas: Vec<u8>) -> PDUSessionResourceSetupListCxtReq<'static> {
-    PDUSessionResourceSetupListCxtReq(vec![PDUSessionResourceSetupItemCxtReq::new(
-        PDUSessionID(1),
-        Some(NASPDU::from(nas)),
-        s_nssai(1, Some([0x00, 0x00, 0x01])),
-        vec![0x01].into(),
-        None,
-    )])
+    PDUSessionResourceSetupListCxtReq(vec![PDUSessionResourceSetupItemCxtReq {
+        pdu_session_id: PDUSessionID(1),
+        nas_pdu: Some(NASPDU::from(nas)),
+        s_nssai: s_nssai(1, Some([0x00, 0x00, 0x01])),
+        pdu_session_resource_setup_request_transfer: vec![0x01].into(),
+        ie_extensions: None,
+    }])
 }
 
 fn handover_required_sessions() -> PDUSessionResourceListHORqd<'static> {
-    PDUSessionResourceListHORqd(vec![PDUSessionResourceItemHORqd::new(
-        PDUSessionID(1),
-        vec![0x01].into(),
-        None,
-    )])
+    PDUSessionResourceListHORqd(vec![PDUSessionResourceItemHORqd {
+        pdu_session_id: PDUSessionID(1),
+        handover_required_transfer: vec![0x01].into(),
+        ie_extensions: None,
+    }])
 }
 
 fn admitted_sessions() -> PDUSessionResourceAdmittedList<'static> {
-    PDUSessionResourceAdmittedList(vec![PDUSessionResourceAdmittedItem::new(
-        PDUSessionID(1),
-        vec![0x01].into(),
-        None,
-    )])
+    PDUSessionResourceAdmittedList(vec![PDUSessionResourceAdmittedItem {
+        pdu_session_id: PDUSessionID(1),
+        handover_request_acknowledge_transfer: vec![0x01].into(),
+        ie_extensions: None,
+    }])
 }
 
 fn print_and_encode(pdu: &NGAP_PDU) -> Result<(), Error> {

@@ -134,7 +134,11 @@ fn extended_snssai(count: usize, fragmented_open_type: bool) -> Vec<u8> {
 #[test]
 fn unknown_additions_handle_small_large_and_fragmented_bitmaps() {
     let expected = FollowingSNSSAI {
-        value: SNSSAI::new(SST([1]), None, None),
+        value: SNSSAI {
+            sst: SST([1]),
+            sd: None,
+            ie_extensions: None,
+        },
         following: 0x7c,
     };
     for count in [1, 64, 65, 128, 16384, 65536] {
@@ -172,7 +176,11 @@ fn unknown_additions_reject_truncated_small_open_types() {
 fn root_fields_keep_the_original_sequence_layout() {
     // The extension bit, a bit for each of the two members that may be absent, the SST
     // in eight bits, then the SD, which is three octets and so starts an octet.
-    let value = SNSSAI::new(SST([1]), Some(SD([1, 2, 3])), None);
+    let value = SNSSAI {
+        sst: SST([1]),
+        sd: Some(SD([1, 2, 3])),
+        ie_extensions: None,
+    };
     let wire = encode(&value).unwrap();
     assert_eq!(wire, [0b0100_0000, 0b0010_0000, 1, 2, 3]);
     assert_eq!(decode::<SNSSAI>(&wire).unwrap(), value);

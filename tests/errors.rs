@@ -156,12 +156,12 @@ fn a_value_outside_its_constraint_is_an_encode_error() {
 #[test]
 fn a_member_that_does_not_encode_is_named_as_one_that_does_not_decode_is() {
     // The priority level is an INTEGER (1..15), TS 38.413 clause 9.3.1.19.
-    let priority = AllocationAndRetentionPriority::new(
-        PriorityLevelARP(16),
-        PreEmptionCapability::shall_not_trigger_pre_emption,
-        PreEmptionVulnerability::not_pre_emptable,
-        None,
-    );
+    let priority = AllocationAndRetentionPriority {
+        priority_level_arp: PriorityLevelARP(16),
+        pre_emption_capability: PreEmptionCapability::shall_not_trigger_pre_emption,
+        pre_emption_vulnerability: PreEmptionVulnerability::not_pre_emptable,
+        ie_extensions: None,
+    };
     let error = encode_open_type(&priority).unwrap_err();
     assert_eq!(error.kind(), ErrorKind::Encode);
     assert_eq!(
@@ -172,15 +172,21 @@ fn a_member_that_does_not_encode_is_named_as_one_that_does_not_decode_is() {
     assert_eq!(error.fields().collect::<Vec<_>>(), ["priority_level_arp"]);
 
     // In a value that holds it, the fields are those on the way to the member.
-    let characteristics = NonDynamic5QIDescriptor::new(FiveQI(9), None, None, None, None);
-    let parameters = QosFlowLevelQosParameters::new(
-        QosCharacteristics::nonDynamic5QI(characteristics),
-        priority,
-        None,
-        None,
-        None,
-        None,
-    );
+    let characteristics = NonDynamic5QIDescriptor {
+        five_qi: FiveQI(9),
+        priority_level_qos: None,
+        averaging_window: None,
+        maximum_data_burst_volume: None,
+        ie_extensions: None,
+    };
+    let parameters = QosFlowLevelQosParameters {
+        qos_characteristics: QosCharacteristics::nonDynamic5QI(characteristics),
+        allocation_and_retention_priority: priority,
+        gbr_qos_information: None,
+        reflective_qos_attribute: None,
+        additional_qos_flow_information: None,
+        ie_extensions: None,
+    };
     let error = encode_open_type(&parameters).unwrap_err();
     assert_eq!(
         error.to_string(),
@@ -192,15 +198,15 @@ fn a_member_that_does_not_encode_is_named_as_one_that_does_not_decode_is() {
     // absent: the history of a UE has 1 to 16 cells.
     let cell =
         oxirush_ngap::helpers::nr_cgi(oxirush_ngap::helpers::plmn("208", "93").unwrap(), 2, 24, 1);
-    let container = SourceNGRANNodeToTargetNGRANNodeTransparentContainer::new(
-        RRCContainer(vec![0x01].into()),
-        None,
-        None,
-        NGRANCGI::nR_CGI(cell.unwrap()),
-        None,
-        UEHistoryInformation(vec![]),
-        None,
-    );
+    let container = SourceNGRANNodeToTargetNGRANNodeTransparentContainer {
+        rrc_container: RRCContainer(vec![0x01].into()),
+        pdu_session_resource_information_list: None,
+        e_rab_information_list: None,
+        target_cell_id: NGRANCGI::nR_CGI(cell.unwrap()),
+        index_to_rfsp: None,
+        ue_history_information: UEHistoryInformation(vec![]),
+        ie_extensions: None,
+    };
     let error = encode_open_type(&container).unwrap_err();
     assert_eq!(
         error.to_string(),
@@ -238,7 +244,9 @@ fn ids(request: &UEContextReleaseRequest) -> Result<(u64, Option<u32>), Error> {
 }
 
 fn request(ies: Vec<ProtocolIEField>) -> UEContextReleaseRequest {
-    UEContextReleaseRequest::new(ProtocolIEContainer(ies))
+    UEContextReleaseRequest {
+        protocol_ies: ProtocolIEContainer(ies),
+    }
 }
 
 /// The entry of an AMF UE NGAP ID and that of a RAN UE NGAP ID.
@@ -250,7 +258,11 @@ fn amf_and_ran() -> (ProtocolIEField<'static>, ProtocolIEField<'static>) {
 
 /// An entry with the identifier of an IE, whose octets are not the value of that IE.
 fn undecodable(id: u16) -> ProtocolIEField<'static> {
-    ProtocolIEField::new(id, Criticality::Reject, Octets::from(vec![0xff]))
+    ProtocolIEField {
+        id: ProtocolIEID(id),
+        criticality: Criticality::Reject,
+        value: Octets::from(vec![0xff]),
+    }
 }
 
 #[test]

@@ -128,10 +128,16 @@ fn main() -> Result<(), Error> {
     // 3. InitialContextSetupRequest. The NAS PDU is nested in a PDU-session
     // item, as specified by TS 38.413.
     let network = plmn("208", "93")?;
-    let bit_rate =
-        UEAggregateMaximumBitRate::new(BitRate(1_000_000_000), BitRate(500_000_000), None);
+    let bit_rate = UEAggregateMaximumBitRate {
+        ue_aggregate_maximum_bit_rate_dl: BitRate(1_000_000_000),
+        ue_aggregate_maximum_bit_rate_ul: BitRate(500_000_000),
+        ie_extensions: None,
+    };
     let sessions = session_setup_request_list(vec![0x7e, 0x00, 0x42, 0x01]);
-    let allowed_slice = AllowedNSSAIItem::new(s_nssai(1, Some([0x00, 0x00, 0x01])), None);
+    let allowed_slice = AllowedNSSAIItem {
+        s_nssai: s_nssai(1, Some([0x00, 0x00, 0x01])),
+        ie_extensions: None,
+    };
     let ics_pdu = build_ngap!(REJECT InitialContextSetupRequest,
         REJECT AMF_UE_NGAP_ID(200u64),
         REJECT RAN_UE_NGAP_ID(10u32),
@@ -187,27 +193,29 @@ fn target_gnb() -> Result<TargetID, Error> {
     let gnb = GlobalRANNodeID::globalGNB_ID(global_gnb_id(network, 0x123456, 24)?);
     let area = tai(network, [0x00, 0x00, 0x01]);
 
-    Ok(TargetID::targetRANNodeID(TargetRANNodeID::new(
-        gnb, area, None,
-    )))
+    Ok(TargetID::targetRANNodeID(TargetRANNodeID {
+        global_ran_node_id: gnb,
+        selected_tai: area,
+        ie_extensions: None,
+    }))
 }
 
 fn session_setup_request_list(nas: Vec<u8>) -> PDUSessionResourceSetupListCxtReq<'static> {
-    PDUSessionResourceSetupListCxtReq(vec![PDUSessionResourceSetupItemCxtReq::new(
-        PDUSessionID(1),
-        Some(NASPDU::from(nas)),
-        s_nssai(1, Some([0x00, 0x00, 0x01])),
-        vec![0x01].into(),
-        None,
-    )])
+    PDUSessionResourceSetupListCxtReq(vec![PDUSessionResourceSetupItemCxtReq {
+        pdu_session_id: PDUSessionID(1),
+        nas_pdu: Some(NASPDU::from(nas)),
+        s_nssai: s_nssai(1, Some([0x00, 0x00, 0x01])),
+        pdu_session_resource_setup_request_transfer: vec![0x01].into(),
+        ie_extensions: None,
+    }])
 }
 
 fn handover_required_sessions() -> PDUSessionResourceListHORqd<'static> {
-    PDUSessionResourceListHORqd(vec![PDUSessionResourceItemHORqd::new(
-        PDUSessionID(1),
-        vec![0x01].into(),
-        None,
-    )])
+    PDUSessionResourceListHORqd(vec![PDUSessionResourceItemHORqd {
+        pdu_session_id: PDUSessionID(1),
+        handover_required_transfer: vec![0x01].into(),
+        ie_extensions: None,
+    }])
 }
 
 fn nested_nas_len(list: &PDUSessionResourceSetupListCxtReq) -> Option<usize> {

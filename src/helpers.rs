@@ -170,13 +170,13 @@ pub fn guami(
 ) -> Result<GUAMI, Error> {
     let set_id = fits("the AMF Set ID", set_id.into(), 10)?;
     let pointer = fits("the AMF Pointer", pointer.into(), 6)?;
-    Ok(GUAMI::new(
+    Ok(GUAMI {
         plmn_identity,
-        AMFRegionID(Bits::from(region_id)),
-        AMFSetID(Bits::low(set_id, AMF_SET_ID_BITS)),
-        AMFPointer(Bits::low(pointer, AMF_POINTER_BITS)),
-        None,
-    ))
+        amf_region_id: AMFRegionID(Bits::from(region_id)),
+        amf_set_id: AMFSetID(Bits::low(set_id, AMF_SET_ID_BITS)),
+        amf_pointer: AMFPointer(Bits::low(pointer, AMF_POINTER_BITS)),
+        ie_extensions: None,
+    })
 }
 
 /// Build a 5G Tracking Area Identity: a PLMN and the three octets of a TAC.
@@ -191,7 +191,11 @@ pub fn guami(
 /// # Ok::<(), oxirush_ngap::Error>(())
 /// ```
 pub fn tai(plmn_identity: PLMNIdentity, tac: [u8; 3]) -> TAI {
-    TAI::new(plmn_identity, TAC(tac), None)
+    TAI {
+        plmn_identity,
+        tac: TAC(tac),
+        ie_extensions: None,
+    }
 }
 
 /// The length of a gNB ID: 22 to 32 bits (TS 38.413 clause 9.3.1.6).
@@ -234,11 +238,11 @@ pub fn nr_cgi(
     let gnb_id = fits("the gNB ID", gnb_id.into(), length)?;
     let cell_id = fits("the cell of the gNB", cell_id.into(), 36 - length)?;
     let nci = (gnb_id << (36 - length)) | cell_id;
-    Ok(NRCGI::new(
+    Ok(NRCGI {
         plmn_identity,
-        NRCellIdentity(Bits::low(nci, 36)),
-        None,
-    ))
+        nr_cell_identity: NRCellIdentity(Bits::low(nci, 36)),
+        ie_extensions: None,
+    })
 }
 
 /// Build a `GlobalGNBID` for a gNB ID of `gnb_length` bits, 22 to 32 (TS 38.413 clause
@@ -253,11 +257,11 @@ pub fn global_gnb_id(
 ) -> Result<GlobalGNBID, Error> {
     let length = of_a_gnb_id(gnb_length)?;
     let gnb_id = fits("the gNB ID", gnb_id.into(), length)?;
-    Ok(GlobalGNBID::new(
+    Ok(GlobalGNBID {
         plmn_identity,
-        GNBID::gNB_ID(Bits::low(gnb_id, length as usize)),
-        None,
-    ))
+        gnb_id: GNBID::gNB_ID(Bits::low(gnb_id, length as usize)),
+        ie_extensions: None,
+    })
 }
 
 /// The kinds of ng-eNB ID of TS 38.413 clause 9.3.1.8, each of the bits that it has: the
@@ -308,7 +312,11 @@ pub fn global_ng_enb_id(
         NgEnbKind::ShortMacro => NgENBID::shortMacroNgENB_ID(id),
         NgEnbKind::LongMacro => NgENBID::longMacroNgENB_ID(id),
     };
-    Ok(GlobalNgENBID::new(plmn_identity, id, None))
+    Ok(GlobalNgENBID {
+        plmn_identity,
+        ng_enb_id: id,
+        ie_extensions: None,
+    })
 }
 
 /// Build an E-UTRA Cell Global Identifier from an ng-eNB ID of a kind and the cell that
@@ -327,11 +335,11 @@ pub fn eutra_cgi(
     let ng_enb_id = fits(kind.name(), ng_enb_id.into(), bits)?;
     let cell_id = fits("the cell of the ng-eNB", cell_id.into(), 28 - bits)?;
     let eci = (ng_enb_id << (28 - bits)) | cell_id;
-    Ok(EUTRACGI::new(
+    Ok(EUTRACGI {
         plmn_identity,
-        EUTRACellIdentity(Bits::low(eci, 28)),
-        None,
-    ))
+        eutra_cell_identity: EUTRACellIdentity(Bits::low(eci, 28)),
+        ie_extensions: None,
+    })
 }
 
 /// Build Single Network Slice Selection Assistance Information: a Slice/Service Type,
@@ -346,7 +354,11 @@ pub fn eutra_cgi(
 /// assert_eq!(s_nssai(1, None).sd, None);
 /// ```
 pub fn s_nssai(sst: u8, sd: Option<[u8; 3]>) -> SNSSAI {
-    SNSSAI::new(SST([sst]), sd.map(SD), None)
+    SNSSAI {
+        sst: SST([sst]),
+        sd: sd.map(SD),
+        ie_extensions: None,
+    }
 }
 
 /// Build 5G UE security capabilities from the first octet of the NR encryption
@@ -360,13 +372,13 @@ pub fn s_nssai(sst: u8, sd: Option<[u8; 3]>) -> SNSSAI {
 pub fn ue_security_capabilities(encryption: u8, integrity: u8) -> UESecurityCapabilities<'static> {
     // Sixteen bits, of which the first eight are the algorithms.
     let algorithms = |byte: u8| BitString::from([byte, 0]);
-    UESecurityCapabilities::new(
-        NRencryptionAlgorithms(algorithms(encryption)),
-        NRintegrityProtectionAlgorithms(algorithms(integrity)),
-        EUTRAencryptionAlgorithms(algorithms(0)),
-        EUTRAintegrityProtectionAlgorithms(algorithms(0)),
-        None,
-    )
+    UESecurityCapabilities {
+        nr_encryption_algorithms: NRencryptionAlgorithms(algorithms(encryption)),
+        nr_integrity_protection_algorithms: NRintegrityProtectionAlgorithms(algorithms(integrity)),
+        eutra_encryption_algorithms: EUTRAencryptionAlgorithms(algorithms(0)),
+        eutra_integrity_protection_algorithms: EUTRAintegrityProtectionAlgorithms(algorithms(0)),
+        ie_extensions: None,
+    }
 }
 
 #[cfg(test)]

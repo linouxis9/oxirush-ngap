@@ -23,7 +23,11 @@ fn has_no_key(printed: &str) -> bool {
 fn debug_of_a_key_and_of_what_holds_one_shows_its_length() {
     let key = SecurityKey::from(KGNB);
     assert_eq!(format!("{key:?}"), "SecurityKey(256 bits)");
-    let context = SecurityContext::new(NextHopChainingCount(1), SecurityKey::from(NH), None);
+    let context = SecurityContext {
+        next_hop_chaining_count: NextHopChainingCount(1),
+        next_hop_nh: SecurityKey::from(NH),
+        ie_extensions: None,
+    };
     let printed = format!("{context:?}");
     assert!(has_no_key(&printed), "{printed}");
     assert!(
@@ -89,7 +93,11 @@ fn debug_of_a_message_with_a_key_shows_the_length_of_its_octets() -> Result<(), 
 #[test]
 fn debug_of_a_message_with_a_security_context_shows_no_next_hop() -> Result<(), Error> {
     // A PATH SWITCH REQUEST ACKNOWLEDGE with the next hop NH
-    let context = SecurityContext::new(NextHopChainingCount(1), SecurityKey::from(NH), None);
+    let context = SecurityContext {
+        next_hop_chaining_count: NextHopChainingCount(1),
+        next_hop_nh: SecurityKey::from(NH),
+        ie_extensions: None,
+    };
     let pdu = build_ngap!(REJECT PathSwitchRequestAcknowledge,
         IGNORE AMF_UE_NGAP_ID(1u64),
         IGNORE RAN_UE_NGAP_ID(7u32),

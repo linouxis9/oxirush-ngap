@@ -78,12 +78,18 @@ use oxirush_ngap::{build_ngap, extract_ngap_ies, ngap::*};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let network = plmn("208", "93")?;
-    let slices = || SliceSupportList(vec![SliceSupportItem::new(s_nssai(1, None), None)]);
+    let slices = || {
+        SliceSupportList(vec![SliceSupportItem { s_nssai: s_nssai(1, None), ie_extensions: None }])
+    };
 
     // The gNB: its identity, its name, and the tracking area and slices it serves
     let gnb = GlobalRANNodeID::globalGNB_ID(global_gnb_id(network, 0x123456, 24)?);
-    let plmns = BroadcastPLMNList(vec![BroadcastPLMNItem::new(network, slices(), None)]);
-    let area = SupportedTAItem::new(TAC([0, 0, 1]), plmns, None);
+    let plmns = BroadcastPLMNList(vec![BroadcastPLMNItem {
+        plmn_identity: network,
+        tai_slice_support_list: slices(),
+        ie_extensions: None,
+    }]);
+    let area = SupportedTAItem { tac: TAC([0, 0, 1]), broadcast_plmn_list: plmns, ie_extensions: None };
     let request = build_ngap!(NGSetupRequest,
         GlobalRANNodeID(gnb),
         RANNodeName("gnb-1"),
@@ -98,17 +104,32 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         req areas: SupportedTAList = SupportedTAList(areas) => areas,
     );
     println!("{received}: {}, {} tracking area", name.unwrap_or_default(), areas.0.len());
+    let guamis = ServedGUAMIItem {
+        guami: guami(network, 1, 1, 0)?,
+        backup_amf_name: None,
+        ie_extensions: None,
+    };
+    let support = PLMNSupportItem {
+        plmn_identity: network,
+        slice_support_list: slices(),
+        ie_extensions: None,
+    };
     let response = build_ngap!(NGSetupResponse,
         AMFName("amf-1"),
-        ServedGUAMIList(ServedGUAMIList(vec![ServedGUAMIItem::new(guami(network, 1, 1, 0)?, None, None)])),
+        ServedGUAMIList(ServedGUAMIList(vec![guamis])),
         RelativeAMFCapacity(RelativeAMFCapacity(255)),
-        PLMNSupportList(PLMNSupportList(vec![PLMNSupportItem::new(network, slices(), None)])),
+        PLMNSupportList(PLMNSupportList(vec![support])),
     )?;
     println!("{response}");
 
     // The gNB forwards a REGISTRATION REQUEST, with the cell the UE is in
     let cell = nr_cgi(network, 0x123456, 24, 1)?;
-    let location = UserLocationInformationNR::new(cell, tai(network, [0, 0, 1]), None, None);
+    let location = UserLocationInformationNR {
+        nr_cgi: cell,
+        tai: tai(network, [0, 0, 1]),
+        time_stamp: None,
+        ie_extensions: None,
+    };
     let registration = hex::decode("7e004179000d0102f8390000000000000010022e08a020000000000000")?;
     let initial = build_ngap!(InitialUEMessage,
         RAN_UE_NGAP_ID(7u32),
@@ -144,7 +165,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         AMF_UE_NGAP_ID(1u64),
         RAN_UE_NGAP_ID(ran_id),
         GUAMI(guami(network, 1, 1, 0)?),
-        AllowedNSSAI(AllowedNSSAI(vec![AllowedNSSAIItem::new(s_nssai(1, None), None)])),
+        AllowedNSSAI(AllowedNSSAI(vec![AllowedNSSAIItem {
+            s_nssai: s_nssai(1, None),
+            ie_extensions: None,
+        }])),
         UESecurityCapabilities(ue_security_capabilities(0xe0, 0xe0)),
         SecurityKey(k_gnb),
     )?;
@@ -303,9 +327,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("{kind:?}");
 
     // Build one, and check it against its object set
-    let ipv6 = PDUSessionResourceSetupRequestTransfer::new(ProtocolIEContainer(vec![
-        ie::PDUSessionType::field_of::<PDUSessionResourceSetupRequestTransfer>(PDUSessionType::ipv6)?,
-    ]));
+    let ipv6 = PDUSessionResourceSetupRequestTransfer {
+        protocol_ies: ProtocolIEContainer(vec![
+            ie::PDUSessionType::field_of::<PDUSessionResourceSetupRequestTransfer>(PDUSessionType::ipv6)?,
+        ]),
+    };
     let octets = encode_open_type(&ipv6)?;
     println!("{}", hex::encode(&octets));
     for deviation in PDUSessionResourceSetupRequestTransfer::check(&octets)? {

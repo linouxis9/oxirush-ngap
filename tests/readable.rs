@@ -52,12 +52,12 @@ fn a_fixed_number_of_octets_prints_in_hexadecimal() {
     assert_eq!(format!("{:?}", GTPTEID([0, 0, 0, 1])), "GTPTEID(00000001)");
 
     // A 5G-S-TMSI is printed whole, with its TMSI as it is read
-    let identity = FiveGSTMSI::new(
-        AMFSetID::new(1).unwrap(),
-        AMFPointer::new(0).unwrap(),
-        tmsi,
-        None,
-    );
+    let identity = FiveGSTMSI {
+        amf_set_id: AMFSetID::new(1).unwrap(),
+        amf_pointer: AMFPointer::new(0).unwrap(),
+        five_g_tmsi: tmsi,
+        ie_extensions: None,
+    };
     let printed = format!("{identity:?}");
     assert!(printed.contains("FiveGTMSI(deadbeef)"), "{printed}");
 }

@@ -15,7 +15,11 @@ fn a_pdu_shows_the_identifiers_of_its_ue_however_its_message_carries_them() -> R
     let cause = || Cause::nas(CauseNas::normal_release);
 
     // UE CONTEXT RELEASE COMMAND, with the pair
-    let pair = UENGAPIDPair::new(AMFUENGAPID(42), RANUENGAPID(7), None);
+    let pair = UENGAPIDPair {
+        amf_ue_ngap_id: AMFUENGAPID(42),
+        ran_ue_ngap_id: RANUENGAPID(7),
+        ie_extensions: None,
+    };
     let command = build_ngap!(
         UEContextReleaseCommand,
         UE_NGAP_IDs(UENGAPIDs::uE_NGAP_ID_pair(pair)),

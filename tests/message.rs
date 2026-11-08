@@ -67,11 +67,11 @@ fn a_message_of_another_type_is_refused_as_decode_value_refuses_it() -> Result<(
 fn a_message_in_fragments_is_read_through_a_pdu_that_borrows() -> Result<(), Error> {
     // A NAS-PDU of 20000 octets in an INITIAL UE MESSAGE
     let nas = NASPDU(vec![0x7e; 20_000].into());
-    let ie = ProtocolIEField::new(
-        ProtocolIEID(38),
-        Criticality::Reject,
-        oxirush_ngap::aper::encode(&nas)?.into(),
-    );
+    let ie = ProtocolIEField {
+        id: ProtocolIEID(38),
+        criticality: Criticality::Reject,
+        value: oxirush_ngap::aper::encode(&nas)?.into(),
+    };
     let mut pdu = NGAP_PDU::decode(&hex::decode(INITIAL_UE_MESSAGE).unwrap())?;
     pdu.set_protocol_ies(ProtocolIEContainer(vec![ie]))?;
     let received = pdu.encode()?;

@@ -239,11 +239,11 @@
 //! oxirush-aper, with the identifiers that the specifications write otherwise than
 //! their others, as `parentTImeSource`. The JSON forms keep the identifiers of ASN.1.
 //!
-//! A `SEQUENCE` is a struct that a literal builds, and its `new` takes the members in
-//! their order. An extensible `CHOICE` or `ENUMERATED` is `#[non_exhaustive]`: a later
-//! version of the specification adds alternatives and values to it, which a `match`
-//! leaves room for with a `_` arm. A member that a later version adds to a `SEQUENCE`
-//! changes its struct and its `new`, and comes with a breaking release of the crate.
+//! A `SEQUENCE` is a struct that a literal builds, with its members by their names. An
+//! extensible `CHOICE` or `ENUMERATED` is `#[non_exhaustive]`: a later version of the
+//! specification adds alternatives and values to it, which a `match` leaves room for
+//! with a `_` arm. A member that a later version adds to a `SEQUENCE` changes its
+//! struct, and comes with a breaking release of the crate.
 //!
 //! # The types of the values
 //!

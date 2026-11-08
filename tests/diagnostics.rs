@@ -21,13 +21,20 @@ const SUPPORTED_TA_LIST: u16 = 102;
 const DEFAULT_PAGING_DRX: u16 = 21;
 
 fn areas() -> Result<SupportedTAList, Error> {
-    let slices = SliceSupportList(vec![SliceSupportItem::new(s_nssai(1, None), None)]);
-    let networks = BroadcastPLMNList(vec![BroadcastPLMNItem::new(
-        plmn("208", "93")?,
-        slices,
-        None,
-    )]);
-    let area = SupportedTAItem::new(TAC([0, 0, 1]), networks, None);
+    let slices = SliceSupportList(vec![SliceSupportItem {
+        s_nssai: s_nssai(1, None),
+        ie_extensions: None,
+    }]);
+    let networks = BroadcastPLMNList(vec![BroadcastPLMNItem {
+        plmn_identity: plmn("208", "93")?,
+        tai_slice_support_list: slices,
+        ie_extensions: None,
+    }]);
+    let area = SupportedTAItem {
+        tac: TAC([0, 0, 1]),
+        broadcast_plmn_list: networks,
+        ie_extensions: None,
+    };
     Ok(SupportedTAList(vec![area]))
 }
 
@@ -85,14 +92,20 @@ fn diagnostics(
 ) -> CriticalityDiagnostics {
     let items = (!items.is_empty()).then_some(CriticalityDiagnosticsIEList(items));
     match indication {
-        true => CriticalityDiagnostics::new(
-            Some(ProcedureCode(21)),
-            Some(TriggeringMessage::initiating_message),
-            Some(Criticality::Reject),
-            items,
-            None,
-        ),
-        false => CriticalityDiagnostics::new(None, None, None, items, None),
+        true => CriticalityDiagnostics {
+            procedure_code: Some(ProcedureCode(21)),
+            triggering_message: Some(TriggeringMessage::initiating_message),
+            procedure_criticality: Some(Criticality::Reject),
+            ies_criticality_diagnostics: items,
+            ie_extensions: None,
+        },
+        false => CriticalityDiagnostics {
+            procedure_code: None,
+            triggering_message: None,
+            procedure_criticality: None,
+            ies_criticality_diagnostics: items,
+            ie_extensions: None,
+        },
     }
 }
 
@@ -180,12 +193,12 @@ fn the_error_of_a_missing_ie_has_the_criticality_that_is_assigned() -> Result<()
         Some(CauseProtocol::abstract_syntax_error_reject)
     );
     assert_eq!(missing.type_of_error(), Some(TypeOfError::missing));
-    let item = CriticalityDiagnosticsIEItem::new(
-        Criticality::Reject,
-        ProtocolIEID(SUPPORTED_TA_LIST),
-        TypeOfError::missing,
-        None,
-    );
+    let item = CriticalityDiagnosticsIEItem {
+        ie_criticality: Criticality::Reject,
+        ie_id: ProtocolIEID(SUPPORTED_TA_LIST),
+        type_of_error: TypeOfError::missing,
+        ie_extensions: None,
+    };
     assert_eq!(missing.diagnostics_item(), Some(item.clone()));
     let cause = Cause::protocol(CauseProtocol::abstract_syntax_error_reject);
     assert_eq!(
@@ -276,12 +289,12 @@ fn an_ie_of_the_criticality_ignore_is_in_no_item_of_the_diagnostics() -> Result<
         name: "DefaultPagingDRX",
         criticality: Criticality::Reject,
     };
-    let item = CriticalityDiagnosticsIEItem::new(
-        Criticality::Reject,
-        ProtocolIEID(DEFAULT_PAGING_DRX),
-        TypeOfError::missing,
-        None,
-    );
+    let item = CriticalityDiagnosticsIEItem {
+        ie_criticality: Criticality::Reject,
+        ie_id: ProtocolIEID(DEFAULT_PAGING_DRX),
+        type_of_error: TypeOfError::missing,
+        ie_extensions: None,
+    };
     assert_eq!(reject.diagnostics_item(), Some(item));
     Ok(())
 }
@@ -319,12 +332,12 @@ fn check_reports_every_ie_that_is_missing_or_does_not_decode() -> Result<(), Err
     let items: Vec<_> = (deviations.iter())
         .filter_map(Deviation::diagnostics_item)
         .collect();
-    let missing = CriticalityDiagnosticsIEItem::new(
-        Criticality::Reject,
-        ProtocolIEID(SUPPORTED_TA_LIST),
-        TypeOfError::missing,
-        None,
-    );
+    let missing = CriticalityDiagnosticsIEItem {
+        ie_criticality: Criticality::Reject,
+        ie_id: ProtocolIEID(SUPPORTED_TA_LIST),
+        type_of_error: TypeOfError::missing,
+        ie_extensions: None,
+    };
     assert_eq!(items, [missing]);
     Ok(())
 }
@@ -336,8 +349,11 @@ fn check_reports_every_ie_that_is_missing_or_does_not_decode() -> Result<(), Err
 fn each_deviation_has_the_cause_of_its_clause() -> Result<(), Error> {
     // An UPLINK NAS TRANSPORT with an IE of no message, received as `notify`, another
     // as `ignore`, and its identifiers in the other order.
-    let ie =
-        |id: u16, criticality| ProtocolIEField::new(ProtocolIEID(id), criticality, vec![0].into());
+    let ie = |id: u16, criticality| ProtocolIEField {
+        id: ProtocolIEID(id),
+        criticality,
+        value: vec![0].into(),
+    };
     let mut pdu = build_ngap!(IGNORE UplinkNASTransport,
         REJECT RAN_UE_NGAP_ID(7u32),
         REJECT AMF_UE_NGAP_ID(1u64),
@@ -363,13 +379,11 @@ fn each_deviation_has_the_cause_of_its_clause() -> Result<(), Error> {
     let items: Vec<_> = (deviations.iter())
         .filter_map(Deviation::diagnostics_item)
         .collect();
-    let item = |id: u16, criticality| {
-        CriticalityDiagnosticsIEItem::new(
-            criticality,
-            ProtocolIEID(id),
-            TypeOfError::not_understood,
-            None,
-        )
+    let item = |id: u16, criticality| CriticalityDiagnosticsIEItem {
+        ie_criticality: criticality,
+        ie_id: ProtocolIEID(id),
+        type_of_error: TypeOfError::not_understood,
+        ie_extensions: None,
     };
     // The IE received as `ignore` has none.
     assert_eq!(items, [item(60_000, Criticality::Notify)]);
@@ -396,10 +410,20 @@ fn a_value_outside_the_root_of_an_extensible_constraint_is_reported() -> Result<
     // An NG SETUP RESPONSE with that name is built as any other, and `check` says it.
     let response = |name: &'static str| {
         let network = plmn("208", "93")?;
-        let served =
-            ServedGUAMIItem::new(oxirush_ngap::helpers::guami(network, 1, 1, 0)?, None, None);
-        let slices = SliceSupportList(vec![SliceSupportItem::new(s_nssai(1, None), None)]);
-        let supported = PLMNSupportItem::new(network, slices, None);
+        let served = ServedGUAMIItem {
+            guami: oxirush_ngap::helpers::guami(network, 1, 1, 0)?,
+            backup_amf_name: None,
+            ie_extensions: None,
+        };
+        let slices = SliceSupportList(vec![SliceSupportItem {
+            s_nssai: s_nssai(1, None),
+            ie_extensions: None,
+        }]);
+        let supported = PLMNSupportItem {
+            plmn_identity: network,
+            slice_support_list: slices,
+            ie_extensions: None,
+        };
         build_ngap!(REJECT NGSetupResponse,
             REJECT AMFName(AMFName(name.into())),
             REJECT ServedGUAMIList(ServedGUAMIList(vec![served])),
@@ -441,6 +465,11 @@ fn location() -> Result<UserLocationInformation<'static>, Error> {
     let network = plmn("208", "93")?;
     let cell = oxirush_ngap::helpers::nr_cgi(network, 1, 24, 1)?;
     let area = oxirush_ngap::helpers::tai(network, [0, 0, 1]);
-    let nr = UserLocationInformationNR::new(cell, area, None, None);
+    let nr = UserLocationInformationNR {
+        nr_cgi: cell,
+        tai: area,
+        time_stamp: None,
+        ie_extensions: None,
+    };
     Ok(UserLocationInformation::userLocationInformationNR(nr))
 }

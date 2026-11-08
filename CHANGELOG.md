@@ -36,6 +36,9 @@ All notable changes to `oxirush-ngap` are recorded here.
   extensible: `reader.unsigned(0, 255, false)`. An index of a `CHOICE` or an
   `ENUMERATED` that the type does not have is refused as `the type has no
   index 7`.
+- No `SEQUENCE` has a `new`: a struct literal builds one, with its members by
+  their names. The `new` of a bit string of one size, as `AMFSetID::new(1)?`,
+  stays.
 
 ### Removed
 
@@ -54,6 +57,7 @@ All notable changes to `oxirush-ngap` are recorded here.
 | `Criticality::reject` | `Criticality::Reject` |
 | `pdu.is_initiating()` | `pdu.direction() == Direction::Initiating` |
 | `pdu.direction() == "SuccessfulOutcome"` | `pdu.direction() == Direction::Successful` |
+| `TAI::new(plmn, tac, None)` | `TAI { plmn_identity: plmn, tac, ie_extensions: None }` |
 | `inspect::message_named(name)` gives `("InitiatingMessage", code)` | it gives `(Direction::Initiating, code)` |
 | `tree["message"] == "..."` | `tree["message"] == tree!("...")` (oxirush-utils 0.2.0) |
 | `build_ngap!(InitiatingMessage, UEContextReleaseRequest, UEContextReleaseRequest, ...)` | `build_ngap!(UEContextReleaseRequest, ...)` |

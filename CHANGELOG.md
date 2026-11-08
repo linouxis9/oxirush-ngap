@@ -8,6 +8,8 @@ All notable changes to `oxirush-ngap` are recorded here.
 
 - The codec of each member of a `SEQUENCE` is one line in the bindings, which
   are about a sixth shorter, and a build takes less memory.
+- The trees of the bindings read the names of their members and values in the
+  inspection tables, which write each once: the bindings are 2926 lines shorter.
 - `Criticality` is the one of oxirush-aper, which an error and a deviation have
   too: its values are `Criticality::Reject`, `Ignore` and `Notify`.
 - The direction of a PDU is `Direction`: `pdu.direction()`, `Message::DIRECTION`,

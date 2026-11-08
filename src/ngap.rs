@@ -11,6 +11,8 @@
 )]
 pub mod ngap_common_data_types {
     use super::*;
+    #[cfg(feature = "inspect")]
+    use crate::inspect_registry::names;
     use alloc::borrow::Cow;
     use alloc::vec::Vec;
     pub use oxirush_aper::Criticality;
@@ -75,7 +77,7 @@ pub mod ngap_common_data_types {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(value, &["local", "global"])?;
+            let (position, value) = reading.alternative(value, names::PrivateIEID)?;
             Ok(match position {
                 0 => Self::local(reading.within("local", value, |value, reading| {
                     reading
@@ -243,13 +245,6 @@ pub mod ngap_common_data_types {
             Self::successful_outcome,
             Self::unsuccessful_outcome,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 3] = [
-            "initiating-message",
-            "successful-outcome",
-            "unsuccessful-outcome",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -273,10 +268,10 @@ pub mod ngap_common_data_types {
     impl Tree for TriggeringMessage {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::TriggeringMessage[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::TriggeringMessage)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -292,6 +287,8 @@ pub mod ngap_common_data_types {
 )]
 pub mod ngap_constants {
     use super::*;
+    #[cfg(feature = "inspect")]
+    use crate::inspect_registry::names;
     use alloc::borrow::Cow;
     use alloc::vec::Vec;
     #[cfg(feature = "inspect")]
@@ -1009,6 +1006,8 @@ pub mod ngap_constants {
 )]
 pub mod ngap_containers {
     use super::*;
+    #[cfg(feature = "inspect")]
+    use crate::inspect_registry::names;
     use alloc::borrow::Cow;
     use alloc::vec::Vec;
     #[cfg(feature = "inspect")]
@@ -1347,6 +1346,8 @@ pub mod ngap_containers {
 )]
 pub mod ngap_ies {
     use super::*;
+    #[cfg(feature = "inspect")]
+    use crate::inspect_registry::names;
     use alloc::borrow::Cow;
     use alloc::vec::Vec;
     #[cfg(feature = "inspect")]
@@ -1441,14 +1442,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "a2X-GuaranteedFlowBitRate",
-                    "a2X-MaximumFlowBitRate",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::A2XPC5FlowBitRates)?;
             let a2x_guaranteed_flow_bit_rate =
                 reading.member(&members, "a2X-GuaranteedFlowBitRate", BitRate::from_tree)?;
             let a2x_maximum_flow_bit_rate =
@@ -1497,11 +1491,6 @@ pub mod ngap_ies {
             Self::m700,
             Self::m1000,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 9] = [
-            "m50", "m80", "m180", "m200", "m350", "m400", "m500", "m700", "m1000",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -1525,10 +1514,10 @@ pub mod ngap_ies {
     impl Tree for A2XPC5QoSFlowItemA2XRange {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::A2XPC5QoSFlowItemA2XRange[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::A2XPC5QoSFlowItemA2XRange)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -1643,15 +1632,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "a2X-PQI",
-                    "a2X-PC5-FlowBitRates",
-                    "a2X-Range",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::A2XPC5QoSFlowItem)?;
             let a2x_pqi = reading.member(&members, "a2X-PQI", |value, reading| {
                 reading.unsigned(value, u64::MIN, u64::MAX)
             })?;
@@ -1826,14 +1807,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "a2X-PC5-QoS-Flow-List",
-                    "a2X-PC5-LinkAggregateBitRates",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::A2XPC5QoSParameters)?;
             let a2x_pc5_qos_flow_list = reading.member(
                 &members,
                 "a2X-PC5-QoS-Flow-List",
@@ -2037,14 +2011,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "aIOTFNameVisibleString",
-                    "aIOTFNameUTF8String",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::AIOTFName)?;
             let aiotf_name_visible_string = reading.optional(
                 &members,
                 "aIOTFNameVisibleString",
@@ -2246,7 +2213,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::AIOTSessionReleaseCommandTransfer)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -2351,14 +2318,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "correlationIdentifier",
-                    "criticalityDiagnostics",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::AIOTSessionReleaseCompleteTransfer)?;
             let correlation_identifier = reading.member(
                 &members,
                 "correlationIdentifier",
@@ -2463,8 +2423,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["correlationIdentifier", "cause", "iE-Extensions"])?;
+            let members = reading.members(value, names::AIOTSessionReleaseRequestTransfer)?;
             let correlation_identifier = reading.member(
                 &members,
                 "correlationIdentifier",
@@ -2559,8 +2518,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["estimateofExpectedD2RMsgSize", "iE-Extensions"])?;
+            let members = reading.members(value, names::AIoTCommandAssistanceInformation)?;
             let estimateof_expected_d2r_msg_size = reading.member(
                 &members,
                 "estimateofExpectedD2RMsgSize",
@@ -2713,15 +2671,8 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "singleDevice",
-                    "groupDevices",
-                    "allDevices",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) =
+                reading.alternative(value, names::AIoTDeviceIdentificationRequested)?;
             Ok(match position {
                 0 => Self::singleDevice(reading.within(
                     "singleDevice",
@@ -2848,10 +2799,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["aIoT-NASPDU", "rAN-AIOT-Device-NGAP-ID", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::AIoTDeviceReportItem)?;
             let aiot_nas_pdu = reading.member(&members, "aIoT-NASPDU", AIoTNASPDU::from_tree)?;
             let ran_aiot_device_ngap_id = reading.optional(
                 &members,
@@ -2943,9 +2891,6 @@ pub mod ngap_ies {
     impl AIoTFollowonCommandIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -2969,10 +2914,10 @@ pub mod ngap_ies {
     impl Tree for AIoTFollowonCommandIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::AIoTFollowonCommandIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::AIoTFollowonCommandIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -3101,15 +3046,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "expectedD2RMsgSize",
-                    "approximateNoofTargetDevices",
-                    "timeInterval",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::AIoTInventoryAssistanceInformation)?;
             let expected_d2r_msg_size =
                 reading.member(&members, "expectedD2RMsgSize", |value, reading| {
                     reading.unsigned(value, u64::MIN, u64::MAX)
@@ -3327,8 +3264,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["readerIndex", "deviceReportList", "iE-Extensions"])?;
+            let members = reading.members(value, names::AIoTReaderReportItem)?;
             let reader_index =
                 reading.member(&members, "readerIndex", AIoTReaderIndex::from_tree)?;
             let device_report_list = reading.member(
@@ -3539,8 +3475,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["globalgNB-ID", "readerIndex", "iE-Extensions"])?;
+            let members = reading.members(value, names::AIoTRequestedReaderItem)?;
             let global_gnb_id = reading.member(&members, "globalgNB-ID", GlobalGNBID::from_tree)?;
             let reader_index =
                 reading.member(&members, "readerIndex", AIoTReaderIndex::from_tree)?;
@@ -3718,14 +3653,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "requestedReaderList",
-                    "requestedAIoTAreaList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::AIoTRequestedServiceAreaInformation)?;
             let requested_reader_list = reading.optional(
                 &members,
                 "requestedReaderList",
@@ -3819,8 +3747,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) =
-                reading.alternative(value, &["a-IoT-RAND-n", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::AIoTSecurityInfo)?;
             Ok(match position {
                 0 => Self::a_IoT_RAND_n(reading.within(
                     "a-IoT-RAND-n",
@@ -3850,9 +3777,6 @@ pub mod ngap_ies {
     impl AIoTSupport {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::aIoT_only, Self::aIoT_and_NRUu];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["aIoT-only", "aIoT-and-NRUu"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -3876,10 +3800,10 @@ pub mod ngap_ies {
     impl Tree for AIoTSupport {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::AIoTSupport[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::AIoTSupport)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -3976,10 +3900,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["pLMNidentity", "nID", "aIoTAreaCode", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::AIoTAreaID)?;
             let plmn_identity =
                 reading.member(&members, "pLMNidentity", PLMNIdentity::from_tree)?;
             let nid = reading.optional(&members, "nID", NID::from_tree)?;
@@ -4082,8 +4003,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["aMF-TNLAssociationAddress", "iE-Extensions"])?;
+            let members = reading.members(value, names::AMFTNLAssociationSetupItem)?;
             let amf_tnl_association_address = reading.member(
                 &members,
                 "aMF-TNLAssociationAddress",
@@ -4281,15 +4201,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "aMF-TNLAssociationAddress",
-                    "tNLAssociationUsage",
-                    "tNLAddressWeightFactor",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::AMFTNLAssociationToAddItem)?;
             let amf_tnl_association_address = reading.member(
                 &members,
                 "aMF-TNLAssociationAddress",
@@ -4460,8 +4372,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["aMF-TNLAssociationAddress", "iE-Extensions"])?;
+            let members = reading.members(value, names::AMFTNLAssociationToRemoveItem)?;
             let amf_tnl_association_address = reading.member(
                 &members,
                 "aMF-TNLAssociationAddress",
@@ -4672,15 +4583,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "aMF-TNLAssociationAddress",
-                    "tNLAssociationUsage",
-                    "tNLAddressWeightFactor",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::AMFTNLAssociationToUpdateItem)?;
             let amf_tnl_association_address = reading.member(
                 &members,
                 "aMF-TNLAssociationAddress",
@@ -5074,8 +4977,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) =
-                reading.alternative(value, &["globalRANNodeID", "tAI", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::AMFPagingTarget)?;
             Ok(match position {
                 0 => Self::globalRANNodeID(reading.within(
                     "globalRANNodeID",
@@ -5264,9 +5166,6 @@ pub mod ngap_ies {
     impl AUN3DeviceAccessInfoAUN3DeviceAccess {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -5290,10 +5189,10 @@ pub mod ngap_ies {
     impl Tree for AUN3DeviceAccessInfoAUN3DeviceAccess {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::AUN3DeviceAccessInfoAUN3DeviceAccess[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::AUN3DeviceAccessInfoAUN3DeviceAccess)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -5311,9 +5210,6 @@ pub mod ngap_ies {
     impl AUN3DeviceAccessInfoExistingNGConnectionwithSameLocation {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::R_true, Self::R_false];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["true", "false"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -5337,10 +5233,16 @@ pub mod ngap_ies {
     impl Tree for AUN3DeviceAccessInfoExistingNGConnectionwithSameLocation {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(
+                names::AUN3DeviceAccessInfoExistingNGConnectionwithSameLocation
+                    [self.index() as usize],
+            )
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(
+                value,
+                names::AUN3DeviceAccessInfoExistingNGConnectionwithSameLocation,
+            )?])
         }
     }
     #[cfg(feature = "serde")]
@@ -5430,14 +5332,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "aUN3DeviceAccess",
-                    "existingNGConnectionwithSameLocation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::AUN3DeviceAccessInfo)?;
             let aun3_device_access = reading.member(
                 &members,
                 "aUN3DeviceAccess",
@@ -5527,9 +5422,6 @@ pub mod ngap_ies {
     impl ActivationStatus {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::active, Self::not_active];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["active", "not-active"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -5553,10 +5445,10 @@ pub mod ngap_ies {
     impl Tree for ActivationStatus {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ActivationStatus[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ActivationStatus)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -5638,7 +5530,7 @@ pub mod ngap_ies {
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
             let members = reading.members(
                 value,
-                &["locationReportingReferenceIDToBeCancelled", "iE-Extensions"],
+                names::AdditionalCancelledlocationReportingReferenceIDItem,
             )?;
             let location_reporting_reference_id_to_be_cancelled = reading.member(
                 &members,
@@ -5844,15 +5736,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "additionalDL-NGU-UP-TNLInformation",
-                    "additionalQosFlowSetupResponseList",
-                    "additionalDLForwardingUPTNLInformation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::AdditionalDLUPTNLInformationForHOItem)?;
             let additional_dl_ngu_up_tnl_information = reading.member(
                 &members,
                 "additionalDL-NGU-UP-TNLInformation",
@@ -5962,9 +5846,6 @@ pub mod ngap_ies {
     impl AdditionalQosFlowInformation {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::more_likely];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["more-likely"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -5988,10 +5869,10 @@ pub mod ngap_ies {
     impl Tree for AdditionalQosFlowInformation {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::AdditionalQosFlowInformation[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::AdditionalQosFlowInformation)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -6070,7 +5951,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["nRCGI", "tAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::AdditionalULI)?;
             let nr_cgi = reading.member(&members, "nRCGI", NRCGI::from_tree)?;
             let tai = reading.member(&members, "tAI", TAI::from_tree)?;
             let ie_extensions = reading.optional(
@@ -6163,7 +6044,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["altitude", "timeStamp", "iE-Extensions"])?;
+            let members = reading.members(value, names::AerialUEFlightInformationReporting)?;
             let altitude = reading.member(&members, "altitude", Altitude::from_tree)?;
             let time_stamp = reading.member(&members, "timeStamp", TimeStamp::from_tree)?;
             let ie_extensions = reading.optional(
@@ -6297,16 +6178,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "higher-Altitude-Threshold",
-                    "lower-Altitude-Threshold",
-                    "aerial-UE-report-periodicity",
-                    "areaID",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members =
+                reading.members(value, names::AerialUEFlightInformationReportingControl)?;
             let higher_altitude_threshold =
                 reading.member(&members, "higher-Altitude-Threshold", Altitude::from_tree)?;
             let lower_altitude_threshold =
@@ -6409,13 +6282,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "aerial-UE-FlightInformationReportingControl",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members =
+                reading.members(value, names::AerialUEFlightInformationReportingControlItem)?;
             let aerial_ue_flight_information_reporting_control = reading.member(
                 &members,
                 "aerial-UE-FlightInformationReportingControl",
@@ -6534,12 +6402,6 @@ pub mod ngap_ies {
             Self::min12,
             Self::min30,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 14] = [
-            "ms120", "ms240", "ms480", "ms640", "ms1024", "ms2048", "ms5120", "ms10240", "ms20480",
-            "ms40960", "min1", "min6", "min12", "min30",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -6563,10 +6425,10 @@ pub mod ngap_ies {
     impl Tree for AerialUEReportingPeriodicity {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::AerialUEReportingPeriodicity[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::AerialUEReportingPeriodicity)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -6584,9 +6446,6 @@ pub mod ngap_ies {
     impl AerialUEsubscriptionInformation {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::allowed, Self::not_allowed];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["allowed", "not-allowed"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -6610,10 +6469,10 @@ pub mod ngap_ies {
     impl Tree for AerialUEsubscriptionInformation {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::AerialUEsubscriptionInformation[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::AerialUEsubscriptionInformation)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -6714,15 +6573,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "priorityLevelARP",
-                    "pre-emptionCapability",
-                    "pre-emptionVulnerability",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::AllocationAndRetentionPriority)?;
             let priority_level_arp =
                 reading.member(&members, "priorityLevelARP", PriorityLevelARP::from_tree)?;
             let pre_emption_capability = reading.member(
@@ -6815,9 +6666,6 @@ pub mod ngap_ies {
     impl AllowedPNINPNItemPNINPNRestricted {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::restricted, Self::not_restricted];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["restricted", "not-restricted"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -6841,10 +6689,10 @@ pub mod ngap_ies {
     impl Tree for AllowedPNINPNItemPNINPNRestricted {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::AllowedPNINPNItemPNINPNRestricted[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::AllowedPNINPNItemPNINPNRestricted)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -6941,15 +6789,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pLMNIdentity",
-                    "pNI-NPN-restricted",
-                    "allowed-CAG-List-per-PLMN",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::AllowedPNINPNItem)?;
             let plmn_identity =
                 reading.member(&members, "pLMNIdentity", PLMNIdentity::from_tree)?;
             let pni_npn_restricted = reading.member(
@@ -7148,7 +6988,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["s-NSSAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::AllowedNSSAIItem)?;
             let s_nssai = reading.member(&members, "s-NSSAI", SNSSAI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -7464,17 +7304,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "alternativeQoSParaSetIndex",
-                    "guaranteedFlowBitRateDL",
-                    "guaranteedFlowBitRateUL",
-                    "packetDelayBudget",
-                    "packetErrorRate",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::AlternativeQoSParaSetItem)?;
             let alternative_qos_para_set_index = reading.member(
                 &members,
                 "alternativeQoSParaSetIndex",
@@ -7721,10 +7551,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &["tAI", "globalRANNodeID", "nR-CGI", "choice-Extensions"],
-            )?;
+            let (position, value) = reading.alternative(value, names::AreaID)?;
             Ok(match position {
                 0 => Self::tAI(reading.within("tAI", value, TAI::from_tree)?),
                 1 => Self::globalRANNodeID(reading.within(
@@ -7875,15 +7702,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "areaOfInterestTAIList",
-                    "areaOfInterestCellList",
-                    "areaOfInterestRANNodeList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::AreaOfInterest)?;
             let area_of_interest_tai_list = reading.optional(
                 &members,
                 "areaOfInterestTAIList",
@@ -7983,7 +7802,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["nGRAN-CGI", "iE-Extensions"])?;
+            let members = reading.members(value, names::AreaOfInterestCellItem)?;
             let ngran_cgi = reading.member(&members, "nGRAN-CGI", NGRANCGI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -8133,14 +7952,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "areaOfInterest",
-                    "locationReportingReferenceID",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::AreaOfInterestItem)?;
             let area_of_interest =
                 reading.member(&members, "areaOfInterest", AreaOfInterest::from_tree)?;
             let location_reporting_reference_id = reading.member(
@@ -8284,7 +8096,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["globalRANNodeID", "iE-Extensions"])?;
+            let members = reading.members(value, names::AreaOfInterestRANNodeItem)?;
             let global_ran_node_id =
                 reading.member(&members, "globalRANNodeID", GlobalRANNodeID::from_tree)?;
             let ie_extensions = reading.optional(
@@ -8410,7 +8222,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["tAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::AreaOfInterestTAIItem)?;
             let tai = reading.member(&members, "tAI", TAI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -8563,16 +8375,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "cellBased",
-                    "tABased",
-                    "pLMNWide",
-                    "tAIBased",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::AreaScopeOfMDTEUTRA)?;
             Ok(match position {
                 0 => Self::cellBased(reading.within(
                     "cellBased",
@@ -8683,16 +8486,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "cellBased",
-                    "tABased",
-                    "pLMNWide",
-                    "tAIBased",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::AreaScopeOfMDTNR)?;
             Ok(match position {
                 0 => Self::cellBased(reading.within(
                     "cellBased",
@@ -8810,10 +8604,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["nrFrequencyInfo", "pciListForMDT", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::AreaScopeOfNeighCellsItem)?;
             let nr_frequency_info =
                 reading.member(&members, "nrFrequencyInfo", NRFrequencyInfo::from_tree)?;
             let pci_list_for_mdt =
@@ -8981,16 +8772,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "cellBased",
-                    "tABased",
-                    "tAIBased",
-                    "pLMNAreaBased",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::AreaScopeOfQMC)?;
             Ok(match position {
                 0 => {
                     Self::cellBased(reading.within("cellBased", value, CellBasedQMC::from_tree)?)
@@ -9120,14 +8902,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "assistanceDataForRecommendedCells",
-                    "pagingAttemptInformation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::AssistanceDataForPaging)?;
             let assistance_data_for_recommended_cells = reading.optional(
                 &members,
                 "assistanceDataForRecommendedCells",
@@ -9225,8 +9000,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["recommendedCellsForPaging", "iE-Extensions"])?;
+            let members = reading.members(value, names::AssistanceDataForRecommendedCells)?;
             let recommended_cells_for_paging = reading.member(
                 &members,
                 "recommendedCellsForPaging",
@@ -9373,14 +9147,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mBS-QosFlowIdentifier",
-                    "associatedUnicastQosFlowIdentifier",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::AssociatedMBSQosFlowSetupRequestItem)?;
             let mbs_qos_flow_identifier = reading.member(
                 &members,
                 "mBS-QosFlowIdentifier",
@@ -9543,14 +9310,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mBS-QosFlowIdentifier",
-                    "associatedUnicastQosFlowIdentifier",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members =
+                reading.members(value, names::AssociatedMBSQosFlowSetuporModifyRequestItem)?;
             let mbs_qos_flow_identifier = reading.member(
                 &members,
                 "mBS-QosFlowIdentifier",
@@ -9648,9 +9409,6 @@ pub mod ngap_ies {
     impl AssociatedQosFlowItemQosFlowMappingIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::ul, Self::dl];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["ul", "dl"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -9674,10 +9432,11 @@ pub mod ngap_ies {
     impl Tree for AssociatedQosFlowItemQosFlowMappingIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::AssociatedQosFlowItemQosFlowMappingIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES
+                [reading.named(value, names::AssociatedQosFlowItemQosFlowMappingIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -9776,14 +9535,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "qosFlowIdentifier",
-                    "qosFlowMappingIndication",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::AssociatedQosFlowItem)?;
             let qos_flow_identifier =
                 reading.member(&members, "qosFlowIdentifier", QosFlowIdentifier::from_tree)?;
             let qos_flow_mapping_indication = reading.optional(
@@ -9929,9 +9681,6 @@ pub mod ngap_ies {
     impl AuthenticatedIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -9955,10 +9704,10 @@ pub mod ngap_ies {
     impl Tree for AuthenticatedIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::AuthenticatedIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::AuthenticatedIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -10033,7 +9782,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["reportingThreshold", "iE-Extensions"])?;
+            let members = reading.members(value, names::AvailableBitrateReportThresholdItem)?;
             let reporting_threshold = reading.member(
                 &members,
                 "reportingThreshold",
@@ -10116,9 +9865,6 @@ pub mod ngap_ies {
     impl AvailableRANVisibleQoEMetricsApplicationLayerBufferLevelList {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -10142,10 +9888,16 @@ pub mod ngap_ies {
     impl Tree for AvailableRANVisibleQoEMetricsApplicationLayerBufferLevelList {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(
+                names::AvailableRANVisibleQoEMetricsApplicationLayerBufferLevelList
+                    [self.index() as usize],
+            )
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(
+                value,
+                names::AvailableRANVisibleQoEMetricsApplicationLayerBufferLevelList,
+            )?])
         }
     }
     #[cfg(feature = "serde")]
@@ -10162,9 +9914,6 @@ pub mod ngap_ies {
     impl AvailableRANVisibleQoEMetricsPlayoutDelayForMediaStartup {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -10188,10 +9937,16 @@ pub mod ngap_ies {
     impl Tree for AvailableRANVisibleQoEMetricsPlayoutDelayForMediaStartup {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(
+                names::AvailableRANVisibleQoEMetricsPlayoutDelayForMediaStartup
+                    [self.index() as usize],
+            )
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(
+                value,
+                names::AvailableRANVisibleQoEMetricsPlayoutDelayForMediaStartup,
+            )?])
         }
     }
     #[cfg(feature = "serde")]
@@ -10310,14 +10065,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "applicationLayerBufferLevelList",
-                    "playoutDelayForMediaStartup",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::AvailableRANVisibleQoEMetrics)?;
             let application_layer_buffer_level_list = reading.optional(
                 &members,
                 "applicationLayerBufferLevelList",
@@ -10492,14 +10240,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "beamMeasurementsReportQuantity",
-                    "maxNrofRS-IndexesToReport",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::BeamMeasurementsReportConfiguration)?;
             let beam_measurements_report_quantity = reading.optional(
                 &members,
                 "beamMeasurementsReportQuantity",
@@ -10537,9 +10278,6 @@ pub mod ngap_ies {
     impl BeamMeasurementsReportQuantityRSRP {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::R_true, Self::R_false];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["true", "false"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -10563,10 +10301,10 @@ pub mod ngap_ies {
     impl Tree for BeamMeasurementsReportQuantityRSRP {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::BeamMeasurementsReportQuantityRSRP[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::BeamMeasurementsReportQuantityRSRP)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -10584,9 +10322,6 @@ pub mod ngap_ies {
     impl BeamMeasurementsReportQuantityRSRQ {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::R_true, Self::R_false];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["true", "false"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -10610,10 +10345,10 @@ pub mod ngap_ies {
     impl Tree for BeamMeasurementsReportQuantityRSRQ {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::BeamMeasurementsReportQuantityRSRQ[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::BeamMeasurementsReportQuantityRSRQ)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -10631,9 +10366,6 @@ pub mod ngap_ies {
     impl BeamMeasurementsReportQuantitySINR {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::R_true, Self::R_false];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["true", "false"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -10657,10 +10389,10 @@ pub mod ngap_ies {
     impl Tree for BeamMeasurementsReportQuantitySINR {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::BeamMeasurementsReportQuantitySINR[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::BeamMeasurementsReportQuantitySINR)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -10749,7 +10481,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["rSRP", "rSRQ", "sINR", "iE-Extensions"])?;
+            let members = reading.members(value, names::BeamMeasurementsReportQuantity)?;
             let rsrp = reading.member(
                 &members,
                 "rSRP",
@@ -10834,9 +10566,6 @@ pub mod ngap_ies {
     impl BluetoothMeasConfig {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::setup];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["setup"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -10860,10 +10589,10 @@ pub mod ngap_ies {
     impl Tree for BluetoothMeasConfig {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::BluetoothMeasConfig[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::BluetoothMeasConfig)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -10946,7 +10675,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["bluetoothName", "iE-Extensions"])?;
+            let members = reading.members(value, names::BluetoothMeasConfigNameItem)?;
             let bluetooth_name =
                 reading.member(&members, "bluetoothName", BluetoothName::from_tree)?;
             let ie_extensions = reading.optional(
@@ -11033,9 +10762,6 @@ pub mod ngap_ies {
     impl BluetoothMeasurementConfigurationBtRssi {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -11059,10 +10785,11 @@ pub mod ngap_ies {
     impl Tree for BluetoothMeasurementConfigurationBtRssi {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::BluetoothMeasurementConfigurationBtRssi[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES
+                [reading.named(value, names::BluetoothMeasurementConfigurationBtRssi)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -11193,15 +10920,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "bluetoothMeasConfig",
-                    "bluetoothMeasConfigNameList",
-                    "bt-rssi",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::BluetoothMeasurementConfiguration)?;
             let bluetooth_meas_config = reading.member(
                 &members,
                 "bluetoothMeasConfig",
@@ -11418,18 +11137,8 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "cellIDCancelledEUTRA",
-                    "tAICancelledEUTRA",
-                    "emergencyAreaIDCancelledEUTRA",
-                    "cellIDCancelledNR",
-                    "tAICancelledNR",
-                    "emergencyAreaIDCancelledNR",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) =
+                reading.alternative(value, names::BroadcastCancelledAreaList)?;
             Ok(match position {
                 0 => Self::cellIDCancelledEUTRA(reading.within(
                     "cellIDCancelledEUTRA",
@@ -11597,18 +11306,8 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "cellIDBroadcastEUTRA",
-                    "tAIBroadcastEUTRA",
-                    "emergencyAreaIDBroadcastEUTRA",
-                    "cellIDBroadcastNR",
-                    "tAIBroadcastNR",
-                    "emergencyAreaIDBroadcastNR",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) =
+                reading.alternative(value, names::BroadcastCompletedAreaList)?;
             Ok(match position {
                 0 => Self::cellIDBroadcastEUTRA(reading.within(
                     "cellIDBroadcastEUTRA",
@@ -11729,10 +11428,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["pLMNIdentity", "tAISliceSupportList", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::BroadcastPLMNItem)?;
             let plmn_identity =
                 reading.member(&members, "pLMNIdentity", PLMNIdentity::from_tree)?;
             let tai_slice_support_list =
@@ -11904,15 +11600,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mBS-SessionID",
-                    "cause",
-                    "criticalityDiagnostics",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::BroadcastTransportFailureTransfer)?;
             let mbs_session_id =
                 reading.member(&members, "mBS-SessionID", MBSSessionID::from_tree)?;
             let cause = reading.member(&members, "cause", Cause::from_tree)?;
@@ -12028,10 +11716,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["mBS-SessionID", "mBS-SessionTNLInfoNGRAN", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::BroadcastTransportRequestTransfer)?;
             let mbs_session_id =
                 reading.member(&members, "mBS-SessionID", MBSSessionID::from_tree)?;
             let mbs_session_tnl_info_ngran = reading.member(
@@ -12123,7 +11808,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["mBS-SessionID", "iE-Extensions"])?;
+            let members = reading.members(value, names::BroadcastTransportResponseTransfer)?;
             let mbs_session_id =
                 reading.member(&members, "mBS-SessionID", MBSSessionID::from_tree)?;
             let ie_extensions = reading.optional(
@@ -12292,14 +11977,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "burstArrivalTimeWindowStart",
-                    "burstArrivalTimeWindowEnd",
-                    "iE-Extension",
-                ],
-            )?;
+            let members = reading.members(value, names::BurstArrivalTimeWindow)?;
             let burst_arrival_time_window_start =
                 reading.member(&members, "burstArrivalTimeWindowStart", |value, reading| {
                     reading.unsigned(value, u64::MIN, u64::MAX)
@@ -12552,7 +12230,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["plmnID", "cAGID", "iE-Extensions"])?;
+            let members = reading.members(value, names::CAGListforMDTItem)?;
             let plmn_id = reading.member(&members, "plmnID", PLMNIdentity::from_tree)?;
             let cag_id = reading.member(&members, "cAGID", CAGID::from_tree)?;
             let ie_extensions = reading.optional(
@@ -12581,9 +12259,6 @@ pub mod ngap_ies {
     impl CEmodeBSupportIndicator {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::supported];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["supported"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -12607,10 +12282,10 @@ pub mod ngap_ies {
     impl Tree for CEmodeBSupportIndicator {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::CEmodeBSupportIndicator[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::CEmodeBSupportIndicator)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -12628,9 +12303,6 @@ pub mod ngap_ies {
     impl CEmodeBrestricted {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::restricted, Self::not_restricted];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["restricted", "not-restricted"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -12654,10 +12326,10 @@ pub mod ngap_ies {
     impl Tree for CEmodeBrestricted {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::CEmodeBrestricted[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::CEmodeBrestricted)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -12674,9 +12346,6 @@ pub mod ngap_ies {
     impl CNMTCommunicationHandling {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::supported];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["supported"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -12700,10 +12369,10 @@ pub mod ngap_ies {
     impl Tree for CNMTCommunicationHandling {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::CNMTCommunicationHandling[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::CNMTCommunicationHandling)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -12792,7 +12461,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["expectedUEBehaviour", "iE-Extensions"])?;
+            let members = reading.members(value, names::CNAssistedRANTuning)?;
             let expected_ue_behaviour = reading.optional(
                 &members,
                 "expectedUEBehaviour",
@@ -12876,9 +12545,6 @@ pub mod ngap_ies {
     impl CNTypeRestrictionsForEquivalentItemCnType {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::epc_forbidden, Self::fiveGC_forbidden];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["epc-forbidden", "fiveGC-forbidden"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -12902,10 +12568,11 @@ pub mod ngap_ies {
     impl Tree for CNTypeRestrictionsForEquivalentItemCnType {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::CNTypeRestrictionsForEquivalentItemCnType[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES
+                [reading.named(value, names::CNTypeRestrictionsForEquivalentItemCnType)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -12987,7 +12654,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["plmnIdentity", "cn-Type", "iE-Extensions"])?;
+            let members = reading.members(value, names::CNTypeRestrictionsForEquivalentItem)?;
             let plmn_identity =
                 reading.member(&members, "plmnIdentity", PLMNIdentity::from_tree)?;
             let cn_type = reading.member(
@@ -13021,9 +12688,6 @@ pub mod ngap_ies {
     impl CNTypeRestrictionsForServing {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::epc_forbidden];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["epc-forbidden"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -13047,10 +12711,10 @@ pub mod ngap_ies {
     impl Tree for CNTypeRestrictionsForServing {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::CNTypeRestrictionsForServing[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::CNTypeRestrictionsForServing)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -13182,8 +12846,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["pDCP-SN12", "hFN-PDCP-SN12", "iE-Extensions"])?;
+            let members = reading.members(value, names::COUNTValueForPDCPSN12)?;
             let pdcp_sn12 = reading.member(&members, "pDCP-SN12", |value, reading| {
                 reading.unsigned(value, 0, 4095).map(|number| number as u16)
             })?;
@@ -13291,8 +12954,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["pDCP-SN18", "hFN-PDCP-SN18", "iE-Extensions"])?;
+            let members = reading.members(value, names::COUNTValueForPDCPSN18)?;
             let pdcp_sn18 = reading.member(&members, "pDCP-SN18", |value, reading| {
                 reading
                     .unsigned(value, 0, 262143)
@@ -13388,7 +13050,7 @@ pub mod ngap_ies {
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
             let (position, value) =
-                reading.alternative(value, &["endpointIPAddress", "choice-Extensions"])?;
+                reading.alternative(value, names::CPTransportLayerInformation)?;
             Ok(match position {
                 0 => Self::endpointIPAddress(reading.within(
                     "endpointIPAddress",
@@ -13417,9 +13079,6 @@ pub mod ngap_ies {
     impl CancelAllWarningMessages {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -13443,10 +13102,10 @@ pub mod ngap_ies {
     impl Tree for CancelAllWarningMessages {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::CancelAllWarningMessages[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::CancelAllWarningMessages)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -13582,8 +13241,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["eUTRA-CGI", "numberOfBroadcasts", "iE-Extensions"])?;
+            let members = reading.members(value, names::CancelledCellsInEAIEUTRAItem)?;
             let eutra_cgi = reading.member(&members, "eUTRA-CGI", EUTRACGI::from_tree)?;
             let number_of_broadcasts = reading.member(
                 &members,
@@ -13733,8 +13391,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["nR-CGI", "numberOfBroadcasts", "iE-Extensions"])?;
+            let members = reading.members(value, names::CancelledCellsInEAINRItem)?;
             let nr_cgi = reading.member(&members, "nR-CGI", NRCGI::from_tree)?;
             let number_of_broadcasts = reading.member(
                 &members,
@@ -13886,8 +13543,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["eUTRA-CGI", "numberOfBroadcasts", "iE-Extensions"])?;
+            let members = reading.members(value, names::CancelledCellsInTAIEUTRAItem)?;
             let eutra_cgi = reading.member(&members, "eUTRA-CGI", EUTRACGI::from_tree)?;
             let number_of_broadcasts = reading.member(
                 &members,
@@ -14037,8 +13693,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["nR-CGI", "numberOfBroadcasts", "iE-Extensions"])?;
+            let members = reading.members(value, names::CancelledCellsInTAINRItem)?;
             let nr_cgi = reading.member(&members, "nR-CGI", NRCGI::from_tree)?;
             let number_of_broadcasts = reading.member(
                 &members,
@@ -14125,10 +13780,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &["candidateCGI", "candidatePCI", "choice-Extensions"],
-            )?;
+            let (position, value) = reading.alternative(value, names::CandidateCell)?;
             Ok(match position {
                 0 => Self::candidateCGI(reading.within(
                     "candidateCGI",
@@ -14219,7 +13871,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["candidateCellID", "iE-Extensions"])?;
+            let members = reading.members(value, names::CandidateCellID)?;
             let candidate_cell_id =
                 reading.member(&members, "candidateCellID", NRCGI::from_tree)?;
             let ie_extensions = reading.optional(
@@ -14305,7 +13957,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["candidateCell", "iE-Extensions"])?;
+            let members = reading.members(value, names::CandidateCellItem)?;
             let candidate_cell =
                 reading.member(&members, "candidateCell", CandidateCell::from_tree)?;
             let ie_extensions = reading.optional(
@@ -14459,10 +14111,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["candidatePCI", "candidateNRARFCN", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::CandidatePCI)?;
             let candidate_pci = reading.member(&members, "candidatePCI", |value, reading| {
                 reading.unsigned(value, u64::MIN, u64::MAX)
             })?;
@@ -14608,7 +14257,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["candidateRelayUE-Id", "iE-Extensions"])?;
+            let members = reading.members(value, names::CandidateRelayUEInformationItem)?;
             let candidate_relay_ue_id = reading.member(
                 &members,
                 "candidateRelayUE-Id",
@@ -14783,17 +14432,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "radioNetwork",
-                    "transport",
-                    "nas",
-                    "protocol",
-                    "misc",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::Cause)?;
             Ok(match position {
                 0 => Self::radioNetwork(reading.within(
                     "radioNetwork",
@@ -14842,16 +14481,6 @@ pub mod ngap_ies {
             Self::unknown_PLMN_or_SNPN,
             Self::unspecified,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 6] = [
-            "control-processing-overload",
-            "not-enough-user-plane-processing-resources",
-            "hardware-failure",
-            "om-intervention",
-            "unknown-PLMN-or-SNPN",
-            "unspecified",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -14875,10 +14504,10 @@ pub mod ngap_ies {
     impl Tree for CauseMisc {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::CauseMisc[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::CauseMisc)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -14911,18 +14540,6 @@ pub mod ngap_ies {
             Self::iAB_not_authorized,
             Self::no_aiot_NAS_response,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 8] = [
-            "normal-release",
-            "authentication-failure",
-            "deregister",
-            "unspecified",
-            "uE-not-in-PLMN-serving-area",
-            "mobile-IAB-not-authorized",
-            "iAB-not-authorized",
-            "no-aiot-NAS-response",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -14946,10 +14563,10 @@ pub mod ngap_ies {
     impl Tree for CauseNas {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::CauseNas[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::CauseNas)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -14980,17 +14597,6 @@ pub mod ngap_ies {
             Self::abstract_syntax_error_falsely_constructed_message,
             Self::unspecified,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 7] = [
-            "transfer-syntax-error",
-            "abstract-syntax-error-reject",
-            "abstract-syntax-error-ignore-and-notify",
-            "message-not-compatible-with-receiver-state",
-            "semantic-error",
-            "abstract-syntax-error-falsely-constructed-message",
-            "unspecified",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -15014,10 +14620,10 @@ pub mod ngap_ies {
     impl Tree for CauseProtocol {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::CauseProtocol[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::CauseProtocol)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -15164,75 +14770,6 @@ pub mod ngap_ies {
             Self::aiot_device_not_reachable,
             Self::multiple_AIoT_session_ID_instances,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 65] = [
-            "unspecified",
-            "txnrelocoverall-expiry",
-            "successful-handover",
-            "release-due-to-ngran-generated-reason",
-            "release-due-to-5gc-generated-reason",
-            "handover-cancelled",
-            "partial-handover",
-            "ho-failure-in-target-5GC-ngran-node-or-target-system",
-            "ho-target-not-allowed",
-            "tngrelocoverall-expiry",
-            "tngrelocprep-expiry",
-            "cell-not-available",
-            "unknown-targetID",
-            "no-radio-resources-available-in-target-cell",
-            "unknown-local-UE-NGAP-ID",
-            "inconsistent-remote-UE-NGAP-ID",
-            "handover-desirable-for-radio-reason",
-            "time-critical-handover",
-            "resource-optimisation-handover",
-            "reduce-load-in-serving-cell",
-            "user-inactivity",
-            "radio-connection-with-ue-lost",
-            "radio-resources-not-available",
-            "invalid-qos-combination",
-            "failure-in-radio-interface-procedure",
-            "interaction-with-other-procedure",
-            "unknown-PDU-session-ID",
-            "unkown-qos-flow-ID",
-            "multiple-PDU-session-ID-instances",
-            "multiple-qos-flow-ID-instances",
-            "encryption-and-or-integrity-protection-algorithms-not-supported",
-            "ng-intra-system-handover-triggered",
-            "ng-inter-system-handover-triggered",
-            "xn-handover-triggered",
-            "not-supported-5QI-value",
-            "ue-context-transfer",
-            "ims-voice-eps-fallback-or-rat-fallback-triggered",
-            "up-integrity-protection-not-possible",
-            "up-confidentiality-protection-not-possible",
-            "slice-not-supported",
-            "ue-in-rrc-inactive-state-not-reachable",
-            "redirection",
-            "resources-not-available-for-the-slice",
-            "ue-max-integrity-protected-data-rate-reason",
-            "release-due-to-cn-detected-mobility",
-            "n26-interface-not-available",
-            "release-due-to-pre-emption",
-            "multiple-location-reporting-reference-ID-instances",
-            "rsn-not-available-for-the-up",
-            "npn-access-denied",
-            "cag-only-access-denied",
-            "insufficient-ue-capabilities",
-            "redcap-ue-not-supported",
-            "unknown-MBS-Session-ID",
-            "indicated-MBS-session-area-information-not-served-by-the-gNB",
-            "inconsistent-slice-info-for-the-session",
-            "misaligned-association-for-multicast-unicast",
-            "eredcap-ue-not-supported",
-            "two-rx-xr-ue-not-supported",
-            "aerial-ue-flight-information-reporting-initiation-failure",
-            "unknown-RAN-AIoT-Device-NGAP-ID",
-            "requested-AIoT-service-area-information-not-served-by-the-gNB",
-            "unknown-AIoT-session",
-            "aiot-device-not-reachable",
-            "multiple-AIoT-session-ID-instances",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -15256,10 +14793,10 @@ pub mod ngap_ies {
     impl Tree for CauseRadioNetwork {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::CauseRadioNetwork[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::CauseRadioNetwork)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -15278,10 +14815,6 @@ pub mod ngap_ies {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] =
             [Self::transport_resource_unavailable, Self::unspecified];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] =
-            ["transport-resource-unavailable", "unspecified"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -15305,10 +14838,10 @@ pub mod ngap_ies {
     impl Tree for CauseTransport {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::CauseTransport[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::CauseTransport)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -15391,7 +14924,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["nGRAN-CGI", "cellCAGList", "iE-Extensions"])?;
+            let members = reading.members(value, names::CellCAGInformation)?;
             let ngran_cgi = reading.member(&members, "nGRAN-CGI", NGRANCGI::from_tree)?;
             let cell_cag_list = reading.member(&members, "cellCAGList", CellCAGList::from_tree)?;
             let ie_extensions = reading.optional(
@@ -15478,7 +15011,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["cellIdListforMDT", "iE-Extensions"])?;
+            let members = reading.members(value, names::CellBasedMDTEUTRA)?;
             let cell_id_listfor_mdt = reading.member(
                 &members,
                 "cellIdListforMDT",
@@ -15567,7 +15100,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["cellIdListforMDT", "iE-Extensions"])?;
+            let members = reading.members(value, names::CellBasedMDTNR)?;
             let cell_id_listfor_mdt =
                 reading.member(&members, "cellIdListforMDT", CellIdListforMDTNR::from_tree)?;
             let ie_extensions = reading.optional(
@@ -15653,7 +15186,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["cellIdListforQMC", "iE-Extensions"])?;
+            let members = reading.members(value, names::CellBasedQMC)?;
             let cell_id_listfor_qmc =
                 reading.member(&members, "cellIdListforQMC", CellIdListforQMC::from_tree)?;
             let ie_extensions = reading.optional(
@@ -15842,7 +15375,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["eUTRA-CGI", "iE-Extensions"])?;
+            let members = reading.members(value, names::CellIDBroadcastEUTRAItem)?;
             let eutra_cgi = reading.member(&members, "eUTRA-CGI", EUTRACGI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -15976,7 +15509,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["nR-CGI", "iE-Extensions"])?;
+            let members = reading.members(value, names::CellIDBroadcastNRItem)?;
             let nr_cgi = reading.member(&members, "nR-CGI", NRCGI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -16122,8 +15655,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["eUTRA-CGI", "numberOfBroadcasts", "iE-Extensions"])?;
+            let members = reading.members(value, names::CellIDCancelledEUTRAItem)?;
             let eutra_cgi = reading.member(&members, "eUTRA-CGI", EUTRACGI::from_tree)?;
             let number_of_broadcasts = reading.member(
                 &members,
@@ -16273,8 +15805,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["nR-CGI", "numberOfBroadcasts", "iE-Extensions"])?;
+            let members = reading.members(value, names::CellIDCancelledNRItem)?;
             let nr_cgi = reading.member(&members, "nR-CGI", NRCGI::from_tree)?;
             let number_of_broadcasts = reading.member(
                 &members,
@@ -16365,14 +15896,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "eUTRA-CGIListforRestart",
-                    "nR-CGIListforRestart",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::CellIDListForRestart)?;
             Ok(match position {
                 0 => Self::eUTRA_CGIListforRestart(reading.within(
                     "eUTRA-CGIListforRestart",
@@ -16566,9 +16090,6 @@ pub mod ngap_ies {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 4] =
             [Self::verysmall, Self::small, Self::medium, Self::large];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 4] = ["verysmall", "small", "medium", "large"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -16592,10 +16113,10 @@ pub mod ngap_ies {
     impl Tree for CellSize {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::CellSize[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::CellSize)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -16669,7 +16190,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["cellSize", "iE-Extensions"])?;
+            let members = reading.members(value, names::CellType)?;
             let cell_size = reading.member(&members, "cellSize", CellSize::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -16798,14 +16319,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "clockAccuracyValue",
-                    "clockAccuracyIndex",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::ClockAccuracy)?;
             Ok(match position {
                 0 => Self::clockAccuracyValue(reading.within(
                     "clockAccuracyValue",
@@ -16839,9 +16353,6 @@ pub mod ngap_ies {
     impl ClockQualityAcceptanceCriteriaTraceabletoUTC {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -16865,10 +16376,11 @@ pub mod ngap_ies {
     impl Tree for ClockQualityAcceptanceCriteriaTraceabletoUTC {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ClockQualityAcceptanceCriteriaTraceabletoUTC[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES
+                [reading.named(value, names::ClockQualityAcceptanceCriteriaTraceabletoUTC)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -16885,9 +16397,6 @@ pub mod ngap_ies {
     impl ClockQualityAcceptanceCriteriaTraceabletoGNSS {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -16911,10 +16420,11 @@ pub mod ngap_ies {
     impl Tree for ClockQualityAcceptanceCriteriaTraceabletoGNSS {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ClockQualityAcceptanceCriteriaTraceabletoGNSS[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES
+                [reading.named(value, names::ClockQualityAcceptanceCriteriaTraceabletoGNSS)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -17132,18 +16642,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "synchronisationState",
-                    "traceabletoUTC",
-                    "traceabletoGNSS",
-                    "clockFrequencyStability",
-                    "clockAccuracy",
-                    "parentTImeSource",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::ClockQualityAcceptanceCriteria)?;
             let synchronisation_state =
                 reading.optional(&members, "synchronisationState", |value, reading| {
                     json::read_bit_string(reading, value, 8, 8, true)
@@ -17271,8 +16770,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["clockQualityAcceptanceCriteria", "iE-Extensions"])?;
+            let members = reading.members(value, names::ClockQualityAcceptanceIndication)?;
             let clock_quality_acceptance_criteria = reading.member(
                 &members,
                 "clockQualityAcceptanceCriteria",
@@ -17379,14 +16877,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "clockQualityMetrics",
-                    "clockQualityAcceptanceIndication",
-                    "choice-extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::ClockQualityDetailLevel)?;
             Ok(match position {
                 0 => Self::clockQualityMetrics(reading.within(
                     "clockQualityMetrics",
@@ -17489,7 +16980,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["clockQualityDetailLevel", "iE-Extensions"])?;
+            let members = reading.members(value, names::ClockQualityReportingControlInfo)?;
             let clock_quality_detail_level = reading.member(
                 &members,
                 "clockQualityDetailLevel",
@@ -17523,9 +17014,6 @@ pub mod ngap_ies {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 3] =
             [Self::mbs_broadcast, Self::mbs_multicast, Self::unicast];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 3] = ["mbs-broadcast", "mbs-multicast", "unicast"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -17549,10 +17037,10 @@ pub mod ngap_ies {
     impl Tree for CommServiceType {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::CommServiceType[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::CommServiceType)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -17674,16 +17162,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "correlationIdentifier",
-                    "rAN-AIOT-Device-NGAP-ID",
-                    "cause",
-                    "criticalityDiagnostics",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::CommandFailureTransfer)?;
             let correlation_identifier = reading.member(
                 &members,
                 "correlationIdentifier",
@@ -17765,7 +17244,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::CommandRequestTransfer)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -17903,16 +17382,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "correlationIdentifier",
-                    "rAN-AIOT-Device-NGAP-ID",
-                    "aIoT-NASPDU",
-                    "criticalityDiagnostics",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::CommandResponseTransfer)?;
             let correlation_identifier = reading.member(
                 &members,
                 "correlationIdentifier",
@@ -18126,7 +17596,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["eUTRA-CGI", "iE-Extensions"])?;
+            let members = reading.members(value, names::CompletedCellsInEAIEUTRAItem)?;
             let eutra_cgi = reading.member(&members, "eUTRA-CGI", EUTRACGI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -18260,7 +17730,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["nR-CGI", "iE-Extensions"])?;
+            let members = reading.members(value, names::CompletedCellsInEAINRItem)?;
             let nr_cgi = reading.member(&members, "nR-CGI", NRCGI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -18396,7 +17866,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["eUTRA-CGI", "iE-Extensions"])?;
+            let members = reading.members(value, names::CompletedCellsInTAIEUTRAItem)?;
             let eutra_cgi = reading.member(&members, "eUTRA-CGI", EUTRACGI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -18530,7 +18000,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["nR-CGI", "iE-Extensions"])?;
+            let members = reading.members(value, names::CompletedCellsInTAINRItem)?;
             let nr_cgi = reading.member(&members, "nR-CGI", NRCGI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -18644,10 +18114,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["cellCapacityClassValue", "capacityValue", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::CompositeAvailableCapacity)?;
             let cell_capacity_class_value =
                 reading.optional(&members, "cellCapacityClassValue", |value, reading| {
                     reading.unsigned(value, u64::MIN, u64::MAX)
@@ -18681,9 +18148,6 @@ pub mod ngap_ies {
     impl ConcurrentWarningMessageInd {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -18707,10 +18171,10 @@ pub mod ngap_ies {
     impl Tree for ConcurrentWarningMessageInd {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ConcurrentWarningMessageInd[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ConcurrentWarningMessageInd)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -18729,9 +18193,6 @@ pub mod ngap_ies {
     impl ConfidentialityProtectionIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 3] = [Self::required, Self::preferred, Self::not_needed];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 3] = ["required", "preferred", "not-needed"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -18755,10 +18216,10 @@ pub mod ngap_ies {
     impl Tree for ConfidentialityProtectionIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ConfidentialityProtectionIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ConfidentialityProtectionIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -18776,9 +18237,6 @@ pub mod ngap_ies {
     impl ConfidentialityProtectionResult {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::performed, Self::not_performed];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["performed", "not-performed"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -18802,10 +18260,10 @@ pub mod ngap_ies {
     impl Tree for ConfidentialityProtectionResult {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ConfidentialityProtectionResult[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ConfidentialityProtectionResult)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -18877,9 +18335,6 @@ pub mod ngap_ies {
     impl ConfiguredTACIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -18903,10 +18358,10 @@ pub mod ngap_ies {
     impl Tree for ConfiguredTACIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ConfiguredTACIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ConfiguredTACIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -18926,9 +18381,6 @@ pub mod ngap_ies {
     impl CongestionInformationRequest {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 4] = [Self::ul, Self::dl, Self::both, Self::stop];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 4] = ["ul", "dl", "both", "stop"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -18952,10 +18404,10 @@ pub mod ngap_ies {
     impl Tree for CongestionInformationRequest {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::CongestionInformationRequest[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::CongestionInformationRequest)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -19119,18 +18571,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "uEIdentityIndexValue",
-                    "uESpecificDRX",
-                    "periodicRegistrationUpdateTimer",
-                    "mICOModeIndication",
-                    "tAIListForInactive",
-                    "expectedUEBehaviour",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members =
+                reading.members(value, names::CoreNetworkAssistanceInformationForInactive)?;
             let ue_identity_index_value = reading.member(
                 &members,
                 "uEIdentityIndexValue",
@@ -19379,16 +18821,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "procedureCode",
-                    "triggeringMessage",
-                    "procedureCriticality",
-                    "iEsCriticalityDiagnostics",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::CriticalityDiagnostics)?;
             let procedure_code =
                 reading.optional(&members, "procedureCode", ProcedureCode::from_tree)?;
             let triggering_message =
@@ -19501,10 +18934,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["iECriticality", "iE-ID", "typeOfError", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::CriticalityDiagnosticsIEItem)?;
             let ie_criticality =
                 reading.member(&members, "iECriticality", Criticality::from_tree)?;
             let ie_id = reading.member(&members, "iE-ID", ProtocolIEID::from_tree)?;
@@ -19588,9 +19018,6 @@ pub mod ngap_ies {
     impl DAPSRequestInfoDAPSIndicator {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::daps_ho_required];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["daps-ho-required"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -19614,10 +19041,10 @@ pub mod ngap_ies {
     impl Tree for DAPSRequestInfoDAPSIndicator {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::DAPSRequestInfoDAPSIndicator[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::DAPSRequestInfoDAPSIndicator)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -19692,7 +19119,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["dAPSIndicator", "iE-Extensions"])?;
+            let members = reading.members(value, names::DAPSRequestInfo)?;
             let daps_indicator = reading.member(
                 &members,
                 "dAPSIndicator",
@@ -19724,9 +19151,6 @@ pub mod ngap_ies {
     impl DAPSResponseInfoDapsresponseindicator {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::daps_ho_accepted, Self::daps_ho_not_accepted];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["daps-ho-accepted", "daps-ho-not-accepted"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -19750,10 +19174,10 @@ pub mod ngap_ies {
     impl Tree for DAPSResponseInfoDapsresponseindicator {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::DAPSResponseInfoDapsresponseindicator[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::DAPSResponseInfoDapsresponseindicator)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -19831,7 +19255,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["dapsresponseindicator", "iE-Extensions"])?;
+            let members = reading.members(value, names::DAPSResponseInfo)?;
             let dapsresponseindicator = reading.member(
                 &members,
                 "dapsresponseindicator",
@@ -19932,8 +19356,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["dRB-ID", "dAPSResponseInfo", "iE-Extension"])?;
+            let members = reading.members(value, names::DAPSResponseInfoItem)?;
             let drb_id = reading.member(&members, "dRB-ID", DRBID::from_tree)?;
             let daps_response_info =
                 reading.member(&members, "dAPSResponseInfo", DAPSResponseInfo::from_tree)?;
@@ -20079,7 +19502,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["dl-NAS-MAC", "iE-Extensions"])?;
+            let members = reading.members(value, names::DLCPSecurityInformation)?;
             let dl_nas_mac = reading.member(&members, "dl-NAS-MAC", DLNASMAC::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -20158,9 +19581,6 @@ pub mod ngap_ies {
     impl DLNGUTNLInformationReused {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -20184,10 +19604,10 @@ pub mod ngap_ies {
     impl Tree for DLNGUTNLInformationReused {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::DLNGUTNLInformationReused[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::DLNGUTNLInformationReused)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -20204,9 +19624,6 @@ pub mod ngap_ies {
     impl DLSignalling {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -20230,10 +19647,10 @@ pub mod ngap_ies {
     impl Tree for DLSignalling {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::DLSignalling[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::DLSignalling)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -20317,8 +19734,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) =
-                reading.alternative(value, &["count12bits", "count18bits", "choice-extension"])?;
+            let (position, value) = reading.alternative(value, names::DLCountChoice)?;
             Ok(match position {
                 0 => Self::count12bits(reading.within(
                     "count12bits",
@@ -20417,7 +19833,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["dRBsSubjectToDLDiscarding", "iE-Extension"])?;
+            let members = reading.members(value, names::DLDiscarding)?;
             let drbs_subject_to_dl_discarding = reading.member(
                 &members,
                 "dRBsSubjectToDLDiscarding",
@@ -20448,9 +19864,6 @@ pub mod ngap_ies {
     impl DLForwarding {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::dl_forwarding_proposed];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["dl-forwarding-proposed"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -20474,10 +19887,10 @@ pub mod ngap_ies {
     impl Tree for DLForwarding {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::DLForwarding[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::DLForwarding)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -20494,9 +19907,6 @@ pub mod ngap_ies {
     impl DLPDUSetInformationMarkingSupportIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -20520,10 +19930,11 @@ pub mod ngap_ies {
     impl Tree for DLPDUSetInformationMarkingSupportIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::DLPDUSetInformationMarkingSupportIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES
+                [reading.named(value, names::DLPDUSetInformationMarkingSupportIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -20647,10 +20058,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &["dRBStatusDL12", "dRBStatusDL18", "choice-Extensions"],
-            )?;
+            let (position, value) = reading.alternative(value, names::DRBStatusDL)?;
             Ok(match position {
                 0 => Self::dRBStatusDL12(reading.within(
                     "dRBStatusDL12",
@@ -20746,7 +20154,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["dL-COUNTValue", "iE-Extension"])?;
+            let members = reading.members(value, names::DRBStatusDL12)?;
             let dl_count_value =
                 reading.member(&members, "dL-COUNTValue", COUNTValueForPDCPSN12::from_tree)?;
             let ie_extension = reading.optional(
@@ -20836,7 +20244,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["dL-COUNTValue", "iE-Extension"])?;
+            let members = reading.members(value, names::DRBStatusDL18)?;
             let dl_count_value =
                 reading.member(&members, "dL-COUNTValue", COUNTValueForPDCPSN18::from_tree)?;
             let ie_extension = reading.optional(
@@ -20929,10 +20337,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &["dRBStatusUL12", "dRBStatusUL18", "choice-Extensions"],
-            )?;
+            let (position, value) = reading.alternative(value, names::DRBStatusUL)?;
             Ok(match position {
                 0 => Self::dRBStatusUL12(reading.within(
                     "dRBStatusUL12",
@@ -21056,14 +20461,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "uL-COUNTValue",
-                    "receiveStatusOfUL-PDCP-SDUs",
-                    "iE-Extension",
-                ],
-            )?;
+            let members = reading.members(value, names::DRBStatusUL12)?;
             let ul_count_value =
                 reading.member(&members, "uL-COUNTValue", COUNTValueForPDCPSN12::from_tree)?;
             let receive_status_of_ul_pdcp_sdus =
@@ -21186,14 +20584,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "uL-COUNTValue",
-                    "receiveStatusOfUL-PDCP-SDUs",
-                    "iE-Extension",
-                ],
-            )?;
+            let members = reading.members(value, names::DRBStatusUL18)?;
             let ul_count_value =
                 reading.member(&members, "uL-COUNTValue", COUNTValueForPDCPSN18::from_tree)?;
             let receive_status_of_ul_pdcp_sdus =
@@ -21293,7 +20684,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["drbID", "dlCount", "iE-Extension"])?;
+            let members = reading.members(value, names::DRBsSubjectToDLDiscardingItem)?;
             let drb_id = reading.member(&members, "drbID", DRBID::from_tree)?;
             let dl_count = reading.member(&members, "dlCount", DLCountChoice::from_tree)?;
             let ie_extension = reading.optional(
@@ -21452,7 +20843,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["dRB-ID", "firstDLCOUNT", "iE-Extension"])?;
+            let members = reading.members(value, names::DRBsSubjectToEarlyStatusTransferItem)?;
             let drb_id = reading.member(&members, "dRB-ID", DRBID::from_tree)?;
             let first_dl_count =
                 reading.member(&members, "firstDLCOUNT", DRBStatusDL::from_tree)?;
@@ -21628,10 +21019,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["dRB-ID", "dRBStatusUL", "dRBStatusDL", "iE-Extension"],
-            )?;
+            let members = reading.members(value, names::DRBsSubjectToStatusTransferItem)?;
             let drb_id = reading.member(&members, "dRB-ID", DRBID::from_tree)?;
             let drb_status_ul = reading.member(&members, "dRBStatusUL", DRBStatusUL::from_tree)?;
             let drb_status_dl = reading.member(&members, "dRBStatusDL", DRBStatusDL::from_tree)?;
@@ -21791,8 +21179,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["dRB-ID", "associatedQosFlowList", "iE-Extensions"])?;
+            let members = reading.members(value, names::DRBsToQosFlowsMappingItem)?;
             let drb_id = reading.member(&members, "dRB-ID", DRBID::from_tree)?;
             let associated_qos_flow_list = reading.member(
                 &members,
@@ -21929,9 +21316,6 @@ pub mod ngap_ies {
     impl DataForwardingAccepted {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::data_forwarding_accepted];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["data-forwarding-accepted"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -21955,10 +21339,10 @@ pub mod ngap_ies {
     impl Tree for DataForwardingAccepted {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::DataForwardingAccepted[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::DataForwardingAccepted)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -21975,9 +21359,6 @@ pub mod ngap_ies {
     impl DataForwardingNotPossible {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::data_forwarding_not_possible];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["data-forwarding-not-possible"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -22001,10 +21382,10 @@ pub mod ngap_ies {
     impl Tree for DataForwardingNotPossible {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::DataForwardingNotPossible[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::DataForwardingNotPossible)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -22138,15 +21519,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "dRB-ID",
-                    "dLForwardingUP-TNLInformation",
-                    "uLForwardingUP-TNLInformation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::DataForwardingResponseDRBItem)?;
             let drb_id = reading.member(&members, "dRB-ID", DRBID::from_tree)?;
             let dl_forwarding_up_tnl_information = reading.optional(
                 &members,
@@ -22386,10 +21759,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["e-RAB-ID", "dLForwardingUP-TNLInformation", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::DataForwardingResponseERABListItem)?;
             let e_rab_id = reading.member(&members, "e-RAB-ID", ERABID::from_tree)?;
             let dl_forwarding_up_tnl_information = reading.member(
                 &members,
@@ -22423,9 +21793,6 @@ pub mod ngap_ies {
     impl DelayCritical {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::delay_critical, Self::non_delay_critical];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["delay-critical", "non-delay-critical"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -22449,10 +21816,10 @@ pub mod ngap_ies {
     impl Tree for DelayCritical {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::DelayCritical[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::DelayCritical)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -22469,9 +21836,6 @@ pub mod ngap_ies {
     impl DirectForwardingPathAvailability {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::direct_path_available];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["direct-path-available"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -22495,10 +21859,10 @@ pub mod ngap_ies {
     impl Tree for DirectForwardingPathAvailability {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::DirectForwardingPathAvailability[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::DirectForwardingPathAvailability)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -22665,19 +22029,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "priorityLevelQos",
-                    "packetDelayBudget",
-                    "packetErrorRate",
-                    "fiveQI",
-                    "delayCritical",
-                    "averagingWindow",
-                    "maximumDataBurstVolume",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::Dynamic5QIDescriptor)?;
             let priority_level_qos =
                 reading.member(&members, "priorityLevelQos", PriorityLevelQos::from_tree)?;
             let packet_delay_budget =
@@ -22839,7 +22191,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["e-RAB-ID", "dLForwarding", "iE-Extensions"])?;
+            let members = reading.members(value, names::ERABInformationItem)?;
             let e_rab_id = reading.member(&members, "e-RAB-ID", ERABID::from_tree)?;
             let dl_forwarding =
                 reading.optional(&members, "dLForwarding", DLForwarding::from_tree)?;
@@ -22924,9 +22276,6 @@ pub mod ngap_ies {
     impl ECNMarkingAtRANRequest {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 4] = [Self::ul, Self::dl, Self::both, Self::stop];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 4] = ["ul", "dl", "both", "stop"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -22950,10 +22299,10 @@ pub mod ngap_ies {
     impl Tree for ECNMarkingAtRANRequest {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ECNMarkingAtRANRequest[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ECNMarkingAtRANRequest)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -22973,9 +22322,6 @@ pub mod ngap_ies {
     impl ECNMarkingAtUPFRequest {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 4] = [Self::ul, Self::dl, Self::both, Self::stop];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 4] = ["ul", "dl", "both", "stop"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -22999,10 +22345,10 @@ pub mod ngap_ies {
     impl Tree for ECNMarkingAtUPFRequest {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ECNMarkingAtUPFRequest[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ECNMarkingAtUPFRequest)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -23097,12 +22443,7 @@ pub mod ngap_ies {
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
             let (position, value) = reading.alternative(
                 value,
-                &[
-                    "eCNMarkingAtRANRequest",
-                    "eCNMarkingAtUPFRequest",
-                    "congestionInformationRequest",
-                    "choice-Extensions",
-                ],
+                names::ECNMarkingorCongestionInformationReportingRequest,
             )?;
             Ok(match position {
                 0 => Self::eCNMarkingAtRANRequest(reading.within(
@@ -23286,7 +22627,7 @@ pub mod ngap_ies {
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
             let members = reading.members(
                 value,
-                &["qosFlowIdentifier", "activationStatus", "iE-Extension"],
+                names::ECNMarkingorCongestionInformationReportingStatusItem,
             )?;
             let qos_flow_identifier =
                 reading.member(&members, "qosFlowIdentifier", QosFlowIdentifier::from_tree)?;
@@ -23318,9 +22659,6 @@ pub mod ngap_ies {
     impl EDTSession {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -23344,10 +22682,10 @@ pub mod ngap_ies {
     impl Tree for EDTSession {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::EDTSession[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::EDTSession)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -23492,16 +22830,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "macroENB-ID",
-                    "homeENB-ID",
-                    "short-macroENB-ID",
-                    "long-macroENB-ID",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::ENBID)?;
             Ok(match position {
                 0 => {
                     Self::macroENB_ID(reading.within("macroENB-ID", value, |value, reading| {
@@ -23663,7 +22992,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pLMNIdentity", "ePS-TAC", "iE-Extensions"])?;
+            let members = reading.members(value, names::EPSTAI)?;
             let plmn_identity =
                 reading.member(&members, "pLMNIdentity", PLMNIdentity::from_tree)?;
             let eps_tac = reading.member(&members, "ePS-TAC", EPSTAC::from_tree)?;
@@ -23693,9 +23022,6 @@ pub mod ngap_ies {
     impl ERedCapIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -23719,10 +23045,10 @@ pub mod ngap_ies {
     impl Tree for ERedCapIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ERedCapIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ERedCapIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -23806,10 +23132,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["pLMNIdentity", "eUTRACellIdentity", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::EUTRACGI)?;
             let plmn_identity =
                 reading.member(&members, "pLMNIdentity", PLMNIdentity::from_tree)?;
             let eutra_cell_identity =
@@ -23976,12 +23299,6 @@ pub mod ngap_ies {
             Self::s15,
             Self::s16,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 16] = [
-            "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11", "s12", "s13",
-            "s14", "s15", "s16",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -24005,10 +23322,10 @@ pub mod ngap_ies {
     impl Tree for EUTRAPagingTimeWindow {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::EUTRAPagingTimeWindow[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::EUTRAPagingTimeWindow)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -24053,12 +23370,6 @@ pub mod ngap_ies {
             Self::hf128,
             Self::hf256,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 14] = [
-            "hfhalf", "hf1", "hf2", "hf4", "hf6", "hf8", "hf10", "hf12", "hf14", "hf16", "hf32",
-            "hf64", "hf128", "hf256",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -24082,10 +23393,10 @@ pub mod ngap_ies {
     impl Tree for EUTRAPagingEDRXCycle {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::EUTRAPagingEDRXCycle[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::EUTRAPagingEDRXCycle)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -24187,14 +23498,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "eUTRA-paging-eDRX-Cycle",
-                    "eUTRA-paging-Time-Window",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::EUTRAPagingeDRXInformation)?;
             let eutra_paging_edrx_cycle = reading.member(
                 &members,
                 "eUTRA-paging-eDRX-Cycle",
@@ -24425,17 +23729,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "eCGI",
-                    "eUTRAN-CompositeAvailableCapacityGroup",
-                    "eUTRAN-NumberOfActiveUEs",
-                    "eUTRAN-NoofRRCConnections",
-                    "eUTRAN-RadioResourceStatus",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::EUTRANCellReportItem)?;
             let ecgi = reading.member(&members, "eCGI", EUTRACGI::from_tree)?;
             let eutran_composite_available_capacity_group = reading.member(
                 &members,
@@ -24593,7 +23887,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["eCGI", "iE-Extensions"])?;
+            let members = reading.members(value, names::EUTRANCellToReportItem)?;
             let ecgi = reading.member(&members, "eCGI", EUTRACGI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -24746,14 +24040,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "dL-CompositeAvailableCapacity",
-                    "uL-CompositeAvailableCapacity",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::EUTRANCompositeAvailableCapacityGroup)?;
             let dl_composite_available_capacity = reading.member(
                 &members,
                 "dL-CompositeAvailableCapacity",
@@ -25020,20 +24307,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "dL-GBR-PRB-usage",
-                    "uL-GBR-PRB-usage",
-                    "dL-non-GBR-PRB-usage",
-                    "uL-non-GBR-PRB-usage",
-                    "dL-Total-PRB-usage",
-                    "uL-Total-PRB-usage",
-                    "dL-scheduling-PDCCH-CCE-usage",
-                    "uL-scheduling-PDCCH-CCE-usage",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::EUTRANRadioResourceStatus)?;
             let dl_gbr_prb_usage =
                 reading.member(&members, "dL-GBR-PRB-usage", |value, reading| {
                     reading.unsigned(value, 0, 100).map(|number| number as u8)
@@ -25161,7 +24435,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["eUTRAN-CellReportList", "iE-Extensions"])?;
+            let members = reading.members(value, names::EUTRANReportingStatusIEs)?;
             let eutran_cell_report_list = reading.member(
                 &members,
                 "eUTRAN-CellReportList",
@@ -25253,7 +24527,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["eUTRAN-CellToReportList", "iE-Extensions"])?;
+            let members = reading.members(value, names::EUTRANReportingSystemIEs)?;
             let eutran_cell_to_report_list = reading.member(
                 &members,
                 "eUTRAN-CellToReportList",
@@ -25384,9 +24658,6 @@ pub mod ngap_ies {
     impl EarlyMeasurement {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -25410,10 +24681,10 @@ pub mod ngap_ies {
     impl Tree for EarlyMeasurement {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::EarlyMeasurement[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::EarlyMeasurement)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -25496,7 +24767,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["procedureStage", "iE-Extensions"])?;
+            let members = reading.members(value, names::EarlyStatusTransferTransparentContainer)?;
             let procedure_stage =
                 reading.member(&members, "procedureStage", ProcedureStageChoice::from_tree)?;
             let ie_extensions = reading.optional(
@@ -25702,14 +24973,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "emergencyAreaID",
-                    "completedCellsInEAI-EUTRA",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::EmergencyAreaIDBroadcastEUTRAItem)?;
             let emergency_area_id =
                 reading.member(&members, "emergencyAreaID", EmergencyAreaID::from_tree)?;
             let completed_cells_in_eai_eutra = reading.member(
@@ -25866,10 +25130,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["emergencyAreaID", "completedCellsInEAI-NR", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::EmergencyAreaIDBroadcastNRItem)?;
             let emergency_area_id =
                 reading.member(&members, "emergencyAreaID", EmergencyAreaID::from_tree)?;
             let completed_cells_in_eai_nr = reading.member(
@@ -26026,14 +25287,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "emergencyAreaID",
-                    "cancelledCellsInEAI-EUTRA",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::EmergencyAreaIDCancelledEUTRAItem)?;
             let emergency_area_id =
                 reading.member(&members, "emergencyAreaID", EmergencyAreaID::from_tree)?;
             let cancelled_cells_in_eai_eutra = reading.member(
@@ -26190,10 +25444,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["emergencyAreaID", "cancelledCellsInEAI-NR", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::EmergencyAreaIDCancelledNRItem)?;
             let emergency_area_id =
                 reading.member(&members, "emergencyAreaID", EmergencyAreaID::from_tree)?;
             let cancelled_cells_in_eai_nr = reading.member(
@@ -26417,14 +25668,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "emergencyFallbackRequestIndicator",
-                    "emergencyServiceTargetCN",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::EmergencyFallbackIndicator)?;
             let emergency_fallback_request_indicator = reading.member(
                 &members,
                 "emergencyFallbackRequestIndicator",
@@ -26461,9 +25705,6 @@ pub mod ngap_ies {
     impl EmergencyFallbackRequestIndicator {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::emergency_fallback_requested];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["emergency-fallback-requested"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -26487,10 +25728,10 @@ pub mod ngap_ies {
     impl Tree for EmergencyFallbackRequestIndicator {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::EmergencyFallbackRequestIndicator[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::EmergencyFallbackRequestIndicator)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -26508,9 +25749,6 @@ pub mod ngap_ies {
     impl EmergencyServiceTargetCN {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::fiveGC, Self::epc];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["fiveGC", "epc"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -26534,10 +25772,10 @@ pub mod ngap_ies {
     impl Tree for EmergencyServiceTargetCN {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::EmergencyServiceTargetCN[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::EmergencyServiceTargetCN)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -26555,9 +25793,6 @@ pub mod ngap_ies {
     impl EndIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::no_further_data, Self::further_data_exists];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["no-further-data", "further-data-exists"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -26581,10 +25816,10 @@ pub mod ngap_ies {
     impl Tree for EndIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::EndIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::EndIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -26672,8 +25907,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["endpointIPAddress", "portNumber", "iE-Extensions"])?;
+            let members = reading.members(value, names::EndpointIPAddressAndPort)?;
             let endpoint_ip_address = reading.member(
                 &members,
                 "endpointIPAddress",
@@ -26706,9 +25940,6 @@ pub mod ngap_ies {
     impl EnhancedCoverageRestriction {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::restricted];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["restricted"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -26732,10 +25963,10 @@ pub mod ngap_ies {
     impl Tree for EnhancedCoverageRestriction {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::EnhancedCoverageRestriction[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::EnhancedCoverageRestriction)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -26868,7 +26099,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["plmnIdentity", "nID", "iE-Extensions"])?;
+            let members = reading.members(value, names::EquivalentSNPNsItem)?;
             let plmn_identity =
                 reading.member(&members, "plmnIdentity", PLMNIdentity::from_tree)?;
             let nid = reading.member(&members, "nID", NID::from_tree)?;
@@ -27039,15 +26270,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "intersystemResourceThresholdLow",
-                    "intersystemResourceThresholdHigh",
-                    "numberOfMeasurementReportingLevels",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::EventBasedReportingIEs)?;
             let intersystem_resource_threshold_low = reading.member(
                 &members,
                 "intersystemResourceThresholdLow",
@@ -27167,15 +26390,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "l1Threshold",
-                    "hysteresis",
-                    "timeToTrigger",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::EventL1LoggedMDTConfig)?;
             let l1_threshold = reading.member(
                 &members,
                 "l1Threshold",
@@ -27211,9 +26426,6 @@ pub mod ngap_ies {
     impl EventTriggerOutOfCoverage {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -27237,10 +26449,10 @@ pub mod ngap_ies {
     impl Tree for EventTriggerOutOfCoverage {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::EventTriggerOutOfCoverage[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::EventTriggerOutOfCoverage)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -27313,14 +26525,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "outOfCoverage",
-                    "eventL1LoggedMDTConfig",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::EventTrigger)?;
             Ok(match position {
                 0 => Self::outOfCoverage(reading.within(
                     "outOfCoverage",
@@ -27372,19 +26577,6 @@ pub mod ngap_ies {
             Self::report_the_Aerial_UE_flight_information,
             Self::cancel_the_Aerial_UE_flight_information_reporting,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 9] = [
-            "direct",
-            "change-of-serve-cell",
-            "ue-presence-in-area-of-interest",
-            "stop-change-of-serve-cell",
-            "stop-ue-presence-in-area-of-interest",
-            "cancel-location-reporting-for-the-ue",
-            "change-of-serving-cell-and-UE-presence-in-the-Area-of-Interest",
-            "report-the-Aerial-UE-flight-information",
-            "cancel-the-Aerial-UE-flight-information-reporting",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -27408,10 +26600,10 @@ pub mod ngap_ies {
     impl Tree for EventType {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::EventType[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::EventType)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -27549,10 +26741,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["fiveQi", "excessPacketDelayThresholdValue", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::ExcessPacketDelayThresholdItem)?;
             let five_qi = reading.member(&members, "fiveQi", FiveQI::from_tree)?;
             let excess_packet_delay_threshold_value = reading.member(
                 &members,
@@ -27623,12 +26812,6 @@ pub mod ngap_ies {
             Self::ms300,
             Self::ms500,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 19] = [
-            "ms0dot25", "ms0dot5", "ms1", "ms2", "ms4", "ms5", "ms10", "ms20", "ms30", "ms40",
-            "ms50", "ms60", "ms70", "ms80", "ms90", "ms100", "ms150", "ms300", "ms500",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -27652,10 +26835,10 @@ pub mod ngap_ies {
     impl Tree for ExcessPacketDelayThresholdValue {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ExcessPacketDelayThresholdValue[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ExcessPacketDelayThresholdValue)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -27728,17 +26911,6 @@ pub mod ngap_ies {
             Self::sec180,
             Self::long_time,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 7] = [
-            "sec15",
-            "sec30",
-            "sec60",
-            "sec90",
-            "sec120",
-            "sec180",
-            "long-time",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -27762,10 +26934,10 @@ pub mod ngap_ies {
     impl Tree for ExpectedHOInterval {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ExpectedHOInterval[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ExpectedHOInterval)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -27944,15 +27116,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "expectedActivityPeriod",
-                    "expectedIdlePeriod",
-                    "sourceOfUEActivityBehaviourInformation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::ExpectedUEActivityBehaviour)?;
             let expected_activity_period = reading.optional(
                 &members,
                 "expectedActivityPeriod",
@@ -28133,16 +27297,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "expectedUEActivityBehaviour",
-                    "expectedHOInterval",
-                    "expectedUEMobility",
-                    "expectedUEMovingTrajectory",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::ExpectedUEBehaviour)?;
             let expected_ue_activity_behaviour = reading.optional(
                 &members,
                 "expectedUEActivityBehaviour",
@@ -28192,9 +27347,6 @@ pub mod ngap_ies {
     impl ExpectedUEMobility {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::stationary, Self::mobile];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["stationary", "mobile"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -28218,10 +27370,10 @@ pub mod ngap_ies {
     impl Tree for ExpectedUEMobility {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ExpectedUEMobility[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ExpectedUEMobility)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -28372,8 +27524,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["nGRAN-CGI", "timeStayedInCell", "iE-Extensions"])?;
+            let members = reading.members(value, names::ExpectedUEMovingTrajectoryItem)?;
             let ngran_cgi = reading.member(&members, "nGRAN-CGI", NGRANCGI::from_tree)?;
             let time_stayed_in_cell =
                 reading.optional(&members, "timeStayedInCell", |value, reading| {
@@ -28509,10 +27660,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["aMFNameVisibleString", "aMFNameUTF8String", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::ExtendedAMFName)?;
             let amf_name_visible_string = reading.optional(
                 &members,
                 "aMFNameVisibleString",
@@ -28699,14 +27847,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "rANNodeNameVisibleString",
-                    "rANNodeNameUTF8String",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::ExtendedRANNodeName)?;
             let ran_node_name_visible_string = reading.optional(
                 &members,
                 "rANNodeNameVisibleString",
@@ -28922,14 +28063,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "primaryRATRestriction",
-                    "secondaryRATRestriction",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::ExtendedRATRestrictionInformation)?;
             let primary_rat_restriction =
                 reading.member(&members, "primaryRATRestriction", |value, reading| {
                     json::read_bit_string(reading, value, 8, 8, true)
@@ -29011,9 +28145,6 @@ pub mod ngap_ies {
     impl ExtendedReportIntervalMDT {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::ms20480, Self::ms40960];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["ms20480", "ms40960"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -29037,10 +28168,10 @@ pub mod ngap_ies {
     impl Tree for ExtendedReportIntervalMDT {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ExtendedReportIntervalMDT[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ExtendedReportIntervalMDT)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -29230,7 +28361,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["uERLFReportContainer", "iE-Extensions"])?;
+            let members = reading.members(value, names::FailureIndication)?;
             let ue_rlf_report_container = reading.member(
                 &members,
                 "uERLFReportContainer",
@@ -29329,8 +28460,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["dRBsSubjectToEarlyStatusTransfer", "iE-Extension"])?;
+            let members = reading.members(value, names::FirstDLCount)?;
             let drbs_subject_to_early_status_transfer = reading.member(
                 &members,
                 "dRBsSubjectToEarlyStatusTransfer",
@@ -29529,17 +28659,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "fiveGProSeDirectDiscovery",
-                    "fiveGProSeDirectCommunication",
-                    "fiveGProSeLayer2UEtoNetworkRelay",
-                    "fiveGProSeLayer3UEtoNetworkRelay",
-                    "fiveGProSeLayer2RemoteUE",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::FiveGProSeAuthorized)?;
             let five_g_prose_direct_discovery = reading.optional(
                 &members,
                 "fiveGProSeDirectDiscovery",
@@ -29679,14 +28799,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "fiveGProSepc5QoSFlowList",
-                    "fiveGProSepc5LinkAggregateBitRates",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::FiveGProSePC5QoSParameters)?;
             let five_g_prose_pc5_qos_flow_list = reading.member(
                 &members,
                 "fiveGProSepc5QoSFlowList",
@@ -29798,10 +28911,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["aMFSetID", "aMFPointer", "fiveG-TMSI", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::FiveGSTMSI)?;
             let amf_set_id = reading.member(&members, "aMFSetID", AMFSetID::from_tree)?;
             let amf_pointer = reading.member(&members, "aMFPointer", AMFPointer::from_tree)?;
             let five_g_tmsi = reading.member(&members, "fiveG-TMSI", FiveGTMSI::from_tree)?;
@@ -29944,10 +29054,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &["hLComActivate", "hLComDeactivate", "choice-Extensions"],
-            )?;
+            let (position, value) = reading.alternative(value, names::FiveGCAction)?;
             Ok(match position {
                 0 => Self::hLComActivate(reading.within(
                     "hLComActivate",
@@ -29982,9 +29089,6 @@ pub mod ngap_ies {
     impl FiveGProSeDirectCommunication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -30008,10 +29112,10 @@ pub mod ngap_ies {
     impl Tree for FiveGProSeDirectCommunication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::FiveGProSeDirectCommunication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::FiveGProSeDirectCommunication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -30029,9 +29133,6 @@ pub mod ngap_ies {
     impl FiveGProSeDirectDiscovery {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -30055,10 +29156,10 @@ pub mod ngap_ies {
     impl Tree for FiveGProSeDirectDiscovery {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::FiveGProSeDirectDiscovery[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::FiveGProSeDirectDiscovery)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -30076,9 +29177,6 @@ pub mod ngap_ies {
     impl FiveGProSeLayer2MHIntermediateUEtoNetworkRelay {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -30102,10 +29200,11 @@ pub mod ngap_ies {
     impl Tree for FiveGProSeLayer2MHIntermediateUEtoNetworkRelay {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::FiveGProSeLayer2MHIntermediateUEtoNetworkRelay[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES
+                [reading.named(value, names::FiveGProSeLayer2MHIntermediateUEtoNetworkRelay)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -30123,9 +29222,6 @@ pub mod ngap_ies {
     impl FiveGProSeLayer2MHRemote {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -30149,10 +29245,10 @@ pub mod ngap_ies {
     impl Tree for FiveGProSeLayer2MHRemote {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::FiveGProSeLayer2MHRemote[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::FiveGProSeLayer2MHRemote)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -30170,9 +29266,6 @@ pub mod ngap_ies {
     impl FiveGProSeLayer2MHUEtoNetworkRelay {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -30196,10 +29289,10 @@ pub mod ngap_ies {
     impl Tree for FiveGProSeLayer2MHUEtoNetworkRelay {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::FiveGProSeLayer2MHUEtoNetworkRelay[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::FiveGProSeLayer2MHUEtoNetworkRelay)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -30217,9 +29310,6 @@ pub mod ngap_ies {
     impl FiveGProSeLayer2Multipath {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -30243,10 +29333,10 @@ pub mod ngap_ies {
     impl Tree for FiveGProSeLayer2Multipath {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::FiveGProSeLayer2Multipath[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::FiveGProSeLayer2Multipath)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -30264,9 +29354,6 @@ pub mod ngap_ies {
     impl FiveGProSeLayer2RemoteUE {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -30290,10 +29377,10 @@ pub mod ngap_ies {
     impl Tree for FiveGProSeLayer2RemoteUE {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::FiveGProSeLayer2RemoteUE[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::FiveGProSeLayer2RemoteUE)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -30311,9 +29398,6 @@ pub mod ngap_ies {
     impl FiveGProSeLayer2UEtoNetworkRelay {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -30337,10 +29421,10 @@ pub mod ngap_ies {
     impl Tree for FiveGProSeLayer2UEtoNetworkRelay {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::FiveGProSeLayer2UEtoNetworkRelay[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::FiveGProSeLayer2UEtoNetworkRelay)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -30358,9 +29442,6 @@ pub mod ngap_ies {
     impl FiveGProSeLayer2UEtoUERelay {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -30384,10 +29465,10 @@ pub mod ngap_ies {
     impl Tree for FiveGProSeLayer2UEtoUERelay {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::FiveGProSeLayer2UEtoUERelay[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::FiveGProSeLayer2UEtoUERelay)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -30405,9 +29486,6 @@ pub mod ngap_ies {
     impl FiveGProSeLayer2UEtoUERemote {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -30431,10 +29509,10 @@ pub mod ngap_ies {
     impl Tree for FiveGProSeLayer2UEtoUERemote {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::FiveGProSeLayer2UEtoUERemote[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::FiveGProSeLayer2UEtoUERemote)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -30452,9 +29530,6 @@ pub mod ngap_ies {
     impl FiveGProSeLayer3MHUEtoNetworkRelay {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -30478,10 +29553,10 @@ pub mod ngap_ies {
     impl Tree for FiveGProSeLayer3MHUEtoNetworkRelay {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::FiveGProSeLayer3MHUEtoNetworkRelay[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::FiveGProSeLayer3MHUEtoNetworkRelay)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -30499,9 +29574,6 @@ pub mod ngap_ies {
     impl FiveGProSeLayer3UEtoNetworkRelay {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -30525,10 +29597,10 @@ pub mod ngap_ies {
     impl Tree for FiveGProSeLayer3UEtoNetworkRelay {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::FiveGProSeLayer3UEtoNetworkRelay[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::FiveGProSeLayer3UEtoNetworkRelay)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -30619,14 +29691,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "fiveGproSeguaranteedFlowBitRate",
-                    "fiveGproSemaximumFlowBitRate",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::FiveGProSePC5FlowBitRates)?;
             let five_g_prose_guaranteed_flow_bit_rate = reading.member(
                 &members,
                 "fiveGproSeguaranteedFlowBitRate",
@@ -30762,15 +29827,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "fiveGproSepQI",
-                    "fiveGproSepc5FlowBitRates",
-                    "fiveGproSerange",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::FiveGProSePC5QoSFlowItem)?;
             let five_g_prose_pqi = reading.member(&members, "fiveGproSepQI", FiveQI::from_tree)?;
             let five_g_prose_pc5_flow_bit_rates = reading.optional(
                 &members,
@@ -31019,8 +30076,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["pLMNIdentity", "forbiddenTACs", "iE-Extensions"])?;
+            let members = reading.members(value, names::ForbiddenAreaInformationItem)?;
             let plmn_identity =
                 reading.member(&members, "pLMNIdentity", PLMNIdentity::from_tree)?;
             let forbidden_tacs =
@@ -31166,10 +30222,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["sourceeNBID", "targetNGRANnodeID", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::FromEUTRANtoNGRAN)?;
             let source_enb_id =
                 reading.member(&members, "sourceeNBID", IntersystemSONeNBID::from_tree)?;
             let target_ngran_node_id = reading.member(
@@ -31266,10 +30319,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["sourceNGRANnodeID", "targeteNBID", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::FromNGRANtoEUTRAN)?;
             let source_ngran_node_id = reading.member(
                 &members,
                 "sourceNGRANnodeID",
@@ -31527,19 +30577,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "maximumFlowBitRateDL",
-                    "maximumFlowBitRateUL",
-                    "guaranteedFlowBitRateDL",
-                    "guaranteedFlowBitRateUL",
-                    "notificationControl",
-                    "maximumPacketLossRateDL",
-                    "maximumPacketLossRateUL",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::GBRQosInformation)?;
             let maximum_flow_bit_rate_dl =
                 reading.member(&members, "maximumFlowBitRateDL", BitRate::from_tree)?;
             let maximum_flow_bit_rate_ul =
@@ -31638,7 +30676,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(value, &["gNB-ID", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::GNBID)?;
             Ok(match position {
                 0 => Self::gNB_ID(reading.within("gNB-ID", value, |value, reading| {
                     json::read_bits(reading, value, 22, 32)
@@ -31867,10 +30905,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["transportLayerAddress", "gTP-TEID", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::GTPTunnel)?;
             let transport_layer_address = reading.member(
                 &members,
                 "transportLayerAddress",
@@ -31987,16 +31022,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pLMNIdentity",
-                    "aMFRegionID",
-                    "aMFSetID",
-                    "aMFPointer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::GUAMI)?;
             let plmn_identity =
                 reading.member(&members, "pLMNIdentity", PLMNIdentity::from_tree)?;
             let amf_region_id = reading.member(&members, "aMFRegionID", AMFRegionID::from_tree)?;
@@ -32137,7 +31163,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["gUAMI", "iE-Extensions"])?;
+            let members = reading.members(value, names::GUAMIListItem)?;
             let guami = reading.member(&members, "gUAMI", GUAMI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -32165,9 +31191,6 @@ pub mod ngap_ies {
     impl GUAMIType {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::native, Self::mapped];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["native", "mapped"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -32191,10 +31214,10 @@ pub mod ngap_ies {
     impl Tree for GUAMIType {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::GUAMIType[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::GUAMIType)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -32211,9 +31234,6 @@ pub mod ngap_ies {
     impl GWContextReleaseIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -32237,10 +31257,10 @@ pub mod ngap_ies {
     impl Tree for GWContextReleaseIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::GWContextReleaseIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::GWContextReleaseIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -32344,10 +31364,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["nTN-Geographical-Area", "nTN-PLMN-List", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::GeographyBasedMDT)?;
             let ntn_geographical_area = reading.member(
                 &members,
                 "nTN-Geographical-Area",
@@ -32515,7 +31532,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["globalCable-ID", "tAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::GlobalCableIDNew)?;
             let global_cable_id =
                 reading.member(&members, "globalCable-ID", GlobalCableID::from_tree)?;
             let tai = reading.member(&members, "tAI", TAI::from_tree)?;
@@ -32609,7 +31626,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pLMNidentity", "eNB-ID", "iE-Extensions"])?;
+            let members = reading.members(value, names::GlobalENBID)?;
             let plmn_identity =
                 reading.member(&members, "pLMNidentity", PLMNIdentity::from_tree)?;
             let enb_id = reading.member(&members, "eNB-ID", ENBID::from_tree)?;
@@ -32703,7 +31720,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pLMNIdentity", "gNB-ID", "iE-Extensions"])?;
+            let members = reading.members(value, names::GlobalGNBID)?;
             let plmn_identity =
                 reading.member(&members, "pLMNIdentity", PLMNIdentity::from_tree)?;
             let gnb_id = reading.member(&members, "gNB-ID", GNBID::from_tree)?;
@@ -32817,8 +31834,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["globalLineIdentity", "lineType", "iE-Extensions"])?;
+            let members = reading.members(value, names::GlobalLineID)?;
             let global_line_identity = reading.member(
                 &members,
                 "globalLineIdentity",
@@ -32975,7 +31991,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pLMNIdentity", "n3IWF-ID", "iE-Extensions"])?;
+            let members = reading.members(value, names::GlobalN3IWFID)?;
             let plmn_identity =
                 reading.member(&members, "pLMNIdentity", PLMNIdentity::from_tree)?;
             let n3iwf_id = reading.member(&members, "n3IWF-ID", N3IWFID::from_tree)?;
@@ -33071,7 +32087,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pLMNIdentity", "ngENB-ID", "iE-Extensions"])?;
+            let members = reading.members(value, names::GlobalNgENBID)?;
             let plmn_identity =
                 reading.member(&members, "pLMNIdentity", PLMNIdentity::from_tree)?;
             let ng_enb_id = reading.member(&members, "ngENB-ID", NgENBID::from_tree)?;
@@ -33167,15 +32183,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "globalGNB-ID",
-                    "globalNgENB-ID",
-                    "globalN3IWF-ID",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::GlobalRANNodeID)?;
             Ok(match position {
                 0 => Self::globalGNB_ID(reading.within(
                     "globalGNB-ID",
@@ -33287,7 +32295,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pLMNIdentity", "tNGF-ID", "iE-Extensions"])?;
+            let members = reading.members(value, names::GlobalTNGFID)?;
             let plmn_identity =
                 reading.member(&members, "pLMNIdentity", PLMNIdentity::from_tree)?;
             let tngf_id = reading.member(&members, "tNGF-ID", TNGFID::from_tree)?;
@@ -33390,7 +32398,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pLMNIdentity", "tWIF-ID", "iE-Extensions"])?;
+            let members = reading.members(value, names::GlobalTWIFID)?;
             let plmn_identity =
                 reading.member(&members, "pLMNIdentity", PLMNIdentity::from_tree)?;
             let twif_id = reading.member(&members, "tWIF-ID", TWIFID::from_tree)?;
@@ -33493,7 +32501,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pLMNIdentity", "w-AGF-ID", "iE-Extensions"])?;
+            let members = reading.members(value, names::GlobalWAGFID)?;
             let plmn_identity =
                 reading.member(&members, "pLMNIdentity", PLMNIdentity::from_tree)?;
             let w_agf_id = reading.member(&members, "w-AGF-ID", WAGFID::from_tree)?;
@@ -33656,7 +32664,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["hFCNode-ID", "tAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::HFCNodeIDNew)?;
             let hfc_node_id = reading.member(&members, "hFCNode-ID", HFCNodeID::from_tree)?;
             let tai = reading.member(&members, "tAI", TAI::from_tree)?;
             let ie_extensions = reading.optional(
@@ -33749,13 +32757,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "nR-Paging-Long-eDRX-Information-for-RRC-INACTIVE",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::HLComActivate)?;
             let nr_paging_long_edrx_information_for_rrc_inactive = reading.member(
                 &members,
                 "nR-Paging-Long-eDRX-Information-for-RRC-INACTIVE",
@@ -33786,9 +32788,6 @@ pub mod ngap_ies {
     impl HLComDeactivateUEReachabilityIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -33812,10 +32811,11 @@ pub mod ngap_ies {
     impl Tree for HLComDeactivateUEReachabilityIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::HLComDeactivateUEReachabilityIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES
+                [reading.named(value, names::HLComDeactivateUEReachabilityIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -33894,7 +32894,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["uEReachabilityIndication", "iE-Extensions"])?;
+            let members = reading.members(value, names::HLComDeactivate)?;
             let ue_reachability_indication = reading.member(
                 &members,
                 "uEReachabilityIndication",
@@ -33931,10 +32931,6 @@ pub mod ngap_ies {
             Self::ho_to_wrong_cell,
             Self::intersystem_ping_pong,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 3] =
-            ["ho-too-early", "ho-to-wrong-cell", "intersystem-ping-pong"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -33958,10 +32954,10 @@ pub mod ngap_ies {
     impl Tree for HOReportHandoverReportType {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::HOReportHandoverReportType[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::HOReportHandoverReportType)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -34196,21 +33192,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "handoverReportType",
-                    "handoverCause",
-                    "sourcecellCGI",
-                    "targetcellCGI",
-                    "reestablishmentcellCGI",
-                    "sourcecellC-RNTI",
-                    "targetcellinE-UTRAN",
-                    "mobilityInformation",
-                    "uERLFReportContainer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::HOReport)?;
             let handover_report_type = reading.member(
                 &members,
                 "handoverReportType",
@@ -34404,15 +33386,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "dLForwardingUP-TNLInformation",
-                    "qosFlowToBeForwardedList",
-                    "dataForwardingResponseDRBList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::HandoverCommandTransfer)?;
             let dl_forwarding_up_tnl_information = reading.optional(
                 &members,
                 "dLForwardingUP-TNLInformation",
@@ -34455,9 +33429,6 @@ pub mod ngap_ies {
     impl HandoverFlag {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::handover_preparation];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["handover-preparation"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -34481,10 +33452,10 @@ pub mod ngap_ies {
     impl Tree for HandoverFlag {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::HandoverFlag[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::HandoverFlag)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -34556,7 +33527,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["cause", "iE-Extensions"])?;
+            let members = reading.members(value, names::HandoverPreparationUnsuccessfulTransfer)?;
             let cause = reading.member(&members, "cause", Cause::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -34763,18 +33734,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "dL-NGU-UP-TNLInformation",
-                    "dLForwardingUP-TNLInformation",
-                    "securityResult",
-                    "qosFlowSetupResponseList",
-                    "qosFlowFailedToSetupList",
-                    "dataForwardingResponseDRBList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::HandoverRequestAcknowledgeTransfer)?;
             let dl_ngu_up_tnl_information = reading.member(
                 &members,
                 "dL-NGU-UP-TNLInformation",
@@ -34904,10 +33864,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["directForwardingPathAvailability", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::HandoverRequiredTransfer)?;
             let direct_forwarding_path_availability = reading.optional(
                 &members,
                 "directForwardingPathAvailability",
@@ -35018,7 +33975,7 @@ pub mod ngap_ies {
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
             let members =
-                reading.members(value, &["cause", "criticalityDiagnostics", "iE-Extensions"])?;
+                reading.members(value, names::HandoverResourceAllocationUnsuccessfulTransfer)?;
             let cause = reading.member(&members, "cause", Cause::from_tree)?;
             let criticality_diagnostics = reading.optional(
                 &members,
@@ -35059,10 +34016,6 @@ pub mod ngap_ies {
             Self::eps_to_5gs,
             Self::fivegs_to_utran,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 4] =
-            ["intra5gs", "fivegs-to-eps", "eps-to-5gs", "fivegs-to-utran"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -35086,10 +34039,10 @@ pub mod ngap_ies {
     impl Tree for HandoverType {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::HandoverType[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::HandoverType)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -35289,9 +34242,6 @@ pub mod ngap_ies {
     impl IABAuthorized {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -35315,10 +34265,10 @@ pub mod ngap_ies {
     impl Tree for IABAuthorized {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::IABAuthorized[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::IABAuthorized)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -35335,9 +34285,6 @@ pub mod ngap_ies {
     impl IABSupported {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -35361,10 +34308,10 @@ pub mod ngap_ies {
     impl Tree for IABSupported {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::IABSupported[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::IABSupported)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -35381,9 +34328,6 @@ pub mod ngap_ies {
     impl IABNodeIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -35407,10 +34351,10 @@ pub mod ngap_ies {
     impl Tree for IABNodeIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::IABNodeIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::IABNodeIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -35428,9 +34372,6 @@ pub mod ngap_ies {
     impl IMSVoiceSupportIndicator {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::supported, Self::not_supported];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["supported", "not-supported"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -35454,10 +34395,10 @@ pub mod ngap_ies {
     impl Tree for IMSVoiceSupportIndicator {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::IMSVoiceSupportIndicator[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::IMSVoiceSupportIndicator)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -35732,22 +34673,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "measurementsToActivate",
-                    "m1Configuration",
-                    "m4Configuration",
-                    "m5Configuration",
-                    "m6Configuration",
-                    "m7Configuration",
-                    "bluetoothMeasurementConfiguration",
-                    "wLANMeasurementConfiguration",
-                    "mDT-Location-Info",
-                    "sensorMeasurementConfiguration",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::ImmediateMDTNr)?;
             let measurements_to_activate = reading.member(
                 &members,
                 "measurementsToActivate",
@@ -35814,9 +34740,6 @@ pub mod ngap_ies {
     impl IncludeBeamMeasurementsIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -35840,10 +34763,10 @@ pub mod ngap_ies {
     impl Tree for IncludeBeamMeasurementsIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::IncludeBeamMeasurementsIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::IncludeBeamMeasurementsIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -35902,9 +34825,6 @@ pub mod ngap_ies {
     impl IndicationOfBitrateAdaptation {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::uplink];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["uplink"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -35928,10 +34848,10 @@ pub mod ngap_ies {
     impl Tree for IndicationOfBitrateAdaptation {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::IndicationOfBitrateAdaptation[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::IndicationOfBitrateAdaptation)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -36022,14 +34942,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "recommendedCellsForPaging",
-                    "recommendRANNodesForPaging",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members =
+                reading.members(value, names::InfoOnRecommendedCellsAndRANNodesForPaging)?;
             let recommended_cells_for_paging = reading.member(
                 &members,
                 "recommendedCellsForPaging",
@@ -36068,9 +34982,6 @@ pub mod ngap_ies {
     impl IntegrityProtectionIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 3] = [Self::required, Self::preferred, Self::not_needed];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 3] = ["required", "preferred", "not-needed"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -36094,10 +35005,10 @@ pub mod ngap_ies {
     impl Tree for IntegrityProtectionIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::IntegrityProtectionIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::IntegrityProtectionIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -36115,9 +35026,6 @@ pub mod ngap_ies {
     impl IntegrityProtectionResult {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::performed, Self::not_performed];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["performed", "not-performed"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -36141,10 +35049,10 @@ pub mod ngap_ies {
     impl Tree for IntegrityProtectionResult {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::IntegrityProtectionResult[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::IntegrityProtectionResult)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -36345,7 +35253,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["uERLFReportContainer", "iE-Extensions"])?;
+            let members = reading.members(value, names::InterSystemFailureIndication)?;
             let ue_rlf_report_container = reading.optional(
                 &members,
                 "uERLFReportContainer",
@@ -36442,7 +35350,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["handoverReportType", "iE-Extensions"])?;
+            let members = reading.members(value, names::InterSystemHOReport)?;
             let handover_report_type = reading.member(
                 &members,
                 "handoverReportType",
@@ -36548,14 +35456,8 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "tooearlyIntersystemHO",
-                    "intersystemUnnecessaryHO",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) =
+                reading.alternative(value, names::InterSystemHandoverReportType)?;
             Ok(match position {
                 0 => Self::tooearlyIntersystemHO(reading.within(
                     "tooearlyIntersystemHO",
@@ -36710,10 +35612,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["activatedCellList", "activation-ID", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::IntersystemCellActivationReply)?;
             let activated_cell_list =
                 reading.member(&members, "activatedCellList", ActivatedCellList::from_tree)?;
             let activation_id = reading.member(&members, "activation-ID", |value, reading| {
@@ -36814,10 +35713,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["activationID", "cellsToActivateList", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::IntersystemCellActivationRequest)?;
             let activation_id = reading.member(&members, "activationID", |value, reading| {
                 reading.unsigned(value, u64::MIN, u64::MAX)
             })?;
@@ -36913,7 +35809,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["notificationCellList", "iE-Extensions"])?;
+            let members = reading.members(value, names::IntersystemCellStateIndication)?;
             let notification_cell_list = reading.member(
                 &members,
                 "notificationCellList",
@@ -37066,16 +35962,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "sourcecellID",
-                    "targetcellID",
-                    "reconnectCellID",
-                    "uERLFReportContainer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members =
+                reading.members(value, names::IntersystemMobilityFailureforVoiceFallback)?;
             let sourcecell_id = reading.member(&members, "sourcecellID", NGRANCGI::from_tree)?;
             let targetcell_id = reading.member(&members, "targetcellID", EUTRACGI::from_tree)?;
             let reconnect_cell_id =
@@ -37171,7 +36059,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["reportingsystem", "iE-Extensions"])?;
+            let members = reading.members(value, names::IntersystemResourceStatusReply)?;
             let reportingsystem =
                 reading.member(&members, "reportingsystem", ReportingSystem::from_tree)?;
             let ie_extensions = reading.optional(
@@ -37257,7 +36145,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["reportingSystem", "iE-Extensions"])?;
+            let members = reading.members(value, names::IntersystemResourceStatusReport)?;
             let reporting_system = reading.member(
                 &members,
                 "reportingSystem",
@@ -37368,15 +36256,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "reportingSystem",
-                    "reportCharacteristics",
-                    "reportType",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::IntersystemResourceStatusRequest)?;
             let reporting_system =
                 reading.member(&members, "reportingSystem", ReportingSystem::from_tree)?;
             let report_characteristics = reading.member(
@@ -37536,10 +36416,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["transferType", "intersystemSONInformation", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::IntersystemSONConfigurationTransfer)?;
             let transfer_type = reading.member(
                 &members,
                 "transferType",
@@ -37636,10 +36513,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &["intersystemSONInformationReport", "choice-Extensions"],
-            )?;
+            let (position, value) = reading.alternative(value, names::IntersystemSONInformation)?;
             Ok(match position {
                 0 => Self::intersystemSONInformationReport(reading.within(
                     "intersystemSONInformationReport",
@@ -37724,14 +36598,8 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "nGRAN-CellActivation",
-                    "resourceStatus",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) =
+                reading.alternative(value, names::IntersystemSONInformationReply)?;
             Ok(match position {
                 0 => Self::nGRAN_CellActivation(reading.within(
                     "nGRAN-CellActivation",
@@ -37844,14 +36712,8 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "hOReportInformation",
-                    "failureIndicationInformation",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) =
+                reading.alternative(value, names::IntersystemSONInformationReport)?;
             Ok(match position {
                 0 => Self::hOReportInformation(reading.within(
                     "hOReportInformation",
@@ -37941,14 +36803,8 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "nGRAN-CellActivation",
-                    "resourceStatus",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) =
+                reading.alternative(value, names::IntersystemSONInformationRequest)?;
             Ok(match position {
                 0 => Self::nGRAN_CellActivation(reading.within(
                     "nGRAN-CellActivation",
@@ -38049,8 +36905,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["globalRANNodeID", "selectedTAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::IntersystemSONNGRANnodeID)?;
             let global_ran_node_id =
                 reading.member(&members, "globalRANNodeID", GlobalRANNodeID::from_tree)?;
             let selected_tai = reading.member(&members, "selectedTAI", TAI::from_tree)?;
@@ -38138,14 +36993,8 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "fromEUTRANtoNGRAN",
-                    "fromNGRANtoEUTRAN",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) =
+                reading.alternative(value, names::IntersystemSONTransferType)?;
             Ok(match position {
                 0 => Self::fromEUTRANtoNGRAN(reading.within(
                     "fromEUTRANtoNGRAN",
@@ -38245,8 +37094,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["globaleNBID", "selectedEPSTAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::IntersystemSONeNBID)?;
             let global_enb_id = reading.member(&members, "globaleNBID", GlobalENBID::from_tree)?;
             let selected_eps_tai = reading.member(&members, "selectedEPSTAI", EPSTAI::from_tree)?;
             let ie_extensions = reading.optional(
@@ -38276,9 +37124,6 @@ pub mod ngap_ies {
     impl IntersystemUnnecessaryHOEarlyIRATHO {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::R_true, Self::R_false];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["true", "false"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -38302,10 +37147,10 @@ pub mod ngap_ies {
     impl Tree for IntersystemUnnecessaryHOEarlyIRATHO {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::IntersystemUnnecessaryHOEarlyIRATHO[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::IntersystemUnnecessaryHOEarlyIRATHO)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -38408,16 +37253,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "sourcecellID",
-                    "targetcellID",
-                    "earlyIRATHO",
-                    "candidateCellList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::IntersystemUnnecessaryHO)?;
             let sourcecell_id = reading.member(&members, "sourcecellID", NGRANCGI::from_tree)?;
             let targetcell_id = reading.member(&members, "targetcellID", EUTRACGI::from_tree)?;
             let early_irat_ho = reading.member(
@@ -38547,15 +37383,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "correlationIdentifier",
-                    "cause",
-                    "criticalityDiagnostics",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::InventoryFailureTransfer)?;
             let correlation_identifier = reading.member(
                 &members,
                 "correlationIdentifier",
@@ -38594,9 +37422,6 @@ pub mod ngap_ies {
     impl InventoryReportTransferInventoryCompleteIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -38620,10 +37445,15 @@ pub mod ngap_ies {
     impl Tree for InventoryReportTransferInventoryCompleteIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(
+                names::InventoryReportTransferInventoryCompleteIndication[self.index() as usize],
+            )
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(
+                value,
+                names::InventoryReportTransferInventoryCompleteIndication,
+            )?])
         }
     }
     #[cfg(feature = "serde")]
@@ -38769,16 +37599,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "correlationIdentifier",
-                    "globalgNB-ID",
-                    "readerReportList",
-                    "inventoryCompleteIndication",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::InventoryReportTransfer)?;
             let correlation_identifier = reading.member(
                 &members,
                 "correlationIdentifier",
@@ -38860,7 +37681,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::InventoryRequestTransfer)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -38965,14 +37786,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "correlationIdentifier",
-                    "criticalityDiagnostics",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::InventoryResponseTransfer)?;
             let correlation_identifier = reading.member(
                 &members,
                 "correlationIdentifier",
@@ -39129,7 +37943,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pLMNidentity", "lAC", "iE-Extensions"])?;
+            let members = reading.members(value, names::LAI)?;
             let plmn_identity =
                 reading.member(&members, "pLMNidentity", PLMNIdentity::from_tree)?;
             let lac = reading.member(&members, "lAC", LAC::from_tree)?;
@@ -39201,9 +38015,6 @@ pub mod ngap_ies {
     impl LPWUSDisableIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -39227,10 +38038,10 @@ pub mod ngap_ies {
     impl Tree for LPWUSDisableIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::LPWUSDisableIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::LPWUSDisableIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -39305,7 +38116,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["lPWUScNsubgroupID", "iE-Extensions"])?;
+            let members = reading.members(value, names::LPWUSPSAssistanceInformation)?;
             let lpwus_cn_subgroup_id =
                 reading.member(&members, "lPWUScNsubgroupID", LPWUSCNsubgroupID::from_tree)?;
             let ie_extensions = reading.optional(
@@ -39334,9 +38145,6 @@ pub mod ngap_ies {
     impl LTEA2XServicesAuthorizedAerialUE {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -39360,10 +38168,10 @@ pub mod ngap_ies {
     impl Tree for LTEA2XServicesAuthorizedAerialUE {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::LTEA2XServicesAuthorizedAerialUE[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::LTEA2XServicesAuthorizedAerialUE)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -39381,9 +38189,6 @@ pub mod ngap_ies {
     impl LTEA2XServicesAuthorizedAerialControllerUE {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -39407,10 +38212,11 @@ pub mod ngap_ies {
     impl Tree for LTEA2XServicesAuthorizedAerialControllerUE {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::LTEA2XServicesAuthorizedAerialControllerUE[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES
+                [reading.named(value, names::LTEA2XServicesAuthorizedAerialControllerUE)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -39519,8 +38325,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["aerialUE", "aerialControllerUE", "iE-Extensions"])?;
+            let members = reading.members(value, names::LTEA2XServicesAuthorized)?;
             let aerial_ue = reading.optional(
                 &members,
                 "aerialUE",
@@ -39557,9 +38362,6 @@ pub mod ngap_ies {
     impl LTEMIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::lte_m];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["lte-m"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -39583,10 +38385,10 @@ pub mod ngap_ies {
     impl Tree for LTEMIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::LTEMIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::LTEMIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -39724,10 +38526,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["uESidelinkAggregateMaximumBitRate", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::LTEUESidelinkAggregateMaximumBitrate)?;
             let ue_sidelink_aggregate_maximum_bit_rate = reading.member(
                 &members,
                 "uESidelinkAggregateMaximumBitRate",
@@ -39840,8 +38639,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["vehicleUE", "pedestrianUE", "iE-Extensions"])?;
+            let members = reading.members(value, names::LTEV2XServicesAuthorized)?;
             let vehicle_ue = reading.optional(&members, "vehicleUE", VehicleUE::from_tree)?;
             let pedestrian_ue =
                 reading.optional(&members, "pedestrianUE", PedestrianUE::from_tree)?;
@@ -39966,16 +38764,8 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "nGRANCell",
-                    "eUTRANCell",
-                    "uTRANCell",
-                    "gERANCell",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) =
+                reading.alternative(value, names::LastVisitedCellInformation)?;
             Ok(match position {
                 0 => Self::nGRANCell(reading.within(
                     "nGRANCell",
@@ -40088,8 +38878,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["lastVisitedCellInformation", "iE-Extensions"])?;
+            let members = reading.members(value, names::LastVisitedCellItem)?;
             let last_visited_cell_information = reading.member(
                 &members,
                 "lastVisitedCellInformation",
@@ -40360,17 +39149,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "globalCellID",
-                    "cellType",
-                    "timeUEStayedInCell",
-                    "timeUEStayedInCellEnhancedGranularity",
-                    "hOCauseValue",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::LastVisitedNGRANCellInformation)?;
             let global_cell_id = reading.member(&members, "globalCellID", NGRANCGI::from_tree)?;
             let cell_type = reading.member(&members, "cellType", CellType::from_tree)?;
             let time_ue_stayed_in_cell = reading.member(
@@ -40489,7 +39268,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pSCellID", "timeStay", "iE-Extensions"])?;
+            let members = reading.members(value, names::LastVisitedPSCellInformation)?;
             let ps_cell_id = reading.optional(&members, "pSCellID", NGRANCGI::from_tree)?;
             let time_stay = reading.member(&members, "timeStay", |value, reading| {
                 reading
@@ -40635,9 +39414,6 @@ pub mod ngap_ies {
     impl LineType {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::dsl, Self::pon];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["dsl", "pon"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -40661,10 +39437,10 @@ pub mod ngap_ies {
     impl Tree for LineType {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::LineType[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::LineType)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -40684,10 +39460,6 @@ pub mod ngap_ies {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 3] =
             [Self::uplink, Self::downlink, Self::both_uplink_and_downlink];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 3] =
-            ["uplink", "downlink", "both-uplink-and-downlink"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -40711,10 +39483,10 @@ pub mod ngap_ies {
     impl Tree for LinksToLog {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::LinksToLog[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::LinksToLog)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -40731,9 +39503,6 @@ pub mod ngap_ies {
     impl LocationReportingAdditionalInfo {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::includePSCell];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["includePSCell"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -40757,10 +39526,10 @@ pub mod ngap_ies {
     impl Tree for LocationReportingAdditionalInfo {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::LocationReportingAdditionalInfo[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::LocationReportingAdditionalInfo)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -40936,16 +39705,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "eventType",
-                    "reportArea",
-                    "areaOfInterestList",
-                    "locationReportingReferenceIDToBeCancelled",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::LocationReportingRequestType)?;
             let event_type = reading.member(&members, "eventType", EventType::from_tree)?;
             let report_area = reading.member(&members, "reportArea", ReportArea::from_tree)?;
             let area_of_interest_list = reading.optional(
@@ -41180,19 +39940,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "loggingInterval",
-                    "loggingDuration",
-                    "loggedMDTTrigger",
-                    "bluetoothMeasurementConfiguration",
-                    "wLANMeasurementConfiguration",
-                    "sensorMeasurementConfiguration",
-                    "areaScopeOfNeighCellsList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::LoggedMDTNr)?;
             let logging_interval =
                 reading.member(&members, "loggingInterval", LoggingInterval::from_tree)?;
             let logging_duration =
@@ -41303,8 +40051,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) =
-                reading.alternative(value, &["periodical", "eventTrigger", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::LoggedMDTTrigger)?;
             Ok(match position {
                 0 => Self::periodical(
                     reading.within("periodical", value, |value, reading| reading.null(value))?,
@@ -41348,9 +40095,6 @@ pub mod ngap_ies {
             Self::m90,
             Self::m120,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 6] = ["m10", "m20", "m40", "m60", "m90", "m120"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -41374,10 +40118,10 @@ pub mod ngap_ies {
     impl Tree for LoggingDuration {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::LoggingDuration[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::LoggingDuration)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -41416,12 +40160,6 @@ pub mod ngap_ies {
             Self::ms61440,
             Self::infinity,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 11] = [
-            "ms320", "ms640", "ms1280", "ms2560", "ms5120", "ms10240", "ms20480", "ms30720",
-            "ms40960", "ms61440", "infinity",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -41445,10 +40183,10 @@ pub mod ngap_ies {
     impl Tree for LoggingInterval {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::LoggingInterval[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::LoggingInterval)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -41571,15 +40309,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "m1reportingTrigger",
-                    "m1thresholdEventA2",
-                    "m1periodicReporting",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::M1Configuration)?;
             let m1_reporting_trigger = reading.member(
                 &members,
                 "m1reportingTrigger",
@@ -41690,8 +40420,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["reportInterval", "reportAmount", "iE-Extensions"])?;
+            let members = reading.members(value, names::M1PeriodicReporting)?;
             let report_interval =
                 reading.member(&members, "reportInterval", ReportIntervalMDT::from_tree)?;
             let report_amount =
@@ -41728,10 +40457,6 @@ pub mod ngap_ies {
             Self::a2eventtriggered,
             Self::a2eventtriggered_periodic,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 3] =
-            ["periodic", "a2eventtriggered", "a2eventtriggered-periodic"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -41755,10 +40480,10 @@ pub mod ngap_ies {
     impl Tree for M1ReportingTrigger {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::M1ReportingTrigger[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::M1ReportingTrigger)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -41833,7 +40558,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["m1ThresholdType", "iE-Extensions"])?;
+            let members = reading.members(value, names::M1ThresholdEventA2)?;
             let m1_threshold_type =
                 reading.member(&members, "m1ThresholdType", M1ThresholdType::from_tree)?;
             let ie_extensions = reading.optional(
@@ -41929,15 +40654,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "threshold-RSRP",
-                    "threshold-RSRQ",
-                    "threshold-SINR",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::M1ThresholdType)?;
             Ok(match position {
                 0 => Self::threshold_RSRP(reading.within(
                     "threshold-RSRP",
@@ -42043,8 +40760,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["m4period", "m4-links-to-log", "iE-Extensions"])?;
+            let members = reading.members(value, names::M4Configuration)?;
             let m4_period = reading.member(&members, "m4period", M4period::from_tree)?;
             let m4_links_to_log =
                 reading.member(&members, "m4-links-to-log", LinksToLog::from_tree)?;
@@ -42090,10 +40806,6 @@ pub mod ngap_ies {
             Self::r64,
             Self::infinity,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 8] =
-            ["r1", "r2", "r4", "r8", "r16", "r32", "r64", "infinity"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -42117,10 +40829,10 @@ pub mod ngap_ies {
     impl Tree for M4ReportAmountMDT {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::M4ReportAmountMDT[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::M4ReportAmountMDT)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -42147,10 +40859,6 @@ pub mod ngap_ies {
             Self::ms10240,
             Self::min1,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 5] =
-            ["ms1024", "ms2048", "ms5120", "ms10240", "min1"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -42174,10 +40882,10 @@ pub mod ngap_ies {
     impl Tree for M4period {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::M4period[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::M4period)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -42261,8 +40969,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["m5period", "m5-links-to-log", "iE-Extensions"])?;
+            let members = reading.members(value, names::M5Configuration)?;
             let m5_period = reading.member(&members, "m5period", M5period::from_tree)?;
             let m5_links_to_log =
                 reading.member(&members, "m5-links-to-log", LinksToLog::from_tree)?;
@@ -42308,10 +41015,6 @@ pub mod ngap_ies {
             Self::r64,
             Self::infinity,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 8] =
-            ["r1", "r2", "r4", "r8", "r16", "r32", "r64", "infinity"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -42335,10 +41038,10 @@ pub mod ngap_ies {
     impl Tree for M5ReportAmountMDT {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::M5ReportAmountMDT[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::M5ReportAmountMDT)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -42365,10 +41068,6 @@ pub mod ngap_ies {
             Self::ms10240,
             Self::min1,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 5] =
-            ["ms1024", "ms2048", "ms5120", "ms10240", "min1"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -42392,10 +41091,10 @@ pub mod ngap_ies {
     impl Tree for M5period {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::M5period[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::M5period)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -42480,10 +41179,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["m6report-Interval", "m6-links-to-log", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::M6Configuration)?;
             let m6_report_interval =
                 reading.member(&members, "m6report-Interval", M6reportInterval::from_tree)?;
             let m6_links_to_log =
@@ -42530,10 +41226,6 @@ pub mod ngap_ies {
             Self::r64,
             Self::infinity,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 8] =
-            ["r1", "r2", "r4", "r8", "r16", "r32", "r64", "infinity"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -42557,10 +41249,10 @@ pub mod ngap_ies {
     impl Tree for M6ReportAmountMDT {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::M6ReportAmountMDT[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::M6ReportAmountMDT)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -42605,12 +41297,6 @@ pub mod ngap_ies {
             Self::min12,
             Self::min30,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 14] = [
-            "ms120", "ms240", "ms480", "ms640", "ms1024", "ms2048", "ms5120", "ms10240", "ms20480",
-            "ms40960", "min1", "min6", "min12", "min30",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -42634,10 +41320,10 @@ pub mod ngap_ies {
     impl Tree for M6reportInterval {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::M6reportInterval[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::M6reportInterval)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -42721,8 +41407,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["m7period", "m7-links-to-log", "iE-Extensions"])?;
+            let members = reading.members(value, names::M7Configuration)?;
             let m7_period = reading.member(&members, "m7period", M7period::from_tree)?;
             let m7_links_to_log =
                 reading.member(&members, "m7-links-to-log", LinksToLog::from_tree)?;
@@ -42768,10 +41453,6 @@ pub mod ngap_ies {
             Self::r64,
             Self::infinity,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 8] =
-            ["r1", "r2", "r4", "r8", "r16", "r32", "r64", "infinity"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -42795,10 +41476,10 @@ pub mod ngap_ies {
     impl Tree for M7ReportAmountMDT {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::M7ReportAmountMDT[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::M7ReportAmountMDT)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -42993,17 +41674,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mBS-SessionID",
-                    "mBS-AreaSessionID",
-                    "mBS-ServiceArea",
-                    "mBS-QoSFlowsToBeSetupList",
-                    "mBS-MappingandDataForwardingRequestList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members =
+                reading.members(value, names::MBSActiveSessionInformationSourcetoTargetItem)?;
             let mbs_session_id =
                 reading.member(&members, "mBS-SessionID", MBSSessionID::from_tree)?;
             let mbs_area_session_id =
@@ -43202,14 +41874,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mBS-SessionID",
-                    "mBS-DataForwardingResponseMRBList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members =
+                reading.members(value, names::MBSActiveSessionInformationTargettoSourceItem)?;
             let mbs_session_id =
                 reading.member(&members, "mBS-SessionID", MBSSessionID::from_tree)?;
             let mbs_data_forwarding_response_mrb_list = reading.optional(
@@ -43406,9 +42072,6 @@ pub mod ngap_ies {
     impl MBSAssistanceInformation {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -43432,10 +42095,10 @@ pub mod ngap_ies {
     impl Tree for MBSAssistanceInformation {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::MBSAssistanceInformation[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::MBSAssistanceInformation)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -43556,15 +42219,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mRB-ID",
-                    "dL-Forwarding-UPTNLInformation",
-                    "mRB-ProgressInformation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::MBSDataForwardingResponseMRBItem)?;
             let mrb_id = reading.member(&members, "mRB-ID", MRBID::from_tree)?;
             let dl_forwarding_up_tnl_information = reading.member(
                 &members,
@@ -43787,16 +42442,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mBS-SessionID",
-                    "mBS-AreaSessionID",
-                    "sharedNGU-UnicastTNLInformation",
-                    "cause",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::MBSDistributionReleaseRequestTransfer)?;
             let mbs_session_id =
                 reading.member(&members, "mBS-SessionID", MBSSessionID::from_tree)?;
             let mbs_area_session_id =
@@ -43950,15 +42596,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mBS-SessionID",
-                    "mBS-AreaSessionID",
-                    "sharedNGU-UnicastTNLInformation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::MBSDistributionSetupRequestTransfer)?;
             let mbs_session_id =
                 reading.member(&members, "mBS-SessionID", MBSSessionID::from_tree)?;
             let mbs_area_session_id =
@@ -44153,18 +42791,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mBS-SessionID",
-                    "mBS-AreaSessionID",
-                    "sharedNGU-MulticastTNLInformation",
-                    "mBS-QoSFlowsToBeSetupList",
-                    "mBSSessionStatus",
-                    "mBS-ServiceArea",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::MBSDistributionSetupResponseTransfer)?;
             let mbs_session_id =
                 reading.member(&members, "mBS-SessionID", MBSSessionID::from_tree)?;
             let mbs_area_session_id =
@@ -44323,16 +42950,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mBS-SessionID",
-                    "mBS-AreaSessionID",
-                    "cause",
-                    "criticalityDiagnostics",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members =
+                reading.members(value, names::MBSDistributionSetupUnsuccessfulTransfer)?;
             let mbs_session_id =
                 reading.member(&members, "mBS-SessionID", MBSSessionID::from_tree)?;
             let mbs_area_session_id =
@@ -44537,15 +43156,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mRB-ID",
-                    "mBS-QoSFlowList",
-                    "mRB-ProgressInformation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::MBSMappingandDataForwardingRequestItem)?;
             let mrb_id = reading.member(&members, "mRB-ID", MRBID::from_tree)?;
             let mbs_qos_flow_list =
                 reading.member(&members, "mBS-QoSFlowList", MBSQoSFlowList::from_tree)?;
@@ -44693,14 +43304,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "locationindependent",
-                    "locationdependent",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::MBSNGUFailureIndication)?;
             Ok(match position {
                 0 => Self::locationindependent(reading.within(
                     "locationindependent",
@@ -44860,14 +43464,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mBSqosFlowIdentifier",
-                    "mBSqosFlowLevelQosParameters",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::MBSQoSFlowsToBeSetupItem)?;
             let mbs_qos_flow_identifier = reading.member(
                 &members,
                 "mBSqosFlowIdentifier",
@@ -45014,14 +43611,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "locationindependent",
-                    "locationdependent",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::MBSServiceArea)?;
             Ok(match position {
                 0 => Self::locationindependent(reading.within(
                     "locationindependent",
@@ -45203,14 +43793,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mBS-ServiceAreaCellList",
-                    "mBS-ServiceAreaTAIList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::MBSServiceAreaInformation)?;
             let mbs_service_area_cell_list = reading.optional(
                 &members,
                 "mBS-ServiceAreaCellList",
@@ -45318,14 +43901,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mBS-AreaSessionID",
-                    "mBS-ServiceAreaInformation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::MBSServiceAreaInformationItem)?;
             let mbs_area_session_id =
                 reading.member(&members, "mBS-AreaSessionID", MBSAreaSessionID::from_tree)?;
             let mbs_service_area_information = reading.member(
@@ -45639,7 +44215,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["tMGI", "nID", "iE-Extensions"])?;
+            let members = reading.members(value, names::MBSSessionID)?;
             let tmgi = reading.member(&members, "tMGI", TMGI::from_tree)?;
             let nid = reading.optional(&members, "nID", NID::from_tree)?;
             let ie_extensions = reading.optional(
@@ -45741,14 +44317,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "locationindependent",
-                    "locationdependent",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::MBSSessionTNLInfo5GC)?;
             Ok(match position {
                 0 => Self::locationindependent(reading.within(
                     "locationindependent",
@@ -45865,14 +44434,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mBS-AreaSessionID",
-                    "sharedNGU-MulticastTNLInformation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::MBSSessionTNLInfo5GCItem)?;
             let mbs_area_session_id =
                 reading.member(&members, "mBS-AreaSessionID", MBSAreaSessionID::from_tree)?;
             let shared_ngu_multicast_tnl_information = reading.member(
@@ -46038,14 +44600,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "locationindependent",
-                    "locationdependent",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::MBSSessionTNLInfoNGRAN)?;
             Ok(match position {
                 0 => Self::locationindependent(reading.within(
                     "locationindependent",
@@ -46172,14 +44727,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mBS-AreaSessionID",
-                    "sharedNGU-UnicastTNLInformation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::MBSSessionTNLInfoNGRANItem)?;
             let mbs_area_session_id =
                 reading.member(&members, "mBS-AreaSessionID", MBSAreaSessionID::from_tree)?;
             let shared_ngu_unicast_tnl_information = reading.optional(
@@ -46276,12 +44824,6 @@ pub mod ngap_ies {
             Self::multicast_supported,
             Self::multicast_supported_with_reception_in_RRC_inactive,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = [
-            "multicast-supported",
-            "multicast-supported-with-reception-in-RRC-inactive",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -46305,10 +44847,10 @@ pub mod ngap_ies {
     impl Tree for MBSSupportIndicator {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::MBSSupportIndicator[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::MBSSupportIndicator)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -46325,9 +44867,6 @@ pub mod ngap_ies {
     impl MBSUPFailureIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::ng_u_path_failure_detected];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["ng-u-path-failure-detected"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -46351,10 +44890,10 @@ pub mod ngap_ies {
     impl Tree for MBSUPFailureIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::MBSUPFailureIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::MBSUPFailureIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -46442,14 +44981,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mBS-AreaSessionID",
-                    "mBS-UP-FailureIndication",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::MBSUPFailureIndicationItem)?;
             let mbs_area_session_id =
                 reading.member(&members, "mBS-AreaSessionID", MBSAreaSessionID::from_tree)?;
             let mbs_up_failure_indication = reading.member(
@@ -46621,15 +45153,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mBS-SessionID",
-                    "mBS-AreaSessionID",
-                    "cause",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::MBSSessionFailedtoSetupItem)?;
             let mbs_session_id =
                 reading.member(&members, "mBS-SessionID", MBSSessionID::from_tree)?;
             let mbs_area_session_id =
@@ -46796,7 +45320,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["mBS-SessionTNLInfoNGRAN", "iE-Extensions"])?;
+            let members = reading.members(value, names::MBSSessionReleaseResponseTransfer)?;
             let mbs_session_tnl_info_ngran = reading.optional(
                 &members,
                 "mBS-SessionTNLInfoNGRAN",
@@ -46906,8 +45430,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["cause", "criticalityDiagnostics", "iE-Extensions"])?;
+            let members = reading.members(value, names::MBSSessionSetupOrModFailureTransfer)?;
             let cause = reading.member(&members, "cause", Cause::from_tree)?;
             let criticality_diagnostics = reading.optional(
                 &members,
@@ -46977,7 +45500,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::MBSSessionSetupOrModRequestTransfer)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -47079,7 +45602,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["mBS-SessionTNLInfoNGRAN", "iE-Extensions"])?;
+            let members = reading.members(value, names::MBSSessionSetupOrModResponseTransfer)?;
             let mbs_session_tnl_info_ngran = reading.optional(
                 &members,
                 "mBS-SessionTNLInfoNGRAN",
@@ -47216,15 +45739,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mBS-SessionID",
-                    "mBS-AreaSessionID",
-                    "associatedMBSQosFlowSetupRequestList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::MBSSessionSetupRequestItem)?;
             let mbs_session_id =
                 reading.member(&members, "mBS-SessionID", MBSSessionID::from_tree)?;
             let mbs_area_session_id =
@@ -47392,10 +45907,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["mBS-SessionID", "mBS-AreaSessionID", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::MBSSessionSetupResponseItem)?;
             let mbs_session_id =
                 reading.member(&members, "mBS-SessionID", MBSSessionID::from_tree)?;
             let mbs_area_session_id =
@@ -47612,16 +46124,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mBS-SessionID",
-                    "mBS-AreaSessionID",
-                    "associatedMBSQosFlowSetuporModifyRequestList",
-                    "mBS-QosFlowToReleaseList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::MBSSessionSetuporModifyRequestItem)?;
             let mbs_session_id =
                 reading.member(&members, "mBS-SessionID", MBSSessionID::from_tree)?;
             let mbs_area_session_id =
@@ -47717,9 +46220,6 @@ pub mod ngap_ies {
     impl MBSSessionStatus {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::activated, Self::deactivated];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["activated", "deactivated"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -47743,10 +46243,10 @@ pub mod ngap_ies {
     impl Tree for MBSSessionStatus {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::MBSSessionStatus[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::MBSSessionStatus)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -47828,7 +46328,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["mBS-SessionID", "cause", "iE-Extensions"])?;
+            let members = reading.members(value, names::MBSSessionToReleaseItem)?;
             let mbs_session_id =
                 reading.member(&members, "mBS-SessionID", MBSSessionID::from_tree)?;
             let cause = reading.member(&members, "cause", Cause::from_tree)?;
@@ -47916,13 +46416,6 @@ pub mod ngap_ies {
             Self::logged_MDT_only,
             Self::immediate_MDT_and_Trace,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 3] = [
-            "immediate-MDT-only",
-            "logged-MDT-only",
-            "immediate-MDT-and-Trace",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -47946,10 +46439,10 @@ pub mod ngap_ies {
     impl Tree for MDTActivation {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::MDTActivation[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::MDTActivation)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -48010,8 +46503,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) =
-                reading.alternative(value, &["s-basedMDT", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::MDTAlignmentInfo)?;
             Ok(match position {
                 0 => Self::s_basedMDT(reading.within(
                     "s-basedMDT",
@@ -48131,10 +46623,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["mdt-Config-NR", "mdt-Config-EUTRA", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::MDTConfiguration)?;
             let mdt_config_nr =
                 reading.optional(&members, "mdt-Config-NR", MDTConfigurationNR::from_tree)?;
             let mdt_config_eutra = reading.optional(
@@ -48278,16 +46767,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mdt-Activation",
-                    "areaScopeOfMDT",
-                    "mDTMode",
-                    "signallingBasedMDTPLMNList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::MDTConfigurationEUTRA)?;
             let mdt_activation =
                 reading.member(&members, "mdt-Activation", MDTActivation::from_tree)?;
             let area_scope_of_mdt =
@@ -48438,16 +46918,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "mdt-Activation",
-                    "areaScopeOfMDT",
-                    "mDTModeNr",
-                    "signallingBasedMDTPLMNList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::MDTConfigurationNR)?;
             let mdt_activation =
                 reading.member(&members, "mdt-Activation", MDTActivation::from_tree)?;
             let area_scope_of_mdt =
@@ -48547,7 +47018,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["mDT-Location-Information", "iE-Extensions"])?;
+            let members = reading.members(value, names::MDTLocationInfo)?;
             let mdt_location_information = reading.member(
                 &members,
                 "mDT-Location-Information",
@@ -48712,10 +47183,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["reference-location", "distance-radius", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::MDTCircle)?;
             let reference_location =
                 reading.member(&members, "reference-location", |value, reading| {
                     json::read_octets(reading, value)
@@ -48937,10 +47405,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &["immediateMDTNr", "loggedMDTNr", "choice-Extensions"],
-            )?;
+            let (position, value) = reading.alternative(value, names::MDTModeNr)?;
             Ok(match position {
                 0 => Self::immediateMDTNr(reading.within(
                     "immediateMDTNr",
@@ -49078,9 +47543,6 @@ pub mod ngap_ies {
     impl MICOModeIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -49104,10 +47566,10 @@ pub mod ngap_ies {
     impl Tree for MICOModeIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::MICOModeIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::MICOModeIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -49179,9 +47641,6 @@ pub mod ngap_ies {
     impl MNOnlyMDTCollection {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::mn_only];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["mn-only"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -49205,10 +47664,10 @@ pub mod ngap_ies {
     impl Tree for MNOnlyMDTCollection {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::MNOnlyMDTCollection[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::MNOnlyMDTCollection)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -49327,10 +47786,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &["pDCP-SN-Length12", "pDCP-SN-Length18", "choice-Extensions"],
-            )?;
+            let (position, value) = reading.alternative(value, names::MRBProgressInformation)?;
             Ok(match position {
                 0 => Self::pDCP_SN_Length12(reading.within(
                     "pDCP-SN-Length12",
@@ -49505,9 +47961,6 @@ pub mod ngap_ies {
     impl MaximumIntegrityProtectedDataRate {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::bitrate64kbs, Self::maximum_UE_rate];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["bitrate64kbs", "maximum-UE-rate"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -49531,10 +47984,10 @@ pub mod ngap_ies {
     impl Tree for MaximumIntegrityProtectedDataRate {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::MaximumIntegrityProtectedDataRate[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::MaximumIntegrityProtectedDataRate)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -49607,10 +48060,8 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &["threshold-RSRP", "threshold-RSRQ", "choice-Extensions"],
-            )?;
+            let (position, value) =
+                reading.alternative(value, names::MeasurementThresholdL1LoggedMDT)?;
             Ok(match position {
                 0 => Self::threshold_RSRP(reading.within(
                     "threshold-RSRP",
@@ -49748,9 +48199,6 @@ pub mod ngap_ies {
     impl MicoAllPLMN {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -49774,10 +48222,10 @@ pub mod ngap_ies {
     impl Tree for MicoAllPLMN {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::MicoAllPLMN[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::MicoAllPLMN)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -49795,9 +48243,6 @@ pub mod ngap_ies {
     impl MobileIABAuthorized {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -49821,10 +48266,10 @@ pub mod ngap_ies {
     impl Tree for MobileIABAuthorized {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::MobileIABAuthorized[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::MobileIABAuthorized)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -49903,7 +48348,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["nRCGI", "tAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::MobileIABMTUserLocationInformation)?;
             let nr_cgi = reading.member(&members, "nRCGI", NRCGI::from_tree)?;
             let tai = reading.member(&members, "tAI", TAI::from_tree)?;
             let ie_extensions = reading.optional(
@@ -49932,9 +48377,6 @@ pub mod ngap_ies {
     impl MobileIABSupported {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -49958,10 +48400,10 @@ pub mod ngap_ies {
     impl Tree for MobileIABSupported {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::MobileIABSupported[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::MobileIABSupported)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -49978,9 +48420,6 @@ pub mod ngap_ies {
     impl MobileIABNodeIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -50004,10 +48443,10 @@ pub mod ngap_ies {
     impl Tree for MobileIABNodeIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::MobileIABNodeIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::MobileIABNodeIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -50227,17 +48666,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "servingPLMN",
-                    "equivalentPLMNs",
-                    "rATRestrictions",
-                    "forbiddenAreaInformation",
-                    "serviceAreaInformation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::MobilityRestrictionList)?;
             let serving_plmn = reading.member(&members, "servingPLMN", PLMNIdentity::from_tree)?;
             let equivalent_plmns =
                 reading.optional(&members, "equivalentPLMNs", EquivalentPLMNs::from_tree)?;
@@ -50285,9 +48714,6 @@ pub mod ngap_ies {
     impl MonitoringRequest {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 4] = [Self::ul, Self::dl, Self::both, Self::stop];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 4] = ["ul", "dl", "both", "stop"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -50311,10 +48737,10 @@ pub mod ngap_ies {
     impl Tree for MonitoringRequest {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::MonitoringRequest[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::MonitoringRequest)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -50437,15 +48863,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "monitoringRequest",
-                    "dlAvailableBitrateReportThresholds",
-                    "ulAvailableBitrateReportThresholds",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::MonitoringRequestonAvailableBitrate)?;
             let monitoring_request =
                 reading.member(&members, "monitoringRequest", MonitoringRequest::from_tree)?;
             let dl_available_bitrate_report_thresholds = reading.optional(
@@ -50543,7 +48961,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["mBS-AreaTAIList", "iE-Extensions"])?;
+            let members = reading.members(value, names::MulticastGroupPagingArea)?;
             let mbs_area_tai_list =
                 reading.member(&members, "mBS-AreaTAIList", MBSAreaTAIList::from_tree)?;
             let ie_extensions = reading.optional(
@@ -50649,10 +49067,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["multicastGroupPagingArea", "uE-PagingList", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::MulticastGroupPagingAreaItem)?;
             let multicast_group_paging_area = reading.member(
                 &members,
                 "multicastGroupPagingArea",
@@ -50796,7 +49211,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["mBS-SessionID", "iE-Extensions"])?;
+            let members =
+                reading.members(value, names::MulticastSessionActivationRequestTransfer)?;
             let mbs_session_id =
                 reading.member(&members, "mBS-SessionID", MBSSessionID::from_tree)?;
             let ie_extensions = reading.optional(
@@ -50882,7 +49298,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["mBS-SessionID", "iE-Extensions"])?;
+            let members =
+                reading.members(value, names::MulticastSessionDeactivationRequestTransfer)?;
             let mbs_session_id =
                 reading.member(&members, "mBS-SessionID", MBSSessionID::from_tree)?;
             let ie_extensions = reading.optional(
@@ -50947,7 +49364,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::MulticastSessionUpdateRequestTransfer)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -51011,8 +49428,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) =
-                reading.alternative(value, &["n3IWF-ID", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::N3IWFID)?;
             Ok(match position {
                 0 => Self::n3IWF_ID(reading.within("n3IWF-ID", value, |value, reading| {
                     json::read_bits(reading, value, 16, 16)
@@ -51117,10 +49533,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["n6JitterLowerBound", "n6JitterUpperBound", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::N6JitterInformation)?;
             let n6_jitter_lower_bound =
                 reading.member(&members, "n6JitterLowerBound", |value, reading| {
                     reading.signed(value, -127, 127).map(|number| number as i8)
@@ -51278,9 +49691,6 @@ pub mod ngap_ies {
     impl NBIoTDefaultPagingDRX {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 4] = [Self::rf128, Self::rf256, Self::rf512, Self::rf1024];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 4] = ["rf128", "rf256", "rf512", "rf1024"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -51304,10 +49714,10 @@ pub mod ngap_ies {
     impl Tree for NBIoTDefaultPagingDRX {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::NBIoTDefaultPagingDRX[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::NBIoTDefaultPagingDRX)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -51356,12 +49766,6 @@ pub mod ngap_ies {
             Self::s15,
             Self::s16,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 16] = [
-            "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11", "s12", "s13",
-            "s14", "s15", "s16",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -51385,10 +49789,10 @@ pub mod ngap_ies {
     impl Tree for NBIoTPagingTimeWindow {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::NBIoTPagingTimeWindow[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::NBIoTPagingTimeWindow)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -51433,12 +49837,6 @@ pub mod ngap_ies {
             Self::hf512,
             Self::hf1024,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 14] = [
-            "hf2", "hf4", "hf6", "hf8", "hf10", "hf12", "hf14", "hf16", "hf32", "hf64", "hf128",
-            "hf256", "hf512", "hf1024",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -51462,10 +49860,10 @@ pub mod ngap_ies {
     impl Tree for NBIoTPagingEDRXCycle {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::NBIoTPagingEDRXCycle[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::NBIoTPagingEDRXCycle)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -51567,14 +49965,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "nB-IoT-Paging-eDRXCycle",
-                    "nB-IoT-Paging-TimeWindow",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::NBIoTPagingEDRXInfo)?;
             let nb_iot_paging_edrx_cycle = reading.member(
                 &members,
                 "nB-IoT-Paging-eDRXCycle",
@@ -51623,10 +50014,6 @@ pub mod ngap_ies {
             Self::rf512,
             Self::rf1024,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 6] =
-            ["rf32", "rf64", "rf128", "rf256", "rf512", "rf1024"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -51650,10 +50037,10 @@ pub mod ngap_ies {
     impl Tree for NBIoTPagingDRX {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::NBIoTPagingDRX[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::NBIoTPagingDRX)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -51770,7 +50157,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["ngap-ProtocolIE-Id", "iE-Extensions"])?;
+            let members = reading.members(value, names::NGAPIESupportInformationRequestItem)?;
             let ngap_protocol_ie_id =
                 reading.member(&members, "ngap-ProtocolIE-Id", ProtocolIEID::from_tree)?;
             let ie_extensions = reading.optional(
@@ -51851,9 +50238,6 @@ pub mod ngap_ies {
     impl NGAPIESupportInformationResponseItemNgapProtocolIESupportInfo {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::supported, Self::not_supported];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["supported", "not-supported"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -51877,10 +50261,16 @@ pub mod ngap_ies {
     impl Tree for NGAPIESupportInformationResponseItemNgapProtocolIESupportInfo {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(
+                names::NGAPIESupportInformationResponseItemNgapProtocolIESupportInfo
+                    [self.index() as usize],
+            )
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(
+                value,
+                names::NGAPIESupportInformationResponseItemNgapProtocolIESupportInfo,
+            )?])
         }
     }
     #[cfg(feature = "serde")]
@@ -51898,9 +50288,6 @@ pub mod ngap_ies {
     impl NGAPIESupportInformationResponseItemNgapProtocolIEPresenceInfo {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::present, Self::not_present];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["present", "not-present"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -51924,10 +50311,16 @@ pub mod ngap_ies {
     impl Tree for NGAPIESupportInformationResponseItemNgapProtocolIEPresenceInfo {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(
+                names::NGAPIESupportInformationResponseItemNgapProtocolIEPresenceInfo
+                    [self.index() as usize],
+            )
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(
+                value,
+                names::NGAPIESupportInformationResponseItemNgapProtocolIEPresenceInfo,
+            )?])
         }
     }
     #[cfg(feature = "serde")]
@@ -52032,15 +50425,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "ngap-ProtocolIE-Id",
-                    "ngap-ProtocolIESupportInfo",
-                    "ngap-ProtocolIEPresenceInfo",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::NGAPIESupportInformationResponseItem)?;
             let ngap_protocol_ie_id =
                 reading.member(&members, "ngap-ProtocolIE-Id", ProtocolIEID::from_tree)?;
             let ngap_protocol_ie_support_info = reading.member(
@@ -52186,8 +50571,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) =
-                reading.alternative(value, &["nR-CGI", "eUTRA-CGI", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::NGRANCGI)?;
             Ok(match position {
                 0 => Self::nR_CGI(reading.within("nR-CGI", value, NRCGI::from_tree)?),
                 1 => Self::eUTRA_CGI(reading.within("eUTRA-CGI", value, EUTRACGI::from_tree)?),
@@ -52356,17 +50740,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "nGRAN-CGI",
-                    "nGRAN-CompositeAvailableCapacityGroup",
-                    "nGRAN-NumberOfActiveUEs",
-                    "nGRAN-NoofRRCConnections",
-                    "nGRAN-RadioResourceStatus",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::NGRANCellReportItem)?;
             let ngran_cgi = reading.member(&members, "nGRAN-CGI", NGRANCGI::from_tree)?;
             let ngran_composite_available_capacity_group = reading.member(
                 &members,
@@ -52526,7 +50900,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["nGRAN-CGI", "iE-Extensions"])?;
+            let members = reading.members(value, names::NGRANCellToReportItem)?;
             let ngran_cgi = reading.member(&members, "nGRAN-CGI", NGRANCGI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -52827,18 +51201,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "dL-GBR-PRB-usage-for-MIMO",
-                    "uL-GBR-PRB-usage-for-MIMO",
-                    "dL-non-GBR-PRB-usage-for-MIMO",
-                    "uL-non-GBR-PRB-usage-for-MIMO",
-                    "dL-Total-PRB-usage-for-MIMO",
-                    "uL-Total-PRB-usage-for-MIMO",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::NGRANRadioResourceStatus)?;
             let dl_gbr_prb_usage_for_mimo =
                 reading.member(&members, "dL-GBR-PRB-usage-for-MIMO", |value, reading| {
                     reading.unsigned(value, 0, 100).map(|number| number as u8)
@@ -52956,7 +51319,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["nGRAN-CellReportList", "iE-Extensions"])?;
+            let members = reading.members(value, names::NGRANReportingStatusIEs)?;
             let ngran_cell_report_list = reading.member(
                 &members,
                 "nGRAN-CellReportList",
@@ -53048,7 +51411,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["nGRAN-CellToReportList", "iE-Extensions"])?;
+            let members = reading.members(value, names::NGRANReportingSystemIEs)?;
             let ngran_cell_to_report_list = reading.member(
                 &members,
                 "nGRAN-CellToReportList",
@@ -53173,14 +51536,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "tNLAssociationTransportLayerAddress",
-                    "tNLAssociationTransportLayerAddressAMF",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::NGRANTNLAssociationToRemoveItem)?;
             let tnl_association_transport_layer_address = reading.member(
                 &members,
                 "tNLAssociationTransportLayerAddress",
@@ -53429,8 +51785,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) =
-                reading.alternative(value, &["pNI-NPN-Access-Information", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::NPNAccessInformation)?;
             Ok(match position {
                 0 => Self::pNI_NPN_Access_Information(reading.within(
                     "pNI-NPN-Access-Information",
@@ -53517,14 +51872,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "sNPN-MobilityInformation",
-                    "pNI-NPN-MobilityInformation",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::NPNMobilityInformation)?;
             Ok(match position {
                 0 => Self::sNPN_MobilityInformation(reading.within(
                     "sNPN-MobilityInformation",
@@ -53603,7 +51951,7 @@ pub mod ngap_ies {
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
             let (position, value) =
-                reading.alternative(value, &["pNI-NPN-PagingAssistance", "choice-Extensions"])?;
+                reading.alternative(value, names::NPNPagingAssistanceInformation)?;
             Ok(match position {
                 0 => Self::pNI_NPN_PagingAssistance(reading.within(
                     "pNI-NPN-PagingAssistance",
@@ -53676,7 +52024,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(value, &["sNPN", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::NPNSupport)?;
             Ok(match position {
                 0 => Self::sNPN(reading.within("sNPN", value, NID::from_tree)?),
                 _ => Self::choice_Extensions(reading.within(
@@ -53702,9 +52050,6 @@ pub mod ngap_ies {
     impl NRA2XServicesAuthorizedAerialUE {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -53728,10 +52073,10 @@ pub mod ngap_ies {
     impl Tree for NRA2XServicesAuthorizedAerialUE {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::NRA2XServicesAuthorizedAerialUE[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::NRA2XServicesAuthorizedAerialUE)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -53749,9 +52094,6 @@ pub mod ngap_ies {
     impl NRA2XServicesAuthorizedAerialControllerUE {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -53775,10 +52117,11 @@ pub mod ngap_ies {
     impl Tree for NRA2XServicesAuthorizedAerialControllerUE {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::NRA2XServicesAuthorizedAerialControllerUE[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES
+                [reading.named(value, names::NRA2XServicesAuthorizedAerialControllerUE)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -53887,8 +52230,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["aerialUE", "aerialControllerUE", "iE-Extensions"])?;
+            let members = reading.members(value, names::NRA2XServicesAuthorized)?;
             let aerial_ue = reading.optional(
                 &members,
                 "aerialUE",
@@ -53992,8 +52334,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["pLMNIdentity", "nRCellIdentity", "iE-Extensions"])?;
+            let members = reading.members(value, names::NRCGI)?;
             let plmn_identity =
                 reading.member(&members, "pLMNIdentity", PLMNIdentity::from_tree)?;
             let nr_cell_identity =
@@ -54190,11 +52531,6 @@ pub mod ngap_ies {
             Self::hf512,
             Self::hf1024,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 10] = [
-            "hf2", "hf4", "hf8", "hf16", "hf32", "hf64", "hf128", "hf256", "hf512", "hf1024",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -54218,10 +52554,10 @@ pub mod ngap_ies {
     impl Tree for NRPagingLongEDRXCycleForRRCINACTIVE {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::NRPagingLongEDRXCycleForRRCINACTIVE[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::NRPagingLongEDRXCycleForRRCINACTIVE)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -54314,14 +52650,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "nR-paging-Long-eDRX-Cycle-for-RRC-INACTIVE",
-                    "nR-paging-Time-Window-for-RRC-INACTIVE",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members =
+                reading.members(value, names::NRPagingLongEDRXInformationForRRCINACTIVE)?;
             let nr_paging_long_edrx_cycle_for_rrc_inactive = reading.member(
                 &members,
                 "nR-paging-Long-eDRX-Cycle-for-RRC-INACTIVE",
@@ -54422,13 +52752,6 @@ pub mod ngap_ies {
             Self::s31,
             Self::s32,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 32] = [
-            "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11", "s12", "s13",
-            "s14", "s15", "s16", "s17", "s18", "s19", "s20", "s21", "s22", "s23", "s24", "s25",
-            "s26", "s27", "s28", "s29", "s30", "s31", "s32",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -54452,10 +52775,10 @@ pub mod ngap_ies {
     impl Tree for NRPagingTimeWindow {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::NRPagingTimeWindow[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::NRPagingTimeWindow)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -54536,13 +52859,6 @@ pub mod ngap_ies {
             Self::s31,
             Self::s32,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 32] = [
-            "s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11", "s12", "s13",
-            "s14", "s15", "s16", "s17", "s18", "s19", "s20", "s21", "s22", "s23", "s24", "s25",
-            "s26", "s27", "s28", "s29", "s30", "s31", "s32",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -54566,10 +52882,10 @@ pub mod ngap_ies {
     impl Tree for NRPagingTimeWindowForRRCINACTIVE {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::NRPagingTimeWindowForRRCINACTIVE[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::NRPagingTimeWindowForRRCINACTIVE)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -54612,23 +52928,6 @@ pub mod ngap_ies {
             Self::hf512,
             Self::hf1024,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 13] = [
-            "hfquarter",
-            "hfhalf",
-            "hf1",
-            "hf2",
-            "hf4",
-            "hf8",
-            "hf16",
-            "hf32",
-            "hf64",
-            "hf128",
-            "hf256",
-            "hf512",
-            "hf1024",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -54652,10 +52951,10 @@ pub mod ngap_ies {
     impl Tree for NRPagingEDRXCycle {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::NRPagingEDRXCycle[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::NRPagingEDRXCycle)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -54754,14 +53053,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "nR-paging-eDRX-Cycle",
-                    "nR-paging-Time-Window",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::NRPagingeDRXInformation)?;
             let nr_paging_edrx_cycle = reading.member(
                 &members,
                 "nR-paging-eDRX-Cycle",
@@ -55060,7 +53352,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["nr-frequency-band", "iE-Extension"])?;
+            let members = reading.members(value, names::NRFrequencyBandItem)?;
             let nr_frequency_band =
                 reading.member(&members, "nr-frequency-band", NRFrequencyBand::from_tree)?;
             let ie_extension = reading.optional(
@@ -55158,8 +53450,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["nrARFCN", "frequencyBand-List", "iE-Extension"])?;
+            let members = reading.members(value, names::NRFrequencyInfo)?;
             let nr_arfcn = reading.member(&members, "nrARFCN", NRARFCN::from_tree)?;
             let frequency_band_list = reading.member(
                 &members,
@@ -55340,15 +53631,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "servingPLMN",
-                    "tACListInNRNTN",
-                    "uELocationDerivedTACInNRNTN",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::NRNTNTAIInformation)?;
             let serving_plmn = reading.member(&members, "servingPLMN", PLMNIdentity::from_tree)?;
             let tac_list_in_nr_ntn =
                 reading.member(&members, "tACListInNRNTN", TACListInNRNTN::from_tree)?;
@@ -55562,10 +53845,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["uESidelinkAggregateMaximumBitRate", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::NRUESidelinkAggregateMaximumBitrate)?;
             let ue_sidelink_aggregate_maximum_bit_rate = reading.member(
                 &members,
                 "uESidelinkAggregateMaximumBitRate",
@@ -55678,8 +53958,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["vehicleUE", "pedestrianUE", "iE-Extensions"])?;
+            let members = reading.members(value, names::NRV2XServicesAuthorized)?;
             let vehicle_ue = reading.optional(&members, "vehicleUE", VehicleUE::from_tree)?;
             let pedestrian_ue =
                 reading.optional(&members, "pedestrianUE", PedestrianUE::from_tree)?;
@@ -55916,8 +54195,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) =
-                reading.alternative(value, &["circle", "polygon", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::NTNGeographicalAreaItem)?;
             Ok(match position {
                 0 => Self::circle(reading.within("circle", value, MDTCircle::from_tree)?),
                 1 => Self::polygon(reading.within("polygon", value, MDTPolygon::from_tree)?),
@@ -56003,9 +54281,6 @@ pub mod ngap_ies {
     impl NetworkControlledRepeaterAuthorized {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -56029,10 +54304,10 @@ pub mod ngap_ies {
     impl Tree for NetworkControlledRepeaterAuthorized {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::NetworkControlledRepeaterAuthorized[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::NetworkControlledRepeaterAuthorized)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -56152,7 +54427,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["networkSliceListforMDT", "iE-Extensions"])?;
+            let members = reading.members(value, names::NetworkSliceAreaScopeofMDT)?;
             let network_slice_listfor_mdt = reading.member(
                 &members,
                 "networkSliceListforMDT",
@@ -56248,7 +54523,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["plmnID", "sliceMDTList", "iE-Extensions"])?;
+            let members = reading.members(value, names::NetworkSliceItemforMDT)?;
             let plmn_id = reading.member(&members, "plmnID", PLMNIdentity::from_tree)?;
             let slice_mdt_list =
                 reading.member(&members, "sliceMDTList", SliceMDTList::from_tree)?;
@@ -56330,9 +54605,6 @@ pub mod ngap_ies {
     impl NewSecurityContextInd {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -56356,10 +54628,10 @@ pub mod ngap_ies {
     impl Tree for NewSecurityContextInd {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::NewSecurityContextInd[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::NewSecurityContextInd)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -56421,9 +54693,6 @@ pub mod ngap_ies {
     impl NextPagingAreaScope {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::same, Self::changed];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["same", "changed"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -56447,10 +54716,10 @@ pub mod ngap_ies {
     impl Tree for NextPagingAreaScope {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::NextPagingAreaScope[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::NextPagingAreaScope)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -56526,15 +54795,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "macroNgENB-ID",
-                    "shortMacroNgENB-ID",
-                    "longMacroNgENB-ID",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::NgENBID)?;
             Ok(match position {
                 0 => Self::macroNgENB_ID(reading.within(
                     "macroNgENB-ID",
@@ -56573,9 +54834,6 @@ pub mod ngap_ies {
     impl NoPDUSessionIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -56599,10 +54857,10 @@ pub mod ngap_ies {
     impl Tree for NoPDUSessionIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::NoPDUSessionIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::NoPDUSessionIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -56736,16 +54994,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "fiveQI",
-                    "priorityLevelQos",
-                    "averagingWindow",
-                    "maximumDataBurstVolume",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::NonDynamic5QIDescriptor)?;
             let five_qi = reading.member(&members, "fiveQI", FiveQI::from_tree)?;
             let priority_level_qos =
                 reading.optional(&members, "priorityLevelQos", PriorityLevelQos::from_tree)?;
@@ -56844,14 +55093,6 @@ pub mod ngap_ies {
             Self::not_fulfilled_DL,
             Self::not_fulfilled_UL,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 4] = [
-            "fulfilled",
-            "not-fulfilled",
-            "not-fulfilled-DL",
-            "not-fulfilled-UL",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -56875,10 +55116,10 @@ pub mod ngap_ies {
     impl Tree for NotificationCause {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::NotificationCause[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::NotificationCause)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -56896,9 +55137,6 @@ pub mod ngap_ies {
     impl NotificationCellItemNotifyFlag {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::activated, Self::deactivated];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["activated", "deactivated"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -56922,10 +55160,10 @@ pub mod ngap_ies {
     impl Tree for NotificationCellItemNotifyFlag {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::NotificationCellItemNotifyFlag[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::NotificationCellItemNotifyFlag)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -57009,7 +55247,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["nGRAN-CGI", "notifyFlag", "iE-Extensions"])?;
+            let members = reading.members(value, names::NotificationCellItem)?;
             let ngran_cgi = reading.member(&members, "nGRAN-CGI", NGRANCGI::from_tree)?;
             let notify_flag = reading.member(
                 &members,
@@ -57094,9 +55332,6 @@ pub mod ngap_ies {
     impl NotificationControl {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::notification_requested];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["notification-requested"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -57120,10 +55355,10 @@ pub mod ngap_ies {
     impl Tree for NotificationControl {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::NotificationControl[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::NotificationControl)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -57140,9 +55375,6 @@ pub mod ngap_ies {
     impl NotifySourceNGRANNode {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::notifySource];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["notifySource"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -57166,10 +55398,10 @@ pub mod ngap_ies {
     impl Tree for NotifySourceNGRANNode {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::NotifySourceNGRANNode[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::NotifySourceNGRANNode)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -57284,9 +55516,6 @@ pub mod ngap_ies {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 6] =
             [Self::n2, Self::n3, Self::n4, Self::n5, Self::n10, Self::n0];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 6] = ["n2", "n3", "n4", "n5", "n10", "n0"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -57310,10 +55539,10 @@ pub mod ngap_ies {
     impl Tree for NumberOfMeasurementReportingLevels {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::NumberOfMeasurementReportingLevels[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::NumberOfMeasurementReportingLevels)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -57330,9 +55559,6 @@ pub mod ngap_ies {
     impl OnboardingSupport {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -57356,10 +55582,10 @@ pub mod ngap_ies {
     impl Tree for OnboardingSupport {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::OnboardingSupport[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::OnboardingSupport)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -57384,14 +55610,6 @@ pub mod ngap_ies {
             Self::permit_emergency_sessions_and_mobile_terminated_services_only,
             Self::permit_high_priority_sessions_and_mobile_terminated_services_only,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 4] = [
-            "reject-non-emergency-mo-dt",
-            "reject-rrc-cr-signalling",
-            "permit-emergency-sessions-and-mobile-terminated-services-only",
-            "permit-high-priority-sessions-and-mobile-terminated-services-only",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -57415,10 +55633,10 @@ pub mod ngap_ies {
     impl Tree for OverloadAction {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::OverloadAction[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::OverloadAction)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -57479,8 +55697,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) =
-                reading.alternative(value, &["overloadAction", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::OverloadResponse)?;
             Ok(match position {
                 0 => Self::overloadAction(reading.within(
                     "overloadAction",
@@ -57615,15 +55832,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "sliceOverloadList",
-                    "sliceOverloadResponse",
-                    "sliceTrafficLoadReductionIndication",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::OverloadStartNSSAIItem)?;
             let slice_overload_list =
                 reading.member(&members, "sliceOverloadList", SliceOverloadList::from_tree)?;
             let slice_overload_response = reading.optional(
@@ -57786,14 +55995,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "guaranteedFlowBitRate",
-                    "maximumFlowBitRate",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PC5FlowBitRates)?;
             let guaranteed_flow_bit_rate =
                 reading.member(&members, "guaranteedFlowBitRate", BitRate::from_tree)?;
             let maximum_flow_bit_rate =
@@ -57914,8 +56116,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["pQI", "pc5FlowBitRates", "range", "iE-Extensions"])?;
+            let members = reading.members(value, names::PC5QoSFlowItem)?;
             let pqi = reading.member(&members, "pQI", FiveQI::from_tree)?;
             let pc5_flow_bit_rates =
                 reading.optional(&members, "pc5FlowBitRates", PC5FlowBitRates::from_tree)?;
@@ -58078,14 +56279,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pc5QoSFlowList",
-                    "pc5LinkAggregateBitRates",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PC5QoSParameters)?;
             let pc5_qos_flow_list =
                 reading.member(&members, "pc5QoSFlowList", PC5QoSFlowList::from_tree)?;
             let pc5_link_aggregate_bit_rates =
@@ -58242,14 +56436,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionAggregateMaximumBitRateDL",
-                    "pDUSessionAggregateMaximumBitRateUL",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionAggregateMaximumBitRate)?;
             let pdu_session_aggregate_maximum_bit_rate_dl = reading.member(
                 &members,
                 "pDUSessionAggregateMaximumBitRateDL",
@@ -58358,14 +56545,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pagingPolicyDifferentiationList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionForPagingItem)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let paging_policy_differentiation_list = reading.member(
@@ -58605,7 +56785,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pDUSessionID", "iE-Extensions"])?;
+            let members = reading.members(value, names::PDUSessionListMTCommHReqItem)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let ie_extensions = reading.optional(
@@ -58763,14 +56943,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "handoverRequestAcknowledgeTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceAdmittedItem)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let handover_request_acknowledge_transfer = reading.member(
@@ -58956,14 +57129,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pDUSessionResourceModifyIndicationUnsuccessfulTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members =
+                reading.members(value, names::PDUSessionResourceFailedToModifyItemModCfm)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let pdu_session_resource_modify_indication_unsuccessful_transfer = reading.member(
@@ -59088,14 +57255,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pDUSessionResourceModifyUnsuccessfulTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members =
+                reading.members(value, names::PDUSessionResourceFailedToModifyItemModRes)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let pdu_session_resource_modify_unsuccessful_transfer = reading.member(
@@ -59328,7 +57489,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pDUSessionID", "cause", "iE-Extensions"])?;
+            let members =
+                reading.members(value, names::PDUSessionResourceFailedToResumeItemRESReq)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let cause = reading.member(&members, "cause", Cause::from_tree)?;
@@ -59423,7 +57585,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pDUSessionID", "cause", "iE-Extensions"])?;
+            let members =
+                reading.members(value, names::PDUSessionResourceFailedToResumeItemRESRes)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let cause = reading.member(&members, "cause", Cause::from_tree)?;
@@ -59657,14 +57820,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pDUSessionResourceSetupUnsuccessfulTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members =
+                reading.members(value, names::PDUSessionResourceFailedToSetupItemCxtFail)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let pdu_session_resource_setup_unsuccessful_transfer = reading.member(
@@ -59786,14 +57943,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pDUSessionResourceSetupUnsuccessfulTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members =
+                reading.members(value, names::PDUSessionResourceFailedToSetupItemCxtRes)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let pdu_session_resource_setup_unsuccessful_transfer = reading.member(
@@ -59918,14 +58069,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "handoverResourceAllocationUnsuccessfulTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members =
+                reading.members(value, names::PDUSessionResourceFailedToSetupItemHOAck)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let handover_resource_allocation_unsuccessful_transfer = reading.member(
@@ -60047,14 +58192,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pathSwitchRequestSetupFailedTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members =
+                reading.members(value, names::PDUSessionResourceFailedToSetupItemPSReq)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let path_switch_request_setup_failed_transfer = reading.member(
@@ -60176,14 +58315,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pDUSessionResourceSetupUnsuccessfulTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members =
+                reading.members(value, names::PDUSessionResourceFailedToSetupItemSURes)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let pdu_session_resource_setup_unsuccessful_transfer = reading.member(
@@ -60633,10 +58766,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["pDUSessionID", "handoverCommandTransfer", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceHandoverItem)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let handover_command_transfer =
@@ -60825,15 +58955,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "qosFlowInformationList",
-                    "dRBsToQosFlowsMappingList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceInformationItem)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let qos_flow_information_list = reading.member(
@@ -60983,7 +59105,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pDUSessionID", "iE-Extensions"])?;
+            let members = reading.members(value, names::PDUSessionResourceItemCxtRelCpl)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let ie_extensions = reading.optional(
@@ -61069,7 +59191,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pDUSessionID", "iE-Extensions"])?;
+            let members = reading.members(value, names::PDUSessionResourceItemCxtRelReq)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let ie_extensions = reading.optional(
@@ -61178,10 +59300,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["pDUSessionID", "handoverRequiredTransfer", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceItemHORqd)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let handover_required_transfer =
@@ -61512,16 +59631,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "qosFlowModifyConfirmList",
-                    "uLNGU-UP-TNLInformation",
-                    "additionalNG-UUPTNLInformation",
-                    "qosFlowFailedToModifyList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceModifyConfirmTransfer)?;
             let qos_flow_modify_confirm_list = reading.member(
                 &members,
                 "qosFlowModifyConfirmList",
@@ -61666,14 +59776,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "dLQosFlowPerTNLInformation",
-                    "additionalDLQosFlowPerTNLInformation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members =
+                reading.members(value, names::PDUSessionResourceModifyIndicationTransfer)?;
             let dl_qos_flow_per_tnl_information = reading.member(
                 &members,
                 "dLQosFlowPerTNLInformation",
@@ -61765,7 +59869,10 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["cause", "iE-Extensions"])?;
+            let members = reading.members(
+                value,
+                names::PDUSessionResourceModifyIndicationUnsuccessfulTransfer,
+            )?;
             let cause = reading.member(&members, "cause", Cause::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -61880,14 +59987,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pDUSessionResourceModifyConfirmTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceModifyItemModCfm)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let pdu_session_resource_modify_confirm_transfer = reading.member(
@@ -62009,14 +60109,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pDUSessionResourceModifyIndicationTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceModifyItemModInd)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let pdu_session_resource_modify_indication_transfer = reading.member(
@@ -62156,15 +60249,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "nAS-PDU",
-                    "pDUSessionResourceModifyRequestTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceModifyItemModReq)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let nas_pdu = reading.optional(&members, "nAS-PDU", NASPDU::from_tree)?;
@@ -62288,14 +60373,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pDUSessionResourceModifyResponseTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceModifyItemModRes)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let pdu_session_resource_modify_response_transfer = reading.member(
@@ -62634,7 +60712,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::PDUSessionResourceModifyRequestTransfer)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -62840,17 +60918,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "dL-NGU-UP-TNLInformation",
-                    "uL-NGU-UP-TNLInformation",
-                    "qosFlowAddOrModifyResponseList",
-                    "additionalDLQosFlowPerTNLInformation",
-                    "qosFlowFailedToAddOrModifyList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members =
+                reading.members(value, names::PDUSessionResourceModifyResponseTransfer)?;
             let dl_ngu_up_tnl_information = reading.optional(
                 &members,
                 "dL-NGU-UP-TNLInformation",
@@ -62985,7 +61054,7 @@ pub mod ngap_ies {
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
             let members =
-                reading.members(value, &["cause", "criticalityDiagnostics", "iE-Extensions"])?;
+                reading.members(value, names::PDUSessionResourceModifyUnsuccessfulTransfer)?;
             let cause = reading.member(&members, "cause", Cause::from_tree)?;
             let criticality_diagnostics = reading.optional(
                 &members,
@@ -63106,14 +61175,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pDUSessionResourceNotifyTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceNotifyItem)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let pdu_session_resource_notify_transfer = reading.member(
@@ -63261,7 +61323,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["cause", "iE-Extensions"])?;
+            let members =
+                reading.members(value, names::PDUSessionResourceNotifyReleasedTransfer)?;
             let cause = reading.member(&members, "cause", Cause::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -63381,10 +61444,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["qosFlowNotifyList", "qosFlowReleasedList", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceNotifyTransfer)?;
             let qos_flow_notify_list =
                 reading.optional(&members, "qosFlowNotifyList", QosFlowNotifyList::from_tree)?;
             let qos_flow_released_list = reading.optional(
@@ -63473,7 +61533,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["cause", "iE-Extensions"])?;
+            let members =
+                reading.members(value, names::PDUSessionResourceReleaseCommandTransfer)?;
             let cause = reading.member(&members, "cause", Cause::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -63542,7 +61603,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["iE-Extensions"])?;
+            let members =
+                reading.members(value, names::PDUSessionResourceReleaseResponseTransfer)?;
             let ie_extensions = reading.optional(
                 &members,
                 "iE-Extensions",
@@ -63653,14 +61715,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pDUSessionResourceNotifyReleasedTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceReleasedItemNot)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let pdu_session_resource_notify_released_transfer = reading.member(
@@ -63782,14 +61837,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pathSwitchRequestUnsuccessfulTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceReleasedItemPSAck)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let path_switch_request_unsuccessful_transfer = reading.member(
@@ -63911,14 +61959,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pathSwitchRequestUnsuccessfulTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceReleasedItemPSFail)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let path_switch_request_unsuccessful_transfer = reading.member(
@@ -64040,14 +62081,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pDUSessionResourceReleaseResponseTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceReleasedItemRelRes)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let pdu_session_resource_release_response_transfer = reading.member(
@@ -64437,14 +62471,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "uEContextResumeRequestTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceResumeItemRESReq)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let ue_context_resume_request_transfer = reading.member(
@@ -64566,14 +62593,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "uEContextResumeResponseTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceResumeItemRESRes)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let ue_context_resume_response_transfer = reading.member(
@@ -64829,14 +62849,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "secondaryRATDataUsageReportTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceSecondaryRATUsageItem)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let secondary_rat_data_usage_report_transfer = reading.member(
@@ -65051,16 +63064,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "nAS-PDU",
-                    "s-NSSAI",
-                    "pDUSessionResourceSetupRequestTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceSetupItemCxtReq)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let nas_pdu = reading.optional(&members, "nAS-PDU", NASPDU::from_tree)?;
@@ -65186,14 +63190,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pDUSessionResourceSetupResponseTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceSetupItemCxtRes)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let pdu_session_resource_setup_response_transfer = reading.member(
@@ -65316,15 +63313,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "s-NSSAI",
-                    "handoverRequestTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceSetupItemHOReq)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let s_nssai = reading.member(&members, "s-NSSAI", SNSSAI::from_tree)?;
@@ -65493,16 +63482,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pDUSessionNAS-PDU",
-                    "s-NSSAI",
-                    "pDUSessionResourceSetupRequestTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceSetupItemSUReq)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let pdu_session_nas_pdu =
@@ -65629,14 +63609,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pDUSessionResourceSetupResponseTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceSetupItemSURes)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let pdu_session_resource_setup_response_transfer = reading.member(
@@ -66064,7 +64037,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::PDUSessionResourceSetupRequestTransfer)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -66223,16 +64196,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "dLQosFlowPerTNLInformation",
-                    "additionalDLQosFlowPerTNLInformation",
-                    "securityResult",
-                    "qosFlowFailedToSetupList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceSetupResponseTransfer)?;
             let dl_qos_flow_per_tnl_information = reading.member(
                 &members,
                 "dLQosFlowPerTNLInformation",
@@ -66358,7 +64322,7 @@ pub mod ngap_ies {
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
             let members =
-                reading.members(value, &["cause", "criticalityDiagnostics", "iE-Extensions"])?;
+                reading.members(value, names::PDUSessionResourceSetupUnsuccessfulTransfer)?;
             let cause = reading.member(&members, "cause", Cause::from_tree)?;
             let criticality_diagnostics = reading.optional(
                 &members,
@@ -66479,14 +64443,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "uEContextSuspendRequestTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceSuspendItemSUSReq)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let ue_context_suspend_request_transfer = reading.member(
@@ -66675,14 +64632,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pathSwitchRequestAcknowledgeTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceSwitchedItem)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let path_switch_request_acknowledge_transfer = reading.member(
@@ -66858,10 +64808,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["pDUSessionID", "pathSwitchRequestTransfer", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceToBeSwitchedDLItem)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let path_switch_request_transfer =
@@ -67049,14 +64996,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "handoverPreparationUnsuccessfulTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceToReleaseItemHOCmd)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let handover_preparation_unsuccessful_transfer = reading.member(
@@ -67178,14 +65118,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionID",
-                    "pDUSessionResourceReleaseCommandTransfer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUSessionResourceToReleaseItemRelCmd)?;
             let pdu_session_id =
                 reading.member(&members, "pDUSessionID", PDUSessionID::from_tree)?;
             let pdu_session_resource_release_command_transfer = reading.member(
@@ -67363,10 +65296,6 @@ pub mod ngap_ies {
             Self::ethernet,
             Self::unstructured,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 5] =
-            ["ipv4", "ipv6", "ipv4v6", "ethernet", "unstructured"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -67390,10 +65319,10 @@ pub mod ngap_ies {
     impl Tree for PDUSessionType {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::PDUSessionType[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::PDUSessionType)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -67418,10 +65347,6 @@ pub mod ngap_ies {
             Self::nr_unlicensed,
             Self::e_utra_unlicensed,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 4] =
-            ["nr", "eutra", "nr-unlicensed", "e-utra-unlicensed"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -67445,10 +65370,10 @@ pub mod ngap_ies {
     impl Tree for PDUSessionUsageReportRATType {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::PDUSessionUsageReportRATType[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::PDUSessionUsageReportRATType)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -67534,10 +65459,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["rATType", "pDUSessionTimedReportList", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::PDUSessionUsageReport)?;
             let rat_type =
                 reading.member(&members, "rATType", PDUSessionUsageReportRATType::from_tree)?;
             let pdu_session_timed_report_list = reading.member(
@@ -67571,9 +65493,6 @@ pub mod ngap_ies {
     impl PDUSetbasedHandlingIndicator {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::supported];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["supported"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -67597,10 +65516,10 @@ pub mod ngap_ies {
     impl Tree for PDUSetbasedHandlingIndicator {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::PDUSetbasedHandlingIndicator[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::PDUSetbasedHandlingIndicator)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -67618,9 +65537,6 @@ pub mod ngap_ies {
     impl PDUsetQoSInformationPduSetIntegratedHandlingInformation {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::R_true, Self::R_false];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["true", "false"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -67644,10 +65560,16 @@ pub mod ngap_ies {
     impl Tree for PDUsetQoSInformationPduSetIntegratedHandlingInformation {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(
+                names::PDUsetQoSInformationPduSetIntegratedHandlingInformation
+                    [self.index() as usize],
+            )
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(
+                value,
+                names::PDUsetQoSInformationPduSetIntegratedHandlingInformation,
+            )?])
         }
     }
     #[cfg(feature = "serde")]
@@ -67784,15 +65706,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pduSetDelayBudget",
-                    "pduSetErrorRate",
-                    "pduSetIntegratedHandlingInformation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUsetQoSInformation)?;
             let pdu_set_delay_budget = reading.optional(
                 &members,
                 "pduSetDelayBudget",
@@ -67928,14 +65842,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "ulPDUSetQoSInformation",
-                    "dlPDUSetQoSInformation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PDUsetQoSParameters)?;
             let ul_pdu_set_qos_information = reading.optional(
                 &members,
                 "ulPDUSetQoSInformation",
@@ -68030,7 +65937,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["cNsubgroupID", "iE-Extensions"])?;
+            let members = reading.members(value, names::PEIPSassistanceInformation)?;
             let cn_subgroup_id =
                 reading.member(&members, "cNsubgroupID", CNsubgroupID::from_tree)?;
             let ie_extensions = reading.optional(
@@ -68116,7 +66023,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["plmnListforQMC", "iE-Extensions"])?;
+            let members = reading.members(value, names::PLMNAreaBasedQMC)?;
             let plmn_listfor_qmc =
                 reading.member(&members, "plmnListforQMC", PLMNListforQMC::from_tree)?;
             let ie_extensions = reading.optional(
@@ -68336,10 +66243,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["pLMNIdentity", "sliceSupportList", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::PLMNSupportItem)?;
             let plmn_identity =
                 reading.member(&members, "pLMNIdentity", PLMNIdentity::from_tree)?;
             let slice_support_list =
@@ -68480,7 +66384,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["cAGListforMDT", "iE-Extensions"])?;
+            let members = reading.members(value, names::PNINPNAreaScopeofMDT)?;
             let cag_listfor_mdt =
                 reading.member(&members, "cAGListforMDT", CAGListforMDT::from_tree)?;
             let ie_extensions = reading.optional(
@@ -68566,7 +66470,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["allowed-PNI-NPI-List", "iE-Extensions"])?;
+            let members = reading.members(value, names::PNINPNMobilityInformation)?;
             let allowed_pni_npi_list = reading.member(
                 &members,
                 "allowed-PNI-NPI-List",
@@ -68655,7 +66559,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["cAGListforMDT", "iE-Extensions"])?;
+            let members = reading.members(value, names::PNINPNBasedMDT)?;
             let cag_listfor_mdt =
                 reading.member(&members, "cAGListforMDT", CAGListforMDT::from_tree)?;
             let ie_extensions = reading.optional(
@@ -68741,14 +66645,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "eUTRA-CGI-PWSFailedList",
-                    "nR-CGI-PWSFailedList",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::PWSFailedCellIDList)?;
             Ok(match position {
                 0 => Self::eUTRA_CGI_PWSFailedList(reading.within(
                     "eUTRA-CGI-PWSFailedList",
@@ -68894,7 +66791,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pERScalar", "pERExponent", "iE-Extensions"])?;
+            let members = reading.members(value, names::PacketErrorRate)?;
             let per_scalar = reading.member(&members, "pERScalar", |value, reading| {
                 reading.unsigned(value, u64::MIN, u64::MAX)
             })?;
@@ -69048,10 +66945,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["eUTRA-CGI", "coverageEnhancementLevel", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::PagingAssisDataforCEcapabUE)?;
             let eutra_cgi = reading.member(&members, "eUTRA-CGI", EUTRACGI::from_tree)?;
             let coverage_enhancement_level = reading.member(
                 &members,
@@ -69221,15 +67115,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pagingAttemptCount",
-                    "intendedNumberOfPagingAttempts",
-                    "nextPagingAreaScope",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PagingAttemptInformation)?;
             let paging_attempt_count = reading.member(
                 &members,
                 "pagingAttemptCount",
@@ -69272,9 +67158,6 @@ pub mod ngap_ies {
     impl PagingCause {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::voice];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["voice"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -69298,10 +67181,10 @@ pub mod ngap_ies {
     impl Tree for PagingCause {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::PagingCause[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::PagingCause)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -69318,9 +67201,6 @@ pub mod ngap_ies {
     impl PagingCauseIndicationForVoiceService {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::supported];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["supported"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -69344,10 +67224,10 @@ pub mod ngap_ies {
     impl Tree for PagingCauseIndicationForVoiceService {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::PagingCauseIndicationForVoiceService[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::PagingCauseIndicationForVoiceService)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -69367,9 +67247,6 @@ pub mod ngap_ies {
     impl PagingDRX {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 4] = [Self::v32, Self::v64, Self::v128, Self::v256];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 4] = ["v32", "v64", "v128", "v256"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -69393,10 +67270,10 @@ pub mod ngap_ies {
     impl Tree for PagingDRX {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::PagingDRX[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::PagingDRX)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -69413,9 +67290,6 @@ pub mod ngap_ies {
     impl PagingOrigin {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::non_3gpp];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["non-3gpp"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -69439,10 +67313,10 @@ pub mod ngap_ies {
     impl Tree for PagingOrigin {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::PagingOrigin[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::PagingOrigin)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -69520,7 +67394,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pDUSessionForPagingList", "iE-Extensions"])?;
+            let members = reading.members(value, names::PagingPolicyDifferentiation)?;
             let pdu_session_for_paging_list = reading.member(
                 &members,
                 "pDUSessionForPagingList",
@@ -69707,17 +67581,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "qosFlowIdentifier",
-                    "pagingPolicyIndicator",
-                    "allocationAndRetentionPriority",
-                    "fiveQI",
-                    "dl-DataSize",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PagingPolicyDifferentiationItem)?;
             let qos_flow_identifier =
                 reading.optional(&members, "qosFlowIdentifier", QosFlowIdentifier::from_tree)?;
             let paging_policy_indicator = reading.optional(
@@ -69873,18 +67737,6 @@ pub mod ngap_ies {
             Self::priolevel7,
             Self::priolevel8,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 8] = [
-            "priolevel1",
-            "priolevel2",
-            "priolevel3",
-            "priolevel4",
-            "priolevel5",
-            "priolevel6",
-            "priolevel7",
-            "priolevel8",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -69908,10 +67760,10 @@ pub mod ngap_ies {
     impl Tree for PagingPriority {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::PagingPriority[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::PagingPriority)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -69970,12 +67822,6 @@ pub mod ngap_ies {
             Self::p95,
             Self::p100,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 21] = [
-            "p00", "p05", "p10", "p15", "p20", "p25", "p30", "p35", "p40", "p45", "p50", "p55",
-            "p60", "p65", "p70", "p75", "p80", "p85", "p90", "p95", "p100",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -69999,10 +67845,10 @@ pub mod ngap_ies {
     impl Tree for PagingProbabilityInformation {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::PagingProbabilityInformation[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::PagingProbabilityInformation)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -70037,19 +67883,6 @@ pub mod ngap_ies {
             Self::handset,
             Self::other,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 9] = [
-            "synce",
-            "ptp",
-            "gnss",
-            "atomicclock",
-            "terrestrialradio",
-            "serialtimecode",
-            "ntp",
-            "handset",
-            "other",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -70073,10 +67906,10 @@ pub mod ngap_ies {
     impl Tree for ParentTImeSource {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ParentTImeSource[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ParentTImeSource)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -70200,7 +68033,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["s-NSSAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::PartiallyAllowedNSSAIItem)?;
             let s_nssai = reading.member(&members, "s-NSSAI", SNSSAI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -70331,14 +68164,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "uL-NGU-UP-TNLInformation",
-                    "securityIndication",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PathSwitchRequestAcknowledgeTransfer)?;
             let ul_ngu_up_tnl_information = reading.optional(
                 &members,
                 "uL-NGU-UP-TNLInformation",
@@ -70430,7 +68256,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["cause", "iE-Extensions"])?;
+            let members = reading.members(value, names::PathSwitchRequestSetupFailedTransfer)?;
             let cause = reading.member(&members, "cause", Cause::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -70587,16 +68413,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "dL-NGU-UP-TNLInformation",
-                    "dL-NGU-TNLInformationReused",
-                    "userPlaneSecurityInformation",
-                    "qosFlowAcceptedList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PathSwitchRequestTransfer)?;
             let dl_ngu_up_tnl_information = reading.member(
                 &members,
                 "dL-NGU-UP-TNLInformation",
@@ -70700,7 +68517,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["cause", "iE-Extensions"])?;
+            let members = reading.members(value, names::PathSwitchRequestUnsuccessfulTransfer)?;
             let cause = reading.member(&members, "cause", Cause::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -70728,9 +68545,6 @@ pub mod ngap_ies {
     impl PedestrianUE {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -70754,10 +68568,10 @@ pub mod ngap_ies {
     impl Tree for PedestrianUE {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::PedestrianUE[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::PedestrianUE)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -70884,7 +68698,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["reportingPeriodicity", "iE-Extensions"])?;
+            let members = reading.members(value, names::PeriodicReportingIEs)?;
             let reporting_periodicity = reading.member(
                 &members,
                 "reportingPeriodicity",
@@ -71031,14 +68845,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "periodicityLowerBound",
-                    "periodicityUpperBound",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::PeriodicityBound)?;
             let periodicity_lower_bound =
                 reading.member(&members, "periodicityLowerBound", Periodicity::from_tree)?;
             let periodicity_upper_bound =
@@ -71130,7 +68937,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["allowedPeriodicityList", "iE-Extensions"])?;
+            let members = reading.members(value, names::PeriodicityList)?;
             let allowed_periodicity_list = reading.member(
                 &members,
                 "allowedPeriodicityList",
@@ -71232,10 +69039,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &["periodicityBound", "periodicityList", "choice-extensions"],
-            )?;
+            let (position, value) = reading.alternative(value, names::PeriodicityRange)?;
             Ok(match position {
                 0 => Self::periodicityBound(reading.within(
                     "periodicityBound",
@@ -71329,10 +69133,6 @@ pub mod ngap_ies {
             Self::shall_not_trigger_pre_emption,
             Self::may_trigger_pre_emption,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] =
-            ["shall-not-trigger-pre-emption", "may-trigger-pre-emption"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -71356,10 +69156,10 @@ pub mod ngap_ies {
     impl Tree for PreEmptionCapability {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::PreEmptionCapability[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::PreEmptionCapability)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -71377,9 +69177,6 @@ pub mod ngap_ies {
     impl PreEmptionVulnerability {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::not_pre_emptable, Self::pre_emptable];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["not-pre-emptable", "pre-emptable"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -71403,10 +69200,10 @@ pub mod ngap_ies {
     impl Tree for PreEmptionVulnerability {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::PreEmptionVulnerability[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::PreEmptionVulnerability)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -71510,9 +69307,6 @@ pub mod ngap_ies {
     impl PrivacyIndicator {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::immediate_MDT, Self::logged_MDT];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["immediate-MDT", "logged-MDT"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -71536,10 +69330,10 @@ pub mod ngap_ies {
     impl Tree for PrivacyIndicator {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::PrivacyIndicator[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::PrivacyIndicator)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -71610,8 +69404,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) =
-                reading.alternative(value, &["first-dl-count", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::ProcedureStageChoice)?;
             Ok(match position {
                 0 => Self::first_dl_count(reading.within(
                     "first-dl-count",
@@ -71709,7 +69502,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["uEAppLayerMeasInfoList", "iE-Extensions"])?;
+            let members = reading.members(value, names::QMCConfigInfo)?;
             let ue_app_layer_meas_info_list = reading.member(
                 &members,
                 "uEAppLayerMeasInfoList",
@@ -71798,7 +69591,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["qoEReferenceList", "iE-Extensions"])?;
+            let members = reading.members(value, names::QMCDeactivation)?;
             let qoe_reference_list =
                 reading.member(&members, "qoEReferenceList", QoEReferenceList::from_tree)?;
             let ie_extensions = reading.optional(
@@ -71827,9 +69620,6 @@ pub mod ngap_ies {
     impl QoERVQoEReportingPathsQoEReportingPath {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::srb4, Self::srb5];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["srb4", "srb5"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -71853,10 +69643,13 @@ pub mod ngap_ies {
     impl Tree for QoERVQoEReportingPathsQoEReportingPath {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::QoERVQoEReportingPathsQoEReportingPath[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(
+                Self::VALUES
+                    [reading.named(value, names::QoERVQoEReportingPathsQoEReportingPath)?],
+            )
         }
     }
     #[cfg(feature = "serde")]
@@ -71874,9 +69667,6 @@ pub mod ngap_ies {
     impl QoERVQoEReportingPathsRVQoEReportingPath {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::srb4, Self::srb5];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["srb4", "srb5"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -71900,10 +69690,11 @@ pub mod ngap_ies {
     impl Tree for QoERVQoEReportingPathsRVQoEReportingPath {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::QoERVQoEReportingPathsRVQoEReportingPath[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES
+                [reading.named(value, names::QoERVQoEReportingPathsRVQoEReportingPath)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -72016,10 +69807,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["qoEReportingPath", "rVQoEReportingPath", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::QoERVQoEReportingPaths)?;
             let qoe_reporting_path = reading.optional(
                 &members,
                 "qoEReportingPath",
@@ -72321,15 +70109,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "qosFlowIdentifier",
-                    "tSCTrafficCharacteristicsFeedback",
-                    "aNPacketDelayBudgetUL",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::QoSFlowTSCItem)?;
             let qos_flow_identifier =
                 reading.member(&members, "qosFlowIdentifier", QosFlowIdentifier::from_tree)?;
             let tsc_traffic_characteristics_feedback = reading.optional(
@@ -72429,10 +70209,6 @@ pub mod ngap_ies {
             Self::nr_unlicensed,
             Self::e_utra_unlicensed,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 4] =
-            ["nr", "eutra", "nr-unlicensed", "e-utra-unlicensed"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -72456,10 +70232,10 @@ pub mod ngap_ies {
     impl Tree for QoSFlowsUsageReportItemRATType {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::QoSFlowsUsageReportItemRATType[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::QoSFlowsUsageReportItemRATType)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -72555,15 +70331,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "qosFlowIdentifier",
-                    "rATType",
-                    "qoSFlowsTimedReportList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::QoSFlowsUsageReportItem)?;
             let qos_flow_identifier =
                 reading.member(&members, "qosFlowIdentifier", QosFlowIdentifier::from_tree)?;
             let rat_type = reading.member(
@@ -72709,8 +70477,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading
-                .alternative(value, &["nonDynamic5QI", "dynamic5QI", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::QosCharacteristics)?;
             Ok(match position {
                 0 => Self::nonDynamic5QI(reading.within(
                     "nonDynamic5QI",
@@ -72802,7 +70569,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["qosFlowIdentifier", "iE-Extensions"])?;
+            let members = reading.members(value, names::QosFlowAcceptedItem)?;
             let qos_flow_identifier =
                 reading.member(&members, "qosFlowIdentifier", QosFlowIdentifier::from_tree)?;
             let ie_extensions = reading.optional(
@@ -72981,15 +70748,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "qosFlowIdentifier",
-                    "qosFlowLevelQosParameters",
-                    "e-RAB-ID",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::QosFlowAddOrModifyRequestItem)?;
             let qos_flow_identifier =
                 reading.member(&members, "qosFlowIdentifier", QosFlowIdentifier::from_tree)?;
             let qos_flow_level_qos_parameters = reading.optional(
@@ -73135,7 +70894,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["qosFlowIdentifier", "iE-Extensions"])?;
+            let members = reading.members(value, names::QosFlowAddOrModifyResponseItem)?;
             let qos_flow_identifier =
                 reading.member(&members, "qosFlowIdentifier", QosFlowIdentifier::from_tree)?;
             let ie_extensions = reading.optional(
@@ -73303,10 +71062,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["qosFlowIdentifier", "downlinkTLContainer", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::QosFlowAdditionalInfoItemRelCom)?;
             let qos_flow_identifier =
                 reading.member(&members, "qosFlowIdentifier", QosFlowIdentifier::from_tree)?;
             let downlink_tl_container =
@@ -73425,10 +71181,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["qosFlowIdentifier", "uplinkTLContainer", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::QosFlowAdditionalInfoItemRelRes)?;
             let qos_flow_identifier =
                 reading.member(&members, "qosFlowIdentifier", QosFlowIdentifier::from_tree)?;
             let uplink_tl_container =
@@ -73715,16 +71468,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "qosFlowIdentifier",
-                    "updateFeedback",
-                    "cNpacketDelayBudgetDL",
-                    "cNpacketDelayBudgetUL",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::QosFlowFeedbackItem)?;
             let qos_flow_identifier =
                 reading.member(&members, "qosFlowIdentifier", QosFlowIdentifier::from_tree)?;
             let update_feedback =
@@ -73943,10 +71687,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["qosFlowIdentifier", "dLForwarding", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::QosFlowInformationItem)?;
             let qos_flow_identifier =
                 reading.member(&members, "qosFlowIdentifier", QosFlowIdentifier::from_tree)?;
             let dl_forwarding =
@@ -74111,14 +71852,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "qosFlowIdentifier",
-                    "dataForwardingAccepted",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::QosFlowItemWithDataForwarding)?;
             let qos_flow_identifier =
                 reading.member(&members, "qosFlowIdentifier", QosFlowIdentifier::from_tree)?;
             let data_forwarding_accepted = reading.optional(
@@ -74292,17 +72026,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "qosCharacteristics",
-                    "allocationAndRetentionPriority",
-                    "gBR-QosInformation",
-                    "reflectiveQosAttribute",
-                    "additionalQosFlowInformation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::QosFlowLevelQosParameters)?;
             let qos_characteristics = reading.member(
                 &members,
                 "qosCharacteristics",
@@ -74516,7 +72240,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["qosFlowIdentifier", "iE-Extensions"])?;
+            let members = reading.members(value, names::QosFlowModifyConfirmItem)?;
             let qos_flow_identifier =
                 reading.member(&members, "qosFlowIdentifier", QosFlowIdentifier::from_tree)?;
             let ie_extensions = reading.optional(
@@ -74664,10 +72388,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["qosFlowIdentifier", "notificationCause", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::QosFlowNotifyItem)?;
             let qos_flow_identifier =
                 reading.member(&members, "qosFlowIdentifier", QosFlowIdentifier::from_tree)?;
             let notification_cause =
@@ -74832,14 +72553,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "qosFlowIdentifier",
-                    "alternativeQoSParaSetList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::QosFlowParametersItem)?;
             let qos_flow_identifier =
                 reading.member(&members, "qosFlowIdentifier", QosFlowIdentifier::from_tree)?;
             let alternative_qos_para_set_list = reading.optional(
@@ -75008,14 +72722,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "uPTransportLayerInformation",
-                    "associatedQosFlowList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::QosFlowPerTNLInformation)?;
             let up_transport_layer_information = reading.member(
                 &members,
                 "uPTransportLayerInformation",
@@ -75121,7 +72828,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["qosFlowPerTNLInformation", "iE-Extensions"])?;
+            let members = reading.members(value, names::QosFlowPerTNLInformationItem)?;
             let qos_flow_per_tnl_information = reading.member(
                 &members,
                 "qosFlowPerTNLInformation",
@@ -75299,15 +73006,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "qosFlowIdentifier",
-                    "qosFlowLevelQosParameters",
-                    "e-RAB-ID",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::QosFlowSetupRequestItem)?;
             let qos_flow_identifier =
                 reading.member(&members, "qosFlowIdentifier", QosFlowIdentifier::from_tree)?;
             let qos_flow_level_qos_parameters = reading.member(
@@ -75453,7 +73152,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["qosFlowIdentifier", "iE-Extensions"])?;
+            let members = reading.members(value, names::QosFlowToBeForwardedItem)?;
             let qos_flow_identifier =
                 reading.member(&members, "qosFlowIdentifier", QosFlowIdentifier::from_tree)?;
             let ie_extensions = reading.optional(
@@ -75598,8 +73297,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["qosFlowIdentifier", "cause", "iE-Extensions"])?;
+            let members = reading.members(value, names::QosFlowWithCauseItem)?;
             let qos_flow_identifier =
                 reading.member(&members, "qosFlowIdentifier", QosFlowIdentifier::from_tree)?;
             let cause = reading.member(&members, "cause", Cause::from_tree)?;
@@ -75674,9 +73372,6 @@ pub mod ngap_ies {
     impl QosMonitoringRequest {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 4] = [Self::ul, Self::dl, Self::both, Self::stop];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 4] = ["ul", "dl", "both", "stop"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -75700,10 +73395,10 @@ pub mod ngap_ies {
     impl Tree for QosMonitoringRequest {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::QosMonitoringRequest[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::QosMonitoringRequest)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -75767,9 +73462,6 @@ pub mod ngap_ies {
     impl RANTSSRequestType {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::start, Self::stop];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["start", "stop"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -75793,10 +73485,10 @@ pub mod ngap_ies {
     impl Tree for RANTSSRequestType {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::RANTSSRequestType[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::RANTSSRequestType)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -75867,10 +73559,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &["rANNodeLevel", "cellListLevel", "choice-Extensions"],
-            )?;
+            let (position, value) = reading.alternative(value, names::RANTSSScope)?;
             Ok(match position {
                 0 => Self::rANNodeLevel(reading.within(
                     "rANNodeLevel",
@@ -76260,8 +73949,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["dRBsSubjectToStatusTransferList", "iE-Extensions"])?;
+            let members = reading.members(value, names::RANStatusTransferTransparentContainer)?;
             let drbs_subject_to_status_transfer_list = reading.member(
                 &members,
                 "dRBsSubjectToStatusTransferList",
@@ -76347,7 +74035,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["nRCGI", "iE-Extensions"])?;
+            let members = reading.members(value, names::RANTSSCellItem)?;
             let nr_cgi = reading.member(&members, "nRCGI", NRCGI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -76428,9 +74116,6 @@ pub mod ngap_ies {
     impl RANTimingSynchronisationStatusInfoSynchronisationState {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 3] = [Self::locked, Self::holdover, Self::freerun];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 3] = ["locked", "holdover", "freerun"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -76454,10 +74139,16 @@ pub mod ngap_ies {
     impl Tree for RANTimingSynchronisationStatusInfoSynchronisationState {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(
+                names::RANTimingSynchronisationStatusInfoSynchronisationState
+                    [self.index() as usize],
+            )
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(
+                value,
+                names::RANTimingSynchronisationStatusInfoSynchronisationState,
+            )?])
         }
     }
     #[cfg(feature = "serde")]
@@ -76475,9 +74166,6 @@ pub mod ngap_ies {
     impl RANTimingSynchronisationStatusInfoTraceabletoUTC {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::R_true, Self::R_false];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["true", "false"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -76501,10 +74189,15 @@ pub mod ngap_ies {
     impl Tree for RANTimingSynchronisationStatusInfoTraceabletoUTC {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(
+                names::RANTimingSynchronisationStatusInfoTraceabletoUTC[self.index() as usize],
+            )
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(
+                value,
+                names::RANTimingSynchronisationStatusInfoTraceabletoUTC,
+            )?])
         }
     }
     #[cfg(feature = "serde")]
@@ -76522,9 +74215,6 @@ pub mod ngap_ies {
     impl RANTimingSynchronisationStatusInfoTraceabletoGNSS {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::R_true, Self::R_false];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["true", "false"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -76548,10 +74238,15 @@ pub mod ngap_ies {
     impl Tree for RANTimingSynchronisationStatusInfoTraceabletoGNSS {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(
+                names::RANTimingSynchronisationStatusInfoTraceabletoGNSS[self.index() as usize],
+            )
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(
+                value,
+                names::RANTimingSynchronisationStatusInfoTraceabletoGNSS,
+            )?])
         }
     }
     #[cfg(feature = "serde")]
@@ -76743,18 +74438,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "synchronisationState",
-                    "traceabletoUTC",
-                    "traceabletoGNSS",
-                    "clockFrequencyStability",
-                    "clockAccuracy",
-                    "parentTImeSource",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::RANTimingSynchronisationStatusInfo)?;
             let synchronisation_state = reading.optional(
                 &members,
                 "synchronisationState",
@@ -76875,8 +74559,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) =
-                reading.alternative(value, &["proactive", "reactive", "choice-extensions"])?;
+            let (position, value) = reading.alternative(value, names::RANfeedbacktype)?;
             Ok(match position {
                 0 => Self::proactive(reading.within(
                     "proactive",
@@ -76995,10 +74678,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["burstArrivalTimeWindow", "periodicityRange", "iE-Extension"],
-            )?;
+            let members = reading.members(value, names::RANfeedbacktypeProactive)?;
             let burst_arrival_time_window = reading.member(
                 &members,
                 "burstArrivalTimeWindow",
@@ -77032,9 +74712,6 @@ pub mod ngap_ies {
     impl RANfeedbacktypeReactiveCapabilityForBATAdaptation {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -77058,10 +74735,15 @@ pub mod ngap_ies {
     impl Tree for RANfeedbacktypeReactiveCapabilityForBATAdaptation {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(
+                names::RANfeedbacktypeReactiveCapabilityForBATAdaptation[self.index() as usize],
+            )
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(
+                value,
+                names::RANfeedbacktypeReactiveCapabilityForBATAdaptation,
+            )?])
         }
     }
     #[cfg(feature = "serde")]
@@ -77144,8 +74826,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["capabilityForBATAdaptation", "iE-Extension"])?;
+            let members = reading.members(value, names::RANfeedbacktypeReactive)?;
             let capability_for_bat_adaptation = reading.member(
                 &members,
                 "capabilityForBATAdaptation",
@@ -77188,16 +74869,6 @@ pub mod ngap_ies {
             Self::nR_GEO,
             Self::nR_OTHERSAT,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 6] = [
-            "unlicensed",
-            "nb-IoT",
-            "nR-LEO",
-            "nR-MEO",
-            "nR-GEO",
-            "nR-OTHERSAT",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -77221,10 +74892,10 @@ pub mod ngap_ies {
     impl Tree for RATInformation {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::RATInformation[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::RATInformation)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -77429,10 +75100,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["pLMNIdentity", "rATRestrictionInformation", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::RATRestrictionsItem)?;
             let plmn_identity =
                 reading.member(&members, "pLMNIdentity", PLMNIdentity::from_tree)?;
             let rat_restriction_information = reading.member(
@@ -77527,9 +75195,6 @@ pub mod ngap_ies {
     impl RIMInformationRIMRSDetection {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::rs_detected, Self::rs_disappeared];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["rs-detected", "rs-disappeared"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -77553,10 +75218,10 @@ pub mod ngap_ies {
     impl Tree for RIMInformationRIMRSDetection {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::RIMInformationRIMRSDetection[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::RIMInformationRIMRSDetection)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -77641,10 +75306,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["targetgNBSetID", "rIM-RSDetection", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::RIMInformation)?;
             let target_gnb_set_id =
                 reading.member(&members, "targetgNBSetID", GNBSetID::from_tree)?;
             let rim_rs_detection = reading.member(
@@ -77756,15 +75418,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "targetRANNodeID-RIM",
-                    "sourceRANNodeID",
-                    "rIMInformation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::RIMInformationTransfer)?;
             let target_ran_node_id_rim = reading.member(
                 &members,
                 "targetRANNodeID-RIM",
@@ -77931,22 +75585,6 @@ pub mod ngap_ies {
             Self::notAvailable,
             Self::mo_ExceptionData,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 12] = [
-            "emergency",
-            "highPriorityAccess",
-            "mt-Access",
-            "mo-Signalling",
-            "mo-Data",
-            "mo-VoiceCall",
-            "mo-VideoCall",
-            "mo-SMS",
-            "mps-PriorityAccess",
-            "mcs-PriorityAccess",
-            "notAvailable",
-            "mo-ExceptionData",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -77970,10 +75608,10 @@ pub mod ngap_ies {
     impl Tree for RRCEstablishmentCause {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::RRCEstablishmentCause[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::RRCEstablishmentCause)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -77995,13 +75633,6 @@ pub mod ngap_ies {
             Self::subsequent_state_transition_report,
             Self::single_rrc_connected_state_report,
             Self::cancel_report,
-        ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 3] = [
-            "subsequent-state-transition-report",
-            "single-rrc-connected-state-report",
-            "cancel-report",
         ];
         /// The index of the value in PER.
         #[inline]
@@ -78026,10 +75657,10 @@ pub mod ngap_ies {
     impl Tree for RRCInactiveTransitionReportRequest {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::RRCInactiveTransitionReportRequest[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::RRCInactiveTransitionReportRequest)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -78047,9 +75678,6 @@ pub mod ngap_ies {
     impl RRCState {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::inactive, Self::connected];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["inactive", "connected"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -78073,10 +75701,10 @@ pub mod ngap_ies {
     impl Tree for RRCState {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::RRCState[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::RRCState)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -78094,9 +75722,6 @@ pub mod ngap_ies {
     impl RSN {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::v1, Self::v2];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["v1", "v2"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -78120,10 +75745,10 @@ pub mod ngap_ies {
     impl Tree for RSN {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::RSN[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::RSN)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -78211,14 +75836,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "guaranteedFlowBitRate",
-                    "maximumFlowBitRate",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::RSPPFlowBitRates)?;
             let guaranteed_flow_bit_rate =
                 reading.member(&members, "guaranteedFlowBitRate", BitRate::from_tree)?;
             let maximum_flow_bit_rate =
@@ -78339,10 +75957,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["pQI", "rSPPFlowBitRates", "range", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::RSPPQoSFlowItem)?;
             let pqi = reading.member(&members, "pQI", FiveQI::from_tree)?;
             let rspp_flow_bit_rates =
                 reading.optional(&members, "rSPPFlowBitRates", RSPPFlowBitRates::from_tree)?;
@@ -78444,11 +76059,6 @@ pub mod ngap_ies {
             Self::m700,
             Self::m1000,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 9] = [
-            "m50", "m80", "m180", "m200", "m350", "m400", "m500", "m700", "m1000",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -78472,10 +76082,10 @@ pub mod ngap_ies {
     impl Tree for Range {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::Range[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::Range)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -78574,8 +76184,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["nGRAN-CGI", "timeStayedInCell", "iE-Extensions"])?;
+            let members = reading.members(value, names::RecommendedCellItem)?;
             let ngran_cgi = reading.member(&members, "nGRAN-CGI", NGRANCGI::from_tree)?;
             let time_stayed_in_cell =
                 reading.optional(&members, "timeStayedInCell", |value, reading| {
@@ -78717,7 +76326,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["recommendedCellList", "iE-Extensions"])?;
+            let members = reading.members(value, names::RecommendedCellsForPaging)?;
             let recommended_cell_list = reading.member(
                 &members,
                 "recommendedCellList",
@@ -78806,7 +76415,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["aMFPagingTarget", "iE-Extensions"])?;
+            let members = reading.members(value, names::RecommendedRANNodeItem)?;
             let amf_paging_target =
                 reading.member(&members, "aMFPagingTarget", AMFPagingTarget::from_tree)?;
             let ie_extensions = reading.optional(
@@ -78947,7 +76556,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["recommendedRANNodeList", "iE-Extensions"])?;
+            let members = reading.members(value, names::RecommendedRANNodesForPaging)?;
             let recommended_ran_node_list = reading.member(
                 &members,
                 "recommendedRANNodeList",
@@ -78978,9 +76587,6 @@ pub mod ngap_ies {
     impl RedCapIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::redcap];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["redcap"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -79004,10 +76610,10 @@ pub mod ngap_ies {
     impl Tree for RedCapIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::RedCapIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::RedCapIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -79025,9 +76631,6 @@ pub mod ngap_ies {
     impl RedirectionVoiceFallback {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::possible, Self::not_possible];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["possible", "not-possible"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -79051,10 +76654,10 @@ pub mod ngap_ies {
     impl Tree for RedirectionVoiceFallback {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::RedirectionVoiceFallback[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::RedirectionVoiceFallback)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -79117,7 +76720,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["rSN", "iE-Extensions"])?;
+            let members = reading.members(value, names::RedundantPDUSessionInformation)?;
             let rsn = reading.member(&members, "rSN", RSN::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -79141,9 +76744,6 @@ pub mod ngap_ies {
     impl RedundantQosFlowIndicator {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::R_true, Self::R_false];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["true", "false"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -79167,10 +76767,10 @@ pub mod ngap_ies {
     impl Tree for RedundantQosFlowIndicator {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::RedundantQosFlowIndicator[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::RedundantQosFlowIndicator)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -79187,9 +76787,6 @@ pub mod ngap_ies {
     impl ReflectiveQosAttribute {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::subject_to];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["subject-to"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -79213,10 +76810,10 @@ pub mod ngap_ies {
     impl Tree for ReflectiveQosAttribute {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ReflectiveQosAttribute[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ReflectiveQosAttribute)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -79448,10 +77045,6 @@ pub mod ngap_ies {
             Self::r64,
             Self::rinfinity,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 8] =
-            ["r1", "r2", "r4", "r8", "r16", "r32", "r64", "rinfinity"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -79475,10 +77068,10 @@ pub mod ngap_ies {
     impl Tree for ReportAmountMDT {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ReportAmountMDT[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ReportAmountMDT)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -79495,9 +77088,6 @@ pub mod ngap_ies {
     impl ReportArea {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::cell];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["cell"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -79521,10 +77111,10 @@ pub mod ngap_ies {
     impl Tree for ReportArea {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ReportArea[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ReportArea)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -79618,12 +77208,6 @@ pub mod ngap_ies {
             Self::min30,
             Self::min60,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 13] = [
-            "ms120", "ms240", "ms480", "ms640", "ms1024", "ms2048", "ms5120", "ms10240", "min1",
-            "min6", "min12", "min30", "min60",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -79647,10 +77231,10 @@ pub mod ngap_ies {
     impl Tree for ReportIntervalMDT {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ReportIntervalMDT[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ReportIntervalMDT)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -79725,14 +77309,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "eventBasedReporting",
-                    "periodicReporting",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::ReportType)?;
             Ok(match position {
                 0 => Self::eventBasedReporting(reading.within(
                     "eventBasedReporting",
@@ -79778,10 +77355,6 @@ pub mod ngap_ies {
             Self::ms5000,
             Self::ms10000,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 6] =
-            ["stop", "single", "ms1000", "ms2000", "ms5000", "ms10000"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -79805,10 +77378,10 @@ pub mod ngap_ies {
     impl Tree for ReportingPeriodicity {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ReportingPeriodicity[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ReportingPeriodicity)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -79890,10 +77463,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &["eUTRAN", "nGRAN", "noReporting", "choice-Extensions"],
-            )?;
+            let (position, value) = reading.alternative(value, names::ReportingSystem)?;
             Ok(match position {
                 0 => Self::eUTRAN(reading.within(
                     "eUTRAN",
@@ -80081,7 +77651,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["s-NSSAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::RequestedNSSAIItem)?;
             let s_nssai = reading.member(&members, "s-NSSAI", SNSSAI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -80165,7 +77735,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pLMNIdentity", "iE-Extensions"])?;
+            let members = reading.members(value, names::RequestedTNLInfo)?;
             let plmn_identity =
                 reading.member(&members, "pLMNIdentity", PLMNIdentity::from_tree)?;
             let ie_extensions = reading.optional(
@@ -80193,9 +77763,6 @@ pub mod ngap_ies {
     impl ResetAll {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::reset_all];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["reset-all"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -80219,10 +77786,10 @@ pub mod ngap_ies {
     impl Tree for ResetAll {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ResetAll[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ResetAll)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -80295,10 +77862,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &["nG-Interface", "partOfNG-Interface", "choice-Extensions"],
-            )?;
+            let (position, value) = reading.alternative(value, names::ResetType)?;
             Ok(match position {
                 0 => Self::nG_Interface(reading.within(
                     "nG-Interface",
@@ -80390,14 +77954,8 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "eUTRAN-ReportingStatus",
-                    "nGRAN-ReportingStatus",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) =
+                reading.alternative(value, names::ResourceStatusReportingSystem)?;
             Ok(match position {
                 0 => Self::eUTRAN_ReportingStatus(reading.within(
                     "eUTRAN-ReportingStatus",
@@ -80560,7 +78118,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["sST", "sD", "iE-Extensions"])?;
+            let members = reading.members(value, names::SNSSAI)?;
             let sst = reading.member(&members, "sST", SST::from_tree)?;
             let sd = reading.optional(&members, "sD", SD::from_tree)?;
             let ie_extensions = reading.optional(
@@ -80750,9 +78308,6 @@ pub mod ngap_ies {
     impl SLPositioningRangingAuthorized {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -80776,10 +78331,10 @@ pub mod ngap_ies {
     impl Tree for SLPositioningRangingAuthorized {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::SLPositioningRangingAuthorized[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::SLPositioningRangingAuthorized)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -80875,14 +78430,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "rSPPQoSFlowList",
-                    "rSPPLinkAggregateBitRates",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::SLPositioningRangingQoSParameters)?;
             let rspp_qos_flow_list =
                 reading.member(&members, "rSPPQoSFlowList", RSPPQoSFlowList::from_tree)?;
             let rspp_link_aggregate_bit_rates =
@@ -80998,14 +78546,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "sLPositioningRangingAuthorized",
-                    "sLPositioningRangingQoSParameters",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::SLPositioningRangingServiceInfo)?;
             let sl_positioning_ranging_authorized = reading.member(
                 &members,
                 "sLPositioningRangingAuthorized",
@@ -81100,7 +78641,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["sNPNListforMDT", "iE-Extensions"])?;
+            let members = reading.members(value, names::SNPNBasedMDT)?;
             let snpn_listfor_mdt =
                 reading.member(&members, "sNPNListforMDT", SNPNListforMDT::from_tree)?;
             let ie_extensions = reading.optional(
@@ -81189,7 +78730,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["sNPNcellIdListforMDT", "iE-Extensions"])?;
+            let members = reading.members(value, names::SNPNCellBasedMDT)?;
             let snpn_cell_id_listfor_mdt = reading.member(
                 &members,
                 "sNPNcellIdListforMDT",
@@ -81277,7 +78818,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["serving-NID", "iE-Extensions"])?;
+            let members = reading.members(value, names::SNPNMobilityInformation)?;
             let serving_nid = reading.member(&members, "serving-NID", NID::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -81362,7 +78903,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["sNPNTAIListforMDT", "iE-Extensions"])?;
+            let members = reading.members(value, names::SNPNTAIBasedMDT)?;
             let snpn_tai_listfor_mdt =
                 reading.member(&members, "sNPNTAIListforMDT", SNPNTAIListforMDT::from_tree)?;
             let ie_extensions = reading.optional(
@@ -81504,7 +79045,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["nR-CGI", "nID", "iE-Extensions"])?;
+            let members = reading.members(value, names::SNPNCellIdListforMDTItem)?;
             let nr_cgi = reading.member(&members, "nR-CGI", NRCGI::from_tree)?;
             let nid = reading.member(&members, "nID", NID::from_tree)?;
             let ie_extensions = reading.optional(
@@ -81649,7 +79190,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pLMNIdentity", "nID", "iE-Extensions"])?;
+            let members = reading.members(value, names::SNPNListforMDTItem)?;
             let plmn_identity =
                 reading.member(&members, "pLMNIdentity", PLMNIdentity::from_tree)?;
             let nid = reading.member(&members, "nID", NID::from_tree)?;
@@ -81793,7 +79334,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["tAI", "nID", "iE-Extensions"])?;
+            let members = reading.members(value, names::SNPNTAIListforMDTItem)?;
             let tai = reading.member(&members, "tAI", TAI::from_tree)?;
             let nid = reading.member(&members, "nID", NID::from_tree)?;
             let ie_extensions = reading.optional(
@@ -81937,16 +79478,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "targetRANNodeID-SON",
-                    "sourceRANNodeID",
-                    "sONInformation",
-                    "xnTNLConfigurationInfo",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::SONConfigurationTransfer)?;
             let target_ran_node_id_son = reading.member(
                 &members,
                 "targetRANNodeID-SON",
@@ -82060,14 +79592,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "sONInformationRequest",
-                    "sONInformationReply",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::SONInformation)?;
             Ok(match position {
                 0 => Self::sONInformationRequest(reading.within(
                     "sONInformationRequest",
@@ -82183,7 +79708,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["xnTNLConfigurationInfo", "iE-Extensions"])?;
+            let members = reading.members(value, names::SONInformationReply)?;
             let xn_tnl_configuration_info = reading.optional(
                 &members,
                 "xnTNLConfigurationInfo",
@@ -82287,14 +79812,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "failureIndicationInformation",
-                    "hOReportInformation",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::SONInformationReport)?;
             Ok(match position {
                 0 => Self::failureIndicationInformation(reading.within(
                     "failureIndicationInformation",
@@ -82328,9 +79846,6 @@ pub mod ngap_ies {
     impl SONInformationRequest {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::xn_TNL_configuration_info];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["xn-TNL-configuration-info"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -82354,10 +79869,10 @@ pub mod ngap_ies {
     impl Tree for SONInformationRequest {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::SONInformationRequest[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::SONInformationRequest)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -82377,9 +79892,6 @@ pub mod ngap_ies {
     impl SRVCCOperationPossible {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::possible, Self::notPossible];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["possible", "notPossible"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -82403,10 +79915,10 @@ pub mod ngap_ies {
     impl Tree for SRVCCOperationPossible {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::SRVCCOperationPossible[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::SRVCCOperationPossible)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -82598,15 +80110,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "dayofWeek",
-                    "timeofDayStart",
-                    "timeofDayEnd",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::ScheduledCommunicationTime)?;
             let dayof_week = reading.optional(&members, "dayofWeek", |value, reading| {
                 json::read_bits(reading, value, 7, 7)
             })?;
@@ -82726,8 +80230,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["secondaryRATUsageInformation", "iE-Extensions"])?;
+            let members = reading.members(value, names::SecondaryRATDataUsageReportTransfer)?;
             let secondary_rat_usage_information = reading.optional(
                 &members,
                 "secondaryRATUsageInformation",
@@ -82859,14 +80362,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pDUSessionUsageReport",
-                    "qosFlowsUsageReportList",
-                    "iE-Extension",
-                ],
-            )?;
+            let members = reading.members(value, names::SecondaryRATUsageInformation)?;
             let pdu_session_usage_report = reading.optional(
                 &members,
                 "pDUSessionUsageReport",
@@ -82982,10 +80478,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["nextHopChainingCount", "nextHopNH", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::SecurityContext)?;
             let next_hop_chaining_count = reading.member(
                 &members,
                 "nextHopChainingCount",
@@ -83117,15 +80610,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "integrityProtectionIndication",
-                    "confidentialityProtectionIndication",
-                    "maximumIntegrityProtectedDataRate-UL",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::SecurityIndication)?;
             let integrity_protection_indication = reading.member(
                 &members,
                 "integrityProtectionIndication",
@@ -83304,14 +80789,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "integrityProtectionResult",
-                    "confidentialityProtectionResult",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::SecurityResult)?;
             let integrity_protection_result = reading.member(
                 &members,
                 "integrityProtectionResult",
@@ -83348,9 +80826,6 @@ pub mod ngap_ies {
     impl SensorMeasConfig {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::setup];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["setup"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -83374,10 +80849,10 @@ pub mod ngap_ies {
     impl Tree for SensorMeasConfig {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::SensorMeasConfig[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::SensorMeasConfig)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -83452,7 +80927,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["sensorNameConfig", "iE-Extensions"])?;
+            let members = reading.members(value, names::SensorMeasConfigNameItem)?;
             let sensor_name_config =
                 reading.member(&members, "sensorNameConfig", SensorNameConfig::from_tree)?;
             let ie_extensions = reading.optional(
@@ -83614,14 +81089,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "sensorMeasConfig",
-                    "sensorMeasConfigNameList",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::SensorMeasurementConfiguration)?;
             let sensor_meas_config =
                 reading.member(&members, "sensorMeasConfig", SensorMeasConfig::from_tree)?;
             let sensor_meas_config_name_list = reading.optional(
@@ -83655,9 +81123,6 @@ pub mod ngap_ies {
     impl SensorNameConfigUncompensatedBarometricConfig {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -83681,10 +81146,11 @@ pub mod ngap_ies {
     impl Tree for SensorNameConfigUncompensatedBarometricConfig {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::SensorNameConfigUncompensatedBarometricConfig[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES
+                [reading.named(value, names::SensorNameConfigUncompensatedBarometricConfig)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -83701,9 +81167,6 @@ pub mod ngap_ies {
     impl SensorNameConfigUeSpeedConfig {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -83727,10 +81190,10 @@ pub mod ngap_ies {
     impl Tree for SensorNameConfigUeSpeedConfig {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::SensorNameConfigUeSpeedConfig[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::SensorNameConfigUeSpeedConfig)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -83747,9 +81210,6 @@ pub mod ngap_ies {
     impl SensorNameConfigUeOrientationConfig {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -83773,10 +81233,10 @@ pub mod ngap_ies {
     impl Tree for SensorNameConfigUeOrientationConfig {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::SensorNameConfigUeOrientationConfig[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::SensorNameConfigUeOrientationConfig)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -83869,15 +81329,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "uncompensatedBarometricConfig",
-                    "ueSpeedConfig",
-                    "ueOrientationConfig",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::SensorNameConfig)?;
             Ok(match position {
                 0 => Self::uncompensatedBarometricConfig(reading.within(
                     "uncompensatedBarometricConfig",
@@ -84049,7 +81501,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["gUAMI", "backupAMFName", "iE-Extensions"])?;
+            let members = reading.members(value, names::ServedGUAMIItem)?;
             let guami = reading.member(&members, "gUAMI", GUAMI::from_tree)?;
             let backup_amf_name =
                 reading.optional(&members, "backupAMFName", AMFName::from_tree)?;
@@ -84281,15 +81733,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pLMNIdentity",
-                    "allowedTACs",
-                    "notAllowedTACs",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::ServiceAreaInformationItem)?;
             let plmn_identity =
                 reading.member(&members, "pLMNIdentity", PLMNIdentity::from_tree)?;
             let allowed_tacs = reading.optional(&members, "allowedTACs", AllowedTACs::from_tree)?;
@@ -84324,9 +81768,6 @@ pub mod ngap_ies {
     impl ServiceType {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 3] = [Self::streaming, Self::mTSI, Self::vR];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 3] = ["streaming", "mTSI", "vR"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -84350,10 +81791,10 @@ pub mod ngap_ies {
     impl Tree for ServiceType {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ServiceType[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ServiceType)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -84501,15 +81942,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "iP-MulticastAddress",
-                    "iP-SourceAddress",
-                    "gTP-TEID",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::SharedNGUMulticastTNLInformation)?;
             let ip_multicast_address = reading.member(
                 &members,
                 "iP-MulticastAddress",
@@ -84603,7 +82036,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["sNSSAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::SliceMDTItem)?;
             let s_nssai = reading.member(&members, "sNSSAI", SNSSAI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -84737,7 +82170,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["s-NSSAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::SliceOverloadItem)?;
             let s_nssai = reading.member(&members, "s-NSSAI", SNSSAI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -84871,7 +82304,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["s-NSSAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::SliceSupportItem)?;
             let s_nssai = reading.member(&members, "s-NSSAI", SNSSAI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -85057,7 +82490,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["s-NSSAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::SliceSupportQMCItem)?;
             let s_nssai = reading.member(&members, "s-NSSAI", SNSSAI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -85243,15 +82676,7 @@ pub mod ngap_ies {
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
             let members = reading.members(
                 value,
-                &[
-                    "rRCContainer",
-                    "pDUSessionResourceInformationList",
-                    "e-RABInformationList",
-                    "targetCell-ID",
-                    "indexToRFSP",
-                    "uEHistoryInformation",
-                    "iE-Extensions",
-                ],
+                names::SourceNGRANNodeToTargetNGRANNodeTransparentContainer,
             )?;
             let rrc_container =
                 reading.member(&members, "rRCContainer", RRCContainer::from_tree)?;
@@ -85345,8 +82770,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) =
-                reading.alternative(value, &["sourceengNB-ID", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::SourceNodeID)?;
             Ok(match position {
                 0 => Self::sourceengNB_ID(reading.within(
                     "sourceengNB-ID",
@@ -85376,9 +82800,6 @@ pub mod ngap_ies {
     impl SourceOfUEActivityBehaviourInformation {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::subscription_information, Self::statistics];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["subscription-information", "statistics"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -85402,10 +82823,13 @@ pub mod ngap_ies {
     impl Tree for SourceOfUEActivityBehaviourInformation {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::SourceOfUEActivityBehaviourInformation[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(
+                Self::VALUES
+                    [reading.named(value, names::SourceOfUEActivityBehaviourInformation)?],
+            )
         }
     }
     #[cfg(feature = "serde")]
@@ -85489,8 +82913,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["globalRANNodeID", "selectedTAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::SourceRANNodeID)?;
             let global_ran_node_id =
                 reading.member(&members, "globalRANNodeID", GlobalRANNodeID::from_tree)?;
             let selected_tai = reading.member(&members, "selectedTAI", TAI::from_tree)?;
@@ -85632,15 +83055,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "configuredNSSAI",
-                    "rejectedNSSAIinPLMN",
-                    "rejectedNSSAIinTA",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::SourceToTargetAMFInformationReroute)?;
             let configured_nssai =
                 reading.optional(&members, "configuredNSSAI", ConfiguredNSSAI::from_tree)?;
             let rejected_nssai_in_plmn = reading.optional(
@@ -85807,8 +83222,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["successfulHOReportContainer", "iE-Extensions"])?;
+            let members = reading.members(value, names::SuccessfulHandoverReportItem)?;
             let successful_ho_report_container =
                 reading.member(&members, "successfulHOReportContainer", |value, reading| {
                     json::read_octets(reading, value)
@@ -85974,10 +83388,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["successfulPSCellChangeReportContainer", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::SuccessfulPSCellChangeReportItem)?;
             let successful_ps_cell_change_report_container = reading.member(
                 &members,
                 "successfulPSCellChangeReportContainer",
@@ -86134,7 +83545,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["tAC", "broadcastPLMNList", "iE-Extensions"])?;
+            let members = reading.members(value, names::SupportedTAItem)?;
             let tac = reading.member(&members, "tAC", TAC::from_tree)?;
             let broadcast_plmn_list =
                 reading.member(&members, "broadcastPLMNList", BroadcastPLMNList::from_tree)?;
@@ -86217,9 +83628,6 @@ pub mod ngap_ies {
     impl SupportedUEType {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::non_RedCap_eRedCap_UE, Self::redCap_eRedCap_UE];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["non-RedCap-eRedCap-UE", "redCap-eRedCap-UE"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -86243,10 +83651,10 @@ pub mod ngap_ies {
     impl Tree for SupportedUEType {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::SupportedUEType[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::SupportedUEType)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -86357,9 +83765,6 @@ pub mod ngap_ies {
     impl SuspendRequestIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::suspend_requested];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["suspend-requested"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -86383,10 +83788,10 @@ pub mod ngap_ies {
     impl Tree for SuspendRequestIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::SuspendRequestIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::SuspendRequestIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -86403,9 +83808,6 @@ pub mod ngap_ies {
     impl SuspendResponseIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::suspend_indicated];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["suspend-indicated"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -86429,10 +83831,10 @@ pub mod ngap_ies {
     impl Tree for SuspendResponseIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::SuspendResponseIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::SuspendResponseIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -86449,9 +83851,6 @@ pub mod ngap_ies {
     impl SuspendIndicator {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -86475,10 +83874,10 @@ pub mod ngap_ies {
     impl Tree for SuspendIndicator {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::SuspendIndicator[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::SuspendIndicator)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -86553,7 +83952,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["tAListforMDT", "iE-Extensions"])?;
+            let members = reading.members(value, names::TABasedMDT)?;
             let ta_listfor_mdt =
                 reading.member(&members, "tAListforMDT", TAListforMDT::from_tree)?;
             let ie_extensions = reading.optional(
@@ -86639,7 +84038,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["tAListforQMC", "iE-Extensions"])?;
+            let members = reading.members(value, names::TABasedQMC)?;
             let ta_listfor_qmc =
                 reading.member(&members, "tAListforQMC", TAListforQMC::from_tree)?;
             let ie_extensions = reading.optional(
@@ -86839,7 +84238,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["pLMNIdentity", "tAC", "iE-Extensions"])?;
+            let members = reading.members(value, names::TAI)?;
             let plmn_identity =
                 reading.member(&members, "pLMNIdentity", PLMNIdentity::from_tree)?;
             let tac = reading.member(&members, "tAC", TAC::from_tree)?;
@@ -86927,7 +84326,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["tAIListforMDT", "iE-Extensions"])?;
+            let members = reading.members(value, names::TAIBasedMDT)?;
             let tai_listfor_mdt =
                 reading.member(&members, "tAIListforMDT", TAIListforMDT::from_tree)?;
             let ie_extensions = reading.optional(
@@ -87013,7 +84412,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["tAIListforQMC", "iE-Extensions"])?;
+            let members = reading.members(value, names::TAIBasedQMC)?;
             let tai_listfor_qmc =
                 reading.member(&members, "tAIListforQMC", TAIListforQMC::from_tree)?;
             let ie_extensions = reading.optional(
@@ -87161,10 +84560,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["tAI", "completedCellsInTAI-EUTRA", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::TAIBroadcastEUTRAItem)?;
             let tai = reading.member(&members, "tAI", TAI::from_tree)?;
             let completed_cells_in_tai_eutra = reading.member(
                 &members,
@@ -87317,8 +84713,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["tAI", "completedCellsInTAI-NR", "iE-Extensions"])?;
+            let members = reading.members(value, names::TAIBroadcastNRItem)?;
             let tai = reading.member(&members, "tAI", TAI::from_tree)?;
             let completed_cells_in_tai_nr = reading.member(
                 &members,
@@ -87471,10 +84866,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["tAI", "cancelledCellsInTAI-EUTRA", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::TAICancelledEUTRAItem)?;
             let tai = reading.member(&members, "tAI", TAI::from_tree)?;
             let cancelled_cells_in_tai_eutra = reading.member(
                 &members,
@@ -87627,8 +85019,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["tAI", "cancelledCellsInTAI-NR", "iE-Extensions"])?;
+            let members = reading.members(value, names::TAICancelledNRItem)?;
             let tai = reading.member(&members, "tAI", TAI::from_tree)?;
             let cancelled_cells_in_tai_nr = reading.member(
                 &members,
@@ -87759,7 +85150,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["tAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::TAIListForInactiveItem)?;
             let tai = reading.member(&members, "tAI", TAI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -87881,7 +85272,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["tAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::TAIListForPagingItem)?;
             let tai = reading.member(&members, "tAI", TAI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -88159,7 +85550,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["tAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::TAIMBSSupportItem)?;
             let tai = reading.member(&members, "tAI", TAI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -88303,8 +85694,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["nSAG-ID", "nSAGSliceSupportList", "iE-Extensions"])?;
+            let members = reading.members(value, names::TAINSAGSupportItem)?;
             let nsag_id = reading.member(&members, "nSAG-ID", NSAGID::from_tree)?;
             let nsag_slice_support_list = reading.member(
                 &members,
@@ -88725,8 +86115,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) =
-                reading.alternative(value, &["tNGF-ID", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::TNGFID)?;
             Ok(match position {
                 0 => Self::tNGF_ID(reading.within("tNGF-ID", value, |value, reading| {
                     json::read_bit_string(reading, value, 32, 32, true)
@@ -88874,8 +86263,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["tNLAssociationAddress", "cause", "iE-Extensions"])?;
+            let members = reading.members(value, names::TNLAssociationItem)?;
             let tnl_association_address = reading.member(
                 &members,
                 "tNLAssociationAddress",
@@ -88969,9 +86357,6 @@ pub mod ngap_ies {
     impl TNLAssociationUsage {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 3] = [Self::ue, Self::non_ue, Self::both];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 3] = ["ue", "non-ue", "both"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -88995,10 +86380,10 @@ pub mod ngap_ies {
     impl Tree for TNLAssociationUsage {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::TNLAssociationUsage[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::TNLAssociationUsage)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -89102,8 +86487,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["periodicity", "burstArrivalTime", "iE-Extensions"])?;
+            let members = reading.members(value, names::TSCAssistanceInformation)?;
             let periodicity = reading.member(&members, "periodicity", Periodicity::from_tree)?;
             let burst_arrival_time =
                 reading.optional(&members, "burstArrivalTime", BurstArrivalTime::from_tree)?;
@@ -89216,14 +86600,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "burstArrivalTimeOffset",
-                    "adjustedPeriodicity",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::TSCFeedbackInformation)?;
             let burst_arrival_time_offset =
                 reading.member(&members, "burstArrivalTimeOffset", |value, reading| {
                     reading.signed(value, i64::MIN, i64::MAX)
@@ -89365,14 +86742,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "tSCAssistanceInformationDL",
-                    "tSCAssistanceInformationUL",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::TSCTrafficCharacteristics)?;
             let tsc_assistance_information_dl = reading.optional(
                 &members,
                 "tSCAssistanceInformationDL",
@@ -89505,14 +86875,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "tSCFeedbackInformationDL",
-                    "tSCFeedbackInformationUL",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::TSCTrafficCharacteristicsFeedback)?;
             let tsc_feedback_information_dl = reading.optional(
                 &members,
                 "tSCFeedbackInformationDL",
@@ -89666,8 +87029,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) =
-                reading.alternative(value, &["tWIF-ID", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::TWIFID)?;
             Ok(match position {
                 0 => Self::tWIF_ID(reading.within("tWIF-ID", value, |value, reading| {
                     json::read_bit_string(reading, value, 32, 32, true)
@@ -89769,15 +87131,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "pLMNidentity",
-                    "homeENB-ID",
-                    "selected-EPS-TAI",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::TargetHomeENBID)?;
             let plmn_identity =
                 reading.member(&members, "pLMNidentity", PLMNIdentity::from_tree)?;
             let home_enb_id = reading.member(&members, "homeENB-ID", |value, reading| {
@@ -89868,10 +87222,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &["targetRANNodeID", "targeteNB-ID", "choice-Extensions"],
-            )?;
+            let (position, value) = reading.alternative(value, names::TargetID)?;
             Ok(match position {
                 0 => Self::targetRANNodeID(reading.within(
                     "targetRANNodeID",
@@ -89974,7 +87325,10 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["cell-CAGInformation", "iE-Extensions"])?;
+            let members = reading.members(
+                value,
+                names::TargetNGRANNodeToSourceNGRANNodeFailureTransparentContainer,
+            )?;
             let cell_cag_information = reading.optional(
                 &members,
                 "cell-CAGInformation",
@@ -90070,7 +87424,10 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["rRCContainer", "iE-Extensions"])?;
+            let members = reading.members(
+                value,
+                names::TargetNGRANNodeToSourceNGRANNodeTransparentContainer,
+            )?;
             let rrc_container =
                 reading.member(&members, "rRCContainer", RRCContainer::from_tree)?;
             let ie_extensions = reading.optional(
@@ -90205,7 +87562,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["s-NSSAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::TargetNSSAIItem)?;
             let s_nssai = reading.member(&members, "s-NSSAI", SNSSAI::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -90298,8 +87655,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["targetNSSAI", "indexToRFSP", "iE-Extensions"])?;
+            let members = reading.members(value, names::TargetNSSAIInformation)?;
             let target_nssai = reading.member(&members, "targetNSSAI", TargetNSSAI::from_tree)?;
             let index_to_rfsp = reading.member(&members, "indexToRFSP", IndexToRFSP::from_tree)?;
             let ie_extensions = reading.optional(
@@ -90395,8 +87751,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["globalRANNodeID", "selectedTAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::TargetRANNodeID)?;
             let global_ran_node_id =
                 reading.member(&members, "globalRANNodeID", GlobalRANNodeID::from_tree)?;
             let selected_tai = reading.member(&members, "selectedTAI", TAI::from_tree)?;
@@ -90493,8 +87848,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["globalRANNodeID", "selectedTAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::TargetRANNodeIDRIM)?;
             let global_ran_node_id =
                 reading.member(&members, "globalRANNodeID", GlobalRANNodeID::from_tree)?;
             let selected_tai = reading.member(&members, "selectedTAI", TAI::from_tree)?;
@@ -90591,8 +87945,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["globalRANNodeID", "selectedTAI", "iE-Extensions"])?;
+            let members = reading.members(value, names::TargetRANNodeIDSON)?;
             let global_ran_node_id =
                 reading.member(&members, "globalRANNodeID", GlobalRANNodeID::from_tree)?;
             let selected_tai = reading.member(&members, "selectedTAI", TAI::from_tree)?;
@@ -90701,8 +88054,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["lAI", "rNC-ID", "extendedRNC-ID", "iE-Extensions"])?;
+            let members = reading.members(value, names::TargetRNCID)?;
             let lai = reading.member(&members, "lAI", LAI::from_tree)?;
             let rnc_id = reading.member(&members, "rNC-ID", RNCID::from_tree)?;
             let extended_rnc_id =
@@ -90860,10 +88212,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["globalENB-ID", "selected-EPS-TAI", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::TargeteNBID)?;
             let global_enb_id =
                 reading.member(&members, "globalENB-ID", GlobalNgENBID::from_tree)?;
             let selected_eps_tai =
@@ -91158,10 +88507,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["hOWindowStart", "hOWindowDuration", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::TimeBasedHandoverInformation)?;
             let ho_window_start =
                 reading.member(&members, "hOWindowStart", HandoverWindowStart::from_tree)?;
             let ho_window_duration = reading.member(
@@ -91293,9 +88639,6 @@ pub mod ngap_ies {
     impl TimeSyncAssistanceInfoTimeDistributionIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::enabled, Self::disabled];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["enabled", "disabled"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -91319,10 +88662,15 @@ pub mod ngap_ies {
     impl Tree for TimeSyncAssistanceInfoTimeDistributionIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(
+                names::TimeSyncAssistanceInfoTimeDistributionIndication[self.index() as usize],
+            )
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(
+                value,
+                names::TimeSyncAssistanceInfoTimeDistributionIndication,
+            )?])
         }
     }
     #[cfg(feature = "serde")]
@@ -91426,14 +88774,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "timeDistributionIndication",
-                    "uUTimeSyncErrorBudget",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::TimeSyncAssistanceInfo)?;
             let time_distribution_indication = reading.member(
                 &members,
                 "timeDistributionIndication",
@@ -91500,12 +88841,6 @@ pub mod ngap_ies {
             Self::ms2560,
             Self::ms5120,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 16] = [
-            "ms0", "ms40", "ms64", "ms80", "ms100", "ms128", "ms160", "ms256", "ms320", "ms480",
-            "ms512", "ms640", "ms1024", "ms1280", "ms2560", "ms5120",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -91529,10 +88864,10 @@ pub mod ngap_ies {
     impl Tree for TimeToTrigger {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::TimeToTrigger[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::TimeToTrigger)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -91561,9 +88896,6 @@ pub mod ngap_ies {
             Self::v20s,
             Self::v60s,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 6] = ["v1s", "v2s", "v5s", "v10s", "v20s", "v60s"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -91587,10 +88919,10 @@ pub mod ngap_ies {
     impl Tree for TimeToWait {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::TimeToWait[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::TimeToWait)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -91699,9 +89031,6 @@ pub mod ngap_ies {
     impl TimerApproachForGUAMIRemoval {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::apply_timer];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["apply-timer"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -91725,10 +89054,10 @@ pub mod ngap_ies {
     impl Tree for TimerApproachForGUAMIRemoval {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::TimerApproachForGUAMIRemoval[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::TimerApproachForGUAMIRemoval)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -91847,15 +89176,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "sourcecellID",
-                    "failurecellID",
-                    "uERLFReportContainer",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::TooearlyIntersystemHO)?;
             let sourcecell_id = reading.member(&members, "sourcecellID", EUTRACGI::from_tree)?;
             let failurecell_id = reading.member(&members, "failurecellID", NGRANCGI::from_tree)?;
             let ue_rlf_report_container = reading.optional(
@@ -91993,16 +89314,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "nGRANTraceID",
-                    "interfacesToTrace",
-                    "traceDepth",
-                    "traceCollectionEntityIPAddress",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::TraceActivation)?;
             let ngran_trace_id =
                 reading.member(&members, "nGRANTraceID", NGRANTraceID::from_tree)?;
             let interfaces_to_trace =
@@ -92059,19 +89371,6 @@ pub mod ngap_ies {
             Self::mediumOnlyVendorSpecificTraceRecord,
             Self::maximumOnlyVendorSpecificTraceRecord,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 9] = [
-            "minimum",
-            "medium",
-            "maximum",
-            "minimumWithoutVendorSpecificExtension",
-            "mediumWithoutVendorSpecificExtension",
-            "maximumWithoutVendorSpecificExtension",
-            "minimumOnlyVendorSpecificTraceRecord",
-            "mediumOnlyVendorSpecificTraceRecord",
-            "maximumOnlyVendorSpecificTraceRecord",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -92095,10 +89394,10 @@ pub mod ngap_ies {
     impl Tree for TraceDepth {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::TraceDepth[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::TraceDepth)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -92211,9 +89510,6 @@ pub mod ngap_ies {
     impl TypeOfError {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::not_understood, Self::missing];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["not-understood", "missing"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -92237,10 +89533,10 @@ pub mod ngap_ies {
     impl Tree for TypeOfError {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::TypeOfError[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::TypeOfError)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -92258,9 +89554,6 @@ pub mod ngap_ies {
     impl UEDifferentiationInfoPeriodicCommunicationIndicator {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::periodically, Self::ondemand];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["periodically", "ondemand"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -92284,10 +89577,15 @@ pub mod ngap_ies {
     impl Tree for UEDifferentiationInfoPeriodicCommunicationIndicator {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(
+                names::UEDifferentiationInfoPeriodicCommunicationIndicator[self.index() as usize],
+            )
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(
+                value,
+                names::UEDifferentiationInfoPeriodicCommunicationIndicator,
+            )?])
         }
     }
     #[cfg(feature = "serde")]
@@ -92305,9 +89603,6 @@ pub mod ngap_ies {
     impl UEDifferentiationInfoStationaryIndication {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::stationary, Self::mobile];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["stationary", "mobile"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -92331,10 +89626,11 @@ pub mod ngap_ies {
     impl Tree for UEDifferentiationInfoStationaryIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::UEDifferentiationInfoStationaryIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES
+                [reading.named(value, names::UEDifferentiationInfoStationaryIndication)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -92357,10 +89653,6 @@ pub mod ngap_ies {
             Self::dual_packets,
             Self::multiple_packets,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 3] =
-            ["single-packet", "dual-packets", "multiple-packets"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -92384,10 +89676,10 @@ pub mod ngap_ies {
     impl Tree for UEDifferentiationInfoTrafficProfile {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::UEDifferentiationInfoTrafficProfile[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::UEDifferentiationInfoTrafficProfile)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -92409,13 +89701,6 @@ pub mod ngap_ies {
             Self::battery_powered,
             Self::battery_powered_not_rechargeable_or_replaceable,
             Self::not_battery_powered,
-        ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 3] = [
-            "battery-powered",
-            "battery-powered-not-rechargeable-or-replaceable",
-            "not-battery-powered",
         ];
         /// The index of the value in PER.
         #[inline]
@@ -92440,10 +89725,13 @@ pub mod ngap_ies {
     impl Tree for UEDifferentiationInfoBatteryIndication {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::UEDifferentiationInfoBatteryIndication[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(
+                Self::VALUES
+                    [reading.named(value, names::UEDifferentiationInfoBatteryIndication)?],
+            )
         }
     }
     #[cfg(feature = "serde")]
@@ -92652,18 +89940,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "periodicCommunicationIndicator",
-                    "periodicTime",
-                    "scheduledCommunicationTime",
-                    "stationaryIndication",
-                    "trafficProfile",
-                    "batteryIndication",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::UEDifferentiationInfo)?;
             let periodic_communication_indicator = reading.optional(
                 &members,
                 "periodicCommunicationIndicator",
@@ -92788,10 +90065,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["aMF-UE-NGAP-ID", "rAN-UE-NGAP-ID", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::UENGAPIDPair)?;
             let amf_ue_ngap_id =
                 reading.member(&members, "aMF-UE-NGAP-ID", AMFUENGAPID::from_tree)?;
             let ran_ue_ngap_id =
@@ -92878,10 +90152,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &["uE-NGAP-ID-pair", "aMF-UE-NGAP-ID", "choice-Extensions"],
-            )?;
+            let (position, value) = reading.alternative(value, names::UENGAPIDs)?;
             Ok(match position {
                 0 => Self::uE_NGAP_ID_pair(reading.within(
                     "uE-NGAP-ID-pair",
@@ -92993,10 +90264,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["uEIdentityIndexValue", "pagingDRX", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::UEPagingItem)?;
             let ue_identity_index_value = reading.member(
                 &members,
                 "uEIdentityIndexValue",
@@ -93081,9 +90349,6 @@ pub mod ngap_ies {
     impl UEUPCIoTSupport {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::supported];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["supported"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -93107,10 +90372,10 @@ pub mod ngap_ies {
     impl Tree for UEUPCIoTSupport {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::UEUPCIoTSupport[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::UEUPCIoTSupport)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -93209,10 +90474,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["aMF-UE-NGAP-ID", "rAN-UE-NGAP-ID", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::UEAssociatedLogicalNGConnectionItem)?;
             let amf_ue_ngap_id =
                 reading.optional(&members, "aMF-UE-NGAP-ID", AMFUENGAPID::from_tree)?;
             let ran_ue_ngap_id =
@@ -93387,14 +90649,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "uEAggregateMaximumBitRateDL",
-                    "uEAggregateMaximumBitRateUL",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::UEAggregateMaximumBitRate)?;
             let ue_aggregate_maximum_bit_rate_dl =
                 reading.member(&members, "uEAggregateMaximumBitRateDL", BitRate::from_tree)?;
             let ue_aggregate_maximum_bit_rate_ul =
@@ -93425,9 +90680,6 @@ pub mod ngap_ies {
     impl UEAppLayerMeasConfigInfoQoEMeasurementStatus {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::ongoing];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["ongoing"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -93451,10 +90703,11 @@ pub mod ngap_ies {
     impl Tree for UEAppLayerMeasConfigInfoQoEMeasurementStatus {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::UEAppLayerMeasConfigInfoQoEMeasurementStatus[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES
+                [reading.named(value, names::UEAppLayerMeasConfigInfoQoEMeasurementStatus)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -93731,22 +90984,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "qoEReference",
-                    "serviceType",
-                    "areaScopeOfQMC",
-                    "measCollEntityIPAddress",
-                    "qoEMeasurementStatus",
-                    "containerForAppLayerMeasConfig",
-                    "measConfigAppLayerID",
-                    "sliceSupportListQMC",
-                    "mDT-AlignmentInfo",
-                    "availableRANVisibleQoEMetrics",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::UEAppLayerMeasConfigInfo)?;
             let qoe_reference =
                 reading.member(&members, "qoEReference", QoEReference::from_tree)?;
             let service_type = reading.member(&members, "serviceType", ServiceType::from_tree)?;
@@ -93886,7 +91124,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["uEAppLayerMeasConfigInfo", "iE-Extensions"])?;
+            let members = reading.members(value, names::UEAppLayerMeasInfoItem)?;
             let ue_app_layer_meas_config_info = reading.member(
                 &members,
                 "uEAppLayerMeasConfigInfo",
@@ -93976,9 +91214,6 @@ pub mod ngap_ies {
     impl UECapabilityInfoRequest {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::requested];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["requested"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -94002,10 +91237,10 @@ pub mod ngap_ies {
     impl Tree for UECapabilityInfoRequest {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::UECapabilityInfoRequest[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::UECapabilityInfoRequest)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -94022,9 +91257,6 @@ pub mod ngap_ies {
     impl UEContextRequest {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::requested];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["requested"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -94048,10 +91280,10 @@ pub mod ngap_ies {
     impl Tree for UEContextRequest {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::UEContextRequest[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::UEContextRequest)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -94140,8 +91372,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["qosFlowFailedToResumeList", "iE-Extensions"])?;
+            let members = reading.members(value, names::UEContextResumeRequestTransfer)?;
             let qos_flow_failed_to_resume_list = reading.optional(
                 &members,
                 "qosFlowFailedToResumeList",
@@ -94244,8 +91475,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["qosFlowFailedToResumeList", "iE-Extensions"])?;
+            let members = reading.members(value, names::UEContextResumeResponseTransfer)?;
             let qos_flow_failed_to_resume_list = reading.optional(
                 &members,
                 "qosFlowFailedToResumeList",
@@ -94343,7 +91573,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["suspendIndicator", "iE-Extensions"])?;
+            let members = reading.members(value, names::UEContextSuspendRequestTransfer)?;
             let suspend_indicator =
                 reading.optional(&members, "suspendIndicator", SuspendIndicator::from_tree)?;
             let ie_extensions = reading.optional(
@@ -94484,7 +91714,8 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(value, &["nR", "choice-Extensions"])?;
+            let (position, value) =
+                reading.alternative(value, names::UEHistoryInformationFromTheUE)?;
             Ok(match position {
                 0 => Self::nR(reading.within("nR", value, NRMobilityHistoryReport::from_tree)?),
                 _ => Self::choice_Extensions(reading.within(
@@ -94555,8 +91786,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) =
-                reading.alternative(value, &["indexLength10", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::UEIdentityIndexValue)?;
             Ok(match position {
                 0 => Self::indexLength10(reading.within(
                     "indexLength10",
@@ -94627,8 +91857,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) =
-                reading.alternative(value, &["fiveG-S-TMSI", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::UEPagingIdentity)?;
             Ok(match position {
                 0 => Self::fiveG_S_TMSI(reading.within(
                     "fiveG-S-TMSI",
@@ -94659,9 +91888,6 @@ pub mod ngap_ies {
     impl UEPresence {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 3] = [Self::R_in, Self::out, Self::unknown];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 3] = ["in", "out", "unknown"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -94685,10 +91911,10 @@ pub mod ngap_ies {
     impl Tree for UEPresence {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::UEPresence[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::UEPresence)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -94775,14 +92001,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "locationReportingReferenceID",
-                    "uEPresence",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::UEPresenceInAreaOfInterestItem)?;
             let location_reporting_reference_id = reading.member(
                 &members,
                 "locationReportingReferenceID",
@@ -94932,8 +92151,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) =
-                reading.alternative(value, &["nR", "lTE", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::UERLFReportContainer)?;
             Ok(match position {
                 0 => Self::nR(reading.within("nR", value, NRUERLFReportContainer::from_tree)?),
                 1 => Self::lTE(reading.within("lTE", value, LTEUERLFReportContainer::from_tree)?),
@@ -95128,14 +92346,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "uERadioCapabilityForPagingOfNR",
-                    "uERadioCapabilityForPagingOfEUTRA",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::UERadioCapabilityForPaging)?;
             let ue_radio_capability_for_paging_of_nr = reading.optional(
                 &members,
                 "uERadioCapabilityForPagingOfNR",
@@ -95412,9 +92623,6 @@ pub mod ngap_ies {
     impl UERetentionInformation {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::ues_retained];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["ues-retained"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -95438,10 +92646,10 @@ pub mod ngap_ies {
     impl Tree for UERetentionInformation {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::UERetentionInformation[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::UERetentionInformation)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -95575,16 +92783,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "nRencryptionAlgorithms",
-                    "nRintegrityProtectionAlgorithms",
-                    "eUTRAencryptionAlgorithms",
-                    "eUTRAintegrityProtectionAlgorithms",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::UESecurityCapabilities)?;
             let nr_encryption_algorithms = reading.member(
                 &members,
                 "nRencryptionAlgorithms",
@@ -95714,15 +92913,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "s-NSSAI",
-                    "uESliceMaximumBitRateDL",
-                    "uESliceMaximumBitRateUL",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::UESliceMaximumBitRateItem)?;
             let s_nssai = reading.member(&members, "s-NSSAI", SNSSAI::from_tree)?;
             let ue_slice_maximum_bit_rate_dl =
                 reading.member(&members, "uESliceMaximumBitRateDL", BitRate::from_tree)?;
@@ -95873,8 +93064,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["ul-NAS-MAC", "ul-NAS-Count", "iE-Extensions"])?;
+            let members = reading.members(value, names::ULCPSecurityInformation)?;
             let ul_nas_mac = reading.member(&members, "ul-NAS-MAC", ULNASMAC::from_tree)?;
             let ul_nas_count = reading.member(&members, "ul-NAS-Count", ULNASCount::from_tree)?;
             let ie_extensions = reading.optional(
@@ -96091,14 +93281,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "uL-NGU-UP-TNLInformation",
-                    "dL-NGU-UP-TNLInformation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::ULNGUUPTNLModifyItem)?;
             let ul_ngu_up_tnl_information = reading.member(
                 &members,
                 "uL-NGU-UP-TNLInformation",
@@ -96194,9 +93377,6 @@ pub mod ngap_ies {
     impl ULForwarding {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::ul_forwarding_proposed];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["ul-forwarding-proposed"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -96220,10 +93400,10 @@ pub mod ngap_ies {
     impl Tree for ULForwarding {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::ULForwarding[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::ULForwarding)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -96297,7 +93477,7 @@ pub mod ngap_ies {
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
             let (position, value) =
-                reading.alternative(value, &["gTPTunnel", "choice-Extensions"])?;
+                reading.alternative(value, names::UPTransportLayerInformation)?;
             Ok(match position {
                 0 => Self::gTPTunnel(reading.within("gTPTunnel", value, GTPTunnel::from_tree)?),
                 _ => Self::choice_Extensions(reading.within(
@@ -96391,7 +93571,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["nGU-UP-TNLInformation", "iE-Extensions"])?;
+            let members = reading.members(value, names::UPTransportLayerInformationItem)?;
             let ngu_up_tnl_information = reading.member(
                 &members,
                 "nGU-UP-TNLInformation",
@@ -96566,14 +93746,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "uL-NGU-UP-TNLInformation",
-                    "dL-NGU-UP-TNLInformation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::UPTransportLayerInformationPairItem)?;
             let ul_ngu_up_tnl_information = reading.member(
                 &members,
                 "uL-NGU-UP-TNLInformation",
@@ -96847,15 +94020,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "gUAMI",
-                    "timerApproachForGUAMIRemoval",
-                    "backupAMFName",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::UnavailableGUAMIItem)?;
             let guami = reading.member(&members, "gUAMI", GUAMI::from_tree)?;
             let timer_approach_for_guami_removal = reading.optional(
                 &members,
@@ -97099,15 +94264,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "userLocationInformationEUTRA",
-                    "userLocationInformationNR",
-                    "userLocationInformationN3IWF-with-PortNumber",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::UserLocationInformation)?;
             Ok(match position {
                 0 => Self::userLocationInformationEUTRA(reading.within(
                     "userLocationInformationEUTRA",
@@ -97227,8 +94384,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["eUTRA-CGI", "tAI", "timeStamp", "iE-Extensions"])?;
+            let members = reading.members(value, names::UserLocationInformationEUTRA)?;
             let eutra_cgi = reading.member(&members, "eUTRA-CGI", EUTRACGI::from_tree)?;
             let tai = reading.member(&members, "tAI", TAI::from_tree)?;
             let time_stamp = reading.optional(&members, "timeStamp", TimeStamp::from_tree)?;
@@ -97335,7 +94491,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["iPAddress", "portNumber", "iE-Extensions"])?;
+            let members =
+                reading.members(value, names::UserLocationInformationN3IWFWithPortNumber)?;
             let ip_address =
                 reading.member(&members, "iPAddress", TransportLayerAddress::from_tree)?;
             let port_number = reading.member(&members, "portNumber", PortNumber::from_tree)?;
@@ -97446,7 +94603,8 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["iPAddress", "tAI", "iE-Extensions"])?;
+            let members =
+                reading.members(value, names::UserLocationInformationN3IWFWithoutPortNumber)?;
             let ip_address =
                 reading.member(&members, "iPAddress", TransportLayerAddress::from_tree)?;
             let tai = reading.optional(&members, "tAI", TAI::from_tree)?;
@@ -97572,8 +94730,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["nR-CGI", "tAI", "timeStamp", "iE-Extensions"])?;
+            let members = reading.members(value, names::UserLocationInformationNR)?;
             let nr_cgi = reading.member(&members, "nR-CGI", NRCGI::from_tree)?;
             let tai = reading.member(&members, "tAI", TAI::from_tree)?;
             let time_stamp = reading.optional(&members, "timeStamp", TimeStamp::from_tree)?;
@@ -97696,10 +94853,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["tNAP-ID", "iPAddress", "portNumber", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::UserLocationInformationTNGF)?;
             let tnap_id = reading.member(&members, "tNAP-ID", TNAPID::from_tree)?;
             let ip_address =
                 reading.member(&members, "iPAddress", TransportLayerAddress::from_tree)?;
@@ -97823,10 +94977,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["tWAP-ID", "iPAddress", "portNumber", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::UserLocationInformationTWIF)?;
             let twap_id = reading.member(&members, "tWAP-ID", TWAPID::from_tree)?;
             let ip_address =
                 reading.member(&members, "iPAddress", TransportLayerAddress::from_tree)?;
@@ -97929,8 +95080,8 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading
-                .alternative(value, &["globalLine-ID", "hFCNode-ID", "choice-Extensions"])?;
+            let (position, value) =
+                reading.alternative(value, names::UserLocationInformationWAGF)?;
             Ok(match position {
                 0 => Self::globalLine_ID(reading.within(
                     "globalLine-ID",
@@ -97960,9 +95111,6 @@ pub mod ngap_ies {
     impl UserPlaneErrorIndicator {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::gTP_U_error_indication_received];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["gTP-U-error-indication-received"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -97986,10 +95134,10 @@ pub mod ngap_ies {
     impl Tree for UserPlaneErrorIndicator {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::UserPlaneErrorIndicator[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::UserPlaneErrorIndicator)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -98103,15 +95251,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "userPlaneFailureType",
-                    "uL-NGU-UP-TNLInformation",
-                    "dL-NGU-UP-TNLInformation",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::UserPlaneFailureIndication)?;
             let user_plane_failure_type = reading.member(
                 &members,
                 "userPlaneFailureType",
@@ -98160,13 +95300,6 @@ pub mod ngap_ies {
             Self::qoS_flows_to_be_moved,
             Self::new_transport_address_allocated,
         ];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 3] = [
-            "qos-flows-and-tunnel-to-be-released",
-            "qoS-flows-to-be-moved",
-            "new-transport-address-allocated",
-        ];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -98190,10 +95323,10 @@ pub mod ngap_ies {
     impl Tree for UserPlaneFailureIndicationReport {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::UserPlaneFailureIndicationReport[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::UserPlaneFailureIndicationReport)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -98212,10 +95345,6 @@ pub mod ngap_ies {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] =
             [Self::gtp_u_error_indication_received, Self::up_path_failure];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] =
-            ["gtp-u-error-indication-received", "up-path-failure"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -98239,10 +95368,10 @@ pub mod ngap_ies {
     impl Tree for UserPlaneFailureType {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::UserPlaneFailureType[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::UserPlaneFailureType)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -98327,10 +95456,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &["securityResult", "securityIndication", "iE-Extensions"],
-            )?;
+            let members = reading.members(value, names::UserPlaneSecurityInformation)?;
             let security_result =
                 reading.member(&members, "securityResult", SecurityResult::from_tree)?;
             let security_indication = reading.member(
@@ -98365,9 +95491,6 @@ pub mod ngap_ies {
     impl VehicleUE {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 2] = [Self::authorized, Self::not_authorized];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 2] = ["authorized", "not-authorized"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -98391,10 +95514,10 @@ pub mod ngap_ies {
     impl Tree for VehicleUE {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::VehicleUE[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::VehicleUE)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -98499,16 +95622,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "startTimeStamp",
-                    "endTimeStamp",
-                    "usageCountUL",
-                    "usageCountDL",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::VolumeTimedReportItem)?;
             let start_time_stamp =
                 reading.member(&members, "startTimeStamp", |value, reading| {
                     reading.octet_array::<4>(value)
@@ -98659,8 +95773,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) =
-                reading.alternative(value, &["w-AGF-ID", "choice-Extensions"])?;
+            let (position, value) = reading.alternative(value, names::WAGFID)?;
             Ok(match position {
                 0 => Self::w_AGF_ID(reading.within("w-AGF-ID", value, |value, reading| {
                     json::read_bit_string(reading, value, 16, 16, true)
@@ -98687,9 +95800,6 @@ pub mod ngap_ies {
     impl WLANMeasConfig {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::setup];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["setup"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -98713,10 +95823,10 @@ pub mod ngap_ies {
     impl Tree for WLANMeasConfig {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::WLANMeasConfig[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::WLANMeasConfig)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -98798,7 +95908,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["wLANName", "iE-Extensions"])?;
+            let members = reading.members(value, names::WLANMeasConfigNameItem)?;
             let wlan_name = reading.member(&members, "wLANName", WLANName::from_tree)?;
             let ie_extensions = reading.optional(
                 &members,
@@ -98884,9 +95994,6 @@ pub mod ngap_ies {
     impl WLANMeasurementConfigurationWlanRssi {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -98910,10 +96017,10 @@ pub mod ngap_ies {
     impl Tree for WLANMeasurementConfigurationWlanRssi {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::WLANMeasurementConfigurationWlanRssi[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::WLANMeasurementConfigurationWlanRssi)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -98930,9 +96037,6 @@ pub mod ngap_ies {
     impl WLANMeasurementConfigurationWlanRtt {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -98956,10 +96060,10 @@ pub mod ngap_ies {
     impl Tree for WLANMeasurementConfigurationWlanRtt {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::WLANMeasurementConfigurationWlanRtt[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::WLANMeasurementConfigurationWlanRtt)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -99111,16 +96215,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "wlanMeasConfig",
-                    "wlanMeasConfigNameList",
-                    "wlan-rssi",
-                    "wlan-rtt",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::WLANMeasurementConfiguration)?;
             let wlan_meas_config =
                 reading.member(&members, "wlanMeasConfig", WLANMeasConfig::from_tree)?;
             let wlan_meas_config_name_list = reading.optional(
@@ -99287,8 +96382,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members =
-                reading.members(value, &["pagingProbabilityInformation", "iE-Extensions"])?;
+            let members = reading.members(value, names::WUSAssistanceInformation)?;
             let paging_probability_information = reading.member(
                 &members,
                 "pagingProbabilityInformation",
@@ -99465,16 +96559,7 @@ pub mod ngap_ies {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "eUTRA-CGIListForWarning",
-                    "nR-CGIListForWarning",
-                    "tAIListForWarning",
-                    "emergencyAreaIDList",
-                    "choice-Extensions",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::WarningAreaList)?;
             Ok(match position {
                 0 => Self::eUTRA_CGIListForWarning(reading.within(
                     "eUTRA-CGIListForWarning",
@@ -99779,7 +96864,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["iPsecTLA", "gTP-TLAs", "iE-Extensions"])?;
+            let members = reading.members(value, names::XnExtTLAItem)?;
             let ipsec_tla =
                 reading.optional(&members, "iPsecTLA", TransportLayerAddress::from_tree)?;
             let gtp_tlas = reading.optional(&members, "gTP-TLAs", XnGTPTLAs::from_tree)?;
@@ -100082,14 +97167,7 @@ pub mod ngap_ies {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(
-                value,
-                &[
-                    "xnTransportLayerAddresses",
-                    "xnExtendedTransportLayerAddresses",
-                    "iE-Extensions",
-                ],
-            )?;
+            let members = reading.members(value, names::XnTNLConfigurationInfo)?;
             let xn_transport_layer_addresses =
                 reading.member(&members, "xnTransportLayerAddresses", XnTLAs::from_tree)?;
             let xn_extended_transport_layer_addresses = reading.optional(
@@ -100123,9 +97201,6 @@ pub mod ngap_ies {
     impl XrDeviceWith2Rx {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -100149,10 +97224,10 @@ pub mod ngap_ies {
     impl Tree for XrDeviceWith2Rx {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(names::XrDeviceWith2Rx[self.index() as usize])
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(value, names::XrDeviceWith2Rx)?])
         }
     }
     #[cfg(feature = "serde")]
@@ -100168,6 +97243,8 @@ pub mod ngap_ies {
 )]
 pub mod ngap_pdu_contents {
     use super::*;
+    #[cfg(feature = "inspect")]
+    use crate::inspect_registry::names;
     use alloc::borrow::Cow;
     use alloc::vec::Vec;
     #[cfg(feature = "inspect")]
@@ -100225,7 +97302,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::AIOTSessionReleaseCommand)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -100282,7 +97359,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::AIOTSessionReleaseComplete)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -100339,7 +97416,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::AIOTSessionReleaseRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -100396,7 +97473,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::AMFCPRelocationIndication)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -100453,7 +97530,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::AMFConfigurationUpdate)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -100510,7 +97587,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::AMFConfigurationUpdateAcknowledge)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -100567,7 +97644,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::AMFConfigurationUpdateFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -100624,7 +97701,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::AMFStatusIndication)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -100644,9 +97721,6 @@ pub mod ngap_pdu_contents {
     impl AerialUEFlightInformationOngoingReportingFailed {
         /// The values in the order of their indexes in PER.
         pub(crate) const VALUES: [Self; 1] = [Self::R_true];
-        /// The names that ASN.1 gives the values, in the same order.
-        #[cfg(feature = "inspect")]
-        pub(crate) const NAMES: [&'static str; 1] = ["true"];
         /// The index of the value in PER.
         #[inline]
         fn index(&self) -> u64 {
@@ -100670,10 +97744,15 @@ pub mod ngap_pdu_contents {
     impl Tree for AerialUEFlightInformationOngoingReportingFailed {
         const NAME: &'static str = <Self as AsnType>::NAME;
         fn to_tree(&self) -> Value {
-            json::text(Self::NAMES[self.index() as usize])
+            json::text(
+                names::AerialUEFlightInformationOngoingReportingFailed[self.index() as usize],
+            )
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            Ok(Self::VALUES[reading.named(value, &Self::NAMES)?])
+            Ok(Self::VALUES[reading.named(
+                value,
+                names::AerialUEFlightInformationOngoingReportingFailed,
+            )?])
         }
     }
     #[cfg(feature = "serde")]
@@ -100727,7 +97806,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::BroadcastSessionModificationFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -100784,7 +97863,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::BroadcastSessionModificationRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -100841,7 +97920,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::BroadcastSessionModificationResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -100898,7 +97977,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::BroadcastSessionReleaseRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -100955,7 +98034,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::BroadcastSessionReleaseRequired)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -101012,7 +98091,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::BroadcastSessionReleaseResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -101069,7 +98148,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::BroadcastSessionSetupFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -101126,7 +98205,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::BroadcastSessionSetupRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -101183,7 +98262,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::BroadcastSessionSetupResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -101240,7 +98319,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::BroadcastSessionTransportFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -101297,7 +98376,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::BroadcastSessionTransportRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -101354,7 +98433,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::BroadcastSessionTransportResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -101411,7 +98490,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::CellTrafficTrace)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -101468,7 +98547,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::CommandFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -101525,7 +98604,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::CommandRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -101582,7 +98661,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::CommandResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -101639,7 +98718,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::ConnectionEstablishmentIndication)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -101696,7 +98775,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::DeactivateTrace)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -101753,7 +98832,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::DistributionReleaseRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -101810,7 +98889,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::DistributionReleaseResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -101867,7 +98946,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::DistributionSetupFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -101924,7 +99003,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::DistributionSetupRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -101981,7 +99060,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::DistributionSetupResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -102038,7 +99117,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::DownlinkNASTransport)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -102095,7 +99174,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::DownlinkNonUEAssociatedNRPPaTransport)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -102152,7 +99231,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::DownlinkRANConfigurationTransfer)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -102209,7 +99288,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::DownlinkRANEarlyStatusTransfer)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -102266,7 +99345,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::DownlinkRANStatusTransfer)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -102323,7 +99402,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::DownlinkRIMInformationTransfer)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -102380,7 +99459,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::DownlinkUEAssociatedNRPPaTransport)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -102437,7 +99516,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::ErrorIndication)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -102494,7 +99573,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::HandoverCancel)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -102551,7 +99630,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::HandoverCancelAcknowledge)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -102608,7 +99687,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::HandoverCommand)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -102665,7 +99744,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::HandoverFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -102722,7 +99801,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::HandoverNotify)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -102779,7 +99858,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::HandoverPreparationFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -102836,7 +99915,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::HandoverRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -102893,7 +99972,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::HandoverRequestAcknowledge)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -102950,7 +100029,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::HandoverRequired)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -103007,7 +100086,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::HandoverSuccess)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -103064,7 +100143,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::InitialContextSetupFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -103121,7 +100200,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::InitialContextSetupRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -103178,7 +100257,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::InitialContextSetupResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -103235,7 +100314,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::InitialUEMessage)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -103292,7 +100371,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::InventoryFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -103349,7 +100428,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::InventoryReport)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -103406,7 +100485,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::InventoryRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -103463,7 +100542,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::InventoryResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -103520,7 +100599,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::LocationReport)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -103577,7 +100656,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::LocationReportingControl)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -103634,7 +100713,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::LocationReportingFailureIndication)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -103691,7 +100770,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::MTCommunicationHandlingFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -103748,7 +100827,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::MTCommunicationHandlingRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -103805,7 +100884,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::MTCommunicationHandlingResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -103862,7 +100941,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::MulticastGroupPaging)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -103919,7 +100998,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::MulticastSessionActivationFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -103976,7 +101055,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::MulticastSessionActivationRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -104033,7 +101112,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::MulticastSessionActivationResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -104090,7 +101169,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::MulticastSessionDeactivationRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -104147,7 +101226,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::MulticastSessionDeactivationResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -104204,7 +101283,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::MulticastSessionUpdateFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -104261,7 +101340,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::MulticastSessionUpdateRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -104318,7 +101397,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::MulticastSessionUpdateResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -104375,7 +101454,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::NASNonDeliveryIndication)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -104432,7 +101511,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::NGRemovalFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -104489,7 +101568,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::NGRemovalRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -104546,7 +101625,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::NGRemovalResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -104603,7 +101682,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::NGReset)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -104660,7 +101739,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::NGResetAcknowledge)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -104717,7 +101796,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::NGSetupFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -104774,7 +101853,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::NGSetupRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -104831,7 +101910,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::NGSetupResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -104888,7 +101967,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::OverloadStart)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -104945,7 +102024,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::OverloadStop)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -105002,7 +102081,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::PDUSessionResourceModifyConfirm)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -105059,7 +102138,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::PDUSessionResourceModifyIndication)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -105116,7 +102195,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::PDUSessionResourceModifyRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -105173,7 +102252,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::PDUSessionResourceModifyResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -105230,7 +102309,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::PDUSessionResourceNotify)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -105287,7 +102366,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::PDUSessionResourceReleaseCommand)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -105344,7 +102423,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::PDUSessionResourceReleaseResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -105401,7 +102480,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::PDUSessionResourceSetupRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -105458,7 +102537,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::PDUSessionResourceSetupResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -105515,7 +102594,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::PWSCancelRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -105572,7 +102651,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::PWSCancelResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -105629,7 +102708,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::PWSFailureIndication)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -105686,7 +102765,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::PWSRestartIndication)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -105743,7 +102822,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::Paging)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -105800,7 +102879,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::PathSwitchRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -105857,7 +102936,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::PathSwitchRequestAcknowledge)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -105914,7 +102993,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::PathSwitchRequestFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -105983,7 +103062,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["id", "criticality", "value"])?;
+            let members = reading.members(value, names::AnonymousPrivateMessagePrivateIEs)?;
             let id = reading.member(&members, "id", PrivateIEID::from_tree)?;
             let criticality = reading.member(&members, "criticality", Criticality::from_tree)?;
             let value = reading.member(&members, "value", |value, reading| {
@@ -106106,7 +103185,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["privateIEs"])?;
+            let members = reading.members(value, names::PrivateMessage)?;
             let private_ies =
                 reading.member(&members, "privateIEs", PrivateMessagePrivateIEs::from_tree)?;
             Ok(Self { private_ies })
@@ -106163,7 +103242,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::RANCPRelocationIndication)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -106220,7 +103299,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::RANConfigurationUpdate)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -106277,7 +103356,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::RANConfigurationUpdateAcknowledge)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -106334,7 +103413,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::RANConfigurationUpdateFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -106391,7 +103470,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::RANPagingRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -106448,7 +103527,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::RRCInactiveTransitionReport)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -106505,7 +103584,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::RerouteNASRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -106562,7 +103641,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::RetrieveUEInformation)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -106619,7 +103698,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::SecondaryRATDataUsageReport)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -106676,7 +103755,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::TimingSynchronisationStatusFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -106733,7 +103812,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::TimingSynchronisationStatusReport)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -106790,7 +103869,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::TimingSynchronisationStatusRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -106847,7 +103926,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::TimingSynchronisationStatusResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -106904,7 +103983,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::TraceFailureIndication)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -106961,7 +104040,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::TraceStart)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -107018,7 +104097,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UEContextModificationFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -107075,7 +104154,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UEContextModificationRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -107132,7 +104211,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UEContextModificationResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -107189,7 +104268,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UEContextReleaseCommand)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -107246,7 +104325,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UEContextReleaseComplete)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -107303,7 +104382,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UEContextReleaseRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -107360,7 +104439,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UEContextResumeFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -107417,7 +104496,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UEContextResumeRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -107474,7 +104553,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UEContextResumeResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -107531,7 +104610,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UEContextSuspendFailure)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -107588,7 +104667,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UEContextSuspendRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -107645,7 +104724,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UEContextSuspendResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -107702,7 +104781,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UEInformationTransfer)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -107759,7 +104838,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UERadioCapabilityCheckRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -107816,7 +104895,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UERadioCapabilityCheckResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -107873,7 +104952,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UERadioCapabilityIDMappingRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -107930,7 +105009,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UERadioCapabilityIDMappingResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -107987,7 +105066,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UERadioCapabilityInfoIndication)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -108044,7 +105123,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UETNLABindingReleaseRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -108101,7 +105180,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UplinkNASTransport)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -108158,7 +105237,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UplinkNonUEAssociatedNRPPaTransport)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -108215,7 +105294,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UplinkRANConfigurationTransfer)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -108272,7 +105351,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UplinkRANEarlyStatusTransfer)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -108329,7 +105408,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UplinkRANStatusTransfer)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -108386,7 +105465,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UplinkRIMInformationTransfer)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -108443,7 +105522,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::UplinkUEAssociatedNRPPaTransport)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -108500,7 +105579,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::WriteReplaceWarningRequest)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -108557,7 +105636,7 @@ pub mod ngap_pdu_contents {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["protocolIEs"])?;
+            let members = reading.members(value, names::WriteReplaceWarningResponse)?;
             let protocol_ies =
                 reading.member(&members, "protocolIEs", ProtocolIEContainer::from_tree)?;
             Ok(Self { protocol_ies })
@@ -108576,6 +105655,8 @@ pub mod ngap_pdu_contents {
 )]
 pub mod ngap_pdu_descriptions {
     use super::*;
+    #[cfg(feature = "inspect")]
+    use crate::inspect_registry::names;
     use alloc::borrow::Cow;
     use alloc::vec::Vec;
     #[cfg(feature = "inspect")]
@@ -108671,7 +105752,7 @@ pub mod ngap_pdu_descriptions {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["procedureCode", "criticality", "value"])?;
+            let members = reading.members(value, names::InitiatingMessage)?;
             let procedure_code =
                 reading.member(&members, "procedureCode", ProcedureCode::from_tree)?;
             let criticality = reading.member(&members, "criticality", Criticality::from_tree)?;
@@ -108774,14 +105855,7 @@ pub mod ngap_pdu_descriptions {
             }
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let (position, value) = reading.alternative(
-                value,
-                &[
-                    "initiatingMessage",
-                    "successfulOutcome",
-                    "unsuccessfulOutcome",
-                ],
-            )?;
+            let (position, value) = reading.alternative(value, names::NGAPPDU)?;
             Ok(match position {
                 0 => Self::initiatingMessage(reading.within(
                     "initiatingMessage",
@@ -108888,7 +105962,7 @@ pub mod ngap_pdu_descriptions {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["procedureCode", "criticality", "value"])?;
+            let members = reading.members(value, names::SuccessfulOutcome)?;
             let procedure_code =
                 reading.member(&members, "procedureCode", ProcedureCode::from_tree)?;
             let criticality = reading.member(&members, "criticality", Criticality::from_tree)?;
@@ -108991,7 +106065,7 @@ pub mod ngap_pdu_descriptions {
             members.finish()
         }
         fn from_tree(value: &Value, reading: &mut Reading) -> Result<Self, Refused> {
-            let members = reading.members(value, &["procedureCode", "criticality", "value"])?;
+            let members = reading.members(value, names::UnsuccessfulOutcome)?;
             let procedure_code =
                 reading.member(&members, "procedureCode", ProcedureCode::from_tree)?;
             let criticality = reading.member(&members, "criticality", Criticality::from_tree)?;

@@ -626,7 +626,7 @@ mod tests {
         let bytes = pdu.encode().expect("encode PDU");
         let decoded = NGAPPDU::decode(&bytes).expect("decode PDU");
         assert_eq!(pdu, decoded);
-        assert_eq!(decoded.procedure_name(), "UEContextReleaseRequest");
+        assert_eq!(decoded.kind(), crate::NgapPduKind::UEContextReleaseRequest);
         assert_eq!(decoded.direction(), crate::Direction::Initiating);
     }
 }

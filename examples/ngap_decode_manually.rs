@@ -119,8 +119,8 @@ fn main() {
 
     println!("\n=== Decoded: {decoded} ===");
     println!(
-        "Procedure: {}, Direction: {}\n",
-        decoded.procedure_name(),
+        "Message: {:?}, Direction: {}\n",
+        decoded.kind(),
         decoded.direction()
     );
 

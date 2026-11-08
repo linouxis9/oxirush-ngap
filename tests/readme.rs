@@ -116,7 +116,7 @@ fn block_1() {
         extract_ngap_ies!(pdu, UEContextReleaseRequest,
             req amf_id: u64 = AMF_UE_NGAP_ID(id),
             req ran_id: u32 = RAN_UE_NGAP_ID(id),
-            opt cause: Cause = Cause(cause) => cause,
+            opt cause: Cause = Cause(cause),
         );
         println!("AMF UE {amf_id}, RAN UE {ran_id}, cause {cause:?}");
 
@@ -165,7 +165,7 @@ fn block_2() {
         let received = NGAPPDU::decode(&octets)?;
         extract_ngap_ies!(received, NGSetupRequest,
             opt name: String = RANNodeName(name) => name.0.into_owned(),
-            req areas: SupportedTAList = SupportedTAList(areas) => areas,
+            req areas: SupportedTAList = SupportedTAList(areas),
         );
         println!("{received}: {}, {} tracking area", name.unwrap_or_default(), areas.0.len());
         let guamis = ServedGUAMIItem {
@@ -207,7 +207,7 @@ fn block_2() {
         let received = NGAPPDU::decode(&octets)?;
         extract_ngap_ies!(received, InitialUEMessage,
             req ran_id: u32 = RAN_UE_NGAP_ID(id),
-            req nas: NASPDU = NAS_PDU(nas) => nas,
+            req nas: NASPDU = NAS_PDU(nas),
         );
         println!("{received}: a NAS-PDU of {} octets", nas.0.len());
 
@@ -242,7 +242,7 @@ fn block_2() {
         let received = NGAPPDU::decode(&octets)?;
         let deviations = received.check()?;
         extract_ngap_ies!(received, InitialContextSetupRequest,
-            req key: SecurityKey = SecurityKey(key) => key,
+            req key: SecurityKey = SecurityKey(key),
         );
         println!("{received}: {} deviations, KgNB as sent: {}", deviations.len(), key.0.as_octets() == k_gnb);
         Ok(())
@@ -329,7 +329,7 @@ fn block_5() {
         let octets = hex::decode("0000010086000100")?;
         let transfer: PDUSessionResourceSetupRequestTransfer = oxirush_ngap::decode(&octets)?;
         extract_ngap_ies!(transfer, PDUSessionResourceSetupRequestTransfer,
-            req kind: PDUSessionType = PDUSessionType(kind) => kind,
+            req kind: PDUSessionType = PDUSessionType(kind),
         );
         println!("{kind:?}");
 

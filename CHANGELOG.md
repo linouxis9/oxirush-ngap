@@ -50,6 +50,8 @@ All notable changes to `oxirush-ngap` are recorded here.
   once for both protocols, with the same documentation.
 - `decode` and `encode` of a PDU, and `set_protocol_ies`, are the codecs of the
   types: a PDU is read and written by one implementation.
+- An IE has one name in the macros and in `ie`: the one after its identifier.
+  The 98 IEs that were also named after their type no longer are.
 
 ### Removed
 
@@ -69,6 +71,8 @@ All notable changes to `oxirush-ngap` are recorded here.
   `ngap::AMF_UE_NGAP_ID` for `AMFUENGAPID`.
 - The examples in the documentation of a few generated types: the README has
   each task.
+- `procedure_name()`: `kind()` names the message, and `Display` shows it.
+- `VERSION`, which is `env!("CARGO_PKG_VERSION")`.
 
 ### Migration
 

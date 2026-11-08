@@ -45,7 +45,7 @@ fn handle_handover_required(pdu: &NGAPPDU<'_>) -> Result<Vec<String>, Error> {
         req amf_id: u64 = AMF_UE_NGAP_ID(id),
         req ran_id: u32 = RAN_UE_NGAP_ID(id),
 
-        opt ho_type: HandoverType = HandoverType(value) => value,
+        opt ho_type: HandoverType = HandoverType(value),
         opt cause_str: String = Cause(cause) => format!("{cause:?}"),
 
         opt target: String = TargetID(target_value) => match target_value {

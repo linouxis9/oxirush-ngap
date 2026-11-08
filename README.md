@@ -21,7 +21,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     extract_ngap_ies!(pdu, UEContextReleaseRequest,
         req amf_id: u64 = AMF_UE_NGAP_ID(id),
         req ran_id: u32 = RAN_UE_NGAP_ID(id),
-        opt cause: Cause = Cause(cause) => cause,
+        opt cause: Cause = Cause(cause),
     );
     println!("AMF UE {amf_id}, RAN UE {ran_id}, cause {cause:?}");
 
@@ -102,7 +102,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let received = NGAPPDU::decode(&octets)?;
     extract_ngap_ies!(received, NGSetupRequest,
         opt name: String = RANNodeName(name) => name.0.into_owned(),
-        req areas: SupportedTAList = SupportedTAList(areas) => areas,
+        req areas: SupportedTAList = SupportedTAList(areas),
     );
     println!("{received}: {}, {} tracking area", name.unwrap_or_default(), areas.0.len());
     let guamis = ServedGUAMIItem {
@@ -144,7 +144,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let received = NGAPPDU::decode(&octets)?;
     extract_ngap_ies!(received, InitialUEMessage,
         req ran_id: u32 = RAN_UE_NGAP_ID(id),
-        req nas: NASPDU = NAS_PDU(nas) => nas,
+        req nas: NASPDU = NAS_PDU(nas),
     );
     println!("{received}: a NAS-PDU of {} octets", nas.0.len());
 
@@ -179,7 +179,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let received = NGAPPDU::decode(&octets)?;
     let deviations = received.check()?;
     extract_ngap_ies!(received, InitialContextSetupRequest,
-        req key: SecurityKey = SecurityKey(key) => key,
+        req key: SecurityKey = SecurityKey(key),
     );
     println!("{received}: {} deviations, KgNB as sent: {}", deviations.len(), key.0.as_octets() == k_gnb);
     Ok(())
@@ -242,7 +242,7 @@ NGSetupFailure is not handled here
 |--------|------|
 | `decode` | Decode one PDU, which borrows from the octets and copies nothing |
 | `encode` | Encode it |
-| `procedure_code`, `procedure_name`, `direction`, `kind` | `42`, `"UEContextReleaseRequest"`, `Direction::Initiating`, and an `NgapPduKind` (`Other` for a procedure that the specification lacks in that direction) |
+| `procedure_code`, `direction`, `kind` | `42`, `Direction::Initiating`, and an `NgapPduKind` (`Other` for a procedure that the specification lacks in that direction) |
 | `decode_value`, `message` | The message as its type |
 | `protocol_ies`, `set_protocol_ies` | The IEs of the message, whatever it is |
 | `ie::<T>`, `ies::<T>` | The first IE of a type, or every one in order. A message and a transfer have them too |
@@ -324,7 +324,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let octets = hex::decode("0000010086000100")?;
     let transfer: PDUSessionResourceSetupRequestTransfer = oxirush_ngap::decode(&octets)?;
     extract_ngap_ies!(transfer, PDUSessionResourceSetupRequestTransfer,
-        req kind: PDUSessionType = PDUSessionType(kind) => kind,
+        req kind: PDUSessionType = PDUSessionType(kind),
     );
     println!("{kind:?}");
 

@@ -25,16 +25,15 @@
 //!     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500")?;
 //!     let pdu = NGAPPDU::decode(&bytes)?;
 //!     assert_eq!((pdu.procedure_code(), pdu.direction()), (42, Direction::Initiating));
-//!     println!("{}", pdu.procedure_name());
-//!     # assert_eq!(pdu.procedure_name(), "UEContextReleaseRequest");
+//!     println!("{:?}", pdu.kind());
+//!     # assert_eq!(pdu.kind(), NgapPduKind::UEContextReleaseRequest);
 //!
-//!     // Read its IEs by name. An `opt` field is `None` when its IE is not there,
-//!     // and what follows `=>` is what the field keeps of the decoded value
+//!     // Read its IEs by name: an `opt` field is `None` when its IE is not there
 //!     let request: UEContextReleaseRequest = pdu.decode_value()?;
 //!     extract_ngap_ies!(request, UEContextReleaseRequest,
 //!         opt amf_id: u64 = AMF_UE_NGAP_ID(id),
 //!         opt ran_id: u32 = RAN_UE_NGAP_ID(id),
-//!         opt cause: Cause = Cause(cause) => cause,
+//!         opt cause: Cause = Cause(cause),
 //!     );
 //!     println!("AMF={amf_id:?} RAN={ran_id:?} cause={cause:?}");
 //!     # assert_eq!(format!("AMF={amf_id:?} RAN={ran_id:?} cause={cause:?}"), "AMF=Some(42) RAN=Some(7) cause=Some(radioNetwork(user_inactivity))");
@@ -153,7 +152,7 @@
 //!     let message: InitialUEMessage = pdu.decode_value()?;
 //!     extract_ngap_ies!(message, InitialUEMessage,
 //!         req ran_id: u32 = RAN_UE_NGAP_ID(id),
-//!         req nas: NASPDU = NAS_PDU(nas) => nas,
+//!         req nas: NASPDU = NAS_PDU(nas),
 //!     );
 //!     // Kept beyond the PDU: the octets are copied here, once
 //!     Ok(Ue { ran_id, nas: nas.into_owned() })
@@ -184,7 +183,7 @@
 //!     let pdu = NGAPPDU::decode(&received)?;
 //!     let message: UplinkNASTransport = pdu.decode_value()?;
 //!     extract_ngap_ies!(message, UplinkNASTransport,
-//!         req nas: NASPDU = NAS_PDU(nas) => nas,
+//!         req nas: NASPDU = NAS_PDU(nas),
 //!     );
 //!     // `nas` is a slice of `received`, here and after the await
 //!     deliver(&nas.0).await;
@@ -371,6 +370,3 @@ pub use registry::ie;
 #[cfg(all(doctest, feature = "serde"))]
 #[doc = include_str!("../README.md")]
 struct Readme;
-
-/// Version of oxirush-ngap.
-pub const VERSION: &str = env!("CARGO_PKG_VERSION");

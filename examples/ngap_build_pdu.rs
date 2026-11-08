@@ -206,8 +206,8 @@ fn print_and_encode(pdu: &NGAPPDU<'_>) -> Result<(), Error> {
     // Display example: "NGSetupRequest (procedure 21, initiating message)".
     println!("{pdu}");
     println!(
-        "  procedure: {}  direction: {}  code: {}",
-        pdu.procedure_name(),
+        "  message: {:?}  direction: {}  code: {}",
+        pdu.kind(),
         pdu.direction(),
         pdu.procedure_code()
     );

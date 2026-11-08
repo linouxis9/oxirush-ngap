@@ -22,20 +22,17 @@
 //!     REJECT RAN_UE_NGAP_ID(7u32),
 //!     IGNORE Cause(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)),
 //! )?;
-//! assert_eq!(pdu.procedure_name(), "UEContextReleaseRequest");
+//! assert_eq!(pdu.kind(), NgapPduKind::UEContextReleaseRequest);
 //! # Ok::<(), oxirush_ngap::Error>(())
 //! ```
 //!
 //! The macro gives a `Result`. A value that does not encode, as an integer outside
 //! its constraint, is an [`Error`](crate::Error) of the kind `Encode`, and no panic.
 //!
-//! Arguments:
-//! - `$direction` — `InitiatingMessage`, `SuccessfulOutcome`, or `UnsuccessfulOutcome`
-//! - `$proc` — procedure name, used to derive its ASN.1 procedure code
-//! - `$outer_crit` — outer criticality: `REJECT`, `IGNORE`, or `NOTIFY`, or none
-//! - `$msg` — message struct name, such as `UEContextReleaseRequest`
-//! - IEs — `$ie_crit $ie_name($ie_value)`, with the IE ID derived from its name, and
-//!   `$ie_crit` as the outer criticality
+//! The arguments: the criticality of the PDU, `REJECT`, `IGNORE` or `NOTIFY`, or none,
+//! then the name of the type of the message, which gives the direction and the
+//! procedure code, then each IE as its criticality, or none, and its name with its
+//! value: `REJECT AMF_UE_NGAP_ID(1u64)`.
 //!
 //! A criticality that is left out is the one that the specification assigns: that of
 //! the procedure for the PDU, which is [`Message::CRITICALITY`](crate::Message) of its
@@ -253,7 +250,7 @@
 /// // The cause of a request, when it has one that is read
 /// fn cause(request: &UEContextReleaseRequest<'_>) -> Option<Cause> {
 ///     extract_ngap_ies!(request, UEContextReleaseRequest,
-///         lax cause: Cause = Cause(value) => value,
+///         lax cause: Cause = Cause(value),
 ///     );
 ///     cause
 /// }

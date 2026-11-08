@@ -73,3 +73,9 @@ doc-scrape-examples = false
 name = "ngap_inspect"
 required-features = ["inspect"]
 doc-scrape-examples = false
+
+# The test of the blocks of the README, which protocols/tests/readme.py of oxirush-aper
+# writes with the features that it requires here.
+[[test]]
+name = "readme"
+required-features = ["serde"]

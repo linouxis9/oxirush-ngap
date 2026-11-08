@@ -25,7 +25,9 @@
 //! IE whose value does not encode back to the octets received is its octets in the tree,
 //! `{"octets": "…"}`: one that did not decode, one that holds what a later version of its
 //! type adds, which the value has no place for, and one in another form than X.691 gives
-//! it. An edit of a tree changes the octets of the IEs that it changes, and of no other.
+//! it. An edit of a tree changes the octets of the IEs that it changes, and of no other:
+//! there is no `with_tree` that keeps the octets of the others, as there is none in
+//! oxirush-nas, since [`from_tree`] writes them again.
 //!
 //! # Examples
 //!

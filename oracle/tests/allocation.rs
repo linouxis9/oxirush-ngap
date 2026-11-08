@@ -1,6 +1,7 @@
 //! What the list codec that rasn derives reserves for a count that a peer claims, beside
 //! what the reader of the crate reserves for it: the reason why the oracle has a list
-//! codec of its own, and what `tests/allocation.rs` of the crate holds the crate to.
+//! codec of its own, and what the test `allocation` of TOY, the protocol of the tests of
+//! oxirush-aper, holds the generated crates to.
 
 use std::alloc::{GlobalAlloc, Layout, System};
 use std::sync::atomic::{AtomicUsize, Ordering};

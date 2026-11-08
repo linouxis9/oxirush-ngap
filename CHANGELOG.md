@@ -72,6 +72,14 @@ All notable changes to `oxirush-ngap` are recorded here.
   views (`/ngap/X/value`, `octets` of an IE that has a value, `_raw_value`,
   `_edited`, `_decode_error`, `_lossy`, `decoded`, entries with an `id`). A tree and
   its paths do what a program did with a view.
+  There is no `with_tree`, as there is none in oxirush-nas: `from_tree` writes the
+  octets that each IE was received as for every IE that an edit leaves, which is
+  what `with_view` kept.
+- The tests of what the generated crates share, which oxirush-ngap and
+  oxirush-s1ap held twice: they are those of TOY, the protocol that the generator
+  of oxirush-aper writes from its own ASN.1 (`protocols/toy/` there). The crate
+  keeps the tests of its fixtures, captures and vectors, its forms, its helpers,
+  its keys, its registry, its handover containers and its feature `serde`.
 - The fuzz target `view`, which is `json` and reads trees.
 - `with_ngap_ie_mut!` and `build_ngap_ie!`.
 - The lookups of `inspect`: `ie_names`, `message_names`, `message_name`,

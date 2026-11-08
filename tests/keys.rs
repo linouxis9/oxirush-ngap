@@ -1,10 +1,9 @@
-//! `Debug` prints no octet of a key: of K_gNB and of the next hop NH, which are a
-//! `SecurityKey`, it shows the length, as does every value that holds one. The octets of
-//! an IE and of a message whose type holds a key are shown by their length too. A tree
-//! is the data of a message, and has the key.
+//! The keys of NGAP that `Debug` prints by their length alone: K_gNB and the next hop
+//! NH, which are a `SecurityKey`, as the generator is told. TOY, the protocol of the
+//! tests of oxirush-aper, has the tests of how a key and what holds one print.
 
 use oxirush_ngap::ngap::*;
-use oxirush_ngap::{Error, build_ngap, extract_ngap_ies};
+use oxirush_ngap::{Error, build_ngap};
 
 /// A key of which every octet is `5a`, and one of which every octet is `a5`.
 const KGNB: [u8; 32] = [0x5a; 32];
@@ -20,26 +19,6 @@ fn has_no_key(printed: &str) -> bool {
 }
 
 #[test]
-fn debug_of_a_key_and_of_what_holds_one_shows_its_length() {
-    let key = SecurityKey::from(KGNB);
-    assert_eq!(format!("{key:?}"), "SecurityKey(256 bits)");
-    let context = SecurityContext {
-        next_hop_chaining_count: NextHopChainingCount(1),
-        next_hop_nh: SecurityKey::from(NH),
-        ie_extensions: None,
-    };
-    let printed = format!("{context:?}");
-    assert!(has_no_key(&printed), "{printed}");
-    assert!(
-        printed.contains("next_hop_nh: SecurityKey(256 bits)"),
-        "{printed}"
-    );
-    // The key is the value that it was, and compares as such.
-    assert_eq!(key, SecurityKey::from(KGNB));
-    assert_ne!(key, SecurityKey::from(NH));
-}
-
-#[test]
 fn debug_of_a_message_with_a_key_shows_the_length_of_its_octets() -> Result<(), Error> {
     // An INITIAL CONTEXT SETUP REQUEST with K_gNB
     let pdu = build_ngap!(REJECT InitialContextSetupRequest,
@@ -49,41 +28,9 @@ fn debug_of_a_message_with_a_key_shows_the_length_of_its_octets() -> Result<(), 
     )?;
     let octets = pdu.encode()?;
     assert!(hex::encode(&octets).contains(&"5a".repeat(32)));
-
-    // The PDU, which owns its octets or borrows them
-    for pdu in [NGAPPDU::decode(&octets)?, NGAPPDU::decode(&octets)?] {
-        let printed = format!("{pdu:?}");
-        assert!(has_no_key(&printed), "{printed}");
-        assert!(
-            printed.contains(&format!("value: {} octets", octets.len() - 4)),
-            "{printed}"
-        );
-        assert_eq!(
-            pdu.to_string(),
-            "InitialContextSetupRequest (procedure 14, initiating message), AMF-UE-NGAP-ID 1, \
-             RAN-UE-NGAP-ID 7"
-        );
-
-        // Its IEs: the two identifiers are printed, and the key is 32 octets
-        let ies = pdu.protocol_ies()?;
-        let printed = format!("{ies:?}");
-        assert!(has_no_key(&printed), "{printed}");
-        assert!(printed.contains("value: 0001"), "{printed}");
-        assert!(
-            printed.contains("id: ProtocolIEID(94), criticality: Reject, value: 32 octets"),
-            "{printed}"
-        );
-
-        // Its message, and the key that is read from it
-        let message: InitialContextSetupRequest = pdu.decode_value()?;
-        let printed = format!("{message:?}");
-        assert!(has_no_key(&printed), "{printed}");
-        extract_ngap_ies!(message, InitialContextSetupRequest,
-            req key: SecurityKey = SecurityKey(key) => key,
-        );
-        assert_eq!(format!("{key:?}"), "SecurityKey(256 bits)");
-        assert_eq!(key, SecurityKey::from(KGNB));
-    }
+    let printed = format!("{:?} {:?}", NGAPPDU::decode(&octets)?, pdu.protocol_ies()?);
+    assert!(has_no_key(&printed), "{printed}");
+    assert!(printed.contains("value: 32 octets"), "{printed}");
     Ok(())
 }
 
@@ -108,72 +55,4 @@ fn debug_of_a_message_with_a_security_context_shows_no_next_hop() -> Result<(), 
         "{printed}"
     );
     Ok(())
-}
-
-#[test]
-fn debug_of_a_message_without_a_key_shows_its_octets() -> Result<(), Error> {
-    // An UPLINK NAS TRANSPORT: its object set has no IE that holds a key
-    let pdu = build_ngap!(IGNORE UplinkNASTransport,
-        REJECT AMF_UE_NGAP_ID(1u64),
-        REJECT RAN_UE_NGAP_ID(7u32),
-        REJECT NAS_PDU(vec![0x7e, 0x00, 0x5d]),
-    )?;
-    let printed = format!("{pdu:?}");
-    assert!(printed.contains("7e005d"), "{printed}");
-    let printed = format!("{:?}", pdu.protocol_ies()?);
-    assert!(printed.contains("value: 037e005d"), "{printed}");
-    Ok(())
-}
-
-#[cfg(feature = "inspect")]
-#[test]
-fn a_tree_has_the_key() -> Result<(), Error> {
-    let pdu = build_ngap!(REJECT InitialContextSetupRequest,
-        REJECT AMF_UE_NGAP_ID(1u64),
-        REJECT RAN_UE_NGAP_ID(7u32),
-        REJECT SecurityKey(SecurityKey::from(KGNB)),
-    )?;
-    let key = "5a".repeat(32);
-    let written = pdu.to_tree().to_string().to_ascii_lowercase();
-    assert!(written.contains(&key), "{written}");
-    Ok(())
-}
-
-/// The review of the release candidate found 16 octets of a K_gNB in the error of a tree
-/// that wrote the key in another form than its own: what is written in the place of a
-/// key, or of a next hop, is not shown in a refusal, which still says why.
-#[cfg(feature = "inspect")]
-#[test]
-fn a_refusal_of_a_key_shows_nothing_of_what_is_written() {
-    use oxirush_ngap::tree;
-
-    let key = "5a".repeat(32);
-    let wrong = |value: tree::Value| {
-        let tree =
-            tree!({"message": "InitialContextSetupRequest", "ies": [{"SecurityKey": value}]});
-        NGAPPDU::from_tree(&tree).unwrap_err().to_string()
-    };
-    for (written, why) in [
-        (
-            tree!({"key": key.clone()}),
-            "a bit string of 256 bits is expected, in hexadecimal, and a secret value is written",
-        ),
-        (
-            tree!(format!("{key}5")),
-            "a secret value is not hexadecimal, two digits for each octet",
-        ),
-        (
-            tree!(key[..62].to_string()),
-            "31 octets are written for a bit string of 256 bits, which has 32",
-        ),
-    ] {
-        let error = wrong(written);
-        assert!(has_no_key(&error), "{error}");
-        assert!(error.contains(why), "{error}");
-    }
-    let next_hop =
-        tree!({"SecurityContext": {"nextHopChainingCount": 1, "nextHopNH": [key.clone()]}});
-    let tree = tree!({"message": "InitialContextSetupRequest", "ies": [next_hop]});
-    let error = NGAPPDU::from_tree(&tree).unwrap_err().to_string();
-    assert!(has_no_key(&error), "{error}");
 }

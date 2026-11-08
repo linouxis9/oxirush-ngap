@@ -52,6 +52,9 @@ All notable changes to `oxirush-ngap` are recorded here.
   types: a PDU is read and written by one implementation.
 - An IE has one name in the macros and in `ie`: the one after its identifier.
   The 98 IEs that were also named after their type no longer are.
+- `helpers::plmn` is `Plmn::new` of oxirush-utils, whose errors it gives, and
+  `eutra_cgi` takes the ng-eNB ID, whose alternative has its bits:
+  `eutra_cgi(plmn, &NgENBID::macroNgENB_ID(Bits::new(id, 20)?), cell)`.
 
 ### Removed
 
@@ -73,6 +76,10 @@ All notable changes to `oxirush-ngap` are recorded here.
   each task.
 - `procedure_name()`: `kind()` names the message, and `Display` shows it.
 - `VERSION`, which is `env!("CARGO_PKG_VERSION")`.
+- `helpers::plmn_from`, which `Plmn::try_from(identity)` is; `NgEnbKind`, which
+  the alternatives of `NgENBID` are, and `global_ng_enb_id`; and
+  `AMF_REGION_ID_BITS`, `AMF_SET_ID_BITS` and `AMF_POINTER_BITS`, which the
+  types say.
 
 ### Migration
 
@@ -86,6 +93,8 @@ All notable changes to `oxirush-ngap` are recorded here.
 | `pdu.message::<M>()?` | `pdu.decode_value::<M>()?`, and `.into_owned()` to keep it |
 | `decode_open_type::<T>(&octets)`, `encode_open_type(&value)` | `oxirush_ngap::decode::<T>(&octets)`, `oxirush_ngap::encode(&value)` (a `Vec<u8>`: `.into()` gives `Octets`) |
 | `AMF_UE_NGAP_ID(42)` (the type) | `AMFUENGAPID(42)` |
+| `plmn_from(&identity)` | `Plmn::try_from(identity)`, its `mcc()` and its `mnc()` |
+| `eutra_cgi(plmn, NgEnbKind::Macro, id, cell)` | `eutra_cgi(plmn, &NgENBID::macroNgENB_ID(Bits::new(id, 20)?), cell)` |
 | `TAI::new(plmn, tac, None)` | `TAI { plmn_identity: plmn, tac, ie_extensions: None }` |
 | `inspect::message_named(name)` gives `("InitiatingMessage", code)` | it gives `(Direction::Initiating, code)` |
 | `tree["message"] == "..."` | `tree["message"] == tree!("...")` (oxirush-utils 0.2.0) |

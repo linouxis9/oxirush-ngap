@@ -12,6 +12,7 @@
 //! # let mut printed = String::new();
 //! # macro_rules! println { ($($argument:tt)*) => { writeln!(printed, $($argument)*).unwrap() } }
 //! use oxirush_ngap::helpers::*;
+//! use oxirush_ngap::{Bits, ngap::NgENBID};
 //!
 //! // A PLMN from its MCC and its MNC, and what is identified within it
 //! let network = plmn("208", "93").unwrap();
@@ -19,8 +20,8 @@
 //! let tracking_area = tai(network, [0x00, 0x00, 0x01]); // TAC
 //! let cell = nr_cgi(network, 0x123456, 24, 1).unwrap(); // gNB of 24 bits, cell
 //! let gnb = global_gnb_id(network, 0x123456, 24).unwrap();
-//! let ng_enb = global_ng_enb_id(network, NgEnbKind::Macro, 0x12345).unwrap();
-//! let lte_cell = eutra_cgi(network, NgEnbKind::Macro, 0x12345, 7).unwrap(); // ng-eNB, cell
+//! let ng_enb = NgENBID::macroNgENB_ID(Bits::new(0x12345, 20).unwrap());
+//! let lte_cell = eutra_cgi(network, &ng_enb, 7).unwrap(); // ng-eNB, cell
 //!
 //! // A bit string from octets, and the NR algorithms of a UE: the first
 //! // octet of its encryption bitmap, then of its integrity bitmap
@@ -30,21 +31,21 @@
 //! // What is no MCC, and an AMF Set ID that does not fit in its 10 bits
 //! println!("{}", plmn("20", "93").unwrap_err());
 //! println!("{}", guami(network, 1, 1024, 0).unwrap_err());
-//! # assert_eq!(printed, r##""20" is not an MCC: it has three digits, 0 to 9
+//! # assert_eq!(printed, r##"`mcc` has 2 digits, and must have 3
 //! # the AMF Set ID 1024 does not fit in 10 bits
 //! # "##);
 //! ```
 //!
 //! ```text
-//! "20" is not an MCC: it has three digits, 0 to 9
+//! `mcc` has 2 digits, and must have 3
 //! the AMF Set ID 1024 does not fit in 10 bits
 //! ```
 //!
 //! A PLMN identity has its digits in the order of TS 38.413 clause 9.3.3.5:
 //! `plmn("310", "410")` is the octets `13 40 01`, where a NAS message has
-//! `13 00 14`. [`plmn_from`] reads the MCC and the MNC of a PLMN identity, and a
-//! gNB ID has the length that it is given, 22 to 32 bits (clause 9.3.1.6), and
-//! an ng-eNB ID that of its kind (clause 9.3.1.8).
+//! `13 00 14`. The `Plmn` of [`identity`](crate::identity) reads the MCC and the
+//! MNC of a PLMN identity. A gNB ID has the length that it is given, 22 to 32 bits
+//! (clause 9.3.1.6), and an ng-eNB ID that of its alternative (clause 9.3.1.8).
 
 use oxirush_aper::{BitString, Bits};
 use oxirush_utils::identity::Plmn;
@@ -62,86 +63,28 @@ fn fits(what: &str, value: u64, bits: u32) -> Result<u64, Error> {
     }
 }
 
-/// The octets of the PLMN identity of an MCC and an MNC: the three digits of `mcc`, and
-/// the two or three of `mnc`, each a number from 0 to 9. `None` for an MNC of another
-/// length, and for a digit over 9.
-///
-/// The order is that of TS 38.413 clause 9.3.3.5, which `Plmn::to_ap_octets` of oxirush-utils
-/// writes: octet 2 has the first digit of a three-digit MNC, and octet 3 its second
-/// and its third, so that 310-410 is `13 40 01`. This is not the order of TS 24.008,
-/// which a NAS message has, where octet 2 has the third digit of the MNC.
-pub(crate) fn plmn_octets(mcc: [u8; 3], mnc: &[u8]) -> Option<[u8; 3]> {
-    Some(Plmn::from_digits(mcc, mnc).ok()?.to_ap_octets())
-}
-
-/// The digits of the MCC and those of the MNC in the octets of a PLMN identity, in the
-/// order of [`plmn_octets`]: the MNC has two after a filler, and three otherwise. `None`
-/// for octets that are not a PLMN identity: a half octet is no digit, where it is not
-/// the filler before an MNC of two digits.
-pub(crate) fn plmn_digits(octets: [u8; 3]) -> Option<(String, String)> {
-    let plmn = Plmn::from_ap_octets(octets).ok()?;
-    Some((plmn.mcc().to_string(), plmn.mnc().to_string()))
-}
-
-/// The digits that `text` is, when it is ASCII digits alone.
-fn digits(text: &str) -> Option<Vec<u8>> {
-    let digits = text.bytes();
-    let digits = digits.map(|digit| digit.is_ascii_digit().then(|| digit - b'0'));
-    digits.collect()
-}
-
-/// Encode MCC/MNC as the three octets of a `PLMNIdentity`, in the order of
-/// TS 38.413 clause 9.3.3.5: `plmn("310", "410")` is `13 40 01`, and `plmn("208", "93")`
-/// is `02 f8 39`.
+/// The PLMN identity of an MCC and an MNC, in the order of TS 38.413 clause 9.3.3.5:
+/// `plmn("310", "410")` is `13 40 01`, and `plmn("208", "93")` is `02 f8 39`. The
+/// `Plmn` of oxirush-utils converts to and from a `PLMNIdentity`, and reads its MCC and
+/// its MNC.
 ///
 /// An error of the kind `Argument` unless `mcc` is three decimal digits and `mnc` two
 /// or three.
 ///
 /// ```
-/// use oxirush_ngap::helpers::{plmn, plmn_from};
+/// use oxirush_ngap::helpers::plmn;
+/// use oxirush_ngap::identity::Plmn;
 ///
 /// let network = plmn("310", "410")?;
 /// assert_eq!(network.0, [0x13, 0x40, 0x01]);
-/// assert_eq!(plmn_from(&network), Some(("310".into(), "410".into())));
+/// let read = Plmn::try_from(network).unwrap();
+/// assert_eq!((read.mcc(), read.mnc()), ("310", "410"));
 /// # Ok::<(), oxirush_ngap::Error>(())
 /// ```
 pub fn plmn(mcc: &str, mnc: &str) -> Result<PLMNIdentity, Error> {
-    let refused = |what: &str, text: &str, has: &str| {
-        Error::argument(format!(
-            "{text:?} is not {what}: it has {has} digits, 0 to 9"
-        ))
-    };
-    let mcc_digits = digits(mcc).and_then(|digits| <[u8; 3]>::try_from(digits).ok());
-    let mcc_digits = mcc_digits.ok_or_else(|| refused("an MCC", mcc, "three"))?;
-    let octets = digits(mnc).and_then(|mnc| plmn_octets(mcc_digits, &mnc));
-    let octets = octets.ok_or_else(|| refused("an MNC", mnc, "two or three"))?;
-    Ok(PLMNIdentity(octets))
+    let plmn = Plmn::new(mcc, mnc).map_err(|error| Error::argument(error.to_string()))?;
+    Ok(PLMNIdentity::from(plmn))
 }
-
-/// Decode a `PLMNIdentity` into MCC and MNC strings, in the order of
-/// TS 38.413 clause 9.3.3.5.
-///
-/// `None` for octets that are not a PLMN identity: a half octet is no digit, where it
-/// is not the filler before an MNC of two digits. `ab cd ef` is none, and so is
-/// `02 f8 f9`.
-///
-/// ```
-/// use oxirush_ngap::helpers::plmn_from;
-/// use oxirush_ngap::ngap::PLMNIdentity;
-///
-/// assert_eq!(plmn_from(&PLMNIdentity([0x02, 0xf8, 0x39])), Some(("208".into(), "93".into())));
-/// assert_eq!(plmn_from(&PLMNIdentity([0xab, 0xcd, 0xef])), None);
-/// ```
-pub fn plmn_from(identity: &PLMNIdentity) -> Option<(String, String)> {
-    plmn_digits(identity.0)
-}
-
-/// AMF Region ID field width.
-pub const AMF_REGION_ID_BITS: usize = 8;
-/// AMF Set ID field width.
-pub const AMF_SET_ID_BITS: usize = 10;
-/// AMF Pointer field width.
-pub const AMF_POINTER_BITS: usize = 6;
 
 /// Build a Globally Unique AMF Identifier.
 ///
@@ -173,8 +116,8 @@ pub fn guami(
     Ok(GUAMI {
         plmn_identity,
         amf_region_id: AMFRegionID(Bits::from(region_id)),
-        amf_set_id: AMFSetID(Bits::low(set_id, AMF_SET_ID_BITS)),
-        amf_pointer: AMFPointer(Bits::low(pointer, AMF_POINTER_BITS)),
+        amf_set_id: AMFSetID(Bits::low(set_id, 10)),
+        amf_pointer: AMFPointer(Bits::low(pointer, 6)),
         ie_extensions: None,
     })
 }
@@ -264,77 +207,45 @@ pub fn global_gnb_id(
     })
 }
 
-/// The kinds of ng-eNB ID of TS 38.413 clause 9.3.1.8, each of the bits that it has: the
-/// leftmost bits of the 28 of the E-UTRA Cell Identity of each cell that the ng-eNB
-/// serves.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub enum NgEnbKind {
-    /// A macro ng-eNB ID, of 20 bits, which leaves 8 bits for the cell.
-    Macro,
-    /// A short macro ng-eNB ID, of 18 bits, which leaves 10 bits for the cell.
-    ShortMacro,
-    /// A long macro ng-eNB ID, of 21 bits, which leaves 7 bits for the cell.
-    LongMacro,
-}
-
-impl NgEnbKind {
-    /// The bits of an ng-eNB ID of this kind.
-    pub const fn bits(self) -> u32 {
-        match self {
-            Self::Macro => 20,
-            Self::ShortMacro => 18,
-            Self::LongMacro => 21,
-        }
-    }
-
-    fn name(self) -> &'static str {
-        match self {
-            Self::Macro => "the macro ng-eNB ID",
-            Self::ShortMacro => "the short macro ng-eNB ID",
-            Self::LongMacro => "the long macro ng-eNB ID",
-        }
-    }
-}
-
-/// Build a `GlobalNgENBID` for an ng-eNB ID of a kind (TS 38.413 clause 9.3.1.8).
+/// Build an E-UTRA Cell Global Identifier from an ng-eNB ID and the cell that the rest
+/// of the 28 bits of the E-UTRA Cell Identity hold: the ng-eNB ID is its leftmost bits,
+/// 20, 18 or 21 as its alternative has them (TS 38.413 clauses 9.3.1.8 and 9.3.1.9).
 ///
-/// An error of the kind `Argument` for an ng-eNB ID that does not fit in the bits of its
-/// kind.
-pub fn global_ng_enb_id(
-    plmn_identity: PLMNIdentity,
-    kind: NgEnbKind,
-    ng_enb_id: u32,
-) -> Result<GlobalNgENBID, Error> {
-    let bits = kind.bits();
-    let id = Bits::low(fits(kind.name(), ng_enb_id.into(), bits)?, bits as usize);
-    let id = match kind {
-        NgEnbKind::Macro => NgENBID::macroNgENB_ID(id),
-        NgEnbKind::ShortMacro => NgENBID::shortMacroNgENB_ID(id),
-        NgEnbKind::LongMacro => NgENBID::longMacroNgENB_ID(id),
-    };
-    Ok(GlobalNgENBID {
-        plmn_identity,
-        ng_enb_id: id,
-        ie_extensions: None,
-    })
-}
-
-/// Build an E-UTRA Cell Global Identifier from an ng-eNB ID of a kind and the cell that
-/// the rest of the 28 bits of the E-UTRA Cell Identity hold: the ng-eNB ID is its
-/// leftmost bits (TS 38.413 clauses 9.3.1.8 and 9.3.1.9).
+/// An error of the kind `Argument` for a cell that does not fit in the bits after the
+/// ng-eNB ID, and for an ng-eNB ID of an extension.
 ///
-/// An error of the kind `Argument` for an ng-eNB ID that does not fit in the bits of its
-/// kind, and for a cell that does not fit in the bits after it.
+/// ```
+/// use oxirush_ngap::helpers::{eutra_cgi, plmn};
+/// use oxirush_ngap::{Bits, ngap::NgENBID};
+///
+/// // Cell 7 of the macro ng-eNB 0x12345, of 20 bits: 8 bits are left for the cell
+/// let ng_enb = NgENBID::macroNgENB_ID(Bits::new(0x12345, 20)?);
+/// let cell = eutra_cgi(plmn("208", "93")?, &ng_enb, 7)?;
+/// assert_eq!(cell.eutra_cell_identity.0.value(), 0x1234_507);
+///
+/// // A cell of 9 bits beside a macro ng-eNB ID
+/// let error = eutra_cgi(plmn("208", "93")?, &ng_enb, 0x100).unwrap_err();
+/// assert_eq!(error.to_string(), "the cell of the ng-eNB 256 does not fit in 8 bits");
+/// # Ok::<(), oxirush_ngap::Error>(())
+/// ```
 pub fn eutra_cgi(
     plmn_identity: PLMNIdentity,
-    kind: NgEnbKind,
-    ng_enb_id: u32,
+    ng_enb_id: &NgENBID,
     cell_id: u16,
 ) -> Result<EUTRACGI, Error> {
-    let bits = kind.bits();
-    let ng_enb_id = fits(kind.name(), ng_enb_id.into(), bits)?;
+    let id = match ng_enb_id {
+        NgENBID::macroNgENB_ID(id)
+        | NgENBID::shortMacroNgENB_ID(id)
+        | NgENBID::longMacroNgENB_ID(id) => id,
+        NgENBID::choice_Extensions(_) => {
+            return Err(Error::argument(
+                "an ng-eNB ID of an extension has no bits of an E-UTRA Cell Identity",
+            ));
+        }
+    };
+    let bits = id.len() as u32;
     let cell_id = fits("the cell of the ng-eNB", cell_id.into(), 28 - bits)?;
-    let eci = (ng_enb_id << (28 - bits)) | cell_id;
+    let eci = (id.value() << (28 - bits)) | cell_id;
     Ok(EUTRACGI {
         plmn_identity,
         eutra_cell_identity: EUTRACellIdentity(Bits::low(eci, 28)),
@@ -387,108 +298,50 @@ mod tests {
     use crate::{ErrorKind, build_ngap};
 
     #[test]
-    fn plmn_round_trips_for_two_digit_mnc() {
+    fn a_plmn_identity_has_the_order_of_the_application_protocols() {
+        let read = |identity: PLMNIdentity| {
+            let plmn = Plmn::try_from(identity).unwrap();
+            (plmn.mcc().to_string(), plmn.mnc().to_string())
+        };
         let identity = plmn("208", "93").unwrap();
         assert_eq!(identity.0, [0x02, 0xF8, 0x39]);
-        assert_eq!(plmn_from(&identity), Some(("208".into(), "93".into())));
-    }
-
-    #[test]
-    fn plmn_round_trips_for_three_digit_mnc() {
+        assert_eq!(read(identity), ("208".into(), "93".into()));
         // The digits 9 9 9 0 7 0, two in each octet, the second over the first.
         let identity = plmn("999", "070").unwrap();
         assert_eq!(identity.0, [0x99, 0x09, 0x07]);
-        assert_eq!(plmn_from(&identity), Some(("999".into(), "070".into())));
-    }
-
-    #[test]
-    fn what_is_no_mcc_or_no_mnc_is_an_error_of_its_argument() {
-        // Two digits and four for an MCC, one and four for an MNC, and what is no digit:
-        // a letter, a sign, a digit of another script.
-        for (mcc, mnc) in [
-            ("20", "93"),
-            ("2080", "93"),
-            ("208", "9"),
-            ("208", "9300"),
-            ("20a", "93"),
-            ("208", "+3"),
-            ("208", "9٣"),
-            ("", ""),
-        ] {
+        assert_eq!(read(identity), ("999".into(), "070".into()));
+        // What is no MCC or no MNC is an error of the argument.
+        for (mcc, mnc) in [("20", "93"), ("208", "9300"), ("20a", "93"), ("", "")] {
             let error = plmn(mcc, mnc).unwrap_err();
             assert_eq!(error.kind(), ErrorKind::Argument, "{mcc}-{mnc}");
         }
-        assert_eq!(
-            plmn("20", "93").unwrap_err().to_string(),
-            "\"20\" is not an MCC: it has three digits, 0 to 9"
-        );
-        assert_eq!(
-            plmn("208", "9").unwrap_err().to_string(),
-            "\"9\" is not an MNC: it has two or three digits, 0 to 9"
-        );
-        // The octets of the digits alone, for the notation of a PLMN identity.
-        assert_eq!(plmn_octets([2, 0, 8], &[9, 3]), Some([0x02, 0xF8, 0x39]));
-        assert_eq!(plmn_octets([2, 0, 8], &[9]), None);
-        assert_eq!(plmn_octets([2, 0, 10], &[9, 3]), None);
     }
 
-    /// Each kind of ng-eNB ID of TS 38.413 clause 9.3.1.8 has its bits, the leftmost of
-    /// the E-UTRA Cell Identity, and the cell the rest of the 28.
+    /// Each alternative of an ng-eNB ID of TS 38.413 clause 9.3.1.8 has its bits, the
+    /// leftmost of the E-UTRA Cell Identity, and the cell the rest of the 28.
     #[test]
-    fn each_kind_of_ng_enb_id_has_its_bits_and_the_cell_the_rest() {
+    fn each_ng_enb_id_has_its_bits_and_the_cell_the_rest() {
         let network = plmn("208", "93").unwrap();
-        for (kind, bits, name) in [
-            (NgEnbKind::Macro, 20, "macro"),
-            (NgEnbKind::ShortMacro, 18, "short macro"),
-            (NgEnbKind::LongMacro, 21, "long macro"),
+        for (ng_enb, bits) in [
+            (NgENBID::macroNgENB_ID as fn(Bits) -> NgENBID, 20),
+            (NgENBID::shortMacroNgENB_ID, 18),
+            (NgENBID::longMacroNgENB_ID, 21),
         ] {
-            assert_eq!(kind.bits(), bits);
-            let most = (1u32 << bits) - 1;
-            let global = global_ng_enb_id(network, kind, most).unwrap();
-            let id = match global.ng_enb_id {
-                NgENBID::macroNgENB_ID(id) => (NgEnbKind::Macro, id),
-                NgENBID::shortMacroNgENB_ID(id) => (NgEnbKind::ShortMacro, id),
-                NgENBID::longMacroNgENB_ID(id) => (NgEnbKind::LongMacro, id),
-                NgENBID::choice_Extensions(_) => unreachable!(),
-            };
-            assert_eq!(
-                (id.0, id.1.len(), id.1.value()),
-                (kind, bits as usize, u64::from(most))
-            );
-            assert!(global_ng_enb_id(network, kind, most + 1).is_err());
-            // The ng-eNB ID, then the cell.
+            let id = ng_enb(Bits::new(1, bits).unwrap());
             let cell = (1u16 << (28 - bits)) - 1;
-            let cgi = eutra_cgi(network, kind, 1, cell).unwrap();
+            let cgi = eutra_cgi(network, &id, cell).unwrap();
             assert_eq!(
                 cgi.eutra_cell_identity.0.value(),
                 (1 << (28 - bits)) | u64::from(cell)
             );
-            assert!(eutra_cgi(network, kind, 1, cell + 1).is_err());
             assert_eq!(
-                eutra_cgi(network, kind, most + 1, 0)
-                    .unwrap_err()
-                    .to_string(),
+                eutra_cgi(network, &id, cell + 1).unwrap_err().to_string(),
                 format!(
-                    "the {name} ng-eNB ID {} does not fit in {bits} bits",
-                    most + 1
+                    "the cell of the ng-eNB {} does not fit in {} bits",
+                    cell + 1,
+                    28 - bits
                 )
             );
-        }
-    }
-
-    #[test]
-    fn octets_that_are_no_plmn_identity_have_no_mcc_and_no_mnc() {
-        // No digit at all, a filler in the MNC, a filler in the MCC, a filler before
-        // an MNC that has another one, and a digit over 9.
-        for octets in [
-            [0xab, 0xcd, 0xef],
-            [0x02, 0xf8, 0xf9],
-            [0x0f, 0xf8, 0x39],
-            [0x02, 0xf8, 0x3f],
-            [0x02, 0xa8, 0x39],
-        ] {
-            let identity = PLMNIdentity::from(octets);
-            assert_eq!(plmn_from(&identity), None, "{octets:02x?}");
         }
     }
 

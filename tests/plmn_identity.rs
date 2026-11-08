@@ -24,9 +24,16 @@
 //! tshark -r pdu.pcap -V | grep -E 'pLMNIdentity:|Mobile (Country|Network) Code'
 //! ```
 
-use oxirush_ngap::helpers::{plmn, plmn_from, tai};
+use oxirush_ngap::helpers::{plmn, tai};
+use oxirush_ngap::identity::Plmn;
 use oxirush_ngap::ngap::*;
 use oxirush_ngap::{Error, Ie, extract_ngap_ies, ie};
+
+/// The MCC and the MNC of a PLMN identity, as the `Plmn` of oxirush-utils reads them.
+fn plmn_from(identity: &PLMNIdentity) -> Option<(String, String)> {
+    let plmn = Plmn::try_from(*identity).ok()?;
+    Some((plmn.mcc().to_string(), plmn.mnc().to_string()))
+}
 
 /// An MCC, an MNC and the octets of their PLMN identity, digit by digit from the clause.
 const IDENTITIES: &[(&str, &str, [u8; 3])] = &[

@@ -5,6 +5,7 @@
 //! inside the Initial Context Setup PDU-session list.
 
 use oxirush_ngap::helpers::*;
+use oxirush_ngap::identity::Plmn;
 use oxirush_ngap::ngap::*;
 use oxirush_ngap::{Error, build_ngap, extract_ngap_ies};
 
@@ -50,9 +51,9 @@ fn handle_handover_required(pdu: &NGAPPDU<'_>) -> Result<Vec<String>, Error> {
 
         opt target: String = TargetID(target_value) => match target_value {
             TargetID::targetRANNodeID(value) => match value.global_ran_node_id {
-                GlobalRANNodeID::globalGNB_ID(gnb) => match plmn_from(&gnb.plmn_identity) {
-                    Some((mcc, mnc)) => format!("target gNB in PLMN {mcc}-{mnc}"),
-                    None => "target gNB without a PLMN identity".to_string(),
+                GlobalRANNodeID::globalGNB_ID(gnb) => match Plmn::try_from(gnb.plmn_identity) {
+                    Ok(plmn) => format!("target gNB in PLMN {plmn}"),
+                    Err(_) => "target gNB without a PLMN identity".to_string(),
                 },
                 _ => "non-gNB target".to_string(),
             },

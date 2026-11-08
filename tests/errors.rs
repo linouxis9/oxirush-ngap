@@ -370,8 +370,7 @@ fn a_lax_field_is_the_ie_if_it_decodes_and_none_otherwise() {
     assert_eq!(optional.kind(), ErrorKind::UndecodableIe);
     assert_eq!(
         optional.to_string(),
-        "the Cause of this UEContextReleaseRequest does not decode: 7 is no alternative of \
-         the CHOICE"
+        "the Cause of this UEContextReleaseRequest does not decode: the type has no index 7"
     );
 }
 

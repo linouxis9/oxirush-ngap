@@ -39,7 +39,7 @@ impl<'a> Decode<'a> for FollowingSNSSAI {
     fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
         Ok(Self {
             value: SNSSAI::decode(reader)?,
-            following: reader.unsigned(0, 255)? as u8,
+            following: reader.unsigned(0, 255, false)? as u8,
         })
     }
 }

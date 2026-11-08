@@ -29,6 +29,11 @@ All notable changes to `oxirush-ngap` are recorded here.
   with their criticalities and their `Presence`. `Ngap::ie_names()` and
   `Ngap::item_criticality(id)` give the names of the IEs and the criticality of
   an IE in a single container.
+- A value that a hand-written codec reads or writes is read and written with
+  the methods of oxirush-aper 0.2, whose constraint says whether it is
+  extensible: `reader.unsigned(0, 255, false)`. An index of a `CHOICE` or an
+  `ENUMERATED` that the type does not have is refused as `the type has no
+  index 7`.
 
 ### Removed
 

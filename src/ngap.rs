@@ -43,8 +43,8 @@ pub mod ngap_common_data_types {
     impl<'a> Decode<'a> for PrivateIEID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
-                0 => Self::local(reader.unsigned(0, 65535)? as u16),
+            Ok(match reader.index(2, 0, false)? {
+                0 => Self::local(reader.unsigned(0, 65535, false)? as u16),
                 _ => Self::global(reader.object_identifier()?),
             })
         }
@@ -55,7 +55,7 @@ pub mod ngap_common_data_types {
             match self {
                 Self::local(value) => {
                     writer.index(0, 2, false);
-                    writer.unsigned(u64::from(*value), 0, 65535)?;
+                    writer.unsigned(u64::from(*value), 0, 65535, false)?;
                 }
                 Self::global(value) => {
                     writer.index(1, 2, false);
@@ -110,13 +110,13 @@ pub mod ngap_common_data_types {
     impl<'a> Decode<'a> for ProcedureCode {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 255)? as u8))
+            Ok(Self(reader.unsigned(0, 255, false)? as u8))
         }
     }
     impl Encode for ProcedureCode {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 255)?;
+            writer.unsigned(u64::from(self.0), 0, 255, false)?;
             Ok(())
         }
     }
@@ -154,13 +154,13 @@ pub mod ngap_common_data_types {
     impl<'a> Decode<'a> for ProtocolExtensionID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 65535)? as u16))
+            Ok(Self(reader.unsigned(0, 65535, false)? as u16))
         }
     }
     impl Encode for ProtocolExtensionID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 65535)?;
+            writer.unsigned(u64::from(self.0), 0, 65535, false)?;
             Ok(())
         }
     }
@@ -200,13 +200,13 @@ pub mod ngap_common_data_types {
     impl<'a> Decode<'a> for ProtocolIEID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 65535)? as u16))
+            Ok(Self(reader.unsigned(0, 65535, false)? as u16))
         }
     }
     impl Encode for ProtocolIEID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 65535)?;
+            writer.unsigned(u64::from(self.0), 0, 65535, false)?;
             Ok(())
         }
     }
@@ -259,7 +259,7 @@ pub mod ngap_common_data_types {
     impl<'a> Decode<'a> for TriggeringMessage {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(3, 0, false)? as usize])
+            Ok(Self::VALUES[reader.index(3, 0, false)? as usize])
         }
     }
     impl Encode for TriggeringMessage {
@@ -1511,7 +1511,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for A2XPC5QoSFlowItemA2XRange {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(9, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(9, 0, true)? as usize])
         }
     }
     impl Encode for A2XPC5QoSFlowItemA2XRange {
@@ -1563,9 +1563,7 @@ pub mod ngap_ies {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
             let extended = reader.bit()?;
             let present = reader.bits(3)?;
-            let a2x_pqi = reader
-                .unsigned_extensible(0, 255)
-                .map_err(in_field("a2x_pqi"))?;
+            let a2x_pqi = reader.unsigned(0, 255, true).map_err(in_field("a2x_pqi"))?;
             let a2x_pc5_flow_bit_rates = if present & 4 != 0 {
                 Some(
                     A2XPC5FlowBitRates::decode(reader)
@@ -1606,7 +1604,7 @@ pub mod ngap_ies {
             writer.bit(self.a2x_range.is_some());
             writer.bit(self.ie_extensions.is_some());
             writer
-                .unsigned_extensible(self.a2x_pqi, 0, 255)
+                .unsigned(self.a2x_pqi, 0, 255, true)
                 .map_err(in_field("a2x_pqi"))?;
             if let Some(value) = &self.a2x_pc5_flow_bit_rates {
                 value
@@ -1898,13 +1896,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AIOTFIdentifier<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string_extensible(16, 36)?))
+            Ok(Self(reader.octet_string(16, 36, true)?))
         }
     }
     impl Encode for AIOTFIdentifier<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string_extensible(&self.0, 16, 36)?;
+            writer.octet_string(&self.0, 16, 36, true)?;
             Ok(())
         }
     }
@@ -2173,13 +2171,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AIOTFNameVisibleString<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.visible_string_extensible(1, 150)?))
+            Ok(Self(reader.visible_string(1, 150, true)?))
         }
     }
     impl Encode for AIOTFNameVisibleString<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.visible_string_extensible(&self.0, 1, 150)?;
+            writer.visible_string(&self.0, 1, 150, true)?;
             Ok(())
         }
     }
@@ -2512,7 +2510,7 @@ pub mod ngap_ies {
             let extended = reader.bit()?;
             let present = reader.bits(1)?;
             let estimateof_expected_d2r_msg_size = reader
-                .unsigned_extensible(1, 256)
+                .unsigned(1, 256, true)
                 .map_err(in_field("estimateof_expected_d2r_msg_size"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -2537,7 +2535,7 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.ie_extensions.is_some());
             writer
-                .unsigned_extensible(self.estimateof_expected_d2r_msg_size, 1, 256)
+                .unsigned(self.estimateof_expected_d2r_msg_size, 1, 256, true)
                 .map_err(in_field("estimateof_expected_d2r_msg_size"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -2601,13 +2599,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AIoTCorrelationIdentifier {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 65535)?))
+            Ok(Self(reader.unsigned(0, 65535, true)?))
         }
     }
     impl Encode for AIoTCorrelationIdentifier {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 65535)?;
+            writer.unsigned(self.0, 0, 65535, true)?;
             Ok(())
         }
     }
@@ -2666,9 +2664,9 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AIoTDeviceIdentificationRequested<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(4, 0, false)? {
-                0 => Self::singleDevice(reader.bit_string_extensible(1, 1024)?),
-                1 => Self::groupDevices(reader.bit_string_extensible(1, 1024)?),
+            Ok(match reader.index(4, 0, false)? {
+                0 => Self::singleDevice(reader.bit_string(1, 1024, true)?),
+                1 => Self::groupDevices(reader.bit_string(1, 1024, true)?),
                 2 => Self::allDevices(()),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
@@ -2680,11 +2678,11 @@ pub mod ngap_ies {
             match self {
                 Self::singleDevice(value) => {
                     writer.index(0, 4, false);
-                    writer.bit_string_extensible(value, 1, 1024)?;
+                    writer.bit_string(value, 1, 1024, true)?;
                 }
                 Self::groupDevices(value) => {
                     writer.index(1, 4, false);
-                    writer.bit_string_extensible(value, 1, 1024)?;
+                    writer.bit_string(value, 1, 1024, true)?;
                 }
                 Self::allDevices(value) => {
                     writer.index(2, 4, false);
@@ -2957,7 +2955,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AIoTFollowonCommandIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for AIoTFollowonCommandIndication {
@@ -3010,12 +3008,12 @@ pub mod ngap_ies {
             let extended = reader.bit()?;
             let present = reader.bits(3)?;
             let expected_d2r_msg_size = reader
-                .unsigned_extensible(1, 256)
+                .unsigned(1, 256, true)
                 .map_err(in_field("expected_d2r_msg_size"))?;
             let approximate_noof_target_devices = if present & 4 != 0 {
                 Some(
                     reader
-                        .unsigned_extensible(1, 65535)
+                        .unsigned(1, 65535, true)
                         .map_err(in_field("approximate_noof_target_devices"))?,
                 )
             } else {
@@ -3024,7 +3022,7 @@ pub mod ngap_ies {
             let time_interval = if present & 2 != 0 {
                 Some(
                     reader
-                        .unsigned_extensible(1, 256)
+                        .unsigned(1, 256, true)
                         .map_err(in_field("time_interval"))?,
                 )
             } else {
@@ -3057,16 +3055,16 @@ pub mod ngap_ies {
             writer.bit(self.time_interval.is_some());
             writer.bit(self.ie_extensions.is_some());
             writer
-                .unsigned_extensible(self.expected_d2r_msg_size, 1, 256)
+                .unsigned(self.expected_d2r_msg_size, 1, 256, true)
                 .map_err(in_field("expected_d2r_msg_size"))?;
             if let Some(value) = &self.approximate_noof_target_devices {
                 writer
-                    .unsigned_extensible(*value, 1, 65535)
+                    .unsigned(*value, 1, 65535, true)
                     .map_err(in_field("approximate_noof_target_devices"))?;
             }
             if let Some(value) = &self.time_interval {
                 writer
-                    .unsigned_extensible(*value, 1, 256)
+                    .unsigned(*value, 1, 256, true)
                     .map_err(in_field("time_interval"))?;
             }
             if let Some(value) = &self.ie_extensions {
@@ -3177,13 +3175,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AIoTNASPDU<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for AIoTNASPDU<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -3219,13 +3217,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AIoTReaderIndex {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(1, 65535)?))
+            Ok(Self(reader.unsigned(1, 65535, true)?))
         }
     }
     impl Encode for AIoTReaderIndex {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 65535)?;
+            writer.unsigned(self.0, 1, 65535, true)?;
             Ok(())
         }
     }
@@ -3785,8 +3783,8 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AIoTSecurityInfo<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
-                0 => Self::a_IoT_RAND_n(reader.bit_string_extensible(128, 128)?),
+            Ok(match reader.index(2, 0, false)? {
+                0 => Self::a_IoT_RAND_n(reader.bit_string(128, 128, true)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
         }
@@ -3797,7 +3795,7 @@ pub mod ngap_ies {
             match self {
                 Self::a_IoT_RAND_n(value) => {
                     writer.index(0, 2, false);
-                    writer.bit_string_extensible(value, 128, 128)?;
+                    writer.bit_string(value, 128, 128, true)?;
                 }
                 Self::choice_Extensions(value) => {
                     writer.index(1, 2, false);
@@ -3864,7 +3862,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AIoTSupport {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for AIoTSupport {
@@ -4794,13 +4792,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AMFUENGAPID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 1099511627775)?))
+            Ok(Self(reader.unsigned(0, 1099511627775, false)?))
         }
     }
     impl Encode for AMFUENGAPID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(self.0, 0, 1099511627775)?;
+            writer.unsigned(self.0, 0, 1099511627775, false)?;
             Ok(())
         }
     }
@@ -4854,13 +4852,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AMFName<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.printable_string_extensible(1, 150)?))
+            Ok(Self(reader.printable_string(1, 150, true)?))
         }
     }
     impl Encode for AMFName<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.printable_string_extensible(&self.0, 1, 150)?;
+            writer.printable_string(&self.0, 1, 150, true)?;
             Ok(())
         }
     }
@@ -4982,13 +4980,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AMFNameVisibleString<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.visible_string_extensible(1, 150)?))
+            Ok(Self(reader.visible_string(1, 150, true)?))
         }
     }
     impl Encode for AMFNameVisibleString<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.visible_string_extensible(&self.0, 1, 150)?;
+            writer.visible_string(&self.0, 1, 150, true)?;
             Ok(())
         }
     }
@@ -5035,7 +5033,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for AMFPagingTarget {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::globalRANNodeID(GlobalRANNodeID::decode(reader)?),
                 1 => Self::tAI(TAI::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -5278,7 +5276,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AUN3DeviceAccessInfoAUN3DeviceAccess {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for AUN3DeviceAccessInfoAUN3DeviceAccess {
@@ -5325,7 +5323,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AUN3DeviceAccessInfoExistingNGConnectionwithSameLocation {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for AUN3DeviceAccessInfoExistingNGConnectionwithSameLocation {
@@ -5541,7 +5539,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ActivationStatus {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for ActivationStatus {
@@ -5976,7 +5974,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AdditionalQosFlowInformation {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for AdditionalQosFlowInformation {
@@ -6551,7 +6549,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AerialUEReportingPeriodicity {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(14, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(14, 0, true)? as usize])
         }
     }
     impl Encode for AerialUEReportingPeriodicity {
@@ -6598,7 +6596,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AerialUEsubscriptionInformation {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for AerialUEsubscriptionInformation {
@@ -6829,7 +6827,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AllowedPNINPNItemPNINPNRestricted {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for AllowedPNINPNItemPNINPNRestricted {
@@ -7289,13 +7287,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AlternativeQoSParaSetIndex {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(1, 8)?))
+            Ok(Self(reader.unsigned(1, 8, true)?))
         }
     }
     impl Encode for AlternativeQoSParaSetIndex {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 8)?;
+            writer.unsigned(self.0, 1, 8, true)?;
             Ok(())
         }
     }
@@ -7579,13 +7577,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AlternativeQoSParaSetNotifyIndex {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 8)?))
+            Ok(Self(reader.unsigned(0, 8, true)?))
         }
     }
     impl Encode for AlternativeQoSParaSetNotifyIndex {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 8)?;
+            writer.unsigned(self.0, 0, 8, true)?;
             Ok(())
         }
     }
@@ -7621,13 +7619,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for Altitude {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.signed_extensible(-420, 10000)?))
+            Ok(Self(reader.signed(-420, 10000, true)?))
         }
     }
     impl Encode for Altitude {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.signed_extensible(self.0, -420, 10000)?;
+            writer.signed(self.0, -420, 10000, true)?;
             Ok(())
         }
     }
@@ -7676,7 +7674,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for AreaID {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(4, 0, false)? {
+            Ok(match reader.index(4, 0, false)? {
                 0 => Self::tAI(TAI::decode(reader)?),
                 1 => Self::globalRANNodeID(GlobalRANNodeID::decode(reader)?),
                 2 => Self::nR_CGI(NRCGI::decode(reader)?),
@@ -8515,7 +8513,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for AreaScopeOfMDTEUTRA {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(5, 0, false)? {
+            Ok(match reader.index(5, 0, false)? {
                 0 => Self::cellBased(CellBasedMDTEUTRA::decode(reader)?),
                 1 => Self::tABased(TABasedMDT::decode(reader)?),
                 2 => Self::pLMNWide(()),
@@ -8635,7 +8633,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for AreaScopeOfMDTNR {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(5, 0, false)? {
+            Ok(match reader.index(5, 0, false)? {
                 0 => Self::cellBased(CellBasedMDTNR::decode(reader)?),
                 1 => Self::tABased(TABasedMDT::decode(reader)?),
                 2 => Self::pLMNWide(()),
@@ -8932,7 +8930,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for AreaScopeOfQMC {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(5, 0, false)? {
+            Ok(match reader.index(5, 0, false)? {
                 0 => Self::cellBased(CellBasedQMC::decode(reader)?),
                 1 => Self::tABased(TABasedQMC::decode(reader)?),
                 2 => Self::tAIBased(TAIBasedQMC::decode(reader)?),
@@ -9267,13 +9265,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AssistanceInformationQoEMeas {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(1, 16)?))
+            Ok(Self(reader.unsigned(1, 16, true)?))
         }
     }
     impl Encode for AssistanceInformationQoEMeas {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 16)?;
+            writer.unsigned(self.0, 1, 16, true)?;
             Ok(())
         }
     }
@@ -9662,7 +9660,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AssociatedQosFlowItemQosFlowMappingIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for AssociatedQosFlowItemQosFlowMappingIndication {
@@ -9897,13 +9895,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AssociatedSessionID<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for AssociatedSessionID<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -9943,7 +9941,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AuthenticatedIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for AuthenticatedIndication {
@@ -10130,7 +10128,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AvailableRANVisibleQoEMetricsApplicationLayerBufferLevelList {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for AvailableRANVisibleQoEMetricsApplicationLayerBufferLevelList {
@@ -10176,7 +10174,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AvailableRANVisibleQoEMetricsPlayoutDelayForMediaStartup {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for AvailableRANVisibleQoEMetricsPlayoutDelayForMediaStartup {
@@ -10364,13 +10362,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for AveragingWindow {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 4095)?))
+            Ok(Self(reader.unsigned(0, 4095, true)?))
         }
     }
     impl Encode for AveragingWindow {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 4095)?;
+            writer.unsigned(self.0, 0, 4095, true)?;
             Ok(())
         }
     }
@@ -10551,7 +10549,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for BeamMeasurementsReportQuantityRSRP {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 1, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 1, true)? as usize])
         }
     }
     impl Encode for BeamMeasurementsReportQuantityRSRP {
@@ -10598,7 +10596,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for BeamMeasurementsReportQuantityRSRQ {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 1, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 1, true)? as usize])
         }
     }
     impl Encode for BeamMeasurementsReportQuantityRSRQ {
@@ -10645,7 +10643,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for BeamMeasurementsReportQuantitySINR {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 1, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 1, true)? as usize])
         }
     }
     impl Encode for BeamMeasurementsReportQuantitySINR {
@@ -10802,13 +10800,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for BitRate {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 4000000000000)?))
+            Ok(Self(reader.unsigned(0, 4000000000000, true)?))
         }
     }
     impl Encode for BitRate {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 4000000000000)?;
+            writer.unsigned(self.0, 0, 4000000000000, true)?;
             Ok(())
         }
     }
@@ -10848,7 +10846,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for BluetoothMeasConfig {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for BluetoothMeasConfig {
@@ -11047,7 +11045,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for BluetoothMeasurementConfigurationBtRssi {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for BluetoothMeasurementConfigurationBtRssi {
@@ -11272,13 +11270,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for BluetoothName<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(1, 248)?))
+            Ok(Self(reader.octet_string(1, 248, false)?))
         }
     }
     impl Encode for BluetoothName<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 1, 248)?;
+            writer.octet_string(&self.0, 1, 248, false)?;
             Ok(())
         }
     }
@@ -11345,7 +11343,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for BroadcastCancelledAreaList {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(7, 0, false)? {
+            Ok(match reader.index(7, 0, false)? {
                 0 => Self::cellIDCancelledEUTRA(CellIDCancelledEUTRA::decode(reader)?),
                 1 => Self::tAICancelledEUTRA(TAICancelledEUTRA::decode(reader)?),
                 2 => Self::emergencyAreaIDCancelledEUTRA(EmergencyAreaIDCancelledEUTRA::decode(
@@ -11524,7 +11522,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for BroadcastCompletedAreaList {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(7, 0, false)? {
+            Ok(match reader.index(7, 0, false)? {
                 0 => Self::cellIDBroadcastEUTRA(CellIDBroadcastEUTRA::decode(reader)?),
                 1 => Self::tAIBroadcastEUTRA(TAIBroadcastEUTRA::decode(reader)?),
                 2 => Self::emergencyAreaIDBroadcastEUTRA(EmergencyAreaIDBroadcastEUTRA::decode(
@@ -12179,13 +12177,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for BurstArrivalTime<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for BurstArrivalTime<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -12238,10 +12236,10 @@ pub mod ngap_ies {
             let extended = reader.bit()?;
             let present = reader.bits(1)?;
             let burst_arrival_time_window_start = reader
-                .unsigned_extensible(0, 640000)
+                .unsigned(0, 640000, true)
                 .map_err(in_field("burst_arrival_time_window_start"))?;
             let burst_arrival_time_window_end = reader
-                .unsigned_extensible(0, 640000)
+                .unsigned(0, 640000, true)
                 .map_err(in_field("burst_arrival_time_window_end"))?;
             let ie_extension = if present & 1 != 0 {
                 Some(ProtocolExtensionContainer::decode(reader).map_err(in_field("ie_extension"))?)
@@ -12263,10 +12261,10 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.ie_extension.is_some());
             writer
-                .unsigned_extensible(self.burst_arrival_time_window_start, 0, 640000)
+                .unsigned(self.burst_arrival_time_window_start, 0, 640000, true)
                 .map_err(in_field("burst_arrival_time_window_start"))?;
             writer
-                .unsigned_extensible(self.burst_arrival_time_window_end, 0, 640000)
+                .unsigned(self.burst_arrival_time_window_end, 0, 640000, true)
                 .map_err(in_field("burst_arrival_time_window_end"))?;
             if let Some(value) = &self.ie_extension {
                 value.encode(writer).map_err(in_field("ie_extension"))?;
@@ -12595,7 +12593,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for CEmodeBSupportIndicator {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for CEmodeBSupportIndicator {
@@ -12642,7 +12640,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for CEmodeBrestricted {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for CEmodeBrestricted {
@@ -12688,7 +12686,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for CNMTCommunicationHandling {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for CNMTCommunicationHandling {
@@ -12890,7 +12888,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for CNTypeRestrictionsForEquivalentItemCnType {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for CNTypeRestrictionsForEquivalentItemCnType {
@@ -13035,7 +13033,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for CNTypeRestrictionsForServing {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for CNTypeRestrictionsForServing {
@@ -13077,13 +13075,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for CNsubgroupID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 7)?))
+            Ok(Self(reader.unsigned(0, 7, true)?))
         }
     }
     impl Encode for CNsubgroupID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 7)?;
+            writer.unsigned(self.0, 0, 7, true)?;
             Ok(())
         }
     }
@@ -13126,9 +13124,11 @@ pub mod ngap_ies {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
             let extended = reader.bit()?;
             let present = reader.bits(1)?;
-            let pdcp_sn12 = reader.unsigned(0, 4095).map_err(in_field("pdcp_sn12"))? as u16;
+            let pdcp_sn12 = reader
+                .unsigned(0, 4095, false)
+                .map_err(in_field("pdcp_sn12"))? as u16;
             let hfn_pdcp_sn12 = reader
-                .unsigned(0, 1048575)
+                .unsigned(0, 1048575, false)
                 .map_err(in_field("hfn_pdcp_sn12"))? as u32;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -13154,10 +13154,10 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.ie_extensions.is_some());
             writer
-                .unsigned(u64::from(self.pdcp_sn12), 0, 4095)
+                .unsigned(u64::from(self.pdcp_sn12), 0, 4095, false)
                 .map_err(in_field("pdcp_sn12"))?;
             writer
-                .unsigned(u64::from(self.hfn_pdcp_sn12), 0, 1048575)
+                .unsigned(u64::from(self.hfn_pdcp_sn12), 0, 1048575, false)
                 .map_err(in_field("hfn_pdcp_sn12"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -13233,9 +13233,11 @@ pub mod ngap_ies {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
             let extended = reader.bit()?;
             let present = reader.bits(1)?;
-            let pdcp_sn18 = reader.unsigned(0, 262143).map_err(in_field("pdcp_sn18"))? as u32;
+            let pdcp_sn18 = reader
+                .unsigned(0, 262143, false)
+                .map_err(in_field("pdcp_sn18"))? as u32;
             let hfn_pdcp_sn18 = reader
-                .unsigned(0, 16383)
+                .unsigned(0, 16383, false)
                 .map_err(in_field("hfn_pdcp_sn18"))? as u16;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -13261,10 +13263,10 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.ie_extensions.is_some());
             writer
-                .unsigned(u64::from(self.pdcp_sn18), 0, 262143)
+                .unsigned(u64::from(self.pdcp_sn18), 0, 262143, false)
                 .map_err(in_field("pdcp_sn18"))?;
             writer
-                .unsigned(u64::from(self.hfn_pdcp_sn18), 0, 16383)
+                .unsigned(u64::from(self.hfn_pdcp_sn18), 0, 16383, false)
                 .map_err(in_field("hfn_pdcp_sn18"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -13350,7 +13352,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for CPTransportLayerInformation<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
+            Ok(match reader.index(2, 0, false)? {
                 0 => Self::endpointIPAddress(TransportLayerAddress::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
@@ -13427,7 +13429,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for CancelAllWarningMessages {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for CancelAllWarningMessages {
@@ -14084,7 +14086,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for CandidateCell {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::candidateCGI(CandidateCellID::decode(reader)?),
                 1 => Self::candidatePCI(CandidatePCI::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -14399,10 +14401,10 @@ pub mod ngap_ies {
             let extended = reader.bit()?;
             let present = reader.bits(1)?;
             let candidate_pci = reader
-                .unsigned_extensible(0, 1007)
+                .unsigned(0, 1007, true)
                 .map_err(in_field("candidate_pci"))?;
             let candidate_nr_arfcn = reader
-                .unsigned(0, 3279165)
+                .unsigned(0, 3279165, false)
                 .map_err(in_field("candidate_nr_arfcn"))?
                 as u32;
             let ie_extensions = if present & 1 != 0 {
@@ -14429,10 +14431,10 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.ie_extensions.is_some());
             writer
-                .unsigned_extensible(self.candidate_pci, 0, 1007)
+                .unsigned(self.candidate_pci, 0, 1007, true)
                 .map_err(in_field("candidate_pci"))?;
             writer
-                .unsigned(u64::from(self.candidate_nr_arfcn), 0, 3279165)
+                .unsigned(u64::from(self.candidate_nr_arfcn), 0, 3279165, false)
                 .map_err(in_field("candidate_nr_arfcn"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -14723,7 +14725,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for Cause {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(6, 0, false)? {
+            Ok(match reader.index(6, 0, false)? {
                 0 => Self::radioNetwork(CauseRadioNetwork::decode(reader)?),
                 1 => Self::transport(CauseTransport::decode(reader)?),
                 2 => Self::nas(CauseNas::decode(reader)?),
@@ -14859,7 +14861,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for CauseMisc {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(6, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(6, 0, true)? as usize])
         }
     }
     impl Encode for CauseMisc {
@@ -14930,7 +14932,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for CauseNas {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(4, 4, true)? as usize])
+            Ok(Self::VALUES[reader.index(4, 4, true)? as usize])
         }
     }
     impl Encode for CauseNas {
@@ -14998,7 +15000,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for CauseProtocol {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(7, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(7, 0, true)? as usize])
         }
     }
     impl Encode for CauseProtocol {
@@ -15240,7 +15242,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for CauseRadioNetwork {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(45, 20, true)? as usize])
+            Ok(Self::VALUES[reader.index(45, 20, true)? as usize])
         }
     }
     impl Encode for CauseRadioNetwork {
@@ -15289,7 +15291,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for CauseTransport {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for CauseTransport {
@@ -16320,7 +16322,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for CellIDListForRestart {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::eUTRA_CGIListforRestart(EUTRACGIList::decode(reader)?),
                 1 => Self::nR_CGIListforRestart(NRCGIList::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -16576,7 +16578,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for CellSize {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(4, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(4, 0, true)? as usize])
         }
     }
     impl Encode for CellSize {
@@ -16752,9 +16754,9 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ClockAccuracy {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
-                0 => Self::clockAccuracyValue(reader.unsigned_extensible(1, 40000000)?),
-                1 => Self::clockAccuracyIndex(reader.unsigned_extensible(32, 47)?),
+            Ok(match reader.index(3, 0, false)? {
+                0 => Self::clockAccuracyValue(reader.unsigned(1, 40000000, true)?),
+                1 => Self::clockAccuracyIndex(reader.unsigned(32, 47, true)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
         }
@@ -16765,11 +16767,11 @@ pub mod ngap_ies {
             match self {
                 Self::clockAccuracyValue(value) => {
                     writer.index(0, 3, false);
-                    writer.unsigned_extensible(*value, 1, 40000000)?;
+                    writer.unsigned(*value, 1, 40000000, true)?;
                 }
                 Self::clockAccuracyIndex(value) => {
                     writer.index(1, 3, false);
-                    writer.unsigned_extensible(*value, 32, 47)?;
+                    writer.unsigned(*value, 32, 47, true)?;
                 }
                 Self::choice_Extensions(value) => {
                     writer.index(2, 3, false);
@@ -16849,7 +16851,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ClockQualityAcceptanceCriteriaTraceabletoUTC {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for ClockQualityAcceptanceCriteriaTraceabletoUTC {
@@ -16895,7 +16897,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ClockQualityAcceptanceCriteriaTraceabletoGNSS {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for ClockQualityAcceptanceCriteriaTraceabletoGNSS {
@@ -16972,7 +16974,7 @@ pub mod ngap_ies {
             let synchronisation_state = if present & 64 != 0 {
                 Some(
                     reader
-                        .bit_string_extensible(8, 8)
+                        .bit_string(8, 8, true)
                         .map_err(in_field("synchronisation_state"))?,
                 )
             } else {
@@ -17006,7 +17008,7 @@ pub mod ngap_ies {
             let clock_accuracy = if present & 4 != 0 {
                 Some(
                     reader
-                        .unsigned_extensible(1, 40000000)
+                        .unsigned(1, 40000000, true)
                         .map_err(in_field("clock_accuracy"))?,
                 )
             } else {
@@ -17015,7 +17017,7 @@ pub mod ngap_ies {
             let parent_time_source = if present & 2 != 0 {
                 Some(
                     reader
-                        .bit_string_extensible(16, 16)
+                        .bit_string(16, 16, true)
                         .map_err(in_field("parent_time_source"))?,
                 )
             } else {
@@ -17056,7 +17058,7 @@ pub mod ngap_ies {
             writer.bit(self.ie_extensions.is_some());
             if let Some(value) = &self.synchronisation_state {
                 writer
-                    .bit_string_extensible(value, 8, 8)
+                    .bit_string(value, 8, 8, true)
                     .map_err(in_field("synchronisation_state"))?;
             }
             if let Some(value) = &self.traceableto_utc {
@@ -17072,12 +17074,12 @@ pub mod ngap_ies {
             }
             if let Some(value) = &self.clock_accuracy {
                 writer
-                    .unsigned_extensible(*value, 1, 40000000)
+                    .unsigned(*value, 1, 40000000, true)
                     .map_err(in_field("clock_accuracy"))?;
             }
             if let Some(value) = &self.parent_time_source {
                 writer
-                    .bit_string_extensible(value, 16, 16)
+                    .bit_string(value, 16, 16, true)
                     .map_err(in_field("parent_time_source"))?;
             }
             if let Some(value) = &self.ie_extensions {
@@ -17333,7 +17335,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for ClockQualityDetailLevel<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::clockQualityMetrics(()),
                 1 => Self::clockQualityAcceptanceIndication(
                     ClockQualityAcceptanceIndication::decode(reader)?,
@@ -17533,7 +17535,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for CommServiceType {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 1, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 1, true)? as usize])
         }
     }
     impl Encode for CommServiceType {
@@ -17981,13 +17983,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for CommonNetworkInstance<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for CommonNetworkInstance<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -18573,14 +18575,14 @@ pub mod ngap_ies {
             let cell_capacity_class_value = if present & 2 != 0 {
                 Some(
                     reader
-                        .unsigned_extensible(1, 100)
+                        .unsigned(1, 100, true)
                         .map_err(in_field("cell_capacity_class_value"))?,
                 )
             } else {
                 None
             };
             let capacity_value = reader
-                .unsigned(0, 100)
+                .unsigned(0, 100, false)
                 .map_err(in_field("capacity_value"))? as u8;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -18608,11 +18610,11 @@ pub mod ngap_ies {
             writer.bit(self.ie_extensions.is_some());
             if let Some(value) = &self.cell_capacity_class_value {
                 writer
-                    .unsigned_extensible(*value, 1, 100)
+                    .unsigned(*value, 1, 100, true)
                     .map_err(in_field("cell_capacity_class_value"))?;
             }
             writer
-                .unsigned(u64::from(self.capacity_value), 0, 100)
+                .unsigned(u64::from(self.capacity_value), 0, 100, false)
                 .map_err(in_field("capacity_value"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -18691,7 +18693,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ConcurrentWarningMessageInd {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for ConcurrentWarningMessageInd {
@@ -18739,7 +18741,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ConfidentialityProtectionIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(3, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(3, 0, true)? as usize])
         }
     }
     impl Encode for ConfidentialityProtectionIndication {
@@ -18786,7 +18788,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ConfidentialityProtectionResult {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for ConfidentialityProtectionResult {
@@ -18887,7 +18889,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ConfiguredTACIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for ConfiguredTACIndication {
@@ -18936,7 +18938,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for CongestionInformationRequest {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(4, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(4, 0, true)? as usize])
         }
     }
     impl Encode for CongestionInformationRequest {
@@ -19212,13 +19214,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for CoverageEnhancementLevel<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for CoverageEnhancementLevel<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -19598,7 +19600,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for DAPSRequestInfoDAPSIndicator {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for DAPSRequestInfoDAPSIndicator {
@@ -19734,7 +19736,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for DAPSResponseInfoDapsresponseindicator {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for DAPSResponseInfoDapsresponseindicator {
@@ -20168,7 +20170,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for DLNGUTNLInformationReused {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for DLNGUTNLInformationReused {
@@ -20214,7 +20216,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for DLSignalling {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for DLSignalling {
@@ -20276,7 +20278,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for DLCountChoice<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::count12bits(COUNTValueForPDCPSN12::decode(reader)?),
                 1 => Self::count18bits(COUNTValueForPDCPSN18::decode(reader)?),
                 _ => Self::choice_extension(ProtocolIEField::decode(reader)?),
@@ -20458,7 +20460,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for DLForwarding {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for DLForwarding {
@@ -20504,7 +20506,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for DLPDUSetInformationMarkingSupportIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for DLPDUSetInformationMarkingSupportIndication {
@@ -20546,13 +20548,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for DRBID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(1, 32)?))
+            Ok(Self(reader.unsigned(1, 32, true)?))
         }
     }
     impl Encode for DRBID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 32)?;
+            writer.unsigned(self.0, 1, 32, true)?;
             Ok(())
         }
     }
@@ -20606,7 +20608,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for DRBStatusDL<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::dRBStatusDL12(DRBStatusDL12::decode(reader)?),
                 1 => Self::dRBStatusDL18(DRBStatusDL18::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -20888,7 +20890,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for DRBStatusUL<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::dRBStatusUL12(DRBStatusUL12::decode(reader)?),
                 1 => Self::dRBStatusUL18(DRBStatusUL18::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -20995,7 +20997,7 @@ pub mod ngap_ies {
             let receive_status_of_ul_pdcp_sdus = if present & 2 != 0 {
                 Some(
                     reader
-                        .bit_string(1, 2048)
+                        .bit_string(1, 2048, false)
                         .map_err(in_field("receive_status_of_ul_pdcp_sdus"))?,
                 )
             } else {
@@ -21026,7 +21028,7 @@ pub mod ngap_ies {
                 .map_err(in_field("ul_count_value"))?;
             if let Some(value) = &self.receive_status_of_ul_pdcp_sdus {
                 writer
-                    .bit_string(value, 1, 2048)
+                    .bit_string(value, 1, 2048, false)
                     .map_err(in_field("receive_status_of_ul_pdcp_sdus"))?;
             }
             if let Some(value) = &self.ie_extension {
@@ -21125,7 +21127,7 @@ pub mod ngap_ies {
             let receive_status_of_ul_pdcp_sdus = if present & 2 != 0 {
                 Some(
                     reader
-                        .bit_string(1, 131072)
+                        .bit_string(1, 131072, false)
                         .map_err(in_field("receive_status_of_ul_pdcp_sdus"))?,
                 )
             } else {
@@ -21156,7 +21158,7 @@ pub mod ngap_ies {
                 .map_err(in_field("ul_count_value"))?;
             if let Some(value) = &self.receive_status_of_ul_pdcp_sdus {
                 writer
-                    .bit_string(value, 1, 131072)
+                    .bit_string(value, 1, 131072, false)
                     .map_err(in_field("receive_status_of_ul_pdcp_sdus"))?;
             }
             if let Some(value) = &self.ie_extension {
@@ -21939,7 +21941,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for DataForwardingAccepted {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for DataForwardingAccepted {
@@ -21985,7 +21987,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for DataForwardingNotPossible {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for DataForwardingNotPossible {
@@ -22433,7 +22435,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for DelayCritical {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for DelayCritical {
@@ -22479,7 +22481,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for DirectForwardingPathAvailability {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for DirectForwardingPathAvailability {
@@ -22731,13 +22733,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ERABID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 15)?))
+            Ok(Self(reader.unsigned(0, 15, true)?))
         }
     }
     impl Encode for ERABID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 15)?;
+            writer.unsigned(self.0, 0, 15, true)?;
             Ok(())
         }
     }
@@ -22934,7 +22936,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ECNMarkingAtRANRequest {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(4, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(4, 0, true)? as usize])
         }
     }
     impl Encode for ECNMarkingAtRANRequest {
@@ -22983,7 +22985,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ECNMarkingAtUPFRequest {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(4, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(4, 0, true)? as usize])
         }
     }
     impl Encode for ECNMarkingAtUPFRequest {
@@ -23039,7 +23041,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ECNMarkingorCongestionInformationReportingRequest {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(4, 0, false)? {
+            Ok(match reader.index(4, 0, false)? {
                 0 => Self::eCNMarkingAtRANRequest(ECNMarkingAtRANRequest::decode(reader)?),
                 1 => Self::eCNMarkingAtUPFRequest(ECNMarkingAtUPFRequest::decode(reader)?),
                 2 => Self::congestionInformationRequest(CongestionInformationRequest::decode(
@@ -23328,7 +23330,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for EDTSession {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for EDTSession {
@@ -23388,13 +23390,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ENDCSONConfigurationTransfer<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for ENDCSONConfigurationTransfer<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -23430,7 +23432,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ENBID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(5, 0, false)? {
+            Ok(match reader.index(5, 0, false)? {
                 0 => Self::macroENB_ID(reader.bits_sized(20, 20)?),
                 1 => Self::homeENB_ID(reader.bits_sized(28, 28)?),
                 2 => Self::short_macroENB_ID(reader.bits_sized(18, 18)?),
@@ -23703,7 +23705,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ERedCapIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for ERedCapIndication {
@@ -23989,7 +23991,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for EUTRAPagingTimeWindow {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(16, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(16, 0, true)? as usize])
         }
     }
     impl Encode for EUTRAPagingTimeWindow {
@@ -24066,7 +24068,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for EUTRAPagingEDRXCycle {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(14, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(14, 0, true)? as usize])
         }
     }
     impl Encode for EUTRAPagingEDRXCycle {
@@ -24796,13 +24798,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for EUTRANNumberOfActiveUEs {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 16777215)?))
+            Ok(Self(reader.unsigned(0, 16777215, true)?))
         }
     }
     impl Encode for EUTRANNumberOfActiveUEs {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 16777215)?;
+            writer.unsigned(self.0, 0, 16777215, true)?;
             Ok(())
         }
     }
@@ -24864,31 +24866,31 @@ pub mod ngap_ies {
             let extended = reader.bit()?;
             let present = reader.bits(3)?;
             let dl_gbr_prb_usage = reader
-                .unsigned(0, 100)
+                .unsigned(0, 100, false)
                 .map_err(in_field("dl_gbr_prb_usage"))? as u8;
             let ul_gbr_prb_usage = reader
-                .unsigned(0, 100)
+                .unsigned(0, 100, false)
                 .map_err(in_field("ul_gbr_prb_usage"))? as u8;
             let dl_non_gbr_prb_usage = reader
-                .unsigned(0, 100)
+                .unsigned(0, 100, false)
                 .map_err(in_field("dl_non_gbr_prb_usage"))?
                 as u8;
             let ul_non_gbr_prb_usage = reader
-                .unsigned(0, 100)
+                .unsigned(0, 100, false)
                 .map_err(in_field("ul_non_gbr_prb_usage"))?
                 as u8;
             let dl_total_prb_usage = reader
-                .unsigned(0, 100)
+                .unsigned(0, 100, false)
                 .map_err(in_field("dl_total_prb_usage"))?
                 as u8;
             let ul_total_prb_usage = reader
-                .unsigned(0, 100)
+                .unsigned(0, 100, false)
                 .map_err(in_field("ul_total_prb_usage"))?
                 as u8;
             let dl_scheduling_pdcch_cce_usage = if present & 4 != 0 {
                 Some(
                     reader
-                        .unsigned(0, 100)
+                        .unsigned(0, 100, false)
                         .map_err(in_field("dl_scheduling_pdcch_cce_usage"))?
                         as u8,
                 )
@@ -24898,7 +24900,7 @@ pub mod ngap_ies {
             let ul_scheduling_pdcch_cce_usage = if present & 2 != 0 {
                 Some(
                     reader
-                        .unsigned(0, 100)
+                        .unsigned(0, 100, false)
                         .map_err(in_field("ul_scheduling_pdcch_cce_usage"))?
                         as u8,
                 )
@@ -24937,31 +24939,31 @@ pub mod ngap_ies {
             writer.bit(self.ul_scheduling_pdcch_cce_usage.is_some());
             writer.bit(self.ie_extensions.is_some());
             writer
-                .unsigned(u64::from(self.dl_gbr_prb_usage), 0, 100)
+                .unsigned(u64::from(self.dl_gbr_prb_usage), 0, 100, false)
                 .map_err(in_field("dl_gbr_prb_usage"))?;
             writer
-                .unsigned(u64::from(self.ul_gbr_prb_usage), 0, 100)
+                .unsigned(u64::from(self.ul_gbr_prb_usage), 0, 100, false)
                 .map_err(in_field("ul_gbr_prb_usage"))?;
             writer
-                .unsigned(u64::from(self.dl_non_gbr_prb_usage), 0, 100)
+                .unsigned(u64::from(self.dl_non_gbr_prb_usage), 0, 100, false)
                 .map_err(in_field("dl_non_gbr_prb_usage"))?;
             writer
-                .unsigned(u64::from(self.ul_non_gbr_prb_usage), 0, 100)
+                .unsigned(u64::from(self.ul_non_gbr_prb_usage), 0, 100, false)
                 .map_err(in_field("ul_non_gbr_prb_usage"))?;
             writer
-                .unsigned(u64::from(self.dl_total_prb_usage), 0, 100)
+                .unsigned(u64::from(self.dl_total_prb_usage), 0, 100, false)
                 .map_err(in_field("dl_total_prb_usage"))?;
             writer
-                .unsigned(u64::from(self.ul_total_prb_usage), 0, 100)
+                .unsigned(u64::from(self.ul_total_prb_usage), 0, 100, false)
                 .map_err(in_field("ul_total_prb_usage"))?;
             if let Some(value) = &self.dl_scheduling_pdcch_cce_usage {
                 writer
-                    .unsigned(u64::from(*value), 0, 100)
+                    .unsigned(u64::from(*value), 0, 100, false)
                     .map_err(in_field("dl_scheduling_pdcch_cce_usage"))?;
             }
             if let Some(value) = &self.ul_scheduling_pdcch_cce_usage {
                 writer
-                    .unsigned(u64::from(*value), 0, 100)
+                    .unsigned(u64::from(*value), 0, 100, false)
                     .map_err(in_field("ul_scheduling_pdcch_cce_usage"))?;
             }
             if let Some(value) = &self.ie_extensions {
@@ -25298,13 +25300,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for EUTRAencryptionAlgorithms<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.bit_string_extensible(16, 16)?))
+            Ok(Self(reader.bit_string(16, 16, true)?))
         }
     }
     impl Encode for EUTRAencryptionAlgorithms<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.bit_string_extensible(&self.0, 16, 16)?;
+            writer.bit_string(&self.0, 16, 16, true)?;
             Ok(())
         }
     }
@@ -25348,13 +25350,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for EUTRAintegrityProtectionAlgorithms<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.bit_string_extensible(16, 16)?))
+            Ok(Self(reader.bit_string(16, 16, true)?))
         }
     }
     impl Encode for EUTRAintegrityProtectionAlgorithms<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.bit_string_extensible(&self.0, 16, 16)?;
+            writer.bit_string(&self.0, 16, 16, true)?;
             Ok(())
         }
     }
@@ -25394,7 +25396,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for EarlyMeasurement {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for EarlyMeasurement {
@@ -26471,7 +26473,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for EmergencyFallbackRequestIndicator {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for EmergencyFallbackRequestIndicator {
@@ -26518,7 +26520,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for EmergencyServiceTargetCN {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for EmergencyServiceTargetCN {
@@ -26565,7 +26567,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for EndIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for EndIndication {
@@ -26716,7 +26718,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for EnhancedCoverageRestriction {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for EnhancedCoverageRestriction {
@@ -27221,7 +27223,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for EventTriggerOutOfCoverage {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for EventTriggerOutOfCoverage {
@@ -27270,7 +27272,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for EventTrigger {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::outOfCoverage(EventTriggerOutOfCoverage::decode(reader)?),
                 1 => Self::eventL1LoggedMDTConfig(EventL1LoggedMDTConfig::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -27392,7 +27394,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for EventType {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(6, 3, true)? as usize])
+            Ok(Self::VALUES[reader.index(6, 3, true)? as usize])
         }
     }
     impl Encode for EventType {
@@ -27636,7 +27638,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ExcessPacketDelayThresholdValue {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(19, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(19, 0, true)? as usize])
         }
     }
     impl Encode for ExcessPacketDelayThresholdValue {
@@ -27678,13 +27680,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ExpectedActivityPeriod {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(1, 181)?))
+            Ok(Self(reader.unsigned(1, 181, true)?))
         }
     }
     impl Encode for ExpectedActivityPeriod {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 181)?;
+            writer.unsigned(self.0, 1, 181, true)?;
             Ok(())
         }
     }
@@ -27746,7 +27748,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ExpectedHOInterval {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(7, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(7, 0, true)? as usize])
         }
     }
     impl Encode for ExpectedHOInterval {
@@ -27788,13 +27790,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ExpectedIdlePeriod {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(1, 181)?))
+            Ok(Self(reader.unsigned(1, 181, true)?))
         }
     }
     impl Encode for ExpectedIdlePeriod {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 181)?;
+            writer.unsigned(self.0, 1, 181, true)?;
             Ok(())
         }
     }
@@ -28202,7 +28204,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ExpectedUEMobility {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for ExpectedUEMobility {
@@ -28307,7 +28309,7 @@ pub mod ngap_ies {
             let time_stayed_in_cell = if present & 2 != 0 {
                 Some(
                     reader
-                        .unsigned(0, 4095)
+                        .unsigned(0, 4095, false)
                         .map_err(in_field("time_stayed_in_cell"))? as u16,
                 )
             } else {
@@ -28342,7 +28344,7 @@ pub mod ngap_ies {
                 .map_err(in_field("ngran_cgi"))?;
             if let Some(value) = &self.time_stayed_in_cell {
                 writer
-                    .unsigned(u64::from(*value), 0, 4095)
+                    .unsigned(u64::from(*value), 0, 4095, false)
                     .map_err(in_field("time_stayed_in_cell"))?;
             }
             if let Some(value) = &self.ie_extensions {
@@ -28552,13 +28554,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ExtendedConnectedTime {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 255)? as u8))
+            Ok(Self(reader.unsigned(0, 255, false)? as u8))
         }
     }
     impl Encode for ExtendedConnectedTime {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 255)?;
+            writer.unsigned(u64::from(self.0), 0, 255, false)?;
             Ok(())
         }
     }
@@ -28801,13 +28803,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ExtendedPacketDelayBudget {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(1, 65535)?))
+            Ok(Self(reader.unsigned(1, 65535, true)?))
         }
     }
     impl Encode for ExtendedPacketDelayBudget {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 65535)?;
+            writer.unsigned(self.0, 1, 65535, true)?;
             Ok(())
         }
     }
@@ -28860,10 +28862,10 @@ pub mod ngap_ies {
             let extended = reader.bit()?;
             let present = reader.bits(1)?;
             let primary_rat_restriction = reader
-                .bit_string_extensible(8, 8)
+                .bit_string(8, 8, true)
                 .map_err(in_field("primary_rat_restriction"))?;
             let secondary_rat_restriction = reader
-                .bit_string_extensible(8, 8)
+                .bit_string(8, 8, true)
                 .map_err(in_field("secondary_rat_restriction"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -28889,10 +28891,10 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.ie_extensions.is_some());
             writer
-                .bit_string_extensible(&self.primary_rat_restriction, 8, 8)
+                .bit_string(&self.primary_rat_restriction, 8, 8, true)
                 .map_err(in_field("primary_rat_restriction"))?;
             writer
-                .bit_string_extensible(&self.secondary_rat_restriction, 8, 8)
+                .bit_string(&self.secondary_rat_restriction, 8, 8, true)
                 .map_err(in_field("secondary_rat_restriction"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -28970,13 +28972,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ExtendedRNCID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(4096, 65535)? as u16))
+            Ok(Self(reader.unsigned(4096, 65535, false)? as u16))
         }
     }
     impl Encode for ExtendedRNCID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 4096, 65535)?;
+            writer.unsigned(u64::from(self.0), 4096, 65535, false)?;
             Ok(())
         }
     }
@@ -29021,7 +29023,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ExtendedReportIntervalMDT {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for ExtendedReportIntervalMDT {
@@ -29901,7 +29903,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for FiveGCAction {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::hLComActivate(HLComActivate::decode(reader)?),
                 1 => Self::hLComDeactivate(HLComDeactivate::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -29992,7 +29994,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for FiveGProSeDirectCommunication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for FiveGProSeDirectCommunication {
@@ -30039,7 +30041,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for FiveGProSeDirectDiscovery {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for FiveGProSeDirectDiscovery {
@@ -30086,7 +30088,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for FiveGProSeLayer2MHIntermediateUEtoNetworkRelay {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for FiveGProSeLayer2MHIntermediateUEtoNetworkRelay {
@@ -30133,7 +30135,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for FiveGProSeLayer2MHRemote {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for FiveGProSeLayer2MHRemote {
@@ -30180,7 +30182,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for FiveGProSeLayer2MHUEtoNetworkRelay {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for FiveGProSeLayer2MHUEtoNetworkRelay {
@@ -30227,7 +30229,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for FiveGProSeLayer2Multipath {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for FiveGProSeLayer2Multipath {
@@ -30274,7 +30276,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for FiveGProSeLayer2RemoteUE {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for FiveGProSeLayer2RemoteUE {
@@ -30321,7 +30323,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for FiveGProSeLayer2UEtoNetworkRelay {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for FiveGProSeLayer2UEtoNetworkRelay {
@@ -30368,7 +30370,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for FiveGProSeLayer2UEtoUERelay {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for FiveGProSeLayer2UEtoUERelay {
@@ -30415,7 +30417,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for FiveGProSeLayer2UEtoUERemote {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for FiveGProSeLayer2UEtoUERemote {
@@ -30462,7 +30464,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for FiveGProSeLayer3MHUEtoNetworkRelay {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for FiveGProSeLayer3MHUEtoNetworkRelay {
@@ -30509,7 +30511,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for FiveGProSeLayer3UEtoNetworkRelay {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for FiveGProSeLayer3UEtoNetworkRelay {
@@ -30864,13 +30866,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for FiveQI {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 255)?))
+            Ok(Self(reader.unsigned(0, 255, true)?))
         }
     }
     impl Encode for FiveQI {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 255)?;
+            writer.unsigned(self.0, 0, 255, true)?;
             Ok(())
         }
     }
@@ -31602,7 +31604,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for GNBID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
+            Ok(match reader.index(2, 0, false)? {
                 0 => Self::gNB_ID(reader.bits_sized(22, 32)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
@@ -32175,7 +32177,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for GUAMIType {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for GUAMIType {
@@ -32221,7 +32223,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for GWContextReleaseIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for GWContextReleaseIndication {
@@ -32405,13 +32407,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for GlobalCableID<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for GlobalCableID<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -32875,13 +32877,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for GlobalLineIdentity<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for GlobalLineIdentity<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -33120,7 +33122,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for GlobalRANNodeID {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(4, 0, false)? {
+            Ok(match reader.index(4, 0, false)? {
                 0 => Self::globalGNB_ID(GlobalGNBID::decode(reader)?),
                 1 => Self::globalNgENB_ID(GlobalNgENBID::decode(reader)?),
                 2 => Self::globalN3IWF_ID(GlobalN3IWFID::decode(reader)?),
@@ -33547,13 +33549,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for HFCNodeID<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for HFCNodeID<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -33796,7 +33798,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for HLComDeactivateUEReachabilityIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for HLComDeactivateUEReachabilityIndication {
@@ -33942,7 +33944,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for HOReportHandoverReportType {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(3, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(3, 0, true)? as usize])
         }
     }
     impl Encode for HOReportHandoverReportType {
@@ -34465,7 +34467,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for HandoverFlag {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for HandoverFlag {
@@ -35070,7 +35072,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for HandoverType {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(3, 1, true)? as usize])
+            Ok(Self::VALUES[reader.index(3, 1, true)? as usize])
         }
     }
     impl Encode for HandoverType {
@@ -35112,13 +35114,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for HandoverWindowDuration {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(1, 6000)? as u16))
+            Ok(Self(reader.unsigned(1, 6000, false)? as u16))
         }
     }
     impl Encode for HandoverWindowDuration {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 1, 6000)?;
+            writer.unsigned(u64::from(self.0), 1, 6000, false)?;
             Ok(())
         }
     }
@@ -35158,13 +35160,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for HandoverWindowStart {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 549755813887)?))
+            Ok(Self(reader.unsigned(0, 549755813887, false)?))
         }
     }
     impl Encode for HandoverWindowStart {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(self.0, 0, 549755813887)?;
+            writer.unsigned(self.0, 0, 549755813887, false)?;
             Ok(())
         }
     }
@@ -35208,13 +35210,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for HashedUEIdentityIndexValue<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.bit_string_extensible(13, 13)?))
+            Ok(Self(reader.bit_string(13, 13, true)?))
         }
     }
     impl Encode for HashedUEIdentityIndexValue<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.bit_string_extensible(&self.0, 13, 13)?;
+            writer.bit_string(&self.0, 13, 13, true)?;
             Ok(())
         }
     }
@@ -35250,13 +35252,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for Hysteresis {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 30)? as u8))
+            Ok(Self(reader.unsigned(0, 30, false)? as u8))
         }
     }
     impl Encode for Hysteresis {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 30)?;
+            writer.unsigned(u64::from(self.0), 0, 30, false)?;
             Ok(())
         }
     }
@@ -35299,7 +35301,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for IABAuthorized {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for IABAuthorized {
@@ -35345,7 +35347,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for IABSupported {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for IABSupported {
@@ -35391,7 +35393,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for IABNodeIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for IABNodeIndication {
@@ -35438,7 +35440,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for IMSVoiceSupportIndicator {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for IMSVoiceSupportIndicator {
@@ -35824,7 +35826,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for IncludeBeamMeasurementsIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for IncludeBeamMeasurementsIndication {
@@ -35866,13 +35868,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for IndexToRFSP {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(1, 256)?))
+            Ok(Self(reader.unsigned(1, 256, true)?))
         }
     }
     impl Encode for IndexToRFSP {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 256)?;
+            writer.unsigned(self.0, 1, 256, true)?;
             Ok(())
         }
     }
@@ -35912,7 +35914,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for IndicationOfBitrateAdaptation {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for IndicationOfBitrateAdaptation {
@@ -36078,7 +36080,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for IntegrityProtectionIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(3, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(3, 0, true)? as usize])
         }
     }
     impl Encode for IntegrityProtectionIndication {
@@ -36125,7 +36127,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for IntegrityProtectionResult {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for IntegrityProtectionResult {
@@ -36167,13 +36169,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for IntendedNumberOfPagingAttempts {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(1, 16)?))
+            Ok(Self(reader.unsigned(1, 16, true)?))
         }
     }
     impl Encode for IntendedNumberOfPagingAttempts {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 16)?;
+            writer.unsigned(self.0, 1, 16, true)?;
             Ok(())
         }
     }
@@ -36227,13 +36229,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for IntendedServiceAreaCoordinates<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for IntendedServiceAreaCoordinates<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -36503,7 +36505,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for InterSystemHandoverReportType<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::tooearlyIntersystemHO(TooearlyIntersystemHO::decode(reader)?),
                 1 => Self::intersystemUnnecessaryHO(IntersystemUnnecessaryHO::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -36657,7 +36659,7 @@ pub mod ngap_ies {
             let activated_cell_list =
                 ActivatedCellList::decode(reader).map_err(in_field("activated_cell_list"))?;
             let activation_id = reader
-                .unsigned_extensible(0, 16384)
+                .unsigned(0, 16384, true)
                 .map_err(in_field("activation_id"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -36686,7 +36688,7 @@ pub mod ngap_ies {
                 .encode(writer)
                 .map_err(in_field("activated_cell_list"))?;
             writer
-                .unsigned_extensible(self.activation_id, 0, 16384)
+                .unsigned(self.activation_id, 0, 16384, true)
                 .map_err(in_field("activation_id"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -36759,7 +36761,7 @@ pub mod ngap_ies {
             let extended = reader.bit()?;
             let present = reader.bits(1)?;
             let activation_id = reader
-                .unsigned_extensible(0, 16384)
+                .unsigned(0, 16384, true)
                 .map_err(in_field("activation_id"))?;
             let cells_to_activate_list =
                 CellsToActivateList::decode(reader).map_err(in_field("cells_to_activate_list"))?;
@@ -36787,7 +36789,7 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.ie_extensions.is_some());
             writer
-                .unsigned_extensible(self.activation_id, 0, 16384)
+                .unsigned(self.activation_id, 0, 16384, true)
                 .map_err(in_field("activation_id"))?;
             self.cells_to_activate_list
                 .encode(writer)
@@ -37418,13 +37420,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for IntersystemResourceThreshold {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 100)? as u8))
+            Ok(Self(reader.unsigned(0, 100, false)? as u8))
         }
     }
     impl Encode for IntersystemResourceThreshold {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 100)?;
+            writer.unsigned(u64::from(self.0), 0, 100, false)?;
             Ok(())
         }
     }
@@ -37597,7 +37599,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for IntersystemSONInformation<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
+            Ok(match reader.index(2, 0, false)? {
                 0 => Self::intersystemSONInformationReport(
                     IntersystemSONInformationReport::decode(reader)?,
                 ),
@@ -37681,7 +37683,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for IntersystemSONInformationReply {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::nGRAN_CellActivation(IntersystemCellActivationReply::decode(reader)?),
                 1 => Self::resourceStatus(IntersystemResourceStatusReply::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -37797,7 +37799,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for IntersystemSONInformationReport<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::hOReportInformation(InterSystemHOReport::decode(reader)?),
                 1 => Self::failureIndicationInformation(InterSystemFailureIndication::decode(
                     reader,
@@ -37898,7 +37900,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for IntersystemSONInformationRequest {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::nGRAN_CellActivation(IntersystemCellActivationRequest::decode(reader)?),
                 1 => Self::resourceStatus(IntersystemResourceStatusRequest::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -38093,7 +38095,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for IntersystemSONTransferType {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::fromEUTRANtoNGRAN(FromEUTRANtoNGRAN::decode(reader)?),
                 1 => Self::fromNGRANtoEUTRAN(FromNGRANtoEUTRAN::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -38286,7 +38288,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for IntersystemUnnecessaryHOEarlyIRATHO {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for IntersystemUnnecessaryHOEarlyIRATHO {
@@ -38604,7 +38606,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for InventoryReportTransferInventoryCompleteIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for InventoryReportTransferInventoryCompleteIndication {
@@ -39165,13 +39167,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for LPWUSCNsubgroupID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 30)?))
+            Ok(Self(reader.unsigned(0, 30, true)?))
         }
     }
     impl Encode for LPWUSCNsubgroupID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 30)?;
+            writer.unsigned(self.0, 0, 30, true)?;
             Ok(())
         }
     }
@@ -39211,7 +39213,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for LPWUSDisableIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for LPWUSDisableIndication {
@@ -39344,7 +39346,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for LTEA2XServicesAuthorizedAerialUE {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for LTEA2XServicesAuthorizedAerialUE {
@@ -39391,7 +39393,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for LTEA2XServicesAuthorizedAerialControllerUE {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for LTEA2XServicesAuthorizedAerialControllerUE {
@@ -39567,7 +39569,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for LTEMIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for LTEMIndication {
@@ -39627,13 +39629,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for LTEUERLFReportContainer<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for LTEUERLFReportContainer<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -39913,7 +39915,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for LastVisitedCellInformation<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(5, 0, false)? {
+            Ok(match reader.index(5, 0, false)? {
                 0 => Self::nGRANCell(LastVisitedNGRANCellInformation::decode(reader)?),
                 1 => Self::eUTRANCell(LastVisitedEUTRANCellInformation::decode(reader)?),
                 2 => Self::uTRANCell(LastVisitedUTRANCellInformation::decode(reader)?),
@@ -40144,13 +40146,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for LastVisitedEUTRANCellInformation<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for LastVisitedEUTRANCellInformation<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -40204,13 +40206,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for LastVisitedGERANCellInformation<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for LastVisitedGERANCellInformation<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -40431,7 +40433,9 @@ pub mod ngap_ies {
             } else {
                 None
             };
-            let time_stay = reader.unsigned(0, 40950).map_err(in_field("time_stay"))? as u16;
+            let time_stay = reader
+                .unsigned(0, 40950, false)
+                .map_err(in_field("time_stay"))? as u16;
             let ie_extensions = if present & 1 != 0 {
                 Some(
                     (ProtocolExtensionContainer::decode(reader)
@@ -40460,7 +40464,7 @@ pub mod ngap_ies {
                 value.encode(writer).map_err(in_field("ps_cell_id"))?;
             }
             writer
-                .unsigned(u64::from(self.time_stay), 0, 40950)
+                .unsigned(u64::from(self.time_stay), 0, 40950, false)
                 .map_err(in_field("time_stay"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -40596,13 +40600,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for LastVisitedUTRANCellInformation<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for LastVisitedUTRANCellInformation<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -40643,7 +40647,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for LineType {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for LineType {
@@ -40693,7 +40697,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for LinksToLog {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(3, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(3, 0, true)? as usize])
         }
     }
     impl Encode for LinksToLog {
@@ -40739,7 +40743,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for LocationReportingAdditionalInfo {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for LocationReportingAdditionalInfo {
@@ -40781,13 +40785,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for LocationReportingReferenceID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(1, 64)?))
+            Ok(Self(reader.unsigned(1, 64, true)?))
         }
     }
     impl Encode for LocationReportingReferenceID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 64)?;
+            writer.unsigned(self.0, 1, 64, true)?;
             Ok(())
         }
     }
@@ -41261,7 +41265,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for LoggedMDTTrigger {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::periodical(()),
                 1 => Self::eventTrigger(EventTrigger::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -41356,7 +41360,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for LoggingDuration {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(6, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(6, 0, true)? as usize])
         }
     }
     impl Encode for LoggingDuration {
@@ -41427,7 +41431,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for LoggingInterval {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(11, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(11, 0, true)? as usize])
         }
     }
     impl Encode for LoggingInterval {
@@ -41737,7 +41741,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for M1ReportingTrigger {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(3, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(3, 0, true)? as usize])
         }
     }
     impl Encode for M1ReportingTrigger {
@@ -41879,7 +41883,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for M1ThresholdType {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(4, 0, false)? {
+            Ok(match reader.index(4, 0, false)? {
                 0 => Self::threshold_RSRP(ThresholdRSRP::decode(reader)?),
                 1 => Self::threshold_RSRQ(ThresholdRSRQ::decode(reader)?),
                 2 => Self::threshold_SINR(ThresholdSINR::decode(reader)?),
@@ -42099,7 +42103,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for M4ReportAmountMDT {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(8, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(8, 0, true)? as usize])
         }
     }
     impl Encode for M4ReportAmountMDT {
@@ -42156,7 +42160,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for M4period {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(5, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(5, 0, true)? as usize])
         }
     }
     impl Encode for M4period {
@@ -42317,7 +42321,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for M5ReportAmountMDT {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(8, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(8, 0, true)? as usize])
         }
     }
     impl Encode for M5ReportAmountMDT {
@@ -42374,7 +42378,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for M5period {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(5, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(5, 0, true)? as usize])
         }
     }
     impl Encode for M5period {
@@ -42539,7 +42543,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for M6ReportAmountMDT {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(8, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(8, 0, true)? as usize])
         }
     }
     impl Encode for M6ReportAmountMDT {
@@ -42616,7 +42620,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for M6reportInterval {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(14, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(14, 0, true)? as usize])
         }
     }
     impl Encode for M6reportInterval {
@@ -42777,7 +42781,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for M7ReportAmountMDT {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(8, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(8, 0, true)? as usize])
         }
     }
     impl Encode for M7ReportAmountMDT {
@@ -42819,13 +42823,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for M7period {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(1, 60)?))
+            Ok(Self(reader.unsigned(1, 60, true)?))
         }
     }
     impl Encode for M7period {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 60)?;
+            writer.unsigned(self.0, 1, 60, true)?;
             Ok(())
         }
     }
@@ -43316,13 +43320,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MBSAreaSessionID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 65535)?))
+            Ok(Self(reader.unsigned(0, 65535, true)?))
         }
     }
     impl Encode for MBSAreaSessionID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 65535)?;
+            writer.unsigned(self.0, 0, 65535, true)?;
             Ok(())
         }
     }
@@ -43414,7 +43418,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MBSAssistanceInformation {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for MBSAssistanceInformation {
@@ -44646,7 +44650,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for MBSNGUFailureIndication {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::locationindependent(MBSUPFailureIndication::decode(reader)?),
                 1 => Self::locationdependent(MBSUPFailureIndicationList::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -44967,7 +44971,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for MBSServiceArea {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::locationindependent(MBSServiceAreaInformation::decode(reader)?),
                 1 => Self::locationdependent(MBSServiceAreaInformationList::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -45694,7 +45698,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for MBSSessionTNLInfo5GC<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::locationindependent(SharedNGUMulticastTNLInformation::decode(reader)?),
                 1 => Self::locationdependent(MBSSessionTNLInfo5GCList::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -45991,7 +45995,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for MBSSessionTNLInfoNGRAN<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::locationindependent(UPTransportLayerInformation::decode(reader)?),
                 1 => Self::locationdependent(MBSSessionTNLInfoNGRANList::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -46287,7 +46291,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MBSSupportIndicator {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 1, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 1, true)? as usize])
         }
     }
     impl Encode for MBSSupportIndicator {
@@ -46333,7 +46337,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MBSUPFailureIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for MBSUPFailureIndication {
@@ -47725,7 +47729,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MBSSessionStatus {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for MBSSessionStatus {
@@ -47928,7 +47932,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MDTActivation {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(3, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(3, 0, true)? as usize])
         }
     }
     impl Encode for MDTActivation {
@@ -47972,7 +47976,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MDTAlignmentInfo {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
+            Ok(match reader.index(2, 0, false)? {
                 0 => Self::s_basedMDT(NGRANTraceID::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
@@ -48651,10 +48655,10 @@ pub mod ngap_ies {
             let extended = reader.bit()?;
             let present = reader.bits(1)?;
             let reference_location = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("reference_location"))?;
             let distance_radius = reader
-                .unsigned(1, 65535)
+                .unsigned(1, 65535, false)
                 .map_err(in_field("distance_radius"))? as u16;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -48680,10 +48684,10 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.ie_extensions.is_some());
             writer
-                .octet_string(&self.reference_location, 0, UNBOUNDED)
+                .octet_string(&self.reference_location, 0, UNBOUNDED, false)
                 .map_err(in_field("reference_location"))?;
             writer
-                .unsigned(u64::from(self.distance_radius), 1, 65535)
+                .unsigned(u64::from(self.distance_radius), 1, 65535, false)
                 .map_err(in_field("distance_radius"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -48774,13 +48778,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MDTPolygon<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for MDTPolygon<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -48834,13 +48838,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MDTModeEutra<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for MDTModeEutra<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -48894,7 +48898,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for MDTModeNr<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::immediateMDTNr(ImmediateMDTNr::decode(reader)?),
                 1 => Self::loggedMDTNr(LoggedMDTNr::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -49086,7 +49090,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MICOModeIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for MICOModeIndication {
@@ -49187,7 +49191,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MNOnlyMDTCollection {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for MNOnlyMDTCollection {
@@ -49229,13 +49233,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MRBID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(1, 512)?))
+            Ok(Self(reader.unsigned(1, 512, true)?))
         }
     }
     impl Encode for MRBID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 512)?;
+            writer.unsigned(self.0, 1, 512, true)?;
             Ok(())
         }
     }
@@ -49279,9 +49283,9 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MRBProgressInformation {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
-                0 => Self::pDCP_SN_Length12(reader.unsigned(0, 4095)? as u16),
-                1 => Self::pDCP_SN_Length18(reader.unsigned(0, 262143)? as u32),
+            Ok(match reader.index(3, 0, false)? {
+                0 => Self::pDCP_SN_Length12(reader.unsigned(0, 4095, false)? as u16),
+                1 => Self::pDCP_SN_Length18(reader.unsigned(0, 262143, false)? as u32),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
         }
@@ -49292,11 +49296,11 @@ pub mod ngap_ies {
             match self {
                 Self::pDCP_SN_Length12(value) => {
                     writer.index(0, 3, false);
-                    writer.unsigned(u64::from(*value), 0, 4095)?;
+                    writer.unsigned(u64::from(*value), 0, 4095, false)?;
                 }
                 Self::pDCP_SN_Length18(value) => {
                     writer.index(1, 3, false);
-                    writer.unsigned(u64::from(*value), 0, 262143)?;
+                    writer.unsigned(u64::from(*value), 0, 262143, false)?;
                 }
                 Self::choice_Extensions(value) => {
                     writer.index(2, 3, false);
@@ -49424,13 +49428,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MaxNrofRSIndexesToReport {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(1, 64)?))
+            Ok(Self(reader.unsigned(1, 64, true)?))
         }
     }
     impl Encode for MaxNrofRSIndexesToReport {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 64)?;
+            writer.unsigned(self.0, 1, 64, true)?;
             Ok(())
         }
     }
@@ -49466,13 +49470,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MaximumDataBurstVolume {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 4095)?))
+            Ok(Self(reader.unsigned(0, 4095, true)?))
         }
     }
     impl Encode for MaximumDataBurstVolume {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 4095)?;
+            writer.unsigned(self.0, 0, 4095, true)?;
             Ok(())
         }
     }
@@ -49513,7 +49517,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MaximumIntegrityProtectedDataRate {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for MaximumIntegrityProtectedDataRate {
@@ -49563,7 +49567,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MeasurementThresholdL1LoggedMDT {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::threshold_RSRP(ThresholdRSRP::decode(reader)?),
                 1 => Self::threshold_RSRQ(ThresholdRSRQ::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -49756,7 +49760,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MicoAllPLMN {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for MicoAllPLMN {
@@ -49803,7 +49807,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MobileIABAuthorized {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for MobileIABAuthorized {
@@ -49940,7 +49944,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MobileIABSupported {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for MobileIABSupported {
@@ -49986,7 +49990,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MobileIABNodeIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for MobileIABNodeIndication {
@@ -50293,7 +50297,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for MonitoringRequest {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(4, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(4, 0, true)? as usize])
         }
     }
     impl Encode for MonitoringRequest {
@@ -50973,7 +50977,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for N3IWFID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
+            Ok(match reader.index(2, 0, false)? {
                 0 => Self::n3IWF_ID(reader.bits_sized(16, 16)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
@@ -51051,11 +51055,11 @@ pub mod ngap_ies {
             let extended = reader.bit()?;
             let present = reader.bits(1)?;
             let n6_jitter_lower_bound = reader
-                .signed(-127, 127)
+                .signed(-127, 127, false)
                 .map_err(in_field("n6_jitter_lower_bound"))?
                 as i8;
             let n6_jitter_upper_bound = reader
-                .signed(-127, 127)
+                .signed(-127, 127, false)
                 .map_err(in_field("n6_jitter_upper_bound"))?
                 as i8;
             let ie_extensions = if present & 1 != 0 {
@@ -51082,10 +51086,10 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.ie_extensions.is_some());
             writer
-                .signed(i64::from(self.n6_jitter_lower_bound), -127, 127)
+                .signed(i64::from(self.n6_jitter_lower_bound), -127, 127, false)
                 .map_err(in_field("n6_jitter_lower_bound"))?;
             writer
-                .signed(i64::from(self.n6_jitter_upper_bound), -127, 127)
+                .signed(i64::from(self.n6_jitter_upper_bound), -127, 127, false)
                 .map_err(in_field("n6_jitter_upper_bound"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -51177,13 +51181,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NASPDU<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for NASPDU<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -51237,13 +51241,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NASSecurityParametersFromNGRAN<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for NASSecurityParametersFromNGRAN<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -51286,7 +51290,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NBIoTDefaultPagingDRX {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(4, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(4, 0, true)? as usize])
         }
     }
     impl Encode for NBIoTDefaultPagingDRX {
@@ -51367,7 +51371,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NBIoTPagingTimeWindow {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(16, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(16, 0, true)? as usize])
         }
     }
     impl Encode for NBIoTPagingTimeWindow {
@@ -51444,7 +51448,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NBIoTPagingEDRXCycle {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(14, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(14, 0, true)? as usize])
         }
     }
     impl Encode for NBIoTPagingEDRXCycle {
@@ -51632,7 +51636,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NBIoTPagingDRX {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(6, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(6, 0, true)? as usize])
         }
     }
     impl Encode for NBIoTPagingDRX {
@@ -51674,13 +51678,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NBIoTUEPriority {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 255)?))
+            Ok(Self(reader.unsigned(0, 255, true)?))
         }
     }
     impl Encode for NBIoTUEPriority {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 255)?;
+            writer.unsigned(self.0, 0, 255, true)?;
             Ok(())
         }
     }
@@ -51859,7 +51863,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NGAPIESupportInformationResponseItemNgapProtocolIESupportInfo {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for NGAPIESupportInformationResponseItemNgapProtocolIESupportInfo {
@@ -51906,7 +51910,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NGAPIESupportInformationResponseItemNgapProtocolIEPresenceInfo {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for NGAPIESupportInformationResponseItemNgapProtocolIEPresenceInfo {
@@ -52143,7 +52147,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for NGRANCGI {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::nR_CGI(NRCGI::decode(reader)?),
                 1 => Self::eUTRA_CGI(EUTRACGI::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -52609,13 +52613,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NGRANNoofRRCConnections {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(1, 65536)?))
+            Ok(Self(reader.unsigned(1, 65536, true)?))
         }
     }
     impl Encode for NGRANNoofRRCConnections {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 65536)?;
+            writer.unsigned(self.0, 1, 65536, true)?;
             Ok(())
         }
     }
@@ -52651,13 +52655,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NGRANNumberOfActiveUEs {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 16777215)?))
+            Ok(Self(reader.unsigned(0, 16777215, true)?))
         }
     }
     impl Encode for NGRANNumberOfActiveUEs {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 16777215)?;
+            writer.unsigned(self.0, 0, 16777215, true)?;
             Ok(())
         }
     }
@@ -52713,27 +52717,27 @@ pub mod ngap_ies {
             let extended = reader.bit()?;
             let present = reader.bits(1)?;
             let dl_gbr_prb_usage_for_mimo = reader
-                .unsigned(0, 100)
+                .unsigned(0, 100, false)
                 .map_err(in_field("dl_gbr_prb_usage_for_mimo"))?
                 as u8;
             let ul_gbr_prb_usage_for_mimo = reader
-                .unsigned(0, 100)
+                .unsigned(0, 100, false)
                 .map_err(in_field("ul_gbr_prb_usage_for_mimo"))?
                 as u8;
             let dl_non_gbr_prb_usage_for_mimo = reader
-                .unsigned(0, 100)
+                .unsigned(0, 100, false)
                 .map_err(in_field("dl_non_gbr_prb_usage_for_mimo"))?
                 as u8;
             let ul_non_gbr_prb_usage_for_mimo = reader
-                .unsigned(0, 100)
+                .unsigned(0, 100, false)
                 .map_err(in_field("ul_non_gbr_prb_usage_for_mimo"))?
                 as u8;
             let dl_total_prb_usage_for_mimo = reader
-                .unsigned(0, 100)
+                .unsigned(0, 100, false)
                 .map_err(in_field("dl_total_prb_usage_for_mimo"))?
                 as u8;
             let ul_total_prb_usage_for_mimo = reader
-                .unsigned(0, 100)
+                .unsigned(0, 100, false)
                 .map_err(in_field("ul_total_prb_usage_for_mimo"))?
                 as u8;
             let ie_extensions = if present & 1 != 0 {
@@ -52764,22 +52768,22 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.ie_extensions.is_some());
             writer
-                .unsigned(u64::from(self.dl_gbr_prb_usage_for_mimo), 0, 100)
+                .unsigned(u64::from(self.dl_gbr_prb_usage_for_mimo), 0, 100, false)
                 .map_err(in_field("dl_gbr_prb_usage_for_mimo"))?;
             writer
-                .unsigned(u64::from(self.ul_gbr_prb_usage_for_mimo), 0, 100)
+                .unsigned(u64::from(self.ul_gbr_prb_usage_for_mimo), 0, 100, false)
                 .map_err(in_field("ul_gbr_prb_usage_for_mimo"))?;
             writer
-                .unsigned(u64::from(self.dl_non_gbr_prb_usage_for_mimo), 0, 100)
+                .unsigned(u64::from(self.dl_non_gbr_prb_usage_for_mimo), 0, 100, false)
                 .map_err(in_field("dl_non_gbr_prb_usage_for_mimo"))?;
             writer
-                .unsigned(u64::from(self.ul_non_gbr_prb_usage_for_mimo), 0, 100)
+                .unsigned(u64::from(self.ul_non_gbr_prb_usage_for_mimo), 0, 100, false)
                 .map_err(in_field("ul_non_gbr_prb_usage_for_mimo"))?;
             writer
-                .unsigned(u64::from(self.dl_total_prb_usage_for_mimo), 0, 100)
+                .unsigned(u64::from(self.dl_total_prb_usage_for_mimo), 0, 100, false)
                 .map_err(in_field("dl_total_prb_usage_for_mimo"))?;
             writer
-                .unsigned(u64::from(self.ul_total_prb_usage_for_mimo), 0, 100)
+                .unsigned(u64::from(self.ul_total_prb_usage_for_mimo), 0, 100, false)
                 .map_err(in_field("ul_total_prb_usage_for_mimo"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -53390,7 +53394,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for NPNAccessInformation {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
+            Ok(match reader.index(2, 0, false)? {
                 0 => Self::pNI_NPN_Access_Information(CellCAGList::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
@@ -53470,7 +53474,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for NPNMobilityInformation {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::sNPN_MobilityInformation(SNPNMobilityInformation::decode(reader)?),
                 1 => Self::pNI_NPN_MobilityInformation(PNINPNMobilityInformation::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -53563,7 +53567,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for NPNPagingAssistanceInformation {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
+            Ok(match reader.index(2, 0, false)? {
                 0 => Self::pNI_NPN_PagingAssistance(AllowedPNINPNList::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
@@ -53638,7 +53642,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NPNSupport {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
+            Ok(match reader.index(2, 0, false)? {
                 0 => Self::sNPN(NID::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
@@ -53710,7 +53714,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NRA2XServicesAuthorizedAerialUE {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for NRA2XServicesAuthorizedAerialUE {
@@ -53757,7 +53761,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NRA2XServicesAuthorizedAerialControllerUE {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for NRA2XServicesAuthorizedAerialControllerUE {
@@ -54132,13 +54136,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NRPCI {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 1007)?))
+            Ok(Self(reader.unsigned(0, 1007, true)?))
         }
     }
     impl Encode for NRPCI {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 1007)?;
+            writer.unsigned(self.0, 0, 1007, true)?;
             Ok(())
         }
     }
@@ -54200,7 +54204,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NRPagingLongEDRXCycleForRRCINACTIVE {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(10, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(10, 0, true)? as usize])
         }
     }
     impl Encode for NRPagingLongEDRXCycleForRRCINACTIVE {
@@ -54434,7 +54438,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NRPagingTimeWindow {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(16, 16, true)? as usize])
+            Ok(Self::VALUES[reader.index(16, 16, true)? as usize])
         }
     }
     impl Encode for NRPagingTimeWindow {
@@ -54548,7 +54552,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NRPagingTimeWindowForRRCINACTIVE {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(32, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(32, 0, true)? as usize])
         }
     }
     impl Encode for NRPagingTimeWindowForRRCINACTIVE {
@@ -54634,7 +54638,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NRPagingEDRXCycle {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(13, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(13, 0, true)? as usize])
         }
     }
     impl Encode for NRPagingEDRXCycle {
@@ -54802,13 +54806,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NRARFCN {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 3279165)? as u32))
+            Ok(Self(reader.unsigned(0, 3279165, false)? as u32))
         }
     }
     impl Encode for NRARFCN {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 3279165)?;
+            writer.unsigned(u64::from(self.0), 0, 3279165, false)?;
             Ok(())
         }
     }
@@ -54901,13 +54905,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NRFrequencyBand {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(1, 1024)?))
+            Ok(Self(reader.unsigned(1, 1024, true)?))
         }
     }
     impl Encode for NRFrequencyBand {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 1024)?;
+            writer.unsigned(self.0, 1, 1024, true)?;
             Ok(())
         }
     }
@@ -55214,13 +55218,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NRMobilityHistoryReport<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for NRMobilityHistoryReport<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -55403,13 +55407,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NRPPaPDU<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for NRPPaPDU<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -55463,13 +55467,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NRUERLFReportContainer<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for NRUERLFReportContainer<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -55721,13 +55725,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NRencryptionAlgorithms<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.bit_string_extensible(16, 16)?))
+            Ok(Self(reader.bit_string(16, 16, true)?))
         }
     }
     impl Encode for NRencryptionAlgorithms<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.bit_string_extensible(&self.0, 16, 16)?;
+            writer.bit_string(&self.0, 16, 16, true)?;
             Ok(())
         }
     }
@@ -55771,13 +55775,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NRintegrityProtectionAlgorithms<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.bit_string_extensible(16, 16)?))
+            Ok(Self(reader.bit_string(16, 16, true)?))
         }
     }
     impl Encode for NRintegrityProtectionAlgorithms<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.bit_string_extensible(&self.0, 16, 16)?;
+            writer.bit_string(&self.0, 16, 16, true)?;
             Ok(())
         }
     }
@@ -55813,13 +55817,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NSAGID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 255)?))
+            Ok(Self(reader.unsigned(0, 255, true)?))
         }
     }
     impl Encode for NSAGID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 255)?;
+            writer.unsigned(self.0, 0, 255, true)?;
             Ok(())
         }
     }
@@ -55873,7 +55877,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for NTNGeographicalAreaItem<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::circle(MDTCircle::decode(reader)?),
                 1 => Self::polygon(MDTPolygon::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -56011,7 +56015,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NetworkControlledRepeaterAuthorized {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for NetworkControlledRepeaterAuthorized {
@@ -56053,13 +56057,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NetworkInstance {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(1, 256)?))
+            Ok(Self(reader.unsigned(1, 256, true)?))
         }
     }
     impl Encode for NetworkInstance {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 256)?;
+            writer.unsigned(self.0, 1, 256, true)?;
             Ok(())
         }
     }
@@ -56338,7 +56342,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NewSecurityContextInd {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for NewSecurityContextInd {
@@ -56380,13 +56384,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NextHopChainingCount {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 7)? as u8))
+            Ok(Self(reader.unsigned(0, 7, false)? as u8))
         }
     }
     impl Encode for NextHopChainingCount {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 7)?;
+            writer.unsigned(u64::from(self.0), 0, 7, false)?;
             Ok(())
         }
     }
@@ -56429,7 +56433,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NextPagingAreaScope {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for NextPagingAreaScope {
@@ -56470,7 +56474,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NgENBID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(4, 0, false)? {
+            Ok(match reader.index(4, 0, false)? {
                 0 => Self::macroNgENB_ID(reader.bits_sized(20, 20)?),
                 1 => Self::shortMacroNgENB_ID(reader.bits_sized(18, 18)?),
                 2 => Self::longMacroNgENB_ID(reader.bits_sized(21, 21)?),
@@ -56581,7 +56585,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NoPDUSessionIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for NoPDUSessionIndication {
@@ -56857,7 +56861,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NotificationCause {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 2, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 2, true)? as usize])
         }
     }
     impl Encode for NotificationCause {
@@ -56904,7 +56908,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NotificationCellItemNotifyFlag {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for NotificationCellItemNotifyFlag {
@@ -57102,7 +57106,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NotificationControl {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for NotificationControl {
@@ -57148,7 +57152,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NotifySourceNGRANNode {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for NotifySourceNGRANNode {
@@ -57190,13 +57194,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NumberOfBroadcasts {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 65535)? as u16))
+            Ok(Self(reader.unsigned(0, 65535, false)? as u16))
         }
     }
     impl Encode for NumberOfBroadcasts {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 65535)?;
+            writer.unsigned(u64::from(self.0), 0, 65535, false)?;
             Ok(())
         }
     }
@@ -57236,13 +57240,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NumberOfBroadcastsRequested {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 65535)? as u16))
+            Ok(Self(reader.unsigned(0, 65535, false)? as u16))
         }
     }
     impl Encode for NumberOfBroadcastsRequested {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 65535)?;
+            writer.unsigned(u64::from(self.0), 0, 65535, false)?;
             Ok(())
         }
     }
@@ -57292,7 +57296,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for NumberOfMeasurementReportingLevels {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(5, 1, true)? as usize])
+            Ok(Self::VALUES[reader.index(5, 1, true)? as usize])
         }
     }
     impl Encode for NumberOfMeasurementReportingLevels {
@@ -57338,7 +57342,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for OnboardingSupport {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for OnboardingSupport {
@@ -57397,7 +57401,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for OverloadAction {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(4, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(4, 0, true)? as usize])
         }
     }
     impl Encode for OverloadAction {
@@ -57441,7 +57445,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for OverloadResponse {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
+            Ok(match reader.index(2, 0, false)? {
                 0 => Self::overloadAction(OverloadAction::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
@@ -58455,13 +58459,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PDUSessionID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 255)? as u8))
+            Ok(Self(reader.unsigned(0, 255, false)? as u8))
         }
     }
     impl Encode for PDUSessionID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 255)?;
+            writer.unsigned(u64::from(self.0), 0, 255, false)?;
             Ok(())
         }
     }
@@ -58637,13 +58641,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PDUSessionPairID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 255)?))
+            Ok(Self(reader.unsigned(0, 255, true)?))
         }
     }
     impl Encode for PDUSessionPairID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 255)?;
+            writer.unsigned(self.0, 0, 255, true)?;
             Ok(())
         }
     }
@@ -58700,7 +58704,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let handover_request_acknowledge_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("handover_request_acknowledge_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -58729,7 +58733,12 @@ pub mod ngap_ies {
                 .encode(writer)
                 .map_err(in_field("pdu_session_id"))?;
             writer
-                .octet_string(&self.handover_request_acknowledge_transfer, 0, UNBOUNDED)
+                .octet_string(
+                    &self.handover_request_acknowledge_transfer,
+                    0,
+                    UNBOUNDED,
+                    false,
+                )
                 .map_err(in_field("handover_request_acknowledge_transfer"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -58885,7 +58894,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let pdu_session_resource_modify_indication_unsuccessful_transfer =
-                reader.octet_string(0, UNBOUNDED).map_err(in_field(
+                reader.octet_string(0, UNBOUNDED, false).map_err(in_field(
                     "pdu_session_resource_modify_indication_unsuccessful_transfer",
                 ))?;
             let ie_extensions = if present & 1 != 0 {
@@ -58919,6 +58928,7 @@ pub mod ngap_ies {
                     &self.pdu_session_resource_modify_indication_unsuccessful_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field(
                     "pdu_session_resource_modify_indication_unsuccessful_transfer",
@@ -59016,7 +59026,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let pdu_session_resource_modify_unsuccessful_transfer =
-                reader.octet_string(0, UNBOUNDED).map_err(in_field(
+                reader.octet_string(0, UNBOUNDED, false).map_err(in_field(
                     "pdu_session_resource_modify_unsuccessful_transfer",
                 ))?;
             let ie_extensions = if present & 1 != 0 {
@@ -59050,6 +59060,7 @@ pub mod ngap_ies {
                     &self.pdu_session_resource_modify_unsuccessful_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field(
                     "pdu_session_resource_modify_unsuccessful_transfer",
@@ -59587,7 +59598,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let pdu_session_resource_setup_unsuccessful_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("pdu_session_resource_setup_unsuccessful_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -59620,6 +59631,7 @@ pub mod ngap_ies {
                     &self.pdu_session_resource_setup_unsuccessful_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field("pdu_session_resource_setup_unsuccessful_transfer"))?;
             if let Some(value) = &self.ie_extensions {
@@ -59715,7 +59727,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let pdu_session_resource_setup_unsuccessful_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("pdu_session_resource_setup_unsuccessful_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -59748,6 +59760,7 @@ pub mod ngap_ies {
                     &self.pdu_session_resource_setup_unsuccessful_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field("pdu_session_resource_setup_unsuccessful_transfer"))?;
             if let Some(value) = &self.ie_extensions {
@@ -59843,7 +59856,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let handover_resource_allocation_unsuccessful_transfer =
-                reader.octet_string(0, UNBOUNDED).map_err(in_field(
+                reader.octet_string(0, UNBOUNDED, false).map_err(in_field(
                     "handover_resource_allocation_unsuccessful_transfer",
                 ))?;
             let ie_extensions = if present & 1 != 0 {
@@ -59877,6 +59890,7 @@ pub mod ngap_ies {
                     &self.handover_resource_allocation_unsuccessful_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field(
                     "handover_resource_allocation_unsuccessful_transfer",
@@ -59974,7 +59988,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let path_switch_request_setup_failed_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("path_switch_request_setup_failed_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -60007,6 +60021,7 @@ pub mod ngap_ies {
                     &self.path_switch_request_setup_failed_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field("path_switch_request_setup_failed_transfer"))?;
             if let Some(value) = &self.ie_extensions {
@@ -60102,7 +60117,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let pdu_session_resource_setup_unsuccessful_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("pdu_session_resource_setup_unsuccessful_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -60135,6 +60150,7 @@ pub mod ngap_ies {
                     &self.pdu_session_resource_setup_unsuccessful_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field("pdu_session_resource_setup_unsuccessful_transfer"))?;
             if let Some(value) = &self.ie_extensions {
@@ -60563,7 +60579,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let handover_command_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("handover_command_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -60592,7 +60608,7 @@ pub mod ngap_ies {
                 .encode(writer)
                 .map_err(in_field("pdu_session_id"))?;
             writer
-                .octet_string(&self.handover_command_transfer, 0, UNBOUNDED)
+                .octet_string(&self.handover_command_transfer, 0, UNBOUNDED, false)
                 .map_err(in_field("handover_command_transfer"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -61108,7 +61124,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let handover_required_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("handover_required_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -61137,7 +61153,7 @@ pub mod ngap_ies {
                 .encode(writer)
                 .map_err(in_field("pdu_session_id"))?;
             writer
-                .octet_string(&self.handover_required_transfer, 0, UNBOUNDED)
+                .octet_string(&self.handover_required_transfer, 0, UNBOUNDED, false)
                 .map_err(in_field("handover_required_transfer"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -61805,7 +61821,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let pdu_session_resource_modify_confirm_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("pdu_session_resource_modify_confirm_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -61838,6 +61854,7 @@ pub mod ngap_ies {
                     &self.pdu_session_resource_modify_confirm_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field("pdu_session_resource_modify_confirm_transfer"))?;
             if let Some(value) = &self.ie_extensions {
@@ -61933,7 +61950,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let pdu_session_resource_modify_indication_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("pdu_session_resource_modify_indication_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -61966,6 +61983,7 @@ pub mod ngap_ies {
                     &self.pdu_session_resource_modify_indication_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field("pdu_session_resource_modify_indication_transfer"))?;
             if let Some(value) = &self.ie_extensions {
@@ -62070,7 +62088,7 @@ pub mod ngap_ies {
                 None
             };
             let pdu_session_resource_modify_request_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("pdu_session_resource_modify_request_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -62108,6 +62126,7 @@ pub mod ngap_ies {
                     &self.pdu_session_resource_modify_request_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field("pdu_session_resource_modify_request_transfer"))?;
             if let Some(value) = &self.ie_extensions {
@@ -62209,10 +62228,9 @@ pub mod ngap_ies {
             let present = reader.bits(1)?;
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
-            let pdu_session_resource_modify_response_transfer =
-                reader
-                    .octet_string(0, UNBOUNDED)
-                    .map_err(in_field("pdu_session_resource_modify_response_transfer"))?;
+            let pdu_session_resource_modify_response_transfer = reader
+                .octet_string(0, UNBOUNDED, false)
+                .map_err(in_field("pdu_session_resource_modify_response_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
                     (ProtocolExtensionContainer::decode(reader)
@@ -62244,6 +62262,7 @@ pub mod ngap_ies {
                     &self.pdu_session_resource_modify_response_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field("pdu_session_resource_modify_response_transfer"))?;
             if let Some(value) = &self.ie_extensions {
@@ -63028,7 +63047,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let pdu_session_resource_notify_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("pdu_session_resource_notify_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -63057,7 +63076,12 @@ pub mod ngap_ies {
                 .encode(writer)
                 .map_err(in_field("pdu_session_id"))?;
             writer
-                .octet_string(&self.pdu_session_resource_notify_transfer, 0, UNBOUNDED)
+                .octet_string(
+                    &self.pdu_session_resource_notify_transfer,
+                    0,
+                    UNBOUNDED,
+                    false,
+                )
                 .map_err(in_field("pdu_session_resource_notify_transfer"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -63569,10 +63593,9 @@ pub mod ngap_ies {
             let present = reader.bits(1)?;
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
-            let pdu_session_resource_notify_released_transfer =
-                reader
-                    .octet_string(0, UNBOUNDED)
-                    .map_err(in_field("pdu_session_resource_notify_released_transfer"))?;
+            let pdu_session_resource_notify_released_transfer = reader
+                .octet_string(0, UNBOUNDED, false)
+                .map_err(in_field("pdu_session_resource_notify_released_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
                     (ProtocolExtensionContainer::decode(reader)
@@ -63604,6 +63627,7 @@ pub mod ngap_ies {
                     &self.pdu_session_resource_notify_released_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field("pdu_session_resource_notify_released_transfer"))?;
             if let Some(value) = &self.ie_extensions {
@@ -63699,7 +63723,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let path_switch_request_unsuccessful_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("path_switch_request_unsuccessful_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -63732,6 +63756,7 @@ pub mod ngap_ies {
                     &self.path_switch_request_unsuccessful_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field("path_switch_request_unsuccessful_transfer"))?;
             if let Some(value) = &self.ie_extensions {
@@ -63827,7 +63852,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let path_switch_request_unsuccessful_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("path_switch_request_unsuccessful_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -63860,6 +63885,7 @@ pub mod ngap_ies {
                     &self.path_switch_request_unsuccessful_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field("path_switch_request_unsuccessful_transfer"))?;
             if let Some(value) = &self.ie_extensions {
@@ -63955,7 +63981,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let pdu_session_resource_release_response_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("pdu_session_resource_release_response_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -63988,6 +64014,7 @@ pub mod ngap_ies {
                     &self.pdu_session_resource_release_response_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field("pdu_session_resource_release_response_transfer"))?;
             if let Some(value) = &self.ie_extensions {
@@ -64351,7 +64378,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let ue_context_resume_request_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("ue_context_resume_request_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -64380,7 +64407,12 @@ pub mod ngap_ies {
                 .encode(writer)
                 .map_err(in_field("pdu_session_id"))?;
             writer
-                .octet_string(&self.ue_context_resume_request_transfer, 0, UNBOUNDED)
+                .octet_string(
+                    &self.ue_context_resume_request_transfer,
+                    0,
+                    UNBOUNDED,
+                    false,
+                )
                 .map_err(in_field("ue_context_resume_request_transfer"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -64475,7 +64507,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let ue_context_resume_response_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("ue_context_resume_response_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -64504,7 +64536,12 @@ pub mod ngap_ies {
                 .encode(writer)
                 .map_err(in_field("pdu_session_id"))?;
             writer
-                .octet_string(&self.ue_context_resume_response_transfer, 0, UNBOUNDED)
+                .octet_string(
+                    &self.ue_context_resume_response_transfer,
+                    0,
+                    UNBOUNDED,
+                    false,
+                )
                 .map_err(in_field("ue_context_resume_response_transfer"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -64733,7 +64770,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let secondary_rat_data_usage_report_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("secondary_rat_data_usage_report_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -64762,7 +64799,12 @@ pub mod ngap_ies {
                 .encode(writer)
                 .map_err(in_field("pdu_session_id"))?;
             writer
-                .octet_string(&self.secondary_rat_data_usage_report_transfer, 0, UNBOUNDED)
+                .octet_string(
+                    &self.secondary_rat_data_usage_report_transfer,
+                    0,
+                    UNBOUNDED,
+                    false,
+                )
                 .map_err(in_field("secondary_rat_data_usage_report_transfer"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -64938,7 +64980,7 @@ pub mod ngap_ies {
             };
             let s_nssai = SNSSAI::decode(reader).map_err(in_field("s_nssai"))?;
             let pdu_session_resource_setup_request_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("pdu_session_resource_setup_request_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -64978,6 +65020,7 @@ pub mod ngap_ies {
                     &self.pdu_session_resource_setup_request_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field("pdu_session_resource_setup_request_transfer"))?;
             if let Some(value) = &self.ie_extensions {
@@ -65084,7 +65127,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let pdu_session_resource_setup_response_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("pdu_session_resource_setup_response_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -65117,6 +65160,7 @@ pub mod ngap_ies {
                     &self.pdu_session_resource_setup_response_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field("pdu_session_resource_setup_response_transfer"))?;
             if let Some(value) = &self.ie_extensions {
@@ -65215,7 +65259,7 @@ pub mod ngap_ies {
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let s_nssai = SNSSAI::decode(reader).map_err(in_field("s_nssai"))?;
             let handover_request_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("handover_request_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -65246,7 +65290,7 @@ pub mod ngap_ies {
                 .map_err(in_field("pdu_session_id"))?;
             self.s_nssai.encode(writer).map_err(in_field("s_nssai"))?;
             writer
-                .octet_string(&self.handover_request_transfer, 0, UNBOUNDED)
+                .octet_string(&self.handover_request_transfer, 0, UNBOUNDED, false)
                 .map_err(in_field("handover_request_transfer"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -65374,7 +65418,7 @@ pub mod ngap_ies {
             };
             let s_nssai = SNSSAI::decode(reader).map_err(in_field("s_nssai"))?;
             let pdu_session_resource_setup_request_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("pdu_session_resource_setup_request_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -65416,6 +65460,7 @@ pub mod ngap_ies {
                     &self.pdu_session_resource_setup_request_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field("pdu_session_resource_setup_request_transfer"))?;
             if let Some(value) = &self.ie_extensions {
@@ -65525,7 +65570,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let pdu_session_resource_setup_response_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("pdu_session_resource_setup_response_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -65558,6 +65603,7 @@ pub mod ngap_ies {
                     &self.pdu_session_resource_setup_response_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field("pdu_session_resource_setup_response_transfer"))?;
             if let Some(value) = &self.ie_extensions {
@@ -66374,7 +66420,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let ue_context_suspend_request_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("ue_context_suspend_request_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -66403,7 +66449,12 @@ pub mod ngap_ies {
                 .encode(writer)
                 .map_err(in_field("pdu_session_id"))?;
             writer
-                .octet_string(&self.ue_context_suspend_request_transfer, 0, UNBOUNDED)
+                .octet_string(
+                    &self.ue_context_suspend_request_transfer,
+                    0,
+                    UNBOUNDED,
+                    false,
+                )
                 .map_err(in_field("ue_context_suspend_request_transfer"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -66565,7 +66616,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let path_switch_request_acknowledge_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("path_switch_request_acknowledge_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -66594,7 +66645,12 @@ pub mod ngap_ies {
                 .encode(writer)
                 .map_err(in_field("pdu_session_id"))?;
             writer
-                .octet_string(&self.path_switch_request_acknowledge_transfer, 0, UNBOUNDED)
+                .octet_string(
+                    &self.path_switch_request_acknowledge_transfer,
+                    0,
+                    UNBOUNDED,
+                    false,
+                )
                 .map_err(in_field("path_switch_request_acknowledge_transfer"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -66748,7 +66804,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let path_switch_request_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("path_switch_request_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -66777,7 +66833,7 @@ pub mod ngap_ies {
                 .encode(writer)
                 .map_err(in_field("pdu_session_id"))?;
             writer
-                .octet_string(&self.path_switch_request_transfer, 0, UNBOUNDED)
+                .octet_string(&self.path_switch_request_transfer, 0, UNBOUNDED, false)
                 .map_err(in_field("path_switch_request_transfer"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -66934,7 +66990,7 @@ pub mod ngap_ies {
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
             let handover_preparation_unsuccessful_transfer = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("handover_preparation_unsuccessful_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -66967,6 +67023,7 @@ pub mod ngap_ies {
                     &self.handover_preparation_unsuccessful_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field("handover_preparation_unsuccessful_transfer"))?;
             if let Some(value) = &self.ie_extensions {
@@ -67061,10 +67118,9 @@ pub mod ngap_ies {
             let present = reader.bits(1)?;
             let pdu_session_id =
                 PDUSessionID::decode(reader).map_err(in_field("pdu_session_id"))?;
-            let pdu_session_resource_release_command_transfer =
-                reader
-                    .octet_string(0, UNBOUNDED)
-                    .map_err(in_field("pdu_session_resource_release_command_transfer"))?;
+            let pdu_session_resource_release_command_transfer = reader
+                .octet_string(0, UNBOUNDED, false)
+                .map_err(in_field("pdu_session_resource_release_command_transfer"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
                     (ProtocolExtensionContainer::decode(reader)
@@ -67096,6 +67152,7 @@ pub mod ngap_ies {
                     &self.pdu_session_resource_release_command_transfer,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field("pdu_session_resource_release_command_transfer"))?;
             if let Some(value) = &self.ie_extensions {
@@ -67319,7 +67376,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PDUSessionType {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(5, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(5, 0, true)? as usize])
         }
     }
     impl Encode for PDUSessionType {
@@ -67374,7 +67431,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PDUSessionUsageReportRATType {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 2, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 2, true)? as usize])
         }
     }
     impl Encode for PDUSessionUsageReportRATType {
@@ -67526,7 +67583,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PDUSetbasedHandlingIndicator {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for PDUSetbasedHandlingIndicator {
@@ -67573,7 +67630,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PDUsetQoSInformationPduSetIntegratedHandlingInformation {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for PDUsetQoSInformationPduSetIntegratedHandlingInformation {
@@ -68641,7 +68698,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for PWSFailedCellIDList {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::eUTRA_CGI_PWSFailedList(EUTRACGIList::decode(reader)?),
                 1 => Self::nR_CGI_PWSFailedList(NRCGIList::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -68733,13 +68790,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PacketDelayBudget {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 1023)?))
+            Ok(Self(reader.unsigned(0, 1023, true)?))
         }
     }
     impl Encode for PacketDelayBudget {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 1023)?;
+            writer.unsigned(self.0, 0, 1023, true)?;
             Ok(())
         }
     }
@@ -68783,10 +68840,10 @@ pub mod ngap_ies {
             let extended = reader.bit()?;
             let present = reader.bits(1)?;
             let per_scalar = reader
-                .unsigned_extensible(0, 9)
+                .unsigned(0, 9, true)
                 .map_err(in_field("per_scalar"))?;
             let per_exponent = reader
-                .unsigned_extensible(0, 9)
+                .unsigned(0, 9, true)
                 .map_err(in_field("per_exponent"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -68812,10 +68869,10 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.ie_extensions.is_some());
             writer
-                .unsigned_extensible(self.per_scalar, 0, 9)
+                .unsigned(self.per_scalar, 0, 9, true)
                 .map_err(in_field("per_scalar"))?;
             writer
-                .unsigned_extensible(self.per_exponent, 0, 9)
+                .unsigned(self.per_exponent, 0, 9, true)
                 .map_err(in_field("per_exponent"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -68878,13 +68935,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PacketLossRate {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 1000)?))
+            Ok(Self(reader.unsigned(0, 1000, true)?))
         }
     }
     impl Encode for PacketLossRate {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 1000)?;
+            writer.unsigned(self.0, 0, 1000, true)?;
             Ok(())
         }
     }
@@ -69035,13 +69092,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PagingAttemptCount {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(1, 16)?))
+            Ok(Self(reader.unsigned(1, 16, true)?))
         }
     }
     impl Encode for PagingAttemptCount {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 16)?;
+            writer.unsigned(self.0, 1, 16, true)?;
             Ok(())
         }
     }
@@ -69227,7 +69284,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PagingCause {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for PagingCause {
@@ -69273,7 +69330,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PagingCauseIndicationForVoiceService {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for PagingCauseIndicationForVoiceService {
@@ -69322,7 +69379,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PagingDRX {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(4, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(4, 0, true)? as usize])
         }
     }
     impl Encode for PagingDRX {
@@ -69368,7 +69425,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PagingOrigin {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for PagingOrigin {
@@ -69547,7 +69604,7 @@ pub mod ngap_ies {
             let dl_data_size = if present & 2 != 0 {
                 Some(
                     reader
-                        .unsigned_extensible(0, 96000)
+                        .unsigned(0, 96000, true)
                         .map_err(in_field("dl_data_size"))?,
                 )
             } else {
@@ -69604,7 +69661,7 @@ pub mod ngap_ies {
             }
             if let Some(value) = &self.dl_data_size {
                 writer
-                    .unsigned_extensible(*value, 0, 96000)
+                    .unsigned(*value, 0, 96000, true)
                     .map_err(in_field("dl_data_size"))?;
             }
             if let Some(value) = &self.ie_extensions {
@@ -69766,13 +69823,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PagingPolicyIndicator {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 7)?))
+            Ok(Self(reader.unsigned(0, 7, true)?))
         }
     }
     impl Encode for PagingPolicyIndicator {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 7)?;
+            writer.unsigned(self.0, 0, 7, true)?;
             Ok(())
         }
     }
@@ -69837,7 +69894,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PagingPriority {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(8, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(8, 0, true)? as usize])
         }
     }
     impl Encode for PagingPriority {
@@ -69928,7 +69985,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PagingProbabilityInformation {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(21, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(21, 0, true)? as usize])
         }
     }
     impl Encode for PagingProbabilityInformation {
@@ -70002,7 +70059,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ParentTImeSource {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(9, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(9, 0, true)? as usize])
         }
     }
     impl Encode for ParentTImeSource {
@@ -70683,7 +70740,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PedestrianUE {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for PedestrianUE {
@@ -70866,13 +70923,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for Periodicity {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 640000)?))
+            Ok(Self(reader.unsigned(0, 640000, true)?))
         }
     }
     impl Encode for Periodicity {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 640000)?;
+            writer.unsigned(self.0, 0, 640000, true)?;
             Ok(())
         }
     }
@@ -71132,7 +71189,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for PeriodicityRange<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::periodicityBound(PeriodicityBound::decode(reader)?),
                 1 => Self::periodicityList(AllowedPeriodicityList::decode(reader)?),
                 _ => Self::choice_extensions(ProtocolIEField::decode(reader)?),
@@ -71285,7 +71342,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PreEmptionCapability {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for PreEmptionCapability {
@@ -71332,7 +71389,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PreEmptionVulnerability {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for PreEmptionVulnerability {
@@ -71374,13 +71431,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PriorityLevelARP {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(1, 15)? as u8))
+            Ok(Self(reader.unsigned(1, 15, false)? as u8))
         }
     }
     impl Encode for PriorityLevelARP {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 1, 15)?;
+            writer.unsigned(u64::from(self.0), 1, 15, false)?;
             Ok(())
         }
     }
@@ -71418,13 +71475,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PriorityLevelQos {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(1, 127)?))
+            Ok(Self(reader.unsigned(1, 127, true)?))
         }
     }
     impl Encode for PriorityLevelQos {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 127)?;
+            writer.unsigned(self.0, 1, 127, true)?;
             Ok(())
         }
     }
@@ -71465,7 +71522,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for PrivacyIndicator {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for PrivacyIndicator {
@@ -71520,7 +71577,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for ProcedureStageChoice<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
+            Ok(match reader.index(2, 0, false)? {
                 0 => Self::first_dl_count(FirstDLCount::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
@@ -71782,7 +71839,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for QoERVQoEReportingPathsQoEReportingPath {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for QoERVQoEReportingPathsQoEReportingPath {
@@ -71829,7 +71886,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for QoERVQoEReportingPathsRVQoEReportingPath {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for QoERVQoEReportingPathsRVQoEReportingPath {
@@ -72385,7 +72442,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for QoSFlowsUsageReportItemRATType {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 2, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 2, true)? as usize])
         }
     }
     impl Encode for QoSFlowsUsageReportItemRATType {
@@ -72613,7 +72670,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for QosCharacteristics {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::nonDynamic5QI(NonDynamic5QIDescriptor::decode(reader)?),
                 1 => Self::dynamic5QI(Dynamic5QIDescriptor::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -73777,13 +73834,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for QosFlowIdentifier {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 63)?))
+            Ok(Self(reader.unsigned(0, 63, true)?))
         }
     }
     impl Encode for QosFlowIdentifier {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 63)?;
+            writer.unsigned(self.0, 0, 63, true)?;
             Ok(())
         }
     }
@@ -75580,13 +75637,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for QosMonitoringReportingFrequency {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(1, 1800)?))
+            Ok(Self(reader.unsigned(1, 1800, true)?))
         }
     }
     impl Encode for QosMonitoringReportingFrequency {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 1, 1800)?;
+            writer.unsigned(self.0, 1, 1800, true)?;
             Ok(())
         }
     }
@@ -75629,7 +75686,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for QosMonitoringRequest {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(3, 1, true)? as usize])
+            Ok(Self::VALUES[reader.index(3, 1, true)? as usize])
         }
     }
     impl Encode for QosMonitoringRequest {
@@ -75671,13 +75728,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RANAIOTDeviceNGAPID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 4294967295)? as u32))
+            Ok(Self(reader.unsigned(0, 4294967295, false)? as u32))
         }
     }
     impl Encode for RANAIOTDeviceNGAPID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 4294967295)?;
+            writer.unsigned(u64::from(self.0), 0, 4294967295, false)?;
             Ok(())
         }
     }
@@ -75722,7 +75779,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RANTSSRequestType {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for RANTSSRequestType {
@@ -75771,7 +75828,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for RANTSSScope {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::rANNodeLevel(GlobalGNBID::decode(reader)?),
                 1 => Self::cellListLevel(RANTSSCellList::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -75855,13 +75912,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RANUENGAPID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 4294967295)? as u32))
+            Ok(Self(reader.unsigned(0, 4294967295, false)? as u32))
         }
     }
     impl Encode for RANUENGAPID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 4294967295)?;
+            writer.unsigned(u64::from(self.0), 0, 4294967295, false)?;
             Ok(())
         }
     }
@@ -75919,13 +75976,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RANNodeName<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.printable_string_extensible(1, 150)?))
+            Ok(Self(reader.printable_string(1, 150, true)?))
         }
     }
     impl Encode for RANNodeName<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.printable_string_extensible(&self.0, 1, 150)?;
+            writer.printable_string(&self.0, 1, 150, true)?;
             Ok(())
         }
     }
@@ -76047,13 +76104,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RANNodeNameVisibleString<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.visible_string_extensible(1, 150)?))
+            Ok(Self(reader.visible_string(1, 150, true)?))
         }
     }
     impl Encode for RANNodeNameVisibleString<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.visible_string_extensible(&self.0, 1, 150)?;
+            writer.visible_string(&self.0, 1, 150, true)?;
             Ok(())
         }
     }
@@ -76093,13 +76150,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RANPagingPriority {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(1, 256)? as u16))
+            Ok(Self(reader.unsigned(1, 256, false)? as u16))
         }
     }
     impl Encode for RANPagingPriority {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 1, 256)?;
+            writer.unsigned(u64::from(self.0), 1, 256, false)?;
             Ok(())
         }
     }
@@ -76383,7 +76440,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RANTimingSynchronisationStatusInfoSynchronisationState {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(3, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(3, 0, true)? as usize])
         }
     }
     impl Encode for RANTimingSynchronisationStatusInfoSynchronisationState {
@@ -76430,7 +76487,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RANTimingSynchronisationStatusInfoTraceabletoUTC {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for RANTimingSynchronisationStatusInfoTraceabletoUTC {
@@ -76477,7 +76534,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RANTimingSynchronisationStatusInfoTraceabletoGNSS {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for RANTimingSynchronisationStatusInfoTraceabletoGNSS {
@@ -76779,7 +76836,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for RANfeedbacktype<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::proactive(RANfeedbacktypeProactive::decode(reader)?),
                 1 => Self::reactive(RANfeedbacktypeReactive::decode(reader)?),
                 _ => Self::choice_extensions(ProtocolIEField::decode(reader)?),
@@ -76987,7 +77044,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RANfeedbacktypeReactiveCapabilityForBATAdaptation {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for RANfeedbacktypeReactiveCapabilityForBATAdaptation {
@@ -77150,7 +77207,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RATInformation {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 4, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 4, true)? as usize])
         }
     }
     impl Encode for RATInformation {
@@ -77200,13 +77257,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RATRestrictionInformation<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.bit_string_extensible(8, 8)?))
+            Ok(Self(reader.bit_string(8, 8, true)?))
         }
     }
     impl Encode for RATRestrictionInformation<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.bit_string_extensible(&self.0, 8, 8)?;
+            writer.bit_string(&self.0, 8, 8, true)?;
             Ok(())
         }
     }
@@ -77435,13 +77492,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RGLevelWirelineAccessCharacteristics<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for RGLevelWirelineAccessCharacteristics<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -77482,7 +77539,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RIMInformationRIMRSDetection {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for RIMInformationRIMRSDetection {
@@ -77752,13 +77809,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RNCID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 4095)? as u16))
+            Ok(Self(reader.unsigned(0, 4095, false)? as u16))
         }
     }
     impl Encode for RNCID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 4095)?;
+            writer.unsigned(u64::from(self.0), 0, 4095, false)?;
             Ok(())
         }
     }
@@ -77816,13 +77873,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RRCContainer<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for RRCContainer<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -77899,7 +77956,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RRCEstablishmentCause {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(10, 2, true)? as usize])
+            Ok(Self::VALUES[reader.index(10, 2, true)? as usize])
         }
     }
     impl Encode for RRCEstablishmentCause {
@@ -77955,7 +78012,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RRCInactiveTransitionReportRequest {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(3, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(3, 0, true)? as usize])
         }
     }
     impl Encode for RRCInactiveTransitionReportRequest {
@@ -78002,7 +78059,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RRCState {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for RRCState {
@@ -78049,7 +78106,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RSN {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for RSN {
@@ -78401,7 +78458,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for Range {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(9, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(9, 0, true)? as usize])
         }
     }
     impl Encode for Range {
@@ -78454,7 +78511,7 @@ pub mod ngap_ies {
             let time_stayed_in_cell = if present & 2 != 0 {
                 Some(
                     reader
-                        .unsigned(0, 4095)
+                        .unsigned(0, 4095, false)
                         .map_err(in_field("time_stayed_in_cell"))? as u16,
                 )
             } else {
@@ -78489,7 +78546,7 @@ pub mod ngap_ies {
                 .map_err(in_field("ngran_cgi"))?;
             if let Some(value) = &self.time_stayed_in_cell {
                 writer
-                    .unsigned(u64::from(*value), 0, 4095)
+                    .unsigned(u64::from(*value), 0, 4095, false)
                     .map_err(in_field("time_stayed_in_cell"))?;
             }
             if let Some(value) = &self.ie_extensions {
@@ -78933,7 +78990,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RedCapIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for RedCapIndication {
@@ -78980,7 +79037,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RedirectionVoiceFallback {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for RedirectionVoiceFallback {
@@ -79096,7 +79153,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RedundantQosFlowIndicator {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, false)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, false)? as usize])
         }
     }
     impl Encode for RedundantQosFlowIndicator {
@@ -79142,7 +79199,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ReflectiveQosAttribute {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for ReflectiveQosAttribute {
@@ -79294,13 +79351,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RelativeAMFCapacity {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 255)? as u8))
+            Ok(Self(reader.unsigned(0, 255, false)? as u8))
         }
     }
     impl Encode for RelativeAMFCapacity {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 255)?;
+            writer.unsigned(u64::from(self.0), 0, 255, false)?;
             Ok(())
         }
     }
@@ -79338,13 +79395,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RepetitionPeriod {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 131071)? as u32))
+            Ok(Self(reader.unsigned(0, 131071, false)? as u32))
         }
     }
     impl Encode for RepetitionPeriod {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 131071)?;
+            writer.unsigned(u64::from(self.0), 0, 131071, false)?;
             Ok(())
         }
     }
@@ -79404,7 +79461,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ReportAmountMDT {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(8, 0, false)? as usize])
+            Ok(Self::VALUES[reader.index(8, 0, false)? as usize])
         }
     }
     impl Encode for ReportAmountMDT {
@@ -79450,7 +79507,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ReportArea {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for ReportArea {
@@ -79576,7 +79633,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ReportIntervalMDT {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(13, 0, false)? as usize])
+            Ok(Self::VALUES[reader.index(13, 0, false)? as usize])
         }
     }
     impl Encode for ReportIntervalMDT {
@@ -79625,7 +79682,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for ReportType {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::eventBasedReporting(EventBasedReportingIEs::decode(reader)?),
                 1 => Self::periodicReporting(PeriodicReportingIEs::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -79734,7 +79791,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ReportingPeriodicity {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(6, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(6, 0, true)? as usize])
         }
     }
     impl Encode for ReportingPeriodicity {
@@ -79789,7 +79846,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for ReportingSystem {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(4, 0, false)? {
+            Ok(match reader.index(4, 0, false)? {
                 0 => Self::eUTRAN(EUTRANReportingSystemIEs::decode(reader)?),
                 1 => Self::nGRAN(NGRANReportingSystemIEs::decode(reader)?),
                 2 => Self::noReporting(()),
@@ -79883,13 +79940,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ReportingThreshold {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 4000000000)?))
+            Ok(Self(reader.unsigned(0, 4000000000, true)?))
         }
     }
     impl Encode for ReportingThreshold {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 4000000000)?;
+            writer.unsigned(self.0, 0, 4000000000, true)?;
             Ok(())
         }
     }
@@ -80148,7 +80205,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ResetAll {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for ResetAll {
@@ -80197,7 +80254,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for ResetType {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::nG_Interface(ResetAll::decode(reader)?),
                 1 => Self::partOfNG_Interface(UEAssociatedLogicalNGConnectionList::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -80290,7 +80347,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for ResourceStatusReportingSystem {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::eUTRAN_ReportingStatus(EUTRANReportingStatusIEs::decode(reader)?),
                 1 => Self::nGRAN_ReportingStatus(NGRANReportingStatusIEs::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -80400,13 +80457,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for RoutingID<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for RoutingID<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -80540,13 +80597,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for SCGActivationTime {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 40950)? as u16))
+            Ok(Self(reader.unsigned(0, 40950, false)? as u16))
         }
     }
     impl Encode for SCGActivationTime {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 40950)?;
+            writer.unsigned(u64::from(self.0), 0, 40950, false)?;
             Ok(())
         }
     }
@@ -80705,7 +80762,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for SLPositioningRangingAuthorized {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for SLPositioningRangingAuthorized {
@@ -81960,7 +82017,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for SONInformation<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::sONInformationRequest(SONInformationRequest::decode(reader)?),
                 1 => Self::sONInformationReply(SONInformationReply::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -82187,7 +82244,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for SONInformationReport<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::failureIndicationInformation(FailureIndication::decode(reader)?),
                 1 => Self::hOReportInformation(HOReport::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -82283,7 +82340,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for SONInformationRequest {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for SONInformationRequest {
@@ -82332,7 +82389,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for SRVCCOperationPossible {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for SRVCCOperationPossible {
@@ -82448,7 +82505,7 @@ pub mod ngap_ies {
             let timeof_day_start = if present & 4 != 0 {
                 Some(
                     reader
-                        .unsigned_extensible(0, 86399)
+                        .unsigned(0, 86399, true)
                         .map_err(in_field("timeof_day_start"))?,
                 )
             } else {
@@ -82457,7 +82514,7 @@ pub mod ngap_ies {
             let timeof_day_end = if present & 2 != 0 {
                 Some(
                     reader
-                        .unsigned_extensible(0, 86399)
+                        .unsigned(0, 86399, true)
                         .map_err(in_field("timeof_day_end"))?,
                 )
             } else {
@@ -82497,12 +82554,12 @@ pub mod ngap_ies {
             }
             if let Some(value) = &self.timeof_day_start {
                 writer
-                    .unsigned_extensible(*value, 0, 86399)
+                    .unsigned(*value, 0, 86399, true)
                     .map_err(in_field("timeof_day_start"))?;
             }
             if let Some(value) = &self.timeof_day_end {
                 writer
-                    .unsigned_extensible(*value, 0, 86399)
+                    .unsigned(*value, 0, 86399, true)
                     .map_err(in_field("timeof_day_end"))?;
             }
             if let Some(value) = &self.ie_extensions {
@@ -83137,13 +83194,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for SecurityKey<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.bit_string(256, 256)?))
+            Ok(Self(reader.bit_string(256, 256, false)?))
         }
     }
     impl Encode for SecurityKey<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.bit_string(&self.0, 256, 256)?;
+            writer.bit_string(&self.0, 256, 256, false)?;
             Ok(())
         }
     }
@@ -83303,7 +83360,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for SensorMeasConfig {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for SensorMeasConfig {
@@ -83610,7 +83667,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for SensorNameConfigUncompensatedBarometricConfig {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for SensorNameConfigUncompensatedBarometricConfig {
@@ -83656,7 +83713,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for SensorNameConfigUeSpeedConfig {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for SensorNameConfigUeSpeedConfig {
@@ -83702,7 +83759,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for SensorNameConfigUeOrientationConfig {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for SensorNameConfigUeOrientationConfig {
@@ -83758,7 +83815,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for SensorNameConfig {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(4, 0, false)? {
+            Ok(match reader.index(4, 0, false)? {
                 0 => Self::uncompensatedBarometricConfig(
                     SensorNameConfigUncompensatedBarometricConfig::decode(reader)?,
                 ),
@@ -84279,7 +84336,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ServiceType {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(3, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(3, 0, true)? as usize])
         }
     }
     impl Encode for ServiceType {
@@ -84321,13 +84378,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for SgNBUEX2APID {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 4294967295)? as u32))
+            Ok(Self(reader.unsigned(0, 4294967295, false)? as u32))
         }
     }
     impl Encode for SgNBUEX2APID {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 4294967295)?;
+            writer.unsigned(u64::from(self.0), 0, 4294967295, false)?;
             Ok(())
         }
     }
@@ -85255,7 +85312,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for SourceNodeID {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
+            Ok(match reader.index(2, 0, false)? {
                 0 => Self::sourceengNB_ID(GlobalGNBID::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
@@ -85331,7 +85388,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for SourceOfUEActivityBehaviourInformation {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for SourceOfUEActivityBehaviourInformation {
@@ -85646,13 +85703,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for SourceToTargetTransparentContainer<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for SourceToTargetTransparentContainer<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -85701,7 +85758,7 @@ pub mod ngap_ies {
             let extended = reader.bit()?;
             let present = reader.bits(1)?;
             let successful_ho_report_container = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("successful_ho_report_container"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -85726,7 +85783,7 @@ pub mod ngap_ies {
             writer.bit(false);
             writer.bit(self.ie_extensions.is_some());
             writer
-                .octet_string(&self.successful_ho_report_container, 0, UNBOUNDED)
+                .octet_string(&self.successful_ho_report_container, 0, UNBOUNDED, false)
                 .map_err(in_field("successful_ho_report_container"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -85863,7 +85920,7 @@ pub mod ngap_ies {
             let extended = reader.bit()?;
             let present = reader.bits(1)?;
             let successful_ps_cell_change_report_container = reader
-                .octet_string(0, UNBOUNDED)
+                .octet_string(0, UNBOUNDED, false)
                 .map_err(in_field("successful_ps_cell_change_report_container"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -85892,6 +85949,7 @@ pub mod ngap_ies {
                     &self.successful_ps_cell_change_report_container,
                     0,
                     UNBOUNDED,
+                    false,
                 )
                 .map_err(in_field("successful_ps_cell_change_report_container"))?;
             if let Some(value) = &self.ie_extensions {
@@ -86171,7 +86229,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for SupportedUEType {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for SupportedUEType {
@@ -86265,13 +86323,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for SurvivalTime {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 1920000)?))
+            Ok(Self(reader.unsigned(0, 1920000, true)?))
         }
     }
     impl Encode for SurvivalTime {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 1920000)?;
+            writer.unsigned(self.0, 0, 1920000, true)?;
             Ok(())
         }
     }
@@ -86311,7 +86369,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for SuspendRequestIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for SuspendRequestIndication {
@@ -86357,7 +86415,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for SuspendResponseIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for SuspendResponseIndication {
@@ -86403,7 +86461,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for SuspendIndicator {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for SuspendIndicator {
@@ -88461,13 +88519,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TLContainer<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for TLContainer<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -88576,13 +88634,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TNAPID<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for TNAPID<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -88631,8 +88689,8 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TNGFID<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
-                0 => Self::tNGF_ID(reader.bit_string_extensible(32, 32)?),
+            Ok(match reader.index(2, 0, false)? {
+                0 => Self::tNGF_ID(reader.bit_string(32, 32, true)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
         }
@@ -88643,7 +88701,7 @@ pub mod ngap_ies {
             match self {
                 Self::tNGF_ID(value) => {
                     writer.index(0, 2, false);
-                    writer.bit_string_extensible(value, 32, 32)?;
+                    writer.bit_string(value, 32, 32, true)?;
                 }
                 Self::choice_Extensions(value) => {
                     writer.index(1, 2, false);
@@ -88703,13 +88761,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TNLAddressWeightFactor {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 255)? as u8))
+            Ok(Self(reader.unsigned(0, 255, false)? as u8))
         }
     }
     impl Encode for TNLAddressWeightFactor {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 255)?;
+            writer.unsigned(u64::from(self.0), 0, 255, false)?;
             Ok(())
         }
     }
@@ -88923,7 +88981,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TNLAssociationUsage {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(3, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(3, 0, true)? as usize])
         }
     }
     impl Encode for TNLAssociationUsage {
@@ -89091,7 +89149,7 @@ pub mod ngap_ies {
             let extended = reader.bit()?;
             let present = reader.bits(2)?;
             let burst_arrival_time_offset = reader
-                .signed_extensible(-640000, 640000)
+                .signed(-640000, 640000, true)
                 .map_err(in_field("burst_arrival_time_offset"))?;
             let adjusted_periodicity = if present & 2 != 0 {
                 Some(Periodicity::decode(reader).map_err(in_field("adjusted_periodicity"))?)
@@ -89123,7 +89181,7 @@ pub mod ngap_ies {
             writer.bit(self.adjusted_periodicity.is_some());
             writer.bit(self.ie_extensions.is_some());
             writer
-                .signed_extensible(self.burst_arrival_time_offset, -640000, 640000)
+                .signed(self.burst_arrival_time_offset, -640000, 640000, true)
                 .map_err(in_field("burst_arrival_time_offset"))?;
             if let Some(value) = &self.adjusted_periodicity {
                 value
@@ -89517,13 +89575,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TWAPID<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for TWAPID<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -89572,8 +89630,8 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TWIFID<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
-                0 => Self::tWIF_ID(reader.bit_string_extensible(32, 32)?),
+            Ok(match reader.index(2, 0, false)? {
+                0 => Self::tWIF_ID(reader.bit_string(32, 32, true)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
         }
@@ -89584,7 +89642,7 @@ pub mod ngap_ies {
             match self {
                 Self::tWIF_ID(value) => {
                     writer.index(0, 2, false);
-                    writer.bit_string_extensible(value, 32, 32)?;
+                    writer.bit_string(value, 32, 32, true)?;
                 }
                 Self::choice_Extensions(value) => {
                     writer.index(1, 2, false);
@@ -89769,7 +89827,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for TargetID {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::targetRANNodeID(TargetRANNodeID::decode(reader)?),
                 1 => Self::targeteNB_ID(TargeteNBID::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -90702,13 +90760,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TargetToSourceTransparentContainer<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for TargetToSourceTransparentContainer<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -90864,13 +90922,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TargettoSourceFailureTransparentContainer<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for TargettoSourceFailureTransparentContainer<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -90906,13 +90964,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ThresholdRSRP {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 127)? as u8))
+            Ok(Self(reader.unsigned(0, 127, false)? as u8))
         }
     }
     impl Encode for ThresholdRSRP {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 127)?;
+            writer.unsigned(u64::from(self.0), 0, 127, false)?;
             Ok(())
         }
     }
@@ -90950,13 +91008,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ThresholdRSRQ {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 127)? as u8))
+            Ok(Self(reader.unsigned(0, 127, false)? as u8))
         }
     }
     impl Encode for ThresholdRSRQ {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 127)?;
+            writer.unsigned(u64::from(self.0), 0, 127, false)?;
             Ok(())
         }
     }
@@ -90994,13 +91052,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ThresholdSINR {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 127)? as u8))
+            Ok(Self(reader.unsigned(0, 127, false)? as u8))
         }
     }
     impl Encode for ThresholdSINR {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 127)?;
+            writer.unsigned(u64::from(self.0), 0, 127, false)?;
             Ok(())
         }
     }
@@ -91145,13 +91203,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TimeSinceFailure {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned_extensible(0, 172800)?))
+            Ok(Self(reader.unsigned(0, 172800, true)?))
         }
     }
     impl Encode for TimeSinceFailure {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned_extensible(self.0, 0, 172800)?;
+            writer.unsigned(self.0, 0, 172800, true)?;
             Ok(())
         }
     }
@@ -91247,7 +91305,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TimeSyncAssistanceInfoTimeDistributionIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for TimeSyncAssistanceInfoTimeDistributionIndication {
@@ -91302,7 +91360,7 @@ pub mod ngap_ies {
             let uu_time_sync_error_budget = if present & 2 != 0 {
                 Some(
                     reader
-                        .unsigned_extensible(1, 1000000)
+                        .unsigned(1, 1000000, true)
                         .map_err(in_field("uu_time_sync_error_budget"))?,
                 )
             } else {
@@ -91337,7 +91395,7 @@ pub mod ngap_ies {
                 .map_err(in_field("time_distribution_indication"))?;
             if let Some(value) = &self.uu_time_sync_error_budget {
                 writer
-                    .unsigned_extensible(*value, 1, 1000000)
+                    .unsigned(*value, 1, 1000000, true)
                     .map_err(in_field("uu_time_sync_error_budget"))?;
             }
             if let Some(value) = &self.ie_extensions {
@@ -91457,7 +91515,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TimeToTrigger {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(16, 0, false)? as usize])
+            Ok(Self::VALUES[reader.index(16, 0, false)? as usize])
         }
     }
     impl Encode for TimeToTrigger {
@@ -91515,7 +91573,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TimeToWait {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(6, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(6, 0, true)? as usize])
         }
     }
     impl Encode for TimeToWait {
@@ -91557,13 +91615,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TimeUEStayedInCell {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 4095)? as u16))
+            Ok(Self(reader.unsigned(0, 4095, false)? as u16))
         }
     }
     impl Encode for TimeUEStayedInCell {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 4095)?;
+            writer.unsigned(u64::from(self.0), 0, 4095, false)?;
             Ok(())
         }
     }
@@ -91603,13 +91661,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TimeUEStayedInCellEnhancedGranularity {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(0, 40950)? as u16))
+            Ok(Self(reader.unsigned(0, 40950, false)? as u16))
         }
     }
     impl Encode for TimeUEStayedInCellEnhancedGranularity {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 0, 40950)?;
+            writer.unsigned(u64::from(self.0), 0, 40950, false)?;
             Ok(())
         }
     }
@@ -91653,7 +91711,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TimerApproachForGUAMIRemoval {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for TimerApproachForGUAMIRemoval {
@@ -92023,7 +92081,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TraceDepth {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(6, 3, true)? as usize])
+            Ok(Self::VALUES[reader.index(6, 3, true)? as usize])
         }
     }
     impl Encode for TraceDepth {
@@ -92065,13 +92123,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TrafficLoadReductionIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.unsigned(1, 99)? as u8))
+            Ok(Self(reader.unsigned(1, 99, false)? as u8))
         }
     }
     impl Encode for TrafficLoadReductionIndication {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.unsigned(u64::from(self.0), 1, 99)?;
+            writer.unsigned(u64::from(self.0), 1, 99, false)?;
             Ok(())
         }
     }
@@ -92117,13 +92175,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TransportLayerAddress<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.bit_string_extensible(1, 160)?))
+            Ok(Self(reader.bit_string(1, 160, true)?))
         }
     }
     impl Encode for TransportLayerAddress<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.bit_string_extensible(&self.0, 1, 160)?;
+            writer.bit_string(&self.0, 1, 160, true)?;
             Ok(())
         }
     }
@@ -92165,7 +92223,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for TypeOfError {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for TypeOfError {
@@ -92212,7 +92270,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UEDifferentiationInfoPeriodicCommunicationIndicator {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for UEDifferentiationInfoPeriodicCommunicationIndicator {
@@ -92259,7 +92317,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UEDifferentiationInfoStationaryIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for UEDifferentiationInfoStationaryIndication {
@@ -92312,7 +92370,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UEDifferentiationInfoTrafficProfile {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(3, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(3, 0, true)? as usize])
         }
     }
     impl Encode for UEDifferentiationInfoTrafficProfile {
@@ -92368,7 +92426,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UEDifferentiationInfoBatteryIndication {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(3, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(3, 0, true)? as usize])
         }
     }
     impl Encode for UEDifferentiationInfoBatteryIndication {
@@ -92443,7 +92501,7 @@ pub mod ngap_ies {
             let periodic_time = if present & 32 != 0 {
                 Some(
                     reader
-                        .unsigned_extensible(1, 3600)
+                        .unsigned(1, 3600, true)
                         .map_err(in_field("periodic_time"))?,
                 )
             } else {
@@ -92521,7 +92579,7 @@ pub mod ngap_ies {
             }
             if let Some(value) = &self.periodic_time {
                 writer
-                    .unsigned_extensible(*value, 1, 3600)
+                    .unsigned(*value, 1, 3600, true)
                     .map_err(in_field("periodic_time"))?;
             }
             if let Some(value) = &self.scheduled_communication_time {
@@ -92779,7 +92837,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for UENGAPIDs {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::uE_NGAP_ID_pair(UENGAPIDPair::decode(reader)?),
                 1 => Self::aMF_UE_NGAP_ID(AMFUENGAPID::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -93035,7 +93093,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UEUPCIoTSupport {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for UEUPCIoTSupport {
@@ -93379,7 +93437,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UEAppLayerMeasConfigInfoQoEMeasurementStatus {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for UEAppLayerMeasConfigInfoQoEMeasurementStatus {
@@ -93491,7 +93549,7 @@ pub mod ngap_ies {
             let container_for_app_layer_meas_config = if present & 32 != 0 {
                 Some(
                     reader
-                        .octet_string(1, 8000)
+                        .octet_string(1, 8000, false)
                         .map_err(in_field("container_for_app_layer_meas_config"))?,
                 )
             } else {
@@ -93500,7 +93558,7 @@ pub mod ngap_ies {
             let meas_config_app_layer_id = if present & 16 != 0 {
                 Some(
                     reader
-                        .unsigned_extensible(0, 15)
+                        .unsigned(0, 15, true)
                         .map_err(in_field("meas_config_app_layer_id"))?,
                 )
             } else {
@@ -93586,12 +93644,12 @@ pub mod ngap_ies {
             }
             if let Some(value) = &self.container_for_app_layer_meas_config {
                 writer
-                    .octet_string(value, 1, 8000)
+                    .octet_string(value, 1, 8000, false)
                     .map_err(in_field("container_for_app_layer_meas_config"))?;
             }
             if let Some(value) = &self.meas_config_app_layer_id {
                 writer
-                    .unsigned_extensible(*value, 0, 15)
+                    .unsigned(*value, 0, 15, true)
                     .map_err(in_field("meas_config_app_layer_id"))?;
             }
             if let Some(value) = &self.slice_support_list_qmc {
@@ -93930,7 +93988,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UECapabilityInfoRequest {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for UECapabilityInfoRequest {
@@ -93976,7 +94034,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UEContextRequest {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for UEContextRequest {
@@ -94393,7 +94451,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for UEHistoryInformationFromTheUE<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
+            Ok(match reader.index(2, 0, false)? {
                 0 => Self::nR(NRMobilityHistoryReport::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
@@ -94461,7 +94519,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UEIdentityIndexValue {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
+            Ok(match reader.index(2, 0, false)? {
                 0 => Self::indexLength10(reader.bits_sized(10, 10)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
@@ -94536,7 +94594,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for UEPagingIdentity {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
+            Ok(match reader.index(2, 0, false)? {
                 0 => Self::fiveG_S_TMSI(FiveGSTMSI::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
@@ -94613,7 +94671,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UEPresence {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(3, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(3, 0, true)? as usize])
         }
     }
     impl Encode for UEPresence {
@@ -94835,7 +94893,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for UERLFReportContainer<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::nR(NRUERLFReportContainer::decode(reader)?),
                 1 => Self::lTE(LTEUERLFReportContainer::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -94927,13 +94985,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UERadioCapability<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for UERadioCapability<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -95140,13 +95198,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UERadioCapabilityForPagingOfEUTRA<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for UERadioCapabilityForPagingOfEUTRA<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -95200,13 +95258,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UERadioCapabilityForPagingOfNBIoT<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for UERadioCapabilityForPagingOfNBIoT<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -95260,13 +95318,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UERadioCapabilityForPagingOfNR<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for UERadioCapabilityForPagingOfNR<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -95320,13 +95378,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UERadioCapabilityID<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(0, UNBOUNDED)?))
+            Ok(Self(reader.octet_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for UERadioCapabilityID<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 0, UNBOUNDED)?;
+            writer.octet_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -95366,7 +95424,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UERetentionInformation {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for UERetentionInformation {
@@ -96148,7 +96206,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for ULForwarding {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for ULForwarding {
@@ -96205,7 +96263,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for UPTransportLayerInformation<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
+            Ok(match reader.index(2, 0, false)? {
                 0 => Self::gTPTunnel(GTPTunnel::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
@@ -96645,13 +96703,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for URIAddress<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.visible_string(0, UNBOUNDED)?))
+            Ok(Self(reader.visible_string(0, UNBOUNDED, false)?))
         }
     }
     impl Encode for URIAddress<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.visible_string(&self.0, 0, UNBOUNDED)?;
+            writer.visible_string(&self.0, 0, UNBOUNDED, false)?;
             Ok(())
         }
     }
@@ -96908,13 +96966,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UpdateFeedback<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.bit_string_extensible(8, 8)?))
+            Ok(Self(reader.bit_string(8, 8, true)?))
         }
     }
     impl Encode for UpdateFeedback<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.bit_string_extensible(&self.0, 8, 8)?;
+            writer.bit_string(&self.0, 8, 8, true)?;
             Ok(())
         }
     }
@@ -96985,7 +97043,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for UserLocationInformation<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(4, 0, false)? {
+            Ok(match reader.index(4, 0, false)? {
                 0 => Self::userLocationInformationEUTRA(UserLocationInformationEUTRA::decode(
                     reader,
                 )?),
@@ -97832,7 +97890,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for UserLocationInformationWAGF<'a> {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, false)? {
+            Ok(match reader.index(3, 0, false)? {
                 0 => Self::globalLine_ID(GlobalLineID::decode(reader)?),
                 1 => Self::hFCNode_ID(HFCNodeID::decode(reader)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
@@ -97914,7 +97972,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UserPlaneErrorIndicator {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for UserPlaneErrorIndicator {
@@ -98118,7 +98176,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UserPlaneFailureIndicationReport {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(3, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(3, 0, true)? as usize])
         }
     }
     impl Encode for UserPlaneFailureIndicationReport {
@@ -98167,7 +98225,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for UserPlaneFailureType {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for UserPlaneFailureType {
@@ -98319,7 +98377,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for VehicleUE {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(2, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(2, 0, true)? as usize])
         }
     }
     impl Encode for VehicleUE {
@@ -98381,10 +98439,10 @@ pub mod ngap_ies {
                 .octet_array::<4>()
                 .map_err(in_field("end_time_stamp"))?;
             let usage_count_ul = reader
-                .unsigned(0, 18446744073709551615)
+                .unsigned(0, 18446744073709551615, false)
                 .map_err(in_field("usage_count_ul"))?;
             let usage_count_dl = reader
-                .unsigned(0, 18446744073709551615)
+                .unsigned(0, 18446744073709551615, false)
                 .map_err(in_field("usage_count_dl"))?;
             let ie_extensions = if present & 1 != 0 {
                 Some(
@@ -98414,10 +98472,10 @@ pub mod ngap_ies {
             writer.octet_array(&self.start_time_stamp);
             writer.octet_array(&self.end_time_stamp);
             writer
-                .unsigned(self.usage_count_ul, 0, 18446744073709551615)
+                .unsigned(self.usage_count_ul, 0, 18446744073709551615, false)
                 .map_err(in_field("usage_count_ul"))?;
             writer
-                .unsigned(self.usage_count_dl, 0, 18446744073709551615)
+                .unsigned(self.usage_count_dl, 0, 18446744073709551615, false)
                 .map_err(in_field("usage_count_dl"))?;
             if let Some(value) = &self.ie_extensions {
                 value.encode(writer).map_err(in_field("ie_extensions"))?;
@@ -98565,8 +98623,8 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for WAGFID<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(2, 0, false)? {
-                0 => Self::w_AGF_ID(reader.bit_string_extensible(16, 16)?),
+            Ok(match reader.index(2, 0, false)? {
+                0 => Self::w_AGF_ID(reader.bit_string(16, 16, true)?),
                 _ => Self::choice_Extensions((ProtocolIEField::decode(reader)?).into_owned()),
             })
         }
@@ -98577,7 +98635,7 @@ pub mod ngap_ies {
             match self {
                 Self::w_AGF_ID(value) => {
                     writer.index(0, 2, false);
-                    writer.bit_string_extensible(value, 16, 16)?;
+                    writer.bit_string(value, 16, 16, true)?;
                 }
                 Self::choice_Extensions(value) => {
                     writer.index(1, 2, false);
@@ -98641,7 +98699,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for WLANMeasConfig {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for WLANMeasConfig {
@@ -98838,7 +98896,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for WLANMeasurementConfigurationWlanRssi {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for WLANMeasurementConfigurationWlanRssi {
@@ -98884,7 +98942,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for WLANMeasurementConfigurationWlanRtt {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for WLANMeasurementConfigurationWlanRtt {
@@ -99134,13 +99192,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for WLANName<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(1, 32)?))
+            Ok(Self(reader.octet_string(1, 32, false)?))
         }
     }
     impl Encode for WLANName<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 1, 32)?;
+            writer.octet_string(&self.0, 1, 32, false)?;
             Ok(())
         }
     }
@@ -99287,13 +99345,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for WarningAreaCoordinates<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(1, 1024)?))
+            Ok(Self(reader.octet_string(1, 1024, false)?))
         }
     }
     impl Encode for WarningAreaCoordinates<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 1, 1024)?;
+            writer.octet_string(&self.0, 1, 1024, false)?;
             Ok(())
         }
     }
@@ -99348,7 +99406,7 @@ pub mod ngap_ies {
     }
     impl<'a> Decode<'a> for WarningAreaList {
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(5, 0, false)? {
+            Ok(match reader.index(5, 0, false)? {
                 0 => Self::eUTRA_CGIListForWarning(EUTRACGIListForWarning::decode(reader)?),
                 1 => Self::nR_CGIListForWarning(NRCGIListForWarning::decode(reader)?),
                 2 => Self::tAIListForWarning(TAIListForWarning::decode(reader)?),
@@ -99486,13 +99544,13 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for WarningMessageContents<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self(reader.octet_string(1, 9600)?))
+            Ok(Self(reader.octet_string(1, 9600, false)?))
         }
     }
     impl Encode for WarningMessageContents<'_> {
         #[inline]
         fn encode(&self, writer: &mut Writer<'_>) -> Result<(), Error> {
-            writer.octet_string(&self.0, 1, 9600)?;
+            writer.octet_string(&self.0, 1, 9600, false)?;
             Ok(())
         }
     }
@@ -100077,7 +100135,7 @@ pub mod ngap_ies {
     impl<'a> Decode<'a> for XrDeviceWith2Rx {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for XrDeviceWith2Rx {
@@ -100598,7 +100656,7 @@ pub mod ngap_pdu_contents {
     impl<'a> Decode<'a> for AerialUEFlightInformationOngoingReportingFailed {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(Self::VALUES[reader.enumerated(1, 0, true)? as usize])
+            Ok(Self::VALUES[reader.index(1, 0, true)? as usize])
         }
     }
     impl Encode for AerialUEFlightInformationOngoingReportingFailed {
@@ -108672,7 +108730,7 @@ pub mod ngap_pdu_descriptions {
     impl<'a> Decode<'a> for NGAPPDU<'a> {
         #[inline]
         fn decode(reader: &mut Reader<'a>) -> Result<Self, Error> {
-            Ok(match reader.choice(3, 0, true)? {
+            Ok(match reader.index(3, 0, true)? {
                 0 => Self::initiatingMessage(InitiatingMessage::decode(reader)?),
                 1 => Self::successfulOutcome(SuccessfulOutcome::decode(reader)?),
                 _ => Self::unsuccessfulOutcome(UnsuccessfulOutcome::decode(reader)?),

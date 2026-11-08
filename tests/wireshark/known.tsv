@@ -16,7 +16,7 @@
 *	does not decode	ws-malformed	both-refuse	an IE that check() finds does not decode, where Wireshark stops
 *	the value is followed by \d+ octets	crate-refuses	several-pdus	a payload of several PDUs: Wireshark reads each, the crate one PDU a buffer, and refuses the octets after it
 *	Not a NAS (5GS|EPS) PD	ws-malformed alone	both-ignore	a NAS-PDU whose octets are no NAS message: the crate keeps them as octets, Wireshark's NAS dissector reports it
-*	no alternative of the CHOICE	crate-refuses	crate-by-clause	an alternative of NGAP-PDU after its extension marker, which no procedure has (TS 38.413 §10.2): Wireshark notes it undecoded
+*	the type has no index \d+ after its extension marker	crate-refuses	crate-by-clause	an alternative of NGAP-PDU after its extension marker, which no procedure has (TS 38.413 §10.2): Wireshark notes it undecoded
 *	Missing Mandatory element	ws-malformed alone	both-ignore	a NAS-PDU cut short: the crate keeps its octets, Wireshark's NAS dissector reports it
 re:^002c40	Malformed	ws-malformed alone	both-ignore	a UE radio capability of a test whose octets are no RRC message: Wireshark's NR RRC dissector fails on them, the crate keeps them
 *	/[a-z0-9]+	an IE that the crate keeps as octets, where Wireshark notes nothing \(check\(\): .*padding bits are not zero.*\)	crate-octets	a value not written as its sender writes it (padding bits that are not zero, X.691 §11.1.4): the tree keeps its octets and check() reports it, Wireshark reads the value without a note

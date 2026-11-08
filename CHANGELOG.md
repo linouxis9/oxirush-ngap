@@ -2,7 +2,7 @@
 
 All notable changes to `oxirush-ngap` are recorded here.
 
-## Unreleased
+## 0.6.1 - 2026-11-08
 
 ### Fixed
 

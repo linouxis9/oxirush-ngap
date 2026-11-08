@@ -82,3 +82,10 @@ path = "../../oxirush-aper/protocols/fuzz/fuzz_targets/transfer.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "jer"
+path = "../../oxirush-aper/protocols/fuzz/fuzz_targets/jer.rs"
+test = false
+doc = false
+bench = false

@@ -208,6 +208,70 @@ fn the_names_and_the_positions_of_a_tree_are_the_path_of_each_value() {
     assert_eq!(inspect::check_path("HandoverRequired", area), Ok(()));
 }
 
+/// A path is the names of the tree joined: the name after an IE is a member of its value,
+/// and `value` there, which no tree has, is refused with the path that the names of the
+/// tree write, without each such `value`. The `value` of a gNB-ID, a bit string whose
+/// size varies, is a member of it.
+#[test]
+fn a_path_is_the_names_of_the_tree_and_value_after_an_ie_is_refused() {
+    let transfer = "PDUSessionResourceSetupListSUReq/0/pDUSessionResourceSetupRequestTransfer";
+    let gnb = "globalGNB-ID/gNB-ID/gNB-ID/value";
+    for (name, path, written, value) in [
+        (
+            "UEContextReleaseCommand",
+            "/ngap/UE-NGAP-IDs/value/uE-NGAP-ID-pair/aMF-UE-NGAP-ID".to_string(),
+            "/ngap/UE-NGAP-IDs/uE-NGAP-ID-pair/aMF-UE-NGAP-ID".to_string(),
+            tree!(0),
+        ),
+        (
+            "UEContextReleaseCommand",
+            "/ngap/Cause/value/radioNetwork".to_string(),
+            "/ngap/Cause/radioNetwork".to_string(),
+            tree!("unspecified"),
+        ),
+        (
+            "InitialUEMessage",
+            "/ngap/NAS-PDU/value".to_string(),
+            "/ngap/NAS-PDU".to_string(),
+            tree!("7e006416"),
+        ),
+        (
+            "Paging",
+            "/ngap/UEPagingIdentity/value/fiveG-S-TMSI/fiveG-TMSI".to_string(),
+            "/ngap/UEPagingIdentity/fiveG-S-TMSI/fiveG-TMSI".to_string(),
+            tree!(3661752294u32),
+        ),
+        (
+            "PDUSessionResourceSetupRequest",
+            "/ngap/PDUSessionResourceSetupListSUReq/value/0/\
+             pDUSessionResourceSetupRequestTransfer/QosFlowSetupRequestList/value/0/\
+             qosFlowIdentifier"
+                .to_string(),
+            format!("/ngap/{transfer}/QosFlowSetupRequestList/0/qosFlowIdentifier"),
+            tree!(0),
+        ),
+        (
+            "NGSetupRequest",
+            format!("/ngap/GlobalRANNodeID/value/{gnb}"),
+            format!("/ngap/GlobalRANNodeID/{gnb}"),
+            tree!("000000"),
+        ),
+    ] {
+        let mut tree = NGAPPDU::decode(&fixture(name)).unwrap().to_tree();
+        let joined = format!("a path is the tree's names joined: write `{written}`, at {path}");
+        let error = inspect::select(&tree, &path).unwrap_err();
+        assert_eq!(error.kind(), oxirush_ngap::ErrorKind::Path, "{path}");
+        assert_eq!(error.to_string(), joined);
+        let checked = inspect::check_path(name, &path).map_err(|error| error.to_string());
+        assert_eq!(checked, Err(joined.clone()));
+        let before = tree.clone();
+        let set = inspect::set(&mut tree, &path, tree!(1)).map_err(|error| error.to_string());
+        assert_eq!(set, Err(joined));
+        assert_eq!(tree, before);
+        assert_eq!(select(&tree, &written), [value], "{written}");
+    }
+}
+
 #[test]
 fn the_parts_of_a_guami_are_numbers_of_their_bits() {
     let wire = fixture("InitialContextSetupRequest");

@@ -1,6 +1,6 @@
 [package]
 name = "oxirush-ngap"
-version = "0.6.1"
+version = "0.7.0"
 edition = "2024"
 description = "5G NGAP (3GPP TS 38.413, Release 19) in Rust, generated from the ASN.1: aligned PER, IEs read and built by name, message checks with their causes, JSON trees and serde. No unsafe code."
 license = "Apache-2.0"
@@ -55,7 +55,7 @@ serde_json = "1.0.154"
 serde_norway = "0.9"
 # The other protocol of the family, whose tables the tests of the handover containers
 # between 5GS and EPS register.
-oxirush-s1ap = { version = "0.4", features = ["inspect"] }
+oxirush-s1ap = { version = "0.5", features = ["inspect"] }
 
 [[example]]
 name = "ngap_build_pdu"

@@ -237,19 +237,19 @@
 //! assert_eq!(check("/ngap/Cause/nas"), Ok(()));
 //! assert_eq!(check("/ngap/*/radioNetwork"), Ok(()));
 //!
-//! // A name that is written wrong, and an IE that the message does not have
+//! // A name that is written wrong, `value` after an IE, and an IE that the message does not have
 //! for wrong in ["/ngap/Cause/radioNetwrok", "/ngap/RAN-UE-NGAP-ID/value", "/ngap/GUAMI"] {
 //!     println!("{}", check(wrong).unwrap_err());
 //! }
 //! # assert_eq!(printed, r##""radioNetwrok" is not a member of Cause, which has radioNetwork, transport, nas, protocol, misc, choice-Extensions, at /ngap/Cause/radioNetwrok
-//! # "value" is not a member of this value, which has none, at /ngap/RAN-UE-NGAP-ID/value
+//! # a path is the tree's names joined: write `/ngap/RAN-UE-NGAP-ID`, at /ngap/RAN-UE-NGAP-ID/value
 //! # "GUAMI" is not an IE of UEContextReleaseRequest, which has AMF-UE-NGAP-ID, RAN-UE-NGAP-ID, PDUSessionResourceListCxtRelReq, Cause, GW-Context-Release-Indication, at /ngap/GUAMI
 //! # "##);
 //! ```
 //!
 //! ```text
 //! "radioNetwrok" is not a member of Cause, which has radioNetwork, transport, nas, protocol, misc, choice-Extensions, at /ngap/Cause/radioNetwrok
-//! "value" is not a member of this value, which has none, at /ngap/RAN-UE-NGAP-ID/value
+//! a path is the tree's names joined: write `/ngap/RAN-UE-NGAP-ID`, at /ngap/RAN-UE-NGAP-ID/value
 //! "GUAMI" is not an IE of UEContextReleaseRequest, which has AMF-UE-NGAP-ID, RAN-UE-NGAP-ID, PDUSessionResourceListCxtRelReq, Cause, GW-Context-Release-Indication, at /ngap/GUAMI
 //! ```
 //!
@@ -347,7 +347,10 @@
 //! ```
 //!
 //! So the names and the positions that a tree shows, joined after the root, are the path
-//! of a value in it. Any other list selects by position and `*`.
+//! of a value in it. Any other list selects by position and `*`. The name after an IE is
+//! a member of its value: `value` there, which no tree has, is an error that says the
+//! path without it, `/ngap/Cause/radioNetwork` for `/ngap/Cause/value/radioNetwork`, but
+//! where the value has a member of that name, as a bit string whose size varies.
 //!
 //! ## Names
 //!

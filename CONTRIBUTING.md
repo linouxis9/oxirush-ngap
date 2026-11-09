@@ -92,7 +92,7 @@ oxirush-aper out at it beside this repository, run
 place, generate the bindings again, and commit the three together.
 
 `oxirush-aper`, oxirush-ngap and oxirush-s1ap are released in step. Both
-protocol crates depend on one version of `oxirush-aper` exactly (`=0.2.1` in
+protocol crates depend on one version of `oxirush-aper` exactly (`=0.3.0` in
 `Cargo.toml`): they build on its module `inspect`, which is hidden from its
 documentation and changes with them, so a release of `oxirush-aper` comes with
 a release of each, which takes that version.

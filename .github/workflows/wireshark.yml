@@ -17,6 +17,6 @@ permissions:
 
 jobs:
   wireshark:
-    uses: linouxis9/oxirush-aper/.github/workflows/protocol-wireshark.yml@a4d1c5b994c52f0e6c07cb72568e99e6acad73b4
+    uses: linouxis9/oxirush-aper/.github/workflows/protocol-wireshark.yml@f0ac242e921289807c1dc64483e4931e0792f0e0
     with:
       protocol: ngap

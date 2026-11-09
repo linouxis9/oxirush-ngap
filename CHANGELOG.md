@@ -6,8 +6,21 @@ All notable changes to `oxirush-ngap` are recorded here.
 
 ### Added
 
+- `Deviation::rejects` and `check::answer` of `aper::check`, with oxirush-aper
+  0.3.0: whether a receiver rejects a message for a deviation that `check()`
+  reports, and the protocol cause of its answer to all of them, by the clause of
+  the criticality.
 - `TimeToWait::seconds`, the time that a Time to Wait says to wait at least
   (TS 38.413 clause 9.3.1.56), beside the helpers.
+
+### Changed
+
+- A path of `inspect` is the names of the tree joined, with oxirush-aper 0.3.0:
+  `value` after the name of an IE, or after its position, where its value has no
+  member of that name, is refused by every function that takes a path, with the
+  path to write: ``a path is the tree's names joined: write
+  `/ngap/AMF-UE-NGAP-ID`, at /ngap/AMF-UE-NGAP-ID/value``. The `value` of a bit
+  string whose size varies, as that of a `gNB-ID` beside its `length`, stays.
 
 ## 0.6.1 - 2026-11-08
 

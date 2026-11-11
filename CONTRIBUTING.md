@@ -241,6 +241,14 @@ on Wednesday, with a corpus that the cache of the repository keeps and the
 seeds add to, and that of oxirush-aper does the same with the head of each
 repository.
 
+The four targets that start from a fixture PDU (`edit`, `tree`, `transfer` and
+`jer`) skip PDUs whose tree has more than 32,768 values. In the vectors these
+are the NG SETUP RESPONSE with 65,535 slices and the NG RESET with 65,536
+connections. Each target makes five or more passes over the tree of its PDU on
+every input, which takes seconds in a fuzz build for a list that long. Skipped
+PDUs keep their index among the fixtures, so existing corpus inputs still pick
+the same PDU.
+
 | Target | What holds for any octets |
 |--------|---------------------------|
 | `decode` | A PDU is written as octets that are read as the same PDU, the protocol IEs of its message are put back as they were, and its message is read as its type and written |

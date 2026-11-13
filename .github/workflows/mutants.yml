@@ -1,6 +1,6 @@
 name: Mutants
 
-# The mutation testing of the crate: the jobs that oxirush-ngap and oxirush-s1ap share,
+# The mutation testing of the crate: the jobs that every crate of the family shares,
 # in the repository of oxirush-aper, at the revision that build/revisions records, which
 # say what each run mutates. The workflow is run by hand before a release: with `full`,
 # every mutant; without it, the mutants of the code that the commits since the last run
@@ -35,9 +35,11 @@ permissions:
 
 jobs:
   mutants:
-    uses: linouxis9/oxirush-aper/.github/workflows/protocol-mutants.yml@8cead854da8b26311ff3d3e5053f469c4dd8f8e2
+    uses: linouxis9/oxirush-aper/.github/workflows/crate-mutants.yml@8cead854da8b26311ff3d3e5053f469c4dd8f8e2
     with:
-      protocol: ngap
+      shards: 2
+      # The generated bindings are measured with the rest, and left out of the summary.
+      coverage-ignore: src/(ngap|registry|inspect_registry)\.rs
       full: ${{ fromJSON(inputs.full || 'false') }}
       parallel: ${{ inputs.parallel || '' }}
       recheck: ${{ inputs.recheck || '' }}

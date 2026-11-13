@@ -70,7 +70,7 @@ revision of `build/revisions`, as `build/` takes the generator. A file of
 | The codecs of the bindings for rasn in the place of rasn's | `protocols/rasn/`, which `rasn/Cargo.toml` builds with the bindings of `rasn/src/` here |
 | The fuzz targets and `seed.sh` | `protocols/fuzz/`, which `fuzz/Cargo.toml` builds with the crate, which it names `codec` |
 | The benchmarks, their programs, `build_cost.py` and the comparison with other implementations | `protocols/benches/`, which `benches/Cargo.toml` builds with `benches/src/protocol.rs`, `benches/src/readers.rs` and `benches/compare/pdus.tsv` here |
-| The jobs of CI and of the Reproduce, Mutants, Fuzz and Wireshark workflows | `.github/workflows/protocol.yml`, `protocol-reproduce.yml`, `protocol-mutants.yml`, `protocol-fuzz.yml` and `protocol-wireshark.yml` of oxirush-aper, which the five workflows here call |
+| The jobs of CI and of the Reproduce, Mutants, Fuzz and Wireshark workflows | `.github/workflows/protocol.yml`, `protocol-reproduce.yml`, `crate-mutants.yml`, `crate-fuzz.yml` and `protocol-wireshark.yml` of oxirush-aper, which the five workflows here call |
 
 A change to a shared piece is a commit of oxirush-aper, which each protocol
 crate takes when `build/revisions` records it.

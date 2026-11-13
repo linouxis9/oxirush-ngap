@@ -15,7 +15,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Decode a UE CONTEXT RELEASE REQUEST
     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500")?;
     let pdu = NGAPPDU::decode(&bytes)?;
-    println!("{pdu}");
+    assert_eq!(
+        pdu.to_string(),
+        "UEContextReleaseRequest (procedure 42, initiating message), AMF-UE-NGAP-ID 42, RAN-UE-NGAP-ID 7",
+    );
 
     // Read its IEs by name: `req` fails when the IE is missing, `opt` gives an Option
     extract_ngap_ies!(pdu, UEContextReleaseRequest,
@@ -23,7 +26,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         req ran_id: u32 = RAN_UE_NGAP_ID(id),
         opt cause: Cause = Cause(cause),
     );
-    println!("AMF UE {amf_id}, RAN UE {ran_id}, cause {cause:?}");
+    assert_eq!((amf_id, ran_id), (42, 7));
+    assert_eq!(cause, Some(Cause::radioNetwork(CauseRadioNetwork::user_inactivity)));
 
     // Build the same message with another cause, and encode it
     let pdu = build_ngap!(UEContextReleaseRequest,
@@ -31,18 +35,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         RAN_UE_NGAP_ID(7u32),
         Cause(Cause::radioNetwork(CauseRadioNetwork::radio_connection_with_ue_lost)),
     )?;
-    println!("{}", hex::encode(pdu.encode()?));
+    assert_eq!(hex::encode(pdu.encode()?), "002a4015000003000a0002002a005500020007000f40020540");
     Ok(())
 }
 ```
 
-```text
-UEContextReleaseRequest (procedure 42, initiating message), AMF-UE-NGAP-ID 42, RAN-UE-NGAP-ID 7
-AMF UE 42, RAN UE 7, cause Some(radioNetwork(user_inactivity))
-002a4015000003000a0002002a005500020007000f40020540
-```
-
-Each example is followed by its output.
+Each example shows what it gives with `assert_eq!`, and runs as a test of the crate.
 
 ## Installation
 
@@ -104,7 +102,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         opt name: String = RANNodeName(name) => name.0.into_owned(),
         req areas: SupportedTAList = SupportedTAList(areas),
     );
-    println!("{received}: {}, {} tracking area", name.unwrap_or_default(), areas.0.len());
+    assert_eq!(received.to_string(), "NGSetupRequest (procedure 21, initiating message)");
+    assert_eq!((name.as_deref(), areas.0.len()), (Some("gnb-1"), 1));
     let guamis = ServedGUAMIItem {
         guami: guami(network, 1, 1, 0)?,
         backup_amf_name: None,
@@ -121,7 +120,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         RelativeAMFCapacity(RelativeAMFCapacity(255)),
         PLMNSupportList(PLMNSupportList(vec![support])),
     )?;
-    println!("{response}");
+    assert_eq!(response.to_string(), "NGSetupResponse (procedure 21, successful outcome)");
 
     // The gNB forwards a REGISTRATION REQUEST, with the cell the UE is in
     let cell = nr_cgi(network, 0x123456, 24, 1)?;
@@ -146,7 +145,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         req ran_id: u32 = RAN_UE_NGAP_ID(id),
         req nas: NASPDU = NAS_PDU(nas),
     );
-    println!("{received}: a NAS-PDU of {} octets", nas.0.len());
+    assert_eq!(
+        received.to_string(),
+        "InitialUEMessage (procedure 15, initiating message), RAN-UE-NGAP-ID 7",
+    );
+    assert_eq!(nas.0.len(), 29);
 
     // It gives the UE an AMF UE NGAP ID, and answers with an AUTHENTICATION REQUEST
     let authentication = hex::decode(
@@ -157,7 +160,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         RAN_UE_NGAP_ID(ran_id),
         NAS_PDU(authentication),
     )?;
-    println!("{downlink}");
+    assert_eq!(
+        downlink.to_string(),
+        "DownlinkNASTransport (procedure 4, initiating message), AMF-UE-NGAP-ID 1, RAN-UE-NGAP-ID 7",
+    );
 
     // After the security mode: the UE's GUAMI, slices, security capabilities and KgNB
     let mut k_gnb = [0; 32];
@@ -181,17 +187,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     extract_ngap_ies!(received, InitialContextSetupRequest,
         req key: SecurityKey = SecurityKey(key),
     );
-    println!("{received}: {} deviations, KgNB as sent: {}", deviations.len(), key.0.as_octets() == k_gnb);
+    assert!(deviations.is_empty());
+    assert_eq!(key.0.as_octets(), k_gnb);
     Ok(())
 }
-```
-
-```text
-NGSetupRequest (procedure 21, initiating message): gnb-1, 1 tracking area
-NGSetupResponse (procedure 21, successful outcome)
-InitialUEMessage (procedure 15, initiating message), RAN-UE-NGAP-ID 7: a NAS-PDU of 29 octets
-DownlinkNASTransport (procedure 4, initiating message), AMF-UE-NGAP-ID 1, RAN-UE-NGAP-ID 7
-InitialContextSetupRequest (procedure 14, initiating message), AMF-UE-NGAP-ID 1, RAN-UE-NGAP-ID 7: 0 deviations, KgNB as sent: true
 ```
 
 ## Decode a PDU and read its IEs
@@ -203,10 +202,10 @@ it: an IE that does not decode fails only the read that asks for it.
 ```rust
 use oxirush_ngap::{NgapPduKind, extract_ngap_ies, ie, ngap::*};
 
-fn receive(octets: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
+fn receive(octets: &[u8]) -> Result<String, Box<dyn std::error::Error>> {
     // `decode` copies nothing: the PDU borrows from `octets`
     let pdu = NGAPPDU::decode(octets)?;
-    match pdu.kind() {
+    let handled = match pdu.kind() {
         NgapPduKind::UEContextReleaseRequest => {
             // Only the IEs that a field asks for are decoded
             extract_ngap_ies!(pdu, UEContextReleaseRequest,
@@ -215,27 +214,24 @@ fn receive(octets: &[u8]) -> Result<(), Box<dyn std::error::Error>> {
             );
             // One IE, by its marker type
             let cause = pdu.ie::<ie::Cause>().transpose()?;
-            println!("release of AMF UE {amf_id}, RAN UE {ran_id}: {cause:?}");
+            format!("release of AMF UE {amf_id}, RAN UE {ran_id}: {cause:?}")
         }
         NgapPduKind::Other { direction, procedure_code } => {
-            println!("procedure {procedure_code} has no {direction}");
+            format!("procedure {procedure_code} has no {direction}")
         }
-        kind => println!("{kind:?} is not handled here"),
-    }
-    Ok(())
+        kind => format!("{kind:?} is not handled here"),
+    };
+    Ok(handled)
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // A UE CONTEXT RELEASE REQUEST, then an NG SETUP FAILURE
-    receive(&hex::decode("002a4015000003000a0002002a005500020007000f40020500")?)?;
-    receive(&hex::decode("40150008000001000f400188")?)?;
+    let release = receive(&hex::decode("002a4015000003000a0002002a005500020007000f40020500")?)?;
+    assert_eq!(release, "release of AMF UE 42, RAN UE 7: Some(radioNetwork(user_inactivity))");
+    let failure = receive(&hex::decode("40150008000001000f400188")?)?;
+    assert_eq!(failure, "NGSetupFailure is not handled here");
     Ok(())
 }
-```
-
-```text
-release of AMF UE 42, RAN UE 7: Some(radioNetwork(user_inactivity))
-NGSetupFailure is not handled here
 ```
 
 | Method | Does |
@@ -276,7 +272,7 @@ A name that does not exist, or a message that the procedure does not have in
 that direction, does not compile.
 
 ```rust
-use oxirush_ngap::{Message, build_ngap, ngap::*};
+use oxirush_ngap::{Criticality, Message, build_ngap, ngap::*};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // The criticalities of the procedure and of the message's object set
@@ -284,28 +280,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         RAN_UE_NGAP_ID(7u32),
         NAS_PDU(vec![0x7e, 0x00, 0x41]),
     )?;
-    println!("{} {}", pdu.criticality(), hex::encode(pdu.encode()?));
+    assert_eq!(pdu.criticality(), Criticality::Ignore);
+    assert_eq!(hex::encode(pdu.encode()?), "000f401100000200550002000700260004037e0041");
 
     // The PDU of a message you already have
     let message: InitialUEMessage = pdu.decode_value()?;
     let again = NGAPPDU::of_message(&message, InitialUEMessage::CRITICALITY)?;
-    println!("{}", again == pdu);
+    assert_eq!(again, pdu);
 
     // An IE that the message cannot have has no criticality to take
     let error = build_ngap!(InitialUEMessage,
         TimeToWait(TimeToWait::v5s),
+    ).unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        "TimeToWait is no IE of the object set of InitialUEMessage, which assigns it no criticality: write its criticality",
     );
-    if let Err(error) = error {
-        println!("{error}");
-    }
     Ok(())
 }
-```
-
-```text
-ignore 000f401100000200550002000700260004037e0041
-true
-TimeToWait is no IE of the object set of InitialUEMessage, which assigns it no criticality: write its criticality
 ```
 
 ## Transfers and handover containers
@@ -326,7 +318,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     extract_ngap_ies!(transfer, PDUSessionResourceSetupRequestTransfer,
         req kind: PDUSessionType = PDUSessionType(kind),
     );
-    println!("{kind:?}");
+    assert_eq!(kind, PDUSessionType::ipv4);
 
     // Build one, and check it against its object set
     let ipv6 = PDUSessionResourceSetupRequestTransfer {
@@ -335,27 +327,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ]),
     };
     let octets = oxirush_ngap::encode(&ipv6)?;
-    println!("{}", hex::encode(&octets));
-    for deviation in PDUSessionResourceSetupRequestTransfer::check(&octets)? {
-        println!("{deviation}");
-    }
+    assert_eq!(hex::encode(&octets), "0000010086000110");
+    let deviations = PDUSessionResourceSetupRequestTransfer::check(&octets)?;
+    let deviations: Vec<String> = deviations.iter().map(ToString::to_string).collect();
+    assert_eq!(deviations, [
+        "UL-NGU-UP-TNLInformation (IE 139) is mandatory, and the message does not have it",
+        "QosFlowSetupRequestList (IE 136) is mandatory, and the message does not have it",
+    ]);
 
     // A SourceToTarget-TransparentContainer, as the type it carries
     let octets = hex::decode("000201020002f8390000012340080100")?;
     let container: SourceNGRANNodeToTargetNGRANNodeTransparentContainer =
         oxirush_ngap::decode(&octets)?;
-    println!("{:?}", container.target_cell_id);
+    assert_eq!(
+        format!("{:?}", container.target_cell_id),
+        "nR_CGI(NRCGI { plmn_identity: PLMNIdentity(208-93), nr_cell_identity: NRCellIdentity(0x1234/36), ie_extensions: None })",
+    );
     assert_eq!(oxirush_ngap::encode(&container)?, octets);
     Ok(())
 }
-```
-
-```text
-ipv4
-0000010086000110
-UL-NGU-UP-TNLInformation (IE 139) is mandatory, and the message does not have it
-QosFlowSetupRequestList (IE 136) is mandatory, and the message does not have it
-nR_CGI(NRCGI { plmn_identity: PLMNIdentity(208-93), nr_cell_identity: NRCellIdentity(0x1234/36), ie_extensions: None })
 ```
 
 ## Check a message, and answer a faulty one
@@ -379,9 +369,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let octets = request.encode()?;
     let received = NGAPPDU::decode(&octets)?;
     let deviations = received.check()?;
-    for deviation in &deviations {
-        println!("{deviation}");
-    }
+    let listed: Vec<String> = deviations.iter().map(ToString::to_string).collect();
+    assert_eq!(listed, [
+        "the criticality of the PDU is ignore, and that of its procedure is reject",
+        "TimeToWait (IE 107), at position 1, is not an IE of the message",
+        "GlobalRANNodeID (IE 27) is mandatory, and the message does not have it",
+        "SupportedTAList (IE 102) is mandatory, and the message does not have it",
+    ]);
 
     // The AMF rejects the procedure, and reports the IEs at fault
     let cause = deviations.iter().find_map(Deviation::cause).ok_or("no cause")?;
@@ -389,17 +383,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Cause(Cause::protocol(cause)),
         CriticalityDiagnostics(received.criticality_diagnostics_for_response(&deviations)),
     )?;
-    println!("{failure}: {}", hex::encode(failure.encode()?));
+    assert_eq!(failure.to_string(), "NGSetupFailure (procedure 21, unsuccessful outcome)");
+    assert_eq!(
+        hex::encode(failure.encode()?),
+        "40150018000002000f4001620013400c190200006b00001b40006640",
+    );
     Ok(())
 }
-```
-
-```text
-the criticality of the PDU is ignore, and that of its procedure is reject
-TimeToWait (IE 107), at position 1, is not an IE of the message
-GlobalRANNodeID (IE 27) is mandatory, and the message does not have it
-SupportedTAList (IE 102) is mandatory, and the message does not have it
-NGSetupFailure (procedure 21, unsuccessful outcome): 40150018000002000f4001620013400c190200006b00001b40006640
 ```
 
 `check()` decodes every IE. `check_structure()` looks at the container
@@ -424,33 +414,42 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // A UE CONTEXT RELEASE REQUEST, as a tree
     let bytes = hex::decode("002a4015000003000a0002002a005500020007000f40020500")?;
     let mut tree = NGAPPDU::decode(&bytes)?.to_tree();
-    println!("{tree}");
+    assert_eq!(tree, tree!({"message": "UEContextReleaseRequest", "ies": [
+        {"AMF-UE-NGAP-ID": 42},
+        {"RAN-UE-NGAP-ID": 7},
+        {"Cause": {"radioNetwork": "user-inactivity"}},
+    ]}));
 
     // Each value with the path that selects it
-    for (path, value) in inspect::paths(&tree) {
-        println!("{path} = {value}");
-    }
+    let paths: Vec<String> = inspect::paths(&tree)
+        .iter()
+        .map(|(path, value)| format!("{path} = {value}"))
+        .collect();
+    assert_eq!(paths, [
+        "/ngap/AMF-UE-NGAP-ID = 42",
+        "/ngap/RAN-UE-NGAP-ID = 7",
+        r#"/ngap/Cause/radioNetwork = "user-inactivity""#,
+    ]);
 
     // Set a value, and pick another alternative of a CHOICE
     inspect::set(&mut tree, "/ngap/RAN-UE-NGAP-ID", tree!(9))?;
     inspect::set(&mut tree, "/ngap/Cause/nas", tree!("Normal Release"))?;
-    println!("{}", NGAPPDU::from_tree(&tree)?.to_tree());
+    assert_eq!(NGAPPDU::from_tree(&tree)?.to_tree(), tree!({"message": "UEContextReleaseRequest", "ies": [
+        {"AMF-UE-NGAP-ID": 42},
+        {"RAN-UE-NGAP-ID": 9},
+        {"Cause": {"nas": "normal-release"}},
+    ]}));
 
     // A misspelt name is refused, and the tree stays as it was
-    if let Err(error) = inspect::set(&mut tree, "/ngap/Cause/radioNetwrok", tree!("unspecified")) {
-        println!("{error}");
-    }
+    let before = tree.clone();
+    let error = inspect::set(&mut tree, "/ngap/Cause/radioNetwrok", tree!("unspecified")).unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        r#""radioNetwrok" is not a member of Cause, which has radioNetwork, transport, nas, protocol, misc, choice-Extensions, at /ngap/Cause/radioNetwrok"#,
+    );
+    assert_eq!(tree, before);
     Ok(())
 }
-```
-
-```text
-{"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":7},{"Cause":{"radioNetwork":"user-inactivity"}}]}
-/ngap/AMF-UE-NGAP-ID = 42
-/ngap/RAN-UE-NGAP-ID = 7
-/ngap/Cause/radioNetwork = "user-inactivity"
-{"message":"UEContextReleaseRequest","ies":[{"AMF-UE-NGAP-ID":42},{"RAN-UE-NGAP-ID":9},{"Cause":{"nas":"normal-release"}}]}
-"radioNetwrok" is not a member of Cause, which has radioNetwork, transport, nas, protocol, misc, choice-Extensions, at /ngap/Cause/radioNetwrok
 ```
 
 The [`inspect`] module has the rules of the paths and more examples: adding
@@ -482,20 +481,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ],
     });
     let pdu = NGAPPDU::from_tree(&request)?;
-    println!("{}", hex::encode(pdu.encode()?));
+    assert_eq!(
+        hex::encode(pdu.encode()?),
+        "002a4027000005000a0002002a005500020007000f40020500005240070200676e622d31fde80003c0ffee",
+    );
 
     // The name gave the procedure and the criticalities, which the tree writes
     // where the message does not assign them
-    println!("{pdu}");
-    println!("{}", tree!(inspect::select(&pdu.to_tree(), "/ngap/*/criticality")?));
+    assert_eq!(
+        pdu.to_string(),
+        "UEContextReleaseRequest (procedure 42, initiating message), AMF-UE-NGAP-ID 42, RAN-UE-NGAP-ID 7",
+    );
+    let tree = pdu.to_tree();
+    let criticalities = inspect::select(&tree, "/ngap/*/criticality")?;
+    assert_eq!(criticalities, [&tree!("ignore"), &tree!("reject")]);
     Ok(())
 }
-```
-
-```text
-002a4027000005000a0002002a005500020007000f40020500005240070200676e622d31fde80003c0ffee
-UEContextReleaseRequest (procedure 42, initiating message), AMF-UE-NGAP-ID 42, RAN-UE-NGAP-ID 7
-["ignore","reject"]
 ```
 
 ## Limits
@@ -567,9 +568,7 @@ cargo test --all-features
 cargo run --example ngap_build_pdu
 ```
 
-Each Rust block of this page is checked with what it prints, by
-`tests/readme.rs`, which `protocols/tests/readme.py` of oxirush-aper writes
-from this page. [CONTRIBUTING.md](CONTRIBUTING.md) says how the bindings are
+[CONTRIBUTING.md](CONTRIBUTING.md) says how the bindings are
 generated, how the vectors were made and the PDUs captured, and what a change
 to them or to the pinned revisions takes.
 

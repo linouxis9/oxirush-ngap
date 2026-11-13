@@ -64,7 +64,6 @@ revision of `build/revisions`, as `build/` takes the generator. A file of
 | The traits of a protocol, the readers `ies::<T>()`, `ie::<T>()` and `items::<L>()`, `check()` and `check_structure()`, the errors that name an IE, and the bodies of the macros, which `src/macros.rs` and `src/pdu.rs` here forward to | `src/protocol/` of oxirush-aper, which the registry of each protocol, `src/registry.rs`, invokes; the paths of `inspect` in `src/inspect/` there |
 | The generator of the bindings, of the registry and of the bindings for rasn | `generator/` of oxirush-aper; `build/main.rs` here says what is of NGAP |
 | `extract_asn1.py`, `pin.py` | `protocols/build/` |
-| The README test: `readme.py` writes `tests/readme.rs` from the README | `protocols/tests/readme.py` |
 | `package.sh`, `workspace_member.sh` | `protocols/tests/` |
 | The writer of the vectors and their reading by tshark: `generate.py`, `dissect.py` | `protocols/tests/fixtures/` |
 | The comparison with Wireshark: `compare.py`, which `tests/wireshark.rs` runs with `tests/wireshark/`, and `extract.py`, which collects PDUs from captures | `protocols/tests/wireshark/` |

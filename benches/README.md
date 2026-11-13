@@ -51,7 +51,6 @@ information of the default profile and without it:
 |-------|------|-------------|------------------------------------------|
 | No feature | 15 s | 1.36 GiB | 1.09 GiB |
 | `inspect` | 24 s | 2.02 GiB | 1.57 GiB |
-| `serde` | 24 s | 2.11 GiB | 1.60 GiB |
 | `inspect`, `--release` | 35 s | 1.60 GiB | 1.59 GiB |
 
 On a message of 65,535 IEs of one name, 393 KB, `decode` takes 0.01 ms, `check`

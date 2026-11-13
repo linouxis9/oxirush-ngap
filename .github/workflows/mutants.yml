@@ -35,7 +35,7 @@ permissions:
 
 jobs:
   mutants:
-    uses: linouxis9/oxirush-aper/.github/workflows/protocol-mutants.yml@d10cc96051a9e79c5b4bb70a126130eabf0eb94d
+    uses: linouxis9/oxirush-aper/.github/workflows/protocol-mutants.yml@fdd4d6fe7dd913616f9c035fd155a1b77a0a59a5
     with:
       protocol: ngap
       full: ${{ fromJSON(inputs.full || 'false') }}

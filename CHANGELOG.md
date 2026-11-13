@@ -2,6 +2,14 @@
 
 All notable changes to `oxirush-ngap` are recorded here.
 
+## Unreleased
+
+### Removed
+
+- The feature `serde`, and `Serialize` and `Deserialize` of every type of the
+  bindings, which went through the tree: a program serializes the tree,
+  `to_tree()`, which implements both, and reads a PDU back with `from_tree`.
+
 ## 0.7.0 - 2026-11-09
 
 A path of `inspect` is the names of the tree joined: `value` after the name of an

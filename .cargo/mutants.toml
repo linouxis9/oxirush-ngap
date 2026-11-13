@@ -7,7 +7,7 @@
 # The CI of the crate is the same build without debug information
 # (CARGO_PROFILE_DEV_DEBUG=0), which builds the bindings faster and in less memory.
 
-# Every feature, so that the code of `inspect` and of `serde` is in the build that
+# Every feature, so that the code of `inspect` is in the build that
 # the tests run on: without its feature, a mutant of that code would build without it
 # and pass.
 all_features = true

@@ -233,7 +233,7 @@ fn the_notation_of_a_plmn_identity_has_the_octets_of_the_clause() {
 }
 
 /// The review of the release candidate found a PLMN identity written as its six digits
-/// read in a tree and through serde as three octets in hexadecimal, another network
+/// read in a tree as three octets in hexadecimal, another network
 /// (`"310410"` as 134-001), and a TAC `"123456"` as 1193046. A string of decimal digits
 /// is refused there with the two values that it could be, and octets whose hexadecimal
 /// has no letter are written after `0x`.
@@ -309,28 +309,6 @@ fn digits_that_could_be_a_plmn_identity_or_its_octets_are_refused() {
             "this is not a value of UserLocationInformation: \"1\" is a number in quotes: write \
              1 without quotes, {at}"
         )
-    );
-}
-
-/// The same refusals through serde, which reads a PDU as its tree.
-#[cfg(feature = "serde")]
-#[test]
-fn digits_that_could_be_a_plmn_identity_or_its_octets_are_refused_by_serde() {
-    let text = r#"{"message": "InitialContextSetupRequest", "ies": [{"GUAMI": {"pLMNIdentity": "310410", "aMFRegionID": 1, "aMFSetID": 1, "aMFPointer": 0}}]}"#;
-    let error = serde_json::from_str::<NGAPPDU<'static>>(text)
-        .unwrap_err()
-        .to_string();
-    assert!(
-        error.contains("310-410") && error.contains("0x310410"),
-        "{error}"
-    );
-    let yaml = "message: InitialContextSetupRequest\nies:\n- GUAMI: {pLMNIdentity: '001001', aMFRegionID: 1, aMFSetID: 1, aMFPointer: 0}\n";
-    let error = serde_norway::from_str::<NGAPPDU<'static>>(yaml)
-        .unwrap_err()
-        .to_string();
-    assert!(
-        error.contains("001-001") && error.contains("0x001001"),
-        "{error}"
     );
 }
 

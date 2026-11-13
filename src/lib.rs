@@ -354,6 +354,6 @@ pub use registry::Ngap;
 pub use registry::ie;
 
 /// The examples of the README, which the documentation tests compile and run.
-#[cfg(all(doctest, feature = "serde"))]
+#[cfg(all(doctest, feature = "inspect"))]
 #[doc = include_str!("../README.md")]
 struct Readme;

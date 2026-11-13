@@ -1,7 +1,7 @@
 // Auto-generated from ASN.1 by the generator of oxirush-aper; do not edit.
 oxirush_aper::__protocol! { protocol Ngap "NGAP", bindings ngap, pdu NGAPPDU, triggering initiating_message successful_outcome unsuccessful_outcome }
 oxirush_aper::__procedures! {
-    protocol Ngap "NGAP", bindings ngap, pdu NGAPPDU, kind NgapPduKind, hooks oxirush_ngap_hooks;
+    protocol Ngap "NGAP", bindings ngap, pdu NGAPPDU, kind NgapPduKind;
     0 AMFConfigurationUpdate reject { InitiatingMessage AMFConfigurationUpdate "AMFConfigurationUpdate" [1 reject optional, 96 reject optional, 86 ignore optional, 80 reject optional, 6 ignore optional, 7 ignore optional, 8 ignore optional, 274 ignore optional]; SuccessfulOutcome AMFConfigurationUpdateAcknowledge "AMFConfigurationUpdateAcknowledge" [5 ignore optional, 4 ignore optional, 19 ignore optional]; UnsuccessfulOutcome AMFConfigurationUpdateFailure "AMFConfigurationUpdateFailure" [15 ignore mandatory, 107 ignore optional, 19 ignore optional]; }
     1 AMFStatusIndication ignore { InitiatingMessage AMFStatusIndication "AMFStatusIndication" [120 reject mandatory]; }
     2 CellTrafficTrace ignore { InitiatingMessage CellTrafficTrace "CellTrafficTrace" [10 reject mandatory, 85 reject mandatory, 44 ignore mandatory, 43 ignore mandatory, 109 ignore mandatory, 256 ignore optional, 257 ignore optional]; }

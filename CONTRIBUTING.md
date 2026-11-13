@@ -68,7 +68,7 @@ revision of `build/revisions`, as `build/` takes the generator. A file of
 | The writer of the vectors and their reading by tshark: `generate.py`, `dissect.py` | `protocols/tests/fixtures/` |
 | The comparison with Wireshark: `compare.py`, which `tests/wireshark.rs` runs with `tests/wireshark/`, and `extract.py`, which collects PDUs from captures | `protocols/tests/wireshark/` |
 | The codecs of the bindings for rasn in the place of rasn's | `protocols/rasn/`, which `rasn/Cargo.toml` builds with the bindings of `rasn/src/` here |
-| The fuzz targets and `seed.sh` | `protocols/fuzz/`, which `fuzz/Cargo.toml` builds with the crate, which it names `codec`: its module `hooks` names what is of the protocol |
+| The fuzz targets and `seed.sh` | `protocols/fuzz/`, which `fuzz/Cargo.toml` builds with the crate, which it names `codec` |
 | The benchmarks, their programs, `build_cost.py` and the comparison with other implementations | `protocols/benches/`, which `benches/Cargo.toml` builds with `benches/src/protocol.rs`, `benches/src/readers.rs` and `benches/compare/pdus.tsv` here |
 | The jobs of CI and of the Reproduce, Mutants, Fuzz and Wireshark workflows | `.github/workflows/protocol.yml`, `protocol-reproduce.yml`, `protocol-mutants.yml`, `protocol-fuzz.yml` and `protocol-wireshark.yml` of oxirush-aper, which the five workflows here call |
 
@@ -250,10 +250,10 @@ the same PDU.
 
 | Target | What holds for any octets |
 |--------|---------------------------|
-| `decode` | A PDU is written as octets that are read as the same PDU, the protocol IEs of its message are put back as they were, and its message is read as its type and written |
+| `decode` | A PDU is written as octets that are read as the same PDU, and the protocol IEs of its message are put back as they were |
 | `json` | The tree of a PDU gives that PDU back, and each path of a tree selects its value |
 | `paths` | `select`, `set`, `insert`, `remove`, `open`, `check_path` and `enumerated_at` take any path and any value without a panic, and a tree that one of them changed is a PDU or an error |
-| `exact` | A PDU is written back to the octets that it was read from, but where `check` finds a form that X.691 does not give; `check_structure` says what `check` says of all but the values, and the Criticality Diagnostics of the deviations encode; a PDU that `check` finds nothing to say of is written to the same octets by the codec of its message |
+| `exact` | A PDU is written back to the octets that it was read from, but where `check` finds a form that X.691 does not give; `check_structure` says what `check` says of all but the values, and the Criticality Diagnostics of the deviations encode; the protocol IEs of its message, put back, give the octets of the message again, but where `check` finds such a form around them |
 | `edit` | A PDU of the fixtures edited by the paths of its tree, with values of the trees of the fixtures and of the fuzzer: what `from_tree` writes encodes and is read back, and only the IEs that an edit was under change |
 | `tree` | A PDU written from a tree whose IEs the fuzzer takes from the trees of the fixtures, changes, repeats, removes and puts in another order: it encodes, is read back, and its tree writes it again |
 | `transfer` | A PDU of the fixtures in which the fuzzer's octets take the place of a transfer, an IE or another value that holds others: what `from_tree` writes with them encodes, is read back, and its tree writes it again |
@@ -262,8 +262,6 @@ the same PDU.
 ```sh
 cargo install cargo-fuzz
 ../oxirush-aper/protocols/fuzz/seed.sh
-# What the targets take from the inside of the crate is behind its own name
-export RUSTFLAGS="--cfg oxirush_ngap_hooks"
 cargo +nightly fuzz run decode -- -max_total_time=60 -max_len=4096 -dict=fuzz/corpus/protocol.dict
 cargo +nightly fuzz run edit -- -max_total_time=60 -max_len=1024 -len_control=0
 ```

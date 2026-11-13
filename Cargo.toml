@@ -35,12 +35,6 @@ serde = ["inspect", "dep:serde_core"]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
-# `--cfg oxirush_ngap_hooks` gives the fuzz targets of `fuzz/` what they take from the
-# inside of the crate, the module `hooks`. No other build has it: cargo-fuzz sets
-# `fuzzing` for every crate of a fuzz build, and that changes nothing here.
-[lints.rust]
-unexpected_cfgs = { level = "warn", check-cfg = ['cfg(oxirush_ngap_hooks)'] }
-
 [dependencies]
 # One version exactly: the crate builds on the module `inspect` of oxirush-aper, which is
 # hidden and changes with the two protocol crates, which are released with it in step.

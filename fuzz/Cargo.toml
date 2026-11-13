@@ -1,8 +1,7 @@
 # The fuzz targets of oxirush-ngap, for cargo-fuzz. A package of its own, which
 # is not published. Its targets are those of `protocols/fuzz/` of oxirush-aper, in
 # the checkout beside this repository, which oxirush-ngap and oxirush-s1ap share:
-# they name the crate `codec`, and take what is of the protocol from its module
-# `hooks`.
+# they name the crate `codec`.
 [package]
 name = "oxirush-ngap-fuzz"
 version = "0.0.0"

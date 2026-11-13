@@ -528,7 +528,7 @@
 // The tables, the paths and the functions of the module, which oxirush-aper writes for
 // both protocols.
 oxirush_aper::__inspect! {
-    bindings ngap, pdu NGAPPDU, hooks oxirush_ngap_hooks, any crate::ngap::ErrorIndication<'a>
+    bindings ngap, pdu NGAPPDU, any crate::ngap::ErrorIndication<'a>
 }
 
 use crate::ngap::NGAPPDU;

@@ -69,6 +69,6 @@ doc-scrape-examples = false
 # that the walker needs, and oxirush-s1ap of the same change, whose handover
 # containers the tests read, until the releases that have them.
 [patch.crates-io]
-oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "ff51f19ee221f70e1c9572d661926dea5132a814" }
+oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "43eaad282f3a9db72a71f51389812d0550979176" }
 oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "89606c26c44b70d11055882abdee99b22f564353" }
 oxirush-s1ap = { git = "https://github.com/linouxis9/oxirush-s1ap", rev = "cfa554a2331612357920102c0f46fdebed7ec3aa" }

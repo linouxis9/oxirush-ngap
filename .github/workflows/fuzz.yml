@@ -45,7 +45,7 @@ jobs:
   # A dispatch gives its minutes as text, which fromJSON makes the number that the
   # called workflow takes, as it does the boolean of `weekly`; a schedule gives neither.
   fuzz:
-    uses: linouxis9/oxirush-aper/.github/workflows/protocol-fuzz.yml@31ac1ac301291bd8c7e4c243b6091a38673b1b54
+    uses: linouxis9/oxirush-aper/.github/workflows/protocol-fuzz.yml@8cead854da8b26311ff3d3e5053f469c4dd8f8e2
     with:
       protocol: ngap
       weekly: "33 14 * * 3"

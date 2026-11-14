@@ -242,7 +242,7 @@ fn the_notation_of_a_plmn_identity_has_the_octets_of_the_clause() {
 fn digits_that_could_be_a_plmn_identity_or_its_octets_are_refused() {
     use oxirush_ngap::tree;
 
-    let guami = |plmn: &str| {
+    let guami = |plmn: &'static str| {
         let tree = tree!({"message": "InitialContextSetupRequest", "ies": [{"GUAMI": {
             "pLMNIdentity": plmn, "aMFRegionID": 1, "aMFSetID": 1, "aMFPointer": 0,
         }}]});

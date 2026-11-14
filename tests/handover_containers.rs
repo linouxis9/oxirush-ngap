@@ -32,7 +32,7 @@ fn source() -> Value {
 
 /// The octets that oxirush-s1ap writes for the container `name` with the value `value`,
 /// in the IE of its own HANDOVER REQUEST or HANDOVER REQUEST ACKNOWLEDGE.
-fn by_s1ap(message: &str, ie: &str, name: &str, value: Value) -> Value {
+fn by_s1ap(message: &'static str, ie: &'static str, name: &'static str, value: Value) -> Value {
     let pdu = S1APPDU::from_tree(&tree!({"message": message, "ies": [
         {"MME-UE-S1AP-ID": 1},
         {(ie): {(name): (value)}},

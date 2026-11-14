@@ -72,7 +72,7 @@ fn identifiers(value: &Value, found: &mut BTreeSet<u16>, unread: &mut Vec<String
         Value::Object(members) => {
             let mut named = members.keys().filter(|name| *name != "criticality");
             if let (Some(name), None) = (named.next(), named.next()) {
-                found.extend(names.get(name.as_str()));
+                found.extend(names.get(name));
             }
             for member in members.values() {
                 identifiers(member, found, unread);

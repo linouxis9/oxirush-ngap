@@ -78,7 +78,7 @@ fn redundant(value: &Value, holder: &str, found: &mut Vec<String>) {
     match value {
         Value::Object(members) => {
             for (name, member) in members {
-                let wraps = match name.as_str() {
+                let wraps = match name {
                     "decoded" | "id" | "extensionValue" => true,
                     // A bit string whose size varies has a `value` and a `length`.
                     "value" => !members.contains_key("length"),
@@ -491,8 +491,8 @@ fn the_additional_information_of_qos_flows_has_the_type_of_what_it_extends() {
         oxirush_ngap::encode(&QosFlowAdditionalInfoListRelRes(vec![item])).unwrap()
     };
     // Of the transfer of a release command.
-    let flows = |container: &str| tree!([{"qosFlowIdentifier": 1, container: "0102"}]);
-    let released = |container: &str| {
+    let flows = |container: &'static str| tree!([{"qosFlowIdentifier": 1, container: "0102"}]);
+    let released = |container: &'static str| {
         tree!({"message": "PDUSessionResourceReleaseCommand", "ies": [
             {"AMF-UE-NGAP-ID": 1},
             {"RAN-UE-NGAP-ID": 2},
@@ -528,7 +528,7 @@ fn the_additional_information_of_qos_flows_has_the_type_of_what_it_extends() {
         of_command,
     );
     // Of the transfer of a release response.
-    let responded = |container: &str| {
+    let responded = |container: &'static str| {
         tree!({"message": "PDUSessionResourceReleaseResponse", "ies": [
             {"AMF-UE-NGAP-ID": 1},
             {"RAN-UE-NGAP-ID": 2},

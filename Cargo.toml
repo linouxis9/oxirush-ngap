@@ -23,6 +23,11 @@ include = [
     "LICENSE",
 ]
 
+# The tests of the crate are those of tests/ and of the documentation: a test build
+# compiles the library once, and not once more as its own unit tests.
+[lib]
+test = false
+
 [features]
 # With the register of protocols of oxirush-aper, a lock of the standard library: the
 # handover containers of the other protocol of the family, whose tables a program
@@ -40,6 +45,8 @@ oxirush-aper = "=0.3.0"
 oxirush-utils = "0.2.1"
 
 [dev-dependencies]
+# The checks of the tables that the generator writes, which tests/tables.rs runs.
+oxirush-aper = { version = "=0.3.0", features = ["__checks"] }
 hex = "0.4"
 # JSON as text.
 serde_json = "1.0.154"
@@ -69,6 +76,6 @@ doc-scrape-examples = false
 # that the walker needs, and oxirush-s1ap of the same change, whose handover
 # containers the tests read, until the releases that have them.
 [patch.crates-io]
-oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "e562b89ff52003ef29a6907d9f621e155fe038f0" }
+oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "e74549b8621df0ae02f19ba78efb63e07ab81002" }
 oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "219336a848e65a19c80ef2e6bccd8feeb044844a" }
 oxirush-s1ap = { git = "https://github.com/linouxis9/oxirush-s1ap", rev = "735dbbe35fbc6421be977ea59bf701b9bc662825" }

@@ -71,4 +71,4 @@ doc-scrape-examples = false
 [patch.crates-io]
 oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "e562b89ff52003ef29a6907d9f621e155fe038f0" }
 oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "219336a848e65a19c80ef2e6bccd8feeb044844a" }
-oxirush-s1ap = { git = "https://github.com/linouxis9/oxirush-s1ap", rev = "42dfd55d0aa0222879a9ba2548ed2be5e0d8701b" }
+oxirush-s1ap = { git = "https://github.com/linouxis9/oxirush-s1ap", rev = "735dbbe35fbc6421be977ea59bf701b9bc662825" }

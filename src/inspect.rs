@@ -532,6 +532,7 @@ oxirush_aper::__inspect! {
 
 use crate::ngap::NGAPPDU;
 use oxirush_aper::Octets;
+use oxirush_aper::json::{self, Tree};
 use oxirush_aper::protocol::Pdu;
 
 /// The tree of a PDU, with the `inspect` feature: the short form in which a message is

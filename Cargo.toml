@@ -63,3 +63,10 @@ doc-scrape-examples = false
 name = "ngap_inspect"
 required-features = ["inspect"]
 doc-scrape-examples = false
+
+# oxirush-aper at the revision whose generator wrote the bindings, whose walker reads
+# and writes the trees with the table of the types, and oxirush-utils at the revision
+# that the walker needs, until the releases that have them.
+[patch.crates-io]
+oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "ff51f19ee221f70e1c9572d661926dea5132a814" }
+oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "89606c26c44b70d11055882abdee99b22f564353" }

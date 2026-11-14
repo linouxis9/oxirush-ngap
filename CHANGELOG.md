@@ -4,6 +4,22 @@ All notable changes to `oxirush-ngap` are recorded here.
 
 ## Unreleased
 
+### Added
+
+- `inspect::value_tree` and `inspect::value_from_tree`: the tree of a value of
+  a type of the bindings, as the tree of a PDU shows it, and the value that a
+  tree writes. They take the place of `Tree` on each type.
+
+### Changed
+
+- The trees of the IEs, the transfers and the messages are read and written by
+  the walker of oxirush-aper with the table of the types of NGAP
+  (`inspect_registry.rs`), in the place of an `impl Tree` for each type of the
+  bindings: the same trees, octets and errors, and 30,690 generated lines
+  fewer. A type of the bindings no longer implements `oxirush_utils::tree::Tree`.
+  `value_from_tree` refuses a value outside a constraint of its type, which
+  `tree::from_value` read.
+
 ### Removed
 
 - The feature `serde`, and `Serialize` and `Deserialize` of every type of the

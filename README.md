@@ -559,27 +559,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ## Performance
 
-On one core of an AMD Ryzen 7 5700G (Linux 7.0, Rust 1.98.1), at aad0ccf on
-2026-10-18, the macro reads the IEs that its fields ask for in 24 to 52 ns
-without allocating, and `check_structure()` takes 64 to 198 ns.
+On one core of an Intel Xeon E5-2680 v4 (Broadwell, a KVM guest, Linux 7.0,
+Rust 1.100.0), at e09770b on 2026-11-15, the median of ten runs: the macro
+reads the IEs that its fields ask for in 44 to 102 ns without allocating,
+and `check_structure()` takes 258 to 526 ns.
 [`benches/`](benches/README.md) has the figures by message.
 
 ### Against other implementations
 
 Six common PDUs, decoded and encoded by this crate and five other NGAP
-codecs, at the same commit and on the same machine. Decoding is the PDU and
-each of its IEs as its type, as the others do; `NGAPPDU::decode` alone
-takes 8 to 10 ns. A ratio is the time of the other implementation over this
-crate's:
+codecs, at the same commit and on the same machine, ten rounds in turns.
+Decoding is the PDU and each of its IEs as its type, as the others do;
+`NGAPPDU::decode` alone takes 29 to 31 ns. A ratio is the median time of the
+other implementation over this crate's; the ten times of the two overlap for
+none:
 
 | | Decoding | Encoding |
 |---|---|---|
-| this crate | 88 to 525 ns | 63 to 277 ns |
-| rasn 0.29 | 6.0x to 9.2x | 10x to 14x |
-| hampi 0.7.2 | 6.7x to 11x | 21x to 27x |
-| asn1c (Open5GS 2.8.0) | 11x to 19x | 12x to 17x |
-| free5GC ngap 1.2.0 | 7.5x to 13x | 7.5x to 9.5x |
-| pycrate 0.8.1 | 550x to 1,500x | 710x to 1,600x |
+| this crate | 206 to 973 ns | 158 to 615 ns |
+| rasn 0.29 | 5.0x to 7.0x | 12x to 15x |
+| hampi 0.7.2 | 5.8x to 10x | 14x to 19x |
+| asn1c (Open5GS 2.8.0) | 11x to 18x | 11x to 17x |
+| free5GC ngap 1.2.0 | 7.4x to 12x | 6.9x to 8.8x |
+| pycrate 0.8.1 | 510x to 1,300x | 520x to 1,400x |
 
 [`benches/`](benches/README.md#the-six-pdus) has the figures of each PDU and
 the method. From the root of the repository, with oxirush-aper beside it:

@@ -2,7 +2,7 @@
 
 All notable changes to `oxirush-ngap` are recorded here.
 
-## 0.8.0 - unreleased
+## 0.8.0 - 2026-11-16
 
 On oxirush-aper 0.4.0 exactly, and oxirush-utils 0.3. The trees are read and written
 by the walker of oxirush-aper over the table of the types of NGAP, in less time: its

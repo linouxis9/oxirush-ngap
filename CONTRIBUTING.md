@@ -1,6 +1,7 @@
 # Contributing to oxirush-ngap
 
-Each commit is signed off (`git commit -s`): a contribution is under the
+A pull request comes with a test for what it changes. Each commit is signed
+off (`git commit -s`): a contribution is under the
 [Developer Certificate of Origin](https://developercertificate.org/) and the
 licence of the crate. This page is for those who change the generated code,
 the fixtures of the tests or the pinned revisions; the README is for those
@@ -231,7 +232,7 @@ Downlink NAS Transport.
 
 ## Fuzzing
 
-`fuzz/` has eight [cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets,
+`fuzz/` has ten [cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets,
 a package of its own that is not published. A target does not only look for a
 panic: it holds what the crate writes to what it reads and to what `check` says.
 CI runs each for a minute, from the vectors and the captured PDUs. The Fuzz
@@ -258,6 +259,8 @@ the same PDU.
 | `tree` | A PDU written from a tree whose IEs the fuzzer takes from the trees of the fixtures, changes, repeats, removes and puts in another order: it encodes, is read back, and its tree writes it again |
 | `transfer` | A PDU of the fixtures in which the fuzzer's octets take the place of a transfer, an IE or another value that holds others: what `from_tree` writes with them encodes, is read back, and its tree writes it again |
 | `jer` | A PDU of the fixtures as another implementation writes it in the JSON Encoding Rules, with leaves that the fuzzer changes anywhere: `tree_of_jer` takes any view, and what `from_tree` writes from the tree that it gives encodes, is read back, and its tree writes it again |
+| `walker` | The octets of an IE of any identifier in the message of a PDU of the fixtures, read through the walker of the table of the types: in a fuzz build it is checked to read as values the octets that the typed decoder reads, and the tree of the PDU writes the PDU again |
+| `generated` | A PDU of any message that the tables of the protocol make, with the IEs and values that the fuzzer's octets choose: it encodes, decodes, and reads back to the same tree, and `check` finds nothing that the tables made, but for conditional presence |
 
 ```sh
 cargo install cargo-fuzz

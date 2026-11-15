@@ -72,10 +72,10 @@
 //! | Decode a PDU | [`NGAPPDU::decode`](ngap::NGAPPDU::decode), [`NGAPPDU::kind`](ngap::NGAPPDU::kind), [`NGAPPDU::decode_value`](ngap::NGAPPDU::decode_value) |
 //! | Build a PDU | [`build_ngap!`], [`NGAPPDU::of_message`](ngap::NGAPPDU::of_message) |
 //! | Read the IEs of a message | [`extract_ngap_ies!`], [`ie`], [`Ie::field`], `set_ie` |
-//! | A transfer and a handover container, typed | [`decode`], [`encode`], [`PDUSessionResourceSetupRequestTransfer::check`](ngap::PDUSessionResourceSetupRequestTransfer::check) |
+//! | Decode transfers and handover containers | [`decode`], [`encode`], [`PDUSessionResourceSetupRequestTransfer::check`](ngap::PDUSessionResourceSetupRequestTransfer::check) |
 //! | Check a message, and answer one that is faulty | [`NGAPPDU::check`](ngap::NGAPPDU::check), [`NGAPPDU::check_structure`](ngap::NGAPPDU::check_structure), [`Deviation`], [`NGAPPDU::criticality_diagnostics_for_response`](ngap::NGAPPDU::criticality_diagnostics_for_response) |
-//! | A PDU as JSON | [`NGAPPDU::to_tree`](ngap::NGAPPDU::to_tree), [`NGAPPDU::from_tree`](ngap::NGAPPDU::from_tree), [`inspect`] |
-//! | What a path takes | [`inspect::at`], [`inspect::tree_at`], [`inspect::value_tree`], [`inspect::value_from_tree`] |
+//! | Edit a PDU as JSON | [`NGAPPDU::to_tree`](ngap::NGAPPDU::to_tree), [`NGAPPDU::from_tree`](ngap::NGAPPDU::from_tree), [`inspect`] |
+//! | Find the type at a path (in [`inspect`]) | [`inspect::at`], [`inspect::tree_at`], [`inspect::value_tree`], [`inspect::value_from_tree`] |
 //! | Write a message from its tree | [`NGAPPDU::from_tree`](ngap::NGAPPDU::from_tree) |
 //!
 // Without `inspect` the items of the JSON forms in the tasks are no links: the links are

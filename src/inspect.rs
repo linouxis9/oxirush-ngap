@@ -197,6 +197,48 @@
 //! {"PDUSessionResourceSetupListSUReq":[{"pDUSessionID":5,"s-NSSAI":{"sST":1},"pDUSessionResourceSetupRequestTransfer":{"protocolIEs":[{"PDUSessionType":"ipv6"}]}}]}
 //! ```
 //!
+//! ## The type at a path
+//!
+//! [`at`] names the type at a path, even where no PDU has a value yet: through lists,
+//! transfers and the IEs that a transfer holds. It says what its tree takes, and which IEs
+//! a transfer or an extension container may hold. [`tree_at`] reads octets of that type
+//! as the tree of a PDU shows them.
+//!
+//! ```
+//! use oxirush_ngap::tree::Takes;
+//! use oxirush_ngap::{Criticality, Presence, inspect, ngap::*, tree};
+//!
+//! fn main() -> Result<(), Box<dyn std::error::Error>> {
+//!     // The transfer of an item of a PDU SESSION RESOURCE SETUP REQUEST, and its IEs
+//!     let item = "/ngap/PDUSessionResourceSetupListSUReq/0";
+//!     let transfer = format!("{item}/pDUSessionResourceSetupRequestTransfer");
+//!     let at = inspect::at(&transfer)?;
+//!     assert_eq!(at.name, "PDUSessionResourceSetupRequestTransfer");
+//!     let ies = at.ies.ok_or("a transfer has IEs")?;
+//!     assert!(ies.contains(&(139, Criticality::Reject, Presence::Mandatory)));
+//!
+//!     // One IE of the transfer, by its name, and a member of its value: a number
+//!     // up to the bound of BitRate
+//!     let path = format!("{transfer}/PDUSessionAggregateMaximumBitRate");
+//!     let rate = inspect::at(&path)?;
+//!     assert_eq!((rate.name, rate.ie), ("PDUSessionAggregateMaximumBitRate", Some(130)));
+//!     let downlink = inspect::at(&format!("{path}/pDUSessionAggregateMaximumBitRateDL"))?;
+//!     let bound = Takes::Number(4_000_000_000_000);
+//!     assert_eq!((downlink.name, downlink.takes), ("BitRate", bound));
+//!
+//!     // A value of the IE from its tree, and its octets read back as a tree
+//!     let tree = tree!({
+//!         "pDUSessionAggregateMaximumBitRateDL": 1000,
+//!         "pDUSessionAggregateMaximumBitRateUL": 2000,
+//!     });
+//!     let value: PDUSessionAggregateMaximumBitRate = inspect::value_from_tree(&tree)?;
+//!     let octets = oxirush_ngap::encode(&value)?;
+//!     assert_eq!(hex::encode(&octets), "0403e81007d0");
+//!     assert_eq!(inspect::tree_at(&path, &octets)?, tree);
+//!     Ok(())
+//! }
+//! ```
+//!
 //! ## The names of an ENUMERATED
 //!
 //! ```

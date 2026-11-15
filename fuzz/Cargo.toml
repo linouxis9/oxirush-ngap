@@ -20,7 +20,7 @@ path = "../../oxirush-aper/protocols/fuzz/src/lib.rs"
 libfuzzer-sys = { version = "0.4", features = ["arbitrary-derive"] }
 serde_json = "1"
 # The trees that the tables of the protocol make, which the target `generated` writes.
-oxirush-aper = { version = "=0.3.0", features = ["__checks"] }
+oxirush-aper = { version = "=0.4.0", features = ["__checks"] }
 
 [dependencies.codec]
 package = "oxirush-ngap"
@@ -35,7 +35,7 @@ members = ["."]
 [patch.crates-io]
 oxirush-aper = { path = "../../oxirush-aper" }
 # The revision of oxirush-utils that the walker of the trees needs, until its release.
-oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "4eae6c700f102dbf134e47f758e96799bee3f537" }
+oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "922f5b4c2a33f05d1992632faa5efe605315d61e" }
 
 [[bin]]
 name = "decode"

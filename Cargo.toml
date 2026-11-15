@@ -1,6 +1,6 @@
 [package]
 name = "oxirush-ngap"
-version = "0.7.0"
+version = "0.8.0"
 edition = "2024"
 description = "5G NGAP (3GPP TS 38.413, Release 19) in Rust, generated from the ASN.1: aligned PER, IEs read and built by name, message checks with their causes and JSON trees. No unsafe code."
 license = "Apache-2.0"
@@ -41,18 +41,18 @@ rustdoc-args = ["--cfg", "docsrs"]
 [dependencies]
 # One version exactly: the crate builds on the module `inspect` of oxirush-aper, which is
 # hidden and changes with the two protocol crates, which are released with it in step.
-oxirush-aper = "=0.3.0"
-oxirush-utils = "0.2.1"
+oxirush-aper = "=0.4.0"
+oxirush-utils = "0.3.0"
 
 [dev-dependencies]
 # The checks of the tables that the generator writes, which tests/tables.rs runs.
-oxirush-aper = { version = "=0.3.0", features = ["__checks"] }
+oxirush-aper = { version = "=0.4.0", features = ["__checks"] }
 hex = "0.4"
 # JSON as text.
 serde_json = "1.0.154"
 # The other protocol of the family, whose tables the tests of the handover containers
 # between 5GS and EPS register.
-oxirush-s1ap = { version = "0.5", features = ["inspect"] }
+oxirush-s1ap = { version = "0.6", features = ["inspect"] }
 
 [[example]]
 name = "ngap_build_pdu"
@@ -76,8 +76,8 @@ doc-scrape-examples = false
 # that the walker needs, and oxirush-s1ap of the same change, whose handover
 # containers the tests read, until the releases that have them.
 [patch.crates-io]
-oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "05c07177953e53e27fc811690c5e378a52834571" }
-oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "4eae6c700f102dbf134e47f758e96799bee3f537" }
+oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "121f2b0a5ce4d3aba0c96c187540ed23debd28e8" }
+oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "922f5b4c2a33f05d1992632faa5efe605315d61e" }
 oxirush-s1ap = { git = "https://github.com/linouxis9/oxirush-s1ap", rev = "39ff2c7e2767aa62351ffb4753dfcddffeb76f78" }
 
 # A test build has no debug information, as in CI: with it, a test build of the crate

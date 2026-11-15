@@ -2,7 +2,7 @@
 
 All notable changes to `oxirush-ngap` are recorded here.
 
-## Unreleased
+## 0.8.0 - unreleased
 
 ### Added
 

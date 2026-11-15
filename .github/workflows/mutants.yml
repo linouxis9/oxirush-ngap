@@ -35,7 +35,7 @@ permissions:
 
 jobs:
   mutants:
-    uses: linouxis9/oxirush-aper/.github/workflows/crate-mutants.yml@153ae90559f0ece0e218bc7c2dbfe105d4adc4ca
+    uses: linouxis9/oxirush-aper/.github/workflows/crate-mutants.yml@90e9ade5b7a7117d5a1af93a5538e7d7a32685a7
     with:
       shards: 2
       # The generated bindings are measured with the rest, and left out of the summary.

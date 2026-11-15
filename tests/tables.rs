@@ -23,4 +23,8 @@ oxirush_aper::__registry_tests!(oxirush_ngap::Ngap);
 #[cfg(feature = "inspect")]
 mod inspect {
     oxirush_aper::__inspect_tests!(oxirush_ngap::inspect::__tables());
+    oxirush_aper::__generated_tests!(
+        oxirush_ngap::ngap::NGAPPDU<'_>,
+        oxirush_ngap::inspect::__tables()
+    );
 }

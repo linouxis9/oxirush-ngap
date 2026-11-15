@@ -19,6 +19,8 @@ path = "../../oxirush-aper/protocols/fuzz/src/lib.rs"
 [dependencies]
 libfuzzer-sys = { version = "0.4", features = ["arbitrary-derive"] }
 serde_json = "1"
+# The trees that the tables of the protocol make, which the target `generated` writes.
+oxirush-aper = { version = "=0.3.0", features = ["__checks"] }
 
 [dependencies.codec]
 package = "oxirush-ngap"
@@ -94,6 +96,13 @@ bench = false
 [[bin]]
 name = "walker"
 path = "../../oxirush-aper/protocols/fuzz/fuzz_targets/walker.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "generated"
+path = "../../oxirush-aper/protocols/fuzz/fuzz_targets/generated.rs"
 test = false
 doc = false
 bench = false

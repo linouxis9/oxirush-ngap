@@ -19,6 +19,6 @@ jobs:
   # the package alone, the crate in a larger workspace, the benchmarks, the fuzz
   # targets, the format, and the files that the tools write.
   ci:
-    uses: linouxis9/oxirush-aper/.github/workflows/protocol.yml@8cead854da8b26311ff3d3e5053f469c4dd8f8e2
+    uses: linouxis9/oxirush-aper/.github/workflows/protocol.yml@153ae90559f0ece0e218bc7c2dbfe105d4adc4ca
     with:
       protocol: ngap

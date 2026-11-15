@@ -35,7 +35,7 @@ members = ["."]
 [patch.crates-io]
 oxirush-aper = { path = "../../oxirush-aper" }
 # The revision of oxirush-utils that the walker of the trees needs, until its release.
-oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "922f5b4c2a33f05d1992632faa5efe605315d61e" }
+oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "824b57fa9540277e821b107f480718eebda04f1c" }
 
 [[bin]]
 name = "decode"

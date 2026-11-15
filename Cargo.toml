@@ -76,8 +76,8 @@ doc-scrape-examples = false
 # that the walker needs, and oxirush-s1ap of the same change, whose handover
 # containers the tests read, until the releases that have them.
 [patch.crates-io]
-oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "121f2b0a5ce4d3aba0c96c187540ed23debd28e8" }
-oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "922f5b4c2a33f05d1992632faa5efe605315d61e" }
+oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "3ae0f3c9b53a3ab2f730cb4f4b5416c4f856a4c1" }
+oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "824b57fa9540277e821b107f480718eebda04f1c" }
 oxirush-s1ap = { git = "https://github.com/linouxis9/oxirush-s1ap", rev = "63121088a94f99b27166d24310890fbf7f9c507d" }
 
 # A test build has no debug information, as in CI: with it, a test build of the crate

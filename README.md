@@ -164,7 +164,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "DownlinkNASTransport (procedure 4, initiating message), AMF-UE-NGAP-ID 1, RAN-UE-NGAP-ID 7",
     );
 
-    // After the security mode: the UE's GUAMI, slices, security capabilities and KgNB
+    // After the security mode: the UE's GUAMI, slices, security capabilities and KgNB.
+    // The capabilities are the value of the UE's NAS UE security capability IE:
+    // here 5G-EA0 to 128-NEA3 and 5G-IA0 to 128-NIA3
     let mut k_gnb = [0; 32];
     hex::decode_to_slice("c18166e13cfde1dea842c708f6e0b3372b6896664df4e865c0c78bd270852005", &mut k_gnb)?;
     let setup = build_ngap!(InitialContextSetupRequest,
@@ -454,6 +456,43 @@ The [`inspect`] module has the rules of the paths and more examples: adding
 and removing IEs, repeated IEs, list items, transfers, ENUMERATED names and
 handover containers.
 
+## What a path takes
+
+`inspect::at` names the type at a path, even where no PDU has a value yet:
+through lists, transfers and the IEs that a transfer holds. It says what its
+tree takes, and which IEs a transfer or an extension container may hold.
+`inspect::tree_at` reads octets of that type as the tree of a PDU shows them.
+
+```rust
+use oxirush_ngap::tree::Takes;
+use oxirush_ngap::{Criticality, Presence, inspect, ngap::*, tree};
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // The transfer of an item of a PDU SESSION RESOURCE SETUP REQUEST, and its IEs
+    let transfer = "/ngap/PDUSessionResourceSetupListSUReq/0/pDUSessionResourceSetupRequestTransfer";
+    let at = inspect::at(transfer)?;
+    assert_eq!(at.name, "PDUSessionResourceSetupRequestTransfer");
+    let ies = at.ies.ok_or("a transfer has IEs")?;
+    assert!(ies.contains(&(139, Criticality::Reject, Presence::Mandatory)));
+
+    // One IE of the transfer, by its name, and a member of its value: a number
+    // up to the bound of BitRate
+    let path = format!("{transfer}/PDUSessionAggregateMaximumBitRate");
+    let rate = inspect::at(&path)?;
+    assert_eq!((rate.name, rate.ie), ("PDUSessionAggregateMaximumBitRate", Some(130)));
+    let downlink = inspect::at(&format!("{path}/pDUSessionAggregateMaximumBitRateDL"))?;
+    assert_eq!((downlink.name, downlink.takes), ("BitRate", Takes::Number(4_000_000_000_000)));
+
+    // A value of the IE from its tree, and its octets read back as a tree
+    let tree = tree!({"pDUSessionAggregateMaximumBitRateDL": 1000, "pDUSessionAggregateMaximumBitRateUL": 2000});
+    let value: PDUSessionAggregateMaximumBitRate = inspect::value_from_tree(&tree)?;
+    let octets = oxirush_ngap::encode(&value)?;
+    assert_eq!(hex::encode(&octets), "0403e81007d0");
+    assert_eq!(inspect::tree_at(&path, &octets)?, tree);
+    Ok(())
+}
+```
+
 ## Write a message from its tree
 
 A tree names the message, in any case, and lists its IEs. The name gives the
@@ -553,11 +592,13 @@ python3 ../oxirush-aper/protocols/benches/compare/compare.py --core 3 --perf "su
 
 The tests run 144 messages and 479 vectors that pycrate 0.8.1 encoded from
 the ASN.1, and 177 PDUs that Open5GS, free5GC and PacketRusher sent in lab
-runs, through the codec and the trees. `fuzz/` has eight
+runs, through the codec and the trees, and 16 trees of each message of the
+protocol that its tables make, written as PDUs and read back. `fuzz/` has ten
 [cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets: `decode`, `json`,
-`paths` and `exact` read any octets, and `edit`, `tree`, `transfer` and `jer`
-edit the PDUs of the tests and write new ones. CI runs each for a minute, and
-the Fuzz workflows of this repository and of oxirush-aper an hour each day.
+`paths` and `exact` read any octets; `edit`, `tree`, `transfer`, `jer` and
+`walker` edit the PDUs of the tests and write new ones; `generated` writes a
+PDU of any message with the IEs and values that its octets choose. CI runs
+each for a minute, and the Fuzz workflow an hour each day but Sunday.
 `examples/` has four programs.
 
 ```sh
@@ -583,7 +624,8 @@ says how to report a vulnerability.
 - [oxirush-security](https://github.com/linouxis9/oxirush-security): NAS security, AKA and the derivation of keys.
 - [oxirush-ngap](https://github.com/linouxis9/oxirush-ngap): NGAP, between a gNB and an AMF.
 - [oxirush-s1ap](https://github.com/linouxis9/oxirush-s1ap): S1AP, between an eNB and an MME.
-- [oxirush-gtp-u](https://github.com/linouxis9/oxirush-gtp-u): GTP-U tunnels, with a test UPF.
+- [oxirush-gtp-u](https://github.com/linouxis9/oxirush-gtp-u): GTP-U tunnels, with a user-plane test peer.
+- [oxirush-pfcp](https://github.com/linouxis9/oxirush-pfcp): PFCP, between the control plane and the user plane.
 - [oxirush-sctp](https://github.com/linouxis9/oxirush-sctp): SCTP sockets, which carry NGAP and S1AP.
 
 ## License

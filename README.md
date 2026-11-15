@@ -527,15 +527,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ## Performance
 
-| Six common PDUs | This crate | rasn 0.29 | hampi 0.7.2 | asn1c (Open5GS 2.8.0) | free5GC ngap 1.2.0 | pycrate 0.8.1 |
-|---|---|---|---|---|---|---|
-| Decoding, every IE as its type | 206 to 973 ns | 5.0–7.0× slower | 5.8–10× slower | 11–18× slower | 7.4–12× slower | 510–1,300× slower |
-| Encoding | 158 to 615 ns | 12–15× slower | 14–19× slower | 11–17× slower | 6.9–8.8× slower | 520–1,400× slower |
+| Codec, on six common PDUs | Decoding, every IE as its type | Encoding |
+|---|---|---|
+| This crate | 206 to 973 ns | 158 to 615 ns |
+| rasn 0.29 | 5.0–7.0× slower | 12–15× slower |
+| hampi 0.7.2 | 5.8–10× slower | 14–19× slower |
+| asn1c (Open5GS 2.8.0) | 11–18× slower | 11–17× slower |
+| free5GC ngap 1.2.0 | 7.4–12× slower | 6.9–8.8× slower |
+| pycrate 0.8.1 | 510–1,300× slower | 520–1,400× slower |
 
 Medians of ten rounds in turns on one core of an Intel Xeon E5-2680 v4 (a
 KVM guest, Linux 7.0, Rust 1.100.0), at e09770b on 2026-11-15. A cell of
-another codec says how much slower it is than this crate on the six PDUs;
-the ten times of the two overlap for none.
+another codec says how much slower it is than this crate on the six PDUs:
+the medians differ by more than 10 % and the ten times of the two overlap
+for none.
 [`benches/README.md`](benches/README.md) has each PDU, the readers and the
 checks, the method and the command.
 
@@ -546,12 +551,13 @@ cargo test --all-features
 cargo run --example ngap_build_pdu
 ```
 
-Each example of this page checks what it gives with `assert_eq!`, and runs
-as a documentation test. The tests run 144 messages and 479 vectors that
-pycrate 0.8.1 encoded from the ASN.1, and 177 PDUs that Open5GS, free5GC and
-PacketRusher sent in lab runs, through the codec and the trees, and 16 trees
-of each message that the tables make. No PDU of a commercial RAN or core is
-among them. `fuzz/` has ten fuzz targets, and `examples/` four programs.
+Each example of this page checks what it gives with `assert_eq!`, and runs as
+a documentation test. The tests run 144 messages and 479 vectors that pycrate
+0.8.1 encoded from the ASN.1, and 177 PDUs that Open5GS, free5GC and
+PacketRusher sent in lab runs, through the codec and the trees, and, for each
+message, 16 trees generated from the protocol's tables. No PDU of a commercial
+RAN or core is among them. `fuzz/` has ten fuzz targets, and `examples/` four
+programs.
 
 [CONTRIBUTING.md](CONTRIBUTING.md) has how the bindings are generated, the
 vectors made and the PDUs captured, how to run the fuzz targets, and how to

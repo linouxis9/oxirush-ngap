@@ -13,11 +13,12 @@ NUMA node 0; Linux 7.0, Rust 1.100.0), on 2026-11-15, at e09770b.
 
 ## The six PDUs
 
-The comparison of the [README](../README.md#performance), on the six PDUs of `compare/pdus.tsv`, which each implementation decodes and
-encodes. The envelope alone is `NGAPPDU::decode`, which leaves the value of
-each IE in its octets; "this crate" decodes the PDU and then every IE of its
-message as its type, which is what the others do; and encoding writes the PDU
-from the typed values of its IEs, as `build_ngap!` does.
+The comparison of the [README](../README.md#performance), on the six PDUs of
+`compare/pdus.tsv`, which each implementation decodes and encodes. The envelope
+alone is `NGAPPDU::decode`, which leaves the value of each IE in its octets;
+"this crate" decodes the PDU and then every IE of its message as its type, which
+is what the others do; and encoding writes the PDU from the typed values of its
+IEs, as `build_ngap!` does.
 
 Decoding, ns per call:
 
@@ -30,16 +31,16 @@ Decoding, ns per call:
 | PDUSessionResourceSetupRequest (192) | 30 | 368 | 1,994 | 3,570 | 6,630 | 4,087 | 497,047 |
 | HandoverRequest (238) | 31 | 973 | 6,664 | 9,681 | 15,316 | 9,552 | 873,394 |
 
-The time of each other implementation over this crate's, decoding:
+How much slower each other implementation is than this crate, decoding:
 
-| PDU (octets) | rasn / this crate | hampi / this crate | asn1c / this crate | free5GC / this crate | pycrate / this crate |
+| PDU (octets) | rasn | hampi | asn1c | free5GC | pycrate |
 |---|---|---|---|---|---|
-| UEContextReleaseRequest (25) | 5.1x | 5.8x | 17x | 11x | 610x |
-| InitialUEMessage (70) | 7.0x | 10x | 18x | 12x | 720x |
-| InitialContextSetupRequest (212) | 6.8x | 9.4x | 15x | 9.6x | 900x |
-| NGSetupResponse (58) | 5.0x | 7.3x | 11x | 7.4x | 510x |
-| PDUSessionResourceSetupRequest (192) | 5.4x | 9.7x | 18x | 11x | 1,300x |
-| HandoverRequest (238) | 6.8x | 10x | 16x | 9.8x | 900x |
+| UEContextReleaseRequest (25) | 5.1× slower | 5.8× slower | 17× slower | 11× slower | 610× slower |
+| InitialUEMessage (70) | 7.0× slower | 10× slower | 18× slower | 12× slower | 720× slower |
+| InitialContextSetupRequest (212) | 6.8× slower | 9.4× slower | 15× slower | 9.6× slower | 900× slower |
+| NGSetupResponse (58) | 5.0× slower | 7.3× slower | 11× slower | 7.4× slower | 510× slower |
+| PDUSessionResourceSetupRequest (192) | 5.4× slower | 9.7× slower | 18× slower | 11× slower | 1,300× slower |
+| HandoverRequest (238) | 6.8× slower | 10× slower | 16× slower | 9.8× slower | 900× slower |
 
 Encoding, ns per call:
 
@@ -52,18 +53,19 @@ Encoding, ns per call:
 | PDUSessionResourceSetupRequest (192) | 263 | 3,281 | 5,095 | 4,422 | 2,321 | 365,377 |
 | HandoverRequest (238) | 615 | 7,664 | 10,663 | 8,608 | 4,487 | 601,733 |
 
-The time of each other implementation over this crate's, encoding:
+How much slower each other implementation is than this crate, encoding:
 
-| PDU (octets) | rasn / this crate | hampi / this crate | asn1c / this crate | free5GC / this crate | pycrate / this crate |
+| PDU (octets) | rasn | hampi | asn1c | free5GC | pycrate |
 |---|---|---|---|---|---|
-| UEContextReleaseRequest (25) | 14x | 14x | 12x | 7.6x | 520x |
-| InitialUEMessage (70) | 15x | 18x | 15x | 8.2x | 650x |
-| InitialContextSetupRequest (212) | 12x | 16x | 13x | 6.9x | 970x |
-| NGSetupResponse (58) | 12x | 16x | 11x | 6.9x | 660x |
-| PDUSessionResourceSetupRequest (192) | 12x | 19x | 17x | 8.8x | 1,400x |
-| HandoverRequest (238) | 12x | 17x | 14x | 7.3x | 980x |
+| UEContextReleaseRequest (25) | 14× slower | 14× slower | 12× slower | 7.6× slower | 520× slower |
+| InitialUEMessage (70) | 15× slower | 18× slower | 15× slower | 8.2× slower | 650× slower |
+| InitialContextSetupRequest (212) | 12× slower | 16× slower | 13× slower | 6.9× slower | 970× slower |
+| NGSetupResponse (58) | 12× slower | 16× slower | 11× slower | 6.9× slower | 660× slower |
+| PDUSessionResourceSetupRequest (192) | 12× slower | 19× slower | 17× slower | 8.8× slower | 1,400× slower |
+| HandoverRequest (238) | 12× slower | 17× slower | 14× slower | 7.3× slower | 980× slower |
 
-The figures were taken at e09770b, by [the method of the comparison](#the-method-of-the-comparison).
+The figures were taken at e09770b, by [the method of the
+comparison](#the-method-of-the-comparison).
 
 ## Every figure of the comparison for HandoverRequest
 
@@ -83,36 +85,37 @@ The programs, the machine and the method of [the six PDUs](#the-six-pdus), per c
 | encode octets allocated | 497 | 2,171 | 2,315 | 4,504 | 1,184 |  |
 | most memory held, KiB | 4,364 | 5,256 | 4,086 | 6,392 | 9,566 | 36,828 |
 
-The time, the cycles and the instructions of each other implementation over this crate's:
+How much slower each other implementation is than this crate, and how many more
+cycles and instructions it takes:
 
-|  | rasn / this crate | hampi / this crate | asn1c / this crate | free5GC / this crate | pycrate / this crate |
+|  | rasn | hampi | asn1c | free5GC | pycrate |
 |---|---|---|---|---|---|
-| decode ns | 6.8x | 10x | 16x | 9.8x | 900x |
-| decode cycles | 6.9x | 9.9x | 16x | 12x | 900x |
-| decode instructions | 5.9x | 10x | 17x | 14x | 660x |
-| encode ns | 12x | 17x | 14x | 7.3x | 980x |
-| encode cycles | 13x | 17x | 14x | 9.3x | 980x |
-| encode instructions | 11x | 20x | 15x | 9.6x | 670x |
+| decode ns | 6.8× slower | 10× slower | 16× slower | 9.8× slower | 900× slower |
+| decode cycles | 6.9× more | 9.9× more | 16× more | 12× more | 900× more |
+| decode instructions | 5.9× more | 10× more | 17× more | 14× more | 660× more |
+| encode ns | 12× slower | 17× slower | 14× slower | 7.3× slower | 980× slower |
+| encode cycles | 13× more | 17× more | 14× more | 9.3× more | 980× more |
+| encode instructions | 11× more | 20× more | 15× more | 9.6× more | 670× more |
 
 ## The method of the comparison
 
-Every operation of every implementation ran once a round, a call repeated
-for about 0.2 s, in turns, ten rounds: a time is the median of the ten, and a
-ratio of times is given where the ten times of the two do not overlap (they
-overlap for none here). The cycles and the instructions, the median of the
-rounds, are those that `perf stat` counts for the calls alone: the
-difference between a run of twice the calls and one of the calls. The
-allocations and the octets that they ask for are counted by an allocator
-that counts in Rust, by `malloc`, `calloc` and `realloc` for asn1c, by
+Every operation of every implementation ran once a round, a call repeated for
+about 0.2 s, in turns, ten rounds: a time is the median of the ten, and a ratio
+of times is given otherwise than "about the same", which is when the medians are
+within 10 % or the ten times overlap (none is here). The cycles and the
+instructions, the median of the rounds, are those that `perf stat` counts for
+the calls alone: the difference between a run of twice the calls and one of the
+calls. The allocations and the octets that they ask for are counted by an
+allocator that counts in Rust, by `malloc`, `calloc` and `realloc` for asn1c, by
 `runtime.MemStats` for Go; pycrate's are not counted. The most memory held is
 the high-water mark of the resident memory of the program (`VmHWM`), its runtime
 included. The figures were taken at e09770b on an Intel Xeon E5-2680 v4
-(Broadwell, 2.4 GHz; a KVM guest bound to NUMA node 0; Linux 7.0, Rust
-1.100.0, Go 1.27.4, Python 3.14), each program on core 3, on 2026-11-15, with the script, which fetches each implementation at a pinned version: hampi 0.7.2 and rasn
+(Broadwell, 2.4 GHz; a KVM guest bound to NUMA node 0; Linux 7.0, Rust 1.100.0,
+Go 1.27.4, Python 3.14), each program on core 3, on 2026-11-15, with the script,
+which fetches each implementation at a pinned version: hampi 0.7.2 and rasn
 0.29.0 from crates.io, Open5GS v2.8.0 from GitHub, the ngap package v1.2.0 of
 free5GC through its go.mod, pycrate 0.8.1 from PyPI, and the ASN.1 from the
-archive of 3GPP.
-From the root of the repository, with oxirush-aper beside it:
+archive of 3GPP. From the root of the repository, with oxirush-aper beside it:
 
 ```sh
 python3 ../oxirush-aper/protocols/benches/compare/compare.py --core 3 --perf "sudo -n perf"

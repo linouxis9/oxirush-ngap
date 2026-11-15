@@ -78,7 +78,7 @@ doc-scrape-examples = false
 [patch.crates-io]
 oxirush-aper = { git = "https://github.com/linouxis9/oxirush-aper", rev = "153ae90559f0ece0e218bc7c2dbfe105d4adc4ca" }
 oxirush-utils = { git = "https://github.com/linouxis9/oxirush-utils", rev = "4eae6c700f102dbf134e47f758e96799bee3f537" }
-oxirush-s1ap = { git = "https://github.com/linouxis9/oxirush-s1ap", rev = "6ed964b2b78fa6c4c9d8f0e47168e57e5ec185ab" }
+oxirush-s1ap = { git = "https://github.com/linouxis9/oxirush-s1ap", rev = "9ec7c87bdcea0c204b384641596ca3456e5c75c2" }
 
 # A test build has no debug information, as in CI: with it, a test build of the crate
 # took a quarter more time and three times the disk. A panic still names its line.

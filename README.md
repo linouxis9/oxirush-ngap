@@ -541,38 +541,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 - It is a codec: it runs no procedure, keeps no state and carries no
   message.
 - `check()` does not judge conditional IEs: their conditions are prose.
-- A value that you decode as its type and encode again loses what a later
-  release added to it. A PDU keeps the octets of its IEs until you decode
-  one, and a tree keeps those of an IE whose value has no place for them.
+- A value decoded as its type and encoded again loses what a later release
+  added to it; a PDU and its tree keep those octets.
 - The tree is the crate's own JSON, with the names of the specification. It
   is not the JSON Encoding Rules (ITU-T X.697).
-- RRC containers, and handover containers of other systems than NG-RAN and
-  E-UTRAN, stay octets. Those of E-UTRAN are read by the tables of
-  oxirush-s1ap, which a program registers with
+- RRC containers, and handover containers of systems other than NG-RAN and
+  E-UTRAN, stay octets. E-UTRAN's are read once a program calls
   `oxirush_s1ap::inspect::register()`.
-- A PDU has no size limit, and time and memory grow with its size: a tree
-  takes up to 142 octets per octet ([`to_tree`]). Bound what you read from
-  SCTP.
+- A PDU has no size limit, and a tree takes up to 142 octets per octet:
+  bound what you read from SCTP.
 - The bindings are those of TS 38.413 V19.4.0 (Release 19), in aligned PER
   (ITU-T X.691 (02/2021)).
 - No PDU of a commercial RAN or core is among the test fixtures.
 
 ## Performance
 
-On one core of an Intel Xeon E5-2680 v4 (Broadwell, a KVM guest, Linux 7.0,
-Rust 1.100.0), at e09770b on 2026-11-15, the median of ten runs: the macro
-reads the IEs that its fields ask for in 44 to 102 ns without allocating,
-and `check_structure()` takes 258 to 526 ns.
-[`benches/`](benches/README.md) has the figures by message.
-
-### Against other implementations
-
-Six common PDUs, decoded and encoded by this crate and five other NGAP
-codecs, at the same commit and on the same machine, ten rounds in turns.
-Decoding is the PDU and each of its IEs as its type, as the others do;
-`NGAPPDU::decode` alone takes 29 to 31 ns. A ratio is the median time of the
-other implementation over this crate's; the ten times of the two overlap for
-none:
+Six common PDUs, each decoded with every IE as its type and encoded, against
+five other NGAP codecs:
 
 | | Decoding | Encoding |
 |---|---|---|
@@ -583,31 +568,28 @@ none:
 | free5GC ngap 1.2.0 | 7.4x to 12x | 6.9x to 8.8x |
 | pycrate 0.8.1 | 510x to 1,300x | 520x to 1,400x |
 
-[`benches/`](benches/README.md#the-six-pdus) has the figures of each PDU and
-the method. From the root of the repository, with oxirush-aper beside it:
-
-```sh
-python3 ../oxirush-aper/protocols/benches/compare/compare.py --core 3 --perf "sudo -n perf"
-```
+Medians of ten rounds in turns on one core of an Intel Xeon E5-2680 v4 (a
+KVM guest, Linux 7.0, Rust 1.100.0), at e09770b on 2026-11-15; a ratio is
+the other codec's time over this crate's, and the ten times of the two
+overlap for none. [`benches/README.md`](benches/README.md) has each PDU, the
+readers and the checks, the method and the command.
 
 ## Tests and fuzzing
-
-The tests run 144 messages and 479 vectors that pycrate 0.8.1 encoded from
-the ASN.1, and 177 PDUs that Open5GS, free5GC and PacketRusher sent in lab
-runs, through the codec and the trees, and 16 trees of each message of the
-protocol that its tables make, written as PDUs and read back. `fuzz/` has ten
-[cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets: `decode`, `json`,
-`paths` and `exact` read any octets; `edit`, `tree`, `transfer`, `jer` and
-`walker` edit the PDUs of the tests and write new ones; `generated` writes a
-PDU of any message with the IEs and values that its octets choose. CI runs
-each for a minute, and the Fuzz workflow an hour each day but Sunday.
-`examples/` has four programs.
 
 ```sh
 cargo test --all-features
 ../oxirush-aper/protocols/fuzz/seed.sh && cargo +nightly fuzz run json -- -max_total_time=60
 cargo run --example ngap_build_pdu
 ```
+
+The tests run 144 messages and 479 vectors that pycrate 0.8.1 encoded from
+the ASN.1, and 177 PDUs that Open5GS, free5GC and PacketRusher sent in lab
+runs, through the codec and the trees, and 16 trees of each message of the
+protocol that its tables make, written as PDUs and read back. `fuzz/` has ten
+[cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets, which read any
+octets, edit the PDUs of the tests, or write a PDU of any message from the
+tables. CI runs each for a minute, and the Fuzz workflow an hour each day
+but Sunday. `examples/` has four programs.
 
 [CONTRIBUTING.md](CONTRIBUTING.md) says how the bindings are
 generated, how the vectors were made and the PDUs captured, and what a change

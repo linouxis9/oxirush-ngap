@@ -7,7 +7,7 @@ beside this repository, which oxirush-ngap and oxirush-s1ap share; what is of
 the protocol is in `src/` and `compare/` here.
 
 The README sums up the comparison with the other implementations of NGAP,
-and [The six PDUs](#the-six-pdus) has its figures. The figures below were taken on the same
+and [The six PDUs](#the-six-pdus) has its figures. Every figure here was taken on one
 machine, an Intel Xeon E5-2680 v4 (Broadwell, 2.4 GHz; a KVM guest bound to
 NUMA node 0; Linux 7.0, Rust 1.100.0), on 2026-11-15, at e09770b.
 
@@ -64,8 +64,7 @@ measures a clean build.
 
 ## The six PDUs
 
-The comparison of the [README](../README.md#against-other-implementations),
-on the six PDUs of `compare/pdus.tsv`, which each implementation decodes and
+The comparison of the [README](../README.md#performance), on the six PDUs of `compare/pdus.tsv`, which each implementation decodes and
 encodes. The envelope alone is `NGAPPDU::decode`, which leaves the value of
 each IE in its octets; "this crate" decodes the PDU and then every IE of its
 message as its type, which is what the others do; and encoding writes the PDU
@@ -119,8 +118,7 @@ The figures were taken at e09770b, by [the method of the comparison](#the-method
 
 ## Every figure of the comparison for HandoverRequest
 
-The programs, the machine and the method of the comparison of the
-[README](../README.md#against-other-implementations), per call:
+The programs, the machine and the method of [the six PDUs](#the-six-pdus), per call:
 
 |  | this crate | rasn 0.29 | hampi 0.7.2 | asn1c (Open5GS 2.8.0) | free5GC ngap 1.2.0 | pycrate 0.8.1 |
 |---|---|---|---|---|---|---|
@@ -167,4 +165,8 @@ which fetches each implementation at a pinned version: hampi 0.7.2 and rasn
 0.29.0 from crates.io, Open5GS v2.8.0 from GitHub, the ngap package v1.2.0 of
 free5GC through its go.mod, pycrate 0.8.1 from PyPI, and the ASN.1 from the
 archive of 3GPP.
-The [README](../README.md#against-other-implementations) has the command.
+From the root of the repository, with oxirush-aper beside it:
+
+```sh
+python3 ../oxirush-aper/protocols/benches/compare/compare.py --core 3 --perf "sudo -n perf"
+```

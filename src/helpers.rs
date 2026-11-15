@@ -24,10 +24,10 @@
 //! let ng_enb = NgENBID::macroNgENB_ID(Bits::new(0x12345, 20).unwrap());
 //! let lte_cell = eutra_cgi(network, &ng_enb, 7).unwrap(); // ng-eNB, cell
 //!
-//! // A bit string from octets, and the NR algorithms of a UE: the first
-//! // octet of its encryption bitmap, then of its integrity bitmap
+//! // A bit string from octets, and the algorithms of a UE: the value of its
+//! // NAS UE security capability IE
 //! let algorithm_mask = oxirush_ngap::BitString::from([0xe0]);
-//! let capabilities = ue_security_capabilities(0xe0, 0xe0);
+//! let capabilities = ue_security_capabilities(&[0xf0, 0xf0]);
 //!
 //! // What is no MCC, and an AMF Set ID that does not fit in its 10 bits
 //! println!("{}", plmn("20", "93").unwrap_err());
@@ -277,22 +277,33 @@ pub fn s_nssai(sst: u8, sd: Option<[u8; 3]>) -> SNSSAI {
     }
 }
 
-/// Build 5G UE security capabilities from the first octet of the NR encryption
-/// bitmap and the first octet of the NR integrity bitmap.
+/// Build the UE Security Capabilities of a UE from the value of its NAS UE
+/// security capability IE (TS 24.501 §9.11.3.54): the octets of its 5GS
+/// encryption and integrity algorithms, then those of its EPS ones, which a
+/// UE that supports E-UTRA includes.
 ///
-/// Each is the first octet of an NGAP bitmap, whose leading bit is
-/// 128-NEA1 or 128-NIA1 (TS 38.413 §9.3.1.86). The octets of the NAS UE
-/// security capability IE lead with 5G-EA0 and 5G-IA0 (TS 24.501 §9.11.3.54),
-/// so shift them left by one bit first. The E-UTRA bitmaps are all zeros:
-/// EEA0 and EIA0 only.
-pub fn ue_security_capabilities(encryption: u8, integrity: u8) -> UESecurityCapabilities<'static> {
-    // Sixteen bits, of which the first eight are the algorithms.
-    let algorithms = |byte: u8| BitString::from([byte, 0]);
+/// A NAS octet leads with algorithm 0, 5G-EA0 or EEA0, which an NGAP bitmap
+/// leaves out: bits 7 to 1 of the octet are the first to seventh bits of the
+/// bitmap, which starts at 128-NEA1, 128-NIA1, 128-EEA1 or 128-EIA1, and
+/// the AMF sends the capabilities as the UE gave them (TS 38.413
+/// §9.3.1.86). An octet that the value does not have gives a bitmap of no
+/// algorithm. Each bitmap has sixteen bits.
+///
+/// ```
+/// use oxirush_ngap::helpers::ue_security_capabilities;
+///
+/// // 5G-EA0 to 128-NEA3, 5G-IA0 to 128-NIA3, and EEA0 to 128-EEA3, EIA0 to 128-EIA3
+/// let capabilities = ue_security_capabilities(&[0xf0, 0xf0, 0xf0, 0xf0]);
+/// assert_eq!(capabilities.nr_encryption_algorithms.0.as_octets(), [0xe0, 0x00]);
+/// assert_eq!(capabilities.eutra_integrity_protection_algorithms.0.as_octets(), [0xe0, 0x00]);
+/// ```
+pub fn ue_security_capabilities(nas: &[u8]) -> UESecurityCapabilities<'static> {
+    let bitmap = |octet: usize| BitString::from([nas.get(octet).copied().unwrap_or(0) << 1, 0]);
     UESecurityCapabilities {
-        nr_encryption_algorithms: NRencryptionAlgorithms(algorithms(encryption)),
-        nr_integrity_protection_algorithms: NRintegrityProtectionAlgorithms(algorithms(integrity)),
-        eutra_encryption_algorithms: EUTRAencryptionAlgorithms(algorithms(0)),
-        eutra_integrity_protection_algorithms: EUTRAintegrityProtectionAlgorithms(algorithms(0)),
+        nr_encryption_algorithms: NRencryptionAlgorithms(bitmap(0)),
+        nr_integrity_protection_algorithms: NRintegrityProtectionAlgorithms(bitmap(1)),
+        eutra_encryption_algorithms: EUTRAencryptionAlgorithms(bitmap(2)),
+        eutra_integrity_protection_algorithms: EUTRAintegrityProtectionAlgorithms(bitmap(3)),
         ie_extensions: None,
     }
 }

@@ -227,28 +227,45 @@ fn a_number_that_does_not_fit_its_field_is_an_error_and_is_not_cut_short() {
     }
 }
 
+/// The octets of the NAS UE security capability IE lead with algorithm 0,
+/// which the bitmaps of NGAP leave out (TS 24.501 §9.11.3.54, TS 38.413
+/// §9.3.1.86): every other algorithm of the four octets is kept.
 #[test]
-fn security_capability_octets_lead_with_the_first_algorithm() {
-    // 128-NEA1 and 128-NEA2; 128-NIA2.
-    let capabilities = ue_security_capabilities(0xC0, 0x40);
-    let leading = |bits: &BitString| (0..3).map(|at| bits.get(at).unwrap()).collect::<Vec<_>>();
+fn security_capabilities_keep_every_algorithm_of_the_nas_octets() {
+    // 5G-EA0, 128-NEA1, 128-NEA2 and 5G-EA7; 128-NIA2; EEA0, 128-EEA1 and
+    // EEA4 to EEA7; 128-EIA2 and EIA4 to EIA7.
+    let capabilities = ue_security_capabilities(&[0xe1, 0x20, 0xcf, 0x2f]);
+    let octets = |bits: &BitString| (bits.len(), bits.as_octets().to_vec());
     assert_eq!(
-        leading(&capabilities.nr_encryption_algorithms.0),
-        [true, true, false]
+        octets(&capabilities.nr_encryption_algorithms.0),
+        (16, vec![0xc2, 0x00])
     );
     assert_eq!(
-        leading(&capabilities.nr_integrity_protection_algorithms.0),
-        [false, true, false]
-    );
-    // Sixteen bits each, of which the last eight are not set.
-    assert_eq!(capabilities.nr_encryption_algorithms.0.len(), 16);
-    assert_eq!(
-        capabilities.nr_encryption_algorithms.0.as_octets(),
-        [0xC0, 0x00]
+        octets(&capabilities.nr_integrity_protection_algorithms.0),
+        (16, vec![0x40, 0x00])
     );
     assert_eq!(
-        capabilities.eutra_encryption_algorithms.0.as_octets(),
-        [0, 0]
+        octets(&capabilities.eutra_encryption_algorithms.0),
+        (16, vec![0x9e, 0x00])
+    );
+    assert_eq!(
+        octets(&capabilities.eutra_integrity_protection_algorithms.0),
+        (16, vec![0x5e, 0x00])
+    );
+    // Without the E-UTRA octets, the E-UTRA bitmaps have no algorithm:
+    // EEA0 and EIA0 alone.
+    let capabilities = ue_security_capabilities(&[0xf0, 0xf0]);
+    assert_eq!(
+        octets(&capabilities.nr_encryption_algorithms.0),
+        (16, vec![0xe0, 0x00])
+    );
+    assert_eq!(
+        octets(&capabilities.eutra_integrity_protection_algorithms.0),
+        (16, vec![0x00, 0x00])
+    );
+    assert_eq!(
+        ue_security_capabilities(&[]),
+        ue_security_capabilities(&[0; 4])
     );
 }
 

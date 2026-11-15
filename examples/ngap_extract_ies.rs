@@ -148,7 +148,7 @@ fn main() -> Result<(), Error> {
         REJECT PDUSessionResourceSetupListCxtReq(sessions),
         REJECT AllowedNSSAI(AllowedNSSAI(vec![allowed_slice])),
 
-        REJECT UESecurityCapabilities(ue_security_capabilities(0xe0, 0xe0)),
+        REJECT UESecurityCapabilities(ue_security_capabilities(&[0xf0, 0xf0])),
         REJECT SecurityKey([0; 32]),
     )?;
 

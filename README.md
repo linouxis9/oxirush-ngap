@@ -175,7 +175,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             s_nssai: s_nssai(1, None),
             ie_extensions: None,
         }])),
-        UESecurityCapabilities(ue_security_capabilities(0xe0, 0xe0)),
+        UESecurityCapabilities(ue_security_capabilities(&[0xf0, 0xf0])),
         SecurityKey(k_gnb),
     )?;
 

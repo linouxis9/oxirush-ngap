@@ -12,6 +12,12 @@ All notable changes to `oxirush-ngap` are recorded here.
 
 ### Changed
 
+- `helpers::ue_security_capabilities` takes the value of the NAS UE security
+  capability IE (TS 24.501 §9.11.3.54) and keeps every algorithm of its four
+  octets, the E-UTRA ones included (TS 38.413 §9.3.1.86), where it took the
+  first octet of the NR encryption and integrity bitmaps and left the E-UTRA
+  bitmaps empty. Not source compatible: `ue_security_capabilities(0xe0, 0xe0)`
+  is `ue_security_capabilities(&[0xf0, 0xf0])`.
 - The trees of the IEs, the transfers and the messages are read and written by
   the walker of oxirush-aper with the table of the types of NGAP
   (`inspect_registry.rs`), in the place of an `impl Tree` for each type of the

@@ -659,3 +659,38 @@ fn every_pdu_is_its_octets_through_its_tree_whatever_its_ies_hold() {
     // Some of them have IEs that the tree has as their octets.
     assert!(octets > 100, "{octets}");
 }
+
+#[test]
+fn a_path_through_a_list_and_a_transfer_names_the_type_of_an_ie_of_the_transfer() {
+    use oxirush_ngap::tree::Takes;
+    use oxirush_ngap::{Criticality, Presence};
+    let item = "/ngap/PDUSessionResourceSetupListSUReq/0";
+    // The transfer, as the type that its octets contain, with the IEs of its set.
+    let transfer = inspect::at(&format!("{item}/pDUSessionResourceSetupRequestTransfer")).unwrap();
+    assert_eq!(transfer.name, "PDUSessionResourceSetupRequestTransfer");
+    let ies = transfer.ies.expect("the IEs of the transfer");
+    assert!(ies.contains(&(130, Criticality::Reject, Presence::Optional)));
+    assert!(ies.contains(&(139, Criticality::Reject, Presence::Mandatory)));
+    // An IE of the transfer by its name, and a member of its value.
+    let path =
+        format!("{item}/pDUSessionResourceSetupRequestTransfer/PDUSessionAggregateMaximumBitRate");
+    let rate = inspect::at(&path).unwrap();
+    assert_eq!(
+        (rate.name, rate.ie),
+        ("PDUSessionAggregateMaximumBitRate", Some(130))
+    );
+    let downlink = inspect::at(&format!("{path}/pDUSessionAggregateMaximumBitRateDL")).unwrap();
+    assert_eq!(downlink.name, "BitRate");
+    assert!(matches!(downlink.takes, Takes::Number(_)));
+    // The extension container of the item lists the IEs of its extension set.
+    let extensions = inspect::at(&format!("{item}/iE-Extensions")).unwrap();
+    assert_eq!(
+        extensions.ies,
+        Some(&[(281, Criticality::Ignore, Presence::Optional)][..])
+    );
+    // The octets of the IE at the path give its tree.
+    let tree = tree!({"pDUSessionAggregateMaximumBitRateDL": 1000, "pDUSessionAggregateMaximumBitRateUL": 2000});
+    let value: PDUSessionAggregateMaximumBitRate = inspect::value_from_tree(&tree).unwrap();
+    let octets = oxirush_aper::encode(&value).unwrap();
+    assert_eq!(inspect::tree_at(&path, &octets), Ok(tree));
+}

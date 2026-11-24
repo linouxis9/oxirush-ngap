@@ -2,6 +2,16 @@
 
 All notable changes to `oxirush-ngap` are recorded here.
 
+## Unreleased
+
+### Added
+
+- `initiating()` of `NgapPduKind`: the initiating message of the procedure of a
+  successful or an unsuccessful outcome, which the outcome answers, by the registry. A
+  HANDOVER REQUEST ACKNOWLEDGE and a HANDOVER FAILURE answer the HANDOVER REQUEST, and
+  an initiating message, as an UPLINK NAS TRANSPORT, answers none. It comes from
+  oxirush-aper, and the generated files are the same.
+
 ## 0.8.0 - 2026-11-16
 
 On oxirush-aper 0.4.0 exactly, and oxirush-utils 0.3. The trees are read and written

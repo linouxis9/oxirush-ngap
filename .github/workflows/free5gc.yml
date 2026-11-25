@@ -1,0 +1,78 @@
+name: free5GC
+
+# The crate beside the NGAP library of free5GC, on the same PDUs: tests/free5gc.rs writes
+# what the crate reads of each, the program of tests/free5gc/ what free5GC's library reads,
+# and tests/free5gc/compare.py compares the two IE by IE. The library is
+# github.com/free5gc/ngap v1.2.0, that of the AMF of free5GC v4.3.0, which
+# tests/free5gc/go.mod pins, and which tests/free5gc/known.tsv was triaged with. A
+# difference that known.tsv does not explain fails the job, and so does a run in which
+# nothing is compared. The PDUs are those of the comparison with Wireshark, of the fixtures,
+# and the corpora of the fuzz targets decode and tree that the Fuzz workflow keeps in the
+# cache of the repository, under the directory oxirush-ngap where they were fuzzed. Each
+# Tuesday at 06:13 UTC; the report is kept for 30 days.
+on:
+  schedule:
+    - cron: "13 6 * * 2"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+# The crate in the directory of the Fuzz workflow, whose caches keep the paths of the
+# corpora under it
+defaults:
+  run:
+    working-directory: oxirush-ngap
+
+jobs:
+  free5gc:
+    name: free5GC ngap v1.2.0
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: oxirush-ngap
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: oxirush-ngap/tests/free5gc/go.mod
+          cache-dependency-path: oxirush-ngap/tests/free5gc/go.sum
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: oxirush-ngap
+      # The corpus of each target as its last run kept it: the key is none of the keys,
+      # and the newest cache whose key begins with the prefix is restored
+      - uses: actions/cache/restore@v4
+        with:
+          path: oxirush-ngap/fuzz/corpus/decode
+          key: fuzz-corpus-ngap-decode-none
+          restore-keys: fuzz-corpus-ngap-decode-
+      - uses: actions/cache/restore@v4
+        with:
+          path: oxirush-ngap/fuzz/corpus/tree
+          key: fuzz-corpus-ngap-tree-none
+          restore-keys: fuzz-corpus-ngap-tree-
+      - name: The PDUs
+        run: |
+          mkdir -p fuzz/corpus/decode fuzz/corpus/tree
+          python3 -I tests/free5gc/corpus.py "$RUNNER_TEMP/pdus.tsv" fuzz/corpus/decode fuzz/corpus/tree
+      - name: Compare
+        env:
+          NGAP_FREE5GC_CORPUS: ${{ runner.temp }}/pdus.tsv
+          NGAP_FREE5GC_OUTPUT: ${{ runner.temp }}/free5gc
+        run: cargo test --release --test free5gc -- --ignored --nocapture
+      - name: Something was compared
+        if: always()
+        run: |
+          summary=$RUNNER_TEMP/free5gc/summary.txt
+          test -s "$summary" || { echo "::error::nothing was compared with free5GC"; exit 1; }
+          { echo '```'; cat "$summary"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: free5gc
+          path: ${{ runner.temp }}/free5gc
+          retention-days: 30

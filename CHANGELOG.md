@@ -6,6 +6,9 @@ All notable changes to `oxirush-ngap` are recorded here.
 
 ### Added
 
+- The tests compare the crate with the NGAP library of free5GC, v1.2.0 of free5GC
+  v4.3.0's AMF, IE by IE, on the PDUs of the fixtures and the corpora of the fuzz
+  targets, each week (the workflow `free5gc`, CONTRIBUTING.md).
 - `initiating()` of `NgapPduKind`: the initiating message of the procedure of a
   successful or an unsuccessful outcome, which the outcome answers, by the registry. A
   HANDOVER REQUEST ACKNOWLEDGE and a HANDOVER FAILURE answer the HANDOVER REQUEST, and

@@ -230,6 +230,39 @@ simulator, of which free5GC and PacketRusher have two versions of one NGAP
 library, no commercial RAN or core, and 18 of the 144 messages, most often a
 Downlink NAS Transport.
 
+## free5GC beside the crate
+
+`tests/free5gc.rs` writes what the crate reads of each PDU of a corpus, the program of
+`tests/free5gc/` writes what the NGAP library of free5GC reads of the same octets, and
+`tests/free5gc/compare.py` compares the two: whether each reads the PDU, its procedure
+code and type, and the value of each IE, by its id. The library is
+github.com/free5gc/ngap v1.2.0, that of the AMF of free5GC v4.3.0, which
+`tests/free5gc/go.mod` pins. Each difference is a row of `tests/free5gc/known.tsv`, with
+its clause and whether it is free5GC's, both's, the crate's by its clause, or a part of
+TS 38.413 that free5GC does not implement; one without a row fails the test. A panic of
+the library is caught, and counted as a refusal. The workflow `free5gc` runs it each
+week on the PDUs of the comparison with Wireshark, the fixtures and the corpora of the
+fuzz targets decode and tree. free5GC has no S1AP codec, and oxirush-s1ap no such
+comparison.
+
+```sh
+python3 -I tests/free5gc/corpus.py /tmp/pdus.tsv fuzz/corpus/decode
+NGAP_FREE5GC_CORPUS=/tmp/pdus.tsv NGAP_FREE5GC_OUTPUT=/tmp/free5gc \
+    cargo test --release --test free5gc -- --ignored
+```
+
+On 6140 PDUs here, the fixtures and the corpus of 15 minutes of fuzzing, the 20 rows of
+`known.tsv` explain every difference. free5GC's own: it decodes each BIT STRING
+alternative of an NgENB-ID, and of an ENB-ID, as the long macro one, and reads what
+follows from the wrong place; it refuses a PDU for an extension that it does not know,
+whatever its criticality (§10.3.4.2); and it writes back some extensions that it reads
+without their value. The others are procedures and IEs of later releases that it does
+not have, lists of 16384 entries or more, padding bits that it writes as zero, and PDUs
+that the crate finds not comprehended by the clause, among them a SEQUENCE whose
+extension bit is set and whose bitmap has no addition present. One class is held: 37
+fuzzed PDUs that free5GC refuses and the crate decodes whole, whose cause in free5GC is
+not traced.
+
 ## Fuzzing
 
 `fuzz/` has ten [cargo-fuzz](https://crates.io/crates/cargo-fuzz) targets,
